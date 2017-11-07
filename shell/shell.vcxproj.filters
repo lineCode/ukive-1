@@ -30,4 +30,7 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="DeclareDPIAware.manifest" />
+  </ItemGroup>
 </Project>
