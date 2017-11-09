@@ -2,8 +2,36 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="window\window_impl.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+    <ClCompile Include="window\window.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+    <ClCompile Include="log.cpp" />
+    <ClCompile Include="utils\string_utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="window\window_impl.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="window\window.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="log.h" />
+    <ClInclude Include="utils\string_utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="window">
+      <UniqueIdentifier>{b51f6f19-acfb-4465-b930-f86996d5b4d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{7a5fe501-e462-429a-abc6-3c10680bc40f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

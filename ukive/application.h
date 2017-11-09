@@ -22,8 +22,8 @@ namespace ukive {
 
         void run();
 
-        std::wstring getCommand(size_t index);
         size_t getCommandCount();
+        std::wstring getCommand(size_t index);
 
         void setQuitStrategy(QuitStrategy qs);
         QuitStrategy getQuitStrategy();
