@@ -1,8 +1,11 @@
 ﻿#ifndef UKIVE_APPLICATION_H_
 #define UKIVE_APPLICATION_H_
 
-#include <string>
+#include <Windows.h>
+
 #include <vector>
+
+#include "utils/string_utils.h"
 
 
 namespace ukive {
@@ -15,24 +18,18 @@ namespace ukive {
         Application(int argc, wchar_t *argv[]);
         ~Application();
 
-        enum QuitStrategy {
-            QUIT_WHEN_LAST_WINDOW_CLOSED,
-            QUIT_WHEN_STARTUP_WINDOW_CLOSED,
-        };
-
         void run();
 
         size_t getCommandCount();
-        std::wstring getCommand(size_t index);
-
-        void setQuitStrategy(QuitStrategy qs);
-        QuitStrategy getQuitStrategy();
+        string16 getCommand(size_t index);
 
         static int getScreenWidth();
         static int getScreenHeight();
 
         static void setVSync(bool enable);
         static bool isVSyncEnabled();
+
+        static HMODULE getModuleHandle();
 
     private:
         void initApplication();
@@ -41,7 +38,6 @@ namespace ukive {
 
         static bool sVSyncEnabled;
 
-        QuitStrategy quit_strategy_;
         std::vector<std::wstring> command_list_;
     };
 

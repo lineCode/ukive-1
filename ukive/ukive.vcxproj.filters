@@ -12,6 +12,12 @@
     <ClCompile Include="utils\string_utils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="window\window_class_manager.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+    <ClCompile Include="window\window_manager.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -24,6 +30,12 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="utils\string_utils.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="window\window_class_manager.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="window\window_manager.h">
+      <Filter>window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

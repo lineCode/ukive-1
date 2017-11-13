@@ -1,7 +1,5 @@
 ﻿#include "application.h"
 
-#include <Windows.h>
-
 
 namespace ukive {
 
@@ -26,11 +24,6 @@ namespace ukive {
 
     Application::~Application() {
         cleanApplication();
-    }
-
-
-    void Application::initApplication() {
-        quit_strategy_ = QUIT_WHEN_STARTUP_WINDOW_CLOSED;
     }
 
     void Application::cleanApplication() {
@@ -86,7 +79,7 @@ namespace ukive {
     }
 
 
-    std::wstring Application::getCommand(size_t index) {
+    string16 Application::getCommand(size_t index) {
         return command_list_.at(index);
     }
 
@@ -95,22 +88,16 @@ namespace ukive {
         return command_list_.size();
     }
 
-
-    void Application::setQuitStrategy(QuitStrategy qs) {
-        quit_strategy_ = qs;
-    }
-
-
-    Application::QuitStrategy Application::getQuitStrategy() {
-        return quit_strategy_;
-    }
-
     void Application::setVSync(bool enable){
         sVSyncEnabled = enable;
     }
 
     bool Application::isVSyncEnabled(){
         return sVSyncEnabled;
+    }
+
+    HMODULE Application::getModuleHandle() {
+        return ::GetModuleHandle(NULL);
     }
 
 

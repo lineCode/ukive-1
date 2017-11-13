@@ -153,14 +153,18 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="utils\string_utils.h" />
     <ClInclude Include="window\window.h" />
+    <ClInclude Include="window\window_class_manager.h" />
     <ClInclude Include="window\window_impl.h" />
+    <ClInclude Include="window\window_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
     <ClCompile Include="window\window.cpp" />
+    <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />
+    <ClCompile Include="window\window_manager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
