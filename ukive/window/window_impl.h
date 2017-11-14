@@ -3,12 +3,15 @@
 
 #include <Windows.h>
 
-#include "utils/string_utils.h"
+#include <memory>
+
+#include "ukive/utils/string_utils.h"
 
 
 namespace ukive {
 
     class Window;
+    class NonClientFrame;
 
     class WindowImpl {
     public:
@@ -24,13 +27,7 @@ namespace ukive {
         void close(bool notify);
 
         void setTitle(string16 title);
-        void setX(int x);
-        void setY(int y);
-        void setPosition(int x, int y);
-        void setWidth(int width);
-        void setHeight(int height);
-        void setMinWidth(int minWidth);
-        void setMinHeight(int minHeight);
+        void setBound(int x, int y, int width, int height);
         void setStartupWindow(bool enable);
 
         string16 getTitle();
@@ -38,8 +35,6 @@ namespace ukive {
         int getY();
         int getWidth();
         int getHeight();
-        int getMinWidth();
-        int getMinHeight();
 
         bool isCreated();
         bool isShowing();
@@ -57,12 +52,12 @@ namespace ukive {
 
     private:
         Window *delegate_;
+        std::unique_ptr<NonClientFrame> non_client_frame_;
 
         HWND hWnd_;
 
         int x_, y_;
         int width_, height_;
-        int min_width_, min_height_;
         string16 title_;
 
         bool is_created_;

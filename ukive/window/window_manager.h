@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "window/window_impl.h"
+#include "ukive/window/window_impl.h"
 
 
 namespace ukive {
@@ -16,11 +16,14 @@ namespace ukive {
         void addWindow(WindowImpl *window);
         size_t getWindowCount();
         WindowImpl* getWindow(size_t index);
+        void removeWindow(WindowImpl *window);
 
     private:
+        WindowManager() {}
+
         static std::unique_ptr<WindowManager> instance_;
 
-        std::vector<std::unique_ptr<WindowImpl>> window_list_;
+        std::vector<std::shared_ptr<WindowImpl>> window_list_;
     };
 
 }

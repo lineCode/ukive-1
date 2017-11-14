@@ -18,6 +18,12 @@
     <ClCompile Include="window\window_manager.cpp">
       <Filter>window</Filter>
     </ClCompile>
+    <ClCompile Include="window\non_client_frame.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\graphic_device_manager.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -37,6 +43,12 @@
     <ClInclude Include="window\window_manager.h">
       <Filter>window</Filter>
     </ClInclude>
+    <ClInclude Include="window\non_client_frame.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\graphic_device_manager.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -44,6 +56,9 @@
     </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{7a5fe501-e462-429a-abc6-3c10680bc40f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics">
+      <UniqueIdentifier>{be442fbf-17c4-4caa-9ad5-cec076079454}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

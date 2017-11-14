@@ -1,10 +1,11 @@
 #include "window_impl.h"
 
-#include "application.h"
-#include "log.h"
-#include "window/window.h"
-#include "window/window_class_manager.h"
-#include "window/window_manager.h"
+#include "ukive/application.h"
+#include "ukive/log.h"
+#include "ukive/window/window.h"
+#include "ukive/window/window_class_manager.h"
+#include "ukive/window/window_manager.h"
+#include "ukive/window/non_client_frame.h"
 
 
 namespace ukive {
@@ -15,6 +16,10 @@ namespace ukive {
     const int kDefaultHeight = 200;
     const string16 kDefaultTitle = L"Ukive Window";
 
+    const int kDefaultClassStyle = CS_HREDRAW | CS_VREDRAW;
+    const int kDefaultWindowStyle = WS_OVERLAPPEDWINDOW;
+    const int kDefaultWindowExStyle = WS_EX_APPWINDOW;
+
 
     WindowImpl::WindowImpl(Window *win)
         :delegate_(win),
@@ -23,26 +28,31 @@ namespace ukive {
         y_(kDefaultY),
         width_(kDefaultWidth),
         height_(kDefaultHeight),
-        min_width_(0),
-        min_height_(0),
         title_(kDefaultTitle),
         is_created_(false),
-        is_showing_(false)
-    {}
+        is_showing_(false),
+        is_startup_window_(false) {
+        WindowManager::getInstance()->addWindow(this);
+    }
 
     WindowImpl::~WindowImpl() {}
 
+
     void WindowImpl::init() {
         ClassInfo info;
-        delegate_->onPreCreate(info);
+        info.style = kDefaultClassStyle;
+        info.icon = info.icon_small = ::LoadIcon(NULL, IDI_WINLOGO);
+        info.cursor = ::LoadCursor(NULL, IDC_ARROW);
+
+        delegate_->onPreCreate(&info);
 
         ATOM atom = WindowClassManager::getInstance()->retrieveWindowClass(info);
 
         HWND hWnd = ::CreateWindowEx(
-            WS_EX_APPWINDOW,
+            kDefaultWindowExStyle,
             reinterpret_cast<wchar_t*>(atom),
             title_.c_str(),
-            WS_OVERLAPPEDWINDOW,
+            kDefaultWindowStyle,
             x_, y_, width_, height_, 0, 0,
             Application::getModuleHandle(), this);
         if (::IsWindow(hWnd) == FALSE) {
@@ -50,14 +60,14 @@ namespace ukive {
             return;
         }
 
-        hWnd_ = hWnd;
+        non_client_frame_.reset(new NonClientFrame());
+        non_client_frame_->init(hWnd_);
     }
 
     void WindowImpl::show() {
         if (!is_created_) {
             init();
             is_created_ = true;
-            WindowManager::getInstance()->addWindow(this);
         }
 
         ::ShowWindow(hWnd_, SW_SHOW);
@@ -87,8 +97,7 @@ namespace ukive {
             return;
         }
 
-        if (notify ? delegate_->onClose() : true)
-        {
+        if (notify ? delegate_->onClose() : true) {
             BOOL succeed = ::DestroyWindow(hWnd_);
             if (succeed == 0) {
                 Log::e(L"failed to destroy window.");
@@ -97,84 +106,62 @@ namespace ukive {
 
             is_created_ = false;
             is_showing_ = false;
-            WindowManager::getInstance()->addWindow(this);
+            WindowManager::getInstance()->removeWindow(this);
         }
     }
 
     void WindowImpl::setTitle(string16 title) {
-
+        title_ = title;
+        if (is_created_) {
+            ::SetWindowTextW(hWnd_, title_.c_str());
+        }
     }
 
-    void WindowImpl::setX(int x) {
+    void WindowImpl::setBound(int x, int y, int width, int height) {
+        x_ = x;
+        y_ = y;
+        width_ = width;
+        height_ = height;
 
-    }
-
-    void WindowImpl::setY(int y) {
-
-    }
-
-    void WindowImpl::setPosition(int x, int y) {
-
-    }
-
-    void WindowImpl::setWidth(int width) {
-
-    }
-
-    void WindowImpl::setHeight(int height) {
-
-    }
-
-    void WindowImpl::setMinWidth(int minWidth) {
-
-    }
-
-    void WindowImpl::setMinHeight(int minHeight) {
-
+        if (is_created_) {
+            ::MoveWindow(hWnd_, x_, y_, width_, height_, FALSE);
+        }
     }
 
     void WindowImpl::setStartupWindow(bool enable) {
-
+        is_startup_window_ = enable;
     }
 
     string16 WindowImpl::getTitle() {
-
+        return title_;
     }
 
     int WindowImpl::getX() {
-
+        return x_;
     }
 
     int WindowImpl::getY() {
-
+        return y_;
     }
 
     int WindowImpl::getWidth() {
-
+        return width_;
     }
 
     int WindowImpl::getHeight() {
-
-    }
-
-    int WindowImpl::getMinWidth() {
-
-    }
-
-    int WindowImpl::getMinHeight() {
-
+        return height_;
     }
 
     bool WindowImpl::isCreated() {
-
+        return is_created_;
     }
 
     bool WindowImpl::isShowing() {
-
+        return is_showing_;
     }
 
     bool WindowImpl::isStartupWindow() {
-
+        return is_startup_window_;
     }
 
     void WindowImpl::notifySizeChanged(
@@ -195,14 +182,51 @@ namespace ukive {
             delegate_->onCreate();
             return TRUE;
 
+        case 0xAE:
+        case 0xAF:
+            if (non_client_frame_->onInterceptDrawClassic(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
+        case WM_NCPAINT:
+            if (non_client_frame_->onNcPaint(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
+        case WM_NCACTIVATE:
+            if (non_client_frame_->onNcActivate(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
+        case WM_NCHITTEST:
+            return non_client_frame_->onNcHitTest(wParam, lParam);
+
+        case WM_NCCALCSIZE:
+            if (non_client_frame_->onNcCalSize(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
+        case WM_NCLBUTTONDOWN:
+            if (non_client_frame_->onNcLButtonDown(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
+        case WM_NCLBUTTONUP:
+            if (non_client_frame_->onNcLButtonUp(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
         case WM_CLOSE:
-            if (isStartupWindow())
-            {
-                if (delegate_->onClose())
-                {
+            if (isStartupWindow()) {
+                if (delegate_->onClose()) {
                     size_t count = WindowManager::getInstance()->getWindowCount();
-                    for (size_t i = 0; i < count; ++i)
-                    {
+                    for (size_t i = 0; i < count; ++i) {
                         auto pcWindow = WindowManager::getInstance()->getWindow(i);
                         if (!pcWindow->isStartupWindow())
                             pcWindow->close();
@@ -210,8 +234,9 @@ namespace ukive {
                     close(false);
                 }
             }
-            else
+            else {
                 close();
+            }
             return 0;
 
         case WM_DESTROY:
@@ -224,17 +249,15 @@ namespace ukive {
             delegate_->onShow((BOOL)wParam == TRUE ? true : false);
             break;
 
-        case WM_ACTIVATE:
-        {
+        case WM_ACTIVATE: {
             delegate_->onActivate(LOWORD(wParam));
             break;
         }
 
         case WM_ERASEBKGND:
-            return TRUE;
+            break;
 
-        case WM_SETCURSOR:
-        {
+        case WM_SETCURSOR: {
             break;
         }
 
@@ -242,8 +265,7 @@ namespace ukive {
             notifyLocationChanged(LOWORD(lParam), HIWORD(lParam));
             return 0;
 
-        case WM_SIZE:
-        {
+        case WM_SIZE: {
             RECT winRect;
             ::GetWindowRect(hWnd_, &winRect);
 
@@ -251,30 +273,46 @@ namespace ukive {
                 wParam,
                 winRect.right - winRect.left, winRect.bottom - winRect.top,
                 LOWORD(lParam), HIWORD(lParam));
+
+            non_client_frame_->onSize(wParam, lParam);
             return 0;
         }
 
-        case WM_MOVING:
-        {
-            if (delegate_->onMoving((RECT*)lParam))
+        case WM_MOVING: {
+            if (delegate_->onMoving((RECT*)lParam)) {
                 return TRUE;
+            }
             break;
         }
 
-        case WM_SIZING:
-        {
-            if (delegate_->onResizing(wParam, (RECT*)lParam))
+        case WM_SIZING: {
+            if (delegate_->onResizing(wParam, (RECT*)lParam)) {
                 return TRUE;
+            }
             break;
         }
 
         case WM_LBUTTONDOWN:
+            break;
+
         case WM_LBUTTONUP:
+            if (non_client_frame_->OnLButtonUp(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
         case WM_RBUTTONDOWN:
         case WM_RBUTTONUP:
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
+            break;
+
         case WM_MOUSEMOVE:
+            if (non_client_frame_->onMouseMove(wParam, lParam) == TRUE) {
+                return TRUE;
+            }
+            break;
+
         case WM_MOUSELEAVE:
         case WM_MOUSEHOVER:
         case WM_MOUSEWHEEL:
@@ -283,7 +321,7 @@ namespace ukive {
             break;
         }
 
-        return ::DefWindowProcW(hWnd_, uMsg, wParam, lParam);
+        return ::DefWindowProc(hWnd_, uMsg, wParam, lParam);
     }
 
     LRESULT CALLBACK WindowImpl::WndProc(
@@ -303,6 +341,9 @@ namespace ukive {
         }
 
         WindowImpl *window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        if (window == nullptr) {
+            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+        }
         return window->messageHandler(uMsg, wParam, lParam);
     }
 }

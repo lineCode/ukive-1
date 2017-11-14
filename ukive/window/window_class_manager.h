@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "utils/string_utils.h"
+#include "ukive/utils/string_utils.h"
 
 
 namespace ukive {
@@ -38,7 +38,6 @@ namespace ukive {
     private:
         WindowClassManager()
             :class_counter_(0) {}
-        ~WindowClassManager() {}
 
         ATOM createWindowClass(const string16 &className, const ClassInfo &info);
 

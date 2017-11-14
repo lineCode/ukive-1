@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include "utils/string_utils.h"
+#include "ukive/utils/string_utils.h"
 
 
 namespace ukive {
@@ -13,7 +13,7 @@ namespace ukive {
     class Canvas;
     class InputEvent;
     class WindowImpl;
-    class ClassInfo;
+    struct ClassInfo;
 
     class Window {
     public:
@@ -26,7 +26,20 @@ namespace ukive {
         void close();
         void close(bool notify);
 
-        virtual void onPreCreate(ClassInfo &info);
+        void setTitle(string16 title);
+        void setX(int x);
+        void setY(int y);
+        void setPosition(int x, int y);
+        void setWidth(int width);
+        void setHeight(int height);
+        void setBound(int x, int y, int width, int height);
+        void setMinWidth(int minWidth);
+        void setMinHeight(int minHeight);
+
+        int getMinWidth();
+        int getMinHeight();
+
+        virtual void onPreCreate(ClassInfo *info);
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);
@@ -43,6 +56,8 @@ namespace ukive {
 
     private:
         std::unique_ptr<WindowImpl> impl_;
+
+        int min_width_, min_height_;
     };
 
 }

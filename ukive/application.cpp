@@ -1,5 +1,7 @@
 ﻿#include "application.h"
 
+#pragma comment(lib,"gdiplus.lib")
+
 
 namespace ukive {
 
@@ -26,7 +28,12 @@ namespace ukive {
         cleanApplication();
     }
 
+    void Application::initApplication() {
+        Gdiplus::GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input_, NULL);
+    }
+
     void Application::cleanApplication() {
+        Gdiplus::GdiplusShutdown(gdiplus_token_);
     }
 
     void Application::parseCommandLine(wchar_t *cmdLine) {

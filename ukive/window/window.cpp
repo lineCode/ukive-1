@@ -1,13 +1,15 @@
 #include "window.h"
 
-#include "window/window_impl.h"
-#include "window/window_manager.h"
+#include "ukive/window/window_impl.h"
+#include "ukive/window/window_manager.h"
 
 
 namespace ukive {
 
     Window::Window()
-        :impl_(new WindowImpl(this))
+        :impl_(new WindowImpl(this)),
+        min_width_(0),
+        min_height_(0)
     {
 
     }
@@ -18,7 +20,6 @@ namespace ukive {
 
     void Window::show() {
         impl_->show();
-        WindowManager::getInstance()->addWindow(this);
     }
 
     void Window::hide() {
@@ -37,7 +38,23 @@ namespace ukive {
 
     }
 
-    void Window::onPreCreate(ClassInfo &info) {
+    void Window::setMinWidth(int minWidth) {
+        min_width_ = minWidth;
+    }
+
+    void Window::setMinHeight(int minHeight) {
+        min_height_ = minHeight;
+    }
+
+    int Window::getMinWidth() {
+        return min_width_;
+    }
+
+    int Window::getMinHeight() {
+        return min_height_;
+    }
+
+    void Window::onPreCreate(ClassInfo *info) {
 
     }
 
@@ -68,15 +85,57 @@ namespace ukive {
     }
 
     bool Window::onMoving(RECT *rect) {
-
+        return false;
     }
 
     bool Window::onResizing(WPARAM edge, RECT *rect) {
+        int minWidth = min_width_;
+        int minHeight = min_height_;
+        bool processed = false;
 
+        LONG width = rect->right - rect->left;
+        LONG height = rect->bottom - rect->top;
+        if (height < minHeight)
+        {
+            switch (edge)
+            {
+            case WMSZ_TOP:
+            case WMSZ_TOPLEFT:
+            case WMSZ_TOPRIGHT:
+                rect->top = rect->bottom - minHeight;
+                break;
+            case WMSZ_BOTTOM:
+            case WMSZ_BOTTOMLEFT:
+            case WMSZ_BOTTOMRIGHT:
+                rect->bottom = rect->top + minHeight;
+                break;
+            }
+            processed = true;
+        }
+
+        if (width < minWidth)
+        {
+            switch (edge)
+            {
+            case WMSZ_LEFT:
+            case WMSZ_TOPLEFT:
+            case WMSZ_BOTTOMLEFT:
+                rect->left = rect->right - minWidth;
+                break;
+            case WMSZ_RIGHT:
+            case WMSZ_TOPRIGHT:
+            case WMSZ_BOTTOMRIGHT:
+                rect->right = rect->left + minWidth;
+                break;
+            }
+            processed = true;
+        }
+
+        return processed;
     }
 
     bool Window::onClose() {
-
+        return true;
     }
 
     void Window::onDestroy() {

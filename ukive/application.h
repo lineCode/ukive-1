@@ -2,6 +2,7 @@
 #define UKIVE_APPLICATION_H_
 
 #include <Windows.h>
+#include <gdiplus.h>
 
 #include <vector>
 
@@ -37,6 +38,9 @@ namespace ukive {
         void parseCommandLine(wchar_t *cmdLine);
 
         static bool sVSyncEnabled;
+
+        ULONG_PTR gdiplus_token_;
+        Gdiplus::GdiplusStartupInput gdiplus_startup_input_;
 
         std::vector<std::wstring> command_list_;
     };

@@ -1,6 +1,6 @@
-#include "window/window_manager.h"
+#include "window_manager.h"
 
-#include "log.h"
+#include "ukive/log.h"
 
 
 namespace ukive {
@@ -16,9 +16,21 @@ namespace ukive {
     }
 
     void WindowManager::addWindow(WindowImpl *window) {
-        std::unique_ptr<WindowImpl> window_ptr;
-        window_ptr.reset(window);
+        if (window_list_.size() == 0
+            && !window->isStartupWindow()) {
+            window->setStartupWindow(true);
+        }
+        else if (window_list_.size() > 0
+            && window->isStartupWindow()) {
+            for (auto it = window_list_.begin();
+                it != window_list_.end(); ++it) {
+                if (it->get()->isStartupWindow()) {
+                    it->get()->setStartupWindow(false);
+                }
+            }
+        }
 
+        std::shared_ptr<WindowImpl> window_ptr(window);
         window_list_.push_back(window_ptr);
     }
 
@@ -33,4 +45,15 @@ namespace ukive {
         }
         return window_list_.at(index).get();
     }
+
+    void WindowManager::removeWindow(WindowImpl *window) {
+        for (auto it = window_list_.begin();
+            it != window_list_.end(); ++it) {
+            if (it->get() == window) {
+                window_list_.erase(it);
+                return;
+            }
+        }
+    }
+
 }

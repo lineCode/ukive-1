@@ -94,7 +94,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName)\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,8 +150,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="graphics\graphic_device_manager.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="utils\string_utils.h" />
+    <ClInclude Include="window\non_client_frame.h" />
     <ClInclude Include="window\window.h" />
     <ClInclude Include="window\window_class_manager.h" />
     <ClInclude Include="window\window_impl.h" />
@@ -159,8 +161,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="graphics\graphic_device_manager.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
+    <ClCompile Include="window\non_client_frame.cpp" />
     <ClCompile Include="window\window.cpp" />
     <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />
