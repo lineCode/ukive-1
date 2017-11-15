@@ -26,7 +26,7 @@ namespace ukive {
         void close();
         void close(bool notify);
 
-        void setTitle(string16 title);
+        void setTitle(const string16 &title);
         void setBound(int x, int y, int width, int height);
         void setStartupWindow(bool enable);
 

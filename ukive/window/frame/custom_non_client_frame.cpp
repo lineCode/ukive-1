@@ -1,4 +1,4 @@
-#include "non_client_frame.h"
+#include "custom_non_client_frame.h"
 
 #include <Windowsx.h>
 
@@ -29,43 +29,38 @@
 #define RESIZE_HANDLE_INDENT 2
 
 #define TITLE_TEXT L"WLTest"
-#define TITLE_COLOR 0xffffff
-#define BORDER_COLOR   0x231ce5              //Red 500
-
-#define MIN_BUTTON_COLOR           0x41bd42  //Green 300
-#define MIN_BUTTON_PRESSED_COLOR   0x088f0a  //Green 600
-
-#define MAX_BUTTON_COLOR           0x35d8fd  //Yellow 600
-#define MAX_BUTTON_PRESSED_COLOR   0x177ff5  //Yellow 900
-
-#define CLOSE_BUTTON_COLOR         0x4db7ff  //Orange 300
-#define CLOSE_BUTTON_PRESSED_COLOR 0x008cfb  //Orange 600
 
 
 namespace ukive {
 
-    void NonClientFrame::init(HWND hWnd) {
+    const Gdiplus::Color TITLE_COLOR(0xff, 0xff, 0xff);
+    const Gdiplus::Color BORDER_COLOR(0xe5, 0x1c, 0x23);              //Red 500
+    const Gdiplus::Color MIN_BUTTON_COLOR(0x41, 0xbd, 0x42);          //Green 300
+    const Gdiplus::Color MIN_BUTTON_PRESSED_COLOR(0x08, 0x8f, 0x0a);  //Green 600
+    const Gdiplus::Color MAX_BUTTON_COLOR(0x35, 0xd8, 0xfd);          //Yellow 600
+    const Gdiplus::Color MAX_BUTTON_PRESSED_COLOR(0x17, 0x7f, 0xf5);  //Yellow 900
+    const Gdiplus::Color CLOSE_BUTTON_COLOR(0x4d, 0xb7, 0xff);        //Orange 300
+    const Gdiplus::Color CLOSE_BUTTON_PRESSED_COLOR(0x00, 0x8c, 0xfb);//Orange 600
+
+
+    bool colorEqual(const Gdiplus::Color &lhs, const Gdiplus::Color &rhs) {
+        return lhs.GetValue() == rhs.GetValue();
+    }
+
+
+    void CustomNonClientFrame::init(HWND hWnd) {
         hWnd_ = hWnd;
 
         //resources used to drawing Non-client.
-        mFramePen = CreatePen(PS_SOLID, 0, BORDER_COLOR);
-        mFrameBrush = CreateSolidBrush(BORDER_COLOR);
+        brush_.SetColor(BORDER_COLOR);
 
-        mMinButtonColor = MIN_BUTTON_COLOR;
-        mMaxButtonColor = MAX_BUTTON_COLOR;
-        mCloseButtonColor = CLOSE_BUTTON_COLOR;
+        min_button_color_ = MIN_BUTTON_COLOR;
+        max_button_color_ = MAX_BUTTON_COLOR;
+        close_button_color_ = CLOSE_BUTTON_COLOR;
 
         mIsMousePressedInMinButton = false;
         mIsMousePressedInMaxButton = false;
         mIsMousePressedInCloseButton = false;
-
-        HDC dc = GetDC(hWnd_);
-        int fontHeight = -MulDiv(10, GetDeviceCaps(dc, LOGPIXELSY), 72);
-        ReleaseDC(hWnd_, dc);
-        mTitleFont = CreateFontW(fontHeight, 0,
-            0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-            OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-            DEFAULT_PITCH, L"Î¢ÈíÑÅºÚ");
 
         RECT rcWin;
         GetWindowRect(hWnd_, &rcWin);
@@ -79,17 +74,16 @@ namespace ukive {
             WINDOW_CORNER_RADIUS, WINDOW_CORNER_RADIUS);
         SetWindowRgn(hWnd_, mWindowRgn, TRUE);
 
-        mTitleRect.left = TITLE_LEFT_MARGIN;
-        mTitleRect.top = 0;
-        mTitleRect.right = TITLE_WIDTH;
-        mTitleRect.bottom = CAPTION_HEIGHT + TOP_BORDER_WIDTH;
+        title_rect_.X = TITLE_LEFT_MARGIN;
+        title_rect_.Y = 0;
+        title_rect_.Width = TITLE_WIDTH;
+        title_rect_.Height = CAPTION_HEIGHT + TOP_BORDER_WIDTH;
+
+        string_format_.SetLineAlignment(Gdiplus::StringAlignmentCenter);
     }
 
 
-    LRESULT NonClientFrame::onSize(WPARAM wParam, LPARAM lParam) {
-        DeleteObject(mMinButtonRgn);
-        DeleteObject(mMaxButtonRgn);
-        DeleteObject(mCloseButtonRgn);
+    LRESULT CustomNonClientFrame::onSize(WPARAM wParam, LPARAM lParam) {
 
         switch (wParam)
         {
@@ -111,8 +105,8 @@ namespace ukive {
                 rcWin.bottom - bottomExtended + 1, 0, 0);
             SetWindowRgn(hWnd_, mWindowRgn, TRUE);
 
-            mTitleRect.left = TITLE_LEFT_MARGIN + leftExtended - LEFT_BORDER_WIDTH;
-            mTitleRect.top = topExtended - TOP_BORDER_WIDTH;
+            title_rect_.X = TITLE_LEFT_MARGIN + leftExtended - LEFT_BORDER_WIDTH;
+            title_rect_.Y = topExtended - TOP_BORDER_WIDTH;
             createCaptionButtonRgn(rcWin.right, topExtended - TOP_BORDER_WIDTH, rightExtended - RIGHT_BORDER_WIDTH);
             drawCaptionAndBorder();
             break;
@@ -130,8 +124,8 @@ namespace ukive {
                 WINDOW_CORNER_RADIUS, WINDOW_CORNER_RADIUS);
             SetWindowRgn(hWnd_, mWindowRgn, TRUE);
 
-            mTitleRect.left = TITLE_LEFT_MARGIN;
-            mTitleRect.top = 0;
+            title_rect_.X = TITLE_LEFT_MARGIN;
+            title_rect_.Y = 0;
             createCaptionButtonRgn(rcWin.right, 0, 0);
             drawCaptionAndBorder();
             break;
@@ -147,7 +141,7 @@ namespace ukive {
         return FALSE;
     }
 
-    LRESULT NonClientFrame::onMouseMove(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onMouseMove(WPARAM wParam, LPARAM lParam) {
         if (mIsMousePressedInMinButton
             || mIsMousePressedInMaxButton
             || mIsMousePressedInCloseButton)
@@ -166,57 +160,57 @@ namespace ukive {
             bool needRedraw = false;
             if (mIsMousePressedInMinButton)
             {
-                if (PtInRegion(mMinButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+                if (min_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
                 {
-                    if (mMinButtonColor != MIN_BUTTON_PRESSED_COLOR)
+                    if (!colorEqual(min_button_color_, MIN_BUTTON_PRESSED_COLOR))
                     {
-                        mMinButtonColor = MIN_BUTTON_PRESSED_COLOR;
+                        min_button_color_ = MIN_BUTTON_PRESSED_COLOR;
                         needRedraw = true;
                     }
                 }
                 else
                 {
-                    if (mMinButtonColor != MIN_BUTTON_COLOR)
+                    if (!colorEqual(min_button_color_, MIN_BUTTON_COLOR))
                     {
-                        mMinButtonColor = MIN_BUTTON_COLOR;
+                        min_button_color_ = MIN_BUTTON_COLOR;
                         needRedraw = true;
                     }
                 }
             }
             else if (mIsMousePressedInMaxButton)
             {
-                if (PtInRegion(mMaxButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+                if (max_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
                 {
-                    if (mMaxButtonColor != MAX_BUTTON_PRESSED_COLOR)
+                    if (!colorEqual(max_button_color_, MAX_BUTTON_PRESSED_COLOR))
                     {
-                        mMaxButtonColor = MAX_BUTTON_PRESSED_COLOR;
+                        max_button_color_ = MAX_BUTTON_PRESSED_COLOR;
                         needRedraw = true;
                     }
                 }
                 else
                 {
-                    if (mMaxButtonColor != MAX_BUTTON_COLOR)
+                    if (!colorEqual(max_button_color_, MAX_BUTTON_COLOR))
                     {
-                        mMaxButtonColor = MAX_BUTTON_COLOR;
+                        max_button_color_ = MAX_BUTTON_COLOR;
                         needRedraw = true;
                     }
                 }
             }
             else if (mIsMousePressedInCloseButton)
             {
-                if (PtInRegion(mCloseButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+                if (close_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
                 {
-                    if (mCloseButtonColor != CLOSE_BUTTON_PRESSED_COLOR)
+                    if (!colorEqual(close_button_color_, CLOSE_BUTTON_PRESSED_COLOR))
                     {
-                        mCloseButtonColor = CLOSE_BUTTON_PRESSED_COLOR;
+                        close_button_color_ = CLOSE_BUTTON_PRESSED_COLOR;
                         needRedraw = true;
                     }
                 }
                 else
                 {
-                    if (mCloseButtonColor != CLOSE_BUTTON_COLOR)
+                    if (!colorEqual(close_button_color_, CLOSE_BUTTON_COLOR))
                     {
-                        mCloseButtonColor = CLOSE_BUTTON_COLOR;
+                        close_button_color_ = CLOSE_BUTTON_COLOR;
                         needRedraw = true;
                     }
                 }
@@ -229,7 +223,7 @@ namespace ukive {
         return TRUE;
     }
 
-    LRESULT NonClientFrame::OnLButtonUp(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::OnLButtonUp(WPARAM wParam, LPARAM lParam) {
         BOOL handled = FALSE;
 
         if (mIsMousePressedInMinButton
@@ -248,26 +242,26 @@ namespace ukive {
             yPos = pt.y;
 
             if (mIsMousePressedInMinButton
-                && PtInRegion(mMinButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+                && min_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
             {
                 ShowWindow(hWnd_, SW_MINIMIZE);
-                mMinButtonColor = MIN_BUTTON_COLOR;
+                min_button_color_ = MIN_BUTTON_COLOR;
                 handled = TRUE;
             }
             else if (mIsMousePressedInMaxButton
-                && PtInRegion(mMaxButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+                && max_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
             {
                 if (IsZoomed(hWnd_))
                     ShowWindow(hWnd_, SW_NORMAL);
                 else
                     ShowWindow(hWnd_, SW_MAXIMIZE);
 
-                mMaxButtonColor = MAX_BUTTON_COLOR;
+                max_button_color_ = MAX_BUTTON_COLOR;
                 drawCaptionAndBorder();
                 handled = TRUE;
             }
             else if (mIsMousePressedInCloseButton
-                && PtInRegion(mCloseButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+                && close_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
             {
                 //CloseDialog(0);
                 handled = TRUE;
@@ -285,18 +279,18 @@ namespace ukive {
         return handled;
     }
 
-    LRESULT NonClientFrame::onNcPaint(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onNcPaint(WPARAM wParam, LPARAM lParam) {
         drawCaptionAndBorder();
         return TRUE;
     }
 
-    LRESULT NonClientFrame::onNcActivate(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onNcActivate(WPARAM wParam, LPARAM lParam) {
         if (wParam == FALSE)
             drawCaptionAndBorder();
         return TRUE;
     }
 
-    LRESULT NonClientFrame::onNcHitTest(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onNcHitTest(WPARAM wParam, LPARAM lParam) {
         RECT rcWin;
         GetWindowRect(hWnd_, &rcWin);
 
@@ -320,15 +314,15 @@ namespace ukive {
         if (yPos >= rcWin.top && yPos < rcWin.top + TOP_BORDER_WIDTH + CAPTION_HEIGHT)
         {
             isInCaptain = (yPos > rcWin.top + TOP_BORDER_WIDTH + RESIZE_HANDLE_INDENT);
-            if (PtInRegion(mMinButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+            if (min_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
             {
                 return HTMINBUTTON;
             }
-            else if (PtInRegion(mMaxButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+            else if (max_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
             {
                 return HTMAXBUTTON;
             }
-            else if (PtInRegion(mCloseButtonRgn, xPos - rcWin.left, yPos - rcWin.top))
+            else if (close_button_rect_.Contains(xPos - rcWin.left, yPos - rcWin.top))
             {
                 return HTCLOSE;
             }
@@ -341,21 +335,21 @@ namespace ukive {
             else
             {
                 bool needRedraw = false;
-                if (mMinButtonColor != MIN_BUTTON_COLOR)
+                if (!colorEqual(min_button_color_, MIN_BUTTON_COLOR))
                 {
-                    mMinButtonColor = MIN_BUTTON_COLOR;
+                    min_button_color_ = MIN_BUTTON_COLOR;
                     needRedraw = true;
                 }
 
-                if (mMaxButtonColor != MAX_BUTTON_COLOR)
+                if (!colorEqual(max_button_color_, MAX_BUTTON_COLOR))
                 {
-                    mMaxButtonColor = MAX_BUTTON_COLOR;
+                    max_button_color_ = MAX_BUTTON_COLOR;
                     needRedraw = true;
                 }
 
-                if (mCloseButtonColor != CLOSE_BUTTON_COLOR)
+                if (!colorEqual(close_button_color_, CLOSE_BUTTON_COLOR))
                 {
-                    mCloseButtonColor = CLOSE_BUTTON_COLOR;
+                    close_button_color_ = CLOSE_BUTTON_COLOR;
                     needRedraw = true;
                 }
 
@@ -384,7 +378,7 @@ namespace ukive {
         return hitTests[row][col];
     }
 
-    LRESULT NonClientFrame::onNcCalSize(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onNcCalSize(WPARAM wParam, LPARAM lParam) {
         if (wParam == TRUE)
         {
             NCCALCSIZE_PARAMS *ncp = (NCCALCSIZE_PARAMS*)lParam;
@@ -417,26 +411,26 @@ namespace ukive {
         return FALSE;
     }
 
-    LRESULT NonClientFrame::onNcLButtonDown(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onNcLButtonDown(WPARAM wParam, LPARAM lParam) {
         BOOL handled = FALSE;
 
         if (wParam == HTMINBUTTON)
         {
-            mMinButtonColor = MIN_BUTTON_PRESSED_COLOR;
+            min_button_color_ = MIN_BUTTON_PRESSED_COLOR;
             drawCaptionAndBorder();
             mIsMousePressedInMinButton = true;
             handled = TRUE;
         }
         else if (wParam == HTMAXBUTTON)
         {
-            mMaxButtonColor = MAX_BUTTON_PRESSED_COLOR;
+            max_button_color_ = MAX_BUTTON_PRESSED_COLOR;
             drawCaptionAndBorder();
             mIsMousePressedInMaxButton = true;
             handled = TRUE;
         }
         else if (wParam == HTCLOSE)
         {
-            mCloseButtonColor = CLOSE_BUTTON_PRESSED_COLOR;
+            close_button_color_ = CLOSE_BUTTON_PRESSED_COLOR;
             drawCaptionAndBorder();
             mIsMousePressedInCloseButton = true;
             handled = TRUE;
@@ -450,13 +444,13 @@ namespace ukive {
         return handled;
     }
 
-    LRESULT NonClientFrame::onNcLButtonUp(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onNcLButtonUp(WPARAM wParam, LPARAM lParam) {
         BOOL handled = FALSE;
 
         if (wParam == HTMINBUTTON)
         {
             ShowWindow(hWnd_, SW_MINIMIZE);
-            mMinButtonColor = MIN_BUTTON_COLOR;
+            min_button_color_ = MIN_BUTTON_COLOR;
             handled = TRUE;
         }
         else if (wParam == HTMAXBUTTON)
@@ -466,7 +460,7 @@ namespace ukive {
             else
                 ShowWindow(hWnd_, SW_MAXIMIZE);
 
-            mMaxButtonColor = MAX_BUTTON_COLOR;
+            max_button_color_ = MAX_BUTTON_COLOR;
             drawCaptionAndBorder();
             handled = TRUE;
         }
@@ -485,90 +479,79 @@ namespace ukive {
         return handled;
     }
 
-    LRESULT NonClientFrame::onInterceptDrawClassic(WPARAM wParam, LPARAM lParam) {
+    LRESULT CustomNonClientFrame::onInterceptDrawClassic(WPARAM wParam, LPARAM lParam) {
         return TRUE;
     }
 
 
-    void NonClientFrame::drawCaptionAndBorder()
+    void CustomNonClientFrame::drawCaptionAndBorder()
     {
-        HDC hdc = GetWindowDC(hWnd_);
-        SelectObject(hdc, mFramePen);
-        SelectObject(hdc, mFrameBrush);
-        SelectObject(hdc, mTitleFont);
+        HDC hdc = ::GetWindowDC(hWnd_);
+        Gdiplus::Graphics graphics(hdc);
 
         RECT rcWin;
-        GetWindowRect(hWnd_, &rcWin);
-        OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+        ::GetWindowRect(hWnd_, &rcWin);
+        ::OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+
+        Gdiplus::Rect frame[4];
 
         //Top
-        Rectangle(hdc,
-            0, 0,
-            rcWin.right, CAPTION_HEIGHT + TOP_BORDER_WIDTH);
-
+        frame[0] = Gdiplus::Rect(
+            0, 0, rcWin.right - rcWin.left, CAPTION_HEIGHT + TOP_BORDER_WIDTH);
         //Left
-        Rectangle(hdc,
+        frame[1] = Gdiplus::Rect(
             0, CAPTION_HEIGHT + TOP_BORDER_WIDTH,
-            LEFT_BORDER_WIDTH, rcWin.bottom);
-
+            LEFT_BORDER_WIDTH, rcWin.bottom - rcWin.top - CAPTION_HEIGHT + TOP_BORDER_WIDTH);
         //Right
-        Rectangle(hdc,
+        frame[2] = Gdiplus::Rect(
             rcWin.right - RIGHT_BORDER_WIDTH, CAPTION_HEIGHT + TOP_BORDER_WIDTH,
-            rcWin.right, rcWin.bottom);
-
+            RIGHT_BORDER_WIDTH, rcWin.bottom - rcWin.top - CAPTION_HEIGHT + TOP_BORDER_WIDTH);
         //Bottom
-        Rectangle(hdc,
+        frame[3] = Gdiplus::Rect(
             0, rcWin.bottom - BOTTOM_BORDER_WIDTH,
-            rcWin.right, rcWin.bottom);
+            rcWin.right - rcWin.left, BOTTOM_BORDER_WIDTH);
+
+        brush_.SetColor(BORDER_COLOR);
+        graphics.FillRectangles(&brush_, frame, 4);
 
         //Title
-        SetBkColor(hdc, BORDER_COLOR);
-        SetTextColor(hdc, TITLE_COLOR);
-        DrawTextW(hdc, TITLE_TEXT, wcslen(TITLE_TEXT), &mTitleRect, DT_SINGLELINE | DT_VCENTER);
-
-        SelectObject(hdc, GetStockObject(DC_BRUSH));
+        brush_.SetColor(TITLE_COLOR);
+        graphics.DrawString(TITLE_TEXT, wcslen(TITLE_TEXT), &title_font_, title_rect_, &string_format_, &brush_);
 
         //Min button
-        SetDCBrushColor(hdc, mMinButtonColor);
-        PaintRgn(hdc, mMinButtonRgn);
+        brush_.SetColor(min_button_color_);
+        graphics.FillEllipse(&brush_, min_button_rect_);
 
         //Max button
-        SetDCBrushColor(hdc, mMaxButtonColor);
-        PaintRgn(hdc, mMaxButtonRgn);
+        brush_.SetColor(max_button_color_);
+        graphics.FillEllipse(&brush_, max_button_rect_);
 
         //Close button
-        SetDCBrushColor(hdc, mCloseButtonColor);
-        PaintRgn(hdc, mCloseButtonRgn);
+        brush_.SetColor(close_button_color_);
+        graphics.FillEllipse(&brush_, close_button_rect_);
 
-        ReleaseDC(hWnd_, hdc);
+        ::ReleaseDC(hWnd_, hdc);
     }
 
-    void NonClientFrame::createCaptionButtonRgn(int rightOfWin, int topPadding, int rightPadding)
+    void CustomNonClientFrame::createCaptionButtonRgn(int rightOfWin, int topPadding, int rightPadding)
     {
-        RECT rcCloseButton = {
+        close_button_rect_ = {
             rightOfWin - CLOSE_BUTTON_RIGHT_MARGIN - CLOSE_BUTTON_WIDTH - rightPadding,
             static_cast<int>(std::ceil((CAPTION_HEIGHT + TOP_BORDER_WIDTH + topPadding - CLOSE_BUTTON_HEIGHT) / 2.f)),
-            rightOfWin - CLOSE_BUTTON_RIGHT_MARGIN - rightPadding,
-            static_cast<int>(std::floor((CAPTION_HEIGHT + TOP_BORDER_WIDTH + topPadding + CLOSE_BUTTON_HEIGHT) / 2.f))
+            CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT
         };
 
-        RECT rcMaxButton = {
-            rcCloseButton.left - MAX_BUTTON_RIGHT_MARGIN - MAX_BUTTON_WIDTH,
+        max_button_rect_ = {
+            close_button_rect_.X - MAX_BUTTON_RIGHT_MARGIN - MAX_BUTTON_WIDTH,
             static_cast<int>(std::ceil((CAPTION_HEIGHT + TOP_BORDER_WIDTH + topPadding - MAX_BUTTON_HEIGHT) / 2.f)),
-            rcCloseButton.left - MAX_BUTTON_RIGHT_MARGIN,
-            static_cast<int>(std::floor((CAPTION_HEIGHT + TOP_BORDER_WIDTH + topPadding + MAX_BUTTON_HEIGHT) / 2.f))
+            MAX_BUTTON_WIDTH, MAX_BUTTON_HEIGHT,
         };
 
-        RECT rcMinButton = {
-            rcMaxButton.left - MIN_BUTTON_RIGHT_MARGIN - MIN_BUTTON_WIDTH,
+        min_button_rect_ = {
+            max_button_rect_.X - MIN_BUTTON_RIGHT_MARGIN - MIN_BUTTON_WIDTH,
             static_cast<int>(std::ceil((CAPTION_HEIGHT + TOP_BORDER_WIDTH + topPadding - MIN_BUTTON_HEIGHT) / 2.f)),
-            rcMaxButton.left - MIN_BUTTON_RIGHT_MARGIN,
-            static_cast<int>(std::floor((CAPTION_HEIGHT + TOP_BORDER_WIDTH + topPadding + MIN_BUTTON_HEIGHT) / 2.f))
+            MIN_BUTTON_WIDTH, MIN_BUTTON_HEIGHT
         };
-
-        mMinButtonRgn = CreateRectRgnIndirect(&rcMinButton);
-        mMaxButtonRgn = CreateRectRgnIndirect(&rcMaxButton);
-        mCloseButtonRgn = CreateRectRgnIndirect(&rcCloseButton);
     }
 
 }

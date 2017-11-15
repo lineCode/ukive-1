@@ -2,14 +2,16 @@
 #define UKIVE_APPLICATION_H_
 
 #include <Windows.h>
-#include <gdiplus.h>
 
+#include <memory>
 #include <vector>
 
 #include "utils/string_utils.h"
 
 
 namespace ukive {
+
+    class GraphicDeviceManager;
 
     class Application
     {
@@ -39,10 +41,9 @@ namespace ukive {
 
         static bool sVSyncEnabled;
 
-        ULONG_PTR gdiplus_token_;
-        Gdiplus::GdiplusStartupInput gdiplus_startup_input_;
-
         std::vector<std::wstring> command_list_;
+
+        std::unique_ptr<GraphicDeviceManager> graphic_device_manager_;
     };
 
 }

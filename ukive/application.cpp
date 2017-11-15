@@ -1,6 +1,6 @@
 ﻿#include "application.h"
 
-#pragma comment(lib,"gdiplus.lib")
+#include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
@@ -29,11 +29,12 @@ namespace ukive {
     }
 
     void Application::initApplication() {
-        Gdiplus::GdiplusStartup(&gdiplus_token_, &gdiplus_startup_input_, NULL);
+        graphic_device_manager_.reset(new GraphicDeviceManager());
+        graphic_device_manager_->init();
     }
 
     void Application::cleanApplication() {
-        Gdiplus::GdiplusShutdown(gdiplus_token_);
+        graphic_device_manager_->shutdown();
     }
 
     void Application::parseCommandLine(wchar_t *cmdLine) {

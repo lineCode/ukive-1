@@ -18,11 +18,14 @@
     <ClCompile Include="window\window_manager.cpp">
       <Filter>window</Filter>
     </ClCompile>
-    <ClCompile Include="window\non_client_frame.cpp">
-      <Filter>window</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\graphic_device_manager.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="window\frame\default_non_client_frame.cpp">
+      <Filter>window\frame</Filter>
+    </ClCompile>
+    <ClCompile Include="window\frame\custom_non_client_frame.cpp">
+      <Filter>window\frame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -43,11 +46,17 @@
     <ClInclude Include="window\window_manager.h">
       <Filter>window</Filter>
     </ClInclude>
-    <ClInclude Include="window\non_client_frame.h">
-      <Filter>window</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\graphic_device_manager.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="window\frame\default_non_client_frame.h">
+      <Filter>window\frame</Filter>
+    </ClInclude>
+    <ClInclude Include="window\frame\non_client_frame.h">
+      <Filter>window\frame</Filter>
+    </ClInclude>
+    <ClInclude Include="window\frame\custom_non_client_frame.h">
+      <Filter>window\frame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +68,9 @@
     </Filter>
     <Filter Include="graphics">
       <UniqueIdentifier>{be442fbf-17c4-4caa-9ad5-cec076079454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window\frame">
+      <UniqueIdentifier>{fcf6cc79-1ae6-49e7-a6a4-7393cfb63183}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -5,7 +5,8 @@
 #include "ukive/window/window.h"
 #include "ukive/window/window_class_manager.h"
 #include "ukive/window/window_manager.h"
-#include "ukive/window/non_client_frame.h"
+#include "ukive/window/frame/non_client_frame.h"
+#include "ukive/window/frame/default_non_client_frame.h"
 
 
 namespace ukive {
@@ -48,6 +49,9 @@ namespace ukive {
 
         ATOM atom = WindowClassManager::getInstance()->retrieveWindowClass(info);
 
+        non_client_frame_.reset(new DefaultNonClientFrame());
+        //non_client_frame_->init(hWnd_);
+
         HWND hWnd = ::CreateWindowEx(
             kDefaultWindowExStyle,
             reinterpret_cast<wchar_t*>(atom),
@@ -59,9 +63,6 @@ namespace ukive {
             Log::e(L"failed to create window.");
             return;
         }
-
-        non_client_frame_.reset(new NonClientFrame());
-        non_client_frame_->init(hWnd_);
     }
 
     void WindowImpl::show() {
@@ -110,7 +111,7 @@ namespace ukive {
         }
     }
 
-    void WindowImpl::setTitle(string16 title) {
+    void WindowImpl::setTitle(const string16 &title) {
         title_ = title;
         if (is_created_) {
             ::SetWindowTextW(hWnd_, title_.c_str());
@@ -201,8 +202,13 @@ namespace ukive {
             }
             break;
 
-        case WM_NCHITTEST:
-            return non_client_frame_->onNcHitTest(wParam, lParam);
+        case WM_NCHITTEST: {
+            LRESULT ret = non_client_frame_->onNcHitTest(wParam, lParam);
+            if (ret != HTNOWHERE) {
+                return ret;
+            }
+            break;
+        }
 
         case WM_NCCALCSIZE:
             if (non_client_frame_->onNcCalSize(wParam, lParam) == TRUE) {

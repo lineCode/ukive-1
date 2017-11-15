@@ -26,7 +26,7 @@ namespace ukive {
         void close();
         void close(bool notify);
 
-        void setTitle(string16 title);
+        void setTitle(const string16 &title);
         void setX(int x);
         void setY(int y);
         void setPosition(int x, int y);

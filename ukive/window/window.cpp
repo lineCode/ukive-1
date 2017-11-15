@@ -23,18 +23,46 @@ namespace ukive {
     }
 
     void Window::hide() {
-
+        impl_->hide();
     }
 
     void Window::focus() {
-
+        impl_->focus();
     }
 
     void Window::close() {
-
+        impl_->close();
     }
 
     void Window::close(bool notify) {
+        impl_->close(notify);
+    }
+
+    void Window::setTitle(const string16 &title) {
+        impl_->setTitle(title);
+    }
+
+    void Window::setX(int x) {
+
+    }
+
+    void Window::setY(int y) {
+
+    }
+
+    void Window::setPosition(int x, int y) {
+
+    }
+
+    void Window::setWidth(int width) {
+
+    }
+
+    void Window::setHeight(int height) {
+
+    }
+
+    void Window::setBound(int x, int y, int width, int height) {
 
     }
 
