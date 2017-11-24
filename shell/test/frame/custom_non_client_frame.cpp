@@ -1,9 +1,5 @@
 #include "custom_non_client_frame.h"
 
-#include <Windowsx.h>
-
-#include <cmath>
-
 #define MIN_BUTTON_WIDTH 15
 #define MIN_BUTTON_HEIGHT 15
 #define MIN_BUTTON_RIGHT_MARGIN 6
@@ -30,8 +26,12 @@
 
 #define TITLE_TEXT L"WLTest"
 
+#include <Windowsx.h>
 
-namespace ukive {
+#include <cmath>
+
+
+namespace shell {
 
     const Gdiplus::Color TITLE_COLOR(0xff, 0xff, 0xff);
     const Gdiplus::Color BORDER_COLOR(0xe5, 0x1c, 0x23);              //Red 500

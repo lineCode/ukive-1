@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "utils/string_utils.h"
+#include "ukive/graphics/wic_manager.h"
+#include "ukive/text/tsf_manager.h"
 
 
 namespace ukive {
@@ -32,17 +34,30 @@ namespace ukive {
         static void setVSync(bool enable);
         static bool isVSyncEnabled();
 
+        static float dpToPxX(float dp);
+        static float dpToPxY(float dp);
+
         static HMODULE getModuleHandle();
+        static GraphicDeviceManager* getGraphicDeviceManager();
+
+        static WICManager *getWICManager();
+        static TsfManager *getTsfManager();
+
+        static int getViewUID();
 
     private:
         void initApplication();
         void cleanApplication();
         void parseCommandLine(wchar_t *cmdLine);
 
-        static bool sVSyncEnabled;
+        static int view_uid_;
+        static bool vsync_enabled_;
+        static Application *instance_;
 
         std::vector<std::wstring> command_list_;
 
+        std::unique_ptr<TsfManager> tsf_manager_;
+        std::unique_ptr<WICManager> wic_manager_;
         std::unique_ptr<GraphicDeviceManager> graphic_device_manager_;
     };
 

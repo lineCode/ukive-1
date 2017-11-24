@@ -1,5 +1,5 @@
-#ifndef UKIVE_WINDOW_FRAME_CUSTOM_NON_CLIENT_FRAME_H_
-#define UKIVE_WINDOW_FRAME_CUSTOM_NON_CLIENT_FRAME_H_
+#ifndef SHELL_TEST_FRAME_CUSTOM_NON_CLIENT_FRAME_H_
+#define SHELL_TEST_FRAME_CUSTOM_NON_CLIENT_FRAME_H_
 
 #include <Windows.h>
 #include <gdiplus.h>
@@ -7,9 +7,9 @@
 #include "ukive/window/frame/non_client_frame.h"
 
 
-namespace ukive {
+namespace shell {
 
-    class CustomNonClientFrame : public NonClientFrame {
+    class CustomNonClientFrame : public ukive::NonClientFrame {
     public:
         CustomNonClientFrame()
             :title_font_(NULL),
@@ -56,4 +56,4 @@ namespace ukive {
 
 }
 
-#endif  // UKIVE_WINDOW_FRAME_CUSTOM_NON_CLIENT_FRAME_H_
+#endif  // SHELL_TEST_FRAME_CUSTOM_NON_CLIENT_FRAME_H_

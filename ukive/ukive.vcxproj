@@ -72,8 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\lib\</OutDir>
-    <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>UKIVE</TargetName>
@@ -93,13 +93,18 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -149,29 +154,193 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="animation\animation_manager.h" />
+    <ClInclude Include="animation\animation_manager_event_handler.h" />
+    <ClInclude Include="animation\animation_timer_handler.h" />
+    <ClInclude Include="animation\animation_variable_change_handler.h" />
+    <ClInclude Include="animation\animator.h" />
+    <ClInclude Include="animation\animator_state_handler.h" />
+    <ClInclude Include="animation\scroller.h" />
+    <ClInclude Include="animation\transition.h" />
+    <ClInclude Include="animation\view_animator.h" />
     <ClInclude Include="application.h" />
+    <ClInclude Include="drawable\bitmap_drawable.h" />
+    <ClInclude Include="drawable\color_drawable.h" />
+    <ClInclude Include="drawable\drawable.h" />
+    <ClInclude Include="drawable\edittext_drawable.h" />
+    <ClInclude Include="drawable\layer_drawable.h" />
+    <ClInclude Include="drawable\ripple_drawable.h" />
+    <ClInclude Include="drawable\shape_drawable.h" />
+    <ClInclude Include="event\input_event.h" />
+    <ClInclude Include="graphics\bitmap_factory.h" />
+    <ClInclude Include="graphics\canvas.h" />
+    <ClInclude Include="graphics\color.h" />
+    <ClInclude Include="graphics\device_lost_notifier.h" />
+    <ClInclude Include="graphics\direct3d_render_listener.h" />
+    <ClInclude Include="graphics\drawing_object_manager.h" />
     <ClInclude Include="graphics\graphic_device_manager.h" />
+    <ClInclude Include="graphics\rect.h" />
+    <ClInclude Include="graphics\renderer.h" />
+    <ClInclude Include="graphics\swapchain_resize_notifier.h" />
+    <ClInclude Include="graphics\wic_manager.h" />
     <ClInclude Include="log.h" />
+    <ClInclude Include="menu\context_menu.h" />
+    <ClInclude Include="menu\context_menu_callback.h" />
+    <ClInclude Include="menu\inner_window.h" />
+    <ClInclude Include="menu\menu.h" />
+    <ClInclude Include="menu\menu_callback.h" />
+    <ClInclude Include="menu\menu_impl.h" />
+    <ClInclude Include="menu\menu_item.h" />
+    <ClInclude Include="menu\menu_item_impl.h" />
+    <ClInclude Include="message\cycler.h" />
+    <ClInclude Include="message\message.h" />
+    <ClInclude Include="message\message_looper.h" />
+    <ClInclude Include="message\message_queue.h" />
+    <ClInclude Include="system\clipboard_manager.h" />
+    <ClInclude Include="system\system_clock.h" />
+    <ClInclude Include="text\editable.h" />
+    <ClInclude Include="text\input_connection.h" />
+    <ClInclude Include="text\language_detector.h" />
+    <ClInclude Include="text\span\effect_span.h" />
+    <ClInclude Include="text\span\inline_object_span.h" />
+    <ClInclude Include="text\span\interactable_span.h" />
+    <ClInclude Include="text\span\span.h" />
+    <ClInclude Include="text\span\text_span.h" />
+    <ClInclude Include="text\span\underline_span.h" />
+    <ClInclude Include="text\text_action_mode.h" />
+    <ClInclude Include="text\text_action_mode_callback.h" />
+    <ClInclude Include="text\text_blink.h" />
+    <ClInclude Include="text\text_drawing_effect.h" />
+    <ClInclude Include="text\text_key_listener.h" />
+    <ClInclude Include="text\text_renderer.h" />
+    <ClInclude Include="text\tsf_editor.h" />
+    <ClInclude Include="text\tsf_manager.h" />
+    <ClInclude Include="text\word_breaker.h" />
+    <ClInclude Include="utils\com_ptr.h" />
+    <ClInclude Include="utils\double.h" />
+    <ClInclude Include="utils\executable.h" />
+    <ClInclude Include="utils\float.h" />
+    <ClInclude Include="utils\hresult_utils.h" />
+    <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\string_utils.h" />
+    <ClInclude Include="utils\thread_local.h" />
+    <ClInclude Include="views\button.h" />
+    <ClInclude Include="views\click_listener.h" />
+    <ClInclude Include="views\direct3d_view.h" />
+    <ClInclude Include="views\image_view.h" />
+    <ClInclude Include="views\layout\base_layout.h" />
+    <ClInclude Include="views\layout\base_layout_params.h" />
+    <ClInclude Include="views\layout\frame_layout.h" />
+    <ClInclude Include="views\layout\layout_params.h" />
+    <ClInclude Include="views\layout\linear_layout.h" />
+    <ClInclude Include="views\layout\linear_layout_params.h" />
+    <ClInclude Include="views\layout\restraint_layout.h" />
+    <ClInclude Include="views\layout\restraint_layout_params.h" />
+    <ClInclude Include="views\layout\view_group.h" />
+    <ClInclude Include="views\list_adapter.h" />
+    <ClInclude Include="views\list_view.h" />
+    <ClInclude Include="views\scroll_view.h" />
+    <ClInclude Include="views\seek_bar.h" />
+    <ClInclude Include="views\seek_value_changed_listener.h" />
+    <ClInclude Include="views\spinner_view.h" />
+    <ClInclude Include="views\switch_view.h" />
+    <ClInclude Include="views\text_view.h" />
+    <ClInclude Include="views\text_view2.h" />
+    <ClInclude Include="views\view.h" />
     <ClInclude Include="window\frame\default_non_client_frame.h" />
     <ClInclude Include="window\frame\non_client_frame.h" />
-    <ClInclude Include="window\frame\custom_non_client_frame.h" />
     <ClInclude Include="window\window.h" />
     <ClInclude Include="window\window_class_manager.h" />
     <ClInclude Include="window\window_impl.h" />
     <ClInclude Include="window\window_manager.h" />
+    <ClInclude Include="window\window_slave.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="animation\animation_manager.cpp" />
+    <ClCompile Include="animation\animation_manager_event_handler.cpp" />
+    <ClCompile Include="animation\animation_timer_handler.cpp" />
+    <ClCompile Include="animation\animation_variable_change_handler.cpp" />
+    <ClCompile Include="animation\animator.cpp" />
+    <ClCompile Include="animation\animator_state_handler.cpp" />
+    <ClCompile Include="animation\scroller.cpp" />
+    <ClCompile Include="animation\transition.cpp" />
+    <ClCompile Include="animation\view_animator.cpp" />
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="drawable\bitmap_drawable.cpp" />
+    <ClCompile Include="drawable\color_drawable.cpp" />
+    <ClCompile Include="drawable\drawable.cpp" />
+    <ClCompile Include="drawable\edittext_drawable.cpp" />
+    <ClCompile Include="drawable\layer_drawable.cpp" />
+    <ClCompile Include="drawable\ripple_drawable.cpp" />
+    <ClCompile Include="drawable\shape_drawable.cpp" />
+    <ClCompile Include="event\input_event.cpp" />
+    <ClCompile Include="graphics\bitmap_factory.cpp" />
+    <ClCompile Include="graphics\canvas.cpp" />
+    <ClCompile Include="graphics\color.cpp" />
+    <ClCompile Include="graphics\drawing_object_manager.cpp" />
     <ClCompile Include="graphics\graphic_device_manager.cpp" />
+    <ClCompile Include="graphics\rect.cpp" />
+    <ClCompile Include="graphics\renderer.cpp" />
+    <ClCompile Include="graphics\wic_manager.cpp" />
     <ClCompile Include="log.cpp" />
+    <ClCompile Include="menu\context_menu.cpp" />
+    <ClCompile Include="menu\inner_window.cpp" />
+    <ClCompile Include="menu\menu_impl.cpp" />
+    <ClCompile Include="menu\menu_item_impl.cpp" />
+    <ClCompile Include="message\cycler.cpp" />
+    <ClCompile Include="message\message.cpp" />
+    <ClCompile Include="message\message_looper.cpp" />
+    <ClCompile Include="message\message_queue.cpp" />
+    <ClCompile Include="system\clipboard_manager.cpp" />
+    <ClCompile Include="system\system_clock.cpp" />
+    <ClCompile Include="text\editable.cpp" />
+    <ClCompile Include="text\input_connection.cpp" />
+    <ClCompile Include="text\language_detector.cpp" />
+    <ClCompile Include="text\span\effect_span.cpp" />
+    <ClCompile Include="text\span\inline_object_span.cpp" />
+    <ClCompile Include="text\span\interactable_span.cpp" />
+    <ClCompile Include="text\span\span.cpp" />
+    <ClCompile Include="text\span\text_span.cpp" />
+    <ClCompile Include="text\span\underline_span.cpp" />
+    <ClCompile Include="text\text_action_mode.cpp" />
+    <ClCompile Include="text\text_blink.cpp" />
+    <ClCompile Include="text\text_drawing_effect.cpp" />
+    <ClCompile Include="text\text_key_listener.cpp" />
+    <ClCompile Include="text\text_renderer.cpp" />
+    <ClCompile Include="text\tsf_editor.cpp" />
+    <ClCompile Include="text\tsf_manager.cpp" />
+    <ClCompile Include="text\word_breaker.cpp" />
+    <ClCompile Include="utils\double.cpp" />
+    <ClCompile Include="utils\float.cpp" />
+    <ClCompile Include="utils\number.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
+    <ClCompile Include="views\button.cpp" />
+    <ClCompile Include="views\direct3d_view.cpp" />
+    <ClCompile Include="views\image_view.cpp" />
+    <ClCompile Include="views\layout\base_layout.cpp" />
+    <ClCompile Include="views\layout\base_layout_params.cpp" />
+    <ClCompile Include="views\layout\frame_layout.cpp" />
+    <ClCompile Include="views\layout\layout_params.cpp" />
+    <ClCompile Include="views\layout\linear_layout.cpp" />
+    <ClCompile Include="views\layout\linear_layout_params.cpp" />
+    <ClCompile Include="views\layout\restraint_layout.cpp" />
+    <ClCompile Include="views\layout\restraint_layout_params.cpp" />
+    <ClCompile Include="views\layout\view_group.cpp" />
+    <ClCompile Include="views\list_adapter.cpp" />
+    <ClCompile Include="views\list_view.cpp" />
+    <ClCompile Include="views\scroll_view.cpp" />
+    <ClCompile Include="views\seek_bar.cpp" />
+    <ClCompile Include="views\spinner_view.cpp" />
+    <ClCompile Include="views\switch_view.cpp" />
+    <ClCompile Include="views\text_view.cpp" />
+    <ClCompile Include="views\text_view2.cpp" />
+    <ClCompile Include="views\view.cpp" />
     <ClCompile Include="window\frame\default_non_client_frame.cpp" />
-    <ClCompile Include="window\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="window\window.cpp" />
     <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />
     <ClCompile Include="window\window_manager.cpp" />
+    <ClCompile Include="window\window_slave.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

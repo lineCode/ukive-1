@@ -38,32 +38,36 @@ namespace ukive {
         impl_->close(notify);
     }
 
+    void Window::center() {
+        impl_->center();
+    }
+
     void Window::setTitle(const string16 &title) {
         impl_->setTitle(title);
     }
 
     void Window::setX(int x) {
-
+        impl_->setBound(x, impl_->getY(), impl_->getWidth(), impl_->getHeight());
     }
 
     void Window::setY(int y) {
-
+        impl_->setBound(impl_->getX(), y, impl_->getWidth(), impl_->getHeight());
     }
 
     void Window::setPosition(int x, int y) {
-
+        impl_->setBound(x, y, impl_->getWidth(), impl_->getHeight());
     }
 
     void Window::setWidth(int width) {
-
+        impl_->setBound(impl_->getX(), impl_->getY(), width, impl_->getHeight());
     }
 
     void Window::setHeight(int height) {
-
+        impl_->setBound(impl_->getX(), impl_->getY(), impl_->getWidth(), height);
     }
 
     void Window::setBound(int x, int y, int width, int height) {
-
+        impl_->setBound(x, y, width, height);
     }
 
     void Window::setMinWidth(int minWidth) {
@@ -74,6 +78,34 @@ namespace ukive {
         min_height_ = minHeight;
     }
 
+    void Window::setCurrentCursor(LPCWSTR cursor) {
+        impl_->setCurrentCursor(cursor);
+    }
+
+    void Window::setContentView(View *content) {
+        impl_->setContentView(content);
+    }
+
+    void Window::setBackgroundColor(D2D1_COLOR_F color) {
+        impl_->setBackgroundColor(color);
+    }
+
+    int Window::getX() {
+        return impl_->getX();
+    }
+
+    int Window::getY() {
+        return impl_->getY();
+    }
+
+    int Window::getWidth() {
+        return impl_->getWidth();
+    }
+
+    int Window::getHeight() {
+        return impl_->getHeight();
+    }
+
     int Window::getMinWidth() {
         return min_width_;
     }
@@ -82,34 +114,129 @@ namespace ukive {
         return min_height_;
     }
 
-    void Window::onPreCreate(ClassInfo *info) {
+    int Window::getClientWidth() {
+        return impl_->getClientWidth();
+    }
 
+    int Window::getClientHeight() {
+        return impl_->getClientHeight();
+    }
+
+    BaseLayout *Window::getBaseLayout() {
+        return impl_->getBaseLayout();
+    }
+
+    D2D1_COLOR_F Window::getBackgroundColor() {
+        return impl_->getBackgroundColor();
+    }
+
+    Cycler *Window::getCycler() {
+        return impl_->getCycler();
+    }
+
+    Renderer *Window::getRenderer() {
+        return impl_->getRenderer();
+    }
+
+    HWND Window::getHandle() {
+        return impl_->getHandle();
+    }
+
+    View *Window::getKeyboardHolder() {
+        return impl_->getKeyboardHolder();
+    }
+
+    BitmapFactory *Window::getBitmapFactory() {
+        return impl_->getBitmapFactory();
+    }
+
+    AnimationManager *Window::getAnimationManager() {
+        return impl_->getAnimationManager();
+    }
+
+    bool Window::isShowing() {
+        return impl_->isShowing();
+    }
+
+    bool Window::isCursorInClient() {
+        return impl_->isCursorInClient();
+    }
+
+    void Window::captureMouse(View *widget) {
+        impl_->captureMouse(widget);
+    }
+
+    void Window::releaseMouse() {
+        impl_->releaseMouse();
+    }
+
+    void Window::captureKeyboard(View *widget) {
+        impl_->captureKeyboard(widget);
+    }
+
+    void Window::releaseKeyboard() {
+        impl_->releaseKeyboard();
+    }
+
+    void Window::invalidate() {
+        impl_->invalidate();
+    }
+
+    void Window::requestLayout() {
+        impl_->requestLayout();
+    }
+
+    View *Window::findViewById(int id) {
+        return impl_->findWidgetById(id);
+    }
+
+    ContextMenu *Window::startContextMenu(
+        ContextMenuCallback *callback, View *anchor, Gravity gravity) {
+        return impl_->startContextMenu(callback, anchor, gravity);
+    }
+
+    TextActionMode *Window::startTextActionMode(TextActionModeCallback *callback) {
+        return impl_->startTextActionMode(callback);
+    }
+
+    void Window::onPreCreate(ClassInfo *info) {
     }
 
     void Window::onCreate() {
-
     }
 
     void Window::onShow(bool show) {
-
     }
 
     void Window::onActivate(int param) {
-
     }
 
     void Window::onDraw(Canvas *canvas) {
-
     }
 
     void Window::onMove(int x, int y) {
-
     }
 
     void Window::onResize(
         int param, int width, int height,
         int clientWidth, int clientHeight) {
+        switch (param)
+        {
+        case SIZE_RESTORED:
+            break;
 
+        case SIZE_MINIMIZED:
+            break;
+
+        case SIZE_MAXIMIZED:
+            break;
+
+        case SIZE_MAXSHOW:
+            break;
+
+        case SIZE_MAXHIDE:
+            break;
+        }
     }
 
     bool Window::onMoving(RECT *rect) {
@@ -167,11 +294,10 @@ namespace ukive {
     }
 
     void Window::onDestroy() {
-
     }
 
-    void Window::onInputEvent(InputEvent *e) {
-
+    bool Window::onInputEvent(InputEvent *e) {
+        return false;
     }
 
 }

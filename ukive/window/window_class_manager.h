@@ -26,6 +26,8 @@ namespace ukive {
 
     class WindowClassManager {
     public:
+        ~WindowClassManager();
+
         struct RegisteredClass {
             ClassInfo info;
             ATOM atom;

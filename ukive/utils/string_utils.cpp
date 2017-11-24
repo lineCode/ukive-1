@@ -2,4 +2,7 @@
 
 namespace ukive {
 
+    void supress() {
+    }
+
 }

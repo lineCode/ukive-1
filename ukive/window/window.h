@@ -6,13 +6,26 @@
 #include <memory>
 
 #include "ukive/utils/string_utils.h"
+#include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
 
+    class View;
+    class Cycler;
     class Canvas;
+    class Renderer;
     class InputEvent;
     class WindowImpl;
+    class BaseLayout;
+    class BitmapFactory;
+    class AnimationManager;
+    class ContextMenu;
+    class ContextMenuCallback;
+    class TextActionMode;
+    class TextActionModeCallback;
+
+    enum Gravity;
     struct ClassInfo;
 
     class Window {
@@ -25,6 +38,7 @@ namespace ukive {
         void focus();
         void close();
         void close(bool notify);
+        void center();
 
         void setTitle(const string16 &title);
         void setX(int x);
@@ -35,9 +49,43 @@ namespace ukive {
         void setBound(int x, int y, int width, int height);
         void setMinWidth(int minWidth);
         void setMinHeight(int minHeight);
+        void setCurrentCursor(LPCWSTR cursor);
+        void setContentView(View *content);
+        void setBackgroundColor(D2D1_COLOR_F color);
 
+        int getX();
+        int getY();
+        int getWidth();
+        int getHeight();
         int getMinWidth();
         int getMinHeight();
+        int getClientWidth();
+        int getClientHeight();
+        BaseLayout *getBaseLayout();
+        D2D1_COLOR_F getBackgroundColor();
+        Cycler *getCycler();
+        Renderer *getRenderer();
+        HWND getHandle();
+        View *getKeyboardHolder();
+        BitmapFactory *getBitmapFactory();
+        AnimationManager *getAnimationManager();
+
+        bool isShowing();
+        bool isCursorInClient();
+
+        void captureMouse(View *widget);
+        void releaseMouse();
+        void captureKeyboard(View *widget);
+        void releaseKeyboard();
+
+        void invalidate();
+        void requestLayout();
+
+        View *findViewById(int id);
+
+        ContextMenu *startContextMenu(
+            ContextMenuCallback *callback, View *anchor, Gravity gravity);
+        TextActionMode *startTextActionMode(TextActionModeCallback *callback);
 
         virtual void onPreCreate(ClassInfo *info);
         virtual void onCreate();
@@ -52,7 +100,7 @@ namespace ukive {
         virtual bool onResizing(WPARAM edge, RECT *rect);
         virtual bool onClose();
         virtual void onDestroy();
-        virtual void onInputEvent(InputEvent *e);
+        virtual bool onInputEvent(InputEvent *e);
 
     private:
         std::unique_ptr<WindowImpl> impl_;

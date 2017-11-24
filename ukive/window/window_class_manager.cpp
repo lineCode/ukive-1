@@ -18,6 +18,15 @@ namespace ukive {
         return instance_.get();
     }
 
+    WindowClassManager::~WindowClassManager() {
+        for (auto it = class_list_.begin(); it != class_list_.end(); ++it) {
+            wchar_t *class_name = reinterpret_cast<wchar_t*>(it->atom);
+            if (::UnregisterClass(class_name, Application::getModuleHandle()) == 0) {
+                Log::e(string16(L"failed to unregister class: ") + class_name);
+            }
+        }
+    }
+
     ATOM WindowClassManager::retrieveWindowClass(const ClassInfo &info) {
         for (auto it = class_list_.begin(); it != class_list_.end(); ++it) {
             if (it->info == info) {

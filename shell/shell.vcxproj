@@ -72,7 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -95,8 +96,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ukive.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -147,20 +148,87 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="shell.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="shell.ico" />
-    <Image Include="small.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="app\shell.cpp" />
+    <ClCompile Include="direct3d\assist_configure.cpp" />
+    <ClCompile Include="direct3d\camera.cpp" />
+    <ClCompile Include="direct3d\graph_creator.cpp" />
+    <ClCompile Include="direct3d\model_configure.cpp" />
+    <ClCompile Include="direct3d\scene.cpp" />
+    <ClCompile Include="lod\lod_view.cpp" />
+    <ClCompile Include="lod\lod_window.cpp" />
+    <ClCompile Include="lod\qtree_node.cpp" />
+    <ClCompile Include="lod\terrain_configure.cpp" />
+    <ClCompile Include="lod\terrain_scene.cpp" />
+    <ClCompile Include="lod\lod_generator.cpp" />
+    <ClCompile Include="test\animation\wallpaper_effect.cpp" />
+    <ClCompile Include="test\animation\wallpaper_transform.cpp" />
+    <ClCompile Include="test\animation\wallpaper_window.cpp" />
+    <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
+    <ClCompile Include="test\test_window.cpp" />
+    <ClCompile Include="test\text\text_window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="DeclareDPIAware.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="direct3d\assist_configure.h" />
+    <ClInclude Include="direct3d\camera.h" />
+    <ClInclude Include="direct3d\graph_creator.h" />
+    <ClInclude Include="direct3d\model_configure.h" />
+    <ClInclude Include="direct3d\scene.h" />
+    <ClInclude Include="lod\lod_view.h" />
+    <ClInclude Include="lod\lod_window.h" />
+    <ClInclude Include="lod\qtree_node.h" />
+    <ClInclude Include="lod\terrain_configure.h" />
+    <ClInclude Include="lod\terrain_scene.h" />
+    <ClInclude Include="lod\lod_generator.h" />
+    <ClInclude Include="resources\resource.h" />
+    <ClInclude Include="test\animation\wallpaper_effect.h" />
+    <ClInclude Include="test\animation\wallpaper_transform.h" />
+    <ClInclude Include="test\animation\wallpaper_window.h" />
+    <ClInclude Include="test\frame\custom_non_client_frame.h" />
+    <ClInclude Include="test\test_window.h" />
+    <ClInclude Include="test\text\text_window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\shell.ico" />
+    <Image Include="resources\small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\shell.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="test\animation\wallpaper_props.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="hlsl\assist_pixel_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\assist_vertex_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\model_pixel_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\model_vertex_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\terrain_pixel_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\terrain_vertex_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\wallpaper_pixel_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

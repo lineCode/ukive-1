@@ -24,8 +24,233 @@
     <ClCompile Include="window\frame\default_non_client_frame.cpp">
       <Filter>window\frame</Filter>
     </ClCompile>
-    <ClCompile Include="window\frame\custom_non_client_frame.cpp">
-      <Filter>window\frame</Filter>
+    <ClCompile Include="event\input_event.cpp">
+      <Filter>event</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\canvas.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\color.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\double.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\float.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\number.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\wic_manager.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="system\clipboard_manager.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\system_clock.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\bitmap_factory.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\renderer.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="message\cycler.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="message\message.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="message\message_looper.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="message\message_queue.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\drawing_object_manager.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animation_manager.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animation_manager_event_handler.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animation_timer_handler.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animation_variable_change_handler.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animator.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animator_state_handler.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\scroller.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\transition.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\view_animator.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="text\editable.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\input_connection.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\language_detector.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\text_action_mode.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\text_blink.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\text_drawing_effect.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\text_key_listener.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\text_renderer.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\tsf_editor.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\tsf_manager.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\word_breaker.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="text\span\effect_span.cpp">
+      <Filter>text\span</Filter>
+    </ClCompile>
+    <ClCompile Include="text\span\inline_object_span.cpp">
+      <Filter>text\span</Filter>
+    </ClCompile>
+    <ClCompile Include="text\span\interactable_span.cpp">
+      <Filter>text\span</Filter>
+    </ClCompile>
+    <ClCompile Include="text\span\span.cpp">
+      <Filter>text\span</Filter>
+    </ClCompile>
+    <ClCompile Include="text\span\text_span.cpp">
+      <Filter>text\span</Filter>
+    </ClCompile>
+    <ClCompile Include="text\span\underline_span.cpp">
+      <Filter>text\span</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\bitmap_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\color_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\edittext_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\layer_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\ripple_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\shape_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="menu\context_menu.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
+    <ClCompile Include="menu\inner_window.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
+    <ClCompile Include="menu\menu_impl.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
+    <ClCompile Include="menu\menu_item_impl.cpp">
+      <Filter>menu</Filter>
+    </ClCompile>
+    <ClCompile Include="views\button.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\direct3d_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\image_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list_adapter.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\scroll_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\seek_bar.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\spinner_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\switch_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\text_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\text_view2.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\base_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\base_layout_params.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\frame_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\layout_params.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\linear_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\linear_layout_params.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\restraint_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\restraint_layout_params.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\view_group.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\rect.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="window\window_slave.cpp">
+      <Filter>window</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,8 +280,275 @@
     <ClInclude Include="window\frame\non_client_frame.h">
       <Filter>window\frame</Filter>
     </ClInclude>
-    <ClInclude Include="window\frame\custom_non_client_frame.h">
-      <Filter>window\frame</Filter>
+    <ClInclude Include="utils\com_ptr.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="event\input_event.h">
+      <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\canvas.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\color.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\double.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\float.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\number.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\wic_manager.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\thread_local.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="system\clipboard_manager.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="system\system_clock.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\bitmap_factory.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\renderer.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="message\cycler.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="message\message.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="message\message_looper.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="message\message_queue.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\executable.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\device_lost_notifier.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\direct3d_render_listener.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\swapchain_resize_notifier.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\hresult_utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\drawing_object_manager.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation_manager.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation_manager_event_handler.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation_timer_handler.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation_variable_change_handler.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animator.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animator_state_handler.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\scroller.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\transition.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\view_animator.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="text\editable.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\input_connection.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\language_detector.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_action_mode.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_action_mode_callback.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_blink.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_drawing_effect.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_key_listener.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_renderer.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\tsf_editor.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\tsf_manager.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\word_breaker.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\span\effect_span.h">
+      <Filter>text\span</Filter>
+    </ClInclude>
+    <ClInclude Include="text\span\inline_object_span.h">
+      <Filter>text\span</Filter>
+    </ClInclude>
+    <ClInclude Include="text\span\interactable_span.h">
+      <Filter>text\span</Filter>
+    </ClInclude>
+    <ClInclude Include="text\span\span.h">
+      <Filter>text\span</Filter>
+    </ClInclude>
+    <ClInclude Include="text\span\text_span.h">
+      <Filter>text\span</Filter>
+    </ClInclude>
+    <ClInclude Include="text\span\underline_span.h">
+      <Filter>text\span</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\bitmap_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\color_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\edittext_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\layer_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\ripple_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\shape_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\context_menu.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\context_menu_callback.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\inner_window.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\menu.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\menu_callback.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\menu_impl.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\menu_item.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="menu\menu_item_impl.h">
+      <Filter>menu</Filter>
+    </ClInclude>
+    <ClInclude Include="views\button.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\click_listener.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\direct3d_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\image_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list_adapter.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\scroll_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\seek_bar.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\seek_value_changed_listener.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\spinner_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\switch_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\text_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\text_view2.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\base_layout.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\base_layout_params.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\frame_layout.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\layout_params.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\linear_layout.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\linear_layout_params.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\restraint_layout.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\restraint_layout_params.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\view_group.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\rect.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="window\window_slave.h">
+      <Filter>window</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +563,36 @@
     </Filter>
     <Filter Include="window\frame">
       <UniqueIdentifier>{fcf6cc79-1ae6-49e7-a6a4-7393cfb63183}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="event">
+      <UniqueIdentifier>{318bf901-c727-4dd7-9ed4-151b56553dbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="system">
+      <UniqueIdentifier>{840d816d-a64c-4941-b163-e544af4db81d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="message">
+      <UniqueIdentifier>{5e2e9cec-fa20-40b5-9fdf-76c5cd920483}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="animation">
+      <UniqueIdentifier>{98b3ec74-0764-431c-861c-8e0a081530d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text">
+      <UniqueIdentifier>{9c0be27a-aad4-47b8-93ef-aee4385a394a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text\span">
+      <UniqueIdentifier>{b978b27c-0cfd-4429-b48c-d6fc889a25bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawable">
+      <UniqueIdentifier>{e2b3fc37-0803-44fd-a8d9-8978a6b4313d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="menu">
+      <UniqueIdentifier>{7e6ed82a-a573-4670-888e-9639681958e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views">
+      <UniqueIdentifier>{1798bf0b-9516-4d89-9e2e-59ac0a2a3828}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views\layout">
+      <UniqueIdentifier>{cb19e414-e8be-45fe-be55-a3e2d191edc4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -8,6 +8,8 @@ namespace ukive {
     typedef std::string string8;
     typedef std::wstring string16;
 
+    void supress();
+
 }
 
 #endif  // UKIVE_UTILS_STRING_UTILS_H_
