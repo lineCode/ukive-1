@@ -6,6 +6,17 @@
 #include "ukive/graphics/renderer.h"
 
 
+namespace {
+    D2D1_COLOR_F convColor(ukive::Color &color) {
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        return _color;
+    }
+}
+
 namespace shell {
 
     void WallpaperWindow::onCreate()
@@ -144,18 +155,18 @@ namespace shell {
     {
         auto dc = getRenderer()->getD2DDeviceContext();
 
-        dc->CreateSolidColorBrush(ukive::Color::Black, &mCircleBrush);
+        dc->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &mCircleBrush);
 
         // Create an array of gradient stops to put in the gradient stop
         // collection that will be used in the gradient brush.
         ID2D1GradientStopCollection *pGradientStops = NULL;
 
         D2D1_GRADIENT_STOP gradientStops[3];
-        gradientStops[0].color = ukive::Color::parse(L"#aa638c99");
+        gradientStops[0].color = convColor(ukive::Color::parse(L"#aa638c99"));
         gradientStops[0].position = 0.0f;
-        gradientStops[1].color = ukive::Color::parse(L"#44404b4f");
+        gradientStops[1].color = convColor(ukive::Color::parse(L"#44404b4f"));
         gradientStops[1].position = 0.7f;
-        gradientStops[2].color = ukive::Color::parse(L"#0033383b");
+        gradientStops[2].color = convColor(ukive::Color::parse(L"#0033383b"));
         gradientStops[2].position = 1.0f;
 
         // Create the ID2D1GradientStopCollection from a previously
@@ -233,7 +244,7 @@ namespace shell {
 
             ID2D1SolidColorBrush *brush = mCircleBrush;
 
-            brush->SetColor(ukive::Color::parse(L"#ECEFF1"));
+            brush->SetColor(convColor(ukive::Color::parse(L"#ECEFF1")));
             c->getRT()->DrawGeometry(circleGeo, brush, strokeWidth);
 
             circleGeo->Release();
@@ -242,7 +253,7 @@ namespace shell {
 
     void WallpaperWindow::drawDecoredCircle(
         ukive::Canvas *c, float cx, float cy, float radius,
-        float extAngle, float extRadiusAdd, float strokeWidth, D2D1_COLOR_F &color)
+        float extAngle, float extRadiusAdd, float strokeWidth, ukive::Color &color)
     {
         c->drawCircle(cx, cy, radius, strokeWidth, color);
 
@@ -292,7 +303,7 @@ namespace shell {
 
             ID2D1SolidColorBrush *brush = mCircleBrush;
 
-            brush->SetColor(color);
+            brush->SetColor(convColor(color));
             c->getRT()->DrawGeometry(circleGeo, brush, extStrokeWidth);
 
             circleGeo->Release();
@@ -302,7 +313,7 @@ namespace shell {
     void WallpaperWindow::drawDashedLines(ukive::Canvas *c, float cx, float cy, float radius)
     {
         ID2D1SolidColorBrush *brush = mCircleBrush;
-        brush->SetColor(ukive::Color::parse(L"#FF6F00"));
+        brush->SetColor(convColor(ukive::Color::parse(L"#FF6F00")));
 
         ID2D1StrokeStyle1 *style;
         ukive::Application::getGraphicDeviceManager()->getD2DFactory()->CreateStrokeStyle(
@@ -401,12 +412,12 @@ namespace shell {
 
             ID2D1SolidColorBrush *brush = mCircleBrush;
 
-            brush->SetColor(ukive::Color::parse(L"#339FA8DA"));
+            brush->SetColor(convColor(ukive::Color::parse(L"#339FA8DA")));
             canvas->getRT()->FillGeometry(circleGeo, brush);
 
             if (showOutline)
             {
-                brush->SetColor(ukive::Color::parse(L"#5C6BC0"));
+                brush->SetColor(convColor(ukive::Color::parse(L"#5C6BC0")));
                 canvas->getRT()->DrawGeometry(circleGeo, brush, 8 * outlineWidth);
             }
 
@@ -495,7 +506,7 @@ namespace shell {
                 cy + radius - height / 2,
                 cx + width / 2 + appendix,
                 cy + radius + height / 2),
-            ukive::Color::argb(1.f, 1.f, 1.f, alpha));
+            ukive::Color(alpha, 1.f, 1.f, 1.f));
     }
 
 

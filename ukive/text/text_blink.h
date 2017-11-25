@@ -3,6 +3,7 @@
 
 #include "ukive/utils/executable.h"
 #include "ukive/graphics/rect.h"
+#include "ukive/graphics/color.h"
 #include "ukive/graphics/graphic_device_manager.h"
 
 
@@ -25,7 +26,7 @@ namespace ukive {
         Rect mBlinkRect;
 
         float mThickness;
-        D2D1::ColorF mColor;
+        Color mColor;
 
     public:
         TextBlink(View *widget);
@@ -37,11 +38,11 @@ namespace ukive {
         void hide();
         void locate(float xCenter, float top, float bottom);
 
-        void setColor(D2D1::ColorF color);
+        void setColor(Color color);
         void setThickness(float thickness);
 
         bool isShowing();
-        D2D1::ColorF getColor();
+        Color getColor();
         float getThickness();
 
         void run();

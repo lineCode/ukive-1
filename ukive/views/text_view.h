@@ -3,6 +3,7 @@
 
 #include "ukive/views/view.h"
 #include "ukive/text/editable.h"
+#include "ukive/graphics/color.h"
 #include "ukive/text/text_action_mode_callback.h"
 #include "ukive/graphics/graphic_device_manager.h"
 
@@ -63,8 +64,8 @@ namespace ukive {
 
         float mTextSize;
         std::wstring mFontFamilyName;
-        D2D1::ColorF mTextColor;
-        D2D1::ColorF mSelectionBackgroundColor;
+        Color mTextColor;
+        Color mSelectionBackgroundColor;
         DWRITE_TEXT_ALIGNMENT mTextAlignment;
         DWRITE_PARAGRAPH_ALIGNMENT mParagraphAlignment;
         DWRITE_FONT_WEIGHT mTextWeight;
@@ -153,7 +154,7 @@ namespace ukive {
 
         void setText(std::wstring text);
         void setTextSize(float size);
-        void setTextColor(D2D1::ColorF color);
+        void setTextColor(Color color);
         void setTextAlignment(DWRITE_TEXT_ALIGNMENT alignment);
         void setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment);
         void setTextStyle(DWRITE_FONT_STYLE style);

@@ -110,7 +110,7 @@ namespace ukive {
     }
 
     bool Renderer::render(
-        D2D1_COLOR_F bkColor,
+        Color bkColor,
         std::function<void()> renderCallback)
     {
         HRESULT hr;
@@ -119,7 +119,12 @@ namespace ukive {
             d3d_render_listener_->onDirect3DClear();
 
         d2d_dc_->BeginDraw();
-        d2d_dc_->Clear(bkColor);
+        D2D1_COLOR_F color = {
+            bkColor.r,
+            bkColor.g,
+            bkColor.b,
+            bkColor.a, };
+        d2d_dc_->Clear(color);
 
         renderCallback();
 

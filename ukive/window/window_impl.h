@@ -8,6 +8,7 @@
 
 #include "ukive/utils/string_utils.h"
 #include "ukive/message/cycler.h"
+#include "ukive/graphics/color.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
@@ -45,7 +46,7 @@ namespace ukive {
         void setStartupWindow(bool enable);
         void setCurrentCursor(LPCWSTR cursor);
         void setContentView(View *content);
-        void setBackgroundColor(D2D1_COLOR_F color);
+        void setBackgroundColor(const Color &color);
 
         string16 getTitle();
         int getX();
@@ -56,7 +57,7 @@ namespace ukive {
         int getClientHeight();
         HWND getHandle();
         HCURSOR getCurrentCursor();
-        D2D1_COLOR_F getBackgroundColor();
+        Color getBackgroundColor();
         BaseLayout *getBaseLayout();
         Cycler *getCycler();
         Renderer *getRenderer();
@@ -197,7 +198,7 @@ namespace ukive {
         int width_, height_;
         int prev_width_, prev_height_;
         string16 title_;
-        D2D1_COLOR_F background_color_;
+        Color background_color_;
 
         bool is_created_;
         bool is_showing_;

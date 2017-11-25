@@ -3,6 +3,7 @@
 
 #include "ukive/animation/animator.h"
 #include "ukive/drawable/layer_drawable.h"
+#include "ukive/graphics/color.h"
 
 #define DOWN_UP_SEC      0.2
 #define HOVER_LEAVE_SEC  0.2
@@ -22,7 +23,7 @@ namespace ukive {
         RippleDrawable(Window *win);
         ~RippleDrawable();
 
-        void setTintColor(D2D1_COLOR_F tint);
+        void setTintColor(Color tint);
 
         void draw(Canvas *canvas) override;
 
@@ -44,7 +45,7 @@ namespace ukive {
 
     private:
         double mAlpha;
-        D2D1_COLOR_F mTintColor;
+        Color mTintColor;
 
         Window *owner_win_;
 

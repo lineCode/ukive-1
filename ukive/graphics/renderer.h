@@ -6,6 +6,7 @@
 
 #include "ukive/graphics/drawing_object_manager.h"
 #include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/graphics/color.h"
 #include "ukive/utils/com_ptr.h"
 #include "ukive/utils/string_utils.h"
 
@@ -27,7 +28,7 @@ namespace ukive {
         HRESULT init(WindowImpl *window);
         HRESULT resize();
         bool render(
-            D2D1_COLOR_F bkColor,
+            Color bkColor,
             std::function<void()> renderCallback);
         void close();
 

@@ -65,6 +65,9 @@ namespace ukive {
             throw std::runtime_error(
                 "UAnimationManager-initGlobal(): Init anim library failed.");
 
+        graphic_device_manager_.reset(new GraphicDeviceManager());
+        graphic_device_manager_->init();
+
         wic_manager_.reset(new WICManager());
         hr = wic_manager_->init();
         if (FAILED(hr))
@@ -74,9 +77,6 @@ namespace ukive {
         hr = tsf_manager_->init();
         if (FAILED(hr))
             throw std::runtime_error("UApplication-initApplication(): Init Tsf failed.");
-
-        graphic_device_manager_.reset(new GraphicDeviceManager());
-        graphic_device_manager_->init();
     }
 
     void Application::cleanApplication() {

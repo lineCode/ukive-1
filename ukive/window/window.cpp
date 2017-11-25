@@ -86,7 +86,7 @@ namespace ukive {
         impl_->setContentView(content);
     }
 
-    void Window::setBackgroundColor(D2D1_COLOR_F color) {
+    void Window::setBackgroundColor(Color color) {
         impl_->setBackgroundColor(color);
     }
 
@@ -126,7 +126,7 @@ namespace ukive {
         return impl_->getBaseLayout();
     }
 
-    D2D1_COLOR_F Window::getBackgroundColor() {
+    Color Window::getBackgroundColor() {
         return impl_->getBackgroundColor();
     }
 

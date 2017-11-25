@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "ukive/utils/string_utils.h"
-#include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/graphics/color.h"
 
 
 namespace ukive {
@@ -51,7 +51,7 @@ namespace ukive {
         void setMinHeight(int minHeight);
         void setCurrentCursor(LPCWSTR cursor);
         void setContentView(View *content);
-        void setBackgroundColor(D2D1_COLOR_F color);
+        void setBackgroundColor(Color color);
 
         int getX();
         int getY();
@@ -62,7 +62,7 @@ namespace ukive {
         int getClientWidth();
         int getClientHeight();
         BaseLayout *getBaseLayout();
-        D2D1_COLOR_F getBackgroundColor();
+        Color getBackgroundColor();
         Cycler *getCycler();
         Renderer *getRenderer();
         HWND getHandle();

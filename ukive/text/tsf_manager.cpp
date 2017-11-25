@@ -1,68 +1,56 @@
 ﻿#include "tsf_manager.h"
 
+#include "ukive/utils/hresult_utils.h"
+
 
 namespace ukive {
 
     TsfManager::TsfManager()
-    {
-        mSink = nullptr;
+        :mSink(nullptr),
+        mAlpnSinkCookie(TF_INVALID_COOKIE),
+        mOpenModeSinkCookie(TF_INVALID_COOKIE),
+        mConvModeSinkCookie(TF_INVALID_COOKIE) {}
 
-        mAlpnSinkCookie = TF_INVALID_COOKIE;
-        mOpenModeSinkCookie = TF_INVALID_COOKIE;
-        mConvModeSinkCookie = TF_INVALID_COOKIE;
-    }
+    TsfManager::~TsfManager() {}
 
-    TsfManager::~TsfManager()
-    {
-    }
 
-    HRESULT TsfManager::init()
-    {
-        HRESULT hr = E_FAIL;
-
-        hr = CoCreateInstance(CLSID_TF_ThreadMgr,
+    HRESULT TsfManager::init() {
+        RH(::CoCreateInstance(
+            CLSID_TF_ThreadMgr,
             nullptr, CLSCTX_INPROC_SERVER,
             __uuidof(ITfThreadMgr),
-            (void**)&mThreadMgr);
-        if (FAILED(hr))
-            return hr;
+            reinterpret_cast<void**>(&mThreadMgr)));
 
-        hr = mThreadMgr->Activate(&mClientId);
-        if (FAILED(hr))
-            return false;
+        RH(mThreadMgr->Activate(&mClientId));
 
         return S_OK;
     }
 
-    void TsfManager::close()
-    {
+    void TsfManager::close() {
         mThreadMgr->Deactivate();
     }
 
-    TfClientId TsfManager::getClientId()
-    {
+    TfClientId TsfManager::getClientId() {
         return mClientId;
     }
 
-    ComPtr<ITfThreadMgr> TsfManager::getThreadManager()
-    {
+    ComPtr<ITfThreadMgr> TsfManager::getThreadManager() {
         return mThreadMgr;
     }
 
 
-    HRESULT TsfManager::setupCompartmentSinks(ITfCompartment *openMode, ITfCompartment *convMode)
-    {
+    HRESULT TsfManager::setupCompartmentSinks(ITfCompartment *openMode, ITfCompartment *convMode) {
         HRESULT hr = E_FAIL;
-        ITfSource *srcOpenMode = 0;
-        ITfSource *srcConvMode = 0;
+        ITfSource *srcOpenMode = nullptr;
+        ITfSource *srcConvMode = nullptr;
 
-        if (openMode == 0 || convMode == 0)
+        if (openMode == nullptr || convMode == nullptr) {
             return E_FAIL;
+        }
 
         if (SUCCEEDED(hr = openMode->QueryInterface(IID_ITfSource, (void**)&srcOpenMode)))
         {
-            if (mOpenModeSinkCookie != TF_INVALID_COOKIE)
-            {
+            if (mOpenModeSinkCookie != TF_INVALID_COOKIE) {
                 srcOpenMode->UnadviseSink(mOpenModeSinkCookie);
                 mOpenModeSinkCookie = TF_INVALID_COOKIE;
             }
@@ -87,35 +75,30 @@ namespace ukive {
         return hr;
     }
 
-    HRESULT TsfManager::releaseCompartmentSinks()
-    {
+    HRESULT TsfManager::releaseCompartmentSinks() {
         HRESULT hr = E_FAIL;
 
-        ITfCompartmentMgr *cm = 0;
-        ITfCompartment *openMode = 0;
-        ITfCompartment *convMode = 0;
+        ITfCompartmentMgr *cm = nullptr;
+        ITfCompartment *openMode = nullptr;
+        ITfCompartment *convMode = nullptr;
 
         hr = getCompartments(&cm, &openMode, &convMode);
 
-        ITfSource *srcOpenMode = 0;
-        if (SUCCEEDED(hr))
-        {
+        ITfSource *srcOpenMode = nullptr;
+        if (SUCCEEDED(hr)) {
             hr = openMode->QueryInterface(IID_ITfSource, (void**)&srcOpenMode);
 
-            if (mOpenModeSinkCookie != TF_INVALID_COOKIE)
-            {
+            if (mOpenModeSinkCookie != TF_INVALID_COOKIE) {
                 srcOpenMode->UnadviseSink(mOpenModeSinkCookie);
                 mOpenModeSinkCookie = TF_INVALID_COOKIE;
             }
         }
 
-        ITfSource *srcConvMode = 0;
-        if (SUCCEEDED(hr))
-        {
+        ITfSource *srcConvMode = nullptr;
+        if (SUCCEEDED(hr)) {
             hr = convMode->QueryInterface(IID_ITfSource, (void**)&srcConvMode);
 
-            if (mConvModeSinkCookie != TF_INVALID_COOKIE)
-            {
+            if (mConvModeSinkCookie != TF_INVALID_COOKIE) {
                 srcConvMode->UnadviseSink(mConvModeSinkCookie);
                 mConvModeSinkCookie = TF_INVALID_COOKIE;
             }
@@ -127,11 +110,11 @@ namespace ukive {
     HRESULT TsfManager::getCompartments(ITfCompartmentMgr **cm, ITfCompartment **openMode, ITfCompartment **convMode)
     {
         HRESULT hr = E_FAIL;
-        ITfCompartmentMgr *_cm = 0;
-        ITfCompartment *_openMode = 0;
-        ITfCompartment *_convMode = 0;
+        ITfCompartmentMgr *_cm = nullptr;
+        ITfCompartment *_openMode = nullptr;
+        ITfCompartment *_convMode = nullptr;
 
-        if (mThreadMgr.get() == 0)
+        if (mThreadMgr == nullptr)
             return E_FAIL;
 
         hr = mThreadMgr->QueryInterface(IID_ITfCompartmentMgr, (void**)&_cm);
@@ -153,11 +136,10 @@ namespace ukive {
         return S_OK;
     }
 
-    HRESULT TsfManager::updateImeState()
-    {
-        ITfCompartmentMgr *cm = 0;
-        ITfCompartment *openMode = 0;
-        ITfCompartment *convMode = 0;
+    HRESULT TsfManager::updateImeState() {
+        ITfCompartmentMgr *cm = nullptr;
+        ITfCompartment *openMode = nullptr;
+        ITfCompartment *convMode = nullptr;
 
         if (SUCCEEDED(getCompartments(&cm, &openMode, &convMode)))
         {
@@ -192,8 +174,7 @@ namespace ukive {
     }
 
 
-    HRESULT TsfManager::setupSinks()
-    {
+    HRESULT TsfManager::setupSinks() {
         HRESULT hr = E_FAIL;
 
         ComPtr<ITfSource> src;
@@ -238,8 +219,7 @@ namespace ukive {
         return hr;
     }
 
-    HRESULT TsfManager::releaseSinks()
-    {
+    HRESULT TsfManager::releaseSinks() {
         HRESULT hr = E_FAIL;
         ComPtr<ITfSource> source;
 
@@ -256,25 +236,19 @@ namespace ukive {
 
 
     TsfSink::TsfSink(TsfManager *tsfMgr)
-    {
-        mRefCount = 1;
-        mTsfMgr = tsfMgr;
-    }
+        :mRefCount(1),
+        mTsfMgr(tsfMgr) {}
 
-    TsfSink::~TsfSink()
-    {
+    TsfSink::~TsfSink() {}
 
-    }
 
-    STDAPI TsfSink::QueryInterface(REFIID riid, void **ppvObj)
-    {
+    STDAPI TsfSink::QueryInterface(REFIID riid, void **ppvObj) {
         if (ppvObj == NULL)
             return E_INVALIDARG;
 
         *ppvObj = NULL;
 
-        if (IsEqualIID(riid, IID_IUnknown))
-        {
+        if (IsEqualIID(riid, IID_IUnknown)) {
             *ppvObj = reinterpret_cast<IUnknown *>(this);
         }
         else if (IsEqualIID(riid, __uuidof(ITfInputProcessorProfileActivationSink)))
@@ -286,8 +260,7 @@ namespace ukive {
             *ppvObj = (ITfCompartmentEventSink*)this;
         }
 
-        if (*ppvObj)
-        {
+        if (*ppvObj) {
             AddRef();
             return S_OK;
         }
@@ -295,13 +268,11 @@ namespace ukive {
         return E_NOINTERFACE;
     }
 
-    STDAPI_(ULONG) TsfSink::AddRef(void)
-    {
+    STDAPI_(ULONG) TsfSink::AddRef() {
         return InterlockedIncrement(&mRefCount);
     }
 
-    STDAPI_(ULONG) TsfSink::Release(void)
-    {
+    STDAPI_(ULONG) TsfSink::Release() {
         LONG cr = InterlockedDecrement(&mRefCount);
 
         if (mRefCount == 0)
@@ -337,8 +308,7 @@ namespace ukive {
     }
 
     //同一输入法中-英切换，日-英切换等等
-    STDAPI TsfSink::OnChange(REFGUID rguid)
-    {
+    STDAPI TsfSink::OnChange(REFGUID rguid) {
         return S_OK;
     }
 

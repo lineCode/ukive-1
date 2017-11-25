@@ -5,10 +5,10 @@
 
 namespace ukive {
 
-    ColorDrawable::ColorDrawable(D2D1_COLOR_F color)
+    ColorDrawable::ColorDrawable(Color color)
         :Drawable()
     {
-        mColor = color;
+        color_ = color;
     }
 
 
@@ -19,19 +19,19 @@ namespace ukive {
 
     void ColorDrawable::draw(Canvas *canvas)
     {
-        canvas->fillRect(this->getBound(), mColor);
+        canvas->fillRect(this->getBound(), color_);
     }
 
 
     float ColorDrawable::getOpacity()
     {
-        return mColor.a;
+        return color_.a;
     }
 
 
-    D2D1_COLOR_F ColorDrawable::getColor()
+    Color ColorDrawable::getColor()
     {
-        return mColor;
+        return color_;
     }
 
 }

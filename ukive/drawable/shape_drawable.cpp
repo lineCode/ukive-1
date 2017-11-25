@@ -16,8 +16,9 @@ namespace ukive {
         mHasStroke = false;
         mRoundRadius = 1.f;
         mStrokeWidth = 1.f;
-        mSolidColor = D2D1::ColorF(0, 0);
-        mStrokeColor = D2D1::ColorF(0, 0);
+
+        mSolidColor = Color(0, 0.f);
+        mStrokeColor = Color(0, 0.f);
     }
 
 
@@ -42,7 +43,7 @@ namespace ukive {
         mHasSolid = enable;
     }
 
-    void ShapeDrawable::setSolidColor(D2D1_COLOR_F color)
+    void ShapeDrawable::setSolidColor(Color color)
     {
         mSolidColor = color;
     }
@@ -57,7 +58,7 @@ namespace ukive {
         mStrokeWidth = width;
     }
 
-    void ShapeDrawable::setStrokeColor(D2D1_COLOR_F color)
+    void ShapeDrawable::setStrokeColor(Color color)
     {
         mStrokeColor = color;
     }

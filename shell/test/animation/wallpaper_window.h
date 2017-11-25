@@ -12,6 +12,8 @@
 
 #include "ukive/window/window.h"
 #include "ukive/animation/animator.h"
+#include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/graphics/color.h"
 
 
 namespace ukive {
@@ -45,7 +47,7 @@ namespace shell {
         void drawInnerArc(ukive::Canvas *c, float cx, float cy, float radius);
         void drawDecoredCircle(
             ukive::Canvas *c, float cx, float cy, float radius,
-            float extAngle, float extRadiusAdd, float strokeWidth, D2D1_COLOR_F &color);
+            float extAngle, float extRadiusAdd, float strokeWidth, ukive::Color &color);
         void drawDashedLines(ukive::Canvas *c, float cx, float cy, float radius);
 
         void drawCenterCircle(ukive::Canvas *canvas, float radiusMinus);

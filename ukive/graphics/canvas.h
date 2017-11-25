@@ -5,6 +5,7 @@
 
 #include "ukive/utils/com_ptr.h"
 #include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/graphics/color.h"
 
 
 namespace ukive {
@@ -51,27 +52,27 @@ namespace ukive {
             float width, float height,
             ID2D1Bitmap *mask, ID2D1Bitmap *content);
 
-        void drawRect(D2D1_RECT_F &rect, D2D1_COLOR_F &color);
-        void drawRect(D2D1_RECT_F &rect, float strokeWidth, D2D1_COLOR_F &color);
+        void drawRect(D2D1_RECT_F &rect, Color &color);
+        void drawRect(D2D1_RECT_F &rect, float strokeWidth, Color &color);
 
-        void fillRect(D2D1_RECT_F &rect, D2D1_COLOR_F &color);
+        void fillRect(D2D1_RECT_F &rect, Color &color);
 
         void drawRoundRect(
-            D2D1_RECT_F &rect, float radius, D2D1_COLOR_F &color);
+            D2D1_RECT_F &rect, float radius, Color &color);
         void drawRoundRect(
             D2D1_RECT_F &rect, float strokeWidth,
-            float radius, D2D1_COLOR_F &color);
+            float radius, Color &color);
 
         void fillRoundRect(
-            D2D1_RECT_F &rect, float radius, D2D1_COLOR_F &color);
+            D2D1_RECT_F &rect, float radius, Color &color);
 
-        void drawCircle(float cx, float cy, float radius, D2D1_COLOR_F &color);
-        void drawCircle(float cx, float cy, float radius, float strokeWidth, D2D1_COLOR_F &color);
-        void fillCircle(float cx, float cy, float radius, D2D1_COLOR_F &color);
+        void drawCircle(float cx, float cy, float radius, Color &color);
+        void drawCircle(float cx, float cy, float radius, float strokeWidth, Color &color);
+        void fillCircle(float cx, float cy, float radius, Color &color);
 
-        void drawOval(float cx, float cy, float radiusX, float radiusY, D2D1_COLOR_F &color);
-        void drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, D2D1_COLOR_F &color);
-        void fillOval(float cx, float cy, float radiusX, float radiusY, D2D1_COLOR_F &color);
+        void drawOval(float cx, float cy, float radiusX, float radiusY, Color &color);
+        void drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, Color &color);
+        void fillOval(float cx, float cy, float radiusX, float radiusY, Color &color);
 
         void drawBitmap(ID2D1Bitmap *bitmap);
         void drawBitmap(float x, float y, ID2D1Bitmap *bitmap);
@@ -81,14 +82,14 @@ namespace ukive {
         void drawText(
             std::wstring text,
             IDWriteTextFormat *textFormat,
-            D2D1_RECT_F &layoutRect, D2D1_COLOR_F &color);
+            D2D1_RECT_F &layoutRect, Color &color);
         void drawTextLayout(
             float x, float y,
-            IDWriteTextLayout *textLayout, D2D1_COLOR_F &color);
+            IDWriteTextLayout *textLayout, Color &color);
         void drawTextLayoutWithEffect(
             View *widget,
             float x, float y,
-            IDWriteTextLayout *textLayout, D2D1_COLOR_F &color);
+            IDWriteTextLayout *textLayout, Color &color);
 
     private:
         int layer_counter_;

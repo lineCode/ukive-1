@@ -1,5 +1,7 @@
 ﻿#include "tsf_editor.h"
 
+#include <tsattrs.h>
+
 #include <sstream>
 
 #include "ukive/text/input_connection.h"
@@ -7,8 +9,7 @@
 
 namespace ukive {
 
-    TsfEditor::TsfEditor()
-    {
+    TsfEditor::TsfEditor() {
         mRefCount = 1;
         mInputConnection = nullptr;
         mCurLockType = 0;
@@ -207,10 +208,9 @@ namespace ukive {
 
         pdcs->dwStaticFlags = TS_SS_REGIONS;
 
-        if (mInputConnection == 0)
+        if (mInputConnection == nullptr)
             return pdcs->dwDynamicFlags = TS_SD_LOADING;
-        else
-        {
+        else {
             if (mInputConnection->isReadOnly())
                 pdcs->dwDynamicFlags = TS_SD_READONLY;
             else
@@ -222,8 +222,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::QueryInsert(
         LONG acpTestStart, LONG acpTestEnd, ULONG cch,
-        LONG *pacpResultStart, LONG *pacpResultEnd)
-    {
+        LONG *pacpResultStart, LONG *pacpResultEnd) {
+
         ::OutputDebugStringW(L"QueryInsert\n");
 
         long length = mInputConnection->getTextLength();

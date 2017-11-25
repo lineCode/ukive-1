@@ -9,16 +9,18 @@
 
 namespace ukive {
 
-    class UNumber {
+    class Number {
     public:
         static const int MIN_RADIX = 2;
         static const int MAX_RADIX = 36;
 
-        static int32_t digit(wchar_t code, int radix);
-        static wchar_t character(int32_t number);
+        static int digit(wchar_t code, int radix);
+        static wchar_t character(int number);
 
         static int32_t parseInt(string16 s, int radix);
-        static int64_t parseLong(string16 s, int radix);
+        static uint32_t parseUInt(string16 s, int radix);
+        static int64_t parseInt64(string16 s, int radix);
+        static uint64_t parseUInt64(string16 s, int radix);
 
         static string16 toString(int32_t value);
         static string16 toString(uint32_t value);
@@ -26,7 +28,7 @@ namespace ukive {
         static string16 toString(uint64_t value);
 
     private:
-        UNumber();
+        Number();
 
         static wchar_t mDigitc[];
     };

@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "ukive/graphics/color.h"
 #include "ukive/text/input_connection.h"
 #include "ukive/event/input_event.h"
 #include "ukive/text/text_blink.h"
@@ -23,7 +22,7 @@ namespace ukive {
     TextView::TextView(Window *wnd)
         :View(wnd),
         mTextColor(Color::Black),
-        mSelectionBackgroundColor(D2D1::ColorF::SkyBlue)
+        mSelectionBackgroundColor(Color::Blue200)
     {
         initTextView();
     }
@@ -31,7 +30,7 @@ namespace ukive {
     TextView::TextView(Window *wnd, int id)
         :View(wnd, id),
         mTextColor(Color::Black),
-        mSelectionBackgroundColor(D2D1::ColorF::SkyBlue)
+        mSelectionBackgroundColor(Color::Blue200)
     {
         initTextView();
     }
@@ -932,7 +931,7 @@ namespace ukive {
         invalidate();
     }
 
-    void TextView::setTextColor(D2D1::ColorF color)
+    void TextView::setTextColor(Color color)
     {
         mTextColor = color;
         invalidate();

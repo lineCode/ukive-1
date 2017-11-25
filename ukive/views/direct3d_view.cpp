@@ -222,7 +222,7 @@ namespace ukive {
 
     void Direct3DView::onDirect3DClear()
     {
-        D2D1_COLOR_F d2dColor = mWindow->getBackgroundColor();
+        Color d2dColor = mWindow->getBackgroundColor();
         float backColor[4] = { d2dColor.r, d2dColor.g, d2dColor.b, d2dColor.a };
 
         Application::getGraphicDeviceManager()->getD3DDeviceContext()->

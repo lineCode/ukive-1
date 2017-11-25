@@ -23,7 +23,7 @@ namespace ukive {
         Button(Window *wnd, int id);
         virtual ~Button();
 
-        void setButtonColor(D2D1_COLOR_F color);
+        void setButtonColor(Color color);
     };
 
 }

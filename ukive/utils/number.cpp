@@ -5,7 +5,7 @@
 
 namespace ukive {
 
-    wchar_t UNumber::mDigitc[] = {
+    wchar_t Number::mDigitc[] = {
         L'0',L'1',L'2',L'3',L'4',
         L'5',L'6',L'7',L'8',L'9',
         L'a',L'b',L'c',L'd',L'e',
@@ -15,7 +15,7 @@ namespace ukive {
         L'u',L'v',L'w',L'x',L'y',L'z'
     };
 
-    int32_t UNumber::digit(wchar_t code, int radix) {
+    int Number::digit(wchar_t code, int radix) {
         if (code < 128) {
             int result = -1;
             if (L'0' <= code && code <= L'9') {
@@ -34,7 +34,7 @@ namespace ukive {
         return -1;
     }
 
-    wchar_t UNumber::character(int32_t number) {
+    wchar_t Number::character(int number) {
         if (number >= 0 && number <= 9) {
             return number + L'0';
         }
@@ -43,7 +43,7 @@ namespace ukive {
     }
 
 
-    int32_t UNumber::parseInt(string16 s, int radix) {
+    int32_t Number::parseInt(string16 s, int radix) {
         if (s.empty()) {
             Log::e(L"null");
             return 0;
@@ -58,14 +58,14 @@ namespace ukive {
         int32_t digit;
         int32_t multmin;
         size_t i = 0, len = s.length();
-        int32_t limit = -(std::numeric_limits<int32_t>::max)();
+        int32_t limit = -std::numeric_limits<int32_t>::max();
         bool negative = false;
 
         wchar_t firstChar = s.at(0);
         if (firstChar < L'0') {
             if (firstChar == L'-') {
                 negative = true;
-                limit = (std::numeric_limits<int32_t>::min)();
+                limit = std::numeric_limits<int32_t>::min();
             }
             else if (firstChar != L'+') {
                 Log::e(L"illegal number str");
@@ -78,7 +78,7 @@ namespace ukive {
         multmin = limit / radix;
 
         while (i < len) {
-            digit = UNumber::digit(s.at(i++), radix);
+            digit = Number::digit(s.at(i++), radix);
             if (digit < 0) {
                 Log::e(L"illegal number str");
                 return 0;
@@ -101,7 +101,55 @@ namespace ukive {
         return negative ? result : -result;
     }
 
-    int64_t UNumber::parseLong(string16 s, int radix) {
+    uint32_t Number::parseUInt(string16 s, int radix) {
+        if (s.empty()) {
+            Log::e(L"null");
+            return 0;
+        }
+
+        if (radix < MIN_RADIX || radix > MAX_RADIX) {
+            Log::e(L"illegal radix.");
+            return 0;
+        }
+
+        uint32_t result = 0;
+        uint32_t digit;
+        uint32_t multmin;
+        size_t i = 0, len = s.length();
+        int32_t limit = std::numeric_limits<int32_t>::max();
+
+        wchar_t firstChar = s.at(0);
+        if (firstChar < L'0') {
+            Log::e(L"illegal number str");
+        }
+
+        multmin = limit / radix;
+
+        while (i < len) {
+            digit = Number::digit(s.at(i++), radix);
+            if (digit < 0) {
+                Log::e(L"illegal number str");
+                return 0;
+            }
+
+            if (result > multmin) {
+                Log::e(L"illegal number str");
+                return 0;
+            }
+
+            result *= radix;
+            if (result > limit - digit) {
+                Log::e(L"illegal number str");
+                return 0;
+            }
+
+            result += digit;
+        }
+
+        return result;
+    }
+
+    int64_t Number::parseInt64(string16 s, int radix) {
         if (s.empty()) {
             Log::e(L"null");
             return 0;
@@ -135,7 +183,7 @@ namespace ukive {
         multmin = limit / radix;
 
         while (i < len) {
-            digit = UNumber::digit(s.at(i++), radix);
+            digit = Number::digit(s.at(i++), radix);
             if (digit < 0) {
                 Log::e(L"illegal number str");
                 return 0;
@@ -159,7 +207,7 @@ namespace ukive {
     }
 
 
-    string16 UNumber::toString(int32_t value) {
+    string16 Number::toString(int32_t value) {
         bool isNeg = false;
         if (value < 0) {
             value = -value;
@@ -187,7 +235,7 @@ namespace ukive {
         return string16(result + index + 1);
     }
 
-    string16 UNumber::toString(uint32_t value) {
+    string16 Number::toString(uint32_t value) {
         wchar_t result[11];
         result[10] = L'\0';
 
@@ -205,7 +253,7 @@ namespace ukive {
         return string16(result + index + 1);
     }
 
-    string16 UNumber::toString(int64_t value) {
+    string16 Number::toString(int64_t value) {
         bool isNeg = false;
         if (value < 0) {
             value = -value;
@@ -233,7 +281,7 @@ namespace ukive {
         return string16(result + index + 1);
     }
 
-    string16 UNumber::toString(uint64_t value) {
+    string16 Number::toString(uint64_t value) {
         wchar_t result[11];
         result[10] = L'\0';
 

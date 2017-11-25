@@ -46,7 +46,7 @@ namespace ukive {
         this->setElevation(2.0f);
     }
 
-    void Button::setButtonColor(D2D1_COLOR_F color)
+    void Button::setButtonColor(Color color)
     {
         mShapeDrawable->setSolidColor(color);
     }

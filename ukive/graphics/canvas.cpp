@@ -1,6 +1,5 @@
 ﻿#include "canvas.h"
 
-#include "ukive/graphics/color.h"
 #include "ukive/text/text_renderer.h"
 
 
@@ -14,7 +13,7 @@ namespace ukive {
         matrix_ = D2D1::Matrix3x2F::Identity();
 
         render_target_ = renderTarget;
-        render_target_->CreateSolidColorBrush(Color::Black, &solid_brush_);
+        render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
         render_target_->CreateBitmapBrush(nullptr, &bitmap_brush_);
     }
 
@@ -262,71 +261,106 @@ namespace ukive {
     }
 
 
-    void Canvas::drawRect(D2D1_RECT_F &rect, D2D1_COLOR_F &color)
+    void Canvas::drawRect(D2D1_RECT_F &rect, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawRectangle(rect, solid_brush_.get());
     }
 
-    void Canvas::drawRect(D2D1_RECT_F &rect, float strokeWidth, D2D1_COLOR_F &color)
+    void Canvas::drawRect(D2D1_RECT_F &rect, float strokeWidth, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawRectangle(rect, solid_brush_.get(), strokeWidth);
     }
 
 
-    void Canvas::fillRect(D2D1_RECT_F &rect, D2D1_COLOR_F &color)
+    void Canvas::fillRect(D2D1_RECT_F &rect, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->FillRectangle(rect, solid_brush_.get());
     }
 
 
     void Canvas::drawRoundRect(
-        D2D1_RECT_F &rect, float radius, D2D1_COLOR_F &color)
+        D2D1_RECT_F &rect, float radius, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawRoundedRectangle(
             D2D1::RoundedRect(rect, radius, radius), solid_brush_.get());
     }
 
     void Canvas::drawRoundRect(
         D2D1_RECT_F &rect, float strokeWidth,
-        float radius, D2D1_COLOR_F &color)
+        float radius, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawRoundedRectangle(
             D2D1::RoundedRect(rect, radius, radius), solid_brush_.get(), strokeWidth);
     }
 
     void Canvas::fillRoundRect(
-        D2D1_RECT_F &rect, float radius, D2D1_COLOR_F &color)
+        D2D1_RECT_F &rect, float radius, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->FillRoundedRectangle(
             D2D1::RoundedRect(rect, radius, radius), solid_brush_.get());
     }
 
 
-    void Canvas::drawCircle(float cx, float cy, float radius, D2D1_COLOR_F &color)
+    void Canvas::drawCircle(float cx, float cy, float radius, Color &color)
     {
         drawOval(cx, cy, radius, radius, color);
     }
 
-    void Canvas::drawCircle(float cx, float cy, float radius, float strokeWidth, D2D1_COLOR_F &color)
+    void Canvas::drawCircle(float cx, float cy, float radius, float strokeWidth, Color &color)
     {
         drawOval(cx, cy, radius, radius, strokeWidth, color);
     }
 
-    void Canvas::fillCircle(float cx, float cy, float radius, D2D1_COLOR_F &color)
+    void Canvas::fillCircle(float cx, float cy, float radius, Color &color)
     {
         fillOval(cx, cy, radius, radius, color);
     }
 
 
-    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, D2D1_COLOR_F &color)
+    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawEllipse(
             D2D1::Ellipse(
                 D2D1::Point2F(cx, cy),
@@ -334,9 +368,14 @@ namespace ukive {
             solid_brush_.get());
     }
 
-    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, D2D1_COLOR_F &color)
+    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawEllipse(
             D2D1::Ellipse(
                 D2D1::Point2F(cx, cy),
@@ -344,9 +383,14 @@ namespace ukive {
             solid_brush_.get(), strokeWidth);
     }
 
-    void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, D2D1_COLOR_F &color)
+    void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, Color &color)
     {
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->FillEllipse(D2D1::Ellipse(D2D1::Point2F(cx, cy), radiusX, radiusY), solid_brush_.get());
     }
 
@@ -399,30 +443,40 @@ namespace ukive {
 
     void Canvas::drawText(
         std::wstring text, IDWriteTextFormat *textFormat,
-        D2D1_RECT_F &layoutRect, D2D1_COLOR_F &color)
+        D2D1_RECT_F &layoutRect, Color &color)
     {
         if (textFormat == nullptr)
             return;
 
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawTextW(text.c_str(), text.length(), textFormat, layoutRect, solid_brush_.get());
     }
 
     void Canvas::drawTextLayout(
         float x, float y,
-        IDWriteTextLayout *textLayout, D2D1_COLOR_F &color)
+        IDWriteTextLayout *textLayout, Color &color)
     {
-        if (textLayout == 0)
+        if (textLayout == nullptr)
             return;
 
-        solid_brush_->SetColor(color);
+        D2D1_COLOR_F _color = {
+            color.r,
+            color.g,
+            color.b,
+            color.a, };
+        solid_brush_->SetColor(_color);
         render_target_->DrawTextLayout(D2D1::Point2F(x, y), textLayout, solid_brush_.get());
     }
 
     void Canvas::drawTextLayoutWithEffect(
         View *widget,
         float x, float y,
-        IDWriteTextLayout *textLayout, D2D1_COLOR_F &color)
+        IDWriteTextLayout *textLayout, Color &color)
     {
         if (mTextRenderer == nullptr)
         {

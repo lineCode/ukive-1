@@ -1,7 +1,6 @@
 #include "ripple_drawable.h"
 
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/color.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
 
@@ -13,7 +12,7 @@ namespace ukive {
         owner_win_(win)
     {
         mAlpha = 0;
-        mTintColor = D2D1::ColorF(0, 0);
+        mTintColor = Color(0, 0.f);
 
         mDownAnimator = new Animator(win->getAnimationManager());
         mUpAnimator = new Animator(win->getAnimationManager());
@@ -47,7 +46,7 @@ namespace ukive {
     }
 
 
-    void RippleDrawable::setTintColor(D2D1_COLOR_F tint)
+    void RippleDrawable::setTintColor(Color tint)
     {
         mTintColor = tint;
     }
@@ -56,7 +55,7 @@ namespace ukive {
     void RippleDrawable::draw(Canvas *canvas)
     {
         D2D1_RECT_F bound = getBound();
-        D2D1_COLOR_F color = D2D1::ColorF(0, 0, 0, mAlpha);
+        Color color = Color(mAlpha, 0.f, 0.f, 0.f);
 
         //»æÖÆµ×É«¡¢alphaºÍripple¡£
         ComPtr<ID2D1Bitmap> contentBitmap;
@@ -68,7 +67,7 @@ namespace ukive {
             offCanvas.setOpacity(canvas->getOpacity());
 
             D2D1_RECT_F _bound = bound;
-            D2D1_COLOR_F _color = color;
+            Color _color = color;
 
             offCanvas.fillRect(_bound, mTintColor);
             offCanvas.fillRect(_bound, _color);
@@ -76,8 +75,8 @@ namespace ukive {
             if (getState() == STATE_HOVERED
                 && getPrevState() == STATE_PRESSED)
             {
-                D2D1_COLOR_F rippleColor = D2D1::ColorF(0,
-                    mRippleAnimator->getValue(1));
+                Color rippleColor = Color(0U,
+                    (float)mRippleAnimator->getValue(1));
 
                 offCanvas.fillCircle(
                     mStartX, mStartY,

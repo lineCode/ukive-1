@@ -1,6 +1,7 @@
 ﻿#ifndef UKIVE_TEXT_TEXT_RENDER_H_
 #define UKIVE_TEXT_TEXT_RENDER_H_
 
+#include "ukive/graphics/color.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/utils/com_ptr.h"
 
@@ -13,9 +14,9 @@ namespace ukive {
         ULONG mRefCount;
         float mOpacity;
 
-        D2D1_COLOR_F mDefaultTextColor;
-        D2D1_COLOR_F mDefaultUnderlineColor;
-        D2D1_COLOR_F mDefaultStrikethroughColor;
+        Color mDefaultTextColor;
+        Color mDefaultUnderlineColor;
+        Color mDefaultStrikethroughColor;
 
         ComPtr<ID2D1RenderTarget> mRenderTarget;
         ComPtr<ID2D1SolidColorBrush> mSolidBrush;
@@ -25,9 +26,9 @@ namespace ukive {
         ~TextRenderer();
 
         void setOpacity(float opacity);
-        void setTextColor(D2D1_COLOR_F color);
-        void setUnderlineColor(D2D1_COLOR_F color);
-        void setStrikethroughColor(D2D1_COLOR_F color);
+        void setTextColor(Color color);
+        void setUnderlineColor(Color color);
+        void setStrikethroughColor(Color color);
 
         STDMETHOD(IsPixelSnappingDisabled)(
             __maybenull void* clientDrawingContext,

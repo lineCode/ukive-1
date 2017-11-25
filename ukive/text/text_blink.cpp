@@ -9,7 +9,7 @@
 namespace ukive {
 
     TextBlink::TextBlink(View *widget)
-        :mColor(D2D1::ColorF::Black)
+        :mColor(Color::Black)
     {
         mTargetView = widget;
         mBlinkCycler = new Cycler();
@@ -18,7 +18,7 @@ namespace ukive {
         mCancelled = true;
         mBlinkMask = false;
 
-        mThickness = Application::dpToPxX(2);
+        mThickness = 2;
     }
 
     TextBlink::~TextBlink()
@@ -105,7 +105,7 @@ namespace ukive {
     }
 
 
-    void TextBlink::setColor(D2D1::ColorF color)
+    void TextBlink::setColor(Color color)
     {
         mColor = color;
     }
@@ -121,7 +121,7 @@ namespace ukive {
         return !mCancelled;
     }
 
-    D2D1::ColorF TextBlink::getColor()
+    Color TextBlink::getColor()
     {
         return mColor;
     }

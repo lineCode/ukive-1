@@ -195,7 +195,7 @@ namespace ukive {
         mBaseLayout->addContent(content);
     }
 
-    void WindowImpl::setBackgroundColor(D2D1_COLOR_F color)
+    void WindowImpl::setBackgroundColor(const Color &color)
     {
         background_color_ = color;
         invalidate();
@@ -242,7 +242,7 @@ namespace ukive {
         return cursor_;
     }
 
-    D2D1_COLOR_F WindowImpl::getBackgroundColor()
+    Color WindowImpl::getBackgroundColor()
     {
         return background_color_;
     }

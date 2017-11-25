@@ -19,7 +19,12 @@ namespace ukive {
         mDefaultStrikethroughColor = Color::Black;
 
         mRenderTarget = renderTarget;
-        mRenderTarget->CreateSolidColorBrush(mDefaultTextColor, &mSolidBrush);
+        D2D1_COLOR_F color = {
+            mDefaultTextColor.r,
+            mDefaultTextColor.g,
+            mDefaultTextColor.b,
+            mDefaultTextColor.a, };
+        mRenderTarget->CreateSolidColorBrush(color, &mSolidBrush);
     }
 
 
@@ -34,17 +39,17 @@ namespace ukive {
         mSolidBrush->SetOpacity(opacity);
     }
 
-    void TextRenderer::setTextColor(D2D1_COLOR_F color)
+    void TextRenderer::setTextColor(Color color)
     {
         mDefaultTextColor = color;
     }
 
-    void TextRenderer::setUnderlineColor(D2D1_COLOR_F color)
+    void TextRenderer::setUnderlineColor(Color color)
     {
         mDefaultUnderlineColor = color;
     }
 
-    void TextRenderer::setStrikethroughColor(D2D1_COLOR_F color)
+    void TextRenderer::setStrikethroughColor(Color color)
     {
         mDefaultStrikethroughColor = color;
     }
@@ -106,7 +111,12 @@ namespace ukive {
         }
         else
         {
-            mSolidBrush->SetColor(mDefaultTextColor);
+            D2D1_COLOR_F color = {
+                mDefaultTextColor.r,
+                mDefaultTextColor.g,
+                mDefaultTextColor.b,
+                mDefaultTextColor.a, };
+            mSolidBrush->SetColor(color);
 
             mRenderTarget->DrawGlyphRun(
                 D2D1::Point2F(baselineOriginX, baselineOriginY),
@@ -156,7 +166,12 @@ namespace ukive {
         }
         else
         {
-            mSolidBrush->SetColor(mDefaultUnderlineColor);
+            D2D1_COLOR_F color = {
+                mDefaultUnderlineColor.r,
+                mDefaultUnderlineColor.g,
+                mDefaultUnderlineColor.b,
+                mDefaultUnderlineColor.a, };
+            mSolidBrush->SetColor(color);
             mRenderTarget->FillRectangle(rect, mSolidBrush.get());
         }
 
@@ -203,7 +218,12 @@ namespace ukive {
         }
         else
         {
-            mSolidBrush->SetColor(mDefaultStrikethroughColor);
+            D2D1_COLOR_F color = {
+                mDefaultStrikethroughColor.r,
+                mDefaultStrikethroughColor.g,
+                mDefaultStrikethroughColor.b,
+                mDefaultStrikethroughColor.a, };
+            mSolidBrush->SetColor(color);
             mRenderTarget->FillRectangle(rect, mSolidBrush.get());
         }
 

@@ -15,15 +15,13 @@ namespace ukive {
     class TsfEditor : public ITextStoreACP, public ITfContextOwnerCompositionSink
     {
     private:
-        struct ADVISE_SINK
-        {
+        struct ADVISE_SINK {
             IUnknown *punkID;
             ITextStoreACPSink *textStoreACPSink;
             DWORD dwMask;
         };
 
-        struct LockRecord
-        {
+        struct LockRecord {
             DWORD dwLockFlags;
         };
 
@@ -77,77 +75,36 @@ namespace ukive {
         STDMETHODIMP GetSelection(
             ULONG ulIndex, ULONG ulCount,
             TS_SELECTION_ACP *pSelection, ULONG *pcFetched) override;
-
-
         STDMETHODIMP SetSelection(ULONG ulCount, const TS_SELECTION_ACP *pSelection) override;
-
-
         STDMETHODIMP GetText(
             LONG acpStart, LONG acpEnd,
             WCHAR *pchPlain, ULONG cchPlainReq, ULONG *pcchPlainRet,
             TS_RUNINFO *prgRunInfo, ULONG cRunInfoReq, ULONG *pcRunInfoRet, LONG *pacpNext) override;
-
-
         STDMETHODIMP SetText(
             DWORD dwFlags, LONG acpStart, LONG acpEnd,
             const WCHAR *pchText, ULONG cch, TS_TEXTCHANGE *pChange) override;
-
-
         STDMETHODIMP GetFormattedText(LONG acpStart, LONG acpEnd, IDataObject **ppDataObject) override;
-
-
         STDMETHODIMP GetEmbedded(LONG acpPos, REFGUID rguidService, REFIID riid, IUnknown **ppunk) override;
-
-
         STDMETHODIMP QueryInsertEmbedded(const GUID *pguidService, const FORMATETC *pFormatEtc, BOOL *pfInsertable) override;
-
-
         STDMETHODIMP InsertEmbedded(DWORD dwFlags, LONG acpStart, LONG acpEnd, IDataObject *pDataObject, TS_TEXTCHANGE *pChange) override;
-
-
         STDMETHODIMP RequestSupportedAttrs(DWORD dwFlags, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs) override;
-
-
         STDMETHODIMP RequestAttrsAtPosition(LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags) override;
-
-
         STDMETHODIMP RequestAttrsTransitioningAtPosition(LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags) override;
-
-
         STDMETHODIMP FindNextAttrTransition(
             LONG acpStart, LONG acpHalt,
             ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs,
             DWORD dwFlags, LONG *pacpNext, BOOL *pfFound, LONG *plFoundOffset) override;
-
-
         STDMETHODIMP RetrieveRequestedAttrs(ULONG ulCount, TS_ATTRVAL *paAttrVals, ULONG *pcFetched) override;
-
-
         STDMETHODIMP GetEndACP(LONG *pacp) override;
-
-
         STDMETHODIMP GetActiveView(TsViewCookie *pvcView) override;
-
-
         STDMETHODIMP GetACPFromPoint(TsViewCookie vcView, const POINT *pt, DWORD dwFlags, LONG *pacp) override;
-
-
         STDMETHODIMP GetTextExt(TsViewCookie vcView, LONG acpStart, LONG acpEnd, RECT *prc, BOOL *pfClipped) override;
-
-
         STDMETHODIMP GetScreenExt(TsViewCookie vcView, RECT *prc) override;
-
-
         STDMETHODIMP GetWnd(TsViewCookie vcView, HWND *phwnd) override;
-
-
         STDMETHODIMP InsertTextAtSelection(
             DWORD dwFlags, const WCHAR *pchText, ULONG cch, LONG *pacpStart, LONG *pacpEnd, TS_TEXTCHANGE *pChange) override;
-
-
         STDMETHODIMP InsertEmbeddedAtSelection(
             DWORD dwFlags, IDataObject *pDataObject, LONG *pacpStart, LONG *pacpEnd, TS_TEXTCHANGE *pChange) override;
-
 
         //ITfContextOwnerCompositionSink methods.
         STDMETHODIMP OnStartComposition(

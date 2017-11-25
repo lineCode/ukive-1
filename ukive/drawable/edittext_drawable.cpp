@@ -1,7 +1,6 @@
 #include "edittext_drawable.h"
 
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/color.h"
 
 
 namespace ukive {
@@ -9,8 +8,8 @@ namespace ukive {
     EditTextDrawable::EditTextDrawable()
         :Drawable()
     {
-        mPanelLineWidth = 2;
-        mPanelLineColor = Color::Grey400;
+        panel_line_width_ = 2;
+        panel_line_color_ = Color::Grey400;
     }
 
     EditTextDrawable::~EditTextDrawable()
@@ -22,13 +21,13 @@ namespace ukive {
     {
         if (focus)
         {
-            mPanelLineWidth = 2;
-            mPanelLineColor = Color::Blue500;
+            panel_line_width_ = 2;
+            panel_line_color_ = Color::Blue500;
         }
         else
         {
-            mPanelLineWidth = 2;
-            mPanelLineColor = Color::Grey400;
+            panel_line_width_ = 2;
+            panel_line_color_ = Color::Grey400;
         }
 
         return true;
@@ -42,8 +41,8 @@ namespace ukive {
         canvas->fillRect(
             D2D1::RectF(
                 bound.left, bound.bottom - 2,
-                bound.right, bound.bottom - (2 - mPanelLineWidth)),
-            mPanelLineColor);
+                bound.right, bound.bottom - (2 - panel_line_width_)),
+            panel_line_color_);
     }
 
     float EditTextDrawable::getOpacity()
