@@ -311,8 +311,8 @@ namespace ukive {
             int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
             setViewports(
-                static_cast<float>(_left), static_cast<float>(_top),
-                static_cast<float>(width), static_cast<float>(height));
+                Application::dpToPxX(_left), Application::dpToPxY(_top),
+                Application::dpToPxX(width), Application::dpToPxY(height));
         }
     }
 
