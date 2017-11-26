@@ -41,9 +41,9 @@ namespace ukive {
         mThumbInAnimator = new Animator(mWindow->getAnimationManager());
         mThumbOutAnimator = new Animator(mWindow->getAnimationManager());
 
-        mSeekTrackHeight = Application::dpToPxY(2);
-        mSeekThumbMinDiameter = Application::dpToPxX(10);
-        mSeekThumbMaxDiameter = Application::dpToPxX(14);
+        mSeekTrackHeight = 2;
+        mSeekThumbMinDiameter = 10;
+        mSeekThumbMaxDiameter = 14;
 
         mSeekThumbCurDiameter = mSeekThumbMinDiameter;
     }

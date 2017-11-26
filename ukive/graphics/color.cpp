@@ -71,10 +71,12 @@ namespace ukive {
     }
 
 
-    //Color White.
+    // Color White.
     Color Color::White = Color::parse(L"#FFFFFF");
-    //Color Black.
+    // Color Black.
     Color Color::Black = Color::parse(L"#000000");
+    // Color Transparent.
+    Color Color::Transparent = Color::parse(L"#00000000");
 
     //Material Color Red.
     Color Color::Red50 = Color::parse(L"#FFEBEE");

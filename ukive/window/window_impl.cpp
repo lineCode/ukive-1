@@ -72,7 +72,6 @@ namespace ukive {
 
         mCanvas = nullptr;
         mRenderer = nullptr;
-        mBitmapFactory = nullptr;
         mTextActionMode = nullptr;
         mContextMenu = nullptr;
     }
@@ -97,9 +96,10 @@ namespace ukive {
             kDefaultWindowExStyle,
             reinterpret_cast<wchar_t*>(atom),
             title_.c_str(), kDefaultWindowStyle,
-            x_, y_,
+            std::ceil(Application::dpToPxX(x_)),
+            std::ceil(Application::dpToPxY(y_)),
             std::ceil(Application::dpToPxX(width_)),
-            std::ceil(Application::dpToPxY(width_)),
+            std::ceil(Application::dpToPxY(height_)),
             0, 0, Application::getModuleHandle(), this);
         if (::IsWindow(hWnd) == FALSE) {
             Log::e(L"failed to create window.");
@@ -265,11 +265,6 @@ namespace ukive {
     Renderer *WindowImpl::getRenderer()
     {
         return mRenderer;
-    }
-
-    BitmapFactory *WindowImpl::getBitmapFactory()
-    {
-        return mBitmapFactory;
     }
 
     bool WindowImpl::isCreated() {
@@ -678,7 +673,6 @@ namespace ukive {
         auto deviceContext = mRenderer->getD2DDeviceContext();
 
         mCanvas = new Canvas(deviceContext.cast<ID2D1RenderTarget>());
-        mBitmapFactory = new BitmapFactory(deviceContext);
 
         mBaseLayout->onAttachedToWindow();
 
@@ -772,9 +766,6 @@ namespace ukive {
         delegate_->onDestroy();
 
         delete mBaseLayout;
-
-        delete mBitmapFactory;
-        mBitmapFactory = nullptr;
 
         delete mCanvas;
         mCanvas = nullptr;
@@ -919,6 +910,18 @@ namespace ukive {
 
         case WM_ACTIVATE: {
             onActivate(LOWORD(wParam));
+            break;
+        }
+
+        case WM_DPICHANGED: {
+            RECT* const prcNewWindow = (RECT*)lParam;
+            SetWindowPos(hWnd_,
+                NULL,
+                prcNewWindow->left,
+                prcNewWindow->top,
+                prcNewWindow->right - prcNewWindow->left,
+                prcNewWindow->bottom - prcNewWindow->top,
+                SWP_NOZORDER | SWP_NOACTIVATE);
             break;
         }
 
@@ -1202,7 +1205,7 @@ namespace ukive {
             // Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
             NCCALCSIZE_PARAMS *pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
-            RECT newW, oldW, oldWC;
+            RECT newW;
             ::CopyRect(&newW, &pncsp->rgrc[0]);
             //new window client.
             pncsp->rgrc[0].left = newW.left + 0;
@@ -1287,6 +1290,8 @@ namespace ukive {
         HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         if (uMsg == WM_NCCREATE)
         {
+            ::EnableNonClientDpiScaling(hWnd);
+
             CREATESTRUCTW *cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
             WindowImpl *window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
             if (window == nullptr) {

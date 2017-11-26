@@ -209,7 +209,7 @@ namespace ukive {
         pdcs->dwStaticFlags = TS_SS_REGIONS;
 
         if (mInputConnection == nullptr)
-            return pdcs->dwDynamicFlags = TS_SD_LOADING;
+            pdcs->dwDynamicFlags = TS_SD_LOADING;
         else {
             if (mInputConnection->isReadOnly())
                 pdcs->dwDynamicFlags = TS_SD_READONLY;

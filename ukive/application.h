@@ -37,6 +37,9 @@ namespace ukive {
         static float dpToPxX(float dp);
         static float dpToPxY(float dp);
 
+        static float pxToDpX(int px);
+        static float pxToDpY(int px);
+
         static HMODULE getModuleHandle();
         static GraphicDeviceManager* getGraphicDeviceManager();
 

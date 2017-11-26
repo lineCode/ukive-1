@@ -96,7 +96,7 @@ namespace shell {
         linearLayout->addWidget(textView, textParams);
 
         std::wstring imgFileName(::_wgetcwd(nullptr, 0));
-        auto bitmap = getBitmapFactory()->decodeFile(imgFileName + L"\\freshpaint.png");
+        auto bitmap = ukive::BitmapFactory::decodeFile(this, imgFileName + L"\\freshpaint.png");
         ukive::ImageView *imageView = new ukive::ImageView(this, kImageViewId);
         imageView->setImageBitmap(bitmap);
 

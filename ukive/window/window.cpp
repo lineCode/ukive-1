@@ -146,10 +146,6 @@ namespace ukive {
         return impl_->getKeyboardHolder();
     }
 
-    BitmapFactory *Window::getBitmapFactory() {
-        return impl_->getBitmapFactory();
-    }
-
     AnimationManager *Window::getAnimationManager() {
         return impl_->getAnimationManager();
     }

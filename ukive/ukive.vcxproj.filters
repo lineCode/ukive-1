@@ -252,6 +252,9 @@
     <ClCompile Include="window\window_slave.cpp">
       <Filter>window</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\bitmap.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -549,6 +552,9 @@
     </ClInclude>
     <ClInclude Include="window\window_slave.h">
       <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\bitmap.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

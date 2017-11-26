@@ -29,10 +29,12 @@ namespace ukive {
         */
         static Color parse(string16 color);
 
-        //Color Black.
+        // Color Black.
         static Color Black;
-        //Color White.
+        // Color White.
         static Color White;
+        // Color Transparent
+        static Color Transparent;
 
         //Material Color Red.
         static Color Red50, Red100, Red200, Red300, Red400,

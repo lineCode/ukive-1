@@ -53,30 +53,38 @@ namespace ukive {
     }
 
     void Application::initApplication() {
-        ::CoInitialize(NULL);
+        HRESULT hr = ::CoInitialize(NULL);
+        if (FAILED(hr)) {
+            Log::e(L"failed to init COM.");
+        }
+
+        int a = getScreenWidth();
+        int b = getScreenHeight();
 
         Message::init(50);
         MessageLooper::init();
         MessageLooper::prepareMainLooper();
         WordBreaker::initGlobal();
 
-        HRESULT hr = AnimationManager::initGlobal();
-        if (FAILED(hr))
-            throw std::runtime_error(
-                "UAnimationManager-initGlobal(): Init anim library failed.");
+        hr = AnimationManager::initGlobal();
+        if (FAILED(hr)) {
+            Log::e(L"UAnimationManager-initGlobal(): Init anim library failed.");
+        }
 
         graphic_device_manager_.reset(new GraphicDeviceManager());
         graphic_device_manager_->init();
 
         wic_manager_.reset(new WICManager());
         hr = wic_manager_->init();
-        if (FAILED(hr))
-            throw std::runtime_error("UApplication-initApplication(): Init WIC failed.");
+        if (FAILED(hr)) {
+            Log::e(L"UApplication-initApplication(): Init WIC failed.");
+        }
 
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
-        if (FAILED(hr))
-            throw std::runtime_error("UApplication-initApplication(): Init Tsf failed.");
+        if (FAILED(hr)) {
+            Log::e(L"UApplication-initApplication(): Init Tsf failed.");
+        }
     }
 
     void Application::cleanApplication() {
@@ -134,8 +142,12 @@ namespace ukive {
 
         while (!done)
         {
-            if (vsync_enabled_)
+            if (vsync_enabled_) {
                 HRESULT hr = graphic_device_manager_->getCurOutput()->WaitForVBlank();
+                if (FAILED(hr)) {
+                    Log::e(L"failed to wait vblank.");
+                }
+            }
 
             MessageLooper::loop();
             while (::PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
@@ -183,6 +195,18 @@ namespace ukive {
         FLOAT dpiX, dpiY;
         instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
         return dpiY / 96 * dp;
+    }
+
+    float Application::pxToDpX(int px) {
+        FLOAT dpiX, dpiY;
+        instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
+        return px / (dpiX / 96);
+    }
+
+    float Application::pxToDpY(int px) {
+        FLOAT dpiX, dpiY;
+        instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
+        return px / (dpiY / 96);
     }
 
     HMODULE Application::getModuleHandle() {

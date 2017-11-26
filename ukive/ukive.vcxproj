@@ -172,6 +172,7 @@
     <ClInclude Include="drawable\ripple_drawable.h" />
     <ClInclude Include="drawable\shape_drawable.h" />
     <ClInclude Include="event\input_event.h" />
+    <ClInclude Include="graphics\bitmap.h" />
     <ClInclude Include="graphics\bitmap_factory.h" />
     <ClInclude Include="graphics\canvas.h" />
     <ClInclude Include="graphics\color.h" />
@@ -274,6 +275,7 @@
     <ClCompile Include="drawable\ripple_drawable.cpp" />
     <ClCompile Include="drawable\shape_drawable.cpp" />
     <ClCompile Include="event\input_event.cpp" />
+    <ClCompile Include="graphics\bitmap.cpp" />
     <ClCompile Include="graphics\bitmap_factory.cpp" />
     <ClCompile Include="graphics\canvas.cpp" />
     <ClCompile Include="graphics\color.cpp" />

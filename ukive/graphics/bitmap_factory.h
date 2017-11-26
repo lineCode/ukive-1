@@ -8,18 +8,12 @@
 
 namespace ukive {
 
-    class WICManager;
+    class Window;
 
     class BitmapFactory {
     public:
-        BitmapFactory(ComPtr<ID2D1DeviceContext> d2d_dc);
-        ~BitmapFactory();
-
-        ComPtr<ID2D1Bitmap> decodeFile(const string16 &file_name);
-
-    private:
-        WICManager *wic_manager_;
-        ComPtr<ID2D1DeviceContext> d2d_dc_;
+        static ComPtr<ID2D1Bitmap> create(Window *win, unsigned int width, unsigned int height);
+        static ComPtr<ID2D1Bitmap> decodeFile(Window *win, const string16 &file_name);
     };
 
 }

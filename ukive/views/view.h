@@ -18,8 +18,7 @@ namespace ukive {
     class OnClickListener;
     class ViewAnimator;
 
-    enum Gravity
-    {
+    enum Gravity {
         LEFT,
         TOP,
         RIGHT,
@@ -29,8 +28,7 @@ namespace ukive {
         CENTER_VERTICAL,
     };
 
-    class View
-    {
+    class View {
     public:
         const static int FIT = 1;
         const static int EXACTLY = 2;
@@ -64,19 +62,17 @@ namespace ukive {
         OnClickListener *mClickListener;
         ViewAnimator *mAnimator;
 
-        class ClickPerformer : public Executable
-        {
-        private:
-            View *mWidget;
+        class ClickPerformer : public Executable {
         public:
-            ClickPerformer(View *w)
-            {
-                mWidget = w;
+            ClickPerformer(View *v)
+                :view_(v) {}
+
+            void run() override {
+                view_->performClick();
             }
-            void run() override
-            {
-                mWidget->performClick();
-            }
+
+        private:
+            View *view_;
         };
 
         ClickPerformer *mClickPerformer;

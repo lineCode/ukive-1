@@ -46,7 +46,7 @@ namespace ukive {
 
     void TextView::initTextView()
     {
-        mTextSize = 15.f;
+        mTextSize = 17.f;
         mIsAutoWrap = true;
         mIsEditable = false;
         mIsSelectable = false;

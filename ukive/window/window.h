@@ -18,7 +18,6 @@ namespace ukive {
     class InputEvent;
     class WindowImpl;
     class BaseLayout;
-    class BitmapFactory;
     class AnimationManager;
     class ContextMenu;
     class ContextMenuCallback;
@@ -67,7 +66,6 @@ namespace ukive {
         Renderer *getRenderer();
         HWND getHandle();
         View *getKeyboardHolder();
-        BitmapFactory *getBitmapFactory();
         AnimationManager *getAnimationManager();
 
         bool isShowing();

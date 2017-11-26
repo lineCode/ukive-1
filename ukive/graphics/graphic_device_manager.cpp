@@ -87,9 +87,9 @@ namespace ukive {
             D3D_FEATURE_LEVEL_10_0
         };
 
-        HRESULT hr = D3D11CreateDevice(0,
+        HRESULT hr = ::D3D11CreateDevice(0,
             D3D_DRIVER_TYPE_HARDWARE,
-            0, D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG,
+            0, D3D11_CREATE_DEVICE_BGRA_SUPPORT,
             featureLevel, 4, D3D11_SDK_VERSION,
             &d3d_device_, 0, &d3d_devicecontext_);
         if (FAILED(hr)) {

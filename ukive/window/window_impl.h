@@ -20,7 +20,6 @@ namespace ukive {
     class Renderer;
     class BaseLayout;
     class ContextMenu;
-    class BitmapFactory;
     class TextActionMode;
     class NonClientFrame;
     class ContextMenuCallback;
@@ -61,7 +60,6 @@ namespace ukive {
         BaseLayout *getBaseLayout();
         Cycler *getCycler();
         Renderer *getRenderer();
-        BitmapFactory *getBitmapFactory();
         AnimationManager *getAnimationManager();
 
         bool isCreated();
@@ -176,7 +174,6 @@ namespace ukive {
         std::unique_ptr<NonClientFrame> non_client_frame_;
 
         Canvas *mCanvas;
-        BitmapFactory *mBitmapFactory;
         Renderer *mRenderer;
 
         AnimationManager *mAnimationManager;

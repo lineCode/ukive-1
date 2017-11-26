@@ -134,6 +134,9 @@ namespace ukive {
             d3d_render_listener_->onDirect3DRender();
 
         hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
+        if (FAILED(hr)) {
+            Log::e(L"failed to present.");
+        }
 
         return !FAILED(hr);
     }
@@ -207,8 +210,11 @@ namespace ukive {
         std::function<void(ComPtr<ID2D1RenderTarget> rt)> drawer)
     {
         ComPtr<ID2D1BitmapRenderTarget> bmpRenderTarget;
-        RH(d2d_dc_->CreateCompatibleRenderTarget(
-            D2D1::SizeF(width, height), &bmpRenderTarget));
+        HRESULT hr = d2d_dc_->CreateCompatibleRenderTarget(
+            D2D1::SizeF(width, height), &bmpRenderTarget);
+        if (FAILED(hr)) {
+            return hr;
+        }
 
         bmpRenderTarget->BeginDraw();
         bmpRenderTarget->Clear(D2D1::ColorF(0, 0));
