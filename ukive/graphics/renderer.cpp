@@ -55,6 +55,10 @@ namespace ukive {
         RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), (LPVOID*)&backBufferPtr));
         RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
 
+        float dpiX, dpiY;
+        bitmap_render_target_->GetDpi(&dpiX, &dpiY);
+        d2d_dc_->SetDpi(dpiX, dpiY);
+
         d2d_dc_->SetTarget(bitmap_render_target_.get());
 
         DXGI_SWAP_CHAIN_DESC1 checkDesc;

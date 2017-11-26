@@ -154,18 +154,24 @@ namespace ukive {
     }
 
     void WindowImpl::center() {
-        x_ = static_cast<int>((Application::getScreenWidth() - width_) / 2.f);
-        y_ = static_cast<int>((Application::getScreenHeight() - height_) / 2.f);
+        int width_pixel = Application::dpToPxX(width_);
+        int height_pixel = Application::dpToPxY(height_);
+
+        int x_pixel = static_cast<int>((Application::getScreenWidth() - width_pixel) / 2.f);
+        int y_pixel = static_cast<int>((Application::getScreenHeight() - height_pixel) / 2.f);
+
+        x_ = Application::pxToDpX(x_pixel);
+        y_ = Application::pxToDpX(y_pixel);
 
         if (is_created_) {
-            ::MoveWindow(hWnd_, x_, y_, width_, height_, FALSE);
+            ::MoveWindow(hWnd_, x_pixel, y_pixel, width_pixel, height_pixel, FALSE);
         }
     }
 
     void WindowImpl::setTitle(const string16 &title) {
         title_ = title;
         if (is_created_) {
-            ::SetWindowTextW(hWnd_, title_.c_str());
+            ::SetWindowText(hWnd_, title_.c_str());
         }
     }
 
@@ -176,7 +182,13 @@ namespace ukive {
         height_ = height;
 
         if (is_created_) {
-            ::MoveWindow(hWnd_, x_, y_, width_, height_, FALSE);
+            int width_pixel = Application::dpToPxX(width_);
+            int height_pixel = Application::dpToPxY(height_);
+
+            int x_pixel = Application::dpToPxX(x_);
+            int y_pixel = Application::dpToPxX(y_);
+
+            ::MoveWindow(hWnd_, x_pixel, y_pixel, width_pixel, height_pixel, FALSE);
         }
     }
 
@@ -186,7 +198,7 @@ namespace ukive {
 
     void WindowImpl::setCurrentCursor(LPCWSTR cursor)
     {
-        cursor_ = ::LoadCursorW(0, cursor);
+        cursor_ = ::LoadCursor(0, cursor);
         ::SetCursor(cursor_);
     }
 
@@ -224,46 +236,40 @@ namespace ukive {
     int WindowImpl::getClientWidth() {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
-        return rect.right - rect.left;
+        return Application::pxToDpX(rect.right - rect.left);
     }
 
     int WindowImpl::getClientHeight() {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
-        return rect.bottom - rect.top;
+        return Application::pxToDpY(rect.bottom - rect.top);
     }
 
     HWND WindowImpl::getHandle() {
         return hWnd_;
     }
 
-    HCURSOR WindowImpl::getCurrentCursor()
-    {
+    HCURSOR WindowImpl::getCurrentCursor() {
         return cursor_;
     }
 
-    Color WindowImpl::getBackgroundColor()
-    {
+    Color WindowImpl::getBackgroundColor() {
         return background_color_;
     }
 
-    BaseLayout *WindowImpl::getBaseLayout()
-    {
+    BaseLayout *WindowImpl::getBaseLayout() {
         return mBaseLayout;
     }
 
-    AnimationManager *WindowImpl::getAnimationManager()
-    {
+    AnimationManager *WindowImpl::getAnimationManager() {
         return mAnimationManager;
     }
 
-    Cycler *WindowImpl::getCycler()
-    {
+    Cycler *WindowImpl::getCycler() {
         return mLabourCycler;
     }
 
-    Renderer *WindowImpl::getRenderer()
-    {
+    Renderer *WindowImpl::getRenderer() {
         return mRenderer;
     }
 
@@ -900,8 +906,9 @@ namespace ukive {
 
         case WM_DESTROY:
             onDestroy();
-            if (isStartupWindow())
+            if (isStartupWindow()) {
                 ::PostQuitMessage(0);
+            }
             return 0;
 
         case WM_SHOWWINDOW:
@@ -914,6 +921,12 @@ namespace ukive {
         }
 
         case WM_DPICHANGED: {
+            float dpiX, dpiY;
+            Application::getGraphicDeviceManager()->getD2DFactory()->ReloadSystemMetrics();
+            Application::getGraphicDeviceManager()->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
+
+            mRenderer->getD2DDeviceContext()->SetDpi(dpiX, dpiY);
+
             RECT* const prcNewWindow = (RECT*)lParam;
             SetWindowPos(hWnd_,
                 NULL,
@@ -929,29 +942,38 @@ namespace ukive {
             return TRUE;
 
         case WM_SETCURSOR: {
-            if (isCursorInClient())
-            {
+            if (isCursorInClient()) {
                 ::SetCursor(cursor_);
                 return TRUE;
             }
             break;
         }
 
-        case WM_MOVE:
-            notifyLocationChanged(LOWORD(lParam), HIWORD(lParam));
-            return 0;
+        case WM_MOVE: {
+            int x_pixel = LOWORD(lParam);
+            int y_pixel = HIWORD(lParam);
+            int x_dp = Application::pxToDpX(x_pixel);
+            int y_dp = Application::pxToDpY(y_pixel);
+            notifyLocationChanged(x_dp, y_dp);
+            break;
+        }
 
         case WM_SIZE: {
             RECT winRect;
             ::GetWindowRect(hWnd_, &winRect);
 
+            int width_dp = Application::pxToDpX(winRect.right - winRect.left);
+            int height_dp = Application::pxToDpX(winRect.bottom - winRect.top);
+            int client_width_dp = Application::pxToDpX(LOWORD(lParam));
+            int client_height_dp = Application::pxToDpX(HIWORD(lParam));
+
             notifySizeChanged(
                 wParam,
-                winRect.right - winRect.left, winRect.bottom - winRect.top,
-                LOWORD(lParam), HIWORD(lParam));
+                width_dp, height_dp,
+                client_width_dp, client_height_dp);
 
             non_client_frame_->onSize(wParam, lParam);
-            return 0;
+            break;
         }
 
         case WM_MOVING: {
@@ -972,10 +994,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
             ev.setMouseKey(InputEvent::MK_LEFT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -991,10 +1013,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_UP);
             ev.setMouseKey(InputEvent::MK_LEFT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -1006,10 +1028,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
             ev.setMouseKey(InputEvent::MK_RIGHT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -1021,10 +1043,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_UP);
             ev.setMouseKey(InputEvent::MK_RIGHT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -1036,10 +1058,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
             ev.setMouseKey(InputEvent::MK_MIDDLE);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -1051,10 +1073,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_UP);
             ev.setMouseKey(InputEvent::MK_MIDDLE);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -1069,10 +1091,10 @@ namespace ukive {
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_MOVE);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setMouseX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
+            ev.setMouseRawX(Application::pxToDpX(GET_X_LPARAM(lParam)));
+            ev.setMouseRawY(Application::pxToDpY(GET_Y_LPARAM(lParam)));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
@@ -1109,10 +1131,10 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_WHEEL);
             ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
-            ev.setMouseX(pt.x);
-            ev.setMouseY(pt.y);
-            ev.setMouseRawX(pt.x);
-            ev.setMouseRawY(pt.y);
+            ev.setMouseX(Application::pxToDpX(pt.x));
+            ev.setMouseY(Application::pxToDpY(pt.y));
+            ev.setMouseRawX(Application::pxToDpX(pt.x));
+            ev.setMouseRawY(Application::pxToDpY(pt.y));
 
             if (onInputEvent(&ev)) {
                 return TRUE;
