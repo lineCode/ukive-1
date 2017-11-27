@@ -160,11 +160,12 @@ namespace ukive {
         void onResize(
             int param, int width, int height,
             int clientWidth, int clientHeight);
-        bool onMoving(RECT *rect);
-        bool onResizing(WPARAM edge, RECT *rect);
+        bool onMoving(Rect *rect);
+        bool onResizing(WPARAM edge, Rect *rect);
         bool onClose();
         void onDestroy();
         bool onInputEvent(InputEvent *e);
+        void onDpiChanged(int dpi_x, int dpi_y);
 
         Cycler *mLabourCycler;
         AnimStateChangedListener *mAnimStateChangedListener;

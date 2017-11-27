@@ -7,6 +7,7 @@
 
 
 namespace ukive {
+    class Rect;
     class ContextMenu;
 }
 
@@ -62,11 +63,11 @@ namespace shell {
         TextWindow();
         ~TextWindow();
 
-        virtual void onCreate() override;
-        virtual bool onMoving(RECT *rect) override;
-        virtual bool onResizing(WPARAM edge, RECT *rect) override;
-        virtual void onMove(int x, int y) override;
-        virtual void onResize(
+        void onCreate() override;
+        bool onMoving(ukive::Rect *rect) override;
+        bool onResizing(int edge, ukive::Rect *rect) override;
+        void onMove(int x, int y) override;
+        void onResize(
             int param, int width, int height,
             int clientWidth, int clientHeight) override;
     };

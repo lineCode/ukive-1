@@ -34,10 +34,11 @@ namespace ukive {
     public:
         ViewGroup(Window *wnd);
         ViewGroup(Window *wnd, int id);
-        virtual ~ViewGroup();
+        ~ViewGroup();
 
-        virtual bool dispatchInputEvent(InputEvent *e) override;
-        virtual void dispatchWindowFocusChanged(bool windowFocus) override;
+        bool dispatchInputEvent(InputEvent *e) override;
+        void dispatchWindowFocusChanged(bool windowFocus) override;
+        void dispatchWindowDpiChanged(int dpi_x, int dpi_y) override;
 
         virtual void onLayout(
             bool changed, bool sizeChanged,
@@ -47,8 +48,8 @@ namespace ukive {
         virtual bool onInterceptMouseEvent(InputEvent *e);
         virtual bool onInterceptKeyboardEvent(InputEvent *e);
 
-        virtual void onAttachedToWindow() override;
-        virtual void onDetachedFromWindow() override;
+        void onAttachedToWindow() override;
+        void onDetachedFromWindow() override;
 
         void addWidget(View *widget);
         void addWidget(View *widget, LayoutParams *params);
@@ -60,7 +61,7 @@ namespace ukive {
         void removeWidget(std::shared_ptr<View> widget);
         void removeWidget(std::size_t index);
 
-        virtual View *findWidgetById(int id) override;
+        View *findWidgetById(int id) override;
 
         static void getChildMeasure(
             int parentSize, int parentSizeMode,

@@ -853,6 +853,10 @@ namespace ukive {
         onWindowFocusChanged(windowFocus);
     }
 
+    void View::dispatchWindowDpiChanged(int dpi_x, int dpi_y) {
+        onWindowDpiChanged(dpi_x, dpi_y);
+    }
+
 
     void View::onAttachedToWindow() {
         mIsAttachdToWindow = true;
@@ -1086,6 +1090,9 @@ namespace ukive {
                 mICHolder->terminateComposition();
             }
         }
+    }
+
+    void View::onWindowDpiChanged(int dpi_x, int dpi_y) {
     }
 
     void View::onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) {

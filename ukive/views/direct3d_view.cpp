@@ -310,9 +310,7 @@ namespace ukive {
             int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
             int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
-            setViewports(
-                mWindow->dpToPx(_left), mWindow->dpToPx(_top),
-                mWindow->dpToPx(width), mWindow->dpToPx(height));
+            setViewports(_left, _top, width, height);
         }
     }
 

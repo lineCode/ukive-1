@@ -77,13 +77,13 @@ namespace shell {
     }
 
 
-    bool TextWindow::onMoving(RECT *rect)
+    bool TextWindow::onMoving(ukive::Rect *rect)
     {
         ::OutputDebugStringW(L"onMoving()\n");
         return Window::onMoving(rect);
     }
 
-    bool TextWindow::onResizing(WPARAM edge, RECT *rect)
+    bool TextWindow::onResizing(int edge, ukive::Rect *rect)
     {
         ::OutputDebugStringW(L"onResizing()\n");
         return Window::onResizing(edge, rect);

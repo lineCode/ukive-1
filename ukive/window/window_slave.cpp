@@ -98,8 +98,8 @@ namespace ukive {
 
         case WM_SIZING:
         {
-            if (mMaster->onResizing(wParam, (RECT*)lParam))
-                return TRUE;
+            /*if (mMaster->onResizing(wParam, (RECT*)lParam))
+                return TRUE;*/
             break;
         }
         }

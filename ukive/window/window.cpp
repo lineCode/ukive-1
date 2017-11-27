@@ -243,17 +243,17 @@ namespace ukive {
         }
     }
 
-    bool Window::onMoving(RECT *rect) {
+    bool Window::onMoving(Rect *rect) {
         return false;
     }
 
-    bool Window::onResizing(WPARAM edge, RECT *rect) {
+    bool Window::onResizing(int edge, Rect *rect) {
         int minWidth = min_width_;
         int minHeight = min_height_;
         bool processed = false;
 
-        LONG width = rect->right - rect->left;
-        LONG height = rect->bottom - rect->top;
+        int width = rect->right - rect->left;
+        int height = rect->bottom - rect->top;
         if (height < minHeight)
         {
             switch (edge)
@@ -302,6 +302,9 @@ namespace ukive {
 
     bool Window::onInputEvent(InputEvent *e) {
         return false;
+    }
+
+    void Window::onDpiChanged(int dpi_x, int dpi_y) {
     }
 
 }

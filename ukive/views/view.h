@@ -252,6 +252,7 @@ namespace ukive {
 
         virtual bool dispatchInputEvent(InputEvent *e);
         virtual void dispatchWindowFocusChanged(bool windowFocus);
+        virtual void dispatchWindowDpiChanged(int dpi_x, int dpi_y);
 
         virtual void onAttachedToWindow();
         virtual void onDetachedFromWindow();
@@ -273,6 +274,7 @@ namespace ukive {
         virtual void onVisibilityChanged(int visibility);
         virtual void onFocusChanged(bool getFocus);
         virtual void onWindowFocusChanged(bool windowFocus);
+        virtual void onWindowDpiChanged(int dpi_x, int dpi_y);
         virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY);
     };
 

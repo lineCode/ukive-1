@@ -37,9 +37,7 @@ namespace shell {
     void LodView::onSizeChanged(
         int width, int height, int oldWidth, int oldHeight) {
 
-        mScene->onSceneResize(
-            mWindow->dpToPx(width),
-            mWindow->dpToPx(height));
+        mScene->onSceneResize(width, height);
     }
 
     TerrainScene *LodView::getTerrainScene()

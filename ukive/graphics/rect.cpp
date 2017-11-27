@@ -22,7 +22,7 @@ namespace ukive {
         left = x;
         top = y;
         right = left + width;
-        height = top + height;
+        bottom = top + height;
     }
 
     Rect& Rect::operator=(const Rect &rhs) {

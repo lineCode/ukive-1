@@ -11,6 +11,7 @@
 
 namespace ukive {
 
+    class Rect;
     class View;
     class Cycler;
     class Canvas;
@@ -97,11 +98,12 @@ namespace ukive {
         virtual void onResize(
             int param, int width, int height,
             int clientWidth, int clientHeight);
-        virtual bool onMoving(RECT *rect);
-        virtual bool onResizing(WPARAM edge, RECT *rect);
+        virtual bool onMoving(Rect *rect);
+        virtual bool onResizing(int edge, Rect *rect);
         virtual bool onClose();
         virtual void onDestroy();
         virtual bool onInputEvent(InputEvent *e);
+        virtual void onDpiChanged(int dpi_x, int dpi_y);
 
     private:
         std::unique_ptr<WindowImpl> impl_;
