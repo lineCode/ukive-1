@@ -195,6 +195,14 @@ namespace ukive {
         return impl_->startTextActionMode(callback);
     }
 
+    float Window::dpToPx(float dp) {
+        return impl_->dpToPx(dp);
+    }
+
+    float Window::pxToDp(int px) {
+        return impl_->pxToDp(px);
+    }
+
     void Window::onPreCreate(ClassInfo *info) {
     }
 

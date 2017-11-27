@@ -311,8 +311,8 @@ namespace ukive {
             int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
             setViewports(
-                Application::dpToPxX(_left), Application::dpToPxY(_top),
-                Application::dpToPxX(width), Application::dpToPxY(height));
+                mWindow->dpToPx(_left), mWindow->dpToPx(_top),
+                mWindow->dpToPx(width), mWindow->dpToPx(height));
         }
     }
 

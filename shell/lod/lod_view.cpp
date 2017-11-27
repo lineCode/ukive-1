@@ -1,6 +1,7 @@
 #include "lod_view.h"
 
 #include "ukive/application.h"
+#include "ukive/window/window.h"
 
 #include "shell/lod/terrain_scene.h"
 
@@ -37,8 +38,8 @@ namespace shell {
         int width, int height, int oldWidth, int oldHeight) {
 
         mScene->onSceneResize(
-            ukive::Application::dpToPxX(width),
-            ukive::Application::dpToPxY(height));
+            mWindow->dpToPx(width),
+            mWindow->dpToPx(height));
     }
 
     TerrainScene *LodView::getTerrainScene()

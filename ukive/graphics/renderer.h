@@ -66,9 +66,9 @@ namespace ukive {
             IDXGISurface *dxgiSurface, ID2D1Bitmap1 **bitmap);
         HRESULT createCompatBitmapRenderTarget(
             float width, float height, ID2D1BitmapRenderTarget **bRT);
-        static HRESULT createDXGISurfaceRenderTarget(
+        HRESULT createDXGISurfaceRenderTarget(
             IDXGISurface *dxgiSurface, ID2D1RenderTarget **renderTarget);
-        static HRESULT createWindowRenderTarget(
+        HRESULT createWindowRenderTarget(
             HWND handle, unsigned int width, unsigned int height,
             ID2D1HwndRenderTarget **renderTarget);
 

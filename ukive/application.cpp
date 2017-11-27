@@ -1,5 +1,7 @@
 ﻿#include "application.h"
 
+#include <ShellScalingAPI.h>
+
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/log.h"
 #include "ukive/message/message.h"
@@ -15,6 +17,7 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "Elscore.lib")
+#pragma comment(lib, "Shcore.lib")
 
 
 namespace ukive {
@@ -57,9 +60,6 @@ namespace ukive {
         if (FAILED(hr)) {
             Log::e(L"failed to init COM.");
         }
-
-        int a = getScreenWidth();
-        int b = getScreenHeight();
 
         Message::init(50);
         MessageLooper::init();
@@ -185,30 +185,6 @@ namespace ukive {
         return vsync_enabled_;
     }
 
-    float Application::dpToPxX(float dp) {
-        FLOAT dpiX, dpiY;
-        instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
-        return dpiX / 96 * dp;
-    }
-
-    float Application::dpToPxY(float dp) {
-        FLOAT dpiX, dpiY;
-        instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
-        return dpiY / 96 * dp;
-    }
-
-    float Application::pxToDpX(int px) {
-        FLOAT dpiX, dpiY;
-        instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
-        return px / (dpiX / 96);
-    }
-
-    float Application::pxToDpY(int px) {
-        FLOAT dpiX, dpiY;
-        instance_->graphic_device_manager_->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
-        return px / (dpiY / 96);
-    }
-
     HMODULE Application::getModuleHandle() {
         return ::GetModuleHandle(NULL);
     }
@@ -224,6 +200,28 @@ namespace ukive {
     int Application::getViewUID() {
         ++view_uid_;
         return view_uid_;
+    }
+
+    int Application::getPrimaryDpi() {
+        POINT pt = { 0, 0 };
+        HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
+
+        unsigned int dpiX, dpiY;
+        HRESULT hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+        if (FAILED(hr)) {
+            Log::e(L"failed to get primary monitor dpi.");
+            return 0;
+        }
+
+        return dpiX;
+    }
+
+    float Application::dpToPx(float dp) {
+        return getPrimaryDpi() / 96.f * dp;
+    }
+
+    float Application::pxToDp(int px) {
+        return px / (getPrimaryDpi() / 96.f);
     }
 
     GraphicDeviceManager* Application::getGraphicDeviceManager() {

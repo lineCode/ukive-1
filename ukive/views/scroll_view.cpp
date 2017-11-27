@@ -68,7 +68,7 @@ namespace ukive {
         }
 
         if (finalDy != 0)
-            this->scrollBy(0, finalDy);
+            scrollBy(0, finalDy);
     }
 
 

@@ -54,6 +54,7 @@ namespace ukive {
         int getHeight();
         int getClientWidth();
         int getClientHeight();
+        unsigned int getDpi();
         HWND getHandle();
         HCURSOR getCurrentCursor();
         Color getBackgroundColor();
@@ -97,6 +98,9 @@ namespace ukive {
         ContextMenu *startContextMenu(
             ContextMenuCallback *callback, View *anchor, Gravity gravity);
         TextActionMode *startTextActionMode(TextActionModeCallback *callback);
+
+        float dpToPx(float dp);
+        float pxToDp(int px);
 
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 

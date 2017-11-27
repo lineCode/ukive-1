@@ -85,6 +85,9 @@ namespace ukive {
             ContextMenuCallback *callback, View *anchor, Gravity gravity);
         TextActionMode *startTextActionMode(TextActionModeCallback *callback);
 
+        float dpToPx(float dp);
+        float pxToDp(int px);
+
         virtual void onPreCreate(ClassInfo *info);
         virtual void onCreate();
         virtual void onShow(bool show);

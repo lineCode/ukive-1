@@ -1507,10 +1507,9 @@ namespace ukive {
         int left = 0;
         int top = 0;
         View *parent = this;
-        while (parent)
-        {
-            left += parent->getLeft();
-            top += parent->getTop();
+        while (parent) {
+            left += parent->getLeft() - parent->getScrollX();
+            top += parent->getTop() - parent->getScrollY();
             parent = parent->getParent();
         }
 

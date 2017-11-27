@@ -55,9 +55,7 @@ namespace ukive {
         RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), (LPVOID*)&backBufferPtr));
         RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
 
-        float dpiX, dpiY;
-        bitmap_render_target_->GetDpi(&dpiX, &dpiY);
-        d2d_dc_->SetDpi(dpiX, dpiY);
+        d2d_dc_->SetDpi(owner_window_->getDpi(), owner_window_->getDpi());
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
 
@@ -342,15 +340,13 @@ namespace ukive {
     HRESULT Renderer::createBitmapRenderTarget(IDXGISurface *dxgiSurface, ID2D1Bitmap1 **bitmap) {
         HRESULT hr = S_OK;
 
-        FLOAT dpiX;
-        FLOAT dpiY;
-        Application::getGraphicDeviceManager()->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
+        FLOAT dpi = owner_window_->getDpi();
 
         D2D1_BITMAP_PROPERTIES1 bitmapProperties =
             D2D1::BitmapProperties1(
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
-                dpiX, dpiY);
+                dpi, dpi);
 
         return d2d_dc_->
             CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
@@ -372,14 +368,12 @@ namespace ukive {
         HRESULT hr = S_OK;
         auto gdm = Application::getGraphicDeviceManager();
 
-        FLOAT dpiX;
-        FLOAT dpiY;
-        gdm->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
+        FLOAT dpi = owner_window_->getDpi();
 
         D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
             D2D1_RENDER_TARGET_TYPE_DEFAULT,
             D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
-            dpiX, dpiY);
+            dpi, dpi);
 
         return gdm->getD2DFactory()->CreateDxgiSurfaceRenderTarget(dxgiSurface, props, renderTarget);
     }
@@ -390,15 +384,13 @@ namespace ukive {
         HRESULT hr = S_OK;
         auto gdm = Application::getGraphicDeviceManager();
 
-        FLOAT dpiX;
-        FLOAT dpiY;
-        gdm->getD2DFactory()->GetDesktopDpi(&dpiX, &dpiY);
+        FLOAT dpi = owner_window_->getDpi();
 
         D2D1_RENDER_TARGET_PROPERTIES renderTargetProperties = D2D1::RenderTargetProperties();
         // Set the DPI to be the default system DPI to allow direct mapping
         // between image pixels and desktop pixels in different system DPI settings
-        renderTargetProperties.dpiX = dpiX;
-        renderTargetProperties.dpiY = dpiY;
+        renderTargetProperties.dpiX = dpi;
+        renderTargetProperties.dpiY = dpi;
 
         return gdm->getD2DFactory()->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
             D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(width, height)),
