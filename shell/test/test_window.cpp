@@ -21,17 +21,14 @@ namespace {
 namespace shell {
 
     TestWindow::TestWindow()
-        :Window()
-    {
+        :Window() {
     }
 
-    TestWindow::~TestWindow()
-    {
+    TestWindow::~TestWindow() {
     }
 
 
-    void TestWindow::onCreate()
-    {
+    void TestWindow::onCreate() {
         Window::onCreate();
 
         ukive::ScrollView *scrollView = new ukive::ScrollView(this);
@@ -56,7 +53,7 @@ namespace shell {
         std::wstring adapterName(adapterDesc.Description);
         std::wstring outputName(outputDesc.DeviceName);
 
-        std::wstring deviceDesc = L"";
+        std::wstring deviceDesc;
         deviceDesc.append(L"Device: ").append(adapterName)
             .append(L"\n").append(L"Monitor: ").append(outputName);
 
@@ -65,13 +62,13 @@ namespace shell {
         deviceTextView->setIsSelectable(false);
         deviceTextView->setIsEditable(false);
         deviceTextView->setText(deviceDesc);
-        deviceTextView->setPadding(6, 6, 6, 6);
+        deviceTextView->setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6));
 
         ukive::LayoutParams *deviceTextParams = new ukive::LayoutParams(
             ukive::LayoutParams::FIT_CONTENT,
             ukive::LayoutParams::FIT_CONTENT);
         deviceTextParams->leftMargin = deviceTextParams->rightMargin
-            = deviceTextParams->topMargin = deviceTextParams->bottomMargin = 12;
+            = deviceTextParams->topMargin = deviceTextParams->bottomMargin = dpToPx(12);
 
         linearLayout->addWidget(deviceTextView, deviceTextParams);
 
@@ -80,14 +77,14 @@ namespace shell {
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::FIT_CONTENT);
         textParams->leftMargin = textParams->rightMargin
-            = textParams->topMargin = textParams->bottomMargin = 12;
+            = textParams->topMargin = textParams->bottomMargin = dpToPx(12);
 
         ukive::TextView *textView = new ukive::TextView(this, kTextViewId);
         textView->setIsSelectable(true);
         textView->setIsEditable(true);
         textView->setText(L"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii这是一个示例程序，\n\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。");
         textView->setBackground(new ukive::ColorDrawable(ukive::Color::White));
-        textView->setPadding(6, 6, 6, 6);
+        textView->setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6));
         textView->setElevation(3.f);
 
         ukive::UnderlineSpan *span = new ukive::UnderlineSpan(3, 5);
@@ -108,17 +105,9 @@ namespace shell {
             ukive::LayoutParams::FIT_CONTENT,
             ukive::LayoutParams::FIT_CONTENT);
         buttonParams->leftMargin = buttonParams->rightMargin
-            = buttonParams->topMargin = buttonParams->bottomMargin = 12;
+            = buttonParams->topMargin = buttonParams->bottomMargin = dpToPx(12);
 
         linearLayout->addWidget(button, buttonParams);
-
-
-        /*Scene *scene = new TerrainScene(this->getSceneManager());
-        HRESULT hr = scene->init(this->getD3DDrawer(), mWidth, mHeight);
-        if (FAILED(hr))
-            return;
-
-        this->getSceneManager()->addScene(scene, U3DSceneId::TERRAIN_SCENE);*/
     }
 
 }

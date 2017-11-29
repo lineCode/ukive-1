@@ -399,7 +399,7 @@ namespace ukive {
         mTextFormat.reset();
         getWindow()->getRenderer()->createTextFormat(
             mFontFamilyName,
-            mTextSize,
+            getWindow()->dpToPx(mTextSize),
             L"zh-cn",
             &mTextFormat);
     }
@@ -915,7 +915,7 @@ namespace ukive {
         mBaseText->setSelection(0);
     }
 
-    void TextView::setTextSize(float size)
+    void TextView::setTextSize(int size)
     {
         if (size == mTextSize)
             return;

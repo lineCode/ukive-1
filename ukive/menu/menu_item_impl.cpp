@@ -1,6 +1,7 @@
 #include "menu_item_impl.h"
 
 #include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
@@ -33,7 +34,7 @@ namespace ukive {
         setTextSize(13);
         setIsEditable(false);
         setIsSelectable(false);
-        setPadding(16, 0, 16, 0);
+        setPadding(getWindow()->dpToPx(16), 0, getWindow()->dpToPx(16), 0);
         // TODO: ¶ÀÁ¢ÓÚ Direct2D
         setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         autoWrap(false);

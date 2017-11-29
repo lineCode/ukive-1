@@ -6,8 +6,7 @@
 
 namespace shell {
 
-    class TestWindow : public ukive::Window
-    {
+    class TestWindow : public ukive::Window {
     public:
         TestWindow();
         ~TestWindow();

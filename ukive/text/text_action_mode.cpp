@@ -19,8 +19,8 @@ namespace ukive {
         Window *window, TextActionModeCallback *callback)
     {
         mIsFinished = true;
-        mMenuWidth = 92;
-        mMenuItemHeight = 36;
+        mMenuWidth = window->dpToPx(92);
+        mMenuItemHeight = window->dpToPx(36);
 
         mWindow = window;
         mCallback = callback;
@@ -36,7 +36,7 @@ namespace ukive {
         shapeDrawable->setSolidColor(Color::White);
 
         mInnerWindow = std::shared_ptr<InnerWindow>(new InnerWindow(window));
-        mInnerWindow->setElevation(2.f);
+        mInnerWindow->setElevation(window->dpToPx(2.f));
         mInnerWindow->setContentView(mMenu);
         mInnerWindow->setOutsideTouchable(true);
         mInnerWindow->setBackground(shapeDrawable);

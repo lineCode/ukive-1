@@ -240,8 +240,7 @@ namespace ukive {
         gdm->getD3DDeviceContext()->DrawIndexed(object->indexCount, 0, 0);
     }
 
-    void Renderer::draw(ID3D11Buffer* vertices, ID3D11Buffer* indices, int structSize, int indexCount)
-    {
+    void Renderer::draw(ID3D11Buffer* vertices, ID3D11Buffer* indices, int structSize, int indexCount) {
         UINT vertexDataOffset = 0;
         UINT vertexStructSize = structSize;
 
@@ -254,30 +253,28 @@ namespace ukive {
     }
 
 
-    void Renderer::addSwapChainResizeNotifier(SwapChainResizeNotifier *notifier)
-    {
+    void Renderer::addSwapChainResizeNotifier(SwapChainResizeNotifier *notifier) {
         sc_resize_notifier_list_.push_back(notifier);
     }
 
-    void Renderer::removeSwapChainResizeNotifier(SwapChainResizeNotifier *notifier)
-    {
+    void Renderer::removeSwapChainResizeNotifier(SwapChainResizeNotifier *notifier) {
         for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end();)
-        {
-            if ((*it) == notifier)
+            it != sc_resize_notifier_list_.end();) {
+
+            if ((*it) == notifier) {
                 it = sc_resize_notifier_list_.erase(it);
-            else
+            }
+            else {
                 ++it;
+            }
         }
     }
 
-    void Renderer::removeAllSwapChainResizeNotifier()
-    {
+    void Renderer::removeAllSwapChainResizeNotifier() {
         sc_resize_notifier_list_.clear();
     }
 
-    void Renderer::setDirect3DRenderListener(Direct3DRenderListener *listener)
-    {
+    void Renderer::setDirect3DRenderListener(Direct3DRenderListener *listener) {
         d3d_render_listener_ = listener;
     }
 
@@ -338,13 +335,10 @@ namespace ukive {
     HRESULT Renderer::createBitmapRenderTarget(IDXGISurface *dxgiSurface, ID2D1Bitmap1 **bitmap) {
         HRESULT hr = S_OK;
 
-        FLOAT dpi = owner_window_->getDpi();
-
         D2D1_BITMAP_PROPERTIES1 bitmapProperties =
             D2D1::BitmapProperties1(
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE),
-                dpi, dpi);
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
 
         return d2d_dc_->
             CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
@@ -366,12 +360,9 @@ namespace ukive {
         HRESULT hr = S_OK;
         auto gdm = Application::getGraphicDeviceManager();
 
-        FLOAT dpi = owner_window_->getDpi();
-
         D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
             D2D1_RENDER_TARGET_TYPE_DEFAULT,
-            D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
-            dpi, dpi);
+            D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), 96, 96);
 
         return gdm->getD2DFactory()->CreateDxgiSurfaceRenderTarget(dxgiSurface, props, renderTarget);
     }
@@ -382,13 +373,11 @@ namespace ukive {
         HRESULT hr = S_OK;
         auto gdm = Application::getGraphicDeviceManager();
 
-        FLOAT dpi = owner_window_->getDpi();
-
         D2D1_RENDER_TARGET_PROPERTIES renderTargetProperties = D2D1::RenderTargetProperties();
         // Set the DPI to be the default system DPI to allow direct mapping
         // between image pixels and desktop pixels in different system DPI settings
-        renderTargetProperties.dpiX = dpi;
-        renderTargetProperties.dpiY = dpi;
+        renderTargetProperties.dpiX = 96;
+        renderTargetProperties.dpiY = 96;
 
         return gdm->getD2DFactory()->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
             D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(width, height)),

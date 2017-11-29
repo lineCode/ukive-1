@@ -62,7 +62,7 @@ namespace ukive {
 
         ULONG64 mProcessRef;
 
-        float mTextSize;
+        int mTextSize;
         std::wstring mFontFamilyName;
         Color mTextColor;
         Color mSelectionBackgroundColor;
@@ -153,7 +153,7 @@ namespace ukive {
         bool isSelectable();
 
         void setText(std::wstring text);
-        void setTextSize(float size);
+        void setTextSize(int size);
         void setTextColor(Color color);
         void setTextAlignment(DWRITE_TEXT_ALIGNMENT alignment);
         void setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment);

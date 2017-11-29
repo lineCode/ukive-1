@@ -17,8 +17,8 @@ namespace ukive {
         Window *window, ContextMenuCallback *callback)
     {
         mIsFinished = true;
-        mMenuWidth = 92;
-        mMenuItemHeight = 36;
+        mMenuWidth = window->dpToPx(92);
+        mMenuItemHeight = window->dpToPx(36);
 
         mWindow = window;
         mCallback = callback;

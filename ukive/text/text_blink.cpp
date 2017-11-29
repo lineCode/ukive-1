@@ -4,6 +4,7 @@
 #include "ukive/graphics/canvas.h"
 #include "ukive/message/cycler.h"
 #include "ukive/views/view.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
@@ -18,7 +19,7 @@ namespace ukive {
         mCancelled = true;
         mBlinkMask = false;
 
-        mThickness = 2;
+        mThickness = widget->getWindow()->dpToPx(2);
     }
 
     TextBlink::~TextBlink()
