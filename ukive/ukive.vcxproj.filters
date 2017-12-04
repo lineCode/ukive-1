@@ -192,12 +192,6 @@
     <ClCompile Include="views\image_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
-    <ClCompile Include="views\list_adapter.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
-    <ClCompile Include="views\list_view.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="views\scroll_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
@@ -254,6 +248,15 @@
     </ClCompile>
     <ClCompile Include="graphics\bitmap.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\list_adapter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\list_view.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\stl_utils.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -490,12 +493,6 @@
     <ClInclude Include="views\image_view.h">
       <Filter>views</Filter>
     </ClInclude>
-    <ClInclude Include="views\list_adapter.h">
-      <Filter>views</Filter>
-    </ClInclude>
-    <ClInclude Include="views\list_view.h">
-      <Filter>views</Filter>
-    </ClInclude>
     <ClInclude Include="views\scroll_view.h">
       <Filter>views</Filter>
     </ClInclude>
@@ -556,6 +553,15 @@
     <ClInclude Include="graphics\bitmap.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="views\list\list_adapter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\list_view.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\stl_utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -599,6 +605,9 @@
     </Filter>
     <Filter Include="views\layout">
       <UniqueIdentifier>{cb19e414-e8be-45fe-be55-a3e2d191edc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views\list">
+      <UniqueIdentifier>{fe9efc35-eb80-43ea-8d5e-2974a5d8dd4e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

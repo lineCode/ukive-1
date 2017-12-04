@@ -183,7 +183,7 @@ namespace ukive {
     }
 
     View *Window::findViewById(int id) {
-        return impl_->findWidgetById(id);
+        return impl_->findViewById(id);
     }
 
     ContextMenu *Window::startContextMenu(

@@ -29,6 +29,9 @@
     <Filter Include="hlsl">
       <UniqueIdentifier>{f3064276-b2e5-4abd-817d-690205a3563d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\list">
+      <UniqueIdentifier>{6fac98bf-1c33-4738-85f6-95d1af0587b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -84,6 +87,9 @@
     </ClCompile>
     <ClCompile Include="lod\terrain_configure.cpp">
       <Filter>lod</Filter>
+    </ClCompile>
+    <ClCompile Include="test\list\test_adapter.cpp">
+      <Filter>test\list</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="lod\terrain_configure.h">
       <Filter>lod</Filter>
+    </ClInclude>
+    <ClInclude Include="test\list\test_adapter.h">
+      <Filter>test\list</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

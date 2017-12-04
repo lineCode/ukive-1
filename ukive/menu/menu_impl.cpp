@@ -70,7 +70,7 @@ namespace ukive {
             }
         }
 
-        this->addWidget(insertedIndex, widget, new LinearLayoutParams(
+        this->addView(insertedIndex, widget, new LinearLayoutParams(
             LayoutParams::MATCH_PARENT,
             mItemHeight));
         return item;
@@ -86,7 +86,7 @@ namespace ukive {
             MenuItem *item = dynamic_cast<MenuItem*>(child);
             if (item && item->getItemId() == id)
             {
-                removeWidget(child);
+                removeView(child);
 
                 --i;
                 removed = true;

@@ -73,7 +73,7 @@ namespace shell {
             .end(ID_LAYOUT_ROOT, Rlp::END)
             .bottom(ID_LAYOUT_ROOT, Rlp::BOTTOM).build();
 
-        rootLayout->addWidget(editorTV, editorTVLp);
+        rootLayout->addView(editorTV, editorTVLp);
     }
 
 
@@ -122,7 +122,7 @@ namespace shell {
         ukive::LinearLayoutParams *fontParams
             = new ukive::LinearLayoutParams(
                 ukive::LinearLayoutParams::FIT_CONTENT, ukive::LinearLayoutParams::MATCH_PARENT);
-        toolbar->addWidget(font, fontParams);
+        toolbar->addView(font, fontParams);
 
         ukive::TextView *format = new ukive::TextView(this, ID_TOOLBAR_ITEM_FORMAT);
         format->setText(L"格式");
@@ -135,7 +135,7 @@ namespace shell {
         ukive::LinearLayoutParams *formatParams
             = new ukive::LinearLayoutParams(
                 ukive::LinearLayoutParams::FIT_CONTENT, ukive::LinearLayoutParams::MATCH_PARENT);
-        toolbar->addWidget(format, formatParams);
+        toolbar->addView(format, formatParams);
 
         return toolbar;
     }

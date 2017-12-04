@@ -174,8 +174,11 @@ namespace ukive {
 
         void setOnClickListener(OnClickListener *l);
 
-        //设置该Widget的父Widget，该方法由框架调用。
+        //设置该 view 的父 view，该方法由框架调用。
         void setParent(View *parent);
+
+        void offsetTopAndBottom(int dy);
+        void offsetLeftAndRight(int dx);
 
         double getX();
         double getY();
@@ -220,7 +223,10 @@ namespace ukive {
         Rect getBoundInWindow();
         Rect getBoundInScreen();
 
-        virtual View *findWidgetById(int id);
+        Rect getContentBound();
+        Rect getContentBoundInThis();
+
+        virtual View *findViewById(int id);
 
         bool isEnabled();
         bool isAttachedToWindow();

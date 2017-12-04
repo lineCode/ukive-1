@@ -12,6 +12,10 @@ namespace shell {
         ~TestWindow();
 
         void onCreate() override;
+
+    private:
+        void inflateGroup();
+        void inflateListView();
     };
 
 }

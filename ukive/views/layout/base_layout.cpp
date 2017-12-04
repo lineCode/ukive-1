@@ -22,20 +22,22 @@ namespace ukive {
 
     BaseLayout::~BaseLayout()
     {
+        delete mShadeLayout;
+        delete mContentLayout;
     }
 
 
     void BaseLayout::initBaseLayout()
     {
-        mContentLayout = std::make_shared<LinearLayout>(getWindow());
+        mContentLayout = new LinearLayout(getWindow());
         mContentLayout->setOrientation(LinearLayout::VERTICAL);
         mContentLayout->setLayoutParams(
             new LinearLayoutParams(
                 LinearLayoutParams::MATCH_PARENT,
                 LinearLayoutParams::MATCH_PARENT));
-        addWidget(mContentLayout);
+        addView(mContentLayout);
 
-        mShadeLayout = std::make_shared<FrameLayout>(getWindow());
+        mShadeLayout = new FrameLayout(getWindow());
         mShadeLayout->setCanConsumeMouseEvent(false);
         mShadeLayout->setLayoutParams(
             new LayoutParams(
@@ -65,27 +67,27 @@ namespace ukive {
 
     void BaseLayout::addShade(View *shade)
     {
-        mShadeLayout->addWidget(shade);
+        mShadeLayout->addView(shade);
         if (mShadeLayout->getChildCount() == 1)
-            addWidget(mShadeLayout);
+            addView(mShadeLayout);
     }
 
     void BaseLayout::removeShade(View *shade)
     {
-        mShadeLayout->removeWidget(shade);
+        mShadeLayout->removeView(shade);
         if (mShadeLayout->getChildCount() == 0)
-            removeWidget(mShadeLayout);
+            removeView(mShadeLayout);
     }
 
     void BaseLayout::addContent(View *content)
     {
-        mContentLayout->addWidget(content);
+        mContentLayout->addView(content);
     }
 
 
-    View *BaseLayout::findWidgetById(int id)
+    View *BaseLayout::findViewById(int id)
     {
-        return mContentLayout->findWidgetById(id);
+        return mContentLayout->findViewById(id);
     }
 
 }

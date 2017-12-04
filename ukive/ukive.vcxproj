@@ -223,6 +223,7 @@
     <ClInclude Include="utils\float.h" />
     <ClInclude Include="utils\hresult_utils.h" />
     <ClInclude Include="utils\number.h" />
+    <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />
     <ClInclude Include="utils\thread_local.h" />
     <ClInclude Include="views\button.h" />
@@ -238,8 +239,8 @@
     <ClInclude Include="views\layout\restraint_layout.h" />
     <ClInclude Include="views\layout\restraint_layout_params.h" />
     <ClInclude Include="views\layout\view_group.h" />
-    <ClInclude Include="views\list_adapter.h" />
-    <ClInclude Include="views\list_view.h" />
+    <ClInclude Include="views\list\list_adapter.h" />
+    <ClInclude Include="views\list\list_view.h" />
     <ClInclude Include="views\scroll_view.h" />
     <ClInclude Include="views\seek_bar.h" />
     <ClInclude Include="views\seek_value_changed_listener.h" />
@@ -315,6 +316,7 @@
     <ClCompile Include="utils\double.cpp" />
     <ClCompile Include="utils\float.cpp" />
     <ClCompile Include="utils\number.cpp" />
+    <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
@@ -328,8 +330,8 @@
     <ClCompile Include="views\layout\restraint_layout.cpp" />
     <ClCompile Include="views\layout\restraint_layout_params.cpp" />
     <ClCompile Include="views\layout\view_group.cpp" />
-    <ClCompile Include="views\list_adapter.cpp" />
-    <ClCompile Include="views\list_view.cpp" />
+    <ClCompile Include="views\list\list_adapter.cpp" />
+    <ClCompile Include="views\list\list_view.cpp" />
     <ClCompile Include="views\scroll_view.cpp" />
     <ClCompile Include="views\seek_bar.cpp" />
     <ClCompile Include="views\spinner_view.cpp" />

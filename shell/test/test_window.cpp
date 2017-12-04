@@ -11,6 +11,12 @@
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/bitmap_factory.h"
 #include "ukive/graphics/color.h"
+#include "ukive/views/list/list_adapter.h"
+#include "ukive/views/list/list_view.h"
+#include "ukive/drawable/color_drawable.h"
+#include "ukive/graphics/color.h"
+
+#include "shell/test/list/test_adapter.h"
 
 
 namespace {
@@ -31,6 +37,10 @@ namespace shell {
     void TestWindow::onCreate() {
         Window::onCreate();
 
+        inflateListView();
+    }
+
+    void TestWindow::inflateGroup() {
         ukive::ScrollView *scrollView = new ukive::ScrollView(this);
         scrollView->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
@@ -38,7 +48,7 @@ namespace shell {
         setContentView(scrollView);
 
         ukive::LinearLayout *linearLayout = new ukive::LinearLayout(this);
-        scrollView->addWidget(linearLayout,
+        scrollView->addView(linearLayout,
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
 
@@ -70,7 +80,7 @@ namespace shell {
         deviceTextParams->leftMargin = deviceTextParams->rightMargin
             = deviceTextParams->topMargin = deviceTextParams->bottomMargin = dpToPx(12);
 
-        linearLayout->addWidget(deviceTextView, deviceTextParams);
+        linearLayout->addView(deviceTextView, deviceTextParams);
 
 
         ukive::LayoutParams *textParams = new ukive::LayoutParams(
@@ -90,14 +100,14 @@ namespace shell {
         ukive::UnderlineSpan *span = new ukive::UnderlineSpan(3, 5);
         textView->getEditable()->addSpan(span);
 
-        linearLayout->addWidget(textView, textParams);
+        linearLayout->addView(textView, textParams);
 
         std::wstring imgFileName(::_wgetcwd(nullptr, 0));
         auto bitmap = ukive::BitmapFactory::decodeFile(this, imgFileName + L"\\freshpaint.png");
         ukive::ImageView *imageView = new ukive::ImageView(this, kImageViewId);
         imageView->setImageBitmap(bitmap);
 
-        linearLayout->addWidget(imageView);
+        linearLayout->addView(imageView);
 
 
         ukive::Button *button = new ukive::Button(this);
@@ -107,7 +117,31 @@ namespace shell {
         buttonParams->leftMargin = buttonParams->rightMargin
             = buttonParams->topMargin = buttonParams->bottomMargin = dpToPx(12);
 
-        linearLayout->addWidget(button, buttonParams);
+        linearLayout->addView(button, buttonParams);
+    }
+
+    void TestWindow::inflateListView() {
+        ukive::LinearLayout *linearLayout = new ukive::LinearLayout(this);
+        linearLayout->setLayoutParams(
+            new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
+
+        setContentView(linearLayout);
+
+        TestAdapter *adapter = new TestAdapter();
+        for (int i = 0; i < 8; ++i) {
+            adapter->AddItem(0, L"test", L"test test");
+        }
+
+        ukive::ListView *list_view = new ukive::ListView(this);
+        list_view->setAdapter(adapter);
+
+        ukive::LayoutParams *lp = new ukive::LayoutParams(
+            ukive::LayoutParams::MATCH_PARENT,
+            ukive::LayoutParams::MATCH_PARENT);
+        lp->leftMargin = lp->rightMargin
+            = lp->topMargin = lp->bottomMargin = dpToPx(8);
+
+        linearLayout->addView(list_view, lp);
     }
 
 }

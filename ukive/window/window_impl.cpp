@@ -421,9 +421,9 @@ namespace ukive {
     }
 
 
-    View *WindowImpl::findWidgetById(int id)
+    View *WindowImpl::findViewById(int id)
     {
-        return mBaseLayout->findWidgetById(id);
+        return mBaseLayout->findViewById(id);
     }
 
 

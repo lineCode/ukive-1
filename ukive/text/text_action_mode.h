@@ -1,6 +1,8 @@
 #ifndef UKIVE_TEXT_TEXT_ACTION_MODE_H_
 #define UKIVE_TEXT_TEXT_ACTION_MODE_H_
 
+#include <memory>
+
 #include "ukive/menu/menu_callback.h"
 #include "ukive/menu/inner_window.h"
 

@@ -15,8 +15,8 @@ namespace ukive {
     class BaseLayout : public FrameLayout
     {
     private:
-        std::shared_ptr<FrameLayout> mShadeLayout;
-        std::shared_ptr<LinearLayout> mContentLayout;
+        FrameLayout* mShadeLayout;
+        LinearLayout* mContentLayout;
 
         void initBaseLayout();
 
@@ -35,7 +35,7 @@ namespace ukive {
 
         void addContent(View *content);
 
-        virtual View *findWidgetById(int id) override;
+        virtual View *findViewById(int id) override;
     };
 
 }

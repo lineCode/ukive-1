@@ -1,6 +1,7 @@
 ﻿#include "linear_layout.h"
 
 #include <algorithm>
+#include <typeinfo>
 
 #include "ukive/views/layout/linear_layout_params.h"
 

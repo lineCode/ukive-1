@@ -286,6 +286,20 @@ namespace ukive {
         mParent = parent;
     }
 
+    void View::offsetTopAndBottom(int dy) {
+        mTop += dy;
+        mBottom += dy;
+
+        invalidate();
+    }
+
+    void View::offsetLeftAndRight(int dx) {
+        mLeft += dx;
+        mRight += dx;
+
+        invalidate();
+    }
+
     void View::setMinimumWidth(int width) {
         mMinimumWidth = width;
     }
@@ -437,7 +451,7 @@ namespace ukive {
 
 
     Rect View::getBound() {
-        return Rect(mLeft, mTop, mRight, mBottom);
+        return Rect(mLeft, mTop, mRight - mLeft, mBottom - mTop);
     }
 
     Rect View::getBoundInWindow() {
@@ -477,8 +491,24 @@ namespace ukive {
         return bound;
     }
 
+    Rect View::getContentBound() {
+        int content_width = mRight - mLeft - mPaddingLeft - mPaddingRight;
+        int content_height = mBottom - mTop - mPaddingTop - mPaddingBottom;
+        return Rect(
+            mLeft + mPaddingLeft, mTop + mPaddingTop,
+            content_width, content_height);
+    }
 
-    View *View::findWidgetById(int id) {
+    Rect View::getContentBoundInThis() {
+        int content_width = mRight - mLeft - mPaddingLeft - mPaddingRight;
+        int content_height = mBottom - mTop - mPaddingTop - mPaddingBottom;
+        return Rect(
+            mPaddingLeft, mPaddingTop,
+            content_width, content_height);
+    }
+
+
+    View *View::findViewById(int id) {
         return nullptr;
     }
 

@@ -1,7 +1,6 @@
 ﻿#ifndef UKIVE_VIEWS_LAYOUT_VIEW_GROUP_H_
 #define UKIVE_VIEWS_LAYOUT_VIEW_GROUP_H_
 
-#include <memory>
 #include <vector>
 
 #include "ukive/views/view.h"
@@ -12,8 +11,6 @@ namespace ukive {
     class ViewGroup : public View
     {
     private:
-        std::vector<std::shared_ptr<View>> mWidgetList;
-
         void initViewGroup();
 
     protected:
@@ -51,17 +48,12 @@ namespace ukive {
         void onAttachedToWindow() override;
         void onDetachedFromWindow() override;
 
-        void addWidget(View *widget);
-        void addWidget(View *widget, LayoutParams *params);
-        void addWidget(std::size_t index, View *widget, LayoutParams *params);
-        void addWidget(std::shared_ptr<View> widget);
-        void addWidget(std::shared_ptr<View> widget, LayoutParams *params);
-        void addWidget(std::size_t index, std::shared_ptr<View> widget, LayoutParams *params);
-        void removeWidget(View *widget);
-        void removeWidget(std::shared_ptr<View> widget);
-        void removeWidget(std::size_t index);
+        void addView(View *v, LayoutParams *params = nullptr);
+        void addView(std::size_t index, View *v, LayoutParams *params = nullptr);
+        void removeView(View *v, bool del = true);
+        void removeAllViews(bool del = true);
 
-        View *findWidgetById(int id) override;
+        View *findViewById(int id) override;
 
         static void getChildMeasure(
             int parentSize, int parentSizeMode,
@@ -92,6 +84,9 @@ namespace ukive {
         void measureChildrenWithMargins(
             int parentWidth, int parentHeight,
             int parentWidthMode, int parentHeightMode);
+
+    private:
+        std::vector<View*> view_list_;
     };
 
 }

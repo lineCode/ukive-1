@@ -81,7 +81,7 @@ namespace ukive {
         void performRefresh();
         void performRefresh(int left, int top, int right, int bottom);
 
-        View *findWidgetById(int id);
+        View *findViewById(int id);
 
         void captureMouse(View *widget);
         void releaseMouse();

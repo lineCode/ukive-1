@@ -34,7 +34,7 @@ namespace ukive {
     {
         InnerDecorView *decorView
             = new InnerDecorView(this);
-        decorView->addWidget(
+        decorView->addView(
             mContentView, new LayoutParams(mWidth, mHeight));
 
         decorView->setElevation(mElevation);

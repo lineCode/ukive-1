@@ -1,6 +1,7 @@
 #include "restraint_layout.h"
 
 #include <algorithm>
+#include <typeinfo>
 
 #include "ukive/views/layout/restraint_layout_params.h"
 

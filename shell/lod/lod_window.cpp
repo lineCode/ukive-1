@@ -66,8 +66,8 @@ namespace shell {
 
         ////////////////////End Panel////////////////////
 
-        rootLayout->addWidget(lodView);
-        rootLayout->addWidget(rightLayout);
+        rootLayout->addView(lodView);
+        rootLayout->addView(rightLayout);
 
         setContentView(rootLayout);
     }
@@ -89,7 +89,7 @@ namespace shell {
             ->startHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::START, 8)
             ->topHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::TOP, 12);
 
-        rightLayout->addWidget(c1Label, c1LabelLp);
+        rightLayout->addView(c1Label, c1LabelLp);
 
         //c1 seekbar.
         ukive::SeekBar *c1SeekBar = new ukive::SeekBar(this, ID_C1_SEEKBAR);
@@ -106,7 +106,7 @@ namespace shell {
             ->bottomHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM);
 
         mC1SeekBar = c1SeekBar;
-        rightLayout->addWidget(c1SeekBar, c1SeekBarLp);
+        rightLayout->addView(c1SeekBar, c1SeekBarLp);
 
         //c1 value.
         ukive::TextView *c1Value = new ukive::TextView(this, ID_C1_VALUE);
@@ -123,7 +123,7 @@ namespace shell {
             ->bottomHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM);
 
         mC1ValueTV = c1Value;
-        rightLayout->addWidget(c1Value, c1ValueLp);
+        rightLayout->addView(c1Value, c1ValueLp);
 
         /////////////////////////////第二行//////////////////////////////////
         //c2 label.
@@ -139,7 +139,7 @@ namespace shell {
             ->startHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::START, 8)
             ->topHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM, 8);
 
-        rightLayout->addWidget(c2Label, c2LabelLp);
+        rightLayout->addView(c2Label, c2LabelLp);
 
         //c2 seekbar.
         ukive::SeekBar *c2SeekBar = new ukive::SeekBar(this, ID_C2_SEEKBAR);
@@ -156,7 +156,7 @@ namespace shell {
             ->bottomHandle(ID_C2_LABEL, ukive::RestraintLayoutParams::BOTTOM);
 
         mC2SeekBar = c2SeekBar;
-        rightLayout->addWidget(c2SeekBar, c2SeekBarLp);
+        rightLayout->addView(c2SeekBar, c2SeekBarLp);
 
         //c2 value.
         ukive::TextView *c2Value = new ukive::TextView(this, ID_C2_VALUE);
@@ -173,7 +173,7 @@ namespace shell {
             ->bottomHandle(ID_C2_LABEL, ukive::RestraintLayoutParams::BOTTOM);
 
         mC2ValueTV = c2Value;
-        rightLayout->addWidget(c2Value, c2ValueLp);
+        rightLayout->addView(c2Value, c2ValueLp);
 
         /////////////////////////////第三行//////////////////////////////////
         //split label.
@@ -192,7 +192,7 @@ namespace shell {
         splitLabelLp->topHandledEdge = ukive::RestraintLayoutParams::BOTTOM;
         splitLabelLp->topMargin = 16;
 
-        rightLayout->addWidget(splitLabel, splitLabelLp);
+        rightLayout->addView(splitLabel, splitLabelLp);
 
         //split seekbar.
         ukive::SeekBar *splitSeekBar = new ukive::SeekBar(this, ID_SPLIT_SEEKBAR);
@@ -209,7 +209,7 @@ namespace shell {
             ->bottomHandle(ID_SPLIT_LABEL, ukive::RestraintLayoutParams::BOTTOM);
 
         mSplitSeekBar = splitSeekBar;
-        rightLayout->addWidget(splitSeekBar, splitSeekBarLp);
+        rightLayout->addView(splitSeekBar, splitSeekBarLp);
 
         //split value.
         ukive::TextView *splitValue = new ukive::TextView(this, ID_SPLIT_VALUE);
@@ -229,7 +229,7 @@ namespace shell {
         splitValueLp->rightMargin = 8;
 
         mSplitValueTV = splitValue;
-        rightLayout->addWidget(splitValue, splitValueLp);
+        rightLayout->addView(splitValue, splitValueLp);
 
 
         //submit button.
@@ -247,7 +247,7 @@ namespace shell {
         submitBTLp->endHandledEdge = ukive::RestraintLayoutParams::END;
         submitBTLp->rightMargin = 8;
 
-        rightLayout->addWidget(submitBT, submitBTLp);
+        rightLayout->addView(submitBT, submitBTLp);
 
         //vsync button.
         ukive::Button *vsyncBT = new ukive::Button(this, ID_VSYNC_BUTTON);
@@ -267,7 +267,7 @@ namespace shell {
         vsyncBTLp->endHandledEdge = ukive::RestraintLayoutParams::END;
         vsyncBTLp->rightMargin = 8;
 
-        rightLayout->addWidget(vsyncBT, vsyncBTLp);
+        rightLayout->addView(vsyncBT, vsyncBTLp);
 
 
         //渲染参数显示器
@@ -284,7 +284,7 @@ namespace shell {
             ->topHandle(ID_VSYNC_BUTTON, ukive::RestraintLayoutParams::BOTTOM, 16)
             ->endHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::END, 8);
 
-        rightLayout->addWidget(renderInfoTV, renderInfoTVLp);
+        rightLayout->addView(renderInfoTV, renderInfoTVLp);
 
 
         //帮助说明
@@ -293,9 +293,9 @@ namespace shell {
         helperTV->setIsSelectable(true);
         helperTV->setText(
             L"►拖动滑条，点击提交按钮来更改参数。\
-		\n►鼠标滚轮可进行缩放。\
-		\n►按住Shift键和鼠标左键拖动可旋转摄像机。\
-		\n►按住Ctrl键和鼠标左键拖动可移动摄像机");
+        \n►鼠标滚轮可进行缩放。\
+        \n►按住Shift键和鼠标左键拖动可旋转摄像机。\
+        \n►按住Ctrl键和鼠标左键拖动可移动摄像机");
         helperTV->setTextSize(14.f);
         helperTV->setBackground(new ukive::EditTextDrawable());
         helperTV->setPadding(4, 4, 4, 4);
@@ -307,7 +307,7 @@ namespace shell {
             ->topHandle(ID_LOD_INFO, ukive::RestraintLayoutParams::BOTTOM, 24)
             ->endHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::END, 8);
 
-        rightLayout->addWidget(helperTV, helperTVLp);
+        rightLayout->addView(helperTV, helperTVLp);
     }
 
 
