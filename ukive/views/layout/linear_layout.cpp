@@ -26,8 +26,7 @@ namespace ukive {
     }
 
 
-    LayoutParams *LinearLayout::generateLayoutParams(
-        LayoutParams *lp)
+    LayoutParams *LinearLayout::generateLayoutParams(const LayoutParams &lp)
     {
         return new LinearLayoutParams(lp);
     }

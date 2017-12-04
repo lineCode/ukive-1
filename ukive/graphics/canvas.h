@@ -6,6 +6,7 @@
 #include "ukive/utils/com_ptr.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/graphics/color.h"
+#include "ukive/graphics/matrix.h"
 
 
 namespace ukive {
@@ -42,11 +43,10 @@ namespace ukive {
         void scale(float sx, float sy, float cx, float cy);
         void rotate(float angle);
         void rotate(float angle, float cx, float cy);
-        void translate(int dx, int dy);
         void translate(float dx, float dy);
 
-        void setMatrix(D2D1::Matrix3x2F matrix);
-        D2D1::Matrix3x2F getMatrix();
+        void setMatrix(const Matrix &matrix);
+        Matrix getMatrix();
 
         void fillOpacityMask(
             float width, float height,
@@ -55,7 +55,7 @@ namespace ukive {
         void drawRect(D2D1_RECT_F &rect, Color &color);
         void drawRect(D2D1_RECT_F &rect, float strokeWidth, Color &color);
 
-        void fillRect(D2D1_RECT_F &rect, Color &color);
+        void fillRect(D2D1_RECT_F &rect, const Color &color);
 
         void drawRoundRect(
             D2D1_RECT_F &rect, float radius, Color &color);
@@ -94,7 +94,7 @@ namespace ukive {
     private:
         int layer_counter_;
         float opacity_;
-        D2D1::Matrix3x2F matrix_;
+        Matrix matrix_;
 
         TextRenderer *mTextRenderer;
 

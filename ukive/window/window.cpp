@@ -307,4 +307,8 @@ namespace ukive {
     void Window::onDpiChanged(int dpi_x, int dpi_y) {
     }
 
+    bool Window::onDataCopy(unsigned int id, unsigned int size, void *data) {
+        return false;
+    }
+
 }

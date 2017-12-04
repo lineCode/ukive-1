@@ -9,7 +9,7 @@ namespace ukive {
         weight = 0;
     }
 
-    LinearLayoutParams::LinearLayoutParams(LayoutParams *lp)
+    LinearLayoutParams::LinearLayoutParams(const LayoutParams &lp)
         : LayoutParams(lp)
     {
         weight = 0;

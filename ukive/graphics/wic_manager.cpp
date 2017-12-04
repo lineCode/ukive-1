@@ -63,7 +63,7 @@ namespace ukive {
         ComPtr<IWICBitmapDecoder> decoder;
 
         hr = wic_factory_->CreateDecoderFromFilename(
-            file_name.c_str(),                      // Image to be decoded
+            file_name.c_str(),                     // Image to be decoded
             0,                                     // Do not prefer a particular vendor
             GENERIC_READ,                          // Desired read access to the file
             WICDecodeMetadataCacheOnDemand,        // Cache metadata when needed

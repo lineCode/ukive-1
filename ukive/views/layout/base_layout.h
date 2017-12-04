@@ -21,9 +21,9 @@ namespace ukive {
         void initBaseLayout();
 
     protected:
-        virtual LayoutParams *generateLayoutParams(LayoutParams *lp) override;
-        virtual LayoutParams *generateDefaultLayoutParams() override;
-        virtual bool checkLayoutParams(LayoutParams *lp) override;
+        LayoutParams *generateLayoutParams(const LayoutParams &lp) override;
+        LayoutParams *generateDefaultLayoutParams() override;
+        bool checkLayoutParams(LayoutParams *lp) override;
 
     public:
         BaseLayout(Window *wnd);

@@ -166,6 +166,7 @@ namespace ukive {
         void onDestroy();
         bool onInputEvent(InputEvent *e);
         void onDpiChanged(int dpi_x, int dpi_y);
+        bool onDataCopy(unsigned int id, unsigned int size, void *data);
 
         Cycler *mLabourCycler;
         AnimStateChangedListener *mAnimStateChangedListener;

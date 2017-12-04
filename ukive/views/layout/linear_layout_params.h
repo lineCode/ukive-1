@@ -13,7 +13,7 @@ namespace ukive {
 
     public:
         LinearLayoutParams(int width, int height);
-        LinearLayoutParams(LayoutParams *lp);
+        LinearLayoutParams(const LayoutParams &lp);
         virtual ~LinearLayoutParams();
     };
 

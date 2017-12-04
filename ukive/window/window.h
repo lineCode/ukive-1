@@ -104,6 +104,7 @@ namespace ukive {
         virtual void onDestroy();
         virtual bool onInputEvent(InputEvent *e);
         virtual void onDpiChanged(int dpi_x, int dpi_y);
+        virtual bool onDataCopy(unsigned int id, unsigned int size, void *data);
 
     private:
         std::unique_ptr<WindowImpl> impl_;

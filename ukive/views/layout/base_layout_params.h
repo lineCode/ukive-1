@@ -10,7 +10,7 @@ namespace ukive {
     {
     public:
         BaseLayoutParams(int width, int height);
-        BaseLayoutParams(LayoutParams *lp);
+        BaseLayoutParams(const LayoutParams &lp);
         ~BaseLayoutParams();
     };
 

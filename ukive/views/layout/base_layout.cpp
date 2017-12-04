@@ -46,17 +46,15 @@ namespace ukive {
     }
 
 
-    LayoutParams *BaseLayout::generateLayoutParams(
-        LayoutParams *lp)
-    {
+    LayoutParams *BaseLayout::generateLayoutParams(const LayoutParams &lp) {
         return new BaseLayoutParams(lp);
     }
 
     LayoutParams *BaseLayout::generateDefaultLayoutParams()
     {
         return new BaseLayoutParams(
-            BaseLayoutParams::FIT_CONTENT,
-            BaseLayoutParams::FIT_CONTENT);
+            BaseLayoutParams::MATCH_PARENT,
+            BaseLayoutParams::MATCH_PARENT);
     }
 
     bool BaseLayout::checkLayoutParams(LayoutParams *lp)

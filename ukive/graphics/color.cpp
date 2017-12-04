@@ -70,6 +70,22 @@ namespace ukive {
         }
     }
 
+    unsigned int Color::GetA(unsigned int argb) {
+        return (argb & alpha_mask) >> alpha_shift;
+    }
+
+    unsigned int Color::GetR(unsigned int argb) {
+        return (argb & red_mask) >> red_shift;
+    }
+
+    unsigned int Color::GetG(unsigned int argb) {
+        return (argb & green_mask) >> green_shift;
+    }
+
+    unsigned int Color::GetB(unsigned int argb) {
+        return (argb & blue_mask) >> blue_shift;
+    }
+
 
     // Color White.
     Color Color::White = Color::parse(L"#FFFFFF");

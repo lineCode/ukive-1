@@ -29,8 +29,7 @@ namespace ukive {
     }
 
 
-    LayoutParams *ViewGroup::generateLayoutParams(
-        LayoutParams *lp) {
+    LayoutParams *ViewGroup::generateLayoutParams(const LayoutParams &lp) {
         return new LayoutParams(lp);
     }
 
@@ -140,7 +139,7 @@ namespace ukive {
         }
 
         if (!checkLayoutParams(params)) {
-            params = generateLayoutParams(params);
+            params = generateLayoutParams(*params);
         }
 
         v->setParent(this);

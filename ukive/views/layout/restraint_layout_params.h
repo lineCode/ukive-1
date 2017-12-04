@@ -27,7 +27,7 @@ namespace ukive {
     public:
         RestraintLayoutParams();
         RestraintLayoutParams(int width, int height);
-        RestraintLayoutParams(LayoutParams *lp);
+        RestraintLayoutParams(const LayoutParams &lp);
         ~RestraintLayoutParams();
 
         //保存在一次测量过程中与该LayoutParams绑定的View

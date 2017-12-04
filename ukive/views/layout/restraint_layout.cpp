@@ -23,7 +23,7 @@ namespace ukive {
     }
 
 
-    LayoutParams *RestraintLayout::generateLayoutParams(LayoutParams *lp)
+    LayoutParams *RestraintLayout::generateLayoutParams(const LayoutParams &lp)
     {
         return new RestraintLayoutParams(lp);
     }
@@ -1147,7 +1147,7 @@ namespace ukive {
         {
         case FIT:
             finalHeight = measureWrappedHeight() + verticalPadding;
-            finalHeight = std::min(width, finalHeight);
+            finalHeight = std::min(height, finalHeight);
             finalHeight = std::max(mMinimumHeight, finalHeight);
             break;
 

@@ -29,6 +29,11 @@ namespace ukive {
         */
         static Color parse(string16 color);
 
+        static unsigned int GetA(unsigned int argb);
+        static unsigned int GetR(unsigned int argb);
+        static unsigned int GetG(unsigned int argb);
+        static unsigned int GetB(unsigned int argb);
+
         // Color Black.
         static Color Black;
         // Color White.

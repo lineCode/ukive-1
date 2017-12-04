@@ -841,6 +841,10 @@ namespace ukive {
         delegate_->onDpiChanged(dpi_x, dpi_y);
     }
 
+    bool WindowImpl::onDataCopy(unsigned int id, unsigned int size, void *data) {
+        return delegate_->onDataCopy(id, size, data);
+    }
+
 
     LRESULT CALLBACK WindowImpl::messageHandler(
         UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -941,6 +945,19 @@ namespace ukive {
                 SWP_NOZORDER | SWP_NOACTIVATE);
             onDpiChanged(new_dpi_x, new_dpi_y);
             break;
+        }
+
+        case WM_COPYDATA: {
+            PCOPYDATASTRUCT cds = reinterpret_cast<PCOPYDATASTRUCT>(lParam);
+            if (cds == nullptr) {
+                break;
+            }
+
+            if (onDataCopy(cds->dwData, cds->cbData, cds->lpData)) {
+                return TRUE;
+            }
+
+            return FALSE;
         }
 
         case WM_ERASEBKGND:

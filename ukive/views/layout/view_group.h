@@ -21,7 +21,7 @@ namespace ukive {
         virtual bool dispatchMouseEvent(InputEvent *e);
         virtual bool dispatchKeyboardEvent(InputEvent *e);
 
-        virtual LayoutParams *generateLayoutParams(LayoutParams *lp);
+        virtual LayoutParams *generateLayoutParams(const LayoutParams &lp);
         virtual LayoutParams *generateDefaultLayoutParams();
         virtual bool checkLayoutParams(LayoutParams *lp);
 

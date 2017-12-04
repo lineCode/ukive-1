@@ -16,9 +16,9 @@ namespace ukive {
         ~RestraintLayout();
 
     protected:
-        virtual LayoutParams *generateLayoutParams(LayoutParams *lp) override;
-        virtual LayoutParams *generateDefaultLayoutParams() override;
-        virtual bool checkLayoutParams(LayoutParams *lp) override;
+        LayoutParams *generateLayoutParams(const LayoutParams &lp) override;
+        LayoutParams *generateDefaultLayoutParams() override;
+        bool checkLayoutParams(LayoutParams *lp) override;
 
     private:
         View *getChildById(int id);
@@ -60,10 +60,10 @@ namespace ukive {
             int left, int right);
 
     public:
-        virtual void onMeasure(
+        void onMeasure(
             int width, int height,
             int widthMode, int heightMode) override;
-        virtual void onLayout(
+        void onLayout(
             bool changed, bool sizeChanged,
             int left, int top, int right, int bottom) override;
     };

@@ -15,10 +15,9 @@ namespace ukive {
         static const int HORIZONTAL = 2;
 
     protected:
-        virtual LayoutParams *generateLayoutParams(
-            LayoutParams *lp) override;
-        virtual LayoutParams *generateDefaultLayoutParams() override;
-        virtual bool checkLayoutParams(LayoutParams *lp) override;
+        LayoutParams *generateLayoutParams(const LayoutParams &lp) override;
+        LayoutParams *generateDefaultLayoutParams() override;
+        bool checkLayoutParams(LayoutParams *lp) override;
 
     private:
         int mOrientation;

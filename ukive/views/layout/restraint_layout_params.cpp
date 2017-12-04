@@ -15,7 +15,7 @@ namespace ukive {
         initLayoutParams();
     }
 
-    RestraintLayoutParams::RestraintLayoutParams(LayoutParams *lp)
+    RestraintLayoutParams::RestraintLayoutParams(const LayoutParams &lp)
         : LayoutParams(lp)
     {
         initLayoutParams();

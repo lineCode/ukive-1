@@ -10,7 +10,6 @@ namespace ukive {
         opacity_ = 1.f;
         layer_counter_ = 0;
         mTextRenderer = nullptr;
-        matrix_ = D2D1::Matrix3x2F::Identity();
 
         render_target_ = renderTarget;
         render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
@@ -171,14 +170,7 @@ namespace ukive {
         D2D1_DRAWING_STATE_DESCRIPTION desc;
         drawingStateBlock->GetDescription(&desc);
 
-        D2D1_MATRIX_3X2_F matrix = desc.transform;
-
-        matrix_._11 = matrix._11;
-        matrix_._12 = matrix._12;
-        matrix_._21 = matrix._21;
-        matrix_._22 = matrix._22;
-        matrix_._31 = matrix._31;
-        matrix_._32 = matrix._32;
+        matrix_.set(desc.transform);
 
         render_target_->RestoreDrawingState(drawingStateBlock);
 
@@ -202,9 +194,8 @@ namespace ukive {
 
     void Canvas::scale(float sx, float sy, float cx, float cy)
     {
-        D2D1::Matrix3x2F tmp = D2D1::Matrix3x2F::Scale(D2D1::SizeF(sx, sy), D2D1::Point2F(cx, cy));
-        matrix_ = matrix_*tmp;
-        render_target_->SetTransform(matrix_);
+        matrix_.postScale(sx, sy, cx, cy);
+        render_target_->SetTransform(matrix_.getNative());
     }
 
     void Canvas::rotate(float angle)
@@ -214,33 +205,24 @@ namespace ukive {
 
     void Canvas::rotate(float angle, float cx, float cy)
     {
-        D2D1::Matrix3x2F tmp = D2D1::Matrix3x2F::Rotation(angle, D2D1::Point2F(cx, cy));
-        matrix_ = matrix_*tmp;
-        render_target_->SetTransform(matrix_);
-    }
-
-    void Canvas::translate(int dx, int dy)
-    {
-        this->translate(
-            static_cast<float>(dx),
-            static_cast<float>(dy));
+        matrix_.postRotate(angle, cx, cy);
+        render_target_->SetTransform(matrix_.getNative());
     }
 
     void Canvas::translate(float dx, float dy)
     {
-        D2D1::Matrix3x2F tmp = D2D1::Matrix3x2F::Translation(D2D1::SizeF(dx, dy));
-        matrix_ = matrix_*tmp;
-        render_target_->SetTransform(matrix_);
+        matrix_.postTranslate(dx, dy);
+        render_target_->SetTransform(matrix_.getNative());
     }
 
 
-    void Canvas::setMatrix(D2D1::Matrix3x2F matrix)
+    void Canvas::setMatrix(const Matrix &matrix)
     {
         matrix_ = matrix;
-        render_target_->SetTransform(matrix_);
+        render_target_->SetTransform(matrix_.getNative());
     }
 
-    D2D1::Matrix3x2F Canvas::getMatrix()
+    Matrix Canvas::getMatrix()
     {
         return matrix_;
     }
@@ -284,7 +266,7 @@ namespace ukive {
     }
 
 
-    void Canvas::fillRect(D2D1_RECT_F &rect, Color &color)
+    void Canvas::fillRect(D2D1_RECT_F &rect, const Color &color)
     {
         D2D1_COLOR_F _color = {
             color.r,

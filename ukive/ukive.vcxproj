@@ -180,6 +180,7 @@
     <ClInclude Include="graphics\direct3d_render_listener.h" />
     <ClInclude Include="graphics\drawing_object_manager.h" />
     <ClInclude Include="graphics\graphic_device_manager.h" />
+    <ClInclude Include="graphics\matrix.h" />
     <ClInclude Include="graphics\rect.h" />
     <ClInclude Include="graphics\renderer.h" />
     <ClInclude Include="graphics\swapchain_resize_notifier.h" />
@@ -282,6 +283,7 @@
     <ClCompile Include="graphics\color.cpp" />
     <ClCompile Include="graphics\drawing_object_manager.cpp" />
     <ClCompile Include="graphics\graphic_device_manager.cpp" />
+    <ClCompile Include="graphics\matrix.cpp" />
     <ClCompile Include="graphics\rect.cpp" />
     <ClCompile Include="graphics\renderer.cpp" />
     <ClCompile Include="graphics\wic_manager.cpp" />

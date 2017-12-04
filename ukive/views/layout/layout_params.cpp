@@ -10,15 +10,15 @@ namespace ukive {
         leftMargin = topMargin = rightMargin = bottomMargin = 0;
     }
 
-    LayoutParams::LayoutParams(LayoutParams *lp)
+    LayoutParams::LayoutParams(const LayoutParams &lp)
     {
-        this->width = lp->width;
-        this->height = lp->height;
+        width = lp.width;
+        height = lp.height;
 
-        leftMargin = lp->leftMargin;
-        rightMargin = lp->rightMargin;
-        topMargin = lp->topMargin;
-        bottomMargin = lp->bottomMargin;
+        leftMargin = lp.leftMargin;
+        rightMargin = lp.rightMargin;
+        topMargin = lp.topMargin;
+        bottomMargin = lp.bottomMargin;
     }
 
     LayoutParams::~LayoutParams()

@@ -163,6 +163,8 @@
     <ClCompile Include="test\animation\wallpaper_effect.cpp" />
     <ClCompile Include="test\animation\wallpaper_transform.cpp" />
     <ClCompile Include="test\animation\wallpaper_window.cpp" />
+    <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp" />
+    <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
     <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
     <ClCompile Include="test\test_window.cpp" />
@@ -187,6 +189,8 @@
     <ClInclude Include="test\animation\wallpaper_effect.h" />
     <ClInclude Include="test\animation\wallpaper_transform.h" />
     <ClInclude Include="test\animation\wallpaper_window.h" />
+    <ClInclude Include="test\bitmap_research\bitmap_dump_view.h" />
+    <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
     <ClInclude Include="test\frame\custom_non_client_frame.h" />
     <ClInclude Include="test\list\test_adapter.h" />
     <ClInclude Include="test\test_window.h" />

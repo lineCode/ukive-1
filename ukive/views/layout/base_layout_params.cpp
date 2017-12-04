@@ -8,7 +8,7 @@ namespace ukive {
     {
     }
 
-    BaseLayoutParams::BaseLayoutParams(LayoutParams *lp)
+    BaseLayoutParams::BaseLayoutParams(const LayoutParams &lp)
         : LayoutParams(lp)
     {
     }
