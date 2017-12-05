@@ -4,6 +4,7 @@
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/layout/frame_layout.h"
 #include "ukive/graphics/bitmap_factory.h"
+#include "ukive/views/layout/linear_layout.h"
 
 #include "shell/test/bitmap_research/bitmap_dump_view.h"
 
@@ -28,16 +29,14 @@ namespace shell {
         Window::onCreate();
 
         typedef ukive::RestraintLayoutParams Rlp;
-
         ukive::RestraintLayout *layout = new ukive::RestraintLayout(this);
-
         Rlp *lp = Rlp::Builder(
             Rlp::MATCH_PARENT,
             Rlp::MATCH_PARENT)
-            .start(layout->getId(), Rlp::START, 8)
-            .top(layout->getId(), Rlp::TOP, 8)
-            .end(layout->getId(), Rlp::END, 8)
-            .bottom(layout->getId(), Rlp::BOTTOM, 8).build();
+            .start(layout->getId(), Rlp::START)
+            .top(layout->getId(), Rlp::TOP)
+            .end(layout->getId(), Rlp::END)
+            .bottom(layout->getId(), Rlp::BOTTOM).build();
 
         bitmap_dump_view_ = new BitmapDumpView(this);
 
@@ -45,12 +44,12 @@ namespace shell {
 
         setContentView(layout);
 
-        bitmap_dump_view_->setBitmapSize(16, 16);
+        /*bitmap_dump_view_->setBitmapSize(16, 16);
         for (int h = 0; h < 16; ++h) {
             for (int w = 0; w < 16; ++w) {
                 bitmap_dump_view_->setBitmapColor(3435973836, w, h);
             }
-        }
+        }*/
     }
 
     bool BitmapResearchWindow::onDataCopy(unsigned int id, unsigned int size, void *data) {

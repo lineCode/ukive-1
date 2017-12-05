@@ -1,5 +1,7 @@
 #include "matrix.h"
 
+#include "ukive/graphics/rect.h"
+
 
 namespace ukive {
 
@@ -125,6 +127,18 @@ namespace ukive {
 
     D2D1::Matrix3x2F Matrix::getNative() {
         return matrix_native_;
+    }
+
+    void Matrix::transformRect(Rect *rect) {
+        D2D1_POINT_2F left_top_point = { rect->left, rect->top };
+        D2D1_POINT_2F right_bottom_point = { rect->right, rect->bottom };
+        left_top_point = matrix_native_.TransformPoint(left_top_point);
+        right_bottom_point = matrix_native_.TransformPoint(right_bottom_point);
+
+        rect->left = left_top_point.x;
+        rect->top = left_top_point.y;
+        rect->right = right_bottom_point.x;
+        rect->bottom = right_bottom_point.y;
     }
 
 }

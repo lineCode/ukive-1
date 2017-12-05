@@ -15,6 +15,7 @@ namespace ukive {
         int width();
         int height();
         bool empty();
+        bool intersect(const Rect &rect);
 
         int left;
         int top;
@@ -33,6 +34,7 @@ namespace ukive {
         float width();
         float height();
         bool empty();
+        bool intersect(const RectF &rect);
 
         float left;
         float top;

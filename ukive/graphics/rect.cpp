@@ -45,6 +45,11 @@ namespace ukive {
         return (right - left <= 0) || (bottom - top <= 0);
     }
 
+    bool Rect::intersect(const Rect &rect) {
+        return (rect.right > left && rect.left < right)
+            && (rect.bottom > top && rect.top < bottom);
+    }
+
 
     // RectF
     RectF::RectF()
@@ -86,6 +91,11 @@ namespace ukive {
 
     bool RectF::empty() {
         return (right - left <= 0) || (bottom - top <= 0);
+    }
+
+    bool RectF::intersect(const RectF &rect) {
+        return (rect.right > left && rect.left < right)
+            && (rect.bottom > top && rect.top < bottom);
     }
 
 }
