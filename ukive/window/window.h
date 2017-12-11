@@ -89,7 +89,8 @@ namespace ukive {
         float dpToPx(float dp);
         float pxToDp(int px);
 
-        virtual void onPreCreate(ClassInfo *info);
+        virtual void onPreCreate(ClassInfo *info,
+            int *win_style, int *win_ex_style);
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);

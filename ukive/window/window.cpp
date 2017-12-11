@@ -203,7 +203,7 @@ namespace ukive {
         return impl_->pxToDp(px);
     }
 
-    void Window::onPreCreate(ClassInfo *info) {
+    void Window::onPreCreate(ClassInfo *info, int *win_style, int *win_ex_style) {
     }
 
     void Window::onCreate() {

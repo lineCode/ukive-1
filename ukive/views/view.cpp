@@ -197,12 +197,12 @@ namespace ukive {
     }
 
     void View::setBackground(Drawable *drawable) {
-        mBackgroundDrawable = drawable;
+        mBackgroundDrawable.reset(drawable);
         invalidate();
     }
 
     void View::setForeground(Drawable *drawable) {
-        mForegroundDrawable = drawable;
+        mForegroundDrawable.reset(drawable);
         invalidate();
     }
 
@@ -442,11 +442,11 @@ namespace ukive {
 
 
     Drawable *View::getBackground() {
-        return mBackgroundDrawable;
+        return mBackgroundDrawable.get();
     }
 
     Drawable *View::getForeground() {
-        return mForegroundDrawable;
+        return mForegroundDrawable.get();
     }
 
 
@@ -623,20 +623,19 @@ namespace ukive {
                 // 在 pushLayer 之前绘制阴影
                 // TODO: 修改离屏缓冲机制
                 if (hasShadow) {
-                    /*ID2D1Geometry *geo = circleGeo.cast<ID2D1Geometry>().get();
-                    ID2D1BitmapBrush *brush = UDeviceManager::sBitmapBrush.get();
-                    brush->SetBitmap(bgBitmap.get());
+                    ComPtr<ID2D1BitmapBrush> bmp_brush;
+                    canvas->getRT()->CreateBitmapBrush(bgBitmap.get(), &bmp_brush);
 
                     ComPtr<ID2D1Bitmap> bgRevealedBitmap;
                     mWindow->getRenderer()->drawOnBitmap(
                         mRight - mLeft, mBottom - mTop, &bgRevealedBitmap,
-                        [this, geo, brush](ComPtr<ID2D1RenderTarget> rt)
+                        [this, circleGeo, bmp_brush](ComPtr<ID2D1RenderTarget> rt)
                     {
-                        rt->FillGeometry(geo, brush);
+                        rt->FillGeometry(circleGeo.get(), bmp_brush.get());
                     });
 
                     mWindow->getRenderer()->drawShadow(mElevation, canvas->getOpacity(), bgRevealedBitmap.get());
-                    canvas->drawBitmap(bgRevealedBitmap.get());*/
+                    canvas->drawBitmap(bgRevealedBitmap.get());
                 }
 
                 canvas->pushLayer(circleGeo.get());
@@ -657,20 +656,19 @@ namespace ukive {
 
                 // 在 pushLayer 之前绘制阴影
                 if (hasShadow) {
-                    /*ID2D1Geometry *geo = rectGeo.cast<ID2D1Geometry>().get();
-                    ID2D1BitmapBrush *brush = UDeviceManager::sBitmapBrush.get();
-                    brush->SetBitmap(bgBitmap.get());
+                    ComPtr<ID2D1BitmapBrush> bmp_brush;
+                    canvas->getRT()->CreateBitmapBrush(bgBitmap.get(), &bmp_brush);
 
                     ComPtr<ID2D1Bitmap> bgRevealedBitmap;
                     mWindow->getRenderer()->drawOnBitmap(
                         mRight - mLeft, mBottom - mTop, &bgRevealedBitmap,
-                        [this, geo, brush](ComPtr<ID2D1RenderTarget> rt)
+                        [this, rectGeo, bmp_brush](ComPtr<ID2D1RenderTarget> rt)
                     {
-                        rt->FillGeometry(geo, brush);
+                        rt->FillGeometry(rectGeo.get(), bmp_brush.get());
                     });
 
                     mWindow->getRenderer()->drawShadow(mElevation, canvas->getOpacity(), bgRevealedBitmap.get());
-                    canvas->drawBitmap(bgRevealedBitmap.get());*/
+                    canvas->drawBitmap(bgRevealedBitmap.get());
                 }
 
                 canvas->pushLayer(rectGeo.get());

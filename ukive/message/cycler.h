@@ -44,7 +44,7 @@ namespace ukive {
         virtual void handleMessage(Message *msg);
 
     private:
-        MessageLooper *mLooper;
+        MessageLooper *looper_;
     };
 
 }

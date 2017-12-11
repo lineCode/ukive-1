@@ -117,25 +117,27 @@ namespace ukive {
 
         class UpdateCycler : public Cycler
         {
-        private:
-           WindowImpl *mWindow;
         public:
-            UpdateCycler(WindowImpl *window);
+            UpdateCycler(WindowImpl *window)
+                :win_(window) {}
 
             void handleMessage(Message *msg);
+        private:
+            WindowImpl *win_;
         };
 
         class AnimStateChangedListener
             : public AnimationManager::OnStateChangedListener
         {
-        private:
-            WindowImpl *mWindow;
         public:
-            AnimStateChangedListener(WindowImpl *window);
+            AnimStateChangedListener(WindowImpl *window)
+                :win_(window) {}
 
             void onStateChanged(
                 UI_ANIMATION_MANAGER_STATUS newStatus,
                 UI_ANIMATION_MANAGER_STATUS previousStatus);
+        private:
+            WindowImpl *win_;
         };
 
         class AnimTimerEventListener
@@ -151,7 +153,9 @@ namespace ukive {
             void OnRenderingTooSlow(unsigned int fps);
         };
 
-        void onPreCreate(ClassInfo *info);
+        void onPreCreate(
+            ClassInfo *info,
+            int *win_style, int *win_ex_style);
         void onCreate();
         void onShow(bool show);
         void onActivate(int param);

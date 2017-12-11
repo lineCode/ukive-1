@@ -43,6 +43,7 @@ namespace ukive {
         swapChainDesc.SampleDesc.Quality = 0;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+        swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
         auto gdm = Application::getGraphicDeviceManager();
 
@@ -341,7 +342,7 @@ namespace ukive {
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
 
         return d2d_dc_->
-            CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
+            CreateBitmapFromDxgiSurface(dxgiSurface, 0, bitmap);
     }
 
     HRESULT Renderer::createCompatBitmapRenderTarget(

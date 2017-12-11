@@ -1,6 +1,8 @@
 ﻿#ifndef UKIVE_VIEWS_VIEW_H_
 #define UKIVE_VIEWS_VIEW_H_
 
+#include <memory>
+
 #include <Windows.h>
 
 #include "ukive/utils/executable.h"
@@ -113,8 +115,8 @@ namespace ukive {
         bool mCanConsumeMouseEvent;
 
         Window *mWindow;
-        Drawable *mBackgroundDrawable;
-        Drawable *mForegroundDrawable;
+        std::unique_ptr<Drawable> mBackgroundDrawable;
+        std::unique_ptr<Drawable> mForegroundDrawable;
 
         virtual void dispatchDraw(Canvas *canvas);
         virtual void dispatchDiscardFocus();

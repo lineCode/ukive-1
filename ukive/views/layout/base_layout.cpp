@@ -1,5 +1,7 @@
 ﻿#include "base_layout.h"
 
+#include <typeinfo>
+
 #include "ukive/views/layout/linear_layout.h"
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/base_layout_params.h"
@@ -22,24 +24,27 @@ namespace ukive {
 
     BaseLayout::~BaseLayout()
     {
-        delete mShadeLayout;
-        delete mContentLayout;
+        if (!shade_added_) {
+            delete shade_layout_;
+        }
     }
 
 
     void BaseLayout::initBaseLayout()
     {
-        mContentLayout = new LinearLayout(getWindow());
-        mContentLayout->setOrientation(LinearLayout::VERTICAL);
-        mContentLayout->setLayoutParams(
+        shade_added_ = false;
+
+        content_layout_ = new LinearLayout(getWindow());
+        content_layout_->setOrientation(LinearLayout::VERTICAL);
+        content_layout_->setLayoutParams(
             new LinearLayoutParams(
                 LinearLayoutParams::MATCH_PARENT,
                 LinearLayoutParams::MATCH_PARENT));
-        addView(mContentLayout);
+        addView(content_layout_);
 
-        mShadeLayout = new FrameLayout(getWindow());
-        mShadeLayout->setCanConsumeMouseEvent(false);
-        mShadeLayout->setLayoutParams(
+        shade_layout_ = new FrameLayout(getWindow());
+        shade_layout_->setCanConsumeMouseEvent(false);
+        shade_layout_->setLayoutParams(
             new LayoutParams(
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
@@ -65,27 +70,31 @@ namespace ukive {
 
     void BaseLayout::addShade(View *shade)
     {
-        mShadeLayout->addView(shade);
-        if (mShadeLayout->getChildCount() == 1)
-            addView(mShadeLayout);
+        shade_layout_->addView(shade);
+        if (shade_layout_->getChildCount() == 1) {
+            addView(shade_layout_);
+            shade_added_ = true;
+        }
     }
 
     void BaseLayout::removeShade(View *shade)
     {
-        mShadeLayout->removeView(shade);
-        if (mShadeLayout->getChildCount() == 0)
-            removeView(mShadeLayout);
+        shade_layout_->removeView(shade);
+        if (shade_layout_->getChildCount() == 0) {
+            removeView(shade_layout_, false);
+            shade_added_ = false;
+        }
     }
 
     void BaseLayout::addContent(View *content)
     {
-        mContentLayout->addView(content);
+        content_layout_->addView(content);
     }
 
 
     View *BaseLayout::findViewById(int id)
     {
-        return mContentLayout->findViewById(id);
+        return content_layout_->findViewById(id);
     }
 
 }

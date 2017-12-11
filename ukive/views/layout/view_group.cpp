@@ -6,6 +6,7 @@
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/log.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -22,6 +23,7 @@ namespace ukive {
 
 
     ViewGroup::~ViewGroup() {
+        STLDeleteElements(&view_list_);
     }
 
 

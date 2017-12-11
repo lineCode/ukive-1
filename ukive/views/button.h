@@ -12,18 +12,18 @@ namespace ukive {
 
     class Button : public TextView
     {
-    private:
-        ShapeDrawable *mShapeDrawable;
-        RippleDrawable *mRippleBackground;
-
-        void initButton();
-
     public:
         Button(Window *wnd);
         Button(Window *wnd, int id);
         virtual ~Button();
 
         void setButtonColor(Color color);
+
+    private:
+        void initButton();
+
+        ShapeDrawable *shape_drawable_;
+        RippleDrawable *ripple_background_;
     };
 
 }

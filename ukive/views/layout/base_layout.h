@@ -1,8 +1,6 @@
 ﻿#ifndef UKIVE_VIEWS_LAYOUT_BASE_LAYOUT_H_
 #define UKIVE_VIEWS_LAYOUT_BASE_LAYOUT_H_
 
-#include <memory>
-
 #include "ukive/views/layout/frame_layout.h"
 
 
@@ -14,17 +12,6 @@ namespace ukive {
 
     class BaseLayout : public FrameLayout
     {
-    private:
-        FrameLayout* mShadeLayout;
-        LinearLayout* mContentLayout;
-
-        void initBaseLayout();
-
-    protected:
-        LayoutParams *generateLayoutParams(const LayoutParams &lp) override;
-        LayoutParams *generateDefaultLayoutParams() override;
-        bool checkLayoutParams(LayoutParams *lp) override;
-
     public:
         BaseLayout(Window *wnd);
         BaseLayout(Window *wnd, int id);
@@ -35,7 +22,20 @@ namespace ukive {
 
         void addContent(View *content);
 
-        virtual View *findViewById(int id) override;
+        View *findViewById(int id) override;
+
+    protected:
+        LayoutParams *generateLayoutParams(const LayoutParams &lp) override;
+        LayoutParams *generateDefaultLayoutParams() override;
+        bool checkLayoutParams(LayoutParams *lp) override;
+
+    private:
+        void initBaseLayout();
+
+        FrameLayout* shade_layout_;
+        LinearLayout* content_layout_;
+
+        bool shade_added_;
     };
 
 }

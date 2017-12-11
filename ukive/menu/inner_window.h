@@ -26,8 +26,8 @@ namespace ukive {
             InnerDecorView(InnerWindow *inner, int id);
             ~InnerDecorView();
 
-            virtual bool onInterceptInputEvent(InputEvent *e) override;
-            virtual bool onInputEvent(InputEvent *e) override;
+            bool onInterceptInputEvent(InputEvent *e) override;
+            bool onInputEvent(InputEvent *e) override;
         };
 
     private:

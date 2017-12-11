@@ -85,7 +85,10 @@ namespace ukive {
         info.icon = info.icon_small = ::LoadIcon(NULL, IDI_WINLOGO);
         info.cursor = ::LoadCursor(NULL, IDC_ARROW);
 
-        onPreCreate(&info);
+        int win_style = kDefaultWindowStyle;
+        int win_ex_style = kDefaultWindowExStyle;
+
+        onPreCreate(&info, &win_style, &win_ex_style);
 
         ATOM atom = WindowClassManager::getInstance()->retrieveWindowClass(info);
 
@@ -93,9 +96,9 @@ namespace ukive {
         //non_client_frame_->init(hWnd_);
 
         HWND hWnd = ::CreateWindowEx(
-            kDefaultWindowExStyle,
+            win_ex_style,
             reinterpret_cast<wchar_t*>(atom),
-            title_.c_str(), kDefaultWindowStyle,
+            title_.c_str(), win_style,
             x_, y_, width_, height_,
             0, 0, Application::getModuleHandle(), this);
         if (::IsWindow(hWnd) == FALSE) {
@@ -310,8 +313,9 @@ namespace ukive {
         int param, int width, int height,
         int clientWidth, int clientHeight) {
 
-        if (clientWidth <= 0 || clientHeight <= 0)
+        if (clientWidth <= 0 || clientHeight <= 0) {
             return;
+        }
 
         prev_width_ = width_;
         prev_height_ = height_;
@@ -339,7 +343,6 @@ namespace ukive {
     }
 
     void WindowImpl::invalidate(int left, int top, int right, int bottom) {
-
     }
 
     void WindowImpl::requestLayout() {
@@ -348,8 +351,9 @@ namespace ukive {
     }
 
     void WindowImpl::performLayout() {
-        if (!is_created_)
+        if (!is_created_) {
             return;
+        }
 
         LayoutParams *params = mBaseLayout->getLayoutParams();
 
@@ -358,10 +362,8 @@ namespace ukive {
         int widthSpec = View::EXACTLY;
         int heightSpec = View::EXACTLY;
 
-        if (params->width < 0)
-        {
-            switch (params->width)
-            {
+        if (params->width < 0) {
+            switch (params->width) {
             case LayoutParams::FIT_CONTENT:
                 widthSpec = View::FIT;
                 break;
@@ -371,16 +373,13 @@ namespace ukive {
                 break;
             }
         }
-        else
-        {
+        else {
             width = params->width;
             widthSpec = View::EXACTLY;
         }
 
-        if (params->height < 0)
-        {
-            switch (params->height)
-            {
+        if (params->height < 0) {
+            switch (params->height) {
             case LayoutParams::FIT_CONTENT:
                 heightSpec = View::FIT;
                 break;
@@ -390,8 +389,7 @@ namespace ukive {
                 break;
             }
         }
-        else
-        {
+        else {
             height = params->height;
             heightSpec = View::EXACTLY;
         }
@@ -405,38 +403,38 @@ namespace ukive {
     }
 
     void WindowImpl::performRefresh() {
-        if (!is_created_)
+        if (!is_created_) {
             return;
+        }
 
         Rect rect(0, 0, width_, height_);
         onDraw(rect);
     }
 
     void WindowImpl::performRefresh(int left, int top, int right, int bottom) {
-        if (!is_created_)
+        if (!is_created_) {
             return;
+        }
 
         Rect rect(left, top, right - left, bottom - top);
         onDraw(rect);
     }
 
 
-    View *WindowImpl::findViewById(int id)
-    {
+    View *WindowImpl::findViewById(int id) {
         return mBaseLayout->findViewById(id);
     }
 
 
-    void WindowImpl::captureMouse(View *widget)
-    {
-        if (widget == nullptr)
+    void WindowImpl::captureMouse(View *v) {
+        if (v == nullptr) {
             return;
+        }
 
         //当已存在有捕获鼠标的Widget时，若此次调用该方法的Widget
         //与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
         if (mMouseHolderRef != 0
-            && widget != mMouseHolder)
-        {
+            && v != mMouseHolder) {
             ::OutputDebugString(L"abnormal capture mouse!!\n");
             return;
         }
@@ -445,54 +443,47 @@ namespace ukive {
         ::OutputDebugString(L"capture mouse!!\n");
 
         //该Widget第一次捕获鼠标。
-        if (mMouseHolderRef == 1)
-        {
+        if (mMouseHolderRef == 1) {
             ::SetCapture(hWnd_);
-            mMouseHolder = widget;
+            mMouseHolder = v;
         }
     }
 
-    void WindowImpl::releaseMouse()
-    {
-        if (mMouseHolderRef == 0)
+    void WindowImpl::releaseMouse() {
+        if (mMouseHolderRef == 0) {
             return;
+        }
 
         --mMouseHolderRef;
         ::OutputDebugString(L"release mouse!!\n");
 
         //鼠标将被释放。
-        if (mMouseHolderRef == 0)
-        {
+        if (mMouseHolderRef == 0) {
             ::ReleaseCapture();
-            mMouseHolder = 0;
+            mMouseHolder = nullptr;
         }
     }
 
-    View *WindowImpl::getMouseHolder()
-    {
+    View *WindowImpl::getMouseHolder() {
         return mMouseHolder;
     }
 
-    unsigned int WindowImpl::getMouseHolderRef()
-    {
+    unsigned int WindowImpl::getMouseHolderRef() {
         return mMouseHolderRef;
     }
 
 
-    void WindowImpl::captureKeyboard(View *widget)
-    {
+    void WindowImpl::captureKeyboard(View *widget) {
         mFocusHolder = widget;
         //::OutputDebugString(L"captureKeyboard!!\n");
     }
 
-    void WindowImpl::releaseKeyboard()
-    {
-        mFocusHolder = 0;
+    void WindowImpl::releaseKeyboard() {
+        mFocusHolder = nullptr;
         //::OutputDebugString(L"releaseKeyboard!!\n");
     }
 
-    View *WindowImpl::getKeyboardHolder()
-    {
+    View *WindowImpl::getKeyboardHolder() {
         return mFocusHolder;
     }
 
@@ -503,8 +494,7 @@ namespace ukive {
             = new ContextMenu(delegate_, callback);
 
         if (!callback->onCreateContextMenu(
-            contextMenu, contextMenu->getMenu()))
-        {
+            contextMenu, contextMenu->getMenu())) {
             delete contextMenu;
             return nullptr;
         }
@@ -512,8 +502,7 @@ namespace ukive {
         callback->onPrepareContextMenu(
             contextMenu, contextMenu->getMenu());
 
-        if (contextMenu->getMenu()->getItemCount() == 0)
-        {
+        if (contextMenu->getMenu()->getItemCount() == 0) {
             delete contextMenu;
             return nullptr;
         }
@@ -543,26 +532,22 @@ namespace ukive {
             x = rect.left;
         }
 
-        //异步打开TextActionMode菜单，以防止在输入事件处理流程中
+        //异步打开 ContextMenu，以防止在输入事件处理流程中
         //打开菜单时出现问题。
-        class UContextMenuWorker
+        class ContextMenuWorker
             : public Executable
         {
-        private:
-            int mX, mY;
-            WindowImpl *window;
         public:
-            UContextMenuWorker(WindowImpl *w, int x, int y)
-            {
-                mX = x;
-                mY = y;
-                window = w;
+            ContextMenuWorker(WindowImpl *w, int x, int y)
+                :x_(x), y_(y), window(w) {}
+
+            void run() override {
+                window->mContextMenu->show(x_, y_);
             }
-            void run() override
-            {
-                window->mContextMenu->show(mX, mY);
-            }
-        }*worker = new UContextMenuWorker(this, x, y);
+        private:
+            int x_, y_;
+            WindowImpl *window;
+        }*worker = new ContextMenuWorker(this, x, y);
 
         mLabourCycler->post(worker);
 
@@ -576,8 +561,7 @@ namespace ukive {
             = new TextActionMode(delegate_, callback);
 
         if (!callback->onCreateActionMode(
-            actionMode, actionMode->getMenu()))
-        {
+            actionMode, actionMode->getMenu())) {
             delete actionMode;
             return nullptr;
         }
@@ -585,8 +569,7 @@ namespace ukive {
         callback->onPrepareActionMode(
             actionMode, actionMode->getMenu());
 
-        if (actionMode->getMenu()->getItemCount() == 0)
-        {
+        if (actionMode->getMenu()->getItemCount() == 0) {
             delete actionMode;
             return nullptr;
         }
@@ -598,17 +581,15 @@ namespace ukive {
         class TextActionModeWorker
             : public Executable
         {
-        private:
-            WindowImpl *window;
         public:
             TextActionModeWorker(WindowImpl *w)
-            {
-                window = w;
-            }
-            void run() override
-            {
+                :window(w) {}
+
+            void run() override {
                 window->mTextActionMode->show();
             }
+        private:
+            WindowImpl *window;
         }*worker = new TextActionModeWorker(this);
 
         mLabourCycler->post(worker);
@@ -627,22 +608,21 @@ namespace ukive {
 
     void WindowImpl::setMouseTrack()
     {
-        if (is_enable_mouse_track_)
-        {
-            TRACKMOUSEEVENT csTME;
-            csTME.cbSize = sizeof(csTME);
-            csTME.dwFlags = TME_LEAVE | TME_HOVER;
-            csTME.hwndTrack = hWnd_;// 指定要 追踪 的窗口
-            csTME.dwHoverTime = 1000;  // 鼠标在按钮上停留超过 1s ，才认为状态为 HOVER
-            ::_TrackMouseEvent(&csTME); // 开启 Windows 的 WM_MOUSELEAVE ， WM_MOUSEHOVER 事件支持
+        if (is_enable_mouse_track_) {
+            TRACKMOUSEEVENT tme;
+            tme.cbSize = sizeof(tme);
+            tme.dwFlags = TME_LEAVE | TME_HOVER;
+            tme.hwndTrack = hWnd_;// 指定要 追踪 的窗口
+            tme.dwHoverTime = 1000;  // 鼠标在按钮上停留超过 1s ，才认为状态为 HOVER
+            ::_TrackMouseEvent(&tme); // 开启 Windows 的 WM_MOUSELEAVE ， WM_MOUSEHOVER 事件支持
 
             is_enable_mouse_track_ = false;
         }
     }
 
 
-    void WindowImpl::onPreCreate(ClassInfo *info) {
-        delegate_->onPreCreate(info);
+    void WindowImpl::onPreCreate(ClassInfo *info, int *win_style, int *win_ex_style) {
+        delegate_->onPreCreate(info, win_style, win_ex_style);
     }
 
     void WindowImpl::onCreate() {
@@ -727,8 +707,9 @@ namespace ukive {
             bool ret = mRenderer->render(
                 background_color_, [this]() {
 
-                if (mCanvas && mBaseLayout->isLayouted())
+                if (mCanvas && mBaseLayout->isLayouted()) {
                     mBaseLayout->draw(mCanvas);
+                }
 
                 delegate_->onDraw(mCanvas);
             });
@@ -738,8 +719,9 @@ namespace ukive {
                 return;
             }
 
-            if (getAnimationManager()->isBusy())
+            if (getAnimationManager()->isBusy()) {
                 invalidate();
+            }
         }
     }
 
@@ -1395,30 +1377,19 @@ namespace ukive {
     }
 
 
-    WindowImpl::UpdateCycler::UpdateCycler(WindowImpl *window)
-        :Cycler()
-    {
-        this->mWindow = window;
-    }
-
     void WindowImpl::UpdateCycler::handleMessage(Message *msg)
     {
         switch (msg->what)
         {
         case SCHEDULE_RENDER:
-            this->mWindow->performRefresh();
+            win_->performRefresh();
             break;
         case SCHEDULE_LAYOUT:
-            this->mWindow->performLayout();
+            win_->performLayout();
             break;
         }
     }
 
-
-    WindowImpl::AnimStateChangedListener::AnimStateChangedListener(WindowImpl *window)
-    {
-        this->mWindow = window;
-    }
 
     void WindowImpl::AnimStateChangedListener::onStateChanged(
         UI_ANIMATION_MANAGER_STATUS newStatus,
@@ -1426,7 +1397,7 @@ namespace ukive {
     {
         if (newStatus == UI_ANIMATION_MANAGER_BUSY
             && previousStatus == UI_ANIMATION_MANAGER_IDLE)
-            mWindow->invalidate();
+            win_->invalidate();
     }
 
 
