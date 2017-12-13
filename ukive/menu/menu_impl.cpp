@@ -51,11 +51,11 @@ namespace ukive {
 
     MenuItem *MenuImpl::addItem(int id, std::int32_t order, std::wstring title)
     {
-        MenuItem *item = new MenuItemImpl(mWindow, id, order);
+        MenuItem *item = new MenuItemImpl(getWindow(), id, order);
         item->setItemTitle(title);
 
         View *widget = dynamic_cast<View*>(item);
-        widget->setBackground(new RippleDrawable(mWindow));
+        widget->setBackground(new RippleDrawable(getWindow()));
         widget->setOnClickListener(this);
 
         int insertedIndex = getChildCount();

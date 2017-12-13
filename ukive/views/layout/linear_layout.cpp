@@ -56,8 +56,8 @@ namespace ukive {
             {
                 LinearLayoutParams *childParams = (LinearLayoutParams*)child->getLayoutParams();
 
-                int horizontalPadding = mPaddingLeft + mPaddingRight;
-                int verticalPadding = mPaddingTop + mPaddingBottom;
+                int horizontalPadding = getPaddingLeft() + getPaddingRight();
+                int verticalPadding = getPaddingTop() + getPaddingBottom();
 
                 int horizontalMargins = childParams->leftMargin + childParams->rightMargin;
                 int verticalMargins = childParams->topMargin + childParams->bottomMargin;
@@ -106,8 +106,8 @@ namespace ukive {
             {
                 LayoutParams *childParams = child->getLayoutParams();
 
-                int horizontalPadding = mPaddingLeft + mPaddingRight;
-                int verticalPadding = mPaddingTop + mPaddingBottom;
+                int horizontalPadding = getPaddingLeft() + getPaddingRight();
+                int verticalPadding = getPaddingTop() + getPaddingBottom();
 
                 int horizontalMargins = childParams->leftMargin + childParams->rightMargin;
                 int verticalMargins = childParams->topMargin + childParams->bottomMargin;
@@ -166,8 +166,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         measureLinearLayoutChildren(width, height, widthSpec, heightSpec);
 
@@ -178,12 +178,12 @@ namespace ukive {
         case FIT:
             finalWidth = getWrappedWidth();
             finalWidth = std::min(finalWidth + horizontalPadding, width);
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
 
         case UNKNOWN:
             finalWidth = getWrappedWidth();
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
 
         case EXACTLY:
@@ -207,7 +207,7 @@ namespace ukive {
                 }
             }
             finalHeight = std::min(height, totalHeight + verticalPadding);
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
         }
 
@@ -224,7 +224,7 @@ namespace ukive {
                     totalHeight += widget->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
                 }
             }
-            finalHeight = std::max(mMinimumHeight, totalHeight + verticalPadding);
+            finalHeight = std::max(getMinimumHeight(), totalHeight + verticalPadding);
             break;
         }
 
@@ -241,8 +241,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         measureLinearLayoutChildren(width, height, widthSpec, heightSpec);
 
@@ -264,7 +264,7 @@ namespace ukive {
                 }
             }
             finalWidth = std::min(totalWidth + horizontalPadding, width);
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
         }
 
@@ -281,7 +281,7 @@ namespace ukive {
                     totalWidth += widget->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
                 }
             }
-            finalWidth = std::max(mMinimumWidth, totalWidth + horizontalPadding);
+            finalWidth = std::max(getMinimumWidth(), totalWidth + horizontalPadding);
             break;
         }
 
@@ -295,12 +295,12 @@ namespace ukive {
         case FIT:
             finalHeight = getWrappedHeight();
             finalHeight = std::min(finalHeight + verticalPadding, height);
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
 
         case UNKNOWN:
             finalHeight = getWrappedHeight();
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
 
         case EXACTLY:
@@ -317,7 +317,7 @@ namespace ukive {
         View *widget = 0;
         LayoutParams *lp = 0;
 
-        int curTop = mPaddingTop;
+        int curTop = getPaddingTop();
 
         for (unsigned int i = 0; i < this->getChildCount(); ++i)
         {
@@ -332,9 +332,9 @@ namespace ukive {
                 curTop += lp->topMargin;
 
                 widget->layout(
-                    mPaddingLeft + lp->leftMargin,
+                    getPaddingLeft() + lp->leftMargin,
                     curTop,
-                    mPaddingLeft + lp->leftMargin + width,
+                    getPaddingLeft() + lp->leftMargin + width,
                     curTop + height);
 
                 curTop += height + lp->bottomMargin;
@@ -347,7 +347,7 @@ namespace ukive {
         View *widget = 0;
         LayoutParams *lp = 0;
 
-        int curLeft = mPaddingLeft;
+        int curLeft = getPaddingLeft();
 
         for (unsigned int i = 0; i < this->getChildCount(); ++i)
         {
@@ -363,9 +363,9 @@ namespace ukive {
 
                 widget->layout(
                     curLeft,
-                    mPaddingTop + lp->topMargin,
+                    getPaddingTop() + lp->topMargin,
                     curLeft + width,
-                    mPaddingTop + lp->topMargin + height);
+                    getPaddingTop() + lp->topMargin + height);
 
                 curLeft += width + lp->rightMargin;
             }

@@ -12,27 +12,11 @@ namespace ukive {
     class ViewAnimator : public Animator::OnValueChangedListener
     {
     public:
+        ViewAnimator(View *v);
+        ~ViewAnimator();
+
         static const int REVEAL_RECT = 0;
         static const int REVEAL_CIRCULE = 1;
-
-    private:
-        View *mOwningWidget;
-        Animator *mAnimator;
-
-        double mDuration;
-
-        static const int UWIDGET_ANIM_X = 1;
-        static const int UWIDGET_ANIM_Y = 2;
-        static const int UWIDGET_ANIM_ALPHA = 3;
-        static const int UWIDGET_ANIM_SCALE_X = 4;
-        static const int UWIDGET_ANIM_SCALE_Y = 5;
-        static const int UWIDGET_ANIM_TRANSLATE_X = 6;
-        static const int UWIDGET_ANIM_TRANSLATE_Y = 7;
-        static const int UWIDGET_ANIM_REVEAL = 8;
-
-    public:
-        ViewAnimator(View *widget);
-        ~ViewAnimator();
 
         void start();
         void cancel();
@@ -49,11 +33,11 @@ namespace ukive {
         ViewAnimator *setListener(Animator::OnAnimatorListener *l);
 
         static Animator *createRectReveal(
-            View *widget, double centerX, double centerY,
+            View *v, double centerX, double centerY,
             double startWidthRadius, double endWidthRadius,
             double startHeightRadius, double endHeightRadius);
         static Animator *createCirculeReveal(
-            View *widget, double centerX, double centerY, double startRadius, double endRadius);
+            View *v, double centerX, double centerY, double startRadius, double endRadius);
 
         void onValueChanged(
             unsigned int varIndex,
@@ -65,6 +49,20 @@ namespace ukive {
             IUIAnimationStoryboard *storyboard,
             IUIAnimationVariable *variable,
             int newValue, int previousValue) override;
+
+    private:
+        static const int VIEW_ANIM_X = 1;
+        static const int VIEW_ANIM_Y = 2;
+        static const int VIEW_ANIM_ALPHA = 3;
+        static const int VIEW_ANIM_SCALE_X = 4;
+        static const int VIEW_ANIM_SCALE_Y = 5;
+        static const int VIEW_ANIM_TRANSLATE_X = 6;
+        static const int VIEW_ANIM_TRANSLATE_Y = 7;
+        static const int VIEW_ANIM_REVEAL = 8;
+
+        double duration_;
+        View *owner_view_;
+        Animator *animator_;
     };
 
 }

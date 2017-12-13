@@ -3,10 +3,9 @@
 
 #include <memory>
 
-#include <Windows.h>
-
 #include "ukive/utils/executable.h"
 #include "ukive/graphics/rect.h"
+#include "ukive/utils/string_utils.h"
 
 
 namespace ukive {
@@ -20,117 +19,28 @@ namespace ukive {
     class OnClickListener;
     class ViewAnimator;
 
-    enum Gravity {
-        LEFT,
-        TOP,
-        RIGHT,
-        BOTTOM,
-        CENTER,
-        CENTER_HORIZONTAL,
-        CENTER_VERTICAL,
-    };
-
     class View {
     public:
         const static int FIT = 1;
         const static int EXACTLY = 2;
         const static int UNKNOWN = 3;
 
-        const static int VISIBLE = 0;
-        const static int INVISIBLE = 1;
-        const static int VANISHED = 2;
-
-    private:
-        //普通动画变量。
-        double mAlpha;
-        double mScaleX;
-        double mScaleY;
-        double mTranslateX;
-        double mTranslateY;
-        double mPivotX, mPivotY;
-
-        //揭露动画变量。
-        int mRevealType;
-        bool mHasReveal;
-        double mRevealRadius;
-        double mRevealCenterX;
-        double mRevealCenterY;
-        double mRevealWidthRadius;
-        double mRevealHeightRadius;
-
-        View *mParent;
-        LayoutParams *mLayoutParams;
-        InputConnection *mICHolder;
-        OnClickListener *mClickListener;
-        ViewAnimator *mAnimator;
-
-        class ClickPerformer : public Executable {
-        public:
-            ClickPerformer(View *v)
-                :view_(v) {}
-
-            void run() override {
-                view_->performClick();
-            }
-
-        private:
-            View *view_;
+        enum Visibility {
+            VISIBLE,
+            INVISIBLE,
+            VANISHED
         };
 
-        ClickPerformer *mClickPerformer;
+        enum Gravity {
+            LEFT,
+            TOP,
+            RIGHT,
+            BOTTOM,
+            CENTER,
+            CENTER_HORIZONTAL,
+            CENTER_VERTICAL,
+        };
 
-    protected:
-        int mId;
-
-        int mLeft;
-        int mTop;
-        int mRight;
-        int mBottom;
-
-        int mScrollX;
-        int mScrollY;
-
-        int mPaddingLeft;
-        int mPaddingTop;
-        int mPaddingRight;
-        int mPaddingBottom;
-
-        int mMeasuredWidth;
-        int mMeasuredHeight;
-
-        int mMinimumWidth;
-        int mMinimumHeight;
-
-        int mVisibility;
-        float mElevation;
-
-        bool mIsEnable;
-        bool mIsAttachdToWindow;
-        bool mIsInputEventAtLast;
-        bool mIsPressed;
-        bool mHasFocus;
-        bool mIsFocusable;
-        bool mIsLayouted;
-        bool mIsReceiveOutsideInputEvent;
-        bool mCanConsumeMouseEvent;
-
-        Window *mWindow;
-        std::unique_ptr<Drawable> mBackgroundDrawable;
-        std::unique_ptr<Drawable> mForegroundDrawable;
-
-        virtual void dispatchDraw(Canvas *canvas);
-        virtual void dispatchDiscardFocus();
-        virtual void dispatchDiscardPendingOperations();
-
-        void drawBackgroundWithShadow(Canvas *canvas);
-        void drawBackground(Canvas *canvas);
-        void drawForeground(Canvas *canvas);
-
-        void setMeasuredDimension(int width, int height);
-
-        void performClick();
-
-    public:
         View(Window *wnd);
         View(Window *wnd, int id);
         virtual ~View();
@@ -165,7 +75,7 @@ namespace ukive {
         void setLayoutParams(LayoutParams *params);
         void setIsInputEventAtLast(bool isInput);
         void setPressed(bool pressed);
-        void setCurrentCursor(LPCWSTR cursor);
+        void setCurrentCursor(const string16 &cursor);
         void setFocusable(bool focusable);
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
@@ -266,6 +176,18 @@ namespace ukive {
         virtual void onDetachedFromWindow();
 
     protected:
+        void performClick();
+
+        void drawBackgroundWithShadow(Canvas *canvas);
+        void drawBackground(Canvas *canvas);
+        void drawForeground(Canvas *canvas);
+
+        void setMeasuredDimension(int width, int height);
+
+        virtual void dispatchDraw(Canvas *canvas);
+        virtual void dispatchDiscardFocus();
+        virtual void dispatchDiscardPendingOperations();
+
         virtual void onDraw(Canvas *canvas);
         virtual void onMeasure(
             int width, int height,
@@ -284,6 +206,82 @@ namespace ukive {
         virtual void onWindowFocusChanged(bool windowFocus);
         virtual void onWindowDpiChanged(int dpi_x, int dpi_y);
         virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY);
+
+    private:
+        class ClickPerformer
+            : public Executable {
+        public:
+            ClickPerformer(View *v)
+                :view_(v) {}
+            void run() override {
+                view_->performClick();
+            }
+        private:
+            View * view_;
+        };
+
+
+        int id_;
+
+        int mLeft;
+        int mTop;
+        int mRight;
+        int mBottom;
+
+        int mScrollX;
+        int mScrollY;
+
+        int mPaddingLeft;
+        int mPaddingTop;
+        int mPaddingRight;
+        int mPaddingBottom;
+
+        int measured_width_;
+        int measured_height_;
+
+        int min_width_;
+        int min_height_;
+
+        int visibility_;
+        float elevation_;
+
+        bool has_focus_;
+        bool is_enabled_;
+        bool is_attached_to_window_;
+        bool is_input_event_at_last_;
+        bool is_pressed_;
+        bool is_focusable_;
+        bool is_layouted_;
+        bool is_receive_outside_input_event_;
+        bool can_consume_mouse_event_;
+
+        Window *window_;
+        std::unique_ptr<Drawable> bg_drawable_;
+        std::unique_ptr<Drawable> fg_drawable_;
+
+        //普通动画变量。
+        double mAlpha;
+        double mScaleX;
+        double mScaleY;
+        double mTranslateX;
+        double mTranslateY;
+        double mPivotX, mPivotY;
+
+        //揭露动画变量。
+        int mRevealType;
+        bool mHasReveal;
+        double mRevealRadius;
+        double mRevealCenterX;
+        double mRevealCenterY;
+        double mRevealWidthRadius;
+        double mRevealHeightRadius;
+
+        View *parent_;
+        ViewAnimator *animator_;
+        LayoutParams *layout_params_;
+        OnClickListener *click_listener_;
+        ClickPerformer *click_performer_;
+        InputConnection *input_connection_;
     };
 
 }

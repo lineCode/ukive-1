@@ -32,7 +32,7 @@ namespace ukive {
         shape_drawable_->setSolidEnable(true);
         shape_drawable_->setSolidColor(Color::White);
 
-        ripple_background_ = new RippleDrawable(mWindow);
+        ripple_background_ = new RippleDrawable(getWindow());
         ripple_background_->addDrawable(shape_drawable_);
 
         setText(L"UButton");

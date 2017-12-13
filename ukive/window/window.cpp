@@ -78,7 +78,7 @@ namespace ukive {
         min_height_ = minHeight;
     }
 
-    void Window::setCurrentCursor(LPCWSTR cursor) {
+    void Window::setCurrentCursor(const string16 &cursor) {
         impl_->setCurrentCursor(cursor);
     }
 
@@ -187,7 +187,7 @@ namespace ukive {
     }
 
     ContextMenu *Window::startContextMenu(
-        ContextMenuCallback *callback, View *anchor, Gravity gravity) {
+        ContextMenuCallback *callback, View *anchor, View::Gravity gravity) {
         return impl_->startContextMenu(callback, anchor, gravity);
     }
 

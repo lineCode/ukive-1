@@ -184,9 +184,9 @@ namespace ukive {
         is_startup_window_ = enable;
     }
 
-    void WindowImpl::setCurrentCursor(LPCWSTR cursor)
+    void WindowImpl::setCurrentCursor(const string16 &cursor)
     {
-        cursor_ = ::LoadCursor(0, cursor);
+        cursor_ = ::LoadCursor(0, cursor.c_str());
         ::SetCursor(cursor_);
     }
 
@@ -488,7 +488,7 @@ namespace ukive {
     }
 
     ContextMenu *WindowImpl::startContextMenu(
-        ContextMenuCallback *callback, View *anchor, Gravity gravity)
+        ContextMenuCallback *callback, View *anchor, View::Gravity gravity)
     {
         ContextMenu *contextMenu
             = new ContextMenu(delegate_, callback);
@@ -516,15 +516,15 @@ namespace ukive {
 
         switch (gravity)
         {
-        case LEFT:
+        case View::LEFT:
             x = rect.left;
             break;
 
-        case RIGHT:
+        case View::RIGHT:
             x = rect.right - 92;
             break;
 
-        case CENTER:
+        case View::CENTER:
             x = rect.left - (92 - rect.width()) / 2.f;
             break;
 

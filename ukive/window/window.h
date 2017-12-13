@@ -7,12 +7,12 @@
 
 #include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
+#include "ukive/views/view.h"
 
 
 namespace ukive {
 
     class Rect;
-    class View;
     class Cycler;
     class Canvas;
     class Renderer;
@@ -24,8 +24,6 @@ namespace ukive {
     class ContextMenuCallback;
     class TextActionMode;
     class TextActionModeCallback;
-
-    enum Gravity;
     struct ClassInfo;
 
     class Window {
@@ -49,7 +47,7 @@ namespace ukive {
         void setBound(int x, int y, int width, int height);
         void setMinWidth(int minWidth);
         void setMinHeight(int minHeight);
-        void setCurrentCursor(LPCWSTR cursor);
+        void setCurrentCursor(const string16 &cursor);
         void setContentView(View *content);
         void setBackgroundColor(Color color);
 
@@ -83,7 +81,7 @@ namespace ukive {
         View *findViewById(int id);
 
         ContextMenu *startContextMenu(
-            ContextMenuCallback *callback, View *anchor, Gravity gravity);
+            ContextMenuCallback *callback, View *anchor, View::Gravity gravity);
         TextActionMode *startTextActionMode(TextActionModeCallback *callback);
 
         float dpToPx(float dp);

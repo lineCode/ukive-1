@@ -29,8 +29,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int verticalPadding = mPaddingTop + mPaddingBottom;
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
 
         switch (widthSpec)
         {
@@ -38,7 +38,7 @@ namespace ukive {
             if (mBitmapDrawable != 0)
                 finalWidth = mBitmapDrawable->getIncWidth();
 
-            finalWidth = std::max(mMinimumWidth, finalWidth + horizontalPadding);
+            finalWidth = std::max(getMinimumWidth(), finalWidth + horizontalPadding);
             finalWidth = std::min(width, finalWidth);
             break;
 
@@ -46,7 +46,7 @@ namespace ukive {
             if (mBitmapDrawable != 0)
                 finalWidth = mBitmapDrawable->getIncWidth();
 
-            finalWidth = std::max(mMinimumWidth, finalWidth + horizontalPadding);
+            finalWidth = std::max(getMinimumWidth(), finalWidth + horizontalPadding);
             break;
 
         case EXACTLY:
@@ -60,7 +60,7 @@ namespace ukive {
             if (mBitmapDrawable != 0)
                 finalHeight = mBitmapDrawable->getIncHeight();
 
-            finalHeight = std::max(mMinimumHeight, finalHeight + verticalPadding);
+            finalHeight = std::max(getMinimumHeight(), finalHeight + verticalPadding);
             finalHeight = std::min(height, finalHeight);
             break;
 
@@ -68,7 +68,7 @@ namespace ukive {
             if (mBitmapDrawable != 0)
                 finalHeight = mBitmapDrawable->getIncHeight();
 
-            finalHeight = std::max(mMinimumHeight, finalHeight + verticalPadding);
+            finalHeight = std::max(getMinimumHeight(), finalHeight + verticalPadding);
             break;
 
         case EXACTLY:

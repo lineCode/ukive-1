@@ -171,7 +171,7 @@ namespace ukive {
         View *child, RestraintLayoutParams *lp,
         int parentWidth, int parentWidthMode, int *width, int *widthMode)
     {
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
         int horizontalMargins = lp->leftMargin + lp->rightMargin;
 
         int childWidth = 0;
@@ -466,7 +466,7 @@ namespace ukive {
         View *child, RestraintLayoutParams *lp,
         int parentHeight, int parentHeightMode, int *height, int *heightSpec)
     {
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
         int verticalMargins = lp->topMargin + lp->bottomMargin;
 
         int childHeight = 0;
@@ -941,7 +941,7 @@ namespace ukive {
         View *child, RestraintLayoutParams *lp,
         int top, int bottom)
     {
-        int childTop = top + mPaddingTop;
+        int childTop = top + getPaddingTop();
         if (lp->hasTop()
             && lp->topHandledId != this->getId())
         {
@@ -964,7 +964,7 @@ namespace ukive {
             }
         }
 
-        int childBottom = bottom - mPaddingBottom;
+        int childBottom = bottom - getPaddingBottom();
         if (lp->hasBottom()
             && lp->bottomHandledId != this->getId())
         {
@@ -1028,7 +1028,7 @@ namespace ukive {
         View *child, RestraintLayoutParams *lp,
         int left, int right)
     {
-        int childLeft = left + mPaddingLeft;
+        int childLeft = left + getPaddingLeft();
         if (lp->hasStart()
             && lp->startHandledId != this->getId())
         {
@@ -1051,7 +1051,7 @@ namespace ukive {
             }
         }
 
-        int childRight = right - mPaddingRight;
+        int childRight = right - getPaddingRight();
         if (lp->hasEnd()
             && lp->endHandledId != this->getId())
         {
@@ -1119,8 +1119,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         clearMeasureFlag();
         this->measureRestrainedChildren(width, height, widthMode, heightMode);
@@ -1130,7 +1130,7 @@ namespace ukive {
         case FIT:
             finalWidth = measureWrappedWidth() + horizontalPadding;
             finalWidth = std::min(width, finalWidth);
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
 
         case EXACTLY:
@@ -1139,7 +1139,7 @@ namespace ukive {
 
         case UNKNOWN:
             finalWidth = measureWrappedWidth() + horizontalPadding;
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
         }
 
@@ -1148,7 +1148,7 @@ namespace ukive {
         case FIT:
             finalHeight = measureWrappedHeight() + verticalPadding;
             finalHeight = std::min(height, finalHeight);
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
 
         case EXACTLY:
@@ -1157,7 +1157,7 @@ namespace ukive {
 
         case UNKNOWN:
             finalHeight = measureWrappedHeight() + verticalPadding;
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
         }
 
@@ -1168,8 +1168,8 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         for (std::size_t i = 0; i < getChildCount(); ++i)
         {

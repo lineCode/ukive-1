@@ -27,8 +27,8 @@ namespace ukive {
         releaseState();
         releaseResourceView();
 
-        mWindow->getRenderer()->setDirect3DRenderListener(nullptr);
-        mWindow->getRenderer()->removeSwapChainResizeNotifier(this);
+        getWindow()->getRenderer()->setDirect3DRenderListener(nullptr);
+        getWindow()->getRenderer()->removeSwapChainResizeNotifier(this);
     }
 
 
@@ -38,8 +38,8 @@ namespace ukive {
         setMinimumWidth(1);
         setMinimumHeight(1);
 
-        mWindow->getRenderer()->setDirect3DRenderListener(this);
-        mWindow->getRenderer()->addSwapChainResizeNotifier(this);
+        getWindow()->getRenderer()->setDirect3DRenderListener(this);
+        getWindow()->getRenderer()->addSwapChainResizeNotifier(this);
 
         HRESULT hr = createResourceView();
         if (FAILED(hr))
@@ -166,7 +166,7 @@ namespace ukive {
             Application::getGraphicDeviceManager()->getD3DDevice();
         auto d3dDeviceContext =
             Application::getGraphicDeviceManager()->getD3DDeviceContext();
-        auto swapchain = mWindow->getRenderer()->getSwapChain();
+        auto swapchain = getWindow()->getRenderer()->getSwapChain();
 
         ComPtr<ID3D11Texture2D> backBufferPtr;
 
@@ -176,8 +176,8 @@ namespace ukive {
         D3D11_TEXTURE2D_DESC depthBufferDesc;
         ::memset(&depthBufferDesc, 0, sizeof(depthBufferDesc));
 
-        depthBufferDesc.Width = mWindow->getRenderer()->getScWidth();
-        depthBufferDesc.Height = mWindow->getRenderer()->getScHeight();
+        depthBufferDesc.Width = getWindow()->getRenderer()->getScWidth();
+        depthBufferDesc.Height = getWindow()->getRenderer()->getScHeight();
         depthBufferDesc.MipLevels = 1; //对于深度缓冲为1
         depthBufferDesc.ArraySize = 1; //对于深度缓冲为1，对于纹理，这2个参数有更多用途
         depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -222,7 +222,7 @@ namespace ukive {
 
     void Direct3DView::onDirect3DClear()
     {
-        Color d2dColor = mWindow->getBackgroundColor();
+        Color d2dColor = getWindow()->getBackgroundColor();
         float backColor[4] = { d2dColor.r, d2dColor.g, d2dColor.b, d2dColor.a };
 
         Application::getGraphicDeviceManager()->getD3DDeviceContext()->

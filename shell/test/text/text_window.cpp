@@ -177,7 +177,7 @@ namespace shell {
         if (mWindow->mContextMenu == nullptr)
         {
             mWindow->mContextMenu = mWindow->startContextMenu(
-                mWindow->mTBMCallback, widget, ukive::Gravity::LEFT);
+                mWindow->mTBMCallback, widget, ukive::View::Gravity::LEFT);
 
             mWindow->findViewById(TextWindow::ID_TOOLBAR_ITEM_FONT)->requestFocus();
         }
@@ -188,7 +188,7 @@ namespace shell {
         if (mWindow->mContextMenu == nullptr)
         {
             mWindow->mContextMenu = mWindow->startContextMenu(
-                mWindow->mTBMCallback, widget, ukive::Gravity::LEFT);
+                mWindow->mTBMCallback, widget, ukive::View::Gravity::LEFT);
 
             mWindow->findViewById(TextWindow::ID_TOOLBAR_ITEM_FORMAT)->requestFocus();
         }

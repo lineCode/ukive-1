@@ -6,173 +6,168 @@
 
 namespace ukive {
 
-    ViewAnimator::ViewAnimator(View *widget)
+    ViewAnimator::ViewAnimator(View *v)
     {
-        mOwningWidget = widget;
-        mDuration = 0.2;
+        duration_ = 0.2;
+        owner_view_ = v;
 
-        mAnimator = new Animator(
-            mOwningWidget->getWindow()->getAnimationManager());
+        animator_ = new Animator(
+            owner_view_->getWindow()->getAnimationManager());
     }
 
     ViewAnimator::~ViewAnimator()
     {
-        delete mAnimator;
+        delete animator_;
     }
 
 
     void ViewAnimator::start()
     {
-        mAnimator->start();
+        animator_->start();
     }
 
     void ViewAnimator::cancel()
     {
-        mAnimator->stop();
+        animator_->stop();
     }
 
     ViewAnimator *ViewAnimator::setDuration(double duration)
     {
-        mDuration = duration;
-
+        duration_ = duration;
         return this;
     }
 
 
     ViewAnimator *ViewAnimator::x(double x)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
-        mAnimator->addVariable(
-            UWIDGET_ANIM_X, mOwningWidget->getX(),
-            -(dLimit::max)(), (dLimit::max)());
-        mAnimator->addTransition(
-            UWIDGET_ANIM_X, Transition::linearTransition(mDuration, x));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_X, this);
+        animator_->addVariable(
+            VIEW_ANIM_X, owner_view_->getX(),
+            -(lim::max)(), (lim::max)());
+        animator_->addTransition(
+            VIEW_ANIM_X, Transition::linearTransition(duration_, x));
+        animator_->setOnValueChangedListener(VIEW_ANIM_X, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::y(double y)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
-        mAnimator->addVariable(
-            UWIDGET_ANIM_Y, mOwningWidget->getY(),
-            -(dLimit::max)(), (dLimit::max)());
-        mAnimator->addTransition(
-            UWIDGET_ANIM_Y, Transition::linearTransition(mDuration, y));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_Y, this);
+        animator_->addVariable(
+            VIEW_ANIM_Y, owner_view_->getY(),
+            -(lim::max)(), (lim::max)());
+        animator_->addTransition(
+            VIEW_ANIM_Y, Transition::linearTransition(duration_, y));
+        animator_->setOnValueChangedListener(VIEW_ANIM_Y, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::alpha(double value)
     {
-        mAnimator->addVariable(
-            UWIDGET_ANIM_ALPHA, mOwningWidget->getAlpha(), 0, 1);
-        mAnimator->addTransition(
-            UWIDGET_ANIM_ALPHA, Transition::linearTransition(mDuration, value));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_ALPHA, this);
+        animator_->addVariable(
+            VIEW_ANIM_ALPHA, owner_view_->getAlpha(), 0, 1);
+        animator_->addTransition(
+            VIEW_ANIM_ALPHA, Transition::linearTransition(duration_, value));
+        animator_->setOnValueChangedListener(VIEW_ANIM_ALPHA, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::scaleX(double value)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
-        mAnimator->addVariable(
-            UWIDGET_ANIM_SCALE_X, mOwningWidget->getScaleX(),
-            -(dLimit::max)(), (dLimit::max)());
-        mAnimator->addTransition(
-            UWIDGET_ANIM_SCALE_X, Transition::linearTransition(mDuration, value));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_SCALE_X, this);
+        animator_->addVariable(
+            VIEW_ANIM_SCALE_X, owner_view_->getScaleX(),
+            -(lim::max)(), (lim::max)());
+        animator_->addTransition(
+            VIEW_ANIM_SCALE_X, Transition::linearTransition(duration_, value));
+        animator_->setOnValueChangedListener(VIEW_ANIM_SCALE_X, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::scaleY(double value)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
-        mAnimator->addVariable(
-            UWIDGET_ANIM_SCALE_Y, mOwningWidget->getScaleY(),
-            -(dLimit::max)(), (dLimit::max)());
-        mAnimator->addTransition(
-            UWIDGET_ANIM_SCALE_Y, Transition::linearTransition(mDuration, value));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_SCALE_Y, this);
+        animator_->addVariable(
+            VIEW_ANIM_SCALE_Y, owner_view_->getScaleY(),
+            -(lim::max)(), (lim::max)());
+        animator_->addTransition(
+            VIEW_ANIM_SCALE_Y, Transition::linearTransition(duration_, value));
+        animator_->setOnValueChangedListener(VIEW_ANIM_SCALE_Y, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::translateX(double value)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
-        mAnimator->addVariable(
-            UWIDGET_ANIM_TRANSLATE_X, mOwningWidget->getTranslateX(),
-            -(dLimit::max)(), (dLimit::max)());
-        mAnimator->addTransition(
-            UWIDGET_ANIM_TRANSLATE_X, Transition::linearTransition(mDuration, value));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_TRANSLATE_X, this);
+        animator_->addVariable(
+            VIEW_ANIM_TRANSLATE_X, owner_view_->getTranslateX(),
+            -(lim::max)(), (lim::max)());
+        animator_->addTransition(
+            VIEW_ANIM_TRANSLATE_X, Transition::linearTransition(duration_, value));
+        animator_->setOnValueChangedListener(VIEW_ANIM_TRANSLATE_X, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::translateY(double value)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
-        mAnimator->addVariable(
-            UWIDGET_ANIM_TRANSLATE_Y, mOwningWidget->getTranslateY(),
-            -(dLimit::max)(), (dLimit::max)());
-        mAnimator->addTransition(
-            UWIDGET_ANIM_TRANSLATE_Y, Transition::linearTransition(mDuration, value));
-        mAnimator->setOnValueChangedListener(UWIDGET_ANIM_TRANSLATE_Y, this);
+        animator_->addVariable(
+            VIEW_ANIM_TRANSLATE_Y, owner_view_->getTranslateY(),
+            -(lim::max)(), (lim::max)());
+        animator_->addTransition(
+            VIEW_ANIM_TRANSLATE_Y, Transition::linearTransition(duration_, value));
+        animator_->setOnValueChangedListener(VIEW_ANIM_TRANSLATE_Y, this);
 
         return this;
     }
 
     ViewAnimator *ViewAnimator::setListener(Animator::OnAnimatorListener *l)
     {
-        mAnimator->setOnStateChangedListener(l);
-
+        animator_->setOnStateChangedListener(l);
         return this;
     }
 
 
     Animator *ViewAnimator::createRectReveal(
-        View *widget, double centerX, double centerY,
+        View *v, double centerX, double centerY,
         double startWidthRadius, double endWidthRadius,
         double startHeightRadius, double endHeightRadius)
     {
         typedef std::numeric_limits<double> dLimit;
 
         Animator *animator = new Animator(
-            widget->getWindow()->getAnimationManager());
+            v->getWindow()->getAnimationManager());
         animator->addVariable(0, startWidthRadius, -(dLimit::max)(), (dLimit::max)());
         animator->addTransition(0, Transition::linearTransition(0.1, endWidthRadius));
         animator->addVariable(1, startHeightRadius, -(dLimit::max)(), (dLimit::max)());
         animator->addTransition(1, Transition::linearTransition(0.2, endHeightRadius));
 
-        widget->setHasReveal(true);
-        widget->setRevealType(REVEAL_RECT);
-        widget->setRevealCenterX(centerX);
-        widget->setRevealCenterY(centerY);
-        widget->setRevealWidthRadius(startWidthRadius);
-        widget->setRevealHeightRadius(startHeightRadius);
+        v->setHasReveal(true);
+        v->setRevealType(REVEAL_RECT);
+        v->setRevealCenterX(centerX);
+        v->setRevealCenterY(centerY);
+        v->setRevealWidthRadius(startWidthRadius);
+        v->setRevealHeightRadius(startHeightRadius);
 
         class RevealValueListener
             : public Animator::OnValueChangedListener
         {
-        private:
-            View *mWidget;
         public:
             RevealValueListener(View *w)
-            {
-                mWidget = w;
-            }
+                :view_(w) {}
+
             void onValueChanged(
                 unsigned int varIndex,
                 IUIAnimationStoryboard *storyboard,
@@ -180,114 +175,105 @@ namespace ukive {
                 double newValue, double previousValue)
             {
                 if (varIndex == 0)
-                    mWidget->setRevealWidthRadius(newValue);
+                    view_->setRevealWidthRadius(newValue);
                 else if (varIndex == 1)
-                    mWidget->setRevealHeightRadius(newValue);
+                    view_->setRevealHeightRadius(newValue);
             }
             void onIntegerValueChanged(
                 unsigned int varIndex,
                 IUIAnimationStoryboard *storyboard,
                 IUIAnimationVariable *variable,
                 int newValue, int previousValue) {}
-        }*valueListener = new RevealValueListener(widget);
+        private:
+            View * view_;
+        }*value_listener = new RevealValueListener(v);
 
         class RevealStateListener
             : public Animator::OnAnimatorListener
         {
-        private:
-            View *mWidget;
         public:
             RevealStateListener(View *w)
-            {
-                mWidget = w;
-            }
+                :view_(w) {}
 
-            void onAnimationStart(Animator *animator)
-            {
+            void onAnimationStart(Animator *animator) {}
+            void onAnimationEnd(Animator *animator) {
+                view_->setHasReveal(false);
             }
-            void onAnimationEnd(Animator *animator)
-            {
-                mWidget->setHasReveal(false);
+            void onAnimationCancel(Animator *animator) {
+                view_->setHasReveal(false);
             }
-            void onAnimationCancel(Animator *animator)
-            {
-                mWidget->setHasReveal(false);
-            }
-        }*stateListener = new RevealStateListener(widget);
+        private:
+            View * view_;
+        }*state_listener = new RevealStateListener(v);
 
-        animator->setOnValueChangedListener(0, valueListener);
-        animator->setOnValueChangedListener(1, valueListener);
-        animator->setOnStateChangedListener(stateListener);
+        animator->setOnValueChangedListener(0, value_listener);
+        animator->setOnValueChangedListener(1, value_listener);
+        animator->setOnStateChangedListener(state_listener);
 
         return animator;
     }
 
     Animator *ViewAnimator::createCirculeReveal(
-        View *widget, double centerX, double centerY, double startRadius, double endRadius)
+        View *v, double centerX, double centerY, double startRadius, double endRadius)
     {
-        typedef std::numeric_limits<double> dLimit;
+        typedef std::numeric_limits<double> lim;
 
         Animator *animator = new Animator(
-            widget->getWindow()->getAnimationManager());
-        animator->addVariable(0, startRadius, -(dLimit::max)(), (dLimit::max)());
+            v->getWindow()->getAnimationManager());
+        animator->addVariable(0, startRadius, -(lim::max)(), (lim::max)());
         animator->addTransition(0, Transition::linearTransition(0.15, endRadius));
 
-        widget->setHasReveal(true);
-        widget->setRevealType(REVEAL_CIRCULE);
-        widget->setRevealCenterX(centerX);
-        widget->setRevealCenterY(centerY);
-        widget->setRevealRadius(startRadius);
+        v->setHasReveal(true);
+        v->setRevealType(REVEAL_CIRCULE);
+        v->setRevealCenterX(centerX);
+        v->setRevealCenterY(centerY);
+        v->setRevealRadius(startRadius);
 
         class RevealValueListener
             : public Animator::OnValueChangedListener
         {
         private:
-            View *mWidget;
+            View *view_;
         public:
             RevealValueListener(View *w)
-            {
-                mWidget = w;
-            }
+                :view_(w) {}
+
             void onValueChanged(
                 unsigned int varIndex,
                 IUIAnimationStoryboard *storyboard,
                 IUIAnimationVariable *variable,
                 double newValue, double previousValue)
             {
-                mWidget->setRevealRadius(newValue);
+                view_->setRevealRadius(newValue);
             }
             void onIntegerValueChanged(
                 unsigned int varIndex,
                 IUIAnimationStoryboard *storyboard,
                 IUIAnimationVariable *variable,
                 int newValue, int previousValue) {}
-        }*valueListener = new RevealValueListener(widget);
+        }*valueListener = new RevealValueListener(v);
 
         class RevealStateListener
             : public Animator::OnAnimatorListener
         {
         private:
-            View *mWidget;
+            View *view_;
         public:
             RevealStateListener(View *w)
-            {
-                mWidget = w;
-            }
+                :view_(w) {}
 
             void onAnimationStart(Animator *animator)
             {
             }
             void onAnimationEnd(Animator *animator)
             {
-                mWidget->setHasReveal(false);
-                //mWidget->invalidate();
+                view_->setHasReveal(false);
             }
             void onAnimationCancel(Animator *animator)
             {
-                mWidget->setHasReveal(false);
-                //mWidget->invalidate();
+                view_->setHasReveal(false);
             }
-        }*stateListener = new RevealStateListener(widget);
+        }*stateListener = new RevealStateListener(v);
 
         animator->setOnValueChangedListener(0, valueListener);
         animator->setOnStateChangedListener(stateListener);
@@ -304,29 +290,29 @@ namespace ukive {
     {
         switch (varIndex)
         {
-        case UWIDGET_ANIM_X:
-            mOwningWidget->setX(newValue);
+        case VIEW_ANIM_X:
+            owner_view_->setX(newValue);
             break;
-        case UWIDGET_ANIM_Y:
-            mOwningWidget->setY(newValue);
+        case VIEW_ANIM_Y:
+            owner_view_->setY(newValue);
             break;
-        case UWIDGET_ANIM_ALPHA:
-            mOwningWidget->setAlpha(newValue);
+        case VIEW_ANIM_ALPHA:
+            owner_view_->setAlpha(newValue);
             break;
-        case UWIDGET_ANIM_SCALE_X:
-            mOwningWidget->setScaleX(newValue);
+        case VIEW_ANIM_SCALE_X:
+            owner_view_->setScaleX(newValue);
             break;
-        case UWIDGET_ANIM_SCALE_Y:
-            mOwningWidget->setScaleY(newValue);
+        case VIEW_ANIM_SCALE_Y:
+            owner_view_->setScaleY(newValue);
             break;
-        case UWIDGET_ANIM_TRANSLATE_X:
-            mOwningWidget->setTranslateX(newValue);
+        case VIEW_ANIM_TRANSLATE_X:
+            owner_view_->setTranslateX(newValue);
             break;
-        case UWIDGET_ANIM_TRANSLATE_Y:
-            mOwningWidget->setTranslateY(newValue);
+        case VIEW_ANIM_TRANSLATE_Y:
+            owner_view_->setTranslateY(newValue);
             break;
-        case UWIDGET_ANIM_REVEAL:
-            mOwningWidget->setRevealRadius(newValue);
+        case VIEW_ANIM_REVEAL:
+            owner_view_->setRevealRadius(newValue);
             break;
         }
     }

@@ -27,8 +27,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         this->measureChildrenWithMargins(width, height, widthSpec, heightSpec);
 
@@ -37,12 +37,12 @@ namespace ukive {
         case FIT:
             finalWidth = getWrappedWidth();
             finalWidth = std::min(finalWidth + horizontalPadding, width);
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
 
         case UNKNOWN:
             finalWidth = getWrappedWidth();
-            finalWidth = std::max(mMinimumWidth, finalWidth);
+            finalWidth = std::max(getMinimumWidth(), finalWidth);
             break;
 
         case EXACTLY:
@@ -55,12 +55,12 @@ namespace ukive {
         case FIT:
             finalHeight = getWrappedHeight();
             finalHeight = std::min(finalHeight + verticalPadding, height);
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
 
         case UNKNOWN:
             finalHeight = getWrappedHeight();
-            finalHeight = std::max(mMinimumHeight, finalHeight);
+            finalHeight = std::max(getMinimumHeight(), finalHeight);
             break;
 
         case EXACTLY:
@@ -89,8 +89,8 @@ namespace ukive {
                 int width = widget->getMeasuredWidth();
                 int height = widget->getMeasuredHeight();
 
-                int left = mPaddingLeft + lp->leftMargin;
-                int top = mPaddingTop + lp->topMargin;
+                int left = getPaddingLeft() + lp->leftMargin;
+                int top = getPaddingTop() + lp->topMargin;
 
                 widget->layout(
                     left,

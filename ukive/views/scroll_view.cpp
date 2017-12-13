@@ -79,8 +79,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         if (getChildCount() > 1)
             throw std::logic_error("UScrollView-onMeasure(): UScrollView can only have one child.");
@@ -96,7 +96,7 @@ namespace ukive {
             {
                 int childWidth = widget->getMeasuredWidth();
                 finalWidth = std::min(childWidth + horizontalPadding, width);
-                finalWidth = std::max(mMinimumWidth, finalWidth);
+                finalWidth = std::max(getMinimumWidth(), finalWidth);
             }
             break;
         }
@@ -107,7 +107,7 @@ namespace ukive {
             if (widget && widget->getVisibility() != View::VANISHED)
             {
                 int childWidth = widget->getMeasuredWidth();
-                finalWidth = std::max(mMinimumWidth, childWidth);
+                finalWidth = std::max(getMinimumWidth(), childWidth);
             }
             break;
         }
@@ -126,7 +126,7 @@ namespace ukive {
             {
                 int childHeight = widget->getMeasuredHeight();
                 finalHeight = std::min(childHeight + verticalPadding, height);
-                finalHeight = std::max(mMinimumHeight, finalHeight);
+                finalHeight = std::max(getMinimumHeight(), finalHeight);
             }
             break;
         }
@@ -137,7 +137,7 @@ namespace ukive {
             if (widget && widget->getVisibility() != View::VANISHED)
             {
                 int childHeight = widget->getMeasuredHeight();
-                finalHeight = std::max(mMinimumHeight, childHeight);
+                finalHeight = std::max(getMinimumHeight(), childHeight);
             }
             break;
         }
@@ -162,8 +162,8 @@ namespace ukive {
             int width = widget->getMeasuredWidth();
             int height = widget->getMeasuredHeight();
 
-            int childleft = mPaddingLeft + lp->leftMargin;
-            int childTop = mPaddingTop + lp->topMargin;
+            int childleft = getPaddingLeft() + lp->leftMargin;
+            int childTop = getPaddingTop() + lp->topMargin;
 
             widget->layout(
                 childleft,
@@ -208,8 +208,8 @@ namespace ukive {
 
         InputEvent e;
         e.setEvent(InputEvent::EVM_SCROLL_ENTER);
-        e.setMouseX(mMouseXCache + mLeft - mScrollX - (oldScrollX - scrollX));
-        e.setMouseY(mMouseYCache + mTop - mScrollY - (oldScrollY - scrollY));
+        e.setMouseX(mMouseXCache + getLeft() - getScrollX() - (oldScrollX - scrollX));
+        e.setMouseY(mMouseYCache + getTop() - getScrollY() - (oldScrollY - scrollY));
         this->dispatchInputEvent(&e);
     }
 

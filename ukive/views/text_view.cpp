@@ -46,7 +46,7 @@ namespace ukive {
 
     void TextView::initTextView()
     {
-        mTextSize = 15.f;
+        mTextSize = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
         mIsAutoWrap = true;
         mIsEditable = false;
         mIsSelectable = false;
@@ -399,7 +399,7 @@ namespace ukive {
         mTextFormat.reset();
         getWindow()->getRenderer()->createTextFormat(
             mFontFamilyName,
-            getWindow()->dpToPx(mTextSize),
+            mTextSize,
             L"zh-cn",
             &mTextFormat);
     }
@@ -412,7 +412,7 @@ namespace ukive {
         range.startPosition = 0;
         range.length = mBaseText->length();
 
-        mWindow->getRenderer()->createTextLayout(
+        getWindow()->getRenderer()->createTextLayout(
             mBaseText->toString(),
             mTextFormat.get(),
             maxWidth,
@@ -565,7 +565,7 @@ namespace ukive {
                     std::ceil(getTextWidth() + mTextBlink->getThickness()))
                 + horizontalPadding, width);
 
-            finalWidth = std::max(finalWidth, mMinimumWidth);
+            finalWidth = std::max(finalWidth, getMinimumWidth());
 
             if (width != finalWidth)
             {
@@ -589,7 +589,7 @@ namespace ukive {
                 std::ceil(getTextWidth()
                     + mTextBlink->getThickness()))
                 + horizontalPadding;
-            finalWidth = std::max(finalWidth, mMinimumWidth);
+            finalWidth = std::max(finalWidth, getMinimumWidth());
 
             mTextLayout->SetMaxWidth(
                 static_cast<float>(finalWidth - horizontalPadding));
@@ -607,7 +607,7 @@ namespace ukive {
                 static_cast<int>(std::ceil(getTextHeight()))
                 + verticalPadding, height);
 
-            finalHeight = std::max(finalHeight, mMinimumHeight);
+            finalHeight = std::max(finalHeight, getMinimumHeight());
 
             if (finalHeight != height)
             {
@@ -627,7 +627,7 @@ namespace ukive {
             mTextLayout->SetMaxHeight(0.f);
 
             finalHeight = static_cast<int>(std::ceil(getTextHeight())) + verticalPadding;
-            finalHeight = std::max(finalHeight, mMinimumHeight);
+            finalHeight = std::max(finalHeight, getMinimumHeight());
 
             mTextLayout->SetMaxHeight(
                 static_cast<float>(finalHeight - verticalPadding));
@@ -744,7 +744,7 @@ namespace ukive {
                 mIsMouseRightKeyDown = false;
 
                 if (mIsEditable || mIsSelectable)
-                    mTextActionMode = mWindow->startTextActionMode(this);
+                    mTextActionMode = getWindow()->startTextActionMode(this);
             }
             return true;
         }

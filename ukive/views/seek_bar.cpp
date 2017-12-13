@@ -38,8 +38,8 @@ namespace ukive {
         mIsMouseLeftKeyAvailable = false;
         mListener = nullptr;
 
-        mThumbInAnimator = new Animator(mWindow->getAnimationManager());
-        mThumbOutAnimator = new Animator(mWindow->getAnimationManager());
+        mThumbInAnimator = new Animator(getWindow()->getAnimationManager());
+        mThumbOutAnimator = new Animator(getWindow()->getAnimationManager());
 
         mSeekTrackHeight = 2;
         mSeekThumbMinDiameter = 10;
@@ -87,16 +87,16 @@ namespace ukive {
     bool SeekBar::isMouseInThumb(int mouseX, int mouseY)
     {
         float thumbRadius = mSeekThumbMaxDiameter / 2.f;
-        int trackWidth = getWidth() - mSeekThumbMaxDiameter - mPaddingLeft - mPaddingRight;
+        int trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
 
         float thumbCenterXInTrack = trackWidth*mSeekPercent + thumbRadius;
-        float thumbCenterYInTrack = mPaddingTop + thumbRadius;
+        float thumbCenterYInTrack = getPaddingTop() + thumbRadius;
 
-        if (((mouseX - mPaddingLeft) >= (thumbCenterXInTrack - thumbRadius))
-            && ((mouseX - mPaddingLeft) <= (thumbCenterXInTrack + thumbRadius)))
+        if (((mouseX - getPaddingLeft()) >= (thumbCenterXInTrack - thumbRadius))
+            && ((mouseX - getPaddingLeft()) <= (thumbCenterXInTrack + thumbRadius)))
         {
-            if ((mouseY - mPaddingTop) >= (thumbCenterYInTrack - thumbRadius)
-                && (mouseY - mPaddingTop) <= (thumbCenterYInTrack + thumbRadius))
+            if ((mouseY - getPaddingTop()) >= (thumbCenterYInTrack - thumbRadius)
+                && (mouseY - getPaddingTop()) <= (thumbCenterYInTrack + thumbRadius))
                 return true;
         }
 
@@ -105,13 +105,13 @@ namespace ukive {
 
     bool SeekBar::isMouseInTrack(int mouseX, int mouseY)
     {
-        float trackSpace = getWidth() - mPaddingLeft - mPaddingRight;
+        float trackSpace = getWidth() - getPaddingLeft() - getPaddingRight();
 
-        if ((mouseX - mPaddingLeft) >= 0
-            && (mouseX - mPaddingLeft) <= trackSpace)
+        if ((mouseX - getPaddingLeft()) >= 0
+            && (mouseX - getPaddingLeft()) <= trackSpace)
         {
-            if ((mouseY - mPaddingTop) >= 0
-                && (mouseY - mPaddingTop) <= mSeekThumbMaxDiameter)
+            if ((mouseY - getPaddingTop()) >= 0
+                && (mouseY - getPaddingTop()) <= mSeekThumbMaxDiameter)
                 return true;
         }
 
@@ -120,8 +120,8 @@ namespace ukive {
 
     void SeekBar::computePercent(int mouseX, int mouseY)
     {
-        float mouseInTrack = mouseX - mPaddingLeft - mSeekThumbMaxDiameter / 2.f;
-        float trackWidth = getWidth() - mSeekThumbMaxDiameter - mPaddingLeft - mPaddingRight;
+        float mouseInTrack = mouseX - getPaddingLeft() - mSeekThumbMaxDiameter / 2.f;
+        float trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
         mSeekPercent = std::max(0.f, mouseInTrack / trackWidth);
         mSeekPercent = std::min(1.f, mSeekPercent);
 
@@ -174,8 +174,8 @@ namespace ukive {
         int finalWidth = 0;
         int finalHeight = 0;
 
-        int hPadding = mPaddingLeft + mPaddingRight;
-        int vPadding = mPaddingTop + mPaddingBottom;
+        int hPadding = getPaddingLeft() + getPaddingRight();
+        int vPadding = getPaddingTop() + getPaddingBottom();
 
         switch (widthMode)
         {
@@ -215,7 +215,7 @@ namespace ukive {
     {
         float left = mSeekThumbMaxDiameter / 2.f;
         float top = mSeekThumbMaxDiameter / 2.f - mSeekTrackHeight / 2.f;
-        float trackWidth = getWidth() - mSeekThumbMaxDiameter - mPaddingLeft - mPaddingRight;
+        float trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
 
         float centerX = left + trackWidth*mSeekPercent;
         float centerY = mSeekThumbMaxDiameter / 2.f;

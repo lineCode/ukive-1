@@ -154,7 +154,7 @@ namespace ukive {
             view_list_.insert(view_list_.begin() + index, v);
         }
 
-        if (!v->isAttachedToWindow() && mIsAttachdToWindow) {
+        if (!v->isAttachedToWindow() && isAttachedToWindow()) {
             v->onAttachedToWindow();
         }
 
@@ -176,7 +176,7 @@ namespace ukive {
                 v->discardFocus();
                 v->discardPendingOperations();
 
-                if (v->isAttachedToWindow() && mIsAttachdToWindow) {
+                if (v->isAttachedToWindow() && isAttachedToWindow()) {
                     v->onDetachedFromWindow();
                 }
 
@@ -279,8 +279,8 @@ namespace ukive {
         bool consumed = false;
         bool isIntercepted = false;
 
-        e->setMouseX(e->getMouseX() - mLeft + mScrollX);
-        e->setMouseY(e->getMouseY() - mTop + mScrollY);
+        e->setMouseX(e->getMouseX() - getLeft() + getScrollX());
+        e->setMouseY(e->getMouseY() - getTop() + getScrollY());
 
         if (this->onInterceptInputEvent(e)
             || this->onInterceptMouseEvent(e)) {
@@ -519,8 +519,8 @@ namespace ukive {
     {
         LayoutParams *childParams = child->getLayoutParams();
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         int childWidth;
         int childWidthSpec;
@@ -548,8 +548,8 @@ namespace ukive {
     {
         LayoutParams *childParams = child->getLayoutParams();
 
-        int horizontalPadding = mPaddingLeft + mPaddingRight;
-        int verticalPadding = mPaddingTop + mPaddingBottom;
+        int horizontalPadding = getPaddingLeft() + getPaddingRight();
+        int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         int horizontalMargins = childParams->leftMargin + childParams->rightMargin;
         int verticalMargins = childParams->topMargin + childParams->bottomMargin;

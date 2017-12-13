@@ -43,7 +43,7 @@ namespace ukive {
         void setTitle(const string16 &title);
         void setBound(int x, int y, int width, int height);
         void setStartupWindow(bool enable);
-        void setCurrentCursor(LPCWSTR cursor);
+        void setCurrentCursor(const string16 &cursor);
         void setContentView(View *content);
         void setBackgroundColor(const Color &color);
 
@@ -96,7 +96,7 @@ namespace ukive {
         View *getKeyboardHolder();
 
         ContextMenu *startContextMenu(
-            ContextMenuCallback *callback, View *anchor, Gravity gravity);
+            ContextMenuCallback *callback, View *anchor, View::Gravity gravity);
         TextActionMode *startTextActionMode(TextActionModeCallback *callback);
 
         float dpToPx(float dp);
