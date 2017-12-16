@@ -217,15 +217,16 @@ namespace ukive {
         float top = mSeekThumbMaxDiameter / 2.f - mSeekTrackHeight / 2.f;
         float trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
 
-        float centerX = left + trackWidth*mSeekPercent;
+        float cur_pos = trackWidth * mSeekPercent;
+        float centerX = left + cur_pos;
         float centerY = mSeekThumbMaxDiameter / 2.f;
 
         if (centerX < mSeekThumbMinDiameter)
-            canvas->fillRect(D2D1::RectF(left, top, left + trackWidth, top + mSeekTrackHeight), Color::Grey300);
+            canvas->fillRect(RectF(left, top, trackWidth, mSeekTrackHeight), Color::Grey300);
         else
         {
-            canvas->fillRect(D2D1::RectF(left, top, centerX, top + mSeekTrackHeight), Color::Blue400);
-            canvas->fillRect(D2D1::RectF(centerX, top, left + trackWidth, top + mSeekTrackHeight), Color::Grey300);
+            canvas->fillRect(RectF(left, top, cur_pos, mSeekTrackHeight), Color::Blue400);
+            canvas->fillRect(RectF(centerX, top, trackWidth - cur_pos, mSeekTrackHeight), Color::Grey300);
         }
 
         canvas->fillCircle(centerX, centerY, mSeekThumbCurDiameter / 2.f, Color::Blue400);

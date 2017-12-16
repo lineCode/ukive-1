@@ -1,5 +1,7 @@
 #include "rect.h"
 
+#include <algorithm>
+
 
 namespace ukive {
 
@@ -33,6 +35,20 @@ namespace ukive {
         return *this;
     }
 
+    Rect& Rect::operator&(const Rect &rhs) {
+        same(rhs);
+        return *this;
+    }
+
+    Rect& Rect::operator|(const Rect &rhs) {
+        all(rhs);
+        return *this;
+    }
+
+    bool Rect::operator==(const Rect &rhs) {
+        return equal(rhs);
+    }
+
     int Rect::width() {
         return right - left;
     }
@@ -45,9 +61,34 @@ namespace ukive {
         return (right - left <= 0) || (bottom - top <= 0);
     }
 
+    bool Rect::equal(const Rect &rhs) {
+        return (left == rhs.left
+            && top == rhs.top
+            && right == rhs.right
+            && bottom == rhs.bottom);
+    }
+
     bool Rect::intersect(const Rect &rect) {
         return (rect.right > left && rect.left < right)
             && (rect.bottom > top && rect.top < bottom);
+    }
+
+    void Rect::all(const Rect &rhs) {
+        left = std::min(left, rhs.left);
+        top = std::min(top, rhs.top);
+        right = std::max(right, rhs.right);
+        bottom = std::max(bottom, rhs.bottom);
+    }
+
+    void Rect::same(const Rect &rhs) {
+        left = std::max(left, rhs.left);
+        top = std::max(top, rhs.top);
+        right = std::min(right, rhs.right);
+        bottom = std::min(bottom, rhs.bottom);
+
+        if (empty()) {
+            left = top = right = bottom = 0;
+        }
     }
 
 
@@ -70,7 +111,7 @@ namespace ukive {
         left = x;
         top = y;
         right = left + width;
-        height = top + height;
+        bottom = top + height;
     }
 
     RectF& RectF::operator=(const RectF &rhs) {
@@ -79,6 +120,20 @@ namespace ukive {
         right = rhs.right;
         bottom = rhs.bottom;
         return *this;
+    }
+
+    RectF& RectF::operator&(const RectF &rhs) {
+        same(rhs);
+        return *this;
+    }
+
+    RectF& RectF::operator|(const RectF &rhs) {
+        all(rhs);
+        return *this;
+    }
+
+    bool RectF::operator==(const RectF &rhs) {
+        return equal(rhs);
     }
 
     float RectF::width() {
@@ -93,9 +148,34 @@ namespace ukive {
         return (right - left <= 0) || (bottom - top <= 0);
     }
 
+    bool RectF::equal(const RectF &rhs) {
+        return (left == rhs.left
+            && top == rhs.top
+            && right == rhs.right
+            && bottom == rhs.bottom);
+    }
+
     bool RectF::intersect(const RectF &rect) {
         return (rect.right > left && rect.left < right)
             && (rect.bottom > top && rect.top < bottom);
+    }
+
+    void RectF::all(const RectF &rhs) {
+        left = std::min(left, rhs.left);
+        top = std::min(top, rhs.top);
+        right = std::max(right, rhs.right);
+        bottom = std::max(bottom, rhs.bottom);
+    }
+
+    void RectF::same(const RectF &rhs) {
+        left = std::max(left, rhs.left);
+        top = std::max(top, rhs.top);
+        right = std::min(right, rhs.right);
+        bottom = std::min(bottom, rhs.bottom);
+
+        if (empty()) {
+            left = top = right = bottom = 0.f;
+        }
     }
 
 }

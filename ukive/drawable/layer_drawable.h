@@ -16,7 +16,7 @@ namespace ukive {
     protected:
         std::vector<std::shared_ptr<Drawable>> mDrawableList;
 
-        void onBoundChanged(D2D1_RECT_F &newBound) override;
+        void onBoundChanged(RectF &newBound) override;
 
     public:
         LayerDrawable();

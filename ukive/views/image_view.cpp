@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "ukive/drawable/bitmap_drawable.h"
+#include "ukive/graphics/bitmap.h"
 
 
 namespace ukive {
@@ -99,14 +100,11 @@ namespace ukive {
     }
 
 
-    void ImageView::setImageBitmap(ComPtr<ID2D1Bitmap> bitmap)
+    void ImageView::setImageBitmap(std::shared_ptr<Bitmap> bitmap)
     {
-        if (bitmap != nullptr)
-        {
-            D2D1_SIZE_F size = bitmap->GetSize();
-
+        if (bitmap != nullptr) {
             mBitmapDrawable = new BitmapDrawable(bitmap);
-            mBitmapDrawable->setBound(0, 0, size.width, size.height);
+            mBitmapDrawable->setBound(0, 0, bitmap->getWidth(), bitmap->getHeight());
         }
     }
 

@@ -7,6 +7,7 @@
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
+#include "ukive/graphics/rect.h"
 
 
 namespace shell {
@@ -100,8 +101,8 @@ namespace shell {
                 unsigned int color_int = pixels_[h][w];
                 ukive::Color color(color_int);
 
-                auto cell_rect = D2D1::RectF(
-                    cur_x, cur_y, cur_x + cell_width_, cur_y + cell_width_);
+                ukive::RectF cell_rect(
+                    cur_x, cur_y, cell_width_, cell_width_);
 
                 if (isCellVisible(cell_rect)) {
                     canvas->fillRect(cell_rect, color);
@@ -175,7 +176,7 @@ namespace shell {
         return matrix_.get(ukive::Matrix::SCALE_X) > 0.5f;
     }
 
-    bool BitmapDumpView::isCellVisible(const D2D1_RECT_F &rect) {
+    bool BitmapDumpView::isCellVisible(const ukive::RectF &rect) {
         ukive::Rect real_rect(rect.left, rect.top,
             rect.right - rect.left, rect.bottom - rect.top);
         matrix_.transformRect(&real_rect);

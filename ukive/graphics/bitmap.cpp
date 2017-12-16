@@ -8,6 +8,15 @@ namespace ukive {
     }
 
 
+    unsigned int Bitmap::getWidth() {
+        return native_bitmap_->GetPixelSize().width;
+    }
+
+    unsigned int Bitmap::getHeight() {
+        return native_bitmap_->GetPixelSize().height;
+    }
+
+
     ComPtr<ID2D1Bitmap> Bitmap::getNative() {
         return native_bitmap_;
     }

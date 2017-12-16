@@ -60,7 +60,7 @@ namespace shell {
         using ukive::Window::Window;
 
         void onCreate() override;
-        void onDraw(ukive::Canvas *canvas) override;
+        void onDrawCanvas(ukive::Canvas *canvas) override;
         void onDestroy() override;
         bool onInputEvent(ukive::InputEvent *e) override;
 

@@ -10,6 +10,9 @@ namespace ukive {
     public:
         Bitmap(const ComPtr<ID2D1Bitmap> &source);
 
+        unsigned int getWidth();
+        unsigned int getHeight();
+
         ComPtr<ID2D1Bitmap> getNative();
 
     private:

@@ -35,7 +35,7 @@ namespace ukive {
         ripple_background_ = new RippleDrawable(getWindow());
         ripple_background_->addDrawable(shape_drawable_);
 
-        setText(L"UButton");
+        setText(L"Button");
         setTextSize(13);
         setIsEditable(false);
         setIsSelectable(false);

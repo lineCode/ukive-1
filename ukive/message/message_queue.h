@@ -12,14 +12,6 @@ namespace ukive {
 
     class MessageQueue
     {
-    private:
-        bool mQuitting;
-        bool mHasBarrier;
-        Message *mMessage;
-        std::mutex mQueueSync;
-
-        void removeAllLocked();
-
     public:
         MessageQueue();
         ~MessageQueue();
@@ -36,6 +28,14 @@ namespace ukive {
 
         void addBarrier();
         void removeBarrier();
+
+    private:
+        void removeAllLocked();
+
+        bool is_quitting_;
+        bool has_barrier_;
+        Message *message_;
+        std::mutex queue_sync_;
     };
 
 }

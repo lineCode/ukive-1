@@ -2,13 +2,15 @@
 
 #include "ukive/application.h"
 #include "ukive/graphics/wic_manager.h"
+#include "ukive/graphics/bitmap.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
+#include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
 
-    ComPtr<ID2D1Bitmap> BitmapFactory::create(Window *win, unsigned int width, unsigned int height) {
+    std::shared_ptr<Bitmap> BitmapFactory::create(Window *win, unsigned int width, unsigned int height) {
         auto d2d_dc = win->getRenderer()->getD2DDeviceContext();
 
         ComPtr<ID2D1Bitmap> d2dBitmap;
@@ -17,13 +19,13 @@ namespace ukive {
             D2D1::BitmapProperties(D2D1::PixelFormat()),
             &d2dBitmap);
         if (SUCCEEDED(hr)) {
-            return d2dBitmap;
+            return std::make_shared<Bitmap>(d2dBitmap);
         }
 
         return nullptr;
     }
 
-    ComPtr<ID2D1Bitmap> BitmapFactory::decodeFile(Window *win, const string16 &file_name) {
+    std::shared_ptr<Bitmap> BitmapFactory::decodeFile(Window *win, const string16 &file_name) {
         HRESULT hr;
         ComPtr<IWICBitmapSource> source;
         ComPtr<IWICBitmapSource> destFormatSource;
@@ -44,7 +46,7 @@ namespace ukive {
         }
 
         if (SUCCEEDED(hr)) {
-            return d2dBitmap.cast<ID2D1Bitmap>();
+            return std::make_shared<Bitmap>(d2dBitmap);
         }
 
         return nullptr;

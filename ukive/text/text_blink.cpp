@@ -34,11 +34,11 @@ namespace ukive {
     {
         if (mBlinkMask && mLocated)
         {
-            canvas->fillRect(D2D1::RectF(
+            canvas->fillRect(RectF(
                 static_cast<float>(mBlinkRect.left),
                 static_cast<float>(mBlinkRect.top),
-                static_cast<float>(mBlinkRect.right),
-                static_cast<float>(mBlinkRect.bottom)),
+                static_cast<float>(mBlinkRect.width()),
+                static_cast<float>(mBlinkRect.height())),
                 mColor);
         }
     }

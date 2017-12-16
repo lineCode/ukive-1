@@ -3,6 +3,7 @@
 #include "ukive/graphics/canvas.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
+#include "ukive/graphics/bitmap.h"
 
 
 namespace ukive {
@@ -54,56 +55,38 @@ namespace ukive {
 
     void RippleDrawable::draw(Canvas *canvas)
     {
-        D2D1_RECT_F bound = getBound();
-        Color color = Color(mAlpha, 0.f, 0.f, 0.f);
+        auto bound = getBound();
+        Color color(mAlpha, 0.f, 0.f, 0.f);
 
         //绘制底色、alpha和ripple。
-        ComPtr<ID2D1Bitmap> contentBitmap;
-        owner_win_->getRenderer()->drawOnBitmap(
-            bound.right - bound.left, bound.bottom - bound.top, &contentBitmap,
-            [this, bound, color, canvas](ComPtr<ID2D1RenderTarget> rt)
-        {
-            Canvas offCanvas = Canvas(rt);
-            offCanvas.setOpacity(canvas->getOpacity());
+        Canvas offscreen(owner_win_, bound.right - bound.left, bound.bottom - bound.top);
+        offscreen.setOpacity(canvas->getOpacity());
+        offscreen.fillRect(bound, mTintColor);
+        offscreen.fillRect(bound, color);
 
-            D2D1_RECT_F _bound = bound;
-            Color _color = color;
+        if (getState() == STATE_HOVERED
+            && getPrevState() == STATE_PRESSED) {
 
-            offCanvas.fillRect(_bound, mTintColor);
-            offCanvas.fillRect(_bound, _color);
+            Color rippleColor = Color(0U,
+                (float)mRippleAnimator->getValue(1));
 
-            if (getState() == STATE_HOVERED
-                && getPrevState() == STATE_PRESSED)
-            {
-                Color rippleColor = Color(0U,
-                    (float)mRippleAnimator->getValue(1));
+            offscreen.fillCircle(
+                mStartX, mStartY,
+                mRippleAnimator->getValue(0), rippleColor);
+        }
+        auto contentBitmap = offscreen.extractBitmap();
 
-                offCanvas.fillCircle(
-                    mStartX, mStartY,
-                    mRippleAnimator->getValue(0), rippleColor);
-            }
-        });
-
-        if (mDrawableList.empty())
-        {
+        if (mDrawableList.empty()) {
             canvas->drawBitmap(contentBitmap.get());
         }
-        else
-        {
+        else {
             //绘制mask，以该mask确定背景形状以及ripple的扩散边界。
-            ComPtr<ID2D1Bitmap> maskBitmap;
-            owner_win_->getRenderer()->drawOnBitmap(
-                bound.right - bound.left, bound.bottom - bound.top, &maskBitmap,
-                [this, bound, canvas](ComPtr<ID2D1RenderTarget> rt)
-            {
-                Canvas offCanvas = Canvas(rt);
-                offCanvas.setOpacity(canvas->getOpacity());
-
-                LayerDrawable::draw(&offCanvas);
-            });
+            Canvas offscreen(owner_win_, bound.right - bound.left, bound.bottom - bound.top);
+            offscreen.setOpacity(canvas->getOpacity());
+            LayerDrawable::draw(&offscreen);
+            auto maskBitmap = offscreen.extractBitmap();
 
             canvas->drawBitmap(maskBitmap.get());
-
             canvas->fillOpacityMask(
                 bound.right - bound.left, bound.bottom - bound.top,
                 maskBitmap.get(), contentBitmap.get());

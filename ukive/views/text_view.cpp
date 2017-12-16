@@ -669,14 +669,14 @@ namespace ukive {
         {
         case InputEvent::EVM_LEAVE_OBJ:
         {
-            setCurrentCursor(IDC_ARROW);
+            setCurrentCursor(Cursor::ARROW);
             return true;
         }
 
         case InputEvent::EVM_SCROLL_ENTER:
         {
             if (mIsSelectable)
-                setCurrentCursor(IDC_IBEAM);
+                setCurrentCursor(Cursor::IBEAM);
             return true;
         }
 
@@ -697,7 +697,7 @@ namespace ukive {
                     e->getMouseY() - getPaddingTop() + getScrollY());
 
                 if (mIsSelectable && isMouseKeyDownOnText)
-                    setCurrentCursor(IDC_IBEAM);
+                    setCurrentCursor(Cursor::IBEAM);
 
                 if (e->getMouseKey() == InputEvent::MK_LEFT)
                 {
@@ -733,9 +733,9 @@ namespace ukive {
                     && (isHitText(
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
                         e->getMouseY() - getPaddingTop() + getScrollY()) || mIsEditable))
-                    setCurrentCursor(IDC_IBEAM);
+                    setCurrentCursor(Cursor::IBEAM);
                 else
-                    setCurrentCursor(IDC_ARROW);
+                    setCurrentCursor(Cursor::ARROW);
             }
             else if (e->getMouseKey() == InputEvent::MK_RIGHT)
             {
@@ -776,10 +776,10 @@ namespace ukive {
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
                         e->getMouseY() - getPaddingTop() + getScrollY()) || mIsEditable))
                 {
-                    setCurrentCursor(IDC_IBEAM);
+                    setCurrentCursor(Cursor::IBEAM);
                 }
                 else
-                    setCurrentCursor(IDC_ARROW);
+                    setCurrentCursor(Cursor::ARROW);
             }
             return true;
         }
@@ -917,6 +917,7 @@ namespace ukive {
 
     void TextView::setTextSize(int size)
     {
+        size = static_cast<int>(std::round(getWindow()->dpToPx(size)));
         if (size == mTextSize)
             return;
 

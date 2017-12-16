@@ -1,26 +1,54 @@
 ﻿#include "canvas.h"
 
 #include "ukive/text/text_renderer.h"
+#include "ukive/window/window.h"
+#include "ukive/graphics/renderer.h"
+#include "ukive/graphics/rect.h"
+#include "ukive/graphics/bitmap.h"
+#include "ukive/log.h"
 
 
 namespace ukive {
 
+    Canvas::Canvas(Window *win, float width, float height) {
+        is_bmp_target_ = true;
+
+        ComPtr<ID2D1BitmapRenderTarget> bmp_target;
+        HRESULT hr = win->getRenderer()->getD2DDeviceContext()->CreateCompatibleRenderTarget(
+            D2D1::SizeF(width, height), &bmp_target);
+        if (FAILED(hr)) {
+            Log::e(L"cannot create bitmap render target.");
+            return;
+        }
+
+        bmp_target->BeginDraw();
+        bmp_target->Clear(D2D1::ColorF(0, 0));
+
+        initCanvas(bmp_target.cast<ID2D1RenderTarget>());
+    }
+
     Canvas::Canvas(ComPtr<ID2D1RenderTarget> renderTarget)
     {
-        opacity_ = 1.f;
-        layer_counter_ = 0;
-        mTextRenderer = nullptr;
-
-        render_target_ = renderTarget;
-        render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
-        render_target_->CreateBitmapBrush(nullptr, &bitmap_brush_);
+        is_bmp_target_ = false;
+        initCanvas(renderTarget);
     }
 
 
     Canvas::~Canvas()
     {
-        if (mTextRenderer)
-            delete mTextRenderer;
+        if (text_renderer_) {
+            delete text_renderer_;
+        }
+    }
+
+    void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> renderTarget) {
+        opacity_ = 1.f;
+        layer_counter_ = 0;
+        text_renderer_ = nullptr;
+
+        render_target_ = renderTarget;
+        render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
+        render_target_->CreateBitmapBrush(nullptr, &bitmap_brush_);
     }
 
 
@@ -31,8 +59,8 @@ namespace ukive {
 
         opacity_ = opacity;
 
-        if (mTextRenderer)
-            mTextRenderer->setOpacity(opacity_);
+        if (text_renderer_)
+            text_renderer_->setOpacity(opacity_);
     }
 
     float Canvas::getOpacity()
@@ -57,10 +85,11 @@ namespace ukive {
         render_target_->PopAxisAlignedClip();
     }
 
-    void Canvas::pushClip(D2D1_RECT_F &rect)
+    void Canvas::pushClip(const RectF &rect)
     {
+        D2D1_RECT_F d2d_rect = { rect.left, rect.top, rect.right, rect.bottom };
         render_target_->PushAxisAlignedClip(
-            rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+            d2d_rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     }
 
 
@@ -97,13 +126,17 @@ namespace ukive {
         ++layer_counter_;
     }
 
-    void Canvas::pushLayer(D2D1_RECT_F &contentBound, ID2D1Geometry *clipGeometry)
+    void Canvas::pushLayer(const RectF &content_bound, ID2D1Geometry *clipGeometry)
     {
         if (layer_counter_ > 0)
         {
             ++layer_counter_;
             return;
         }
+
+        D2D1_RECT_F d2d_rect = {
+            content_bound.left, content_bound.top,
+            content_bound.right, content_bound.bottom };
 
         ComPtr<ID2D1DeviceContext> d2dDC
             = render_target_.cast<ID2D1DeviceContext>();
@@ -117,13 +150,13 @@ namespace ukive {
             }
 
             render_target_->PushLayer(
-                D2D1::LayerParameters(contentBound, clipGeometry),
+                D2D1::LayerParameters(d2d_rect, clipGeometry),
                 layer_.get());
         }
         else
         {
             d2dDC->PushLayer(
-                D2D1::LayerParameters1(contentBound, clipGeometry),
+                D2D1::LayerParameters1(d2d_rect, clipGeometry),
                 nullptr);
         }
 
@@ -177,13 +210,33 @@ namespace ukive {
         opacity_stack_.pop();
         drawing_state_stack_.pop();
 
-        if (mTextRenderer)
-            mTextRenderer->setOpacity(opacity_);
+        if (text_renderer_)
+            text_renderer_->setOpacity(opacity_);
     }
 
     ID2D1RenderTarget *Canvas::getRT()
     {
         return render_target_.get();
+    }
+
+    std::shared_ptr<Bitmap> Canvas::extractBitmap() {
+        if (is_bmp_target_) {
+            auto bmp_target = render_target_.cast<ID2D1BitmapRenderTarget>();
+            if (FAILED(bmp_target->EndDraw())) {
+                Log::e(L"failed to extract bitmap.");
+                return std::shared_ptr<Bitmap>();
+            }
+
+            ID2D1Bitmap *bitmap = nullptr;
+            if (FAILED(bmp_target->GetBitmap(&bitmap))) {
+                Log::e(L"failed to extract bitmap.");
+                return std::shared_ptr<Bitmap>();
+            }
+
+            return std::make_shared<Bitmap>(bitmap);
+        }
+
+        return std::shared_ptr<Bitmap>();
     }
 
 
@@ -230,92 +283,92 @@ namespace ukive {
 
     void Canvas::fillOpacityMask(
         float width, float height,
-        ID2D1Bitmap *mask, ID2D1Bitmap *content)
+        Bitmap *mask, Bitmap *content)
     {
-        bitmap_brush_->SetBitmap(content);
+        bitmap_brush_->SetBitmap(content->getNative().get());
 
         D2D1_RECT_F rect = D2D1::RectF(0, 0, width, height);
 
         render_target_->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
         render_target_->FillOpacityMask(
-            mask, bitmap_brush_.get(), D2D1_OPACITY_MASK_CONTENT_GRAPHICS, rect, rect);
+            mask->getNative().get(), bitmap_brush_.get(), D2D1_OPACITY_MASK_CONTENT_GRAPHICS, rect, rect);
         render_target_->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     }
 
 
-    void Canvas::drawRect(D2D1_RECT_F &rect, Color &color)
+    void Canvas::drawRect(const RectF &rect, Color &color)
     {
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
-        render_target_->DrawRectangle(rect, solid_brush_.get());
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_rect = {
+            rect.left, rect.top, rect.right, rect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
+        render_target_->DrawRectangle(d2d_rect, solid_brush_.get());
     }
 
-    void Canvas::drawRect(D2D1_RECT_F &rect, float strokeWidth, Color &color)
+    void Canvas::drawRect(const RectF &rect, float strokeWidth, Color &color)
     {
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
-        render_target_->DrawRectangle(rect, solid_brush_.get(), strokeWidth);
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_rect = {
+            rect.left, rect.top, rect.right, rect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
+        render_target_->DrawRectangle(d2d_rect, solid_brush_.get(), strokeWidth);
     }
 
 
-    void Canvas::fillRect(D2D1_RECT_F &rect, const Color &color)
+    void Canvas::fillRect(const RectF &rect, const Color &color)
     {
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
-        render_target_->FillRectangle(rect, solid_brush_.get());
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_rect = {
+            rect.left, rect.top, rect.right, rect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
+        render_target_->FillRectangle(d2d_rect, solid_brush_.get());
     }
 
 
     void Canvas::drawRoundRect(
-        D2D1_RECT_F &rect, float radius, Color &color)
+        const RectF &rect, float radius, Color &color)
     {
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_rect = {
+            rect.left, rect.top, rect.right, rect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
         render_target_->DrawRoundedRectangle(
-            D2D1::RoundedRect(rect, radius, radius), solid_brush_.get());
+            D2D1::RoundedRect(d2d_rect, radius, radius), solid_brush_.get());
     }
 
     void Canvas::drawRoundRect(
-        D2D1_RECT_F &rect, float strokeWidth,
+        const RectF &rect, float strokeWidth,
         float radius, Color &color)
     {
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_rect = {
+            rect.left, rect.top, rect.right, rect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
         render_target_->DrawRoundedRectangle(
-            D2D1::RoundedRect(rect, radius, radius), solid_brush_.get(), strokeWidth);
+            D2D1::RoundedRect(d2d_rect, radius, radius), solid_brush_.get(), strokeWidth);
     }
 
     void Canvas::fillRoundRect(
-        D2D1_RECT_F &rect, float radius, Color &color)
+        const RectF &rect, float radius, Color &color)
     {
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_rect = {
+            rect.left, rect.top, rect.right, rect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
         render_target_->FillRoundedRectangle(
-            D2D1::RoundedRect(rect, radius, radius), solid_brush_.get());
+            D2D1::RoundedRect(d2d_rect, radius, radius), solid_brush_.get());
     }
 
 
@@ -338,10 +391,7 @@ namespace ukive {
     void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, Color &color)
     {
         D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
+            color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
         render_target_->DrawEllipse(
             D2D1::Ellipse(
@@ -353,10 +403,7 @@ namespace ukive {
     void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, Color &color)
     {
         D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
+            color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
         render_target_->DrawEllipse(
             D2D1::Ellipse(
@@ -368,90 +415,99 @@ namespace ukive {
     void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, Color &color)
     {
         D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
+            color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
         render_target_->FillEllipse(D2D1::Ellipse(D2D1::Point2F(cx, cy), radiusX, radiusY), solid_brush_.get());
     }
 
 
-    void Canvas::drawBitmap(ID2D1Bitmap *bitmap)
-    {
-        if (bitmap == nullptr)
-            return;
+    void Canvas::fillGeometry(ID2D1Geometry *geo, ID2D1Brush *brush) {
+        render_target_->FillGeometry(geo, brush);
+    }
 
-        D2D1_SIZE_F size = bitmap->GetSize();
-        D2D1_RECT_F srcRect = D2D1::RectF(0.f, 0.f, size.width, size.height);
+
+    void Canvas::drawBitmap(Bitmap *bitmap)
+    {
+        if (bitmap == nullptr) {
+            return;
+        }
+
+        RectF srcRect(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
 
         drawBitmap(srcRect, srcRect, 1.f, bitmap);
     }
 
-    void Canvas::drawBitmap(float x, float y, ID2D1Bitmap *bitmap)
+    void Canvas::drawBitmap(float x, float y, Bitmap *bitmap)
     {
-        if (bitmap == nullptr)
+        if (bitmap == nullptr) {
             return;
+        }
 
-        D2D1_SIZE_F size = bitmap->GetSize();
-        D2D1_RECT_F srcRect = D2D1::RectF(0.f, 0.f, size.width, size.height);
-        D2D1_RECT_F dstRect = D2D1::RectF(x, y, size.width + x, size.height + y);
+        auto width = bitmap->getWidth();
+        auto height = bitmap->getHeight();
+        RectF srcRect(0.f, 0.f, width, height);
+        RectF dstRect(x, y, width + x, height + y);
 
         drawBitmap(srcRect, dstRect, 1.f, bitmap);
     }
 
-    void Canvas::drawBitmap(D2D1_RECT_F &dst, float opacity, ID2D1Bitmap *bitmap)
+    void Canvas::drawBitmap(const RectF &dst, float opacity, Bitmap *bitmap)
     {
-        if (bitmap == nullptr)
+        if (bitmap == nullptr) {
             return;
+        }
 
-        D2D1_SIZE_F size = bitmap->GetSize();
-        D2D1_RECT_F srcRect = D2D1::RectF(0.f, 0.f, size.width, size.height);
+        RectF srcRect(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
 
         drawBitmap(srcRect, dst, opacity, bitmap);
     }
 
-    void Canvas::drawBitmap(D2D1_RECT_F &src, D2D1_RECT_F &dst, float opacity, ID2D1Bitmap *bitmap)
+    void Canvas::drawBitmap(const RectF &src, const RectF &dst, float opacity, Bitmap *bitmap)
     {
-        if (bitmap == nullptr)
+        if (bitmap == nullptr) {
             return;
+        }
+
+        D2D1_RECT_F d2d_src_rect = {
+            src.left, src.top, src.right, src.bottom };
+        D2D1_RECT_F d2d_dst_rect = {
+            dst.left, dst.top, dst.right, dst.bottom };
 
         render_target_->DrawBitmap(
-            bitmap, dst, opacity,
+            bitmap->getNative().get(), d2d_dst_rect, opacity,
             D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-            src);
+            d2d_src_rect);
     }
 
 
     void Canvas::drawText(
         std::wstring text, IDWriteTextFormat *textFormat,
-        D2D1_RECT_F &layoutRect, Color &color)
+        const RectF &layoutRect, Color &color)
     {
-        if (textFormat == nullptr)
+        if (textFormat == nullptr) {
             return;
+        }
 
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
-        render_target_->DrawTextW(text.c_str(), text.length(), textFormat, layoutRect, solid_brush_.get());
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        D2D1_RECT_F d2d_layout_rect = {
+            layoutRect.left, layoutRect.top, layoutRect.right, layoutRect.bottom };
+
+        solid_brush_->SetColor(d2d_color);
+        render_target_->DrawTextW(text.c_str(), text.length(), textFormat, d2d_layout_rect, solid_brush_.get());
     }
 
     void Canvas::drawTextLayout(
         float x, float y,
         IDWriteTextLayout *textLayout, Color &color)
     {
-        if (textLayout == nullptr)
+        if (textLayout == nullptr) {
             return;
+        }
 
-        D2D1_COLOR_F _color = {
-            color.r,
-            color.g,
-            color.b,
-            color.a, };
-        solid_brush_->SetColor(_color);
+        D2D1_COLOR_F d2d_color = {
+            color.r, color.g, color.b, color.a, };
+        solid_brush_->SetColor(d2d_color);
         render_target_->DrawTextLayout(D2D1::Point2F(x, y), textLayout, solid_brush_.get());
     }
 
@@ -460,14 +516,13 @@ namespace ukive {
         float x, float y,
         IDWriteTextLayout *textLayout, Color &color)
     {
-        if (mTextRenderer == nullptr)
-        {
-            mTextRenderer = new TextRenderer(render_target_);
-            mTextRenderer->setOpacity(opacity_);
+        if (text_renderer_ == nullptr) {
+            text_renderer_ = new TextRenderer(render_target_);
+            text_renderer_->setOpacity(opacity_);
         }
 
-        mTextRenderer->setTextColor(color);
-        textLayout->Draw(widget, mTextRenderer, x, y);
+        text_renderer_->setTextColor(color);
+        textLayout->Draw(widget, text_renderer_, x, y);
     }
 
 }

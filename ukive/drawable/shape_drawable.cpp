@@ -1,6 +1,7 @@
 ﻿#include "shape_drawable.h"
 
 #include "ukive/graphics/canvas.h"
+#include "ukive/graphics/rect.h"
 
 
 namespace ukive {
@@ -69,11 +70,11 @@ namespace ukive {
         if (!mHasSolid && !mHasStroke)
             return;
 
-        D2D1_RECT_F bound;
+        RectF bound;
         if (mWidth == -1 || mHeight == -1)
             bound = getBound();
         else
-            bound = D2D1::RectF(0, 0, mWidth, mHeight);
+            bound = RectF(0, 0, mWidth, mHeight);
 
         switch (mShape)
         {

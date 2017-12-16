@@ -192,12 +192,6 @@
     <ClCompile Include="views\image_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
-    <ClCompile Include="views\list_adapter.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
-    <ClCompile Include="views\list_view.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="views\scroll_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
@@ -266,6 +260,12 @@
     </ClCompile>
     <ClCompile Include="graphics\matrix.cpp">
       <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\cursor.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\weak_bind.cpp">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -572,6 +572,12 @@
       <Filter>views\list</Filter>
     </ClInclude>
     <ClInclude Include="utils\stl_utils.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\cursor.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\weak_bind.h">
       <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>

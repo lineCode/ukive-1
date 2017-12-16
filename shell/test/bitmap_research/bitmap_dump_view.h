@@ -5,6 +5,7 @@
 
 #include "ukive/graphics/color.h"
 #include "ukive/graphics/matrix.h"
+#include "ukive/graphics/bitmap.h"
 #include "ukive/views/view.h"
 #include "ukive/utils/com_ptr.h"
 
@@ -33,7 +34,7 @@ namespace shell {
         void initView();
 
         bool shouldShowText();
-        bool isCellVisible(const D2D1_RECT_F &rect);
+        bool isCellVisible(const ukive::RectF &rect);
 
         int cell_width_;
 

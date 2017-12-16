@@ -5,8 +5,10 @@
 
 #include <memory>
 
+#include "ukive/message/cycler.h"
 #include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
+#include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
 
 
@@ -28,6 +30,9 @@ namespace ukive {
 
     class Window {
     public:
+        static const UINT MSG_INVALIDATE = 0;
+        static const UINT MSG_RELAYOUT = 1;
+
         Window();
         virtual ~Window();
 
@@ -45,9 +50,9 @@ namespace ukive {
         void setWidth(int width);
         void setHeight(int height);
         void setBound(int x, int y, int width, int height);
-        void setMinWidth(int minWidth);
-        void setMinHeight(int minHeight);
-        void setCurrentCursor(const string16 &cursor);
+        void setMinWidth(int min_width);
+        void setMinHeight(int min_height);
+        void setCurrentCursor(Cursor cursor);
         void setContentView(View *content);
         void setBackgroundColor(Color color);
 
@@ -64,19 +69,30 @@ namespace ukive {
         Cycler *getCycler();
         Renderer *getRenderer();
         HWND getHandle();
-        View *getKeyboardHolder();
         AnimationManager *getAnimationManager();
 
         bool isShowing();
         bool isCursorInClient();
 
-        void captureMouse(View *widget);
+        void captureMouse(View *v);
         void releaseMouse();
-        void captureKeyboard(View *widget);
+
+        //当一个widget获取到焦点时，应调用此方法。
+        void captureKeyboard(View *v);
+        //当一个widget放弃焦点时，应调用此方法。
         void releaseKeyboard();
 
+        View *getMouseHolder();
+        unsigned int getMouseHolderRef();
+        View *getKeyboardHolder();
+
         void invalidate();
+        void invalidate(int left, int top, int right, int bottom);
         void requestLayout();
+
+        void performLayout();
+        void performRefresh();
+        void performRefresh(int left, int top, int right, int bottom);
 
         View *findViewById(int id);
 
@@ -92,11 +108,11 @@ namespace ukive {
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);
-        virtual void onDraw(Canvas *canvas);
+        virtual void onDraw(const Rect &rect);
         virtual void onMove(int x, int y);
         virtual void onResize(
             int param, int width, int height,
-            int clientWidth, int clientHeight);
+            int client_width, int client_height);
         virtual bool onMoving(Rect *rect);
         virtual bool onResizing(int edge, Rect *rect);
         virtual bool onClose();
@@ -105,10 +121,77 @@ namespace ukive {
         virtual void onDpiChanged(int dpi_x, int dpi_y);
         virtual bool onDataCopy(unsigned int id, unsigned int size, void *data);
 
+        virtual void onDrawCanvas(Canvas *canvas);
+
     private:
+        static const int SCHEDULE_RENDER = 0;
+        static const int SCHEDULE_LAYOUT = 1;
+
+        class UpdateCycler : public Cycler
+        {
+        public:
+            UpdateCycler(Window *window)
+                :win_(window) {}
+
+            void handleMessage(Message *msg);
+        private:
+            Window * win_;
+        };
+
+        class AnimStateChangedListener
+            : public AnimationManager::OnStateChangedListener
+        {
+        public:
+            AnimStateChangedListener(Window *window)
+                :win_(window) {}
+
+            void onStateChanged(
+                UI_ANIMATION_MANAGER_STATUS newStatus,
+                UI_ANIMATION_MANAGER_STATUS previousStatus);
+        private:
+            Window * win_;
+        };
+
+        class AnimTimerEventListener
+            : public AnimationManager::OnTimerEventListener
+        {
+        public:
+            AnimTimerEventListener(Window *window)
+                :window_(window) {}
+
+            void OnPreUpdate();
+            void OnPostUpdate();
+            void OnRenderingTooSlow(unsigned int fps);
+
+        private:
+            Window *window_;
+        };
+
+
         std::unique_ptr<WindowImpl> impl_;
 
+        Canvas *mCanvas;
+        Renderer *mRenderer;
+
+        Cycler *mLabourCycler;
+        BaseLayout *mBaseLayout;
+
+        View *mMouseHolder;
+        View *mFocusHolder;
+        View *mFocusHolderBackup;
+        unsigned int mMouseHolderRef;
+
+        ContextMenu *mContextMenu;
+        TextActionMode *mTextActionMode;
+
+        AnimationManager *mAnimationManager;
+        AnimationManager::OnStateChangedListener *mStateChangedListener;
+
+        AnimStateChangedListener *mAnimStateChangedListener;
+        AnimTimerEventListener *mAnimTimerEventListener;
+
         int min_width_, min_height_;
+        Color background_color_;
     };
 
 }

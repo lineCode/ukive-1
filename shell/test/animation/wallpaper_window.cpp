@@ -95,9 +95,9 @@ namespace shell {
         mAnimator->start();
     }
 
-    void WallpaperWindow::onDraw(ukive::Canvas *canvas)
+    void WallpaperWindow::onDrawCanvas(ukive::Canvas *canvas)
     {
-        Window::onDraw(canvas);
+        Window::onDrawCanvas(canvas);
 
         float cx = getClientWidth() / 2.f;
         float cy = getClientHeight() / 2.f;
@@ -439,42 +439,38 @@ namespace shell {
         if (split)
         {
             canvas->fillRoundRect(
-                D2D1::RectF(
+                ukive::RectF(
                     cx - width / 2 - topDistance,
                     cy - radius - height / 2,
-                    cx + width / 2 - topDistance,
-                    cy - radius + height / 2),
+                    width, height),
                 corner,
                 ukive::Color::White);
         }
 
         canvas->fillRoundRect(
-            D2D1::RectF(
+            ukive::RectF(
                 cx - width / 2 + topDistance,
                 cy - radius - height / 2,
-                cx + width / 2 + topDistance,
-                cy - radius + height / 2),
+                width, height),
             corner,
             ukive::Color::White);
 
         if (split)
         {
             canvas->fillRoundRect(
-                D2D1::RectF(
+                ukive::RectF(
                     cx - width / 2 - distance,
                     cy + radius - height / 2,
-                    cx + width / 2 - distance,
-                    cy + radius + height / 2),
+                    width, height),
                 corner,
                 ukive::Color::White);
         }
 
         canvas->fillRoundRect(
-            D2D1::RectF(
+            ukive::RectF(
                 cx - width / 2 + distance,
                 cy + radius - height / 2,
-                cx + width / 2 + distance,
-                cy + radius + height / 2),
+                width, height),
             corner,
             ukive::Color::White);
     }
@@ -501,11 +497,10 @@ namespace shell {
 
         canvas->drawText(
             mBottomText.c_str(), mBottomTextFormat,
-            D2D1::RectF(
+            ukive::RectF(
                 cx - width / 2,
                 cy + radius - height / 2,
-                cx + width / 2 + appendix,
-                cy + radius + height / 2),
+                width + appendix, height),
             ukive::Color(alpha, 1.f, 1.f, 1.f));
     }
 

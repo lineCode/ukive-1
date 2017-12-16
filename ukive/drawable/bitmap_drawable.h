@@ -1,33 +1,35 @@
 ﻿#ifndef UKIVE_DRAWABLE_BITMAP_DRAWABLE_H_
 #define UKIVE_DRAWABLE_BITMAP_DRAWABLE_H_
 
-#include "ukive/utils/com_ptr.h"
+#include <memory>
+
 #include "ukive/drawable/drawable.h"
-#include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
+
+    class Bitmap;
 
     class BitmapDrawable : public Drawable
     {
     private:
         float mOpacity;
-        ComPtr<ID2D1Bitmap> mBitmap;
+        std::shared_ptr<Bitmap> mBitmap;
 
     public:
-        BitmapDrawable(ComPtr<ID2D1Bitmap> bitmap);
-        ~BitmapDrawable();
+        BitmapDrawable(std::shared_ptr<Bitmap> bitmap);
+        ~BitmapDrawable() = default;
 
         void setOpacity(float opt);
 
-        virtual void draw(Canvas *canvas) override;
+        void draw(Canvas *canvas) override;
 
-        virtual float getOpacity() override;
+        float getOpacity() override;
 
-        virtual int getIncWidth() override;
-        virtual int getIncHeight() override;
+        int getIncWidth() override;
+        int getIncHeight() override;
 
-        ComPtr<ID2D1Bitmap> getBitmap();
+        std::shared_ptr<Bitmap> getBitmap();
     };
 
 }

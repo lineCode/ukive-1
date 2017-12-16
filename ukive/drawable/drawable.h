@@ -1,7 +1,7 @@
 ﻿#ifndef UKIVE_DRAWABLE_DRAWABLE_H_
 #define UKIVE_DRAWABLE_DRAWABLE_H_
 
-#include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/graphics/rect.h"
 
 
 namespace ukive {
@@ -14,13 +14,13 @@ namespace ukive {
         int mState;
         int mPrevState;
         bool mParentHasFocus;
-        D2D1_RECT_F mRect;
+        RectF mRect;
 
     protected:
         int mStartX, mStartY;
 
         virtual bool onFocusChanged(bool focus);
-        virtual void onBoundChanged(D2D1_RECT_F &newBound);
+        virtual void onBoundChanged(RectF &newBound);
         virtual bool onStateChanged(int newState, int prevState);
 
     public:
@@ -32,7 +32,7 @@ namespace ukive {
         const static int STATE_FOCUSED = 2;
         const static int STATE_HOVERED = 3;
 
-        void setBound(D2D1_RECT_F &rect);
+        void setBound(RectF &rect);
         void setBound(int left, int top, int right, int bottom);
 
         bool setState(int state);
@@ -41,7 +41,7 @@ namespace ukive {
 
         int getState();
         int getPrevState();
-        D2D1_RECT_F &getBound();
+        RectF &getBound();
 
         virtual void draw(Canvas *canvas) = 0;
 

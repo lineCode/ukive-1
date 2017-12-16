@@ -1,5 +1,7 @@
 ﻿#include "test_window.h"
 
+#include <functional>
+
 #include "ukive/application.h"
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
@@ -15,6 +17,7 @@
 #include "ukive/views/list/list_view.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
+#include "ukive/utils/weak_bind.h"
 
 #include "shell/test/list/test_adapter.h"
 

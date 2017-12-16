@@ -37,7 +37,7 @@ namespace ukive {
         {
             unsigned int start;
             unsigned int length;
-            D2D1_RECT_F rect;
+            RectF rect;
         };
 
         static const int MENU_ID_COPY = 1;

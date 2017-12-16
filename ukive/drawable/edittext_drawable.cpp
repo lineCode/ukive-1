@@ -36,17 +36,16 @@ namespace ukive {
 
     void EditTextDrawable::draw(Canvas *canvas)
     {
-        D2D1_RECT_F bound = getBound();
+        auto bound = getBound();
 
         canvas->fillRect(
-            D2D1::RectF(
+            RectF(
                 bound.left, bound.bottom - 2,
-                bound.right, bound.bottom - (2 - panel_line_width_)),
+                bound.width(), panel_line_width_),
             panel_line_color_);
     }
 
-    float EditTextDrawable::getOpacity()
-    {
+    float EditTextDrawable::getOpacity() {
         return 1.f;
     }
 

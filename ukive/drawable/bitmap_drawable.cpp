@@ -1,22 +1,14 @@
 ﻿#include "bitmap_drawable.h"
 
 #include "ukive/graphics/canvas.h"
+#include "ukive/graphics/bitmap.h"
 #include "ukive/log.h"
 
 
 namespace ukive {
 
-    BitmapDrawable::BitmapDrawable(ComPtr<ID2D1Bitmap> bitmap)
-        :Drawable(),
-        mBitmap(bitmap),
-        mOpacity(1.f)
-    {
-    }
-
-
-    BitmapDrawable::~BitmapDrawable()
-    {
-    }
+    BitmapDrawable::BitmapDrawable(std::shared_ptr<Bitmap> bitmap)
+        :mBitmap(bitmap), mOpacity(1.f) {}
 
 
     void BitmapDrawable::setOpacity(float opt)
@@ -31,30 +23,24 @@ namespace ukive {
     }
 
 
-    void BitmapDrawable::draw(Canvas *canvas)
-    {
-        canvas->drawBitmap(this->getBound(), mOpacity, mBitmap.get());
+    void BitmapDrawable::draw(Canvas *canvas) {
+        canvas->drawBitmap(getBound(), mOpacity, mBitmap.get());
     }
 
-    float BitmapDrawable::getOpacity()
-    {
+    float BitmapDrawable::getOpacity() {
         return mOpacity;
     }
 
-    int BitmapDrawable::getIncWidth()
-    {
-        D2D1_SIZE_F size = mBitmap->GetSize();
-        return size.width;
+    int BitmapDrawable::getIncWidth() {
+        return mBitmap->getWidth();
     }
 
-    int BitmapDrawable::getIncHeight()
-    {
-        D2D1_SIZE_F size = mBitmap->GetSize();
-        return size.height;
+    int BitmapDrawable::getIncHeight() {
+        return mBitmap->getHeight();
     }
 
 
-    ComPtr<ID2D1Bitmap> BitmapDrawable::getBitmap()
+    std::shared_ptr<Bitmap> BitmapDrawable::getBitmap()
     {
         return mBitmap;
     }

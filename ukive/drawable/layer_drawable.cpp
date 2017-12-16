@@ -32,7 +32,7 @@ namespace ukive {
     }
 
 
-    void LayerDrawable::onBoundChanged(D2D1_RECT_F &newBound)
+    void LayerDrawable::onBoundChanged(RectF &newBound)
     {
         for (auto it = mDrawableList.begin();
             it != mDrawableList.end(); ++it)

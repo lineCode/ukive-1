@@ -1,13 +1,14 @@
 ﻿#ifndef UKIVE_VIEWS_IMAGE_VIEW_H_
 #define UKIVE_VIEWS_IMAGE_VIEW_H_
 
+#include <memory>
+
 #include "ukive/views/view.h"
-#include "ukive/utils/com_ptr.h"
-#include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
 
+    class Bitmap;
     class BitmapDrawable;
 
     class ImageView : public View
@@ -26,7 +27,7 @@ namespace ukive {
 
         virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight);
 
-        void setImageBitmap(ComPtr<ID2D1Bitmap> bitmap);
+        void setImageBitmap(std::shared_ptr<Bitmap> bitmap);
     };
 
 }

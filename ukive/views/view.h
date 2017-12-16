@@ -6,6 +6,7 @@
 #include "ukive/utils/executable.h"
 #include "ukive/graphics/rect.h"
 #include "ukive/utils/string_utils.h"
+#include "ukive/graphics/cursor.h"
 
 
 namespace ukive {
@@ -75,7 +76,7 @@ namespace ukive {
         void setLayoutParams(LayoutParams *params);
         void setIsInputEventAtLast(bool isInput);
         void setPressed(bool pressed);
-        void setCurrentCursor(const string16 &cursor);
+        void setCurrentCursor(Cursor cursor);
         void setFocusable(bool focusable);
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
@@ -178,7 +179,6 @@ namespace ukive {
     protected:
         void performClick();
 
-        void drawBackgroundWithShadow(Canvas *canvas);
         void drawBackground(Canvas *canvas);
         void drawForeground(Canvas *canvas);
 
@@ -217,7 +217,7 @@ namespace ukive {
                 view_->performClick();
             }
         private:
-            View * view_;
+            View *view_;
         };
 
 

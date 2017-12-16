@@ -2,6 +2,7 @@
 
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
+#include "ukive/graphics/bitmap.h"
 #include "ukive/drawable/drawable.h"
 #include "ukive/animation/view_animator.h"
 #include "ukive/text/input_connection.h"
@@ -43,12 +44,12 @@ namespace ukive {
 
         elevation_ = 0.f;
 
+        has_focus_ = false;
         visibility_ = VISIBLE;
         is_enabled_ = true;
         is_attached_to_window_ = false;
         is_input_event_at_last_ = false;
         is_pressed_ = false;
-        has_focus_ = false;
         is_focusable_ = false;
         is_layouted_ = false;
         is_receive_outside_input_event_ = false;
@@ -245,7 +246,7 @@ namespace ukive {
         invalidate();
     }
 
-    void View::setCurrentCursor(const string16 &cursor) {
+    void View::setCurrentCursor(Cursor cursor) {
         window_->setCurrentCursor(cursor);
     }
 
@@ -587,24 +588,13 @@ namespace ukive {
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
         canvas->scale(mScaleX, mScaleY, mLeft + mPivotX, mTop + mPivotY);
-        canvas->translate(
-            static_cast<float>(mTranslateX),
-            static_cast<float>(mTranslateY));
+        canvas->translate(mTranslateX, mTranslateY);
 
         // 将背景绘制到 bgBitmap 上
-        ComPtr<ID2D1Bitmap> bgBitmap;
-        if (bg_drawable_ != nullptr
-            && bg_drawable_->getOpacity() != 0.f)
-        {
-            window_->getRenderer()->drawOnBitmap(
-                mRight - mLeft, mBottom - mTop, &bgBitmap,
-                [this, canvas](ComPtr<ID2D1RenderTarget> rt)
-            {
-                Canvas bgCanvas(rt);
-                bgCanvas.setOpacity(canvas->getOpacity());
-                drawBackground(&bgCanvas);
-            });
-        }
+        Canvas offscreen(getWindow(), getWidth(), getHeight());
+        offscreen.setOpacity(canvas->getOpacity());
+        drawBackground(&offscreen);
+        auto bgBitmap = offscreen.extractBitmap();
 
         bool hasBg = (bgBitmap != nullptr);
         bool hasShadow = (hasBg && (elevation_ > 0.f));
@@ -624,17 +614,13 @@ namespace ukive {
                 // TODO: 修改离屏缓冲机制
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
-                    canvas->getRT()->CreateBitmapBrush(bgBitmap.get(), &bmp_brush);
+                    canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
 
-                    ComPtr<ID2D1Bitmap> bgRevealedBitmap;
-                    window_->getRenderer()->drawOnBitmap(
-                        mRight - mLeft, mBottom - mTop, &bgRevealedBitmap,
-                        [this, circleGeo, bmp_brush](ComPtr<ID2D1RenderTarget> rt)
-                    {
-                        rt->FillGeometry(circleGeo.get(), bmp_brush.get());
-                    });
+                    Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    offscreen.fillGeometry(circleGeo.get(), bmp_brush.get());
+                    auto bgRevealedBitmap = offscreen.extractBitmap();
 
-                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap.get());
+                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
                     canvas->drawBitmap(bgRevealedBitmap.get());
                 }
 
@@ -657,17 +643,13 @@ namespace ukive {
                 // 在 pushLayer 之前绘制阴影
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
-                    canvas->getRT()->CreateBitmapBrush(bgBitmap.get(), &bmp_brush);
+                    canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
 
-                    ComPtr<ID2D1Bitmap> bgRevealedBitmap;
-                    window_->getRenderer()->drawOnBitmap(
-                        mRight - mLeft, mBottom - mTop, &bgRevealedBitmap,
-                        [this, rectGeo, bmp_brush](ComPtr<ID2D1RenderTarget> rt)
-                    {
-                        rt->FillGeometry(rectGeo.get(), bmp_brush.get());
-                    });
+                    Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    offscreen.fillGeometry(rectGeo.get(), bmp_brush.get());
+                    auto bgRevealedBitmap = offscreen.extractBitmap();
 
-                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap.get());
+                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
                     canvas->drawBitmap(bgRevealedBitmap.get());
                 }
 
@@ -683,7 +665,7 @@ namespace ukive {
             if (hasBg) {
                 if (hasShadow) {
                     window_->getRenderer()->drawShadow(
-                        elevation_, canvas->getOpacity(), bgBitmap.get());
+                        elevation_, canvas->getOpacity(), bgBitmap->getNative().get());
                 }
                 canvas->drawBitmap(bgBitmap.get());
             }
@@ -694,7 +676,7 @@ namespace ukive {
         canvas->translate(mPaddingLeft, mPaddingTop);
 
         // 裁剪
-        canvas->pushClip(D2D1::RectF(0, 0,
+        canvas->pushClip(RectF(0, 0,
             measured_width_ - mPaddingLeft - mPaddingRight,
             measured_height_ - mPaddingTop - mPaddingBottom));
         canvas->translate(-mScrollX, -mScrollY);
@@ -714,30 +696,6 @@ namespace ukive {
             canvas->popLayer();
 
         canvas->restore();
-    }
-
-    void View::drawBackgroundWithShadow(Canvas *canvas) {
-        if (bg_drawable_ != nullptr
-            && bg_drawable_->getOpacity() != 0.f) {
-            if (elevation_ == 0.f) {
-                drawBackground(canvas);
-            }
-            else
-            {
-                bg_drawable_->setBound(
-                    0, 0, mRight - mLeft, mBottom - mTop);
-                D2D1_RECT_F bkRect = bg_drawable_->getBound();
-
-                /*window_->getRenderer()->drawWithShadow(
-                    elevation_, bkRect.right - bkRect.left, bkRect.bottom - bkRect.top,
-                    [this, canvas](ComPtr<ID2D1RenderTarget> rt)
-                {
-                    Canvas bkCanvas(rt);
-                    bkCanvas.setOpacity(canvas->getOpacity());
-                    drawBackground(&bkCanvas);
-                });*/
-            }
-        }
     }
 
     void View::drawBackground(Canvas *canvas) {

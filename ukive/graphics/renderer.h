@@ -14,7 +14,7 @@
 namespace ukive {
 
     class Canvas;
-    class WindowImpl;
+    class Window;
     class GraphicDeviceManager;
     class Direct3DRenderListener;
     class SwapChainResizeNotifier;
@@ -25,20 +25,14 @@ namespace ukive {
         Renderer();
         ~Renderer();
 
-        HRESULT init(WindowImpl *window);
+        HRESULT init(Window *window);
         HRESULT resize();
         bool render(
             Color bkColor,
             std::function<void()> renderCallback);
         void close();
 
-        HRESULT drawWithShadow(
-            float elevation, float width, float height,
-            std::function<void(ComPtr<ID2D1RenderTarget> rt)> drawer);
         HRESULT drawShadow(float elevation, float alpha, ID2D1Bitmap *bitmap);
-        HRESULT drawOnBitmap(
-            float width, float height, ID2D1Bitmap **bitmap,
-            std::function<void(ComPtr<ID2D1RenderTarget> rt)> drawer);
 
         static void drawObjects(DrawingObjectManager::DrawingObject *object);
         static void draw(ID3D11Buffer* vertices, ID3D11Buffer* indices, int structSize, int indexCount);
@@ -104,7 +98,7 @@ namespace ukive {
         void releaseRenderResource();
 
         UINT width_, height_;
-        WindowImpl *owner_window_;
+        Window *owner_window_;
         Direct3DRenderListener *d3d_render_listener_;
         std::list<SwapChainResizeNotifier*> sc_resize_notifier_list_;
 

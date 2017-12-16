@@ -7,7 +7,7 @@
 #include "ukive/graphics/direct3d_render_listener.h"
 #include "ukive/log.h"
 #include "ukive/utils/hresult_utils.h"
-#include "ukive/window/window_impl.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
@@ -20,7 +20,7 @@ namespace ukive {
     }
 
 
-    HRESULT Renderer::init(WindowImpl *window)
+    HRESULT Renderer::init(Window *window)
     {
         owner_window_ = window;
         d2d_dc_ = Application::getGraphicDeviceManager()->createD2DDeviceContext();
@@ -147,83 +147,30 @@ namespace ukive {
         releaseRenderResource();
     }
 
-
-    HRESULT Renderer::drawWithShadow(
-        float elevation,
-        float width, float height,
-        std::function<void(ComPtr<ID2D1RenderTarget> rt)> drawer)
-    {
-        ComPtr<ID2D1BitmapRenderTarget> bmpRenderTarget;
-        RH(d2d_dc_->CreateCompatibleRenderTarget(
-            D2D1::SizeF(width, height), &bmpRenderTarget));
-
-        bmpRenderTarget->BeginDraw();
-        bmpRenderTarget->Clear(D2D1::ColorF(0, 0));
-
-        drawer(bmpRenderTarget.cast<ID2D1RenderTarget>());
-
-        RH(bmpRenderTarget->EndDraw());
-
-        ComPtr<ID2D1Bitmap> bkBitmap;
-        RH(bmpRenderTarget->GetBitmap(&bkBitmap));
-
-        shadow_effect_->SetInput(0, bkBitmap.get());
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, elevation));
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, .4f)));
-
-        D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(0, elevation / 2.f);
-        affinetrans_effect_->SetInputEffect(0, shadow_effect_.get());
-        RH(affinetrans_effect_->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, matrix));
-
-        d2d_dc_->DrawImage(affinetrans_effect_.get());
-        d2d_dc_->DrawBitmap(bkBitmap.get());
-
-        return S_OK;
-    }
-
     HRESULT Renderer::drawShadow(float elevation, float alpha, ID2D1Bitmap *bitmap)
     {
         //在 Alpha 动画时，令阴影更快消退。
-        float shadowAlpha;
-        if (alpha == 0.f)
-            shadowAlpha = 0.f;
-        else if (alpha == 1.f)
-            shadowAlpha = .38f;
-        else
-            shadowAlpha = static_cast<float>(.38f*::pow(2, 8 * (alpha - 1)) / 1.f);
+        float shadow_alpha;
+        if (alpha == 0.f) {
+            shadow_alpha = 0.f;
+        }
+        else if (alpha == 1.f) {
+            shadow_alpha = .38f;
+        }
+        else {
+            shadow_alpha = static_cast<float>(.38f*::pow(2, 8 * (alpha - 1)) / 1.f);
+        }
 
         shadow_effect_->SetInput(0, bitmap);
         RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_OPTIMIZATION, D2D1_SHADOW_OPTIMIZATION_BALANCED));
         RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, elevation));
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, shadowAlpha)));
+        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, shadow_alpha)));
 
         D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(0, elevation / 1.5f);
         affinetrans_effect_->SetInputEffect(0, shadow_effect_.get());
         RH(affinetrans_effect_->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, matrix));
 
         d2d_dc_->DrawImage(affinetrans_effect_.get());
-
-        return S_OK;
-    }
-
-    HRESULT Renderer::drawOnBitmap(
-        float width, float height, ID2D1Bitmap **bitmap,
-        std::function<void(ComPtr<ID2D1RenderTarget> rt)> drawer)
-    {
-        ComPtr<ID2D1BitmapRenderTarget> bmpRenderTarget;
-        HRESULT hr = d2d_dc_->CreateCompatibleRenderTarget(
-            D2D1::SizeF(width, height), &bmpRenderTarget);
-        if (FAILED(hr)) {
-            return hr;
-        }
-
-        bmpRenderTarget->BeginDraw();
-        bmpRenderTarget->Clear(D2D1::ColorF(0, 0));
-
-        drawer(bmpRenderTarget.cast<ID2D1RenderTarget>());
-
-        RH(bmpRenderTarget->EndDraw());
-        RH(bmpRenderTarget->GetBitmap(bitmap));
 
         return S_OK;
     }
