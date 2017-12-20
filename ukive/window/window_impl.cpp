@@ -6,7 +6,6 @@
 #include "ukive/log.h"
 #include "ukive/window/window.h"
 #include "ukive/window/window_class_manager.h"
-#include "ukive/window/window_manager.h"
 #include "ukive/window/frame/non_client_frame.h"
 #include "ukive/window/frame/default_non_client_frame.h"
 #include "ukive/event/input_event.h"
@@ -40,11 +39,7 @@ namespace ukive {
         cursor_(Cursor::ARROW),
         is_created_(false),
         is_showing_(false),
-        is_startup_window_(false),
-        is_enable_mouse_track_(false) {
-
-        WindowManager::getInstance()->addWindow(this);
-    }
+        is_enable_mouse_track_(false) {}
 
     WindowImpl::~WindowImpl() {}
 
@@ -102,24 +97,15 @@ namespace ukive {
     }
 
     void WindowImpl::close() {
-        close(true);
-    }
-
-    void WindowImpl::close(bool notify) {
         if (!is_created_) {
             return;
         }
 
-        if (notify ? onClose() : true) {
-            BOOL succeed = ::DestroyWindow(hWnd_);
-            if (succeed == 0) {
+        if (onClose()) {
+            BOOL ret = ::DestroyWindow(hWnd_);
+            if (ret == 0) {
                 Log::e(L"failed to destroy window.");
-                return;
             }
-
-            is_created_ = false;
-            is_showing_ = false;
-            WindowManager::getInstance()->removeWindow(this);
         }
     }
 
@@ -148,10 +134,6 @@ namespace ukive {
         if (is_created_) {
             ::MoveWindow(hWnd_, x_, y_, width_, height_, FALSE);
         }
-    }
-
-    void WindowImpl::setStartupWindow(bool enable) {
-        is_startup_window_ = enable;
     }
 
     void WindowImpl::setCurrentCursor(Cursor cursor)
@@ -244,10 +226,6 @@ namespace ukive {
         return is_showing_;
     }
 
-    bool WindowImpl::isStartupWindow() {
-        return is_startup_window_;
-    }
-
     bool WindowImpl::isCursorInClient() {
         RECT clientRect;
         RECT clientInScreenRect;
@@ -276,18 +254,10 @@ namespace ukive {
     }
 
     void WindowImpl::setMouseCaptureRaw() {
-        if (::GetCapture() == hWnd_) {
-            Log::e(L"already have capture!");
-            return;
-        }
         ::SetCapture(hWnd_);
     }
 
     void WindowImpl::releaseMouseCaptureRaw() {
-        if (::GetCapture() != hWnd_) {
-            Log::e(L"we dont have capture!");
-            return;
-        }
         ::ReleaseCapture();
     }
 
@@ -376,6 +346,9 @@ namespace ukive {
     }
 
     void WindowImpl::onDestroy() {
+        is_created_ = false;
+        is_showing_ = false;
+
         delegate_->onDestroy();
     }
 
@@ -453,27 +426,13 @@ namespace ukive {
             break;
 
         case WM_CLOSE:
-            if (isStartupWindow()) {
-                if (onClose()) {
-                    size_t count = WindowManager::getInstance()->getWindowCount();
-                    for (size_t i = 0; i < count; ++i) {
-                        auto pcWindow = WindowManager::getInstance()->getWindow(i);
-                        if (!pcWindow->isStartupWindow())
-                            pcWindow->close();
-                    }
-                    close(false);
-                }
-            }
-            else {
-                close();
+            if (onClose()) {
+                break;
             }
             return 0;
 
         case WM_DESTROY:
             onDestroy();
-            if (isStartupWindow()) {
-                ::PostQuitMessage(0);
-            }
             return 0;
 
         case WM_SHOWWINDOW:

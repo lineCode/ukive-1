@@ -2,6 +2,7 @@
 #define UKIVE_MESSAGE_MESSAGE_H_
 
 #include <mutex>
+#include <functional>
 
 
 namespace ukive {
@@ -23,6 +24,7 @@ namespace ukive {
         uint64_t when;
         Cycler *target;
         Executable *callback;
+        std::function<void()> func;
         void *data;
 
         Message *next;

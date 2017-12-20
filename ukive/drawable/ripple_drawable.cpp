@@ -106,7 +106,7 @@ namespace ukive {
                 mAlpha = mHoverAnimator->getValue(0);
 
                 mLeaveAnimator->addVariable(0, mAlpha, 0, 1);
-                mLeaveAnimator->setOnValueChangedListener(0, dynamic_cast<OnValueChangedListener*>(this));
+                mLeaveAnimator->setOnValueChangedListener(0, static_cast<OnValueChangedListener*>(this));
                 mLeaveAnimator->startTransition(0, Transition::linearTransition(HOVER_LEAVE_SEC, 0));
             }
             else if (prevState == STATE_PRESSED)

@@ -29,12 +29,10 @@ namespace ukive {
         void hide();
         void focus();
         void close();
-        void close(bool notify);
         void center();
 
         void setTitle(const string16 &title);
         void setBound(int x, int y, int width, int height);
-        void setStartupWindow(bool enable);
         void setCurrentCursor(Cursor cursor);
 
         string16 getTitle();
@@ -50,7 +48,6 @@ namespace ukive {
 
         bool isCreated();
         bool isShowing();
-        bool isStartupWindow();
         bool isCursorInClient();
 
         void setMouseCaptureRaw();
@@ -102,7 +99,6 @@ namespace ukive {
 
         bool is_created_;
         bool is_showing_;
-        bool is_startup_window_;
         bool is_enable_mouse_track_;
     };
 

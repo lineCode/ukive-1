@@ -62,7 +62,7 @@ namespace ukive {
         if (pool) {
             Message *msg = pool;
             pool = msg->next;
-            msg->next = 0;
+            msg->next = nullptr;
             --pool_size;
 
             return msg;
@@ -81,8 +81,9 @@ namespace ukive {
         what = -1;
         when = 0;
         target = 0;
-        callback = 0;
-        data = 0;
+        callback = nullptr;
+        func = nullptr;
+        data = nullptr;
     }
 
 }

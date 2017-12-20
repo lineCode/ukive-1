@@ -1,6 +1,7 @@
 #include "window.h"
 
 #include "ukive/log.h"
+#include "ukive/application.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/window/window_manager.h"
 #include "ukive/views/layout/base_layout.h"
@@ -19,9 +20,10 @@
 namespace ukive {
 
     Window::Window()
-        :impl_(new WindowImpl(this)),
+        :impl_(std::make_unique<WindowImpl>(this)),
         min_width_(0),
         min_height_(0),
+        is_startup_window_(false),
         mBaseLayout(nullptr),
         mLabourCycler(nullptr),
         mMouseHolder(nullptr),
@@ -35,7 +37,10 @@ namespace ukive {
         mAnimationManager(nullptr),
         mAnimStateChangedListener(nullptr),
         mAnimTimerEventListener(nullptr),
-        background_color_(Color::White) {}
+        background_color_(Color::White) {
+
+        WindowManager::getInstance()->addWindow(this);
+    }
 
     Window::~Window() {
     }
@@ -54,10 +59,6 @@ namespace ukive {
 
     void Window::close() {
         impl_->close();
-    }
-
-    void Window::close(bool notify) {
-        impl_->close(notify);
     }
 
     void Window::center() {
@@ -111,6 +112,10 @@ namespace ukive {
     void Window::setBackgroundColor(Color color) {
         background_color_ = color;
         invalidate();
+    }
+
+    void Window::setStartupWindow(bool enable) {
+        is_startup_window_ = enable;
     }
 
     int Window::getX() {
@@ -175,6 +180,10 @@ namespace ukive {
 
     bool Window::isCursorInClient() {
         return impl_->isCursorInClient();
+    }
+
+    bool Window::isStartupWindow() {
+        return is_startup_window_;
     }
 
     void Window::captureMouse(View *v) {
@@ -393,7 +402,6 @@ namespace ukive {
     }
 
     TextActionMode *Window::startTextActionMode(TextActionModeCallback *callback) {
-
         TextActionMode *actionMode
             = new TextActionMode(this, callback);
 
@@ -621,6 +629,15 @@ namespace ukive {
     }
 
     bool Window::onClose() {
+        if (isStartupWindow()) {
+            size_t count = WindowManager::getInstance()->getWindowCount();
+            for (size_t i = 0; i < count; ++i) {
+                auto window = WindowManager::getInstance()->getWindow(i);
+                if (!window->isStartupWindow()) {
+                    window->close();
+                }
+            }
+        }
         return true;
     }
 
@@ -637,10 +654,16 @@ namespace ukive {
         delete mAnimTimerEventListener;
         delete mAnimStateChangedListener;
 
-        mAnimationManager->setOnStateChangedListener(0);
+        mAnimationManager->setOnStateChangedListener(nullptr);
         mAnimationManager->close();
         delete mAnimationManager;
         delete mLabourCycler;
+
+        WindowManager::getInstance()->removeWindow(this);
+
+        if (isStartupWindow()) {
+            Application::quitSystemQueue();
+        }
     }
 
     bool Window::onInputEvent(InputEvent *e) {

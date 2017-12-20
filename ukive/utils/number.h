@@ -18,14 +18,7 @@ namespace ukive {
         static wchar_t character(int number);
 
         static int32_t parseInt(string16 s, int radix);
-        static uint32_t parseUInt(string16 s, int radix);
         static int64_t parseInt64(string16 s, int radix);
-        static uint64_t parseUInt64(string16 s, int radix);
-
-        static string16 toString(int32_t value);
-        static string16 toString(uint32_t value);
-        static string16 toString(int64_t value);
-        static string16 toString(uint64_t value);
 
     private:
         Number();

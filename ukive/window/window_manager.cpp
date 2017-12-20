@@ -1,6 +1,7 @@
 #include "window_manager.h"
 
 #include "ukive/log.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
@@ -15,7 +16,7 @@ namespace ukive {
         return instance_.get();
     }
 
-    void WindowManager::addWindow(WindowImpl *window) {
+    void WindowManager::addWindow(Window *window) {
         if (window_list_.size() == 0
             && !window->isStartupWindow()) {
             window->setStartupWindow(true);
@@ -24,32 +25,31 @@ namespace ukive {
             && window->isStartupWindow()) {
             for (auto it = window_list_.begin();
                 it != window_list_.end(); ++it) {
-                if (it->get()->isStartupWindow()) {
-                    it->get()->setStartupWindow(false);
+                if ((*it)->isStartupWindow()) {
+                    (*it)->setStartupWindow(false);
                 }
             }
         }
 
-        std::shared_ptr<WindowImpl> window_ptr(window);
-        window_list_.push_back(window_ptr);
+        window_list_.push_back(window);
     }
 
     size_t WindowManager::getWindowCount() {
         return window_list_.size();
     }
 
-    WindowImpl* WindowManager::getWindow(size_t index) {
+    Window* WindowManager::getWindow(size_t index) {
         if (index >= window_list_.size()) {
             Log::e(L"out of bound.");
             return nullptr;
         }
-        return window_list_.at(index).get();
+        return window_list_.at(index);
     }
 
-    void WindowManager::removeWindow(WindowImpl *window) {
+    void WindowManager::removeWindow(Window *window) {
         for (auto it = window_list_.begin();
             it != window_list_.end(); ++it) {
-            if (it->get() == window) {
+            if (*it == window) {
                 window_list_.erase(it);
                 return;
             }

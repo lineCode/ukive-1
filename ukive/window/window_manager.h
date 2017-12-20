@@ -4,26 +4,26 @@
 #include <memory>
 #include <vector>
 
-#include "ukive/window/window_impl.h"
-
 
 namespace ukive {
+
+    class Window;
 
     class WindowManager {
     public:
         static WindowManager* getInstance();
 
-        void addWindow(WindowImpl *window);
+        void addWindow(Window *window);
         size_t getWindowCount();
-        WindowImpl* getWindow(size_t index);
-        void removeWindow(WindowImpl *window);
+        Window* getWindow(size_t index);
+        void removeWindow(Window *window);
 
     private:
         WindowManager() {}
 
         static std::unique_ptr<WindowManager> instance_;
 
-        std::vector<std::shared_ptr<WindowImpl>> window_list_;
+        std::vector<Window*> window_list_;
     };
 
 }

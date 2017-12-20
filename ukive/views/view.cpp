@@ -611,7 +611,6 @@ namespace ukive {
                         mRevealRadius, mRevealRadius), &circleGeo);
 
                 // 在 pushLayer 之前绘制阴影
-                // TODO: 修改离屏缓冲机制
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
                     canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);

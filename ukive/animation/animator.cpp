@@ -188,8 +188,9 @@ namespace ukive {
         double lower, double upper)
     {
         auto it = mVariableList.find(varIndex);
-        if (it != mVariableList.end())
+        if (it != mVariableList.end()) {
             mVariableList.erase(varIndex);
+        }
 
         ComPtr<IUIAnimationVariable> aVariable;
 

@@ -7,10 +7,22 @@
 
 namespace ukive {
 
+    typedef std::function<void()> Solid;
+
+    template <typename T>
+    class SharedHelper : public std::enable_shared_from_this<T> {
+    public:
+        std::shared_ptr<T> s_this() { return shared_from_this(); }
+        std::shared_ptr<const T> s_this() const { return shared_from_this(); }
+        std::weak_ptr<T> w_this() { return weak_from_this(); }
+        std::weak_ptr<const T> w_this() const { return weak_from_this(); }
+    };
+
+
     template <typename Ret>
     struct Wrapper {
         template <typename Obj>
-        Ret operator()(const std::weak_ptr<Obj> &obj, const std::function<void()> &bound_func, Ret &def_ret)
+        Ret operator()(const std::weak_ptr<Obj> &obj, const Solid &bound_func, Ret &def_ret)
         {
             if (auto ptr = obj.lock()) {
                 return bound_func();
@@ -25,17 +37,17 @@ namespace ukive {
         return std::bind(
             Wrapper<Ret>(),
             std::weak_ptr<Obj>(obj),
-            std::function<Ret()>(std::bind(func, obj, std::forward<Types>(args)...)), def_ret);
+            std::function<Ret()>(std::bind(func, obj.get(), std::forward<Types>(args)...)), def_ret);
     }
 
     // 无返回值的特例
     template <>
     struct Wrapper<void> {
         template <typename Obj>
-        void operator()(const std::weak_ptr<Obj> &obj, const std::function<void()> &func)
+        void operator()(const std::weak_ptr<Obj> &obj, Solid &bound_func)
         {
             if (auto ptr = obj.lock()) {
-                func();
+                bound_func();
             }
         }
     };
@@ -45,7 +57,7 @@ namespace ukive {
         return std::bind(
             Wrapper<void>(),
             std::weak_ptr<Obj>(obj),
-            std::function<void()>(std::bind(func, obj, std::forward<Types>(args)...)));
+            std::function<void()>(std::bind(func, obj.get(), std::forward<Types>(args)...)));
     }
 }
 

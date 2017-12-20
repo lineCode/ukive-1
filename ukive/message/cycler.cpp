@@ -29,12 +29,30 @@ namespace ukive {
         postAtTime(exec, millis + SystemClock::upTimeMillis());
     }
 
-    void Cycler::postAtTime(Executable *exec, uint64_t atTimeMillis) {
+    void Cycler::postAtTime(Executable *exec, uint64_t at_time_millis) {
         Message *msg = Message::obtain();
         msg->callback = exec;
 
-        sendMessageAtTime(msg, atTimeMillis);
+        sendMessageAtTime(msg, at_time_millis);
     }
+
+
+    void Cycler::post(const std::function<void()> &func, int what) {
+        postDelayed(func, 0);
+    }
+
+    void Cycler::postDelayed(const std::function<void()> &func, uint64_t millis, int what) {
+        postAtTime(func, millis + SystemClock::upTimeMillis());
+    }
+
+    void Cycler::postAtTime(const std::function<void()> &func, uint64_t at_time_millis, int what) {
+        Message *msg = Message::obtain();
+        msg->func = func;
+        msg->what = what;
+
+        sendMessageAtTime(msg, at_time_millis);
+    }
+
 
     bool Cycler::hasCallbacks(Executable *exec) {
         return looper_->getQueue()->contains(this, exec, nullptr);
@@ -53,11 +71,11 @@ namespace ukive {
         sendEmptyMessageAtTime(what, millis + SystemClock::upTimeMillis());
     }
 
-    void Cycler::sendEmptyMessageAtTime(int what, uint64_t atTimeMillis) {
+    void Cycler::sendEmptyMessageAtTime(int what, uint64_t at_time_millis) {
         Message *msg = Message::obtain();
         msg->what = what;
 
-        sendMessageAtTime(msg, atTimeMillis);
+        sendMessageAtTime(msg, at_time_millis);
     }
 
     void Cycler::sendMessage(Message *msg) {
@@ -68,8 +86,8 @@ namespace ukive {
         sendMessageAtTime(msg, millis + SystemClock::upTimeMillis());
     }
 
-    void Cycler::sendMessageAtTime(Message *msg, uint64_t atTimeMillis) {
-        msg->when = atTimeMillis;
+    void Cycler::sendMessageAtTime(Message *msg, uint64_t at_time_millis) {
+        msg->when = at_time_millis;
         enqueueMessage(msg);
     }
 
@@ -100,6 +118,9 @@ namespace ukive {
     void Cycler::dispatchMessage(Message *msg) {
         if (msg->callback) {
             msg->callback->run();
+        }
+        else if (msg->func) {
+            msg->func();
         }
         else {
             handleMessage(msg);

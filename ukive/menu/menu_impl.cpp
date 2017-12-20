@@ -70,7 +70,7 @@ namespace ukive {
             }
         }
 
-        this->addView(insertedIndex, widget, new LinearLayoutParams(
+        addView(insertedIndex, widget, new LinearLayoutParams(
             LayoutParams::MATCH_PARENT,
             mItemHeight));
         return item;

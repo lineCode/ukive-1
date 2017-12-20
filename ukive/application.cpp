@@ -224,6 +224,10 @@ namespace ukive {
         return px / (getPrimaryDpi() / 96.f);
     }
 
+    void Application::quitSystemQueue() {
+        ::PostQuitMessage(0);
+    }
+
     GraphicDeviceManager* Application::getGraphicDeviceManager() {
         return instance_->graphic_device_manager_.get();
     }

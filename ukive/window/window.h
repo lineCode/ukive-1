@@ -10,6 +10,7 @@
 #include "ukive/graphics/color.h"
 #include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
+#include "ukive/utils/weak_bind.h"
 
 
 namespace ukive {
@@ -30,9 +31,6 @@ namespace ukive {
 
     class Window {
     public:
-        static const UINT MSG_INVALIDATE = 0;
-        static const UINT MSG_RELAYOUT = 1;
-
         Window();
         virtual ~Window();
 
@@ -40,7 +38,6 @@ namespace ukive {
         void hide();
         void focus();
         void close();
-        void close(bool notify);
         void center();
 
         void setTitle(const string16 &title);
@@ -55,6 +52,7 @@ namespace ukive {
         void setCurrentCursor(Cursor cursor);
         void setContentView(View *content);
         void setBackgroundColor(Color color);
+        void setStartupWindow(bool enable);
 
         int getX();
         int getY();
@@ -73,6 +71,7 @@ namespace ukive {
 
         bool isShowing();
         bool isCursorInClient();
+        bool isStartupWindow();
 
         void captureMouse(View *v);
         void releaseMouse();
@@ -133,7 +132,7 @@ namespace ukive {
             UpdateCycler(Window *window)
                 :win_(window) {}
 
-            void handleMessage(Message *msg);
+            void handleMessage(Message *msg) override;
         private:
             Window * win_;
         };
@@ -192,6 +191,7 @@ namespace ukive {
 
         int min_width_, min_height_;
         Color background_color_;
+        bool is_startup_window_;
     };
 
 }

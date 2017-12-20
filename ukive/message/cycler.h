@@ -2,6 +2,7 @@
 #define UKIVE_MESSAGE_CYCLER_H_
 
 #include <cstdint>
+#include <functional>
 
 #include "message_queue.h"
 
@@ -21,17 +22,21 @@ namespace ukive {
 
         void post(Executable *exec);
         void postDelayed(Executable *exec, uint64_t millis);
-        void postAtTime(Executable *exec, uint64_t atTimeMillis);
+        void postAtTime(Executable *exec, uint64_t at_time_millis);
+
+        void post(const std::function<void()> &func, int what = -1);
+        void postDelayed(const std::function<void()> &func, uint64_t millis, int what = -1);
+        void postAtTime(const std::function<void()> &func, uint64_t at_time_millis, int what = -1);
 
         bool hasCallbacks(Executable *exec);
         void removeCallbacks(Executable *exec);
 
         void sendMessage(Message *msg);
         void sendMessageDelayed(Message *msg, uint64_t millis);
-        void sendMessageAtTime(Message *msg, uint64_t atTimeMillis);
+        void sendMessageAtTime(Message *msg, uint64_t at_time_millis);
         void sendEmptyMessage(int what);
         void sendEmptyMessageDelayed(int what, uint64_t millis);
-        void sendEmptyMessageAtTime(int what, uint64_t atTimeMillis);
+        void sendEmptyMessageAtTime(int what, uint64_t at_time_millis);
 
         void enqueueMessage(Message *msg);
 

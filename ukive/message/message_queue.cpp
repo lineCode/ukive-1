@@ -269,9 +269,9 @@ namespace ukive {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
         Message *ptr = message_;
-        Message *prev = 0;
+        Message *prev = nullptr;
         while (ptr) {
-            if (ptr->target == 0) {
+            if (ptr->target == nullptr) {
                 if (prev) {
                     prev->next = ptr->next;
                 }

@@ -47,6 +47,8 @@ namespace ukive {
         static float dpToPx(float dp);
         static float pxToDp(int px);
 
+        static void quitSystemQueue();
+
     private:
         void initApplication();
         void cleanApplication();
