@@ -79,7 +79,7 @@ namespace ukive {
 
     void BaseLayout::removeShade(View *shade)
     {
-        shade_layout_->removeView(shade);
+        shade_layout_->removeView(shade, false);
         if (shade_layout_->getChildCount() == 0) {
             removeView(shade_layout_, false);
             shade_added_ = false;

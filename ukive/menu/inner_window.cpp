@@ -25,8 +25,9 @@ namespace ukive {
 
     InnerWindow::~InnerWindow()
     {
-        if (mDecorView)
+        if (mDecorView && !mIsShowing) {
             delete mDecorView;
+        }
     }
 
 

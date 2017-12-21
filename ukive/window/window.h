@@ -146,7 +146,7 @@ namespace ukive {
 
             void onStateChanged(
                 UI_ANIMATION_MANAGER_STATUS newStatus,
-                UI_ANIMATION_MANAGER_STATUS previousStatus);
+                UI_ANIMATION_MANAGER_STATUS previousStatus) override;
         private:
             Window * win_;
         };
@@ -158,9 +158,9 @@ namespace ukive {
             AnimTimerEventListener(Window *window)
                 :window_(window) {}
 
-            void OnPreUpdate();
-            void OnPostUpdate();
-            void OnRenderingTooSlow(unsigned int fps);
+            void onPreUpdate() override;
+            void onPostUpdate() override;
+            void onRenderingTooSlow(unsigned int fps) override;
 
         private:
             Window *window_;
@@ -180,8 +180,8 @@ namespace ukive {
         View *mFocusHolderBackup;
         unsigned int mMouseHolderRef;
 
-        ContextMenu *mContextMenu;
-        TextActionMode *mTextActionMode;
+        std::shared_ptr<ContextMenu> mContextMenu;
+        std::shared_ptr<TextActionMode> mTextActionMode;
 
         AnimationManager *mAnimationManager;
         AnimationManager::OnStateChangedListener *mStateChangedListener;

@@ -354,7 +354,7 @@ namespace ukive {
             return nullptr;
         }
 
-        mContextMenu = contextMenu;
+        mContextMenu.reset(contextMenu);
 
         int x, y;
         Rect rect = anchor->getBoundInWindow();
@@ -366,38 +366,17 @@ namespace ukive {
         case View::LEFT:
             x = rect.left;
             break;
-
         case View::RIGHT:
             x = rect.right - 92;
             break;
-
         case View::CENTER:
             x = rect.left - (92 - rect.width()) / 2.f;
             break;
-
         default:
             x = rect.left;
         }
 
-        //异步打开 ContextMenu，以防止在输入事件处理流程中
-        //打开菜单时出现问题。
-        class ContextMenuWorker
-            : public Executable
-        {
-        public:
-            ContextMenuWorker(Window *w, int x, int y)
-                :x_(x), y_(y), window_(w) {}
-
-            void run() override {
-                window_->mContextMenu->show(x_, y_);
-            }
-        private:
-            int x_, y_;
-            Window *window_;
-        }*worker = new ContextMenuWorker(this, x, y);
-
-        mLabourCycler->post(worker);
-
+        mContextMenu->show(x, y);
         return contextMenu;
     }
 
@@ -419,25 +398,8 @@ namespace ukive {
             return nullptr;
         }
 
-        mTextActionMode = actionMode;
-
-        //异步打开TextActionMode菜单，以防止在输入事件处理流程中
-        //打开菜单时出现问题。
-        class TextActionModeWorker
-            : public Executable
-        {
-        public:
-            TextActionModeWorker(Window *w)
-                :window_(w) {}
-
-            void run() override {
-                window_->mTextActionMode->show();
-            }
-        private:
-            Window *window_;
-        }*worker = new TextActionModeWorker(this);
-
-        mLabourCycler->post(worker);
+        mTextActionMode.reset(actionMode);
+        mTextActionMode->show();
 
         return actionMode;
     }
@@ -736,14 +698,14 @@ namespace ukive {
     }
 
 
-    void Window::AnimTimerEventListener::OnPreUpdate() {
+    void Window::AnimTimerEventListener::onPreUpdate() {
     }
 
-    void Window::AnimTimerEventListener::OnPostUpdate() {
+    void Window::AnimTimerEventListener::onPostUpdate() {
         window_->invalidate();
     }
 
-    void Window::AnimTimerEventListener::OnRenderingTooSlow(unsigned int fps) {
+    void Window::AnimTimerEventListener::onRenderingTooSlow(unsigned int fps) {
     }
 
 }

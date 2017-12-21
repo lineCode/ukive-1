@@ -32,14 +32,6 @@ namespace ukive {
         }
     };
 
-    template <typename Ret, typename Func, typename Obj, typename... Types>
-    std::function<Ret()> weak_bind(Ret &&def_ret, Func &&func, const std::shared_ptr<Obj> &obj, Types&&... args) {
-        return std::bind(
-            Wrapper<Ret>(),
-            std::weak_ptr<Obj>(obj),
-            std::function<Ret()>(std::bind(func, obj.get(), std::forward<Types>(args)...)), def_ret);
-    }
-
     // 无返回值的特例
     template <>
     struct Wrapper<void> {
@@ -58,6 +50,14 @@ namespace ukive {
             Wrapper<void>(),
             std::weak_ptr<Obj>(obj),
             std::function<void()>(std::bind(func, obj.get(), std::forward<Types>(args)...)));
+    }
+
+    template <typename Ret, typename Func, typename Obj, typename... Types>
+    std::function<Ret()> weak_ret_bind(Ret &&def_ret, Func &&func, const std::shared_ptr<Obj> &obj, Types&&... args) {
+        return std::bind(
+            Wrapper<Ret>(),
+            std::weak_ptr<Obj>(obj),
+            std::function<Ret()>(std::bind(func, obj.get(), std::forward<Types>(args)...)), def_ret);
     }
 }
 

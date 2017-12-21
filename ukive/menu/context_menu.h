@@ -5,6 +5,7 @@
 
 #include "ukive/menu/menu_callback.h"
 #include "ukive/menu/inner_window.h"
+#include "ukive/utils/weak_bind.h"
 
 
 namespace ukive {
@@ -15,19 +16,10 @@ namespace ukive {
     class MenuItem;
     class ContextMenuCallback;
 
-    class ContextMenu : public MenuCallback
+    class ContextMenu :
+        public MenuCallback,
+        public SharedHelper<ContextMenu>
     {
-    private:
-        int mMenuWidth;
-        int mMenuItemHeight;
-        bool mIsFinished;
-
-        Window *mWindow;
-        ContextMenuCallback *mCallback;
-
-        MenuImpl *mMenu;
-        std::shared_ptr<InnerWindow> mInnerWindow;
-
     public:
         ContextMenu(Window *window, ContextMenuCallback *callback);
         ~ContextMenu();
@@ -42,6 +34,20 @@ namespace ukive {
 
         void show(int x, int y);
         void close();
+
+    private:
+        void showAsync(int x, int y);
+        void closeAsync();
+
+        int mMenuWidth;
+        int mMenuItemHeight;
+        bool mIsFinished;
+
+        Window *mWindow;
+        ContextMenuCallback *mCallback;
+
+        MenuImpl *mMenu;
+        std::shared_ptr<InnerWindow> mInnerWindow;
     };
 
 }

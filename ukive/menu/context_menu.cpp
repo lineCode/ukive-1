@@ -72,12 +72,11 @@ namespace ukive {
     {
         if (!mIsFinished) return;
 
-        mInnerWindow->show(x, y);
-
-        //UWidgetAnimator::createCirculeReveal(
-            //mInnerWindow->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
-
         mIsFinished = false;
+
+        //异步打开 ContextMenu，以防止在输入事件处理流程中
+        //打开菜单时出现问题。
+        mWindow->getCycler()->post(weak_bind(&ContextMenu::showAsync, s_this(), x, y));
     }
 
     void ContextMenu::close()
@@ -88,47 +87,42 @@ namespace ukive {
         mIsFinished = true;
         mCallback->onDestroyContextMenu(this);
 
-        //异步关闭TextActionMode菜单，以防止在输入事件处理流程中
+        //异步关闭 ContextMenu，以防止在输入事件处理流程中
         //关闭菜单时出现问题。
-        class UContextMenuWorker
-            : public Executable
+        mWindow->getCycler()->post(weak_bind(&ContextMenu::closeAsync, s_this()));
+    }
+
+    void ContextMenu::showAsync(int x, int y) {
+        mInnerWindow->show(x, y);
+
+        //UWidgetAnimator::createCirculeReveal(
+        //mInnerWindow->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
+    }
+
+    void ContextMenu::closeAsync() {
+        class DismissAnimListener
+            : public Animator::OnAnimatorListener
         {
         private:
             std::shared_ptr<InnerWindow> window;
         public:
-            UContextMenuWorker(std::shared_ptr<InnerWindow> w)
+            DismissAnimListener(std::shared_ptr<InnerWindow> w)
             {
                 window = w;
             }
-            void run() override
+            void onAnimationStart(Animator *animator) {}
+            void onAnimationEnd(Animator *animator)
             {
-                class DismissAnimListener
-                    : public Animator::OnAnimatorListener
-                {
-                private:
-                    std::shared_ptr<InnerWindow> window;
-                public:
-                    DismissAnimListener(std::shared_ptr<InnerWindow> w)
-                    {
-                        window = w;
-                    }
-                    void onAnimationStart(Animator *animator) {}
-                    void onAnimationEnd(Animator *animator)
-                    {
-                        window->dismiss();
-                    }
-                    void onAnimationCancel(Animator *animator)
-                    {
-                        window->dismiss();
-                    }
-                }*animListener = new DismissAnimListener(window);
-
-                window->getDecorView()->animate()->
-                    setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
+                window->dismiss();
             }
-        }*worker = new UContextMenuWorker(mInnerWindow);
+            void onAnimationCancel(Animator *animator)
+            {
+                window->dismiss();
+            }
+        }*animListener = new DismissAnimListener(mInnerWindow);
 
-        mWindow->getCycler()->post(worker);
+        mInnerWindow->getDecorView()->animate()->
+            setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
     }
 
 }

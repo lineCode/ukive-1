@@ -18,16 +18,16 @@ namespace ukive {
     TextActionMode::TextActionMode(
         Window *window, TextActionModeCallback *callback)
     {
-        mIsFinished = true;
-        mMenuWidth = window->dpToPx(92);
-        mMenuItemHeight = window->dpToPx(36);
+        is_finished_ = true;
+        menu_width_ = window->dpToPx(92);
+        menu_item_height_ = window->dpToPx(36);
 
-        mWindow = window;
-        mCallback = callback;
+        window_ = window;
+        callback_ = callback;
 
-        mMenu = new MenuImpl(window);
-        mMenu->setCallback(this);
-        mMenu->setMenuItemHeight(mMenuItemHeight);
+        menu_impl_ = new MenuImpl(window);
+        menu_impl_->setCallback(this);
+        menu_impl_->setMenuItemHeight(menu_item_height_);
 
         ShapeDrawable *shapeDrawable
             = new ShapeDrawable(ShapeDrawable::SHAPE_ROUND_RECT);
@@ -35,12 +35,12 @@ namespace ukive {
         shapeDrawable->setSolidEnable(true);
         shapeDrawable->setSolidColor(Color::White);
 
-        mInnerWindow = std::shared_ptr<InnerWindow>(new InnerWindow(window));
-        mInnerWindow->setElevation(window->dpToPx(2.f));
-        mInnerWindow->setContentView(mMenu);
-        mInnerWindow->setOutsideTouchable(true);
-        mInnerWindow->setBackground(shapeDrawable);
-        mInnerWindow->setWidth(mMenuWidth);
+        inner_window_ = std::shared_ptr<InnerWindow>(new InnerWindow(window));
+        inner_window_->setElevation(window->dpToPx(2.f));
+        inner_window_->setContentView(menu_impl_);
+        inner_window_->setOutsideTouchable(true);
+        inner_window_->setBackground(shapeDrawable);
+        inner_window_->setWidth(menu_width_);
     }
 
     TextActionMode::~TextActionMode()
@@ -58,111 +58,106 @@ namespace ukive {
 
     bool TextActionMode::onMenuItemClicked(Menu *menu, MenuItem *item)
     {
-        return mCallback->onActionItemClicked(this, item);
+        return callback_->onActionItemClicked(this, item);
     }
 
 
     Menu *TextActionMode::getMenu()
     {
-        return mMenu;
+        return menu_impl_;
     }
 
 
     void TextActionMode::invalidateMenu()
     {
-        mCallback->onPrepareActionMode(this, mMenu);
+        callback_->onPrepareActionMode(this, menu_impl_);
     }
 
     void TextActionMode::invalidatePosition()
     {
         int x, y;
-        mCallback->onGetContentPosition(&x, &y);
+        callback_->onGetContentPosition(&x, &y);
 
-        int windowWidth = mWindow->getClientWidth();
-        int windowHeight = mWindow->getClientHeight();
-        if (x + mMenuWidth > windowWidth)
-            x -= mMenuWidth;
+        int windowWidth = window_->getClientWidth();
+        int windowHeight = window_->getClientHeight();
+        if (x + menu_width_ > windowWidth)
+            x -= menu_width_;
 
-        mInnerWindow->update(x, y);
+        inner_window_->update(x, y);
     }
 
-    void TextActionMode::show()
-    {
-        if (!mIsFinished) return;
-
-        int x, y;
-        mCallback->onGetContentPosition(&x, &y);
-
-        int cCenterX = 0, cCenterY = 0;
-        int windowWidth = mWindow->getClientWidth();
-        int windowHeight = mWindow->getClientHeight();
-        if (x + mMenuWidth > windowWidth)
-        {
-            cCenterX = mMenuWidth;
-            cCenterY = 0;
-            x -= mMenuWidth;
+    void TextActionMode::show() {
+        if (!is_finished_) {
+            return;
         }
 
-        mInnerWindow->show(x, y);
+        is_finished_ = false;
 
-        ViewAnimator::createCirculeReveal(
-            mInnerWindow->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
-
-        mIsFinished = false;
+        // 异步打开TextActionMode菜单，以防止在输入事件处理流程中
+        // 打开菜单时出现问题。
+        window_->getCycler()->post(weak_bind(&TextActionMode::showAsync, s_this()));
     }
 
-    void TextActionMode::close()
-    {
-        if (mIsFinished)
+    void TextActionMode::close() {
+        if (is_finished_) {
             return;
+        }
 
-        mIsFinished = true;
+        is_finished_ = true;
 
-        mMenu->setEnabled(false);
+        menu_impl_->setEnabled(false);
+        callback_->onDestroyActionMode(this);
 
-        mCallback->onDestroyActionMode(this);
+        // 异步关闭TextActionMode菜单，以防止在输入事件处理流程中
+        // 关闭菜单时出现问题。
+        window_->getCycler()->post(weak_bind(&TextActionMode::closeAsync, s_this()));
+    }
 
-        //异步关闭TextActionMode菜单，以防止在输入事件处理流程中
-        //关闭菜单时出现问题。
-        class TextActionModeWorker
-            : public Executable
+
+    void TextActionMode::showAsync() {
+        int x, y;
+        callback_->onGetContentPosition(&x, &y);
+
+        int cCenterX = 0, cCenterY = 0;
+        int windowWidth = window_->getClientWidth();
+        int windowHeight = window_->getClientHeight();
+        if (x + menu_width_ > windowWidth)
+        {
+            cCenterX = menu_width_;
+            cCenterY = 0;
+            x -= menu_width_;
+        }
+
+        inner_window_->show(x, y);
+
+        ViewAnimator::createCirculeReveal(
+            inner_window_->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
+    }
+
+    void TextActionMode::closeAsync() {
+        class DismissAnimListener
+            : public Animator::OnAnimatorListener
         {
         private:
             std::shared_ptr<InnerWindow> window;
         public:
-            TextActionModeWorker(std::shared_ptr<InnerWindow> w)
+            DismissAnimListener(std::shared_ptr<InnerWindow> w)
             {
                 window = w;
             }
-            void run() override
+            void onAnimationStart(Animator *animator) {}
+            void onAnimationEnd(Animator *animator)
             {
-                class DismissAnimListener
-                    : public Animator::OnAnimatorListener
-                {
-                private:
-                    std::shared_ptr<InnerWindow> window;
-                public:
-                    DismissAnimListener(std::shared_ptr<InnerWindow> w)
-                    {
-                        window = w;
-                    }
-                    void onAnimationStart(Animator *animator) {}
-                    void onAnimationEnd(Animator *animator)
-                    {
-                        window->dismiss();
-                    }
-                    void onAnimationCancel(Animator *animator)
-                    {
-                        window->dismiss();
-                    }
-                }*animListener = new DismissAnimListener(window);
-
-                window->getDecorView()->animate()->
-                    setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
+                window->dismiss();
             }
-        }*worker = new TextActionModeWorker(mInnerWindow);
+            void onAnimationCancel(Animator *animator)
+            {
+                window->dismiss();
+            }
+        }*animListener = new DismissAnimListener(inner_window_);
 
-        mWindow->getCycler()->post(worker);
+        inner_window_->getDecorView()->animate()->
+            setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
     }
 
 }

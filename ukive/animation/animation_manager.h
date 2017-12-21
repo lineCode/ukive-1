@@ -29,9 +29,9 @@ namespace ukive {
         class OnTimerEventListener
         {
         public:
-            virtual void OnPreUpdate() = 0;
-            virtual void OnPostUpdate() = 0;
-            virtual void OnRenderingTooSlow(unsigned int fps) = 0;
+            virtual void onPreUpdate() = 0;
+            virtual void onPostUpdate() = 0;
+            virtual void onRenderingTooSlow(unsigned int fps) = 0;
         };
 
     public:
