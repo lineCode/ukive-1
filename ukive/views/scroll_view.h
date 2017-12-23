@@ -6,8 +6,8 @@
 
 namespace ukive {
 
-    class UScroller;
-    class UInputEvent;
+    class Scroller;
+    class InputEvent;
 
     class ScrollView : public ViewGroup
     {
@@ -15,7 +15,7 @@ namespace ukive {
         int mMouseXCache;
         int mMouseYCache;
 
-        UScroller *mScroller;
+        Scroller *mScroller;
 
         bool canScroll();
         int computeScrollRange();

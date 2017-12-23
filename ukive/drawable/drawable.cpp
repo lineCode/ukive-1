@@ -4,117 +4,95 @@
 namespace ukive {
 
     Drawable::Drawable()
-    {
-        mStartX = 0.f;
-        mStartY = 0.f;
-        mParentHasFocus = false;
-
-        mState = STATE_NONE;
-        mPrevState = STATE_NONE;
-    }
+        :start_x_(0.f),
+        start_y_(0.f),
+        is_parent_has_focus_(false),
+        state_(STATE_NONE),
+        prev_state_(STATE_NONE) {}
 
 
-    Drawable::~Drawable()
-    {
-    }
-
-
-    void Drawable::setBound(RectF &rect)
-    {
-        if (mRect == rect) {
+    void Drawable::setBounds(RectF &rect) {
+        if (bounds_ == rect) {
             return;
         }
 
-        mRect = rect;
-        onBoundChanged(mRect);
+        bounds_ = rect;
+        onBoundChanged(bounds_);
     }
 
-    void Drawable::setBound(int left, int top, int right, int bottom)
-    {
-        if (mRect.left == left
-            && mRect.top == top
-            && mRect.right == right
-            && mRect.bottom == bottom)
+    void Drawable::setBounds(int left, int top, int width, int height) {
+        if (bounds_.left == left
+            && bounds_.top == top
+            && bounds_.right == left + width
+            && bounds_.bottom == top + height) {
             return;
+        }
 
-        mRect.left = left;
-        mRect.top = top;
-        mRect.right = right;
-        mRect.bottom = bottom;
+        bounds_.left = left;
+        bounds_.top = top;
+        bounds_.right = left + width;
+        bounds_.bottom = top + height;
 
-        this->onBoundChanged(mRect);
+        onBoundChanged(bounds_);
     }
 
-    bool Drawable::setState(int state)
-    {
-        if (state == mState)
+    bool Drawable::setState(int state) {
+        if (state == state_) {
             return false;
+        }
 
-        mPrevState = mState;
-        mState = state;
+        prev_state_ = state_;
+        state_ = state;
 
-        return onStateChanged(state, mPrevState);
+        return onStateChanged(state, prev_state_);
     }
 
-    void Drawable::setHotspot(int x, int y)
-    {
-        mStartX = x;
-        mStartY = y;
+    void Drawable::setHotspot(int x, int y) {
+        start_x_ = x;
+        start_y_ = y;
     }
 
-    bool Drawable::setParentFocus(bool focus)
-    {
-        if (focus == mParentHasFocus)
+    bool Drawable::setParentFocus(bool focus) {
+        if (focus == is_parent_has_focus_) {
             return false;
+        }
 
-        mParentHasFocus = focus;
-        return onFocusChanged(mParentHasFocus);
+        is_parent_has_focus_ = focus;
+        return onFocusChanged(is_parent_has_focus_);
     }
 
 
-    int Drawable::getState()
-    {
-        return mState;
+    int Drawable::getState() {
+        return state_;
     }
 
-    int Drawable::getPrevState()
-    {
-        return mPrevState;
+    int Drawable::getPrevState() {
+        return prev_state_;
     }
 
-    RectF &Drawable::getBound()
-    {
-        return mRect;
+    RectF &Drawable::getBounds() {
+        return bounds_;
     }
 
-    float Drawable::getOpacity()
-    {
+    float Drawable::getOpacity() {
         return 1.f;
     }
 
-
-    bool Drawable::onFocusChanged(bool focus)
-    {
+    bool Drawable::onFocusChanged(bool focus) {
         return false;
     }
 
-    void Drawable::onBoundChanged(RectF &newBound)
-    {
-    }
+    void Drawable::onBoundChanged(RectF &newBound) {}
 
-    bool Drawable::onStateChanged(int newState, int prevState)
-    {
+    bool Drawable::onStateChanged(int newState, int prevState) {
         return false;
     }
 
-
-    int Drawable::getIncWidth()
-    {
+    int Drawable::getIncWidth() {
         return -1;
     }
 
-    int Drawable::getIncHeight()
-    {
+    int Drawable::getIncHeight() {
         return -1;
     }
 

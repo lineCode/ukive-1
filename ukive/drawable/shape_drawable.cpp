@@ -72,7 +72,7 @@ namespace ukive {
 
         RectF bound;
         if (mWidth == -1 || mHeight == -1)
-            bound = getBound();
+            bound = getBounds();
         else
             bound = RectF(0, 0, mWidth, mHeight);
 

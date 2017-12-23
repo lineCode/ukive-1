@@ -104,7 +104,7 @@ namespace ukive {
     {
         if (bitmap != nullptr) {
             mBitmapDrawable = new BitmapDrawable(bitmap);
-            mBitmapDrawable->setBound(0, 0, bitmap->getWidth(), bitmap->getHeight());
+            mBitmapDrawable->setBounds(0, 0, bitmap->getWidth(), bitmap->getHeight());
         }
     }
 

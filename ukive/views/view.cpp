@@ -35,17 +35,13 @@ namespace ukive {
         mRevealWidthRadius = mRevealHeightRadius = 0;
 
         id_ = id;
-        mLeft = mRight = mTop = mBottom = 0;
         measured_width_ = measured_height_ = 0;
         min_width_ = min_height_ = 0;
-
-        mScrollX = mScrollY = 0;
-        mPaddingLeft = mPaddingRight = mPaddingTop = mPaddingBottom = 0;
-
+        scroll_x_ = scroll_y_ = 0;
         elevation_ = 0.f;
+        visibility_ = VISIBLE;
 
         has_focus_ = false;
-        visibility_ = VISIBLE;
         is_enabled_ = true;
         is_attached_to_window_ = false;
         is_input_event_at_last_ = false;
@@ -85,11 +81,11 @@ namespace ukive {
     }
 
     void View::setX(double x) {
-        setTranslateX(x - mLeft);
+        setTranslateX(x - bounds_.left);
     }
 
     void View::setY(double y) {
-        setTranslateY(y - mTop);
+        setTranslateY(y - bounds_.top);
     }
 
     void View::setAlpha(double alpha) {
@@ -149,15 +145,15 @@ namespace ukive {
     }
 
     void View::setScrollX(int x) {
-        if (mScrollX != x) {
-            mScrollX = x;
+        if (scroll_x_ != x) {
+            scroll_x_ = x;
             invalidate();
         }
     }
 
     void View::setScrollY(int y) {
-        if (mScrollY != y) {
-            mScrollY = y;
+        if (scroll_y_ != y) {
+            scroll_y_ = y;
             invalidate();
         }
     }
@@ -208,16 +204,12 @@ namespace ukive {
     }
 
     void View::setPadding(int left, int top, int right, int bottom) {
-        if (mPaddingLeft == left
-            && mPaddingTop == top
-            && mPaddingRight == right
-            && mPaddingBottom == bottom)
+        Rect new_padding(left, top, right - left, bottom - top);
+        if (padding_ == new_padding) {
             return;
+        }
 
-        mPaddingLeft = left;
-        mPaddingTop = top;
-        mPaddingRight = right;
-        mPaddingBottom = bottom;
+        padding_ = new_padding;
 
         requestLayout();
         invalidate();
@@ -288,15 +280,15 @@ namespace ukive {
     }
 
     void View::offsetTopAndBottom(int dy) {
-        mTop += dy;
-        mBottom += dy;
+        bounds_.top += dy;
+        bounds_.bottom += dy;
 
         invalidate();
     }
 
     void View::offsetLeftAndRight(int dx) {
-        mLeft += dx;
-        mRight += dx;
+        bounds_.left += dx;
+        bounds_.right += dx;
 
         invalidate();
     }
@@ -319,11 +311,11 @@ namespace ukive {
     }
 
     double View::getX() {
-        return mLeft + getTranslateX();
+        return bounds_.left + getTranslateX();
     }
 
     double View::getY() {
-        return mTop + getTranslateY();
+        return bounds_.top + getTranslateY();
     }
 
     double View::getAlpha() {
@@ -355,35 +347,35 @@ namespace ukive {
     }
 
     int View::getScrollX() {
-        return mScrollX;
+        return scroll_x_;
     }
 
     int View::getScrollY() {
-        return mScrollY;
+        return scroll_y_;
     }
 
     int View::getLeft() {
-        return mLeft;
+        return bounds_.left;
     }
 
     int View::getTop() {
-        return mTop;
+        return bounds_.top;
     }
 
     int View::getRight() {
-        return mRight;
+        return bounds_.right;
     }
 
     int View::getBottom() {
-        return mBottom;
+        return bounds_.bottom;
     }
 
     int View::getWidth() {
-        return mRight - mLeft;
+        return bounds_.width();
     }
 
     int View::getHeight() {
-        return mBottom - mTop;
+        return bounds_.height();
     }
 
     int View::getMeasuredWidth() {
@@ -412,19 +404,19 @@ namespace ukive {
 
 
     int View::getPaddingLeft() {
-        return mPaddingLeft;
+        return padding_.left;
     }
 
     int View::getPaddingTop() {
-        return mPaddingTop;
+        return padding_.top;
     }
 
     int View::getPaddingRight() {
-        return mPaddingRight;
+        return padding_.right;
     }
 
     int View::getPaddingBottom() {
-        return mPaddingBottom;
+        return padding_.bottom;
     }
 
 
@@ -451,16 +443,16 @@ namespace ukive {
     }
 
 
-    Rect View::getBound() {
-        return Rect(mLeft, mTop, mRight - mLeft, mBottom - mTop);
+    Rect View::getBounds() {
+        return bounds_;
     }
 
-    Rect View::getBoundInWindow() {
-        Rect bound = getBound();
+    Rect View::getBoundsInWindow() {
+        Rect bound = getBounds();
 
         View *parent = parent_;
         while (parent) {
-            Rect parentBound = parent->getBound();
+            Rect parentBound = parent->getBounds();
             bound.left += parentBound.left;
             bound.top += parentBound.top;
             bound.right += parentBound.left;
@@ -472,8 +464,8 @@ namespace ukive {
         return bound;
     }
 
-    Rect View::getBoundInScreen() {
-        Rect bound = getBoundInWindow();
+    Rect View::getBoundsInScreen() {
+        Rect bound = getBoundsInWindow();
 
         POINT pt;
         pt.x = bound.left;
@@ -492,19 +484,17 @@ namespace ukive {
         return bound;
     }
 
-    Rect View::getContentBound() {
-        int content_width = mRight - mLeft - mPaddingLeft - mPaddingRight;
-        int content_height = mBottom - mTop - mPaddingTop - mPaddingBottom;
-        return Rect(
-            mLeft + mPaddingLeft, mTop + mPaddingTop,
-            content_width, content_height);
+    Rect View::getContentBounds() {
+        Rect content_bounds = bounds_;
+        content_bounds.insets(padding_);
+        return content_bounds;
     }
 
-    Rect View::getContentBoundInThis() {
-        int content_width = mRight - mLeft - mPaddingLeft - mPaddingRight;
-        int content_height = mBottom - mTop - mPaddingTop - mPaddingBottom;
+    Rect View::getContentBoundsInThis() {
+        int content_width = bounds_.width() - padding_.width();
+        int content_height = bounds_.height() - padding_.height();
         return Rect(
-            mPaddingLeft, mPaddingTop,
+            padding_.left, padding_.top,
             content_width, content_height);
     }
 
@@ -542,14 +532,13 @@ namespace ukive {
         return is_layouted_;
     }
 
-    bool View::isMouseInThis(InputEvent *e) {
+    bool View::isLocalMouseInThis(InputEvent *e) {
         return (e->getMouseX() >= 0 && e->getMouseX() <= getWidth()
             && e->getMouseY() >= 0 && e->getMouseY() <= getHeight());
     }
 
-    bool View::isGroupMouseInThis(InputEvent *e) {
-        return (e->getMouseX() >= mLeft && e->getMouseX() <= mRight - 1
-            && e->getMouseY() >= mTop && e->getMouseY() <= mBottom - 1);
+    bool View::isParentMouseInThis(InputEvent *e) {
+        return bounds_.hit(e->getMouseX(), e->getMouseY());
     }
 
     bool View::isReceiveOutsideInputEvent() {
@@ -562,12 +551,12 @@ namespace ukive {
 
 
     void View::scrollTo(int x, int y) {
-        if (mScrollX != x || mScrollY != y) {
-            int oldScrollX = mScrollX;
-            int oldScrollY = mScrollY;
+        if (scroll_x_ != x || scroll_y_ != y) {
+            int oldScrollX = scroll_x_;
+            int oldScrollY = scroll_y_;
 
-            mScrollX = x;
-            mScrollY = y;
+            scroll_x_ = x;
+            scroll_y_ = y;
 
             invalidate();
             onScrollChanged(x, y, oldScrollX, oldScrollY);
@@ -575,7 +564,7 @@ namespace ukive {
     }
 
     void View::scrollBy(int dx, int dy) {
-        scrollTo(mScrollX + dx, mScrollY + dy);
+        scrollTo(scroll_x_ + dx, scroll_y_ + dy);
     }
 
     void View::performClick() {
@@ -587,7 +576,7 @@ namespace ukive {
         // 应用动画变量
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
-        canvas->scale(mScaleX, mScaleY, mLeft + mPivotX, mTop + mPivotY);
+        canvas->scale(mScaleX, mScaleY, bounds_.left + mPivotX, bounds_.top + mPivotY);
         canvas->translate(mTranslateX, mTranslateY);
 
         // 将背景绘制到 bgBitmap 上
@@ -672,13 +661,13 @@ namespace ukive {
 
         // 应用 padding
         canvas->save();
-        canvas->translate(mPaddingLeft, mPaddingTop);
+        canvas->translate(padding_.left, padding_.top);
 
         // 裁剪
         canvas->pushClip(RectF(0, 0,
-            measured_width_ - mPaddingLeft - mPaddingRight,
-            measured_height_ - mPaddingTop - mPaddingBottom));
-        canvas->translate(-mScrollX, -mScrollY);
+            measured_width_ - padding_.width(),
+            measured_height_ - padding_.height()));
+        canvas->translate(-scroll_x_, -scroll_y_);
 
         // 绘制自身
         onDraw(canvas);
@@ -700,7 +689,7 @@ namespace ukive {
     void View::drawBackground(Canvas *canvas) {
         if (bg_drawable_ != nullptr
             && bg_drawable_->getOpacity() != 0.f) {
-            bg_drawable_->setBound(0, 0, mRight - mLeft, mBottom - mTop);
+            bg_drawable_->setBounds(0.f, 0.f, bounds_.width(), bounds_.height());
             bg_drawable_->draw(canvas);
         }
     }
@@ -708,7 +697,7 @@ namespace ukive {
     void View::drawForeground(Canvas *canvas) {
         if (fg_drawable_ != nullptr
             && fg_drawable_->getOpacity() != 0.f) {
-            fg_drawable_->setBound(0.f, 0.f, mRight - mLeft, mBottom - mTop);
+            fg_drawable_->setBounds(0.f, 0.f, bounds_.width(), bounds_.height());
             fg_drawable_->draw(canvas);
         }
     }
@@ -722,33 +711,23 @@ namespace ukive {
     void View::layout(int left, int top, int right, int bottom) {
         bool sizeChanged = false;
 
-        int width = right - left;
-        int height = bottom - top;
-        int oldWidth = mRight - mLeft;
-        int oldHeight = mBottom - mTop;
+        Rect new_bounds(left, top, right - left, bottom - top);
 
-        bool changed =
-            left != mLeft
-            || top != mTop
-            || right != mRight
-            || bottom != mBottom;
+        int width = new_bounds.width();
+        int height = new_bounds.height();
+        int old_width = bounds_.width();
+        int old_height = bounds_.height();
+
+        bool changed = bounds_ != new_bounds;
         if (changed) {
-            sizeChanged =
-                oldWidth != width
-                || oldHeight != height;
-
-            mLeft = left;
-            mTop = top;
-            mRight = right;
-            mBottom = bottom;
-
+            sizeChanged = old_width != width || old_height != height;
+            bounds_ = new_bounds;
             if (sizeChanged) {
-                onSizeChanged(width, height, oldWidth, oldHeight);
+                onSizeChanged(width, height, old_width, old_height);
             }
         }
 
-        onLayout(
-            changed, sizeChanged,
+        onLayout(changed, sizeChanged,
             left, top, right, bottom);
 
         is_layouted_ = true;
@@ -756,10 +735,10 @@ namespace ukive {
 
 
     void View::invalidate() {
-        invalidate(mLeft, mTop, mRight, mBottom);
+        invalidate(bounds_);
     }
 
-    void View::invalidate(Rect rect) {
+    void View::invalidate(const Rect &rect) {
         invalidate(rect.left, rect.top, rect.right, rect.bottom);
     }
 
@@ -828,8 +807,8 @@ namespace ukive {
 
 
     bool View::dispatchInputEvent(InputEvent *e) {
-        e->setMouseX(e->getMouseX() - mLeft);
-        e->setMouseY(e->getMouseY() - mTop);
+        e->setMouseX(e->getMouseX() - bounds_.left);
+        e->setMouseY(e->getMouseY() - bounds_.top);
 
         return onInputEvent(e);
     }
@@ -945,7 +924,7 @@ namespace ukive {
                     setPressed(false);
                 }
 
-                if (isMouseInThis(e)) {
+                if (isLocalMouseInThis(e)) {
                     if (fg_drawable_) {
                         fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
                         shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);

@@ -39,7 +39,7 @@ namespace ukive {
         cursor_(Cursor::ARROW),
         is_created_(false),
         is_showing_(false),
-        is_enable_mouse_track_(false) {}
+        is_enable_mouse_track_(true) {}
 
     WindowImpl::~WindowImpl() {}
 
@@ -125,7 +125,7 @@ namespace ukive {
         }
     }
 
-    void WindowImpl::setBound(int x, int y, int width, int height) {
+    void WindowImpl::setBounds(int x, int y, int width, int height) {
         x_ = x;
         y_ = y;
         width_ = width;

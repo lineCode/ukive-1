@@ -304,7 +304,7 @@ namespace ukive {
     {
         if (changed)
         {
-            Rect rect = getBoundInWindow();
+            Rect rect = getBoundsInWindow();
             int _left = rect.left + getPaddingLeft();
             int _top = rect.top + getPaddingTop();
             int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();

@@ -24,16 +24,16 @@ namespace ukive {
         min_width_(0),
         min_height_(0),
         is_startup_window_(false),
-        mBaseLayout(nullptr),
-        mLabourCycler(nullptr),
-        mMouseHolder(nullptr),
-        mFocusHolder(nullptr),
-        mFocusHolderBackup(nullptr),
-        mMouseHolderRef(0),
-        mTextActionMode(nullptr),
-        mContextMenu(nullptr),
-        mCanvas(nullptr),
-        mRenderer(nullptr),
+        base_layout_(nullptr),
+        labour_cycler_(nullptr),
+        mouse_holder_(nullptr),
+        focus_holder_(nullptr),
+        focus_holder_backup_(nullptr),
+        mouse_holder_ref_(0),
+        text_action_mode_(nullptr),
+        context_menu_(nullptr),
+        canvas_(nullptr),
+        renderer_(nullptr),
         mAnimationManager(nullptr),
         mAnimStateChangedListener(nullptr),
         mAnimTimerEventListener(nullptr),
@@ -70,27 +70,27 @@ namespace ukive {
     }
 
     void Window::setX(int x) {
-        impl_->setBound(x, impl_->getY(), impl_->getWidth(), impl_->getHeight());
+        impl_->setBounds(x, impl_->getY(), impl_->getWidth(), impl_->getHeight());
     }
 
     void Window::setY(int y) {
-        impl_->setBound(impl_->getX(), y, impl_->getWidth(), impl_->getHeight());
+        impl_->setBounds(impl_->getX(), y, impl_->getWidth(), impl_->getHeight());
     }
 
     void Window::setPosition(int x, int y) {
-        impl_->setBound(x, y, impl_->getWidth(), impl_->getHeight());
+        impl_->setBounds(x, y, impl_->getWidth(), impl_->getHeight());
     }
 
     void Window::setWidth(int width) {
-        impl_->setBound(impl_->getX(), impl_->getY(), width, impl_->getHeight());
+        impl_->setBounds(impl_->getX(), impl_->getY(), width, impl_->getHeight());
     }
 
     void Window::setHeight(int height) {
-        impl_->setBound(impl_->getX(), impl_->getY(), impl_->getWidth(), height);
+        impl_->setBounds(impl_->getX(), impl_->getY(), impl_->getWidth(), height);
     }
 
-    void Window::setBound(int x, int y, int width, int height) {
-        impl_->setBound(x, y, width, height);
+    void Window::setBounds(int x, int y, int width, int height) {
+        impl_->setBounds(x, y, width, height);
     }
 
     void Window::setMinWidth(int minWidth) {
@@ -106,7 +106,7 @@ namespace ukive {
     }
 
     void Window::setContentView(View *content) {
-        mBaseLayout->addContent(content);
+        base_layout_->addContent(content);
     }
 
     void Window::setBackgroundColor(Color color) {
@@ -151,7 +151,7 @@ namespace ukive {
     }
 
     BaseLayout *Window::getBaseLayout() {
-        return mBaseLayout;
+        return base_layout_;
     }
 
     Color Window::getBackgroundColor() {
@@ -159,11 +159,11 @@ namespace ukive {
     }
 
     Cycler *Window::getCycler() {
-        return mLabourCycler;
+        return labour_cycler_;
     }
 
     Renderer *Window::getRenderer() {
-        return mRenderer;
+        return renderer_;
     }
 
     HWND Window::getHandle() {
@@ -193,70 +193,70 @@ namespace ukive {
 
         //当已存在有捕获鼠标的 view 时，若此次调用该方法的 view
         //与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
-        if (mMouseHolderRef != 0
-            && v != mMouseHolder) {
+        if (mouse_holder_ref_ != 0
+            && v != mouse_holder_) {
             Log::e(L"abnormal capture mouse!!\n");
             return;
         }
 
-        ++mMouseHolderRef;
+        ++mouse_holder_ref_;
         ::OutputDebugString(L"capture mouse!!\n");
 
         //该Widget第一次捕获鼠标。
-        if (mMouseHolderRef == 1) {
+        if (mouse_holder_ref_ == 1) {
             impl_->setMouseCaptureRaw();
-            mMouseHolder = v;
+            mouse_holder_ = v;
         }
     }
 
     void Window::releaseMouse() {
-        if (mMouseHolderRef == 0) {
+        if (mouse_holder_ref_ == 0) {
             return;
         }
 
-        --mMouseHolderRef;
+        --mouse_holder_ref_;
         ::OutputDebugString(L"release mouse!!\n");
 
         //鼠标将被释放。
-        if (mMouseHolderRef == 0) {
+        if (mouse_holder_ref_ == 0) {
             impl_->releaseMouseCaptureRaw();
-            mMouseHolder = nullptr;
+            mouse_holder_ = nullptr;
         }
     }
 
     void Window::captureKeyboard(View *v) {
-        mFocusHolder = v;
+        focus_holder_ = v;
         //::OutputDebugString(L"captureKeyboard!!\n");
     }
 
     void Window::releaseKeyboard() {
-        mFocusHolder = nullptr;
+        focus_holder_ = nullptr;
         //::OutputDebugString(L"releaseKeyboard!!\n");
     }
 
     View *Window::getMouseHolder() {
-        return mMouseHolder;
+        return mouse_holder_;
     }
 
     unsigned int Window::getMouseHolderRef() {
-        return mMouseHolderRef;
+        return mouse_holder_ref_;
     }
 
     View *Window::getKeyboardHolder() {
-        return mFocusHolder;
+        return focus_holder_;
     }
 
     void Window::invalidate() {
-        mLabourCycler->removeMessages(SCHEDULE_RENDER);
-        mLabourCycler->sendEmptyMessage(SCHEDULE_RENDER);
+        labour_cycler_->removeMessages(SCHEDULE_RENDER);
+        labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
     }
 
     void Window::invalidate(int left, int top, int right, int bottom) {
     }
 
     void Window::requestLayout() {
-        mLabourCycler->removeMessages(SCHEDULE_LAYOUT);
-        mLabourCycler->sendEmptyMessage(SCHEDULE_LAYOUT);
+        labour_cycler_->removeMessages(SCHEDULE_LAYOUT);
+        labour_cycler_->sendEmptyMessage(SCHEDULE_LAYOUT);
     }
 
     void Window::performLayout() {
@@ -264,7 +264,7 @@ namespace ukive {
             return;
         }
 
-        LayoutParams *params = mBaseLayout->getLayoutParams();
+        LayoutParams *params = base_layout_->getLayoutParams();
 
         int width = getClientWidth();
         int height = getClientHeight();
@@ -303,12 +303,12 @@ namespace ukive {
             heightSpec = View::EXACTLY;
         }
 
-        mBaseLayout->measure(width, height, widthSpec, heightSpec);
+        base_layout_->measure(width, height, widthSpec, heightSpec);
 
-        int measuredWidth = mBaseLayout->getMeasuredWidth();
-        int measuredHeight = mBaseLayout->getMeasuredHeight();
+        int measuredWidth = base_layout_->getMeasuredWidth();
+        int measuredHeight = base_layout_->getMeasuredHeight();
 
-        mBaseLayout->layout(0, 0, measuredWidth, measuredHeight);
+        base_layout_->layout(0, 0, measuredWidth, measuredHeight);
     }
 
     void Window::performRefresh() {
@@ -331,7 +331,7 @@ namespace ukive {
 
 
     View *Window::findViewById(int id) {
-        return mBaseLayout->findViewById(id);
+        return base_layout_->findViewById(id);
     }
 
     ContextMenu *Window::startContextMenu(
@@ -354,10 +354,10 @@ namespace ukive {
             return nullptr;
         }
 
-        mContextMenu.reset(contextMenu);
+        context_menu_.reset(contextMenu);
 
         int x, y;
-        Rect rect = anchor->getBoundInWindow();
+        Rect rect = anchor->getBoundsInWindow();
 
         y = rect.bottom + 1;
 
@@ -376,7 +376,7 @@ namespace ukive {
             x = rect.left;
         }
 
-        mContextMenu->show(x, y);
+        context_menu_->show(x, y);
         return contextMenu;
     }
 
@@ -398,8 +398,8 @@ namespace ukive {
             return nullptr;
         }
 
-        mTextActionMode.reset(actionMode);
-        mTextActionMode->show();
+        text_action_mode_.reset(actionMode);
+        text_action_mode_->show();
 
         return actionMode;
     }
@@ -416,10 +416,10 @@ namespace ukive {
     }
 
     void Window::onCreate() {
-        mLabourCycler = new UpdateCycler(this);
+        labour_cycler_ = new UpdateCycler(this);
 
-        mBaseLayout = new BaseLayout(this, 0);
-        mBaseLayout->setLayoutParams(
+        base_layout_ = new BaseLayout(this, 0);
+        base_layout_->setLayoutParams(
             new LayoutParams(
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
@@ -428,7 +428,7 @@ namespace ukive {
         titleBar->setBackground(new UColorDrawable(this, UColor::Blue100));
         UBaseLayoutParams *titleBarLp = new UBaseLayoutParams(
         UBaseLayoutParams::MATCH_PARENT, 50);
-        mBaseLayout->addContent(titleBar, titleBarLp);*/
+        base_layout_->addContent(titleBar, titleBarLp);*/
 
         mAnimationManager = new AnimationManager();
         HRESULT hr = mAnimationManager->init();
@@ -442,16 +442,16 @@ namespace ukive {
         mAnimTimerEventListener = new AnimTimerEventListener(this);
         //mAnimationManager->setTimerEventListener(mAnimTimerEventListener);
 
-        mRenderer = new Renderer();
-        hr = mRenderer->init(this);
+        renderer_ = new Renderer();
+        hr = renderer_->init(this);
         if (FAILED(hr))
             throw std::runtime_error("UWindow-onCreate(): Init DirectX renderer failed.");
 
-        auto deviceContext = mRenderer->getD2DDeviceContext();
+        auto deviceContext = renderer_->getD2DDeviceContext();
 
-        mCanvas = new Canvas(deviceContext.cast<ID2D1RenderTarget>());
+        canvas_ = new Canvas(deviceContext.cast<ID2D1RenderTarget>());
 
-        mBaseLayout->onAttachedToWindow();
+        base_layout_->onAttachedToWindow();
     }
 
     void Window::onShow(bool show) {
@@ -462,22 +462,22 @@ namespace ukive {
         {
         case WA_ACTIVE:
         case WA_CLICKACTIVE:
-            mBaseLayout->dispatchWindowFocusChanged(true);
-            /*if (mFocusHolderBackup)
-            mFocusHolderBackup->requestFocus();*/
+            base_layout_->dispatchWindowFocusChanged(true);
+            /*if (focus_holder_backup_)
+            focus_holder_backup_->requestFocus();*/
             break;
         case WA_INACTIVE:
-            while (mMouseHolderRef > 0)
+            while (mouse_holder_ref_ > 0)
                 this->releaseMouse();
-            mBaseLayout->dispatchWindowFocusChanged(false);
-            /*if (mFocusHolder)
+            base_layout_->dispatchWindowFocusChanged(false);
+            /*if (focus_holder_)
             {
             InputEvent ev;
             ev.setEvent(InputEvent::EVENT_CANCEL);
 
-            mFocusHolderBackup = mFocusHolder;
-            mFocusHolderBackup->dispatchInputEvent(&ev);
-            mFocusHolder->discardFocus();
+            focus_holder_backup_ = focus_holder_;
+            focus_holder_backup_->dispatchInputEvent(&ev);
+            focus_holder_->discardFocus();
             }*/
             break;
         }
@@ -488,14 +488,14 @@ namespace ukive {
         {
             getAnimationManager()->update();
 
-            bool ret = mRenderer->render(
+            bool ret = renderer_->render(
                 background_color_, [this]() {
 
-                if (mCanvas) {
-                    onDrawCanvas(mCanvas);
+                if (canvas_) {
+                    onDrawCanvas(canvas_);
 
-                    if (mBaseLayout->isLayouted()) {
-                        mBaseLayout->draw(mCanvas);
+                    if (base_layout_->isLayouted()) {
+                        base_layout_->draw(canvas_);
                     }
                 }
             });
@@ -518,7 +518,7 @@ namespace ukive {
         int param, int width, int height,
         int clientWidth, int clientHeight) {
 
-        HRESULT hr = mRenderer->resize();
+        HRESULT hr = renderer_->resize();
         if (FAILED(hr)) {
             throw std::runtime_error("UWindow-onResize(): Resize DirectX Renderer failed.");
         }
@@ -604,14 +604,14 @@ namespace ukive {
     }
 
     void Window::onDestroy() {
-        delete mBaseLayout;
+        delete base_layout_;
 
-        delete mCanvas;
-        mCanvas = nullptr;
+        delete canvas_;
+        canvas_ = nullptr;
 
-        mRenderer->close();
-        delete mRenderer;
-        mRenderer = nullptr;
+        renderer_->close();
+        delete renderer_;
+        renderer_ = nullptr;
 
         delete mAnimTimerEventListener;
         delete mAnimStateChangedListener;
@@ -619,7 +619,7 @@ namespace ukive {
         mAnimationManager->setOnStateChangedListener(nullptr);
         mAnimationManager->close();
         delete mAnimationManager;
-        delete mLabourCycler;
+        delete labour_cycler_;
 
         WindowManager::getInstance()->removeWindow(this);
 
@@ -632,14 +632,14 @@ namespace ukive {
         if (e->isMouseEvent()) {
             //若有之前捕获过鼠标的Widget存在，则直接将所有事件
             //直接发送至该Widget。
-            if (mMouseHolder
-                && mMouseHolder->getVisibility() == View::VISIBLE
-                && mMouseHolder->isEnabled()) {
+            if (mouse_holder_
+                && mouse_holder_->getVisibility() == View::VISIBLE
+                && mouse_holder_->isEnabled()) {
 
                 //进行坐标变换，将目标Widget左上角映射为(0, 0)。
                 int totalLeft = 0;
                 int totalTop = 0;
-                View *parent = mMouseHolder->getParent();
+                View *parent = mouse_holder_->getParent();
                 while (parent) {
                     totalLeft += (parent->getLeft() - parent->getScrollX());
                     totalTop += (parent->getTop() - parent->getScrollY());
@@ -651,22 +651,22 @@ namespace ukive {
                 e->setMouseY(e->getMouseY() - totalTop);
                 e->setIsMouseCaptured(true);
 
-                return mMouseHolder->dispatchInputEvent(e);
+                return mouse_holder_->dispatchInputEvent(e);
             }
             else {
-                return mBaseLayout->dispatchInputEvent(e);
+                return base_layout_->dispatchInputEvent(e);
             }
         }
         else if (e->isKeyboardEvent()) {
-            if (mFocusHolder)
-                return mFocusHolder->dispatchInputEvent(e);
+            if (focus_holder_)
+                return focus_holder_->dispatchInputEvent(e);
         }
 
         return false;
     }
 
     void Window::onDpiChanged(int dpi_x, int dpi_y) {
-        mBaseLayout->dispatchWindowDpiChanged(dpi_x, dpi_y);
+        base_layout_->dispatchWindowDpiChanged(dpi_x, dpi_y);
     }
 
     bool Window::onDataCopy(unsigned int id, unsigned int size, void *data) {

@@ -55,7 +55,7 @@ namespace ukive {
 
     void RippleDrawable::draw(Canvas *canvas)
     {
-        auto bound = getBound();
+        auto bound = getBounds();
         Color color(mAlpha, 0.f, 0.f, 0.f);
 
         //»æÖÆµ×É«¡¢alphaºÍripple¡£
@@ -71,7 +71,7 @@ namespace ukive {
                 (float)mRippleAnimator->getValue(1));
 
             offscreen.fillCircle(
-                mStartX, mStartY,
+                start_x_, start_y_,
                 mRippleAnimator->getValue(0), rippleColor);
         }
         auto contentBitmap = offscreen.extractBitmap();

@@ -7,9 +7,10 @@ namespace ukive {
     class Menu;
     class MenuItem;
 
-    class MenuCallback
-    {
+    class MenuCallback {
     public:
+        virtual ~MenuCallback() = default;
+
         virtual void onCreateMenu(Menu *menu) = 0;
         virtual void onPrepareMenu(Menu *menu) = 0;
         virtual bool onMenuItemClicked(Menu *menu, MenuItem *item) = 0;

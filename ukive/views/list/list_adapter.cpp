@@ -11,19 +11,19 @@ namespace ukive {
 
     void ListAdapter::notifyItemChanged(int position) {
         if (listener_) {
-            listener_->OnItemChanged(position);
+            listener_->OnItemRangeChanged(position, 1);
         }
     }
 
     void ListAdapter::notifyItemInserted(int position) {
         if (listener_) {
-            listener_->OnItemInserted(position);
+            listener_->OnItemRangeInserted(position, 1);
         }
     }
 
     void ListAdapter::notifyItemRemoved(int position) {
         if (listener_) {
-            listener_->OnItemRemoved(position);
+            listener_->OnItemRangeRemoved(position, 1);
         }
     }
 

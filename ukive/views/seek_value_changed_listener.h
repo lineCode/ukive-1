@@ -9,6 +9,8 @@ namespace ukive {
     class OnSeekValueChangedListener
     {
     public:
+        virtual ~OnSeekValueChangedListener() = default;
+
         virtual void onSeekValueChanged(SeekBar *seekBar, float value) = 0;
         virtual void onSeekIntegerValueChanged(SeekBar *seekBar, int value) = 0;
     };

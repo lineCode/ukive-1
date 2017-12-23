@@ -6,13 +6,11 @@
 
 namespace ukive {
 
-    Scroller::Scroller(Window *wnd)
-    {
+    Scroller::Scroller(Window *wnd) {
         mScrollAnimator = new Animator(wnd->getAnimationManager());
     }
 
-    Scroller::~Scroller()
-    {
+    Scroller::~Scroller() {
         mScrollAnimator->stop();
         delete mScrollAnimator;
     }

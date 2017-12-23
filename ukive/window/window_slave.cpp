@@ -8,7 +8,7 @@
 
 namespace ukive {
 
-    UWindowSlave::UWindowSlave(Window *master)
+    WindowSlave::WindowSlave(Window *master)
     {
         sUWSVtr = this;
         mMaster = master;
@@ -16,12 +16,12 @@ namespace ukive {
     }
 
 
-    UWindowSlave::~UWindowSlave()
+    WindowSlave::~WindowSlave()
     {
     }
 
 
-    void UWindowSlave::initSlave()
+    void WindowSlave::initSlave()
     {
         WNDCLASSEX wc;
         wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -34,7 +34,7 @@ namespace ukive {
         wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
         wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
         wc.lpszMenuName = nullptr;
-        wc.lpszClassName = L"UWindowSlave";
+        wc.lpszClassName = L"WindowSlave";
         wc.cbSize = sizeof(WNDCLASSEXW);
 
         if (RegisterClassExW(&wc) != 0)
@@ -48,7 +48,7 @@ namespace ukive {
 
             mHandle = ::CreateWindowExW(
                 WS_EX_TOOLWINDOW,
-                L"UWindowSlave", L"", WS_POPUP,
+                L"WindowSlave", L"", WS_POPUP,
                 mMaster->getX() - 7, mMaster->getY() - 7,
                 mMaster->getWidth() + 14, mMaster->getHeight() + 14,
                 0, 0, ::GetModuleHandleW(nullptr), nullptr);
@@ -61,7 +61,7 @@ namespace ukive {
     }
 
 
-    LRESULT CALLBACK UWindowSlave::messageHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    LRESULT CALLBACK WindowSlave::messageHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         Window *window = nullptr;
 
@@ -108,7 +108,7 @@ namespace ukive {
     }
 
 
-    void UWindowSlave::sync()
+    void WindowSlave::sync()
     {
         if (mMaster->getHandle() != nullptr
             && mMaster->isShowing()
@@ -116,7 +116,7 @@ namespace ukive {
             initSlave();
     }
 
-    HWND UWindowSlave::getWindowHandle()
+    HWND WindowSlave::getWindowHandle()
     {
         return mHandle;
     }
@@ -146,7 +146,7 @@ namespace ukive {
     }
 
 
-    LRESULT UWindowSlave::processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP)
+    LRESULT WindowSlave::processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP)
     {
         LRESULT lRet = 0;
         HRESULT hr = S_OK;
@@ -191,7 +191,7 @@ namespace ukive {
         return lRet;
     }
 
-    LRESULT UWindowSlave::HitTestNCA(HWND hWnd, WPARAM wParam, LPARAM lParam,
+    LRESULT WindowSlave::HitTestNCA(HWND hWnd, WPARAM wParam, LPARAM lParam,
         int leftExt, int topExt, int rightExt, int bottomExt)
     {
         // Get the point coordinates for the hit test.

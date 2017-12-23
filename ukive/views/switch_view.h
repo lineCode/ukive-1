@@ -6,15 +6,14 @@
 
 namespace ukive {
 
-    class SwitchView : public View
-    {
-    private:
-        void initSwitchView();
-
+    class SwitchView : public View {
     public:
         SwitchView(Window *wnd);
         SwitchView(Window *wnd, int id);
         ~SwitchView();
+
+    private:
+        void initSwitchView();
     };
 
 }

@@ -172,7 +172,7 @@ namespace ukive {
 
         createDecorView();
 
-        Rect rect = anchor->getBoundInWindow();
+        Rect rect = anchor->getBoundsInWindow();
     }
 
     void InnerWindow::update(int x, int y)

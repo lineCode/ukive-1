@@ -46,7 +46,7 @@ namespace ukive {
         void setPosition(int x, int y);
         void setWidth(int width);
         void setHeight(int height);
-        void setBound(int x, int y, int width, int height);
+        void setBounds(int x, int y, int width, int height);
         void setMinWidth(int min_width);
         void setMinHeight(int min_height);
         void setCurrentCursor(Cursor cursor);
@@ -93,11 +93,11 @@ namespace ukive {
         void performRefresh();
         void performRefresh(int left, int top, int right, int bottom);
 
-        View *findViewById(int id);
+        View* findViewById(int id);
 
-        ContextMenu *startContextMenu(
+        ContextMenu* startContextMenu(
             ContextMenuCallback *callback, View *anchor, View::Gravity gravity);
-        TextActionMode *startTextActionMode(TextActionModeCallback *callback);
+        TextActionMode* startTextActionMode(TextActionModeCallback *callback);
 
         float dpToPx(float dp);
         float pxToDp(int px);
@@ -169,19 +169,19 @@ namespace ukive {
 
         std::unique_ptr<WindowImpl> impl_;
 
-        Canvas *mCanvas;
-        Renderer *mRenderer;
+        Canvas *canvas_;
+        Renderer *renderer_;
 
-        Cycler *mLabourCycler;
-        BaseLayout *mBaseLayout;
+        Cycler *labour_cycler_;
+        BaseLayout *base_layout_;
 
-        View *mMouseHolder;
-        View *mFocusHolder;
-        View *mFocusHolderBackup;
-        unsigned int mMouseHolderRef;
+        View *mouse_holder_;
+        View *focus_holder_;
+        View *focus_holder_backup_;
+        unsigned int mouse_holder_ref_;
 
-        std::shared_ptr<ContextMenu> mContextMenu;
-        std::shared_ptr<TextActionMode> mTextActionMode;
+        std::shared_ptr<ContextMenu> context_menu_;
+        std::shared_ptr<TextActionMode> text_action_mode_;
 
         AnimationManager *mAnimationManager;
         AnimationManager::OnStateChangedListener *mStateChangedListener;
@@ -189,9 +189,9 @@ namespace ukive {
         AnimStateChangedListener *mAnimStateChangedListener;
         AnimTimerEventListener *mAnimTimerEventListener;
 
-        int min_width_, min_height_;
         Color background_color_;
         bool is_startup_window_;
+        int min_width_, min_height_;
     };
 
 }

@@ -36,7 +36,7 @@ namespace ukive {
 
     void EditTextDrawable::draw(Canvas *canvas)
     {
-        auto bound = getBound();
+        auto bound = getBounds();
 
         canvas->fillRect(
             RectF(

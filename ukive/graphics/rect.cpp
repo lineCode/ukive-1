@@ -49,6 +49,10 @@ namespace ukive {
         return equal(rhs);
     }
 
+    bool Rect::operator!=(const Rect &rhs) {
+        return !equal(rhs);
+    }
+
     int Rect::width() {
         return right - left;
     }
@@ -66,6 +70,11 @@ namespace ukive {
             && top == rhs.top
             && right == rhs.right
             && bottom == rhs.bottom);
+    }
+
+    bool Rect::hit(int x, int y) {
+        return (x >= left && x < right
+            && y >= top && y < bottom);
     }
 
     bool Rect::intersect(const Rect &rect) {
@@ -89,6 +98,20 @@ namespace ukive {
         if (empty()) {
             left = top = right = bottom = 0;
         }
+    }
+
+    void Rect::insets(const Rect &insets) {
+        left += insets.left;
+        top += insets.top;
+        right -= insets.right;
+        bottom -= insets.bottom;
+    }
+
+    void Rect::insets(int left, int top, int right, int bottom) {
+        this->left += left;
+        this->top += top;
+        this->right -= right;
+        this->bottom -= bottom;
     }
 
 
@@ -136,6 +159,10 @@ namespace ukive {
         return equal(rhs);
     }
 
+    bool RectF::operator!=(const RectF &rhs) {
+        return !equal(rhs);
+    }
+
     float RectF::width() {
         return right - left;
     }
@@ -153,6 +180,11 @@ namespace ukive {
             && top == rhs.top
             && right == rhs.right
             && bottom == rhs.bottom);
+    }
+
+    bool RectF::hit(float x, float y) {
+        return (x >= left && x < right
+            && y >= top && y < bottom);
     }
 
     bool RectF::intersect(const RectF &rect) {
@@ -176,6 +208,20 @@ namespace ukive {
         if (empty()) {
             left = top = right = bottom = 0.f;
         }
+    }
+
+    void RectF::insets(const RectF &insets) {
+        left += insets.left;
+        top += insets.top;
+        right -= insets.right;
+        bottom -= insets.bottom;
+    }
+
+    void RectF::insets(float left, float top, float right, float bottom) {
+        this->left += left;
+        this->top += top;
+        this->right -= right;
+        this->bottom -= bottom;
     }
 
 }

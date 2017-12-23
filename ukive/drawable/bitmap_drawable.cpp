@@ -24,7 +24,7 @@ namespace ukive {
 
 
     void BitmapDrawable::draw(Canvas *canvas) {
-        canvas->drawBitmap(getBound(), mOpacity, mBitmap.get());
+        canvas->drawBitmap(getBounds(), mOpacity, mBitmap.get());
     }
 
     float BitmapDrawable::getOpacity() {

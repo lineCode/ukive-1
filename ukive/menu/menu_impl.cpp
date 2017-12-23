@@ -20,36 +20,32 @@ namespace ukive {
         initMenu();
     }
 
-    MenuImpl::~MenuImpl()
-    {
-    }
-
 
     void MenuImpl::initMenu()
     {
-        mCallback = nullptr;
-        mItemHeight = LayoutParams::FIT_CONTENT;
+        callback_ = nullptr;
+        item_height_ = LayoutParams::FIT_CONTENT;
     }
 
 
     void MenuImpl::setMenuItemHeight(int height)
     {
-        mItemHeight = height;
+        item_height_ = height;
     }
 
 
     void MenuImpl::setCallback(MenuCallback *callback)
     {
-        mCallback = callback;
+        callback_ = callback;
     }
 
     MenuCallback *MenuImpl::getCallback()
     {
-        return mCallback;
+        return callback_;
     }
 
 
-    MenuItem *MenuImpl::addItem(int id, std::int32_t order, std::wstring title)
+    MenuItem* MenuImpl::addItem(int id, int order, string16 title)
     {
         MenuItem *item = new MenuItemImpl(getWindow(), id, order);
         item->setItemTitle(title);
@@ -72,7 +68,7 @@ namespace ukive {
 
         addView(insertedIndex, widget, new LinearLayoutParams(
             LayoutParams::MATCH_PARENT,
-            mItemHeight));
+            item_height_));
         return item;
     }
 
@@ -109,7 +105,7 @@ namespace ukive {
         return false;
     }
 
-    MenuItem *MenuImpl::findItem(int id)
+    MenuItem* MenuImpl::findItem(int id)
     {
         for (std::size_t i = 0; i < getChildCount(); ++i)
         {
@@ -122,14 +118,14 @@ namespace ukive {
         return nullptr;
     }
 
-    std::size_t MenuImpl::getItemCount()
+    size_t MenuImpl::getItemCount()
     {
         return getChildCount();
     }
 
-    void MenuImpl::onClick(View *widget)
+    void MenuImpl::onClick(View *v)
     {
-        mCallback->onMenuItemClicked(this, dynamic_cast<MenuItem*>(widget));
+        callback_->onMenuItemClicked(this, dynamic_cast<MenuItem*>(v));
     }
 
 }

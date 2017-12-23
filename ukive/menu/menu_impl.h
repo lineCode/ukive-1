@@ -14,29 +14,28 @@ namespace ukive {
 
     class MenuImpl : public LinearLayout, public Menu, public OnClickListener
     {
-    private:
-        int mItemHeight;
-        MenuCallback *mCallback;
-
-        void initMenu();
-
     public:
         MenuImpl(Window *wnd);
         MenuImpl(Window *wnd, int id);
-        virtual ~MenuImpl();
 
         void setMenuItemHeight(int height);
 
         void setCallback(MenuCallback *callback) override;
-        MenuCallback *getCallback() override;
+        MenuCallback* getCallback() override;
 
-        MenuItem *addItem(int id, std::int32_t order, std::wstring title) override;
+        MenuItem* addItem(int id, int order, string16 title) override;
         bool removeItem(int id) override;
         bool hasItem(int id) override;
-        MenuItem *findItem(int id) override;
-        std::size_t getItemCount() override;
+        MenuItem* findItem(int id) override;
+        size_t getItemCount() override;
 
-        void onClick(View *widget) override;
+        void onClick(View *v) override;
+
+    private:
+        void initMenu();
+
+        int item_height_;
+        MenuCallback *callback_;
     };
 
 }

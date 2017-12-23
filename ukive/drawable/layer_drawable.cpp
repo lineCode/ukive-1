@@ -37,7 +37,7 @@ namespace ukive {
         for (auto it = mDrawableList.begin();
             it != mDrawableList.end(); ++it)
         {
-            (*it)->setBound(newBound);
+            (*it)->setBounds(newBound);
         }
     }
 

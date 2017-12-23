@@ -19,7 +19,7 @@ namespace ukive {
 
     void ColorDrawable::draw(Canvas *canvas)
     {
-        canvas->fillRect(this->getBound(), color_);
+        canvas->fillRect(this->getBounds(), color_);
     }
 
 

@@ -181,7 +181,7 @@ namespace shell {
             rect.right - rect.left, rect.bottom - rect.top);
         matrix_.transformRect(&real_rect);
 
-        return getContentBoundInThis().intersect(real_rect);
+        return getContentBoundsInThis().intersect(real_rect);
     }
 
 }

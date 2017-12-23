@@ -22,9 +22,11 @@ namespace ukive {
 
     class View {
     public:
-        const static int FIT = 1;
-        const static int EXACTLY = 2;
-        const static int UNKNOWN = 3;
+        enum MeasureOption {
+            FIT,
+            EXACTLY,
+            UNKNOWN
+        };
 
         enum Visibility {
             VISIBLE,
@@ -132,12 +134,12 @@ namespace ukive {
         Drawable *getBackground();
         Drawable *getForeground();
 
-        Rect getBound();
-        Rect getBoundInWindow();
-        Rect getBoundInScreen();
+        Rect getBounds();
+        Rect getBoundsInWindow();
+        Rect getBoundsInScreen();
 
-        Rect getContentBound();
-        Rect getContentBoundInThis();
+        Rect getContentBounds();
+        Rect getContentBoundsInThis();
 
         virtual View *findViewById(int id);
 
@@ -148,8 +150,8 @@ namespace ukive {
         bool hasFocus();
         bool isFocusable();
         bool isLayouted();
-        bool isMouseInThis(InputEvent *e);
-        bool isGroupMouseInThis(InputEvent *e);
+        bool isLocalMouseInThis(InputEvent *e);
+        bool isParentMouseInThis(InputEvent *e);
         bool isReceiveOutsideInputEvent();
         bool canConsumeMouseEvent();
 
@@ -161,7 +163,7 @@ namespace ukive {
         void layout(int left, int top, int right, int bottom);
 
         void invalidate();
-        void invalidate(Rect rect);
+        void invalidate(const Rect &rect);
         void invalidate(int left, int top, int right, int bottom);
         void requestLayout();
 
@@ -222,19 +224,11 @@ namespace ukive {
 
 
         int id_;
+        Rect bounds_;
+        Rect padding_;
 
-        int mLeft;
-        int mTop;
-        int mRight;
-        int mBottom;
-
-        int mScrollX;
-        int mScrollY;
-
-        int mPaddingLeft;
-        int mPaddingTop;
-        int mPaddingRight;
-        int mPaddingBottom;
+        int scroll_x_;
+        int scroll_y_;
 
         int measured_width_;
         int measured_height_;

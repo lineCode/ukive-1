@@ -12,13 +12,9 @@ namespace ukive {
     class ListDataSetChangedListener
     {
     public:
-        virtual ~ListDataSetChangedListener() {}
+        virtual ~ListDataSetChangedListener() = default;
 
         virtual void OnDataSetChanged() = 0;
-
-        void OnItemInserted(size_t position) { OnItemRangeInserted(position, 1); }
-        void OnItemChanged(size_t position) { OnItemRangeChanged(position, 1); }
-        void OnItemRemoved(size_t position) { OnItemRangeRemoved(position, 1); }
 
         virtual void OnItemRangeInserted(size_t start_position, size_t length) {}
         virtual void OnItemRangeChanged(size_t start_position, size_t length) {}
@@ -48,7 +44,7 @@ namespace ukive {
 
         ListAdapter()
             :listener_(0) {}
-        virtual ~ListAdapter() {}
+        virtual ~ListAdapter() = default;
 
         void setListener(ListDataSetChangedListener *listener) { listener_ = listener; }
 

@@ -9,6 +9,8 @@ namespace ukive {
     class OnClickListener
     {
     public:
+        virtual ~OnClickListener() = default;
+
         virtual void onClick(View *v) = 0;
     };
 

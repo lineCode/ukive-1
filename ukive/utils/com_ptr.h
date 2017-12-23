@@ -6,105 +6,96 @@ namespace ukive {
     template <class T>
     class ComPtr
     {
-    private:
-        T *mPtr;
-
     public:
         ComPtr()
-        {
-            mPtr = nullptr;
-        }
+            :ptr_(nullptr) {}
 
         ComPtr(T *real)
-        {
-            mPtr = real;
+            :ptr_(real) {}
+
+        ComPtr(const ComPtr& rhs) {
+            if (rhs.ptr_) {
+                rhs.ptr_->AddRef();
+            }
+            ptr_ = rhs.ptr_;
         }
 
-        ComPtr(const ComPtr& rhs)
-        {
-            if (rhs.mPtr)
-                rhs.mPtr->AddRef();
-            mPtr = rhs.mPtr;
-        }
-
-        ~ComPtr()
-        {
+        ~ComPtr() {
             reset();
         }
 
 
-        ComPtr& operator =(const ComPtr& rhs)
-        {
+        ComPtr& operator =(const ComPtr& rhs) {
             //防止自身给自身赋值。
-            if (this == (ComPtr*)(&(int&)rhs))
+            if (this == (ComPtr*)(&(int&)rhs)) {
                 return *this;
+            }
 
-            if (rhs.mPtr)
-                rhs.mPtr->AddRef();
+            if (rhs.ptr_) {
+                rhs.ptr_->AddRef();
+            }
 
-            if (mPtr)
-                mPtr->Release();
-            mPtr = rhs.mPtr;
+            if (ptr_) {
+                ptr_->Release();
+            }
+
+            ptr_ = rhs.ptr_;
             return *this;
         }
 
-        ComPtr& operator =(T *real)
-        {
-            if (real == mPtr)
+        ComPtr& operator =(T *real) {
+            if (real == ptr_) {
                 return *this;
+            }
 
-            if (mPtr)
-                mPtr->Release();
-            mPtr = real;
+            if (ptr_) {
+                ptr_->Release();
+            }
+
+            ptr_ = real;
             return *this;
         }
 
-        T* operator ->()
-        {
-            return mPtr;
+        T* operator ->() {
+            return ptr_;
         }
 
-        T** operator &()
-        {
-            return (&mPtr);
+        T** operator &() {
+            return &ptr_;
         }
 
-        bool operator ==(std::nullptr_t) const
-        {
-            return (mPtr == nullptr);
+        bool operator ==(std::nullptr_t) const {
+            return ptr_ == nullptr;
         }
 
-        bool operator !=(std::nullptr_t) const
-        {
-            return (mPtr != nullptr);
+        bool operator !=(std::nullptr_t) const {
+            return ptr_ != nullptr;
         }
 
-        explicit operator bool() const
-        {
-            return (mPtr != nullptr);
+        explicit operator bool() const {
+            return ptr_ != nullptr;
         }
 
-        T* get() const
-        {
-            return mPtr;
+        T* get() const {
+            return ptr_;
         }
 
         template<class Ct>
-        ComPtr<Ct> cast()
-        {
+        ComPtr<Ct> cast() {
             Ct *casted = nullptr;
-            mPtr->QueryInterface<Ct>(&casted);
+            ptr_->QueryInterface<Ct>(&casted);
             return ComPtr<Ct>(casted);
         }
 
-        void reset()
-        {
-            if (mPtr)
-            {
-                mPtr->Release();
-                mPtr = nullptr;
+        void reset() {
+            if (ptr_) {
+                ptr_->Release();
+                ptr_ = nullptr;
             }
         }
+
+    private:
+        T *ptr_;
     };
 
 }

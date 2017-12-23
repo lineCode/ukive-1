@@ -222,7 +222,7 @@ namespace ukive {
 
     bool InputConnection::getTextBound(long start, long end, RECT *prc, BOOL *pfClipped)
     {
-        Rect bound = mTextView->getBoundInScreen();
+        Rect bound = mTextView->getBoundsInScreen();
         RectF textBound = mTextView->getSelectionBound(start, end);
 
         prc->left = static_cast<long>(
@@ -239,7 +239,7 @@ namespace ukive {
 
     void InputConnection::getTextViewBound(RECT *prc)
     {
-        Rect bound = mTextView->getBoundInScreen();
+        Rect bound = mTextView->getBoundsInScreen();
         prc->left = bound.left;
         prc->top = bound.top;
         prc->right = bound.right;

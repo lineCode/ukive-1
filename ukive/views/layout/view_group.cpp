@@ -310,7 +310,7 @@ namespace ukive {
             int mx = e->getMouseX();
             int my = e->getMouseY();
 
-            if (child->isGroupMouseInThis(e)
+            if (child->isParentMouseInThis(e)
                 && e->getEvent() != InputEvent::EVM_LEAVE_WIN
                 && e->getEvent() != InputEvent::EV_CANCEL) {
 
