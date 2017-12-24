@@ -100,7 +100,8 @@ namespace shell {
         textParams->leftMargin = textParams->rightMargin
             = textParams->topMargin = textParams->bottomMargin = dpToPx(12);
 
-        ukive::TextView *textView = new ukive::TextView(this, kTextViewId);
+        ukive::TextView *textView = new ukive::TextView(this);
+        textView->setId(kTextViewId);
         textView->setIsSelectable(true);
         textView->setIsEditable(true);
         textView->setText(L"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii这是一个示例程序，\n\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。");
@@ -115,7 +116,8 @@ namespace shell {
 
         std::wstring imgFileName(::_wgetcwd(nullptr, 0));
         auto bitmap = ukive::BitmapFactory::decodeFile(this, imgFileName + L"\\freshpaint.png");
-        ukive::ImageView *imageView = new ukive::ImageView(this, kImageViewId);
+        ukive::ImageView *imageView = new ukive::ImageView(this);
+        imageView->setId(kImageViewId);
         imageView->setImageBitmap(bitmap);
 
         linearLayout->addView(imageView);

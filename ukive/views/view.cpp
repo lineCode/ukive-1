@@ -16,68 +16,67 @@
 
 namespace ukive {
 
-    View::View(Window *wnd)
-        :View(wnd, Application::getViewUID()) {
-    }
-
-    View::View(Window *wnd, int id) {
-        mAlpha = 1;
-        mScaleX = 1;
-        mScaleY = 1;
-        mTranslateX = 0;
-        mTranslateY = 0;
-        mPivotX = mPivotY = 0;
-
-        mRevealType = ViewAnimator::REVEAL_CIRCULE;
-        mHasReveal = false;
-        mRevealRadius = 0;
-        mRevealCenterX = mRevealCenterY = 0;
-        mRevealWidthRadius = mRevealHeightRadius = 0;
-
-        id_ = id;
-        measured_width_ = measured_height_ = 0;
-        min_width_ = min_height_ = 0;
-        scroll_x_ = scroll_y_ = 0;
-        elevation_ = 0.f;
-        visibility_ = VISIBLE;
-
-        has_focus_ = false;
-        is_enabled_ = true;
-        is_attached_to_window_ = false;
-        is_input_event_at_last_ = false;
-        is_pressed_ = false;
-        is_focusable_ = false;
-        is_layouted_ = false;
-        is_receive_outside_input_event_ = false;
-        can_consume_mouse_event_ = true;
-
-        window_ = wnd;
-        layout_params_ = 0;
-        parent_ = 0;
-        input_connection_ = 0;
-
-        bg_drawable_ = nullptr;
-        fg_drawable_ = nullptr;
-        click_listener_ = nullptr;
-        animator_ = nullptr;
-
-        click_performer_ = new ClickPerformer(this);
-    }
+    View::View(Window *w)
+        :window_(w),
+        id_(Application::getViewUID()),
+        min_width_(0),
+        min_height_(0),
+        measured_width_(0),
+        measured_height_(0),
+        scroll_x_(0),
+        scroll_y_(0),
+        elevation_(0.f),
+        visibility_(VISIBLE),
+        has_focus_(false),
+        is_enabled_(true),
+        is_pressed_(false),
+        is_focusable_(false),
+        is_layouted_(false),
+        is_attached_to_window_(false),
+        is_input_event_at_last_(false),
+        is_receive_outside_input_event_(false),
+        can_consume_mouse_event_(true),
+        parent_(nullptr),
+        layout_params_(nullptr),
+        input_connection_(nullptr),
+        click_listener_(nullptr),
+        animator_(nullptr),
+        click_performer_(new ClickPerformer(this)),
+        mAlpha(1.0),
+        mScaleX(1.0),
+        mScaleY(1.0),
+        mTranslateX(0.0),
+        mTranslateY(0.0),
+        mPivotX(0.0),
+        mPivotY(0.0),
+        mRevealType(ViewAnimator::REVEAL_CIRCULE),
+        mHasReveal(false),
+        mRevealRadius(0.0),
+        mRevealCenterX(0.0),
+        mRevealCenterY(0.0),
+        mRevealWidthRadius(0.0),
+        mRevealHeightRadius(0.0) {}
 
 
     View::~View() {
         delete click_performer_;
 
-        if (input_connection_ != nullptr)
+        if (input_connection_ != nullptr) {
             delete input_connection_;
+        }
     }
 
 
     ViewAnimator *View::animate() {
-        if (animator_ == nullptr)
+        if (animator_ == nullptr) {
             animator_ = new ViewAnimator(this);
+        }
 
         return animator_;
+    }
+
+    void View::setId(int id) {
+        id_ = id;
     }
 
     void View::setX(double x) {

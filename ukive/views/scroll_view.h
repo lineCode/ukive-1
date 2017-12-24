@@ -24,9 +24,7 @@ namespace ukive {
         void processVerticalScroll(int dy);
 
     public:
-        ScrollView(Window *wnd);
-        ScrollView(Window *wnd, int id);
-        virtual ~ScrollView();
+        ScrollView(Window *w);
 
         virtual void onMeasure(
             int width, int height,

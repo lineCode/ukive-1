@@ -12,15 +12,8 @@
 
 namespace ukive {
 
-    SeekBar::SeekBar(Window *window)
-        :View(window)
-    {
-        initSeekBar();
-    }
-
-    SeekBar::SeekBar(Window *window, int id)
-        : View(window, id)
-    {
+    SeekBar::SeekBar(Window *w)
+        :View(w) {
         initSeekBar();
     }
 

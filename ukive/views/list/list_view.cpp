@@ -166,21 +166,8 @@ namespace ukive {
     ListView::ListView(Window *wnd)
         :ViewGroup(wnd),
         cur_position_(0),
-        cur_offset_in_position_(0)
-    {
+        cur_offset_in_position_(0) {
         initListView();
-    }
-
-    ListView::ListView(Window *wnd, int id)
-        : ViewGroup(wnd, id),
-        cur_position_(0),
-        cur_offset_in_position_(0)
-    {
-        initListView();
-    }
-
-    ListView::~ListView()
-    {
     }
 
     void ListView::initListView()

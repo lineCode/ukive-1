@@ -105,16 +105,17 @@ namespace ukive {
     }
 
     void Application::parseCommandLine(wchar_t *cmdLine) {
-        if (cmdLine == nullptr)
+        if (cmdLine == nullptr) {
             return;
+        }
 
         std::wstring cmdString = cmdLine;
-        if (cmdString.empty())
+        if (cmdString.empty()) {
             return;
+        }
 
         size_t i = cmdString.find(L" ");
-        if (i == std::wstring::npos)
-        {
+        if (i == std::wstring::npos) {
             command_list_.push_back(cmdString);
             return;
         }
@@ -140,8 +141,7 @@ namespace ukive {
         bool done = false;
         ZeroMemory(&msg, sizeof(MSG));
 
-        while (!done)
-        {
+        while (!done) {
             if (vsync_enabled_) {
                 HRESULT hr = graphic_device_manager_->getCurOutput()->WaitForVBlank();
                 if (FAILED(hr)) {
@@ -150,16 +150,13 @@ namespace ukive {
             }
 
             MessageLooper::loop();
-            while (::PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                {
+            while (::PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
+                if (msg.message == WM_QUIT) {
                     done = true;
                     MessageLooper::myLooper()->quit();
                     break;
                 }
-                else
-                {
+                else {
                     ::TranslateMessage(&msg);
                     ::DispatchMessageW(&msg);
                 }

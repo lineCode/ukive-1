@@ -6,26 +6,12 @@
 
 namespace ukive {
 
-    MenuItemImpl::MenuItemImpl(Window *wnd, int menuId, std::int32_t order)
-        :TextView(wnd)
-    {
-        mOrder = order;
-        mMenuId = menuId;
-        mIsVisible = true;
+    MenuItemImpl::MenuItemImpl(Window *w, int menuId, std::int32_t order)
+        :TextView(w),
+        mOrder(order),
+        mMenuId(menuId),
+        mIsVisible(true) {
         initMenuItem();
-    }
-
-    MenuItemImpl::MenuItemImpl(Window *wnd, int id, int menuId, std::int32_t order)
-        : TextView(wnd, id)
-    {
-        mOrder = order;
-        mMenuId = menuId;
-        mIsVisible = true;
-        initMenuItem();
-    }
-
-    MenuItemImpl::~MenuItemImpl()
-    {
     }
 
 

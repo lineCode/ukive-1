@@ -15,8 +15,7 @@ namespace ukive {
     class MenuImpl : public LinearLayout, public Menu, public OnClickListener
     {
     public:
-        MenuImpl(Window *wnd);
-        MenuImpl(Window *wnd, int id);
+        MenuImpl(Window *w);
 
         void setMenuItemHeight(int height);
 

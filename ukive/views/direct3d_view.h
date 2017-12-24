@@ -39,8 +39,7 @@ namespace ukive {
         void releaseResourceView();
 
     public:
-        Direct3DView(Window *wnd);
-        Direct3DView(Window *wnd, int id);
+        Direct3DView(Window *w);
         ~Direct3DView();
 
         void onDirect3DClear() override;

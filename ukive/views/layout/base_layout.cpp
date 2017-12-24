@@ -9,21 +9,13 @@
 
 namespace ukive {
 
-    BaseLayout::BaseLayout(Window *wnd)
-        :FrameLayout(wnd)
-    {
-        initBaseLayout();
-    }
-
-    BaseLayout::BaseLayout(Window *wnd, int id)
-        : FrameLayout(wnd, id)
-    {
+    BaseLayout::BaseLayout(Window *w)
+        :FrameLayout(w) {
         initBaseLayout();
     }
 
 
-    BaseLayout::~BaseLayout()
-    {
+    BaseLayout::~BaseLayout() {
         if (!shade_added_) {
             delete shade_layout_;
         }

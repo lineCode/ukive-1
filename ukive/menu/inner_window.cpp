@@ -202,24 +202,14 @@ namespace ukive {
 
 
     InnerWindow::InnerDecorView::InnerDecorView(InnerWindow *inner)
-        :FrameLayout(inner->getParent())
-    {
-        mInnerWindow = inner;
-    }
+        :FrameLayout(inner->getParent()),
+        mInnerWindow(inner) {}
 
-    InnerWindow::InnerDecorView::InnerDecorView(InnerWindow *inner, int id)
-        : FrameLayout(inner->getParent(), id)
-    {
-        mInnerWindow = inner;
-    }
-
-    InnerWindow::InnerDecorView::~InnerDecorView()
-    {
+    InnerWindow::InnerDecorView::~InnerDecorView() {
     }
 
 
-    bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent *e)
-    {
+    bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent *e) {
         return false;
     }
 

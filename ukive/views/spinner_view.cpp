@@ -4,14 +4,7 @@
 namespace ukive {
 
     SpinnerView::SpinnerView(Window *wnd)
-        :TextView(wnd)
-    {
-    }
-
-    SpinnerView::SpinnerView(Window *wnd, int id)
-        : TextView(wnd, id)
-    {
-
+        :TextView(wnd) {
     }
 
     SpinnerView::~SpinnerView()

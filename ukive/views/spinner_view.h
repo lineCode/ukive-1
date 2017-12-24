@@ -9,9 +9,8 @@ namespace ukive {
     class SpinnerView : public TextView
     {
     public:
-        SpinnerView(Window *wnd);
-        SpinnerView(Window *wnd, int id);
-        virtual ~SpinnerView();
+        SpinnerView(Window *w);
+        ~SpinnerView();
     };
 
 }

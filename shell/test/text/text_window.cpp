@@ -35,7 +35,8 @@ namespace shell {
         mTBMCallback = new ToolbarMenuCallback(this);
 
         //root view.
-        ukive::RestraintLayout *rootLayout = new ukive::RestraintLayout(this, ID_LAYOUT_ROOT);
+        ukive::RestraintLayout *rootLayout = new ukive::RestraintLayout(this);
+        rootLayout->setId(ID_LAYOUT_ROOT);
         ukive::BaseLayoutParams *rightViewLp = new ukive::BaseLayoutParams(
             ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT);
         rootLayout->setLayoutParams(rightViewLp);
@@ -56,7 +57,8 @@ namespace shell {
 
 
         //编辑器。
-        ukive::TextView *editorTV = new ukive::TextView(this, ID_TV_EDITOR);
+        ukive::TextView *editorTV = new ukive::TextView(this);
+        editorTV->setId(ID_TV_EDITOR);
         editorTV->setIsEditable(true);
         editorTV->setIsSelectable(true);
         editorTV->setFontFamilyName(L"Consolas");
@@ -106,12 +108,14 @@ namespace shell {
 
     ukive::View *TextWindow::inflateToolbar(ukive::View *parent)
     {
-        ukive::LinearLayout *toolbar = new ukive::LinearLayout(this, ID_TOOLBAR);
+        ukive::LinearLayout *toolbar = new ukive::LinearLayout(this);
+        toolbar->setId(ID_TOOLBAR);
         toolbar->setElevation(1);
         toolbar->setOrientation(ukive::LinearLayout::HORIZONTAL);
         toolbar->setBackground(new ukive::ColorDrawable(ukive::Color::White));
 
-        ukive::TextView *font = new ukive::TextView(this, ID_TOOLBAR_ITEM_FONT);
+        ukive::TextView *font = new ukive::TextView(this);
+        font->setId(ID_TOOLBAR_ITEM_FONT);
         font->setText(L"字体");
         font->setTextSize(13);
         font->setPadding(16, 8, 16, 8);
@@ -124,7 +128,8 @@ namespace shell {
                 ukive::LinearLayoutParams::FIT_CONTENT, ukive::LinearLayoutParams::MATCH_PARENT);
         toolbar->addView(font, fontParams);
 
-        ukive::TextView *format = new ukive::TextView(this, ID_TOOLBAR_ITEM_FORMAT);
+        ukive::TextView *format = new ukive::TextView(this);
+        format->setId(ID_TOOLBAR_ITEM_FORMAT);
         format->setText(L"格式");
         format->setTextSize(13);
         format->setPadding(16, 8, 16, 8);

@@ -8,22 +8,9 @@
 
 namespace ukive {
 
-    LinearLayout::LinearLayout(Window *wnd)
-        :ViewGroup(wnd)
-    {
-        mOrientation = VERTICAL;
-    }
-
-    LinearLayout::LinearLayout(Window *wnd, int id)
-        : ViewGroup(wnd, id)
-    {
-        mOrientation = VERTICAL;
-    }
-
-
-    LinearLayout::~LinearLayout()
-    {
-    }
+    LinearLayout::LinearLayout(Window *w)
+        :ViewGroup(w),
+        mOrientation(VERTICAL) {}
 
 
     LayoutParams *LinearLayout::generateLayoutParams(const LayoutParams &lp)

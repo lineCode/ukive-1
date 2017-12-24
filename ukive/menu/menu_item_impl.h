@@ -20,9 +20,7 @@ namespace ukive {
         void initMenuItem();
 
     public:
-        MenuItemImpl(Window *wnd, int menuId, std::int32_t order);
-        MenuItemImpl(Window *wnd, int id, int menuId, std::int32_t order);
-        virtual ~MenuItemImpl();
+        MenuItemImpl(Window *w, int menuId, int order);
 
         void setItemTitle(std::wstring title) override;
         void setItemVisible(bool visible) override;

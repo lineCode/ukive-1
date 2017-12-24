@@ -8,13 +8,8 @@
 
 namespace shell {
 
-    LodView::LodView(ukive::Window *wnd)
-        :Direct3DView(wnd) {
-        initLodView();
-    }
-
-    LodView::LodView(ukive::Window *wnd, int id)
-        : Direct3DView(wnd, id) {
+    LodView::LodView(ukive::Window *w)
+        :Direct3DView(w) {
         initLodView();
     }
 

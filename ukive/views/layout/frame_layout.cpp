@@ -8,18 +8,7 @@
 namespace ukive {
 
     FrameLayout::FrameLayout(Window *wnd)
-        :ViewGroup(wnd)
-    {
-    }
-
-    FrameLayout::FrameLayout(Window *wnd, int id)
-        : ViewGroup(wnd, id)
-    {
-    }
-
-    FrameLayout::~FrameLayout()
-    {
-    }
+        :ViewGroup(wnd) {}
 
 
     void FrameLayout::onMeasure(int width, int height, int widthSpec, int heightSpec)

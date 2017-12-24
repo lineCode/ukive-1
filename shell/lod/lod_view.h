@@ -15,8 +15,7 @@ namespace shell {
 
     class LodView : public ukive::Direct3DView {
     public:
-        LodView(ukive::Window *wnd);
-        LodView(ukive::Window *wnd, int id);
+        LodView(ukive::Window *w);
         ~LodView();
 
         void onDirect3DRender() override;

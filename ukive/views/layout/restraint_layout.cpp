@@ -9,18 +9,7 @@
 namespace ukive {
 
     RestraintLayout::RestraintLayout(Window *wnd)
-        : ViewGroup(wnd)
-    {
-    }
-
-    RestraintLayout::RestraintLayout(Window *wnd, int id)
-        : ViewGroup(wnd, id)
-    {
-    }
-
-    RestraintLayout::~RestraintLayout()
-    {
-    }
+        : ViewGroup(wnd) {}
 
 
     LayoutParams *RestraintLayout::generateLayoutParams(const LayoutParams &lp)

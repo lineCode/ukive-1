@@ -10,10 +10,6 @@ namespace ukive {
 
     class AnimationManager
     {
-    private:
-        ComPtr<IUIAnimationManager> mAnimationManager;
-        ComPtr<IUIAnimationTimer> mAnimationTimer;
-
     public:
         static IUIAnimationTransitionLibrary *sTransitionLibrary;
         static IUIAnimationTransitionFactory *sTransitionFactory;
@@ -34,7 +30,6 @@ namespace ukive {
             virtual void onRenderingTooSlow(unsigned int fps) = 0;
         };
 
-    public:
         AnimationManager();
         ~AnimationManager();
 
@@ -59,6 +54,10 @@ namespace ukive {
         IUIAnimationManager *getAnimationManager();
         IUIAnimationTimer *getAnimationTimer();
         IUIAnimationTransitionLibrary *getTransitionLibrary();
+
+    private:
+        ComPtr<IUIAnimationManager> mAnimationManager;
+        ComPtr<IUIAnimationTimer> mAnimationTimer;
     };
 
 }

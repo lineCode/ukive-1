@@ -8,23 +8,15 @@
 
 namespace ukive {
 
-    MenuImpl::MenuImpl(Window *wnd)
-        :LinearLayout(wnd)
-    {
-        initMenu();
-    }
-
-    MenuImpl::MenuImpl(Window *wnd, int id)
-        : LinearLayout(wnd, id)
-    {
+    MenuImpl::MenuImpl(Window *w)
+        :LinearLayout(w),
+        callback_(nullptr),
+        item_height_(LayoutParams::FIT_CONTENT) {
         initMenu();
     }
 
 
-    void MenuImpl::initMenu()
-    {
-        callback_ = nullptr;
-        item_height_ = LayoutParams::FIT_CONTENT;
+    void MenuImpl::initMenu() {
     }
 
 

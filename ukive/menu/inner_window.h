@@ -23,7 +23,6 @@ namespace ukive {
 
         public:
             InnerDecorView(InnerWindow *inner);
-            InnerDecorView(InnerWindow *inner, int id);
             ~InnerDecorView();
 
             bool onInterceptInputEvent(InputEvent *e) override;

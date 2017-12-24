@@ -40,9 +40,7 @@ namespace ukive {
         void layoutHorizontal(int left, int top, int right, int bottom);
 
     public:
-        LinearLayout(Window *wnd);
-        LinearLayout(Window *wnd, int id);
-        ~LinearLayout();
+        LinearLayout(Window *w);
 
         void setOrientation(int orientation);
 

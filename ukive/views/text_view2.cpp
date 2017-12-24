@@ -6,19 +6,11 @@
 namespace ukive {
 
     TextView2::TextView2(Window *wnd)
-        :View(wnd)
-    {
+        :View(wnd) {
         initTextView();
     }
 
-    TextView2::TextView2(Window *wnd, int id)
-        : View(wnd, id)
-    {
-        initTextView();
-    }
-
-    TextView2::~TextView2()
-    {
+    TextView2::~TextView2() {
     }
 
 

@@ -11,9 +11,7 @@ namespace ukive {
     class RestraintLayout : public ViewGroup
     {
     public:
-        RestraintLayout(Window *wnd);
-        RestraintLayout(Window *wnd, int id);
-        ~RestraintLayout();
+        RestraintLayout(Window *w);
 
     protected:
         LayoutParams *generateLayoutParams(const LayoutParams &lp) override;

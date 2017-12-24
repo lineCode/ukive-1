@@ -29,8 +29,7 @@ namespace ukive {
         int getWrappedHeight();
 
     public:
-        ViewGroup(Window *wnd);
-        ViewGroup(Window *wnd, int id);
+        ViewGroup(Window *w);
         ~ViewGroup();
 
         bool dispatchInputEvent(InputEvent *e) override;

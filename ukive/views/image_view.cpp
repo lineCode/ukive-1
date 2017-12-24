@@ -9,16 +9,8 @@
 namespace ukive {
 
     ImageView::ImageView(Window *wnd)
-        :View(wnd)
-    {
-        mBitmapDrawable = 0;
-    }
-
-    ImageView::ImageView(Window *wnd, int id)
-        : View(wnd, id)
-    {
-        mBitmapDrawable = 0;
-    }
+        :View(wnd),
+        mBitmapDrawable(nullptr) {}
 
     ImageView::~ImageView()
     {

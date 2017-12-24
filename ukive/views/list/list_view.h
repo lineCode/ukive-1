@@ -65,9 +65,7 @@ namespace ukive {
     class ListView : public ViewGroup, public ListDataSetChangedListener
     {
     public:
-        ListView(Window *wnd);
-        ListView(Window *wnd, int id);
-        ~ListView();
+        ListView(Window *w);
 
         void onLayout(
             bool changed, bool sizeChanged,

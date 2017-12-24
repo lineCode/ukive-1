@@ -12,25 +12,21 @@ namespace ukive {
         AnimationManager::sTransitionFactory = nullptr;
 
 
-    AnimationManager::AnimationManager()
-    {
+    AnimationManager::AnimationManager() {
     }
 
 
-    AnimationManager::~AnimationManager()
-    {
+    AnimationManager::~AnimationManager() {
     }
 
 
-    HRESULT AnimationManager::init()
-    {
+    HRESULT AnimationManager::init() {
         HRESULT hr = ::CoCreateInstance(
             CLSID_UIAnimationManager,
             NULL,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&mAnimationManager));
-        if (FAILED(hr))
-        {
+        if (FAILED(hr)) {
             return hr;
         }
 
@@ -39,27 +35,22 @@ namespace ukive {
             NULL,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&mAnimationTimer));
-        if (FAILED(hr))
-        {
+        if (FAILED(hr)) {
             return hr;
         }
 
         return S_OK;
     }
 
-    void AnimationManager::close()
-    {
-    }
+    void AnimationManager::close() {}
 
-    HRESULT AnimationManager::initGlobal()
-    {
+    HRESULT AnimationManager::initGlobal() {
         HRESULT hr = ::CoCreateInstance(
             CLSID_UIAnimationTransitionLibrary,
             NULL,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&sTransitionLibrary));
-        if (FAILED(hr))
-        {
+        if (FAILED(hr)) {
             return hr;
         }
 
@@ -68,16 +59,14 @@ namespace ukive {
             NULL,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&sTransitionFactory));
-        if (FAILED(hr))
-        {
+        if (FAILED(hr)) {
             return hr;
         }
 
         return S_OK;
     }
 
-    void AnimationManager::closeGlobal()
-    {
+    void AnimationManager::closeGlobal() {
         sTransitionLibrary->Release();
         sTransitionLibrary = nullptr;
 
@@ -86,88 +75,76 @@ namespace ukive {
     }
 
 
-    void AnimationManager::pause()
-    {
+    void AnimationManager::pause() {
         mAnimationManager->Pause();
     }
 
-    void AnimationManager::resume()
-    {
+    void AnimationManager::resume() {
         mAnimationManager->Resume();
     }
 
-    void AnimationManager::finish(double second)
-    {
+    void AnimationManager::finish(double second) {
         mAnimationManager->FinishAllStoryboards(second);
     }
 
-    void AnimationManager::abandon()
-    {
+    void AnimationManager::abandon() {
         mAnimationManager->AbandonAllStoryboards();
     }
 
-    bool AnimationManager::isBusy()
-    {
+    bool AnimationManager::isBusy() {
         UI_ANIMATION_MANAGER_STATUS status;
         HRESULT hr = mAnimationManager->GetStatus(&status);
 
         return (status == UI_ANIMATION_MANAGER_BUSY);
     }
 
-    bool AnimationManager::update()
-    {
+    bool AnimationManager::update() {
         UI_ANIMATION_SECONDS secondsNow;
         HRESULT hr = mAnimationTimer->GetTime(&secondsNow);
 
-        if (SUCCEEDED(hr))
+        if (SUCCEEDED(hr)) {
             hr = mAnimationManager->Update(secondsNow);
+        }
 
         return SUCCEEDED(hr);
     }
 
 
-    void AnimationManager::connectTimer(bool enable)
-    {
+    void AnimationManager::connectTimer(bool enable) {
         HRESULT hr;
-
-        if (enable)
-        {
+        if (enable) {
             IUIAnimationTimerUpdateHandler *pTimerUpdateHandler;
             hr = mAnimationManager->QueryInterface(IID_PPV_ARGS(&pTimerUpdateHandler));
-            if (SUCCEEDED(hr))
-            {
+            if (SUCCEEDED(hr)) {
                 hr = mAnimationTimer->SetTimerUpdateHandler(
                     pTimerUpdateHandler,
                     UI_ANIMATION_IDLE_BEHAVIOR_DISABLE);
                 pTimerUpdateHandler->Release();
             }
         }
-        else
-        {
+        else {
             hr = mAnimationTimer->SetTimerUpdateHandler(
                 0, UI_ANIMATION_IDLE_BEHAVIOR_DISABLE);
         }
     }
 
 
-    void AnimationManager::setTimerEventListener(OnTimerEventListener *l)
-    {
-        if (l == 0)
+    void AnimationManager::setTimerEventListener(OnTimerEventListener *l) {
+        if (l == nullptr) {
             mAnimationTimer->SetTimerEventHandler(0);
-        else
-        {
+        }
+        else {
             AnimationTimerHandler *handler = new AnimationTimerHandler(l);
             mAnimationTimer->SetTimerEventHandler(handler);
             handler->Release();
         }
     }
 
-    void AnimationManager::setOnStateChangedListener(OnStateChangedListener *l)
-    {
-        if (l == 0)
+    void AnimationManager::setOnStateChangedListener(OnStateChangedListener *l) {
+        if (l == nullptr) {
             mAnimationManager->SetManagerEventHandler(0);
-        else
-        {
+        }
+        else {
             AnimationManagerEventHandler *handler = new AnimationManagerEventHandler(l);
             mAnimationManager->SetManagerEventHandler(handler);
             handler->Release();
@@ -175,18 +152,15 @@ namespace ukive {
     }
 
 
-    IUIAnimationManager *AnimationManager::getAnimationManager()
-    {
+    IUIAnimationManager *AnimationManager::getAnimationManager() {
         return mAnimationManager.get();
     }
 
-    IUIAnimationTimer *AnimationManager::getAnimationTimer()
-    {
+    IUIAnimationTimer *AnimationManager::getAnimationTimer() {
         return mAnimationTimer.get();
     }
 
-    IUIAnimationTransitionLibrary *AnimationManager::getTransitionLibrary()
-    {
+    IUIAnimationTransitionLibrary *AnimationManager::getTransitionLibrary() {
         return sTransitionLibrary;
     }
 

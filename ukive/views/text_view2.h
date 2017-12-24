@@ -12,14 +12,12 @@ namespace ukive {
     class TextView2 : public View
     {
     private:
-
         void initTextView();
 
         HRESULT createFontFace(PCWCHAR fontName, IDWriteFontFace **fontFace);
 
     public:
         TextView2(Window *wnd);
-        TextView2(Window *wnd, int id);
         ~TextView2();
     };
 

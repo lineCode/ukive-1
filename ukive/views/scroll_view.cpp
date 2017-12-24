@@ -13,15 +13,6 @@ namespace ukive {
     {
     }
 
-    ScrollView::ScrollView(Window *wnd, int id)
-        : ViewGroup(wnd, id)
-    {
-    }
-
-    ScrollView::~ScrollView()
-    {
-    }
-
 
     bool ScrollView::canScroll()
     {

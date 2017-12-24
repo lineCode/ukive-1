@@ -134,9 +134,8 @@ namespace ukive {
         void performSelectAll();
 
     public:
-        TextView(Window *wnd);
-        TextView(Window *wnd, int id);
-        virtual ~TextView();
+        TextView(Window *w);
+        ~TextView();
 
         void onBeginProcess();
         void onEndProcess();

@@ -9,9 +9,7 @@ namespace ukive {
     class FrameLayout : public ViewGroup
     {
     public:
-        FrameLayout(Window *wnd);
-        FrameLayout(Window *wnd, int id);
-        virtual ~FrameLayout();
+        FrameLayout(Window *w);
 
         virtual void onMeasure(
             int width, int height, int widthSpec, int heightSpec) override;

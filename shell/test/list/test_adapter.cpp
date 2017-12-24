@@ -21,14 +21,16 @@ namespace shell {
 
         typedef ukive::RestraintLayoutParams Rlp;
 
-        ukive::ImageView *avatar_view = new ukive::ImageView(parent->getWindow(), ID_AVATAR);
+        ukive::ImageView *avatar_view = new ukive::ImageView(parent->getWindow());
+        avatar_view->setId(ID_AVATAR);
         Rlp *av_lp = new Rlp(36, 36);
         av_lp->startHandle(layout->getId(), Rlp::START, 16);
         av_lp->topHandle(layout->getId(), Rlp::BOTTOM, 8);
         av_lp->bottomHandle(layout->getId(), Rlp::BOTTOM, 8);
         layout->addView(avatar_view, av_lp);
 
-        ukive::TextView *title_label = new ukive::TextView(parent->getWindow(), ID_TITLE);
+        ukive::TextView *title_label = new ukive::TextView(parent->getWindow());
+        title_label->setId(ID_TITLE);
         Rlp *tl_lp = new Rlp(
             Rlp::MATCH_PARENT,
             Rlp::FIT_CONTENT);
@@ -37,7 +39,8 @@ namespace shell {
         tl_lp->endHandle(layout->getId(), Rlp::END, 8);
         layout->addView(title_label, tl_lp);
 
-        ukive::TextView *summary_label = new ukive::TextView(parent->getWindow(), ID_SUMMARY);
+        ukive::TextView *summary_label = new ukive::TextView(parent->getWindow());
+        summary_label->setId(ID_SUMMARY);
         Rlp *sl_lp = new Rlp(
             Rlp::MATCH_PARENT,
             Rlp::FIT_CONTENT);

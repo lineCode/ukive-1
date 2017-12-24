@@ -54,7 +54,8 @@ namespace shell {
         mLodView = lodView;
 
         //right view.
-        ukive::RestraintLayout *rightLayout = new ukive::RestraintLayout(this, ID_RIGHT_RESTRAIN);
+        ukive::RestraintLayout *rightLayout = new ukive::RestraintLayout(this);
+        rightLayout->setId(ID_RIGHT_RESTRAIN);
         ukive::LinearLayoutParams *rightViewLp = new ukive::LinearLayoutParams(
             0, ukive::LayoutParams::MATCH_PARENT);
         rightViewLp->weight = 1;
@@ -77,7 +78,8 @@ namespace shell {
     {
         /////////////////////////////第一行//////////////////////////////////
         //c1 label.
-        ukive::TextView *c1Label = new ukive::TextView(this, ID_C1_LABEL);
+        ukive::TextView *c1Label = new ukive::TextView(this);
+        c1Label->setId(ID_C1_LABEL);
         c1Label->setIsEditable(false);
         c1Label->setIsSelectable(false);
         c1Label->setText(L"C1值:");
@@ -92,7 +94,8 @@ namespace shell {
         rightLayout->addView(c1Label, c1LabelLp);
 
         //c1 seekbar.
-        ukive::SeekBar *c1SeekBar = new ukive::SeekBar(this, ID_C1_SEEKBAR);
+        ukive::SeekBar *c1SeekBar = new ukive::SeekBar(this);
+        c1SeekBar->setId(ID_C1_SEEKBAR);
         c1SeekBar->setMaximum(60.f);
         c1SeekBar->setProgress(2.f - 1.f);
         c1SeekBar->setOnSeekValueChangedListener(this);
@@ -109,7 +112,8 @@ namespace shell {
         rightLayout->addView(c1SeekBar, c1SeekBarLp);
 
         //c1 value.
-        ukive::TextView *c1Value = new ukive::TextView(this, ID_C1_VALUE);
+        ukive::TextView *c1Value = new ukive::TextView(this);
+        c1Value->setId(ID_C1_VALUE);
         c1Value->setIsEditable(false);
         c1Value->setIsSelectable(false);
         c1Value->setText(L"2.00");
@@ -127,7 +131,8 @@ namespace shell {
 
         /////////////////////////////第二行//////////////////////////////////
         //c2 label.
-        ukive::TextView *c2Label = new ukive::TextView(this, ID_C2_LABEL);
+        ukive::TextView *c2Label = new ukive::TextView(this);
+        c2Label->setId(ID_C2_LABEL);
         c2Label->setIsEditable(false);
         c2Label->setIsSelectable(false);
         c2Label->setText(L"C2值:");
@@ -142,7 +147,8 @@ namespace shell {
         rightLayout->addView(c2Label, c2LabelLp);
 
         //c2 seekbar.
-        ukive::SeekBar *c2SeekBar = new ukive::SeekBar(this, ID_C2_SEEKBAR);
+        ukive::SeekBar *c2SeekBar = new ukive::SeekBar(this);
+        c2SeekBar->setId(ID_C2_SEEKBAR);
         c2SeekBar->setMaximum(60.f);
         c2SeekBar->setProgress(30.f - 1.f);
         c2SeekBar->setOnSeekValueChangedListener(this);
@@ -159,7 +165,8 @@ namespace shell {
         rightLayout->addView(c2SeekBar, c2SeekBarLp);
 
         //c2 value.
-        ukive::TextView *c2Value = new ukive::TextView(this, ID_C2_VALUE);
+        ukive::TextView *c2Value = new ukive::TextView(this);
+        c2Value->setId(ID_C2_VALUE);
         c2Value->setIsEditable(false);
         c2Value->setIsSelectable(false);
         c2Value->setText(L"30.00");
@@ -177,7 +184,8 @@ namespace shell {
 
         /////////////////////////////第三行//////////////////////////////////
         //split label.
-        ukive::TextView *splitLabel = new ukive::TextView(this, ID_SPLIT_LABEL);
+        ukive::TextView *splitLabel = new ukive::TextView(this);
+        splitLabel->setId(ID_SPLIT_LABEL);
         splitLabel->setIsEditable(false);
         splitLabel->setIsSelectable(false);
         splitLabel->setText(L"分割:");
@@ -195,7 +203,8 @@ namespace shell {
         rightLayout->addView(splitLabel, splitLabelLp);
 
         //split seekbar.
-        ukive::SeekBar *splitSeekBar = new ukive::SeekBar(this, ID_SPLIT_SEEKBAR);
+        ukive::SeekBar *splitSeekBar = new ukive::SeekBar(this);
+        splitSeekBar->setId(ID_SPLIT_SEEKBAR);
         splitSeekBar->setMaximum(10.f);
         splitSeekBar->setProgress(5.f - 1.f);
         splitSeekBar->setOnSeekValueChangedListener(this);
@@ -212,7 +221,8 @@ namespace shell {
         rightLayout->addView(splitSeekBar, splitSeekBarLp);
 
         //split value.
-        ukive::TextView *splitValue = new ukive::TextView(this, ID_SPLIT_VALUE);
+        ukive::TextView *splitValue = new ukive::TextView(this);
+        splitValue->setId(ID_SPLIT_VALUE);
         splitValue->setIsEditable(false);
         splitValue->setIsSelectable(false);
         splitValue->setText(L"5");
@@ -233,7 +243,8 @@ namespace shell {
 
 
         //submit button.
-        ukive::Button *submitBT = new ukive::Button(this, ID_SUBMIT_BUTTON);
+        ukive::Button *submitBT = new ukive::Button(this);
+        submitBT->setId(ID_SUBMIT_BUTTON);
         submitBT->setText(L"提交");
         submitBT->setTextSize(12.f);
         submitBT->setOnClickListener(this);
@@ -250,7 +261,8 @@ namespace shell {
         rightLayout->addView(submitBT, submitBTLp);
 
         //vsync button.
-        ukive::Button *vsyncBT = new ukive::Button(this, ID_VSYNC_BUTTON);
+        ukive::Button *vsyncBT = new ukive::Button(this);
+        vsyncBT->setId(ID_VSYNC_BUTTON);
         vsyncBT->setText(L"VSYNC ON");
         vsyncBT->setTextSize(12.f);
         vsyncBT->setTextColor(ukive::Color::White);
@@ -271,7 +283,8 @@ namespace shell {
 
 
         //渲染参数显示器
-        ukive::TextView *renderInfoTV = new ukive::TextView(this, ID_LOD_INFO);
+        ukive::TextView *renderInfoTV = new ukive::TextView(this);
+        renderInfoTV->setId(ID_LOD_INFO);
         renderInfoTV->setIsEditable(false);
         renderInfoTV->setIsSelectable(false);
         renderInfoTV->setText(L"Render info.");

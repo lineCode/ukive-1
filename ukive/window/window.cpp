@@ -418,7 +418,8 @@ namespace ukive {
     void Window::onCreate() {
         labour_cycler_ = new UpdateCycler(this);
 
-        base_layout_ = new BaseLayout(this, 0);
+        base_layout_ = new BaseLayout(this);
+        base_layout_->setId(0);
         base_layout_->setLayoutParams(
             new LayoutParams(
                 LayoutParams::MATCH_PARENT,

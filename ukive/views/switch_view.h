@@ -8,8 +8,7 @@ namespace ukive {
 
     class SwitchView : public View {
     public:
-        SwitchView(Window *wnd);
-        SwitchView(Window *wnd, int id);
+        SwitchView(Window *w);
         ~SwitchView();
 
     private:

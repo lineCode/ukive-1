@@ -44,12 +44,12 @@ namespace ukive {
             CENTER_VERTICAL,
         };
 
-        View(Window *wnd);
-        View(Window *wnd, int id);
+        View(Window *w);
         virtual ~View();
 
         ViewAnimator *animate();
 
+        void setId(int id);
         void setX(double x);
         void setY(double y);
         void setAlpha(double alpha);

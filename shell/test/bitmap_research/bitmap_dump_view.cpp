@@ -16,13 +16,8 @@ namespace shell {
         const int kCellWidth = 96;
     }
 
-    BitmapDumpView::BitmapDumpView(ukive::Window *win)
-        :View(win) {
-        initView();
-    }
-
-    BitmapDumpView::BitmapDumpView(ukive::Window *win, int id)
-        : View(win, id) {
+    BitmapDumpView::BitmapDumpView(ukive::Window *w)
+        :View(w) {
         initView();
     }
 

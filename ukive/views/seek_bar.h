@@ -36,8 +36,7 @@ namespace ukive {
         void startZoomOutAnimation();
 
     public:
-        SeekBar(Window *window);
-        SeekBar(Window *window, int id);
+        SeekBar(Window *w);
         ~SeekBar();
 
         void setMaximum(float maximum);

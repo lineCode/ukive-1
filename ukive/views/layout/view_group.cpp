@@ -11,16 +11,10 @@
 
 namespace ukive {
 
-    ViewGroup::ViewGroup(Window *wnd)
-        :View(wnd) {
+    ViewGroup::ViewGroup(Window *w)
+        :View(w) {
         initViewGroup();
     }
-
-    ViewGroup::ViewGroup(Window *wnd, int id)
-        : View(wnd, id) {
-        initViewGroup();
-    }
-
 
     ViewGroup::~ViewGroup() {
         STLDeleteElements(&view_list_);

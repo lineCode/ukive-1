@@ -22,23 +22,13 @@ namespace ukive {
     TextView::TextView(Window *wnd)
         :View(wnd),
         mTextColor(Color::Black),
-        mSelectionBackgroundColor(Color::Blue200)
-    {
-        initTextView();
-    }
-
-    TextView::TextView(Window *wnd, int id)
-        :View(wnd, id),
-        mTextColor(Color::Black),
-        mSelectionBackgroundColor(Color::Blue200)
-    {
+        mSelectionBackgroundColor(Color::Blue200) {
         initTextView();
     }
 
     TextView::~TextView()
     {
         delete mBaseText;
-
         delete mTextBlink;
         delete mTextKeyListener;
     }

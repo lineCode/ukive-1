@@ -7,21 +7,9 @@
 
 namespace ukive {
 
-    Button::Button(Window *wnd)
-        :TextView(wnd)
-    {
+    Button::Button(Window *w)
+        :TextView(w) {
         initButton();
-    }
-
-    Button::Button(Window *wnd, int id)
-        : TextView(wnd, id)
-    {
-        initButton();
-    }
-
-
-    Button::~Button()
-    {
     }
 
 

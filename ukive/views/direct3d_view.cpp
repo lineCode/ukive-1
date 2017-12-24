@@ -10,14 +10,8 @@
 
 namespace ukive {
 
-    Direct3DView::Direct3DView(Window *wnd)
-        :View(wnd)
-    {
-        initDirect3DView();
-    }
-
-    Direct3DView::Direct3DView(Window *wnd, int id)
-        : View(wnd, id)
+    Direct3DView::Direct3DView(Window *w)
+        :View(w)
     {
         initDirect3DView();
     }

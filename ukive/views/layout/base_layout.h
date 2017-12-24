@@ -13,8 +13,7 @@ namespace ukive {
     class BaseLayout : public FrameLayout
     {
     public:
-        BaseLayout(Window *wnd);
-        BaseLayout(Window *wnd, int id);
+        BaseLayout(Window *w);
         ~BaseLayout();
 
         void addShade(View *shade);

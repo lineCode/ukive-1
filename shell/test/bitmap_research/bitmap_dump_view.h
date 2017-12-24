@@ -20,8 +20,7 @@ namespace shell {
 
     class BitmapDumpView : public ukive::View {
     public:
-        BitmapDumpView(ukive::Window *win);
-        BitmapDumpView(ukive::Window *win, int id);
+        BitmapDumpView(ukive::Window *w);
         ~BitmapDumpView();
 
         void onDraw(ukive::Canvas *canvas) override;

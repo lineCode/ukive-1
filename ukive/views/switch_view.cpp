@@ -4,14 +4,7 @@
 namespace ukive {
 
     SwitchView::SwitchView(Window *wnd)
-        :View(wnd)
-    {
-        initSwitchView();
-    }
-
-    SwitchView::SwitchView(Window *wnd, int id)
-        : View(wnd, id)
-    {
+        :View(wnd) {
         initSwitchView();
     }
 

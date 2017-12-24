@@ -17,8 +17,7 @@ namespace ukive {
         BitmapDrawable *mBitmapDrawable;
 
     public:
-        ImageView(Window *wnd);
-        ImageView(Window *wnd, int id);
+        ImageView(Window *w);
         ~ImageView();
 
         virtual void onMeasure(int width, int height, int widthSpec, int heightSpec);
