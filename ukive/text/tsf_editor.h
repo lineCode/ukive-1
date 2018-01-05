@@ -34,10 +34,10 @@ namespace ukive {
 
         std::queue<std::shared_ptr<LockRecord>> mReqQueue;
 
-        const TsViewCookie mViewCookie = 0xBEEFBEEF;
+        TsViewCookie mViewCookie;
 
     public:
-        TsfEditor();
+        TsfEditor(TsViewCookie tvc);
         ~TsfEditor();
 
         void setInputConnection(InputConnection *ic);

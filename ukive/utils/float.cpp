@@ -93,7 +93,7 @@ namespace ukive {
 
     float Float::parseFloat(string16 s) {
         if (s.empty()) {
-            Log::e(L"invalid params");
+            Log::e(L"Float", L"invalid params");
             return 0;
         }
 

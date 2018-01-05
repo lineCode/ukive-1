@@ -45,7 +45,7 @@ namespace ukive {
 
     Color Color::parse(string16 color) {
         if (color.empty() || color.at(0) != L'#') {
-            Log::e(L"unknown color");
+            Log::e(L"Color", L"unknown color");
             return Color::Red500;
         }
 
@@ -65,7 +65,7 @@ namespace ukive {
             return Color(a, r, g, b);
         }
         else {
-            Log::e(L"unknown color");
+            Log::e(L"Color", L"unknown color");
             return Color::Red500;
         }
     }

@@ -45,12 +45,12 @@ namespace ukive {
 
     int32_t Number::parseInt(string16 s, int radix) {
         if (s.empty()) {
-            Log::e(L"null");
+            Log::e(L"Number", L"null");
             return 0;
         }
 
         if (radix < MIN_RADIX || radix > MAX_RADIX) {
-            Log::e(L"illegal radix.");
+            Log::e(L"Number", L"illegal radix.");
             return 0;
         }
 
@@ -68,7 +68,7 @@ namespace ukive {
                 limit = std::numeric_limits<int32_t>::min();
             }
             else if (firstChar != L'+') {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
@@ -80,18 +80,18 @@ namespace ukive {
         while (i < len) {
             digit = Number::digit(s.at(i++), radix);
             if (digit < 0) {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
             if (result < multmin) {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
             result *= radix;
             if (result < limit + digit) {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
@@ -103,12 +103,12 @@ namespace ukive {
 
     int64_t Number::parseInt64(string16 s, int radix) {
         if (s.empty()) {
-            Log::e(L"null");
+            Log::e(L"Number", L"null");
             return 0;
         }
 
         if (radix < MIN_RADIX || radix > MAX_RADIX) {
-            Log::e(L"radix is illegal.");
+            Log::e(L"Number", L"radix is illegal.");
             return 0;
         }
 
@@ -126,7 +126,7 @@ namespace ukive {
                 limit = (std::numeric_limits<int64_t>::min)();
             }
             else if (firstChar != L'+') {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
@@ -137,18 +137,18 @@ namespace ukive {
         while (i < len) {
             digit = Number::digit(s.at(i++), radix);
             if (digit < 0) {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
             if (result < multmin) {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 
             result *= radix;
             if (result < limit + digit) {
-                Log::e(L"illegal number str");
+                Log::e(L"Number", L"illegal number str");
                 return 0;
             }
 

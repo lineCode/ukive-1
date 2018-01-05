@@ -53,7 +53,7 @@ namespace ukive {
             &swapChainDesc, 0, 0, &swapchain_));
 
         ComPtr<IDXGISurface> backBufferPtr;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), (LPVOID*)&backBufferPtr));
+        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&backBufferPtr)));
         RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
@@ -136,7 +136,7 @@ namespace ukive {
 
         hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
         if (FAILED(hr)) {
-            Log::e(L"failed to present.");
+            Log::e(L"Render", L"failed to present.");
         }
 
         return !FAILED(hr);

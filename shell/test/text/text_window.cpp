@@ -62,7 +62,7 @@ namespace shell {
         editorTV->setIsEditable(true);
         editorTV->setIsSelectable(true);
         editorTV->setFontFamilyName(L"Consolas");
-        editorTV->setTextSize(15);
+        editorTV->setTextSize(14);
         editorTV->setPadding(18, 18, 18, 18);
         editorTV->setLineSpacing(true, 1.2f);
         editorTV->autoWrap(false);
@@ -81,19 +81,16 @@ namespace shell {
 
     bool TextWindow::onMoving(ukive::Rect *rect)
     {
-        ::OutputDebugStringW(L"onMoving()\n");
         return Window::onMoving(rect);
     }
 
     bool TextWindow::onResizing(int edge, ukive::Rect *rect)
     {
-        ::OutputDebugStringW(L"onResizing()\n");
         return Window::onResizing(edge, rect);
     }
 
     void TextWindow::onMove(int x, int y)
     {
-        ::OutputDebugStringW(L"onMove()\n");
         Window::onMove(x, y);
     }
 
@@ -101,7 +98,6 @@ namespace shell {
         int param, int width, int height,
         int clientWidth, int clientHeight)
     {
-        ::OutputDebugStringW(L"onResize()\n");
         Window::onResize(param, width, height, clientWidth, clientHeight);
     }
 

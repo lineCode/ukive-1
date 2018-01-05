@@ -99,7 +99,6 @@ namespace ukive {
         {
         case STATE_NONE:
         {
-            ::OutputDebugStringW(L"STATE_NONE\n");
             if (prevState == STATE_HOVERED)
             {
                 mHoverAnimator->stop();
@@ -122,7 +121,6 @@ namespace ukive {
         }
 
         case STATE_HOVERED:
-            ::OutputDebugStringW(L"STATE_HOVERED\n");
             if (prevState == STATE_NONE)
             {
                 mAlpha = 0;
@@ -149,7 +147,6 @@ namespace ukive {
             break;
 
         case STATE_PRESSED:
-            ::OutputDebugStringW(L"STATE_PRESSED\n");
             mHoverAnimator->stop();
             mAlpha = mHoverAnimator->getValue(0);
 

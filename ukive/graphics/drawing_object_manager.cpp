@@ -20,14 +20,14 @@ namespace ukive {
 
         if (vertices == nullptr || indices == nullptr
             || vertexCount == 0 || indexCount == 0) {
-            Log::e(L"invalid params.");
+            Log::e(L"DrawingObjectManager", L"invalid params.");
             return;
         }
 
         for (auto it = mDrawingObjectList.begin();
             it != mDrawingObjectList.end(); ++it) {
             if ((*it)->tag == tag) {
-                Log::e(L"invalid params.");
+                Log::e(L"DrawingObjectManager", L"invalid params.");
                 return;
             }
         }
@@ -42,14 +42,14 @@ namespace ukive {
         HRESULT hr = Renderer::createVertexBuffer(
             vertices, dObject->vertexStructSize, vertexCount, dObject->vertexBuffer);
         if (FAILED(hr)) {
-            Log::e(L"invalid params.");
+            Log::e(L"DrawingObjectManager", L"invalid params.");
             return;
         }
 
         hr = Renderer::createIndexBuffer(
             indices, indexCount, dObject->indexBuffer);
         if (FAILED(hr)) {
-            Log::e(L"invalid params.");
+            Log::e(L"DrawingObjectManager", L"invalid params.");
             return;
         }
 

@@ -67,7 +67,7 @@ namespace ukive {
             x_, y_, width_, height_,
             0, 0, Application::getModuleHandle(), this);
         if (::IsWindow(hWnd) == FALSE) {
-            Log::e(L"failed to create window.");
+            Log::e(L"WindowImpl", L"failed to create window.");
             return;
         }
     }
@@ -104,7 +104,7 @@ namespace ukive {
         if (onClose()) {
             BOOL ret = ::DestroyWindow(hWnd_);
             if (ret == 0) {
-                Log::e(L"failed to destroy window.");
+                Log::e(L"WindowImpl", L"failed to destroy window.");
             }
         }
     }
@@ -160,7 +160,7 @@ namespace ukive {
         }
 
         if (native_cursor == NULL) {
-            Log::e(L"null native cursor.");
+            Log::e(L"WindowImpl", L"null native cursor.");
             return;
         }
 
@@ -204,7 +204,7 @@ namespace ukive {
     unsigned int WindowImpl::getDpi() {
         unsigned int dpi = ::GetDpiForWindow(hWnd_);
         if (dpi == 0) {
-            Log::e(L"failed to get window dpi.");
+            Log::e(L"WindowImpl", L"failed to get window dpi.");
         }
 
         return dpi;
@@ -870,7 +870,7 @@ namespace ukive {
             CREATESTRUCTW *cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
             WindowImpl *window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
             if (window == nullptr) {
-                Log::e(L"null window creating param.");
+                Log::e(L"WindowImpl", L"null window creating param.");
             }
 
             window->hWnd_ = hWnd;

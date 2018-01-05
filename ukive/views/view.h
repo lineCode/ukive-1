@@ -270,8 +270,9 @@ namespace ukive {
         double mRevealWidthRadius;
         double mRevealHeightRadius;
 
+        std::unique_ptr<ViewAnimator> animator_;
+
         View *parent_;
-        ViewAnimator *animator_;
         LayoutParams *layout_params_;
         OnClickListener *click_listener_;
         ClickPerformer *click_performer_;

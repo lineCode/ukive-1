@@ -35,6 +35,9 @@
     <Filter Include="test\bitmap_research">
       <UniqueIdentifier>{e7a193cc-b2d1-4016-8d7a-3523627dd8ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\emulator">
+      <UniqueIdentifier>{a8ecb2be-23d0-45b0-bca9-34a710e22936}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -99,6 +102,12 @@
     </ClCompile>
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp">
       <Filter>test\bitmap_research</Filter>
+    </ClCompile>
+    <ClCompile Include="test\emulator\emulator_view.cpp">
+      <Filter>test\emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="test\emulator\emulator_window.cpp">
+      <Filter>test\emulator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +176,12 @@
     </ClInclude>
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h">
       <Filter>test\bitmap_research</Filter>
+    </ClInclude>
+    <ClInclude Include="test\emulator\emulator_view.h">
+      <Filter>test\emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="test\emulator\emulator_window.h">
+      <Filter>test\emulator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

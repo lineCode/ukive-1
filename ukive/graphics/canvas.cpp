@@ -17,7 +17,7 @@ namespace ukive {
         HRESULT hr = win->getRenderer()->getD2DDeviceContext()->CreateCompatibleRenderTarget(
             D2D1::SizeF(width, height), &bmp_target);
         if (FAILED(hr)) {
-            Log::e(L"cannot create bitmap render target.");
+            Log::e(L"Canvas", L"cannot create bitmap render target.");
             return;
         }
 
@@ -223,13 +223,13 @@ namespace ukive {
         if (is_bmp_target_) {
             auto bmp_target = render_target_.cast<ID2D1BitmapRenderTarget>();
             if (FAILED(bmp_target->EndDraw())) {
-                Log::e(L"failed to extract bitmap.");
+                Log::e(L"Canvas", L"failed to extract bitmap.");
                 return std::shared_ptr<Bitmap>();
             }
 
             ID2D1Bitmap *bitmap = nullptr;
             if (FAILED(bmp_target->GetBitmap(&bitmap))) {
-                Log::e(L"failed to extract bitmap.");
+                Log::e(L"Canvas", L"failed to extract bitmap.");
                 return std::shared_ptr<Bitmap>();
             }
 

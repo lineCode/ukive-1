@@ -195,12 +195,11 @@ namespace ukive {
         //与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
         if (mouse_holder_ref_ != 0
             && v != mouse_holder_) {
-            Log::e(L"abnormal capture mouse!!\n");
+            Log::e(L"Window", L"abnormal capture mouse!!\n");
             return;
         }
 
         ++mouse_holder_ref_;
-        ::OutputDebugString(L"capture mouse!!\n");
 
         //该Widget第一次捕获鼠标。
         if (mouse_holder_ref_ == 1) {
@@ -215,7 +214,6 @@ namespace ukive {
         }
 
         --mouse_holder_ref_;
-        ::OutputDebugString(L"release mouse!!\n");
 
         //鼠标将被释放。
         if (mouse_holder_ref_ == 0) {
@@ -226,12 +224,12 @@ namespace ukive {
 
     void Window::captureKeyboard(View *v) {
         focus_holder_ = v;
-        //::OutputDebugString(L"captureKeyboard!!\n");
+        ::OutputDebugString(L"captureKeyboard!!\n");
     }
 
     void Window::releaseKeyboard() {
         focus_holder_ = nullptr;
-        //::OutputDebugString(L"releaseKeyboard!!\n");
+        ::OutputDebugString(L"releaseKeyboard!!\n");
     }
 
     View *Window::getMouseHolder() {
@@ -502,7 +500,7 @@ namespace ukive {
             });
 
             if (!ret) {
-                Log::e(L"failed to render.");
+                Log::e(L"Window", L"failed to render.");
                 return;
             }
 

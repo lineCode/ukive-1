@@ -1,5 +1,7 @@
 ﻿#include "input_connection.h"
 
+#include "ukive/log.h"
+#include "ukive/application.h"
 #include "ukive/text/tsf_editor.h"
 #include "ukive/text/tsf_manager.h"
 #include "ukive/utils/hresult_utils.h"
@@ -8,6 +10,8 @@
 
 
 namespace ukive {
+
+    DWORD InputConnection::cookie_ = 0xeec;
 
     InputConnection::InputConnection(TextView *textView)
     {
@@ -23,22 +27,24 @@ namespace ukive {
     }
 
 
-    HRESULT InputConnection::initialization(TsfManager *tsfMgr)
+    HRESULT InputConnection::initialization()
     {
         if (mIsInitialized)
             return S_OK;
 
-        mTsfEditor = new TsfEditor();
+        TsfManager *tsfMgr = Application::getTsfManager();
+
+        mTsfEditor = new TsfEditor(cookie_++);
         mTsfEditor->setInputConnection(this);
 
         RH(tsfMgr->getThreadManager()->CreateDocumentMgr(&mDocumentMgr));
 
         RH(mDocumentMgr->CreateContext(tsfMgr->getClientId(), 0,
-            dynamic_cast<ITextStoreACP*>(mTsfEditor),
+            static_cast<ITextStoreACP*>(mTsfEditor),
             &mEditorContext, &mEditorCookie));
 
         RH(mEditorContext->QueryInterface(
-            IID_ITfContextOwnerCompositionServices, (void**)&mCompServices));
+            IID_ITfContextOwnerCompositionServices, reinterpret_cast<void**>(&mCompServices)));
 
         mIsInitialized = true;
 
@@ -50,7 +56,11 @@ namespace ukive {
         if (!mIsInitialized || mIsEditorPushed)
             return;
 
-        mDocumentMgr->Push(mEditorContext.get());
+        HRESULT hr = mDocumentMgr->Push(mEditorContext.get());
+        if (FAILED(hr)) {
+            Log::e(L"InputConnection", L"pushEditor() failed.\n");
+            return;
+        }
 
         mIsEditorPushed = true;
     }
@@ -60,31 +70,50 @@ namespace ukive {
         if (!mIsInitialized || !mIsEditorPushed)
             return;
 
-        mDocumentMgr->Pop(TF_POPF_ALL);
+        HRESULT hr = mDocumentMgr->Pop(TF_POPF_ALL);
+        if (FAILED(hr)) {
+            Log::e(L"InputConnection", L"popEditor() failed.\n");
+            return;
+        }
 
         mIsEditorPushed = false;
     }
 
-    bool InputConnection::mount(TsfManager *tsfMgr)
+    bool InputConnection::mount()
     {
         if (!mIsInitialized)
             return false;
 
-        HRESULT hr = tsfMgr->getThreadManager()->SetFocus(mDocumentMgr.get());
-        if (FAILED(hr))
+        TsfManager *tsfMgr = Application::getTsfManager();
+
+        ComPtr<ITfContext> top_context;
+        HRESULT hr = mDocumentMgr->GetTop(&top_context);
+        if (FAILED(hr) || top_context.get() != mEditorContext.get()) {
+            Log::e(L"InputConnection", L"mount() failed.\n");
             return false;
+        }
+
+        hr = tsfMgr->getThreadManager()->SetFocus(mDocumentMgr.get());
+        if (FAILED(hr)) {
+            Log::e(L"InputConnection", L"mount() failed.\n");
+            return false;
+        }
 
         return true;
     }
 
-    bool InputConnection::unmount(TsfManager *tsfMgr)
+    bool InputConnection::unmount()
     {
         if (!mIsInitialized)
             return false;
 
+        TsfManager *tsfMgr = Application::getTsfManager();
+
         HRESULT hr = tsfMgr->getThreadManager()->SetFocus(nullptr);
-        if (FAILED(hr))
+        if (FAILED(hr)) {
+            Log::e(L"InputConnection", L"unmount() failed.\n");
             return false;
+        }
 
         return true;
     }
@@ -95,8 +124,10 @@ namespace ukive {
             return false;
 
         HRESULT hr = mCompServices->TerminateComposition(nullptr);
-        if (FAILED(hr))
+        if (FAILED(hr)) {
+            Log::e(L"InputConnection", L"terminateComposition() failed.\n");
             return false;
+        }
 
         return true;
     }

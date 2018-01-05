@@ -172,8 +172,8 @@ namespace ukive {
 
         depthBufferDesc.Width = getWindow()->getRenderer()->getScWidth();
         depthBufferDesc.Height = getWindow()->getRenderer()->getScHeight();
-        depthBufferDesc.MipLevels = 1; //对于深度缓冲为1
-        depthBufferDesc.ArraySize = 1; //对于深度缓冲为1，对于纹理，这2个参数有更多用途
+        depthBufferDesc.MipLevels = 1;
+        depthBufferDesc.ArraySize = 1;
         depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         depthBufferDesc.SampleDesc.Count = 1;
         depthBufferDesc.SampleDesc.Quality = 0;

@@ -1,5 +1,6 @@
 ﻿#include "view.h"
 
+#include "ukive/log.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
@@ -69,10 +70,10 @@ namespace ukive {
 
     ViewAnimator *View::animate() {
         if (animator_ == nullptr) {
-            animator_ = new ViewAnimator(this);
+            animator_ = std::make_unique<ViewAnimator>(this);
         }
 
-        return animator_;
+        return animator_.get();
     }
 
     void View::setId(int id) {
@@ -765,7 +766,7 @@ namespace ukive {
             return;
         }
 
-        //先取消其他widget的焦点。
+        //先取消其他 view 的焦点。
         View *prevHolder = window_->getKeyboardHolder();
         if (prevHolder != nullptr) {
             prevHolder->discardFocus();
@@ -947,20 +948,25 @@ namespace ukive {
                     }
                 }
             }
-            if (shouldRefresh)
+            if (shouldRefresh) {
                 invalidate();
+            }
             return can_consume_mouse_event_;
 
         case InputEvent::EV_CANCEL:
-            if (can_consume_mouse_event_)
+            if (can_consume_mouse_event_) {
                 window_->releaseMouse();
+            }
             setPressed(false);
-            if (fg_drawable_)
+            if (fg_drawable_) {
                 shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
-            if (bg_drawable_)
+            }
+            if (bg_drawable_) {
                 shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
-            if (shouldRefresh)
+            }
+            if (shouldRefresh) {
                 invalidate();
+            }
             return can_consume_mouse_event_;
         }
 
@@ -994,23 +1000,28 @@ namespace ukive {
     }
 
     void View::onFocusChanged(bool getFocus) {
+        std::wstring addr = std::to_wstring(reinterpret_cast<int>(this));
         if (getFocus) {
-            if (this->onCheckIsTextEditor()) {
-                if (input_connection_ == nullptr)
-                    input_connection_ = this->onCreateInputConnection();
+            Log::d(L"View", addr + L"==onFocusChanged(true)\n");
+            if (onCheckIsTextEditor()) {
+                Log::d(L"View", addr + L"==onFocusChanged(true): this is a text editor\n");
+                if (input_connection_ == nullptr) {
+                    input_connection_ = onCreateInputConnection();
+                }
 
                 if (input_connection_ != nullptr) {
-                    TsfManager *tsfMgr = Application::getTsfManager();
-                    input_connection_->initialization(tsfMgr);
+                    Log::d(L"View", addr + L"==onFocusChanged(true): init/push/mount\n");
+                    input_connection_->initialization();
                     input_connection_->pushEditor();
-                    input_connection_->mount(tsfMgr);
+                    input_connection_->mount();
                 }
             }
         }
         else {
+            Log::d(L"View", addr + L"==onFocusChanged(false)\n");
             if (input_connection_ != nullptr) {
-                TsfManager *tsfMgr = Application::getTsfManager();
-                input_connection_->unmount(tsfMgr);
+                Log::d(L"View", addr + L"==onFocusChanged(false): unmount\n");
+                input_connection_->unmount();
                 input_connection_->terminateComposition();
             }
         }
@@ -1033,23 +1044,28 @@ namespace ukive {
             return;
         }
 
+        std::wstring addr = std::to_wstring(reinterpret_cast<int>(this));
+
         if (windowFocus) {
+            Log::d(L"View", addr + L"==onWindowFocusChanged(true)\n");
             if (onCheckIsTextEditor()) {
                 if (input_connection_ == nullptr) {
-                    input_connection_ = this->onCreateInputConnection();
+                    input_connection_ = onCreateInputConnection();
                 }
 
                 if (input_connection_ != nullptr) {
-                    TsfManager *tsfMgr = Application::getTsfManager();
-                    input_connection_->initialization(tsfMgr);
-                    input_connection_->mount(tsfMgr);
+                    Log::d(L"View", addr + L"==onWindowFocusChanged(true): init/push/mount\n");
+                    input_connection_->initialization();
+                    input_connection_->pushEditor();
+                    input_connection_->mount();
                 }
             }
         }
         else {
+            Log::d(L"View", addr + L"==onWindowFocusChanged(false)\n");
             if (input_connection_ != nullptr) {
-                TsfManager *tsfMgr = Application::getTsfManager();
-                input_connection_->unmount(tsfMgr);
+                Log::d(L"View", addr + L"==onWindowFocusChanged(false): unmount\n");
+                input_connection_->unmount();
                 input_connection_->terminateComposition();
             }
         }

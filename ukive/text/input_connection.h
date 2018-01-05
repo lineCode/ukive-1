@@ -27,17 +27,19 @@ namespace ukive {
         bool mIsInitialized;
         bool mIsEditorPushed;
 
+        static DWORD cookie_;
+
     public:
         InputConnection(TextView *textView);
         ~InputConnection();
 
-        HRESULT initialization(TsfManager *tsfMgr);
+        HRESULT initialization();
 
         void pushEditor();
         void popEditor();
 
-        bool mount(TsfManager *tsfMgr);
-        bool unmount(TsfManager *tsfMgr);
+        bool mount();
+        bool unmount();
         bool terminateComposition();
 
         void notifyStatusChanged(DWORD flags);

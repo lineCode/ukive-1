@@ -4,12 +4,14 @@
 
 #include <sstream>
 
+#include "ukive/log.h"
 #include "ukive/text/input_connection.h"
 
 
 namespace ukive {
 
-    TsfEditor::TsfEditor() {
+    TsfEditor::TsfEditor(TsViewCookie tvc)
+        :mViewCookie(tvc) {
         mRefCount = 1;
         mInputConnection = nullptr;
         mCurLockType = 0;
@@ -86,7 +88,7 @@ namespace ukive {
     STDMETHODIMP TsfEditor::AdviseSink(REFIID riid, IUnknown *punk, DWORD dwMask)
     {
         HRESULT hr;
-        IUnknown *punkID;
+        IUnknown *punkID = nullptr;
 
         // Determine if the sink interface exists.
         // Get the pointer to the IUnknown interface and check if the IUnknown
@@ -94,11 +96,11 @@ namespace ukive {
         // If the sink exists, update the existing sink with the
         // dwMask parameters passed to this method.
         hr = QueryInterface(IID_IUnknown, (LPVOID*)&punkID);
-        if (FAILED(hr))
+        if (FAILED(hr)) {
             return E_INVALIDARG;
+        }
 
-        if (punkID == mAdviseSink.punkID)
-        {
+        if (punkID == mAdviseSink.punkID) {
             mAdviseSink.dwMask = dwMask;
             return S_OK;
         }
@@ -113,8 +115,7 @@ namespace ukive {
         // 5. Release the IUnknown pointer, since this pointer is no
         //        longer required.
 
-        if (IsEqualIID(riid, IID_ITextStoreACPSink))
-        {
+        if (IsEqualIID(riid, IID_ITextStoreACPSink)) {
             punk->QueryInterface(IID_ITextStoreACPSink, (LPVOID*)&mAdviseSink.textStoreACPSink);
             mAdviseSink.punkID = punkID;
             mAdviseSink.dwMask = dwMask;
@@ -129,13 +130,12 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::UnadviseSink(IUnknown *punk)
     {
-        if (mAdviseSink.punkID)
-        {
+        if (mAdviseSink.punkID) {
             mAdviseSink.punkID->Release();
             mAdviseSink.punkID = nullptr;
         }
-        if (mAdviseSink.textStoreACPSink)
-        {
+
+        if (mAdviseSink.textStoreACPSink) {
             mAdviseSink.textStoreACPSink->Release();
             mAdviseSink.textStoreACPSink = nullptr;
         }
@@ -146,6 +146,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::RequestLock(DWORD dwLockFlags, HRESULT *phrSession)
     {
+        Log::d(L"TsfEditor", L"RequestLock()\n");
+
         if (!mInputConnection)
             return E_FAIL;
 
@@ -203,6 +205,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetStatus(TS_STATUS *pdcs)
     {
+        Log::d(L"TsfEditor", L"GetStatus-\n");
+
         if (pdcs == 0)
             return E_INVALIDARG;
 
@@ -217,6 +221,8 @@ namespace ukive {
                 pdcs->dwDynamicFlags = 0;
         }
 
+        Log::d(L"TsfEditor", L"GetStatus()\n");
+
         return S_OK;
     }
 
@@ -224,7 +230,7 @@ namespace ukive {
         LONG acpTestStart, LONG acpTestEnd, ULONG cch,
         LONG *pacpResultStart, LONG *pacpResultEnd) {
 
-        ::OutputDebugStringW(L"QueryInsert\n");
+        Log::d(L"TsfEditor", L"QueryInsert\n");
 
         long length = mInputConnection->getTextLength();
         if (acpTestStart < 0 || acpTestStart > length || acpTestEnd < 0 || acpTestEnd > length)
@@ -240,7 +246,7 @@ namespace ukive {
         ULONG ulIndex, ULONG ulCount,
         TS_SELECTION_ACP *pSelection, ULONG *pcFetched)
     {
-        ::OutputDebugStringW(L"GetSelection-");
+        Log::d(L"TsfEditor", L"GetSelection-");
 
         if (!this->hasReadOnlyLock())
             return TS_E_NOLOCK;
@@ -252,7 +258,7 @@ namespace ukive {
         ss << "GetSelection("
             << pSelection->acpStart << ", "
             << pSelection->acpEnd << ")\n";
-        ::OutputDebugStringW(ss.str().c_str());
+        Log::d(L"TsfEditor", ss.str());
 
         return S_OK;
     }
@@ -261,7 +267,7 @@ namespace ukive {
     {
         std::wstringstream ss;
         ss << "SetSelection(" << pSelection->acpStart << ", " << pSelection->acpEnd << ")\n";
-        ::OutputDebugStringW(ss.str().c_str());
+        Log::d(L"TsfEditor", ss.str());
 
         if (!this->hasReadWriteLock())
             return TS_E_NOLOCK;
@@ -286,7 +292,7 @@ namespace ukive {
         WCHAR *pchPlain, ULONG cchPlainReq, ULONG *pcchPlainRet,
         TS_RUNINFO *prgRunInfo, ULONG cRunInfoReq, ULONG *pcRunInfoRet, LONG *pacpNext)
     {
-        ::OutputDebugStringW(L"GetText-");
+        Log::d(L"TsfEditor", L"GetText-");
 
         if (!this->hasReadOnlyLock())
             return TS_E_NOLOCK;
@@ -330,7 +336,7 @@ namespace ukive {
             << acpStart << ", "
             << acpEnd << ", "
             << *pacpNext << ")\n";
-        ::OutputDebugStringW(ss.str().c_str());
+        Log::d(L"TsfEditor", ss.str());
 
         return S_OK;
     }
@@ -339,7 +345,7 @@ namespace ukive {
         DWORD dwFlags, LONG acpStart, LONG acpEnd,
         const WCHAR *pchText, ULONG cch, TS_TEXTCHANGE *pChange)
     {
-        ::OutputDebugStringW(L"SetText-");
+        Log::d(L"TsfEditor", L"SetText-");
 
         if (dwFlags == TS_ST_CORRECTION)
             return S_OK;
@@ -371,14 +377,14 @@ namespace ukive {
             << pChange->acpStart << ", "
             << pChange->acpOldEnd << ", "
             << pChange->acpNewEnd << ")\n";
-        ::OutputDebugStringW(ss.str().c_str());
+        Log::d(L"TsfEditor", ss.str());
 
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::GetFormattedText(LONG acpStart, LONG acpEnd, IDataObject **ppDataObject)
     {
-        ::OutputDebugStringW(L"GetFormattedText\n");
+        Log::d(L"TsfEditor", L"GetFormattedText\n");
 
         if (!this->hasReadWriteLock())
             return TS_E_NOLOCK;
@@ -388,21 +394,21 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetEmbedded(LONG acpPos, REFGUID rguidService, REFIID riid, IUnknown **ppunk)
     {
-        ::OutputDebugStringW(L"GetEmbedded\n");
+        Log::d(L"TsfEditor", L"GetEmbedded\n");
 
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::QueryInsertEmbedded(const GUID *pguidService, const FORMATETC *pFormatEtc, BOOL *pfInsertable)
     {
-        ::OutputDebugStringW(L"QueryInsertEmbedded\n");
+        Log::d(L"TsfEditor", L"QueryInsertEmbedded\n");
 
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::InsertEmbedded(DWORD dwFlags, LONG acpStart, LONG acpEnd, IDataObject *pDataObject, TS_TEXTCHANGE *pChange)
     {
-        ::OutputDebugStringW(L"InsertEmbedded\n");
+        Log::d(L"TsfEditor", L"InsertEmbedded\n");
 
         return S_OK;
     }
@@ -414,21 +420,21 @@ namespace ukive {
             << dwFlags << ", "
             << cFilterAttrs << ", "
             << paFilterAttrs->Data1 << "-" << paFilterAttrs->Data2 << "-" << paFilterAttrs->Data3 << "-" << paFilterAttrs->Data4 << ")\n";
-        ::OutputDebugStringW(ss.str().c_str());
+        Log::d(L"TsfEditor", ss.str());
 
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RequestAttrsAtPosition(LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags)
     {
-        ::OutputDebugStringW(L"RequestAttrsAtPosition\n");
+        Log::d(L"TsfEditor", L"RequestAttrsAtPosition\n");
 
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RequestAttrsTransitioningAtPosition(LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags)
     {
-        ::OutputDebugStringW(L"RequestAttrsTransitioningAtPosition\n");
+        Log::d(L"TsfEditor", L"RequestAttrsTransitioningAtPosition\n");
 
         return S_OK;
     }
@@ -437,14 +443,14 @@ namespace ukive {
         LONG acpStart, LONG acpHalt, ULONG cFilterAttrs,
         const TS_ATTRID *paFilterAttrs, DWORD dwFlags, LONG *pacpNext, BOOL *pfFound, LONG *plFoundOffset)
     {
-        ::OutputDebugStringW(L"FindNextAttrTransition\n");
+        Log::d(L"TsfEditor", L"FindNextAttrTransition\n");
 
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RetrieveRequestedAttrs(ULONG ulCount, TS_ATTRVAL *paAttrVals, ULONG *pcFetched)
     {
-        ::OutputDebugStringW(L"RetrieveRequestedAttrs\n");
+        Log::d(L"TsfEditor", L"RetrieveRequestedAttrs\n");
 
         *pcFetched = 0;
 
@@ -453,7 +459,7 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetEndACP(LONG *pacp)
     {
-        ::OutputDebugStringW(L"GetEndACP\n");
+        Log::d(L"TsfEditor", L"GetEndACP\n");
 
         *pacp = mInputConnection->getTextLength();
 
@@ -462,6 +468,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetActiveView(TsViewCookie *pvcView)
     {
+        Log::d(L"TsfEditor", L"GetActiveView\n");
+
         *pvcView = mViewCookie;
 
         return S_OK;
@@ -469,7 +477,7 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetACPFromPoint(TsViewCookie vcView, const POINT *pt, DWORD dwFlags, LONG *pacp)
     {
-        ::OutputDebugStringW(L"GetACPFromPoint\n");
+        Log::d(L"TsfEditor", L"GetACPFromPoint\n");
 
         if (!mInputConnection->getTextPositionAtPoint(pt, dwFlags, pacp))
             return TS_E_INVALIDPOINT;
@@ -479,6 +487,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetTextExt(TsViewCookie vcView, LONG acpStart, LONG acpEnd, RECT *prc, BOOL *pfClipped)
     {
+        Log::d(L"TsfEditor", L"GetTextExt-");
+
         if ((mCurLockType & TS_LF_READ) != TS_LF_READ)
             return TS_E_NOLOCK;
 
@@ -489,12 +499,29 @@ namespace ukive {
         if (!mInputConnection->getTextBound(acpStart, acpEnd, prc, pfClipped))
             return TS_E_NOLAYOUT;
 
+        std::wstringstream ss;
+        ss << "GetTextExt(" << vcView << ", "
+            << acpStart << ", " << acpEnd << ", "
+            << prc->left << " "
+            << prc->top << " "
+            << prc->right << " "
+            << prc->bottom << ")" << std::endl;
+        Log::d(L"TsfEditor", ss.str());
+
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::GetScreenExt(TsViewCookie vcView, RECT *prc)
     {
         mInputConnection->getTextViewBound(prc);
+
+        std::wstringstream ss;
+        ss << "GetScreenExt(" << vcView << ", "
+            << prc->left << " "
+            << prc->top << " "
+            << prc->right << " "
+            << prc->bottom << ")" << std::endl;
+        Log::d(L"TsfEditor", ss.str());
 
         return S_OK;
     }
@@ -503,6 +530,10 @@ namespace ukive {
     {
         *phwnd = mInputConnection->getWindowHandle();
 
+        std::wstringstream ss;
+        ss << "GetWnd(" << vcView << ", " << *phwnd << ")" << std::endl;
+        Log::d(L"TsfEditor", ss.str());
+
         return S_OK;
     }
 
@@ -510,7 +541,7 @@ namespace ukive {
         DWORD dwFlags, const WCHAR *pchText, ULONG cch,
         LONG *pacpStart, LONG *pacpEnd, TS_TEXTCHANGE *pChange)
     {
-        ::OutputDebugStringW(L"InsertTextAtSelection-");
+        Log::d(L"TsfEditor", L"InsertTextAtSelection-");
 
         if (cch != 0 && pchText == 0)
             return E_INVALIDARG;
@@ -531,7 +562,7 @@ namespace ukive {
             << pChange->acpStart << ", "
             << pChange->acpOldEnd << ", "
             << pChange->acpNewEnd << ")\n";
-        ::OutputDebugStringW(ss.str().c_str());
+        Log::d(L"TsfEditor", ss.str());
 
         return S_OK;
     }
@@ -567,26 +598,24 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::QueryInterface(REFIID riid, void **ppvObj)
     {
-        if (ppvObj == 0)
+        if (ppvObj == nullptr) {
             return E_INVALIDARG;
+        }
 
-        *ppvObj = 0;
+        *ppvObj = nullptr;
 
-        if (IsEqualIID(riid, IID_IUnknown))
-        {
+        if (IsEqualIID(riid, IID_IUnknown)) {
             *ppvObj = reinterpret_cast<IUnknown*>(this);
         }
-        else if (IsEqualIID(riid, __uuidof(ITextStoreACP)))
-        {
-            *ppvObj = (ITextStoreACP*)this;
+        else if (IsEqualIID(riid, __uuidof(ITextStoreACP))) {
+            *ppvObj = static_cast<ITextStoreACP*>(this);
         }
         else if (IsEqualIID(riid, __uuidof(ITfContextOwnerCompositionSink)))
         {
-            *ppvObj = (ITfContextOwnerCompositionSink*)this;
+            *ppvObj = static_cast<ITfContextOwnerCompositionSink*>(this);
         }
 
-        if (*ppvObj)
-        {
+        if (*ppvObj) {
             AddRef();
             return S_OK;
         }
@@ -594,17 +623,16 @@ namespace ukive {
         return E_NOINTERFACE;
     }
 
-    STDMETHODIMP_(ULONG) TsfEditor::AddRef(void)
-    {
+    STDMETHODIMP_(ULONG) TsfEditor::AddRef(void) {
         return InterlockedIncrement(&mRefCount);
     }
 
-    STDMETHODIMP_(ULONG) TsfEditor::Release(void)
-    {
+    STDMETHODIMP_(ULONG) TsfEditor::Release(void) {
         LONG cr = InterlockedDecrement(&mRefCount);
 
-        if (mRefCount == 0)
+        if (mRefCount == 0) {
             delete this;
+        }
 
         return cr;
     }

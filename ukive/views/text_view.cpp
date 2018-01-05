@@ -390,7 +390,7 @@ namespace ukive {
         getWindow()->getRenderer()->createTextFormat(
             mFontFamilyName,
             mTextSize,
-            L"zh-cn",
+            L"en-US",
             &mTextFormat);
     }
 

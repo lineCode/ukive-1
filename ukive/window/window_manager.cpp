@@ -40,7 +40,7 @@ namespace ukive {
 
     Window* WindowManager::getWindow(size_t index) {
         if (index >= window_list_.size()) {
-            Log::e(L"out of bound.");
+            Log::e(L"WindowManager", L"out of bound.");
             return nullptr;
         }
         return window_list_.at(index);

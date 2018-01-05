@@ -58,7 +58,7 @@ namespace ukive {
     void Application::initApplication() {
         HRESULT hr = ::CoInitialize(NULL);
         if (FAILED(hr)) {
-            Log::e(L"failed to init COM.");
+            Log::e(L"Application", L"failed to init COM.");
         }
 
         Message::init(50);
@@ -68,7 +68,7 @@ namespace ukive {
 
         hr = AnimationManager::initGlobal();
         if (FAILED(hr)) {
-            Log::e(L"UAnimationManager-initGlobal(): Init anim library failed.");
+            Log::e(L"Application", L"Init anim library failed.");
         }
 
         graphic_device_manager_.reset(new GraphicDeviceManager());
@@ -77,13 +77,13 @@ namespace ukive {
         wic_manager_.reset(new WICManager());
         hr = wic_manager_->init();
         if (FAILED(hr)) {
-            Log::e(L"UApplication-initApplication(): Init WIC failed.");
+            Log::e(L"Application", L"Init WIC failed.");
         }
 
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
         if (FAILED(hr)) {
-            Log::e(L"UApplication-initApplication(): Init Tsf failed.");
+            Log::e(L"Application", L"Init Tsf failed.");
         }
     }
 
@@ -145,7 +145,7 @@ namespace ukive {
             if (vsync_enabled_) {
                 HRESULT hr = graphic_device_manager_->getCurOutput()->WaitForVBlank();
                 if (FAILED(hr)) {
-                    Log::e(L"failed to wait vblank.");
+                    Log::e(L"Application", L"failed to wait vblank.");
                 }
             }
 
@@ -206,7 +206,7 @@ namespace ukive {
         unsigned int dpiX, dpiY;
         HRESULT hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
         if (FAILED(hr)) {
-            Log::e(L"failed to get primary monitor dpi.");
+            Log::e(L"Application", L"failed to get primary monitor dpi.");
             return 0;
         }
 

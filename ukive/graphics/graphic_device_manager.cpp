@@ -21,7 +21,7 @@ namespace ukive {
             D2D1_FACTORY_TYPE_SINGLE_THREADED,
             &d2d_factory_);
         if (FAILED(hr)) {
-            Log::e(L"failed to create d2d factory.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create d2d factory.");
             return;
         }
 
@@ -30,7 +30,7 @@ namespace ukive {
             __uuidof(IDWriteFactory),
             reinterpret_cast<IUnknown**>(&dwrite_factory_));
         if (FAILED(hr)) {
-            Log::e(L"failed to create dwrite factory.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create dwrite factory.");
             return;
         }
 
@@ -38,7 +38,7 @@ namespace ukive {
             __uuidof(IDXGIFactory2),
             reinterpret_cast<void**>(&dxgi_factory_));
         if (FAILED(hr)) {
-            Log::e(L"failed to create dxgi factory.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create dxgi factory.");
             return;
         }
 
@@ -93,7 +93,7 @@ namespace ukive {
             featureLevel, 4, D3D11_SDK_VERSION,
             &d3d_device_, 0, &d3d_devicecontext_);
         if (FAILED(hr)) {
-            Log::e(L"failed to create d3d device.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create d3d device.");
             return;
         }
 
@@ -101,14 +101,14 @@ namespace ukive {
             __uuidof(IDXGIDevice2),
             reinterpret_cast<void**>(&dxgi_device_));
         if (FAILED(hr)) {
-            Log::e(L"failed to create dxgi device.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create dxgi device.");
             return;
         }
 
         hr = d2d_factory_->CreateDevice(
             dxgi_device_.get(), &d2d_device_);
         if (FAILED(hr)) {
-            Log::e(L"failed to create d2d device.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create d2d device.");
             return;
         }
     }
@@ -165,7 +165,7 @@ namespace ukive {
         HRESULT hr = d2d_device_->CreateDeviceContext(
             D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &dc);
         if (FAILED(hr)) {
-            Log::e(L"failed to create d2d device context.");
+            Log::e(L"GraphicsDeviceManager", L"failed to create d2d device context.");
         }
 
         return dc;

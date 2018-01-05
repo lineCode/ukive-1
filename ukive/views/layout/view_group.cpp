@@ -158,7 +158,7 @@ namespace ukive {
 
     void ViewGroup::removeView(View *v, bool del) {
         if (v == nullptr) {
-            Log::e(L"ViewGroup-removeView(): You cannot remove a null view from ViewGroup.");
+            Log::e(L"ViewGroup", L"You cannot remove a null view from ViewGroup.");
             return;
         }
 

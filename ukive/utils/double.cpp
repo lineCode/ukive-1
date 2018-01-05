@@ -87,7 +87,7 @@ namespace ukive {
 
     float Double::parseDouble(string16 s) {
         if (s.empty()) {
-            Log::e(L"invalid params");
+            Log::e(L"Double", L"invalid params");
             return 0;
         }
 
