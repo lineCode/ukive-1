@@ -62,7 +62,6 @@ namespace ukive {
         }
 
         Message::init(50);
-        MessageLooper::init();
         MessageLooper::prepareMainLooper();
         WordBreaker::initGlobal();
 
@@ -88,7 +87,6 @@ namespace ukive {
     }
 
     void Application::cleanApplication() {
-        MessageLooper::close();
         Message::close();
         AnimationManager::closeGlobal();
         WordBreaker::closeGlobal();

@@ -227,7 +227,6 @@
     <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />
-    <ClInclude Include="utils\thread_local.h" />
     <ClInclude Include="utils\weak_bind.h" />
     <ClInclude Include="views\button.h" />
     <ClInclude Include="views\click_listener.h" />

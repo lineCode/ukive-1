@@ -319,9 +319,6 @@
     <ClInclude Include="graphics\wic_manager.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="utils\thread_local.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="system\clipboard_manager.h">
       <Filter>system</Filter>
     </ClInclude>

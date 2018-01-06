@@ -9,7 +9,7 @@ namespace ukive {
 
     std::mutex MessageLooper::mLooperSync;
     MessageLooper *MessageLooper::mMainLooper = nullptr;
-    ThreadLocal<std::shared_ptr<MessageLooper>> *MessageLooper::mThreadLocal = nullptr;
+    thread_local std::shared_ptr<MessageLooper> MessageLooper::looper_;
 
 
     MessageLooper::MessageLooper() {
@@ -18,21 +18,6 @@ namespace ukive {
 
     MessageLooper::~MessageLooper() {
         delete mMsgQueue;
-    }
-
-
-    void MessageLooper::init() {
-        if (mThreadLocal)
-            throw std::logic_error("MessageLooper-init(): can only init once.");
-
-        mThreadLocal = new ThreadLocal<std::shared_ptr<MessageLooper>>();
-    }
-
-    void MessageLooper::close() {
-        if (mThreadLocal) {
-            delete mThreadLocal;
-            mThreadLocal = nullptr;
-        }
     }
 
 
@@ -48,12 +33,11 @@ namespace ukive {
     void MessageLooper::prepare() {
         std::lock_guard<std::mutex> lk(mLooperSync);
 
-        std::shared_ptr<MessageLooper> looperPtr;
-        if (mThreadLocal->get(looperPtr))
+        if (looper_) {
             throw std::logic_error("MessageLooper-prepare(): Only one Looper may be created per thread");
+        }
 
-        std::shared_ptr<MessageLooper> newLooper(new MessageLooper());
-        mThreadLocal->set(newLooper);
+        looper_.reset(new MessageLooper());
     }
 
     void MessageLooper::prepareMainLooper() {
@@ -92,11 +76,7 @@ namespace ukive {
     }
 
     MessageLooper *MessageLooper::myLooper() {
-        std::shared_ptr<MessageLooper> looperPtr;
-        if (mThreadLocal->get(looperPtr))
-            return looperPtr.get();
-
-        return nullptr;
+        return looper_.get();
     }
 
     MessageLooper *MessageLooper::getMainLooper() {
