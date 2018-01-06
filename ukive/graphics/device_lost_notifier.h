@@ -4,9 +4,10 @@
 
 namespace ukive {
 
-    class DeviceLostNotifier
-    {
+    class DeviceLostNotifier {
     public:
+        virtual ~DeviceLostNotifier() = default;
+
         virtual void onDeviceLost() = 0;
         virtual void onDeviceRestored() = 0;
     };

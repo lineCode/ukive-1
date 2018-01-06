@@ -178,7 +178,7 @@
     <ClInclude Include="graphics\color.h" />
     <ClInclude Include="graphics\cursor.h" />
     <ClInclude Include="graphics\device_lost_notifier.h" />
-    <ClInclude Include="graphics\direct3d_render_listener.h" />
+    <ClInclude Include="graphics\direct3d\scene.h" />
     <ClInclude Include="graphics\drawing_object_manager.h" />
     <ClInclude Include="graphics\graphic_device_manager.h" />
     <ClInclude Include="graphics\matrix.h" />
@@ -283,6 +283,7 @@
     <ClCompile Include="graphics\canvas.cpp" />
     <ClCompile Include="graphics\color.cpp" />
     <ClCompile Include="graphics\cursor.cpp" />
+    <ClCompile Include="graphics\direct3d\scene.cpp" />
     <ClCompile Include="graphics\drawing_object_manager.cpp" />
     <ClCompile Include="graphics\graphic_device_manager.cpp" />
     <ClCompile Include="graphics\matrix.cpp" />

@@ -5,9 +5,8 @@
 
 namespace shell {
 
-    GraphCreator::GraphCreator(ukive::DrawingObjectManager* doMgr)
-    {
-        mDrawingObjectManager = doMgr;
+    GraphCreator::GraphCreator(ukive::DrawingObjectManager* doMgr) {
+        drawing_object_manager_ = doMgr;
     }
 
     GraphCreator::~GraphCreator()
@@ -69,15 +68,14 @@ namespace shell {
     }
 
 
-    HRESULT GraphCreator::putWorldAxis(int tag, float length)
+    void GraphCreator::putWorldAxis(int tag, float length)
     {
         int *indices;
         UINT vertexCount = 6;
         UINT indexCount = 6;
         AssistVertexData *vertexData;
 
-        if (length < 10.0f)
-        {
+        if (length < 10.0f) {
             length = 10.0f;
         }
 
@@ -97,18 +95,15 @@ namespace shell {
         vertexData[5].position = dx::XMFLOAT3(0, 0, length);
         vertexData[5].color = dx::XMFLOAT4(0, 0, 1, 1);
 
-        indices = new int[indexCount]
-        {
+        indices = new int[indexCount] {
             0, 1, 2, 3, 4, 5
         };
 
-        mDrawingObjectManager->add(
+        drawing_object_manager_->add(
             vertexData, indices, sizeof(AssistVertexData), vertexCount, indexCount, tag);
-
-        return S_OK;
     }
 
-    HRESULT GraphCreator::putLine(dx::XMFLOAT3 *point1, dx::XMFLOAT3 *point2, int tag)
+    void GraphCreator::putLine(dx::XMFLOAT3 *point1, dx::XMFLOAT3 *point2, int tag)
     {
         int *indices;
         UINT vertexCount = 2;
@@ -121,18 +116,15 @@ namespace shell {
         vertexData[1].position = *point2;
         vertexData[1].color = dx::XMFLOAT4(0.5f, 0, 0, 1);
 
-        indices = new int[indexCount]
-        {
+        indices = new int[indexCount] {
             0, 1
         };
 
-        mDrawingObjectManager->add(
+        drawing_object_manager_->add(
             vertexData, indices, sizeof(AssistVertexData), vertexCount, indexCount, tag);
-
-        return S_OK;
     }
 
-    HRESULT GraphCreator::putMark(int tag, dx::XMFLOAT3 *mark, float length)
+    void GraphCreator::putMark(int tag, dx::XMFLOAT3 *mark, float length)
     {
         int *indices;
         UINT vertexCount = 4;
@@ -149,18 +141,15 @@ namespace shell {
         vertexData[3].position = dx::XMFLOAT3(mark->x, 0, mark->z + length);
         vertexData[3].color = dx::XMFLOAT4(0.5f, 0, 0, 1);
 
-        indices = new int[indexCount]
-        {
+        indices = new int[indexCount] {
             0, 1, 2, 3
         };
 
-        mDrawingObjectManager->add(
+        drawing_object_manager_->add(
             vertexData, indices, sizeof(AssistVertexData), vertexCount, indexCount, tag);
-
-        return S_OK;
     }
 
-    HRESULT GraphCreator::putBlock(int tag, dx::XMFLOAT3 *posCenter, float radius)
+    void GraphCreator::putBlock(int tag, dx::XMFLOAT3 *posCenter, float radius)
     {
         int *indices;
         UINT vertexCount = 8;
@@ -200,18 +189,15 @@ namespace shell {
             posCenter->x + radius, posCenter->y + radius, posCenter->z + radius);
         vertexData[7].color = dx::XMFLOAT4(1, 1, 0, 1);
 
-        indices = new int[indexCount]
-        {
+        indices = new int[indexCount] {
             0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7, 3, 3, 7, 4, 3, 4, 0, 0, 4, 5, 3, 0, 2, 2, 0, 1, 5, 4, 6, 6, 4, 7
         };
 
-        mDrawingObjectManager->add(
+        drawing_object_manager_->add(
             vertexData, indices, sizeof(AssistVertexData), vertexCount, indexCount, tag);
-
-        return S_OK;
     }
 
-    HRESULT GraphCreator::putCube(int tag, float edgeLength)
+    void GraphCreator::putCube(int tag, float edgeLength)
     {
         int *indices;
         UINT vertexCount = 8;
@@ -253,28 +239,25 @@ namespace shell {
         modelVertexData[7].color = dx::XMFLOAT4(0, 0, 1, 1);
         modelVertexData[7].texcoord = dx::XMFLOAT2(1, 0);
 
-        indices = new int[indexCount]
-        {
+        indices = new int[indexCount] {
             0, 5, 1,
-                1, 5, 6,
-                1, 6, 2,
-                2, 6, 7,
-                2, 7, 3,
-                3, 7, 4,
-                3, 4, 0,
-                0, 4, 5,
-                3, 0, 2,
-                2, 0, 1,
-                5, 4, 6,
-                6, 4, 7
+            1, 5, 6,
+            1, 6, 2,
+            2, 6, 7,
+            2, 7, 3,
+            3, 7, 4,
+            3, 4, 0,
+            0, 4, 5,
+            3, 0, 2,
+            2, 0, 1,
+            5, 4, 6,
+            6, 4, 7
         };
 
         calculateNormalVector(modelVertexData, vertexCount, indices, indexCount);
 
-        mDrawingObjectManager->add(
+        drawing_object_manager_->add(
             modelVertexData, indices, sizeof(ModelVertexData), vertexCount, indexCount, tag);
-
-        return S_OK;
     }
 
 }

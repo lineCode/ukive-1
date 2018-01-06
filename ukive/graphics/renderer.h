@@ -16,7 +16,6 @@ namespace ukive {
     class Canvas;
     class Window;
     class GraphicDeviceManager;
-    class Direct3DRenderListener;
     class SwapChainResizeNotifier;
 
     class Renderer
@@ -41,16 +40,12 @@ namespace ukive {
         void removeSwapChainResizeNotifier(SwapChainResizeNotifier *notifier);
         void removeAllSwapChainResizeNotifier();
 
-        void setDirect3DRenderListener(Direct3DRenderListener *listener);
-
         static void setVertexShader(ID3D11VertexShader *shader);
         static void setPixelShader(ID3D11PixelShader *shader);
         static void setInputLayout(ID3D11InputLayout *inputLayout);
         static void setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
         static void setConstantBuffers(UINT startSlot, UINT NumBuffers, ID3D11Buffer *const *ppConstantBuffers);
 
-        UINT getScWidth();
-        UINT getScHeight();
         ComPtr<ID2D1Effect> getShadowEffect();
         ComPtr<ID2D1Effect> getAffineTransEffect();
         ComPtr<IDXGISwapChain1> getSwapChain();
@@ -97,9 +92,7 @@ namespace ukive {
         HRESULT createRenderResource();
         void releaseRenderResource();
 
-        UINT width_, height_;
         Window *owner_window_;
-        Direct3DRenderListener *d3d_render_listener_;
         std::list<SwapChainResizeNotifier*> sc_resize_notifier_list_;
 
         ComPtr<IDXGISwapChain1> swapchain_;

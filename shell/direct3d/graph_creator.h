@@ -3,9 +3,9 @@
 
 #include <Windows.h>
 
-#include "shell/third_party/directx_math/Inc/DirectXMath.h"
 #include "shell/direct3d/assist_configure.h"
 #include "shell/direct3d/model_configure.h"
+#include "shell/third_party/directx_math/Inc/DirectXMath.h"
 
 
 namespace ukive {
@@ -18,23 +18,21 @@ namespace shell {
 
     struct ModelVertexData;
 
-    class GraphCreator
-    {
-    private:
-        ukive::DrawingObjectManager* mDrawingObjectManager;
-
+    class GraphCreator {
     public:
         GraphCreator(ukive::DrawingObjectManager* doMgr);
         ~GraphCreator();
 
         void calculateNormalVector(ModelVertexData *vertices, int vertexCount, int *indices, int indexCount);
 
-        HRESULT putLine(dx::XMFLOAT3 *point1, dx::XMFLOAT3 *point2, int tag);
+        void putLine(dx::XMFLOAT3 *point1, dx::XMFLOAT3 *point2, int tag);
+        void putCube(int tag, float edgeLength);
+        void putWorldAxis(int tag, float length);
+        void putMark(int tag, dx::XMFLOAT3 *mark, float length);
+        void putBlock(int tag, dx::XMFLOAT3 *posCenter, float radius);
 
-        HRESULT putCube(int tag, float edgeLength);
-        HRESULT putWorldAxis(int tag, float length);
-        HRESULT putMark(int tag, dx::XMFLOAT3 *mark, float length);
-        HRESULT putBlock(int tag, dx::XMFLOAT3 *posCenter, float radius);
+    private:
+        ukive::DrawingObjectManager* drawing_object_manager_;
     };
 
 }

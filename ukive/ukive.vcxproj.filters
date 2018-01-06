@@ -267,6 +267,9 @@
     <ClCompile Include="utils\weak_bind.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\direct3d\scene.cpp">
+      <Filter>graphics\direct3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -347,9 +350,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="graphics\device_lost_notifier.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\direct3d_render_listener.h">
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="graphics\swapchain_resize_notifier.h">
@@ -577,6 +577,9 @@
     <ClInclude Include="utils\weak_bind.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\direct3d\scene.h">
+      <Filter>graphics\direct3d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -623,6 +626,9 @@
     </Filter>
     <Filter Include="views\list">
       <UniqueIdentifier>{fe9efc35-eb80-43ea-8d5e-2974a5d8dd4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\direct3d">
+      <UniqueIdentifier>{9f042d8b-7913-4a2a-ab66-69969e03967e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

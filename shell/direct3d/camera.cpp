@@ -4,73 +4,71 @@
 namespace shell {
 
     Camera::Camera()
-    {
-        mWidth = 1;
-        mHeight = 1;
+        :width_(1),
+        height_(1) {
     }
 
-    Camera::~Camera()
-    {
+    Camera::~Camera() {
     }
 
-    void Camera::init(unsigned int wWidth, unsigned int wHeight)
+    void Camera::init(unsigned int width, unsigned int height)
     {
-        mWidth = wWidth;
-        mHeight = wHeight;
+        width_ = width;
+        height_ = height;
 
         //摄像机位置。
-        mPos = dx::XMFLOAT3(0.0f, 0.0f, -10.0f);
+        pos_ = dx::XMFLOAT3(0.0f, 0.0f, -10.0f);
         //摄像机看向的位置。
-        mLookAt = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
+        look_at_ = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-        mUp = dx::XMFLOAT3(0.0f, 1.0f, 0.0f);
-        mRight = dx::XMFLOAT3(1.0f, 0.0f, 0.0f);
-        mLook = dx::XMFLOAT3(0.0f, 0.0f, 1.0f);
+        up_ = dx::XMFLOAT3(0.0f, 1.0f, 0.0f);
+        right_ = dx::XMFLOAT3(1.0f, 0.0f, 0.0f);
+        look_ = dx::XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-        mZVector = dx::XMFLOAT3(0.0f, 0.0f, 1.0f);
-        mYVector = dx::XMFLOAT3(0.0f, 1.0f, 0.0f);
+        z_vector_ = dx::XMFLOAT3(0.0f, 0.0f, 1.0f);
+        y_vector_ = dx::XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-        dx::XMVECTOR upVec = dx::XMLoadFloat3(&mUp);
-        dx::XMVECTOR posVec = dx::XMLoadFloat3(&mPos);
-        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&mLookAt);
+        dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
+        dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
+        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
 
-        dx::XMStoreFloat(&mRadius, dx::XMVector3Length(dx::XMVectorSubtract(lookAtVec, posVec)));
+        dx::XMStoreFloat(&radius_, dx::XMVector3Length(dx::XMVectorSubtract(lookAtVec, posVec)));
 
-        dx::XMStoreFloat4x4(&mWorldMatrix, dx::XMMatrixIdentity());
-        dx::XMStoreFloat4x4(&mViewMatrix, dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
+        dx::XMStoreFloat4x4(&world_matrix_, dx::XMMatrixIdentity());
+        dx::XMStoreFloat4x4(&view_matrix_, dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat4x4(&mProjectionMatrix,
-            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, (float)mWidth / mHeight, NEAR_PLANE, FAR_PLANE));
-        dx::XMStoreFloat4x4(&mOrthoMatrix,
-            dx::XMMatrixOrthographicLH((float)mWidth, (float)mHeight, NEAR_PLANE, FAR_PLANE));
+        dx::XMStoreFloat4x4(&projection_matrix_,
+            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, (float)width_ / height_, NEAR_PLANE, FAR_PLANE));
+        dx::XMStoreFloat4x4(&ortho_matrix_,
+            dx::XMMatrixOrthographicLH((float)width_, (float)height_, NEAR_PLANE, FAR_PLANE));
     }
 
     void Camera::close()
     {
     }
 
-    void Camera::resize(unsigned int wWidth, unsigned int wHeight)
+    void Camera::resize(unsigned int width, unsigned int height)
     {
-        mWidth = wWidth;
-        mHeight = wHeight;
+        width_ = width;
+        height_ = height;
 
-        dx::XMStoreFloat4x4(&mProjectionMatrix,
-            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, (float)mWidth / mHeight, NEAR_PLANE, FAR_PLANE));
+        dx::XMStoreFloat4x4(&projection_matrix_,
+            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, (float)width_ / height_, NEAR_PLANE, FAR_PLANE));
 
-        dx::XMStoreFloat4x4(&mOrthoMatrix,
-            dx::XMMatrixOrthographicLH((float)mWidth, (float)mHeight, NEAR_PLANE, FAR_PLANE));
+        dx::XMStoreFloat4x4(&ortho_matrix_,
+            dx::XMMatrixOrthographicLH((float)width_, (float)height_, NEAR_PLANE, FAR_PLANE));
     }
 
 
     void Camera::moveCamera(float dx, float dy)
     {
-        dx::XMVECTOR frontVec = dx::XMVectorSet(mLook.x, 0, mLook.z, 0);
+        dx::XMVECTOR frontVec = dx::XMVectorSet(look_.x, 0, look_.z, 0);
         frontVec = dx::XMVector3Normalize(frontVec);
 
-        dx::XMVECTOR upVec = dx::XMLoadFloat3(&mUp);
-        dx::XMVECTOR rightVec = dx::XMLoadFloat3(&mRight);
-        dx::XMVECTOR posVec = dx::XMLoadFloat3(&mPos);
-        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&mLookAt);
+        dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
+        dx::XMVECTOR rightVec = dx::XMLoadFloat3(&right_);
+        dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
+        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
 
         dx::XMVECTOR deltaVec = dx::XMVectorAdd(
             dx::XMVectorScale(frontVec, dy),
@@ -79,37 +77,37 @@ namespace shell {
         posVec = dx::XMVectorAdd(posVec, deltaVec);
         lookAtVec = dx::XMVectorAdd(lookAtVec, deltaVec);
 
-        dx::XMStoreFloat4x4(&mViewMatrix,
+        dx::XMStoreFloat4x4(&view_matrix_,
             dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat3(&mPos, posVec);
-        dx::XMStoreFloat3(&mLookAt, lookAtVec);
+        dx::XMStoreFloat3(&pos_, posVec);
+        dx::XMStoreFloat3(&look_at_, lookAtVec);
     }
 
     void Camera::scaleCamera(float factor)
     {
-        dx::XMVECTOR upVec = dx::XMLoadFloat3(&mUp);
-        dx::XMVECTOR lookVec = dx::XMLoadFloat3(&mLook);
-        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&mLookAt);
+        dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
+        dx::XMVECTOR lookVec = dx::XMLoadFloat3(&look_);
+        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
 
-        mRadius *= factor;
+        radius_ *= factor;
 
         dx::XMVECTOR posVec = dx::XMVectorAdd(lookAtVec,
-            dx::XMVectorScale(lookVec, -mRadius));
+            dx::XMVectorScale(lookVec, -radius_));
 
-        dx::XMStoreFloat4x4(&mViewMatrix,
+        dx::XMStoreFloat4x4(&view_matrix_,
             dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat3(&mPos, posVec);
+        dx::XMStoreFloat3(&pos_, posVec);
     }
 
     void Camera::circuleCamera(float dxAngle, float dyAngle)
     {
-        dx::XMVECTOR yVec = dx::XMLoadFloat3(&mYVector);
-        dx::XMVECTOR upVec = dx::XMLoadFloat3(&mUp);
-        dx::XMVECTOR rightVec = dx::XMLoadFloat3(&mRight);
-        dx::XMVECTOR posVec = dx::XMLoadFloat3(&mPos);
-        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&mLookAt);
+        dx::XMVECTOR yVec = dx::XMLoadFloat3(&y_vector_);
+        dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
+        dx::XMVECTOR rightVec = dx::XMLoadFloat3(&right_);
+        dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
+        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
 
         dx::XMMATRIX rotateMatrix
             = dx::XMMatrixRotationAxis(yVec, dxAngle);
@@ -126,21 +124,21 @@ namespace shell {
         upVec = dx::XMVector3Normalize(upVec);
         lookVec = dx::XMVector3Normalize(lookVec);
 
-        dx::XMStoreFloat4x4(&mViewMatrix,
+        dx::XMStoreFloat4x4(&view_matrix_,
             dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat3(&mUp, upVec);
-        dx::XMStoreFloat3(&mRight, rightVec);
-        dx::XMStoreFloat3(&mPos, posVec);
-        dx::XMStoreFloat3(&mLook, lookVec);
+        dx::XMStoreFloat3(&up_, upVec);
+        dx::XMStoreFloat3(&right_, rightVec);
+        dx::XMStoreFloat3(&pos_, posVec);
+        dx::XMStoreFloat3(&look_, lookVec);
     }
 
     void Camera::circuleCamera2(float dxAngle, float dyAngle)
     {
-        dx::XMVECTOR yVec = dx::XMLoadFloat3(&mYVector);
-        dx::XMVECTOR rightVec = dx::XMLoadFloat3(&mRight);
-        dx::XMVECTOR posVec = dx::XMLoadFloat3(&mPos);
-        dx::XMVECTOR lookVec = dx::XMLoadFloat3(&mLook);
+        dx::XMVECTOR yVec = dx::XMLoadFloat3(&y_vector_);
+        dx::XMVECTOR rightVec = dx::XMLoadFloat3(&right_);
+        dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
+        dx::XMVECTOR lookVec = dx::XMLoadFloat3(&look_);
 
         dx::XMMATRIX rotateMatrix
             = dx::XMMatrixRotationAxis(yVec, dxAngle);
@@ -149,38 +147,38 @@ namespace shell {
 
         dx::XMVECTOR lookAtVec
             = dx::XMVectorAdd(posVec,
-                dx::XMVectorScale(lookVec, mRadius));
+                dx::XMVectorScale(lookVec, radius_));
 
         rotateMatrix
             = dx::XMMatrixRotationAxis(rightVec, dyAngle);
         lookVec = dx::XMVector3TransformCoord(lookVec, rotateMatrix);
 
         lookAtVec = dx::XMVectorAdd(posVec,
-            dx::XMVectorScale(lookVec, mRadius));
+            dx::XMVectorScale(lookVec, radius_));
 
         dx::XMVECTOR upVec = dx::XMVector3Cross(lookVec, rightVec);
         upVec = dx::XMVector3Normalize(upVec);
         lookVec = dx::XMVector3Normalize(lookVec);
 
-        dx::XMStoreFloat4x4(&mViewMatrix,
+        dx::XMStoreFloat4x4(&view_matrix_,
             dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat3(&mUp, upVec);
-        dx::XMStoreFloat3(&mRight, rightVec);
-        dx::XMStoreFloat3(&mLook, lookVec);
-        dx::XMStoreFloat3(&mLookAt, lookAtVec);
+        dx::XMStoreFloat3(&up_, upVec);
+        dx::XMStoreFloat3(&right_, rightVec);
+        dx::XMStoreFloat3(&look_, lookVec);
+        dx::XMStoreFloat3(&look_at_, lookAtVec);
     }
 
 
     void Camera::moveWorld(float dx, float dy)
     {
         dx::XMVECTOR frontVec
-            = dx::XMVectorSet(mLook.x, 0, mLook.z, 0);
+            = dx::XMVectorSet(look_.x, 0, look_.z, 0);
         frontVec = dx::XMVector3Normalize(frontVec);
         frontVec = dx::XMVectorScale(frontVec, dy);
 
         dx::XMVECTOR rightVec
-            = dx::XMLoadFloat3(&mRight);
+            = dx::XMLoadFloat3(&right_);
         rightVec = dx::XMVectorScale(rightVec, dx);
 
         dx::XMMATRIX transMatrix
@@ -189,9 +187,9 @@ namespace shell {
                 0, dx::XMVectorGetZ(frontVec) + dx::XMVectorGetZ(rightVec));
 
         dx::XMMATRIX worldMatrix
-            = dx::XMLoadFloat4x4(&mWorldMatrix);
+            = dx::XMLoadFloat4x4(&world_matrix_);
         dx::XMMatrixMultiply(worldMatrix, transMatrix);
-        dx::XMStoreFloat4x4(&mWorldMatrix, worldMatrix);
+        dx::XMStoreFloat4x4(&world_matrix_, worldMatrix);
     }
 
     void Camera::scaleWorld(int direction)
@@ -207,9 +205,9 @@ namespace shell {
             = dx::XMMatrixScaling(scaleFactor, scaleFactor, scaleFactor);
 
         dx::XMMATRIX worldMatrix
-            = dx::XMLoadFloat4x4(&mWorldMatrix);
+            = dx::XMLoadFloat4x4(&world_matrix_);
         dx::XMMatrixMultiply(worldMatrix, scaleMatrix);
-        dx::XMStoreFloat4x4(&mWorldMatrix, worldMatrix);
+        dx::XMStoreFloat4x4(&world_matrix_, worldMatrix);
     }
 
     void Camera::rotateWorld(float dxAngle, float dyAngle)
@@ -218,19 +216,19 @@ namespace shell {
             = dx::XMMatrixRotationY(dxAngle);
 
         dx::XMMATRIX worldMatrix
-            = dx::XMLoadFloat4x4(&mWorldMatrix);
+            = dx::XMLoadFloat4x4(&world_matrix_);
         dx::XMMatrixMultiply(worldMatrix, rotateMatrix);
-        dx::XMStoreFloat4x4(&mWorldMatrix, worldMatrix);
+        dx::XMStoreFloat4x4(&world_matrix_, worldMatrix);
     }
 
     void Camera::setCameraPosition(float x, float y, float z)
     {
-        dx::XMVECTOR upVec = dx::XMLoadFloat3(&mUp);
-        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&mLookAt);
+        dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
+        dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
         dx::XMVECTOR posVec = dx::XMVectorSet(x, y, z, 0);
         dx::XMVECTOR lookVec = dx::XMVectorSubtract(lookAtVec, posVec);
 
-        dx::XMStoreFloat(&mRadius, dx::XMVector3Length(lookVec));
+        dx::XMStoreFloat(&radius_, dx::XMVector3Length(lookVec));
 
         //TODO:此处假设在变换前后up不变。当up在变换后改变，需要额外变量确定right。
         dx::XMVECTOR rightVec = dx::XMVector3Cross(upVec, lookVec);
@@ -240,23 +238,23 @@ namespace shell {
         lookVec = dx::XMVector3Normalize(lookVec);
         rightVec = dx::XMVector3Normalize(rightVec);
 
-        dx::XMStoreFloat4x4(&mViewMatrix,
+        dx::XMStoreFloat4x4(&view_matrix_,
             dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat3(&mUp, upVec);
-        dx::XMStoreFloat3(&mRight, rightVec);
-        dx::XMStoreFloat3(&mPos, posVec);
-        dx::XMStoreFloat3(&mLook, lookVec);
+        dx::XMStoreFloat3(&up_, upVec);
+        dx::XMStoreFloat3(&right_, rightVec);
+        dx::XMStoreFloat3(&pos_, posVec);
+        dx::XMStoreFloat3(&look_, lookVec);
     }
 
     void Camera::setCameraLookAt(float x, float y, float z)
     {
-        dx::XMVECTOR upVec = dx::XMLoadFloat3(&mUp);
-        dx::XMVECTOR posVec = dx::XMLoadFloat3(&mPos);
+        dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
+        dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
         dx::XMVECTOR lookAtVec = dx::XMVectorSet(x, y, z, 0);
         dx::XMVECTOR lookVec = dx::XMVectorSubtract(lookAtVec, posVec);
 
-        dx::XMStoreFloat(&mRadius, dx::XMVector3Length(lookVec));
+        dx::XMStoreFloat(&radius_, dx::XMVector3Length(lookVec));
 
         //TODO:此处假设在变换前后up不变。当up在变换后改变，需要额外变量确定right。
         dx::XMVECTOR rightVec = dx::XMVector3Cross(upVec, lookVec);
@@ -266,55 +264,55 @@ namespace shell {
         lookVec = dx::XMVector3Normalize(lookVec);
         rightVec = dx::XMVector3Normalize(rightVec);
 
-        dx::XMStoreFloat4x4(&mViewMatrix,
+        dx::XMStoreFloat4x4(&view_matrix_,
             dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
-        dx::XMStoreFloat3(&mUp, upVec);
-        dx::XMStoreFloat3(&mRight, rightVec);
-        dx::XMStoreFloat3(&mLook, lookVec);
-        dx::XMStoreFloat3(&mLookAt, lookVec);
+        dx::XMStoreFloat3(&up_, upVec);
+        dx::XMStoreFloat3(&right_, rightVec);
+        dx::XMStoreFloat3(&look_, lookVec);
+        dx::XMStoreFloat3(&look_at_, lookVec);
     }
 
     const dx::XMFLOAT3 *Camera::getCameraPos()
     {
-        return &mPos;
+        return &pos_;
     }
 
     const dx::XMFLOAT3 *Camera::getCameraLookAt()
     {
-        return &mLookAt;
+        return &look_at_;
     }
 
     const dx::XMFLOAT3 *Camera::getCameraUp()
     {
-        return &mUp;
+        return &up_;
     }
 
     const dx::XMFLOAT4X4 *Camera::getWorldMatrix()
     {
-        return &mWorldMatrix;
+        return &world_matrix_;
     }
 
     const dx::XMFLOAT4X4 *Camera::getViewMatrix()
     {
-        return &mViewMatrix;
+        return &view_matrix_;
     }
 
     const dx::XMFLOAT4X4 *Camera::getProjectionMatrix()
     {
-        return &mProjectionMatrix;
+        return &projection_matrix_;
     }
 
     const dx::XMFLOAT4X4 *Camera::getOrthoMatrix()
     {
-        return &mOrthoMatrix;
+        return &ortho_matrix_;
     }
 
     void Camera::getWVPMatrix(dx::XMFLOAT4X4 *wvp)
     {
-        dx::XMMATRIX world = dx::XMLoadFloat4x4(&mWorldMatrix);
-        dx::XMMATRIX view = dx::XMLoadFloat4x4(&mViewMatrix);
-        dx::XMMATRIX projection = dx::XMLoadFloat4x4(&mProjectionMatrix);
+        dx::XMMATRIX world = dx::XMLoadFloat4x4(&world_matrix_);
+        dx::XMMATRIX view = dx::XMLoadFloat4x4(&view_matrix_);
+        dx::XMMATRIX projection = dx::XMLoadFloat4x4(&projection_matrix_);
 
         dx::XMStoreFloat4x4(wvp,
             dx::XMMatrixMultiply(
@@ -323,9 +321,9 @@ namespace shell {
 
     void Camera::getWVOMatrix(dx::XMFLOAT4X4 *wvo)
     {
-        dx::XMMATRIX world = dx::XMLoadFloat4x4(&mWorldMatrix);
-        dx::XMMATRIX view = dx::XMLoadFloat4x4(&mViewMatrix);
-        dx::XMMATRIX ortho = dx::XMLoadFloat4x4(&mOrthoMatrix);
+        dx::XMMATRIX world = dx::XMLoadFloat4x4(&world_matrix_);
+        dx::XMMATRIX view = dx::XMLoadFloat4x4(&view_matrix_);
+        dx::XMMATRIX ortho = dx::XMLoadFloat4x4(&ortho_matrix_);
 
         dx::XMStoreFloat4x4(wvo,
             dx::XMMatrixMultiply(

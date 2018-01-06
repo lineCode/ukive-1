@@ -46,16 +46,7 @@
     <ClCompile Include="direct3d\assist_configure.cpp">
       <Filter>direct3d</Filter>
     </ClCompile>
-    <ClCompile Include="direct3d\camera.cpp">
-      <Filter>direct3d</Filter>
-    </ClCompile>
-    <ClCompile Include="direct3d\graph_creator.cpp">
-      <Filter>direct3d</Filter>
-    </ClCompile>
     <ClCompile Include="direct3d\model_configure.cpp">
-      <Filter>direct3d</Filter>
-    </ClCompile>
-    <ClCompile Include="direct3d\scene.cpp">
       <Filter>direct3d</Filter>
     </ClCompile>
     <ClCompile Include="test\frame\custom_non_client_frame.cpp">
@@ -88,9 +79,6 @@
     <ClCompile Include="test\animation\wallpaper_window.cpp">
       <Filter>test\animation</Filter>
     </ClCompile>
-    <ClCompile Include="lod\lod_view.cpp">
-      <Filter>lod</Filter>
-    </ClCompile>
     <ClCompile Include="lod\terrain_configure.cpp">
       <Filter>lod</Filter>
     </ClCompile>
@@ -109,6 +97,12 @@
     <ClCompile Include="test\emulator\emulator_window.cpp">
       <Filter>test\emulator</Filter>
     </ClCompile>
+    <ClCompile Include="direct3d\camera.cpp">
+      <Filter>direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="direct3d\graph_creator.cpp">
+      <Filter>direct3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="DeclareDPIAware.manifest" />
@@ -120,16 +114,7 @@
     <ClInclude Include="direct3d\assist_configure.h">
       <Filter>direct3d</Filter>
     </ClInclude>
-    <ClInclude Include="direct3d\camera.h">
-      <Filter>direct3d</Filter>
-    </ClInclude>
-    <ClInclude Include="direct3d\graph_creator.h">
-      <Filter>direct3d</Filter>
-    </ClInclude>
     <ClInclude Include="direct3d\model_configure.h">
-      <Filter>direct3d</Filter>
-    </ClInclude>
-    <ClInclude Include="direct3d\scene.h">
       <Filter>direct3d</Filter>
     </ClInclude>
     <ClInclude Include="test\frame\custom_non_client_frame.h">
@@ -162,9 +147,6 @@
     <ClInclude Include="test\animation\wallpaper_window.h">
       <Filter>test\animation</Filter>
     </ClInclude>
-    <ClInclude Include="lod\lod_view.h">
-      <Filter>lod</Filter>
-    </ClInclude>
     <ClInclude Include="lod\terrain_configure.h">
       <Filter>lod</Filter>
     </ClInclude>
@@ -182,6 +164,12 @@
     </ClInclude>
     <ClInclude Include="test\emulator\emulator_window.h">
       <Filter>test\emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="direct3d\camera.h">
+      <Filter>direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="direct3d\graph_creator.h">
+      <Filter>direct3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

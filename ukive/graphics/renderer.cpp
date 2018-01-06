@@ -4,7 +4,6 @@
 
 #include "ukive/application.h"
 #include "ukive/graphics/swapchain_resize_notifier.h"
-#include "ukive/graphics/direct3d_render_listener.h"
 #include "ukive/log.h"
 #include "ukive/utils/hresult_utils.h"
 #include "ukive/window/window.h"
@@ -12,8 +11,7 @@
 
 namespace ukive {
 
-    Renderer::Renderer()
-        :d3d_render_listener_(nullptr) {
+    Renderer::Renderer() {
     }
 
     Renderer::~Renderer() {
@@ -52,17 +50,11 @@ namespace ukive {
             owner_window_->getHandle(),
             &swapChainDesc, 0, 0, &swapchain_));
 
-        ComPtr<IDXGISurface> backBufferPtr;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&backBufferPtr)));
-        RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
+        ComPtr<IDXGISurface> back_buffer;
+        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer)));
+        RH(createBitmapRenderTarget(back_buffer.get(), &bitmap_render_target_));
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
-
-        DXGI_SWAP_CHAIN_DESC1 checkDesc;
-        swapchain_->GetDesc1(&checkDesc);
-
-        width_ = checkDesc.Width;
-        height_ = checkDesc.Height;
 
         return S_OK;
     }
@@ -77,62 +69,45 @@ namespace ukive {
 
     HRESULT Renderer::resize()
     {
-        d2d_dc_->SetTarget(0);
+        d2d_dc_->SetTarget(nullptr);
         bitmap_render_target_.reset();
 
         for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it)
-        {
-            (*it)->onSwapChainResize();
+            it != sc_resize_notifier_list_.end(); ++it) {
+            (*it)->onPreSwapChainResize();
         }
 
         RH(swapchain_->ResizeBuffers(
             0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
 
-        ComPtr<IDXGISurface> backBufferPtr;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), (LPVOID*)&backBufferPtr));
-        RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
+        ComPtr<IDXGISurface> back_buffer;
+        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer)));
+        RH(createBitmapRenderTarget(back_buffer.get(), &bitmap_render_target_));
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
 
-        DXGI_SWAP_CHAIN_DESC1 checkDesc;
-        swapchain_->GetDesc1(&checkDesc);
-
-        width_ = checkDesc.Width;
-        height_ = checkDesc.Height;
-
         for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it)
-        {
-            (*it)->onSwapChainResized();
+            it != sc_resize_notifier_list_.end(); ++it) {
+            (*it)->onPostSwapChainResize();
         }
 
         return S_OK;
     }
 
     bool Renderer::render(
-        Color bkColor,
-        std::function<void()> renderCallback)
+        Color bk_color, std::function<void()> callback)
     {
-        HRESULT hr;
-
-        if (d3d_render_listener_)
-            d3d_render_listener_->onDirect3DClear();
-
         d2d_dc_->BeginDraw();
         D2D1_COLOR_F color = {
-            bkColor.r,
-            bkColor.g,
-            bkColor.b,
-            bkColor.a, };
+            bk_color.r, bk_color.g, bk_color.b, bk_color.a, };
         d2d_dc_->Clear(color);
 
-        renderCallback();
+        callback();
 
-        hr = d2d_dc_->EndDraw();
-
-        if (d3d_render_listener_)
-            d3d_render_listener_->onDirect3DRender();
+        HRESULT hr = d2d_dc_->EndDraw();
+        if (FAILED(hr)) {
+            Log::e(L"Render", L"failed to draw d2d content.");
+        }
 
         hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
         if (FAILED(hr)) {
@@ -142,8 +117,7 @@ namespace ukive {
         return !FAILED(hr);
     }
 
-    void Renderer::close()
-    {
+    void Renderer::close() {
         releaseRenderResource();
     }
 
@@ -222,10 +196,6 @@ namespace ukive {
         sc_resize_notifier_list_.clear();
     }
 
-    void Renderer::setDirect3DRenderListener(Direct3DRenderListener *listener) {
-        d3d_render_listener_ = listener;
-    }
-
 
     void Renderer::setVertexShader(ID3D11VertexShader *shader) {
         auto gdm = Application::getGraphicDeviceManager();
@@ -254,15 +224,6 @@ namespace ukive {
             startSlot, NumBuffers, ppConstantBuffers);
     }
 
-
-    UINT Renderer::getScWidth() {
-        return width_;
-    }
-
-    UINT Renderer::getScHeight() {
-        return height_;
-    }
-
     ComPtr<ID2D1Effect> Renderer::getShadowEffect() {
         return shadow_effect_;
     }
@@ -286,10 +247,10 @@ namespace ukive {
         D2D1_BITMAP_PROPERTIES1 bitmapProperties =
             D2D1::BitmapProperties1(
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
         return d2d_dc_->
-            CreateBitmapFromDxgiSurface(dxgiSurface, 0, bitmap);
+            CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
     }
 
     HRESULT Renderer::createCompatBitmapRenderTarget(

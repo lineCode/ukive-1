@@ -12,8 +12,8 @@
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/drawable/edittext_drawable.h"
 #include "ukive/utils/float.h"
+#include "ukive/views/direct3d_view.h"
 
-#include "shell/lod/lod_view.h"
 #include "shell/lod/terrain_scene.h"
 
 
@@ -40,8 +40,10 @@ namespace shell {
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::MATCH_PARENT));
 
+        terrain_scene_ = new TerrainScene();
+
         //3d view.
-        LodView *lodView = new LodView(this);
+        ukive::Direct3DView* lodView = new ukive::Direct3DView(this, terrain_scene_);
         ukive::LinearLayoutParams *d3dViewLp = new ukive::LinearLayoutParams(
             0, ukive::LayoutParams::MATCH_PARENT);
         d3dViewLp->leftMargin = d3dViewLp->topMargin
@@ -330,15 +332,13 @@ namespace shell {
         {
         case ID_SUBMIT_BUTTON:
         {
-            TerrainScene *scene = mLodView->getTerrainScene();
-
             float c1 = mC1SeekBar->getProgress() + 1.f;
             float c2 = mC2SeekBar->getProgress() + 1.f;
             int splitCount = static_cast<int>(mSplitSeekBar->getProgress()) + 1;
 
-            scene->recreate(splitCount);
-            scene->reevaluate(c1, c2);
-            scene->refresh();
+            terrain_scene_->recreate(splitCount);
+            terrain_scene_->reevaluate(c1, c2);
+            mLodView->invalidate();
 
             break;
         }

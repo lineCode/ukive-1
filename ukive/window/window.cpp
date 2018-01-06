@@ -519,7 +519,8 @@ namespace ukive {
 
         HRESULT hr = renderer_->resize();
         if (FAILED(hr)) {
-            throw std::runtime_error("UWindow-onResize(): Resize DirectX Renderer failed.");
+            Log::e(L"Window", L"Resize DirectX Renderer failed.");
+            return;
         }
 
         switch (param) {

@@ -154,8 +154,6 @@
     <ClCompile Include="direct3d\camera.cpp" />
     <ClCompile Include="direct3d\graph_creator.cpp" />
     <ClCompile Include="direct3d\model_configure.cpp" />
-    <ClCompile Include="direct3d\scene.cpp" />
-    <ClCompile Include="lod\lod_view.cpp" />
     <ClCompile Include="lod\lod_window.cpp" />
     <ClCompile Include="lod\qtree_node.cpp" />
     <ClCompile Include="lod\terrain_configure.cpp" />
@@ -181,8 +179,6 @@
     <ClInclude Include="direct3d\camera.h" />
     <ClInclude Include="direct3d\graph_creator.h" />
     <ClInclude Include="direct3d\model_configure.h" />
-    <ClInclude Include="direct3d\scene.h" />
-    <ClInclude Include="lod\lod_view.h" />
     <ClInclude Include="lod\lod_window.h" />
     <ClInclude Include="lod\qtree_node.h" />
     <ClInclude Include="lod\terrain_configure.h" />

@@ -195,7 +195,7 @@ namespace ukive {
             int width, int height,
             int widthMode, int heightMode);
         virtual void onLayout(
-            bool changed, bool sizeChanged,
+            bool changed, bool size_changed,
             int left, int top, int right, int bottom);
         virtual bool onInputEvent(InputEvent *e);
 

@@ -10,29 +10,18 @@ namespace ukive {
     class TextView;
     class SeekBar;
     class RestraintLayout;
+    class Direct3DView;
 }
 
 namespace shell {
 
-    class LodView;
+    class TerrainScene;
 
     class LodWindow :
         public ukive::Window,
         public ukive::OnSeekValueChangedListener,
         public ukive::OnClickListener
     {
-    private:
-        LodView *mLodView;
-        ukive::TextView *mC1ValueTV;
-        ukive::TextView *mC2ValueTV;
-        ukive::TextView *mSplitValueTV;
-
-        ukive::SeekBar *mC1SeekBar;
-        ukive::SeekBar *mC2SeekBar;
-        ukive::SeekBar *mSplitSeekBar;
-
-        void inflateCtlLayout(ukive::RestraintLayout *rightLayout);
-
     public:
         static const int ID_LOD_INFO = 0x010;
         static const int ID_RIGHT_RESTRAIN = 0x011;
@@ -61,10 +50,23 @@ namespace shell {
 
         void onCreate() override;
 
-        void onClick(ukive::View *widget);
+        void onClick(ukive::View* widget);
 
-        void onSeekValueChanged(ukive::SeekBar *seekBar, float value);
-        void onSeekIntegerValueChanged(ukive::SeekBar *seekBar, int value);
+        void onSeekValueChanged(ukive::SeekBar* seekBar, float value);
+        void onSeekIntegerValueChanged(ukive::SeekBar* seekBar, int value);
+
+    private:
+        void inflateCtlLayout(ukive::RestraintLayout* rightLayout);
+
+        ukive::SeekBar* mC1SeekBar;
+        ukive::SeekBar* mC2SeekBar;
+        ukive::SeekBar* mSplitSeekBar;
+        ukive::TextView* mC1ValueTV;
+        ukive::TextView* mC2ValueTV;
+        ukive::TextView* mSplitValueTV;
+        ukive::Direct3DView* mLodView;
+
+        TerrainScene* terrain_scene_;
     };
 
 }

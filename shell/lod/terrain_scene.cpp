@@ -13,7 +13,6 @@
 #include "shell/lod/lod_generator.h"
 #include "shell/lod/terrain_configure.h"
 #include "shell/direct3d/camera.h"
-#include "shell/third_party/directx_math/Inc/DirectXMath.h"
 
 
 namespace {
@@ -26,10 +25,7 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    TerrainScene::TerrainScene(ukive::Direct3DView *d3dView,
-        unsigned int width, unsigned int height)
-        :Scene(d3dView, width, height)
-    {
+    TerrainScene::TerrainScene() {
         mPrevTime = 0;
         mFrameCounter = 0;
         mFramePreSecond = 0;
@@ -39,6 +35,13 @@ namespace shell {
         mIsCtrlKeyPressed = false;
         mIsShiftKeyPressed = false;
         mIsMouseLeftKeyPressed = false;
+
+        mDrawingObjectManager = new ukive::DrawingObjectManager();
+
+        mGraphCreator = new GraphCreator(mDrawingObjectManager);
+
+        mCamera = new Camera();
+        mCamera->init(1, 1);
 
         mLodGenerator = new LodGenerator(8192, 5);
 
@@ -60,6 +63,10 @@ namespace shell {
         mIndexBuffer->Release();
         mVertexBuffer->Release();
         delete mLodGenerator;
+
+        delete mDrawingObjectManager;
+        delete mGraphCreator;
+        delete mCamera;
     }
 
 
@@ -137,17 +144,49 @@ namespace shell {
             if (isHitVer)
             {
                 //getGraphCreator()->putBlock(155, &vPos, 10.f);
-                refresh();
+                d3d_view_->invalidate();
             }
             else
             {
                 if (getDrawingObjectManager()->contains(155))
                 {
                     getDrawingObjectManager()->removeByTag(155);
-                    refresh();
+                    d3d_view_->invalidate();
                 }
             }
         }
+    }
+
+    void TerrainScene::getPickLine(int sx, int sy, dx::XMVECTOR *lineOrig, dx::XMVECTOR *lineDir)
+    {
+        float vx, vy;
+        const dx::XMFLOAT4X4 *worldMatrix;
+        const dx::XMFLOAT4X4 *viewMatrix;
+        const dx::XMFLOAT4X4 *projectionMatrix;
+
+        worldMatrix = mCamera->getWorldMatrix();
+        viewMatrix = mCamera->getViewMatrix();
+        projectionMatrix = mCamera->getProjectionMatrix();
+
+        vx = (2.0f * sx / mWidth - 1.0f) / projectionMatrix->_11;
+        vy = (-2.0f * sy / mHeight + 1.0f) / projectionMatrix->_22;
+
+        dx::XMVECTOR rayDir = dx::XMVectorSet(vx, vy, 1.0f, 0);
+        dx::XMVECTOR rayOrigin = dx::XMVectorSet(0.0f, 0.0f, 0.0f, 0);
+
+        dx::XMMATRIX world = dx::XMLoadFloat4x4(worldMatrix);
+        dx::XMMATRIX view = dx::XMLoadFloat4x4(viewMatrix);
+
+        dx::XMMATRIX inverseView = dx::XMMatrixInverse(0, view);
+        rayDir = dx::XMVector3TransformNormal(rayDir, inverseView);
+        rayOrigin = dx::XMVector3TransformCoord(rayOrigin, inverseView);
+
+        dx::XMMATRIX inverseWorld = dx::XMMatrixInverse(0, world);
+        rayDir = dx::XMVector3TransformNormal(rayDir, inverseWorld);
+        rayOrigin = dx::XMVector3TransformCoord(rayOrigin, inverseWorld);
+
+        *lineOrig = rayOrigin;
+        *lineDir = rayDir;
     }
 
 
@@ -182,9 +221,9 @@ namespace shell {
     }
 
 
-    void TerrainScene::onSceneCreate()
+    void TerrainScene::onSceneCreate(ukive::Direct3DView* d3d_view)
     {
-        Scene::onSceneCreate();
+        d3d_view_ = d3d_view;
 
         getCamera()->setCameraPosition(1024, 1024, -1024);
         getCamera()->circuleCamera2(1.f, -0.2f);
@@ -204,9 +243,7 @@ namespace shell {
         if (FAILED(hr))
             throw std::runtime_error("");
 
-        hr = getGraphCreator()->putWorldAxis(kWorldAxis, 1024);
-        if (FAILED(hr))
-            throw std::runtime_error("");
+        getGraphCreator()->putWorldAxis(kWorldAxis, 1024);
 
         updateLodTerrain();
     }
@@ -215,6 +252,11 @@ namespace shell {
     void TerrainScene::onSceneResize(unsigned int width, unsigned int height)
     {
         Scene::onSceneResize(width, height);
+
+        mWidth = width;
+        mHeight = height;
+
+        mCamera->resize(width, height);
 
         updateLodTerrain();
     }
@@ -246,18 +288,18 @@ namespace shell {
                 if (::GetKeyState(VK_SHIFT) < 0)
                 {
                     getCamera()->circuleCamera2(
-                        (float)-dx / this->getSceneWidth(),
-                        (float)-dy / this->getSceneHeight());
+                        (float)-dx / mWidth,
+                        (float)-dy / mHeight);
 
                     updateLodTerrain();
-                    refresh();
+                    d3d_view_->invalidate();
                 }
                 else if (::GetKeyState(VK_CONTROL) < 0)
                 {
                     getCamera()->moveCamera((float)-dx, (float)dy);
 
                     updateLodTerrain();
-                    refresh();
+                    d3d_view_->invalidate();
                 }
 
                 mPrevX = e->getMouseX();
@@ -294,9 +336,9 @@ namespace shell {
             break;
 
         case ukive::InputEvent::EVM_WHEEL:
-            this->getCamera()->scaleCamera(e->getMouseWheel() > 0 ? 0.9f : 1.1f);
+            getCamera()->scaleCamera(e->getMouseWheel() > 0 ? 0.9f : 1.1f);
             updateLodTerrain();
-            refresh();
+            d3d_view_->invalidate();
             break;
         }
     }
@@ -326,7 +368,7 @@ namespace shell {
         if (mLodInfoTV)
             mLodInfoTV->setText(ss.str());
         else
-            mLodInfoTV = (ukive::TextView*)getView()->getWindow()->findViewById(0x010);
+            mLodInfoTV = (ukive::TextView*)d3d_view_->getWindow()->findViewById(0x010);
 
 
         dx::XMFLOAT4X4 wvpMatrix;
@@ -358,30 +400,38 @@ namespace shell {
         //ukive::Renderer::drawObjects(getDrawingObjectManager()->getByTag(U3DGraphId::NORMAL_CUBE));
     }
 
-    void TerrainScene::onSceneDestroy()
-    {
+    void TerrainScene::onSceneDestroy() {
         Scene::onSceneDestroy();
 
-        if (mAssistConfigure)
-        {
+        if (mAssistConfigure) {
             mAssistConfigure->close();
             delete mAssistConfigure;
             mAssistConfigure = nullptr;
         }
 
-        if (mModelConfigure)
-        {
+        if (mModelConfigure) {
             mModelConfigure->close();
             delete mModelConfigure;
             mModelConfigure = nullptr;
         }
 
-        if (mTerrainConfigure)
-        {
+        if (mTerrainConfigure) {
             mTerrainConfigure->close();
             delete mTerrainConfigure;
             mTerrainConfigure = nullptr;
         }
+    }
+
+    Camera *TerrainScene::getCamera() {
+        return mCamera;
+    }
+
+    GraphCreator *TerrainScene::getGraphCreator() {
+        return mGraphCreator;
+    }
+
+    ukive::DrawingObjectManager *TerrainScene::getDrawingObjectManager() {
+        return mDrawingObjectManager;
     }
 
 }

@@ -988,7 +988,7 @@ namespace ukive {
         return false;
     }
 
-    InputConnection *View::onCreateInputConnection() {
+    InputConnection* View::onCreateInputConnection() {
         return nullptr;
     }
 
