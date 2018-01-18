@@ -10,6 +10,8 @@
 #include "ukive/window/frame/default_non_client_frame.h"
 #include "ukive/event/input_event.h"
 
+#include "shell/test/frame/custom_non_client_frame.h"
+
 
 namespace ukive {
 
@@ -56,9 +58,6 @@ namespace ukive {
         onPreCreate(&info, &win_style, &win_ex_style);
 
         ATOM atom = WindowClassManager::getInstance()->retrieveWindowClass(info);
-
-        non_client_frame_.reset(new DefaultNonClientFrame());
-        //non_client_frame_->init(hWnd_);
 
         HWND hWnd = ::CreateWindowEx(
             win_ex_style,
@@ -375,53 +374,75 @@ namespace ukive {
 
     LRESULT CALLBACK WindowImpl::messageHandler(
         UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+        bool nc_handled = false;
+        LRESULT nc_result = 0;
+
         switch (uMsg) {
+        case WM_NCCREATE: {
+            non_client_frame_.reset(new DefaultNonClientFrame());
+            nc_result = non_client_frame_->onNcCreate(delegate_, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
+            }
+            break;
+        }
+
         case WM_CREATE:
             onCreate();
             return TRUE;
 
         case 0xAE:
         case 0xAF:
-            if (non_client_frame_->onInterceptDrawClassic(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onInterceptDrawClassic(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
 
         case WM_NCPAINT:
-            if (non_client_frame_->onNcPaint(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onNcPaint(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
 
+        case WM_PAINT:
+            break;
+
         case WM_NCACTIVATE:
-            if (non_client_frame_->onNcActivate(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onNcActivate(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
 
         case WM_NCHITTEST: {
-            LRESULT ret = non_client_frame_->onNcHitTest(wParam, lParam);
-            if (ret != HTNOWHERE) {
-                return ret;
+            nc_result = non_client_frame_->onNcHitTest(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
         }
 
         case WM_NCCALCSIZE:
-            if (non_client_frame_->onNcCalSize(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onNcCalSize(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
 
         case WM_NCLBUTTONDOWN:
-            if (non_client_frame_->onNcLButtonDown(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onNcLButtonDown(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
 
         case WM_NCLBUTTONUP:
-            if (non_client_frame_->onNcLButtonUp(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onNcLButtonUp(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
             break;
 
@@ -434,6 +455,13 @@ namespace ukive {
         case WM_DESTROY:
             onDestroy();
             return 0;
+
+        case WM_NCDESTROY:
+            nc_result = non_client_frame_->onNcDestroy(&nc_handled);
+            if (nc_handled) {
+                return nc_result;
+            }
+            break;
 
         case WM_SHOWWINDOW:
             onShow((BOOL)wParam == TRUE ? true : false);
@@ -501,7 +529,7 @@ namespace ukive {
             int client_height_px = HIWORD(lParam);
 
             onResize(wParam, width_px, height_px, client_width_px, client_height_px);
-            non_client_frame_->onSize(wParam, lParam);
+            nc_result = non_client_frame_->onSize(wParam, lParam, &nc_handled);
             break;
         }
 
@@ -559,8 +587,9 @@ namespace ukive {
         }
 
         case WM_LBUTTONUP: {
-            if (non_client_frame_->OnLButtonUp(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->OnLButtonUp(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
 
             InputEvent ev;
@@ -638,8 +667,9 @@ namespace ukive {
         }
 
         case WM_MOUSEMOVE: {
-            if (non_client_frame_->onMouseMove(wParam, lParam) == TRUE) {
-                return TRUE;
+            nc_result = non_client_frame_->onMouseMove(wParam, lParam, &nc_handled);
+            if (nc_handled) {
+                return nc_result;
             }
 
             InputEvent ev;

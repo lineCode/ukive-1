@@ -9,6 +9,7 @@ namespace ukive {
     class Color {
     public:
         Color();
+        Color(const Color& color);
         Color(unsigned int r, unsigned int g, unsigned int b);
         Color(unsigned int a, unsigned int r, unsigned int g, unsigned int b);
         Color(float r, float g, float b);
@@ -16,6 +17,8 @@ namespace ukive {
         Color(unsigned int rgb, unsigned int a);
         Color(unsigned int rgb, float a);
         Color(unsigned int argb);
+
+        Color& operator=(const Color& rhs);
 
         float a;
         float r;
@@ -35,11 +38,11 @@ namespace ukive {
         static unsigned int GetB(unsigned int argb);
 
         // Color Black.
-        static Color Black;
+        const static Color Black;
         // Color White.
-        static Color White;
+        const static Color White;
         // Color Transparent
-        static Color Transparent;
+        const static Color Transparent;
 
         //Material Color Red.
         static Color Red50, Red100, Red200, Red300, Red400,

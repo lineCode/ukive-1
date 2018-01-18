@@ -1,5 +1,7 @@
 ﻿#include "canvas.h"
 
+#include <algorithm>
+
 #include "ukive/text/text_renderer.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
@@ -296,7 +298,7 @@ namespace ukive {
     }
 
 
-    void Canvas::drawRect(const RectF &rect, Color &color)
+    void Canvas::drawRect(const RectF &rect, const Color &color)
     {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
@@ -307,7 +309,7 @@ namespace ukive {
         render_target_->DrawRectangle(d2d_rect, solid_brush_.get());
     }
 
-    void Canvas::drawRect(const RectF &rect, float strokeWidth, Color &color)
+    void Canvas::drawRect(const RectF &rect, float strokeWidth, const Color &color)
     {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
@@ -332,7 +334,7 @@ namespace ukive {
 
 
     void Canvas::drawRoundRect(
-        const RectF &rect, float radius, Color &color)
+        const RectF &rect, float radius, const Color &color)
     {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
@@ -346,7 +348,7 @@ namespace ukive {
 
     void Canvas::drawRoundRect(
         const RectF &rect, float strokeWidth,
-        float radius, Color &color)
+        float radius, const Color &color)
     {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
@@ -359,7 +361,7 @@ namespace ukive {
     }
 
     void Canvas::fillRoundRect(
-        const RectF &rect, float radius, Color &color)
+        const RectF &rect, float radius, const Color &color)
     {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
@@ -372,23 +374,47 @@ namespace ukive {
     }
 
 
-    void Canvas::drawCircle(float cx, float cy, float radius, Color &color)
+    void Canvas::drawCircle(float cx, float cy, float radius, const Color &color)
     {
         drawOval(cx, cy, radius, radius, color);
     }
 
-    void Canvas::drawCircle(float cx, float cy, float radius, float strokeWidth, Color &color)
+    void Canvas::drawCircle(float cx, float cy, float radius, float strokeWidth, const Color &color)
     {
         drawOval(cx, cy, radius, radius, strokeWidth, color);
     }
 
-    void Canvas::fillCircle(float cx, float cy, float radius, Color &color)
+    void Canvas::fillCircle(float cx, float cy, float radius, const Color &color)
     {
         fillOval(cx, cy, radius, radius, color);
     }
 
+    void Canvas::drawCircle(const RectF &rect, const Color &color) {
+        float cx = rect.left + rect.width() / 2;
+        float cy = rect.top + rect.height() / 2;
+        float radius = std::min(rect.width() / 2, rect.height() / 2);
 
-    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, Color &color)
+        drawOval(cx, cy, radius, radius, color);
+    }
+
+    void Canvas::drawCircle(const RectF &rect, float strokeWidth, const Color &color) {
+        float cx = rect.left + rect.width() / 2;
+        float cy = rect.top + rect.height() / 2;
+        float radius = std::min(rect.width() / 2, rect.height() / 2);
+
+        drawOval(cx, cy, radius, radius, strokeWidth, color);
+    }
+
+    void Canvas::fillCircle(const RectF &rect, const Color &color) {
+        float cx = rect.left + rect.width() / 2;
+        float cy = rect.top + rect.height() / 2;
+        float radius = std::min(rect.width() / 2, rect.height() / 2);
+
+        fillOval(cx, cy, radius, radius, color);
+    }
+
+
+    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, const Color &color)
     {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
@@ -400,7 +426,7 @@ namespace ukive {
             solid_brush_.get());
     }
 
-    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, Color &color)
+    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, const Color &color)
     {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
@@ -412,7 +438,7 @@ namespace ukive {
             solid_brush_.get(), strokeWidth);
     }
 
-    void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, Color &color)
+    void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, const Color &color)
     {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
@@ -482,7 +508,7 @@ namespace ukive {
 
     void Canvas::drawText(
         std::wstring text, IDWriteTextFormat *textFormat,
-        const RectF &layoutRect, Color &color)
+        const RectF &layoutRect, const Color &color)
     {
         if (textFormat == nullptr) {
             return;
@@ -499,7 +525,7 @@ namespace ukive {
 
     void Canvas::drawTextLayout(
         float x, float y,
-        IDWriteTextLayout *textLayout, Color &color)
+        IDWriteTextLayout *textLayout, const Color &color)
     {
         if (textLayout == nullptr) {
             return;
@@ -512,9 +538,8 @@ namespace ukive {
     }
 
     void Canvas::drawTextLayoutWithEffect(
-        View *widget,
-        float x, float y,
-        IDWriteTextLayout *textLayout, Color &color)
+        View *v, float x, float y,
+        IDWriteTextLayout *textLayout, const Color &color)
     {
         if (text_renderer_ == nullptr) {
             text_renderer_ = new TextRenderer(render_target_);
@@ -522,7 +547,7 @@ namespace ukive {
         }
 
         text_renderer_->setTextColor(color);
-        textLayout->Draw(widget, text_renderer_, x, y);
+        textLayout->Draw(v, text_renderer_, x, y);
     }
 
 }

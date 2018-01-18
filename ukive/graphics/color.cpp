@@ -9,6 +9,9 @@ namespace ukive {
     Color::Color()
         :a(1.f), r(0.f), g(0.f), b(0.f) {}
 
+    Color::Color(const Color& color)
+        :a(color.a), r(color.r), g(color.g), b(color.b) {}
+
     Color::Color(unsigned int r, unsigned int g, unsigned int b)
         : a(1.f), r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
 
@@ -40,6 +43,15 @@ namespace ukive {
         r = ((argb & red_mask) >> red_shift) / 255.f;
         g = ((argb & green_mask) >> green_shift) / 255.f;
         b = ((argb & blue_mask) >> blue_shift) / 255.f;
+    }
+
+    Color& Color::operator=(const Color& rhs) {
+        r = rhs.r;
+        g = rhs.g;
+        b = rhs.b;
+        a = rhs.a;
+
+        return *this;
     }
 
 
@@ -88,11 +100,11 @@ namespace ukive {
 
 
     // Color White.
-    Color Color::White = Color::parse(L"#FFFFFF");
+    const Color Color::White = Color::parse(L"#FFFFFF");
     // Color Black.
-    Color Color::Black = Color::parse(L"#000000");
+    const Color Color::Black = Color::parse(L"#000000");
     // Color Transparent.
-    Color Color::Transparent = Color::parse(L"#00000000");
+    const Color Color::Transparent = Color::parse(L"#00000000");
 
     //Material Color Red.
     Color Color::Red50 = Color::parse(L"#FFEBEE");

@@ -16,14 +16,14 @@ namespace ukive {
         bool operator==(const Rect &rhs);
         bool operator!=(const Rect &rhs);
 
-        int width();
-        int height();
-        bool empty();
-        bool equal(const Rect &rhs);
-        bool hit(int x, int y);
-        bool intersect(const Rect &rect);
+        int width() const;
+        int height() const;
+        bool empty() const;
+        bool equal(const Rect &rhs) const;
+        bool hit(int x, int y) const;
+        bool intersect(const Rect &rect) const;
 
-        void all(const Rect &rhs);
+        void join(const Rect &rhs);
         void same(const Rect &rhs);
 
         void insets(const Rect &insets);
@@ -47,14 +47,14 @@ namespace ukive {
         bool operator==(const RectF &rhs);
         bool operator!=(const RectF &rhs);
 
-        float width();
-        float height();
-        bool empty();
-        bool equal(const RectF &rhs);
-        bool hit(float x, float y);
-        bool intersect(const RectF &rect);
+        float width() const;
+        float height() const;
+        bool empty() const;
+        bool equal(const RectF &rhs) const;
+        bool hit(float x, float y) const;
+        bool intersect(const RectF &rect) const;
 
-        void all(const RectF &rhs);
+        void join(const RectF &rhs);
         void same(const RectF &rhs);
 
         void insets(const RectF &insets);

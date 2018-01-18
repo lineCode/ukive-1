@@ -41,7 +41,7 @@ namespace ukive {
     }
 
     Rect& Rect::operator|(const Rect &rhs) {
-        all(rhs);
+        join(rhs);
         return *this;
     }
 
@@ -53,36 +53,36 @@ namespace ukive {
         return !equal(rhs);
     }
 
-    int Rect::width() {
+    int Rect::width() const {
         return right - left;
     }
 
-    int Rect::height() {
+    int Rect::height() const {
         return bottom - top;
     }
 
-    bool Rect::empty() {
+    bool Rect::empty() const {
         return (right - left <= 0) || (bottom - top <= 0);
     }
 
-    bool Rect::equal(const Rect &rhs) {
+    bool Rect::equal(const Rect &rhs) const {
         return (left == rhs.left
             && top == rhs.top
             && right == rhs.right
             && bottom == rhs.bottom);
     }
 
-    bool Rect::hit(int x, int y) {
+    bool Rect::hit(int x, int y) const {
         return (x >= left && x < right
             && y >= top && y < bottom);
     }
 
-    bool Rect::intersect(const Rect &rect) {
+    bool Rect::intersect(const Rect &rect) const {
         return (rect.right > left && rect.left < right)
             && (rect.bottom > top && rect.top < bottom);
     }
 
-    void Rect::all(const Rect &rhs) {
+    void Rect::join(const Rect &rhs) {
         left = std::min(left, rhs.left);
         top = std::min(top, rhs.top);
         right = std::max(right, rhs.right);
@@ -151,7 +151,7 @@ namespace ukive {
     }
 
     RectF& RectF::operator|(const RectF &rhs) {
-        all(rhs);
+        join(rhs);
         return *this;
     }
 
@@ -163,36 +163,36 @@ namespace ukive {
         return !equal(rhs);
     }
 
-    float RectF::width() {
+    float RectF::width() const {
         return right - left;
     }
 
-    float RectF::height() {
+    float RectF::height() const {
         return bottom - top;
     }
 
-    bool RectF::empty() {
+    bool RectF::empty() const {
         return (right - left <= 0) || (bottom - top <= 0);
     }
 
-    bool RectF::equal(const RectF &rhs) {
+    bool RectF::equal(const RectF &rhs) const {
         return (left == rhs.left
             && top == rhs.top
             && right == rhs.right
             && bottom == rhs.bottom);
     }
 
-    bool RectF::hit(float x, float y) {
+    bool RectF::hit(float x, float y) const {
         return (x >= left && x < right
             && y >= top && y < bottom);
     }
 
-    bool RectF::intersect(const RectF &rect) {
+    bool RectF::intersect(const RectF &rect) const {
         return (rect.right > left && rect.left < right)
             && (rect.bottom > top && rect.top < bottom);
     }
 
-    void RectF::all(const RectF &rhs) {
+    void RectF::join(const RectF &rhs) {
         left = std::min(left, rhs.left);
         top = std::min(top, rhs.top);
         right = std::max(right, rhs.right);

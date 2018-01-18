@@ -62,22 +62,22 @@ namespace ukive {
             ID2D1HwndRenderTarget **renderTarget);
 
         static HRESULT createTextFormat(
-            string16 fontFamilyName,
+            const string16 fontFamilyName,
             float fontSize, string16 localeName,
             IDWriteTextFormat **textFormat);
         static HRESULT createTextLayout(
-            string16 text, IDWriteTextFormat *textFormat,
+            const string16 text, IDWriteTextFormat *textFormat,
             float maxWidth, float maxHeight,
             IDWriteTextLayout **textLayout);
 
         static HRESULT createVertexShader(
-            string16 fileName,
+            const string16 fileName,
             D3D11_INPUT_ELEMENT_DESC *polygonLayout,
             UINT numElements,
             ID3D11VertexShader **vertexShader,
             ID3D11InputLayout **inputLayout);
         static HRESULT createPixelShader(
-            string16 fileName,
+            const string16 fileName,
             ID3D11PixelShader **pixelShader);
 
         static HRESULT createVertexBuffer(

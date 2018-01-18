@@ -294,7 +294,7 @@ namespace ukive {
     }
 
     HRESULT Renderer::createTextFormat(
-        string16 fontFamilyName,
+        const string16 fontFamilyName,
         float fontSize, string16 localeName,
         IDWriteTextFormat **textFormat)
     {
@@ -309,7 +309,7 @@ namespace ukive {
     }
 
     HRESULT Renderer::createTextLayout(
-        string16 text,
+        const string16 text,
         IDWriteTextFormat *textFormat,
         float maxWidth, float maxHeight,
         IDWriteTextLayout **textLayout)
@@ -320,7 +320,7 @@ namespace ukive {
 
 
     HRESULT Renderer::createVertexShader(
-        string16 fileName,
+        const string16 fileName,
         D3D11_INPUT_ELEMENT_DESC *polygonLayout,
         UINT numElements,
         ID3D11VertexShader **vertexShader,
@@ -350,7 +350,7 @@ namespace ukive {
     }
 
     HRESULT Renderer::createPixelShader(
-        string16 fileName,
+        const string16 fileName,
         ID3D11PixelShader **pixelShader)
     {
         std::ifstream reader(fileName.c_str(), std::ios::binary);
