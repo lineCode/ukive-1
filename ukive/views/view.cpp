@@ -1000,27 +1000,20 @@ namespace ukive {
     }
 
     void View::onFocusChanged(bool getFocus) {
-        std::wstring addr = std::to_wstring(reinterpret_cast<int>(this));
         if (getFocus) {
-            Log::d(L"View", addr + L"==onFocusChanged(true)\n");
             if (onCheckIsTextEditor()) {
-                Log::d(L"View", addr + L"==onFocusChanged(true): this is a text editor\n");
                 if (input_connection_ == nullptr) {
                     input_connection_ = onCreateInputConnection();
                 }
 
                 if (input_connection_ != nullptr) {
-                    Log::d(L"View", addr + L"==onFocusChanged(true): init/push/mount\n");
                     input_connection_->initialization();
                     input_connection_->pushEditor();
                     input_connection_->mount();
                 }
             }
-        }
-        else {
-            Log::d(L"View", addr + L"==onFocusChanged(false)\n");
+        } else {
             if (input_connection_ != nullptr) {
-                Log::d(L"View", addr + L"==onFocusChanged(false): unmount\n");
                 input_connection_->unmount();
                 input_connection_->terminateComposition();
             }
@@ -1041,32 +1034,29 @@ namespace ukive {
 
     void View::onWindowFocusChanged(bool windowFocus) {
         if (!hasFocus()) {
+            DCHECK(getWindow()->getKeyboardHolder() != this);
             return;
         }
 
-        std::wstring addr = std::to_wstring(reinterpret_cast<int>(this));
-
         if (windowFocus) {
-            Log::d(L"View", addr + L"==onWindowFocusChanged(true)\n");
             if (onCheckIsTextEditor()) {
                 if (input_connection_ == nullptr) {
                     input_connection_ = onCreateInputConnection();
                 }
 
                 if (input_connection_ != nullptr) {
-                    Log::d(L"View", addr + L"==onWindowFocusChanged(true): init/push/mount\n");
-                    input_connection_->initialization();
+                    HRESULT hr = input_connection_->initialization();
+                    DCHECK(SUCCEEDED(hr));
                     input_connection_->pushEditor();
                     input_connection_->mount();
                 }
             }
-        }
-        else {
-            Log::d(L"View", addr + L"==onWindowFocusChanged(false)\n");
+        } else {
             if (input_connection_ != nullptr) {
-                Log::d(L"View", addr + L"==onWindowFocusChanged(false): unmount\n");
-                input_connection_->unmount();
-                input_connection_->terminateComposition();
+                bool ret = input_connection_->unmount();
+                DCHECK(ret);
+                ret = input_connection_->terminateComposition();
+                DCHECK(ret);
             }
         }
     }

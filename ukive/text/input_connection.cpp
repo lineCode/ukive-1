@@ -22,15 +22,15 @@ namespace ukive {
         mIsEditorPushed = false;
     }
 
-    InputConnection::~InputConnection()
-    {
+    InputConnection::~InputConnection() {
     }
 
 
     HRESULT InputConnection::initialization()
     {
-        if (mIsInitialized)
+        if (mIsInitialized) {
             return S_OK;
+        }
 
         TsfManager *tsfMgr = Application::getTsfManager();
 
@@ -104,8 +104,9 @@ namespace ukive {
 
     bool InputConnection::unmount()
     {
-        if (!mIsInitialized)
+        if (!mIsInitialized) {
             return false;
+        }
 
         TsfManager *tsfMgr = Application::getTsfManager();
 

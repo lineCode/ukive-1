@@ -245,20 +245,20 @@ namespace ukive {
         bool changed, bool size_changed,
         int left, int top, int right, int bottom) {
 
-        int width = right - left - getPaddingLeft() - getPaddingRight();
-        int height = bottom - top - getPaddingTop() - getPaddingBottom();
-
-        if (d3d_content_) {
-            releaseResourceView();
-        }
-
-        HRESULT hr = createResourceView(width, height);
-        if (FAILED(hr)) {
-            Log::e(L"Direct3DView", L"init res view failed.");
-            return;
-        }
-
         if (size_changed) {
+            int width = right - left - getPaddingLeft() - getPaddingRight();
+            int height = bottom - top - getPaddingTop() - getPaddingBottom();
+
+            if (d3d_content_) {
+                releaseResourceView();
+            }
+
+            HRESULT hr = createResourceView(width, height);
+            if (FAILED(hr)) {
+                Log::e(L"Direct3DView", L"init res view failed.");
+                return;
+            }
+
             setViewports(0, 0, width, height);
             scene_->onSceneResize(width, height);
         }
@@ -280,8 +280,6 @@ namespace ukive {
 
             Bitmap bmp(d3d_content_);
             canvas->drawBitmap(&bmp);
-        } else {
-            int i = 0;
         }
     }
 

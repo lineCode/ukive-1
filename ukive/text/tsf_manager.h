@@ -25,7 +25,6 @@ namespace ukive {
 
         HRESULT setupCompartmentSinks(ITfCompartment *openMode, ITfCompartment *convMode);
         HRESULT releaseCompartmentSinks();
-
         HRESULT getCompartments(ITfCompartmentMgr **cm, ITfCompartment **openMode, ITfCompartment **convMode);
 
     public:
@@ -46,18 +45,9 @@ namespace ukive {
 
     class TsfSink : public ITfInputProcessorProfileActivationSink, public ITfCompartmentEventSink
     {
-    private:
-        LONG mRefCount;
-        TsfManager *mTsfMgr;
-        ITfCompositionView *pComposition;
-
     public:
         TsfSink(TsfManager *tsfMgr);
         ~TsfSink();
-
-        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj) override;
-        STDMETHODIMP_(ULONG) AddRef(void) override;
-        STDMETHODIMP_(ULONG) Release(void) override;
 
         // ITfInputProcessorProfileActivationSink
         // Notification for keyboard input locale change
@@ -67,6 +57,15 @@ namespace ukive {
         // ITfCompartmentEventSink
         // Notification for open mode (toggle state) change
         STDMETHODIMP OnChange(REFGUID rguid) override;
+
+        STDMETHODIMP_(ULONG) AddRef() override;
+        STDMETHODIMP_(ULONG) Release() override;
+        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj) override;
+
+    private:
+        ULONG ref_count_;
+        TsfManager *mTsfMgr;
+        ITfCompositionView *pComposition;
     };
 
 }

@@ -357,7 +357,7 @@ namespace ukive {
         int x, y;
         Rect rect = anchor->getBoundsInWindow();
 
-        y = rect.bottom + 1;
+        y = rect.bottom;
 
         switch (gravity)
         {
@@ -466,8 +466,9 @@ namespace ukive {
             focus_holder_backup_->requestFocus();*/
             break;
         case WA_INACTIVE:
-            while (mouse_holder_ref_ > 0)
-                this->releaseMouse();
+            while (mouse_holder_ref_ > 0) {
+                releaseMouse();
+            }
             base_layout_->dispatchWindowFocusChanged(false);
             /*if (focus_holder_)
             {

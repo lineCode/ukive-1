@@ -87,11 +87,11 @@ namespace shell {
         c1Label->setText(L"C1值:");
         c1Label->setTextSize(13.f);
 
-        ukive::RestraintLayoutParams *c1LabelLp = new ukive::RestraintLayoutParams(
-            ukive::LayoutParams::FIT_CONTENT, ukive::LayoutParams::FIT_CONTENT);
-        c1LabelLp
-            ->startHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::START, 8)
-            ->topHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::TOP, 12);
+        auto c1LabelLp = ukive::RestraintLayoutParams::Builder(
+            ukive::LayoutParams::FIT_CONTENT,
+            ukive::LayoutParams::FIT_CONTENT)
+            .start(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::START, 8)
+            .top(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::TOP, 12).build();
 
         rightLayout->addView(c1Label, c1LabelLp);
 
@@ -102,31 +102,29 @@ namespace shell {
         c1SeekBar->setProgress(2.f - 1.f);
         c1SeekBar->setOnSeekValueChangedListener(this);
 
-        ukive::RestraintLayoutParams *c1SeekBarLp = new ukive::RestraintLayoutParams(
-            ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT);
-        c1SeekBarLp
-            ->startHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::END, 4)
-            ->topHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::TOP)
-            ->endHandle(ID_C1_VALUE, ukive::RestraintLayoutParams::START, 4)
-            ->bottomHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM);
+        auto c1SeekBarLp = ukive::RestraintLayoutParams::Builder(
+            ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT)
+            .start(ID_C1_LABEL, ukive::RestraintLayoutParams::END, 4)
+            .top(ID_C1_LABEL)
+            .end(ID_C1_VALUE, ukive::RestraintLayoutParams::START, 4)
+            .bottom(ID_C1_LABEL).build();
 
         mC1SeekBar = c1SeekBar;
         rightLayout->addView(c1SeekBar, c1SeekBarLp);
 
         //c1 value.
-        ukive::TextView *c1Value = new ukive::TextView(this);
+        auto c1Value = new ukive::TextView(this);
         c1Value->setId(ID_C1_VALUE);
         c1Value->setIsEditable(false);
         c1Value->setIsSelectable(false);
         c1Value->setText(L"2.00");
         c1Value->setTextSize(13.f);
 
-        ukive::RestraintLayoutParams *c1ValueLp = new ukive::RestraintLayoutParams(
-            36, ukive::LayoutParams::FIT_CONTENT);
-        c1ValueLp
-            ->topHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::TOP)
-            ->endHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::END, 8)
-            ->bottomHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM);
+        auto c1ValueLp = ukive::RestraintLayoutParams::Builder(
+            36, ukive::LayoutParams::FIT_CONTENT)
+            .top(ID_C1_LABEL)
+            .end(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::END, 8)
+            .bottom(ID_C1_LABEL).build();
 
         mC1ValueTV = c1Value;
         rightLayout->addView(c1Value, c1ValueLp);
@@ -140,11 +138,10 @@ namespace shell {
         c2Label->setText(L"C2值:");
         c2Label->setTextSize(13.f);
 
-        ukive::RestraintLayoutParams *c2LabelLp = new ukive::RestraintLayoutParams(
-            ukive::LayoutParams::FIT_CONTENT, ukive::LayoutParams::FIT_CONTENT);
-        c2LabelLp
-            ->startHandle(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::START, 8)
-            ->topHandle(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM, 8);
+        auto c2LabelLp = ukive::RestraintLayoutParams::Builder(
+            ukive::LayoutParams::FIT_CONTENT, ukive::LayoutParams::FIT_CONTENT)
+            .start(ID_RIGHT_RESTRAIN, ukive::RestraintLayoutParams::START, 8)
+            .top(ID_C1_LABEL, ukive::RestraintLayoutParams::BOTTOM, 8).build();
 
         rightLayout->addView(c2Label, c2LabelLp);
 
@@ -304,6 +301,7 @@ namespace shell {
 
         //帮助说明
         ukive::TextView *helperTV = new ukive::TextView(this);
+        helperTV->setId(ID_HELPER);
         helperTV->setIsEditable(true);
         helperTV->setIsSelectable(true);
         helperTV->setText(
@@ -326,9 +324,9 @@ namespace shell {
     }
 
 
-    void LodWindow::onClick(ukive::View *widget)
+    void LodWindow::onClick(ukive::View *v)
     {
-        switch (widget->getId())
+        switch (v->getId())
         {
         case ID_SUBMIT_BUTTON:
         {
@@ -345,7 +343,7 @@ namespace shell {
 
         case ID_VSYNC_BUTTON:
         {
-            ukive::Button *vsyncButton = static_cast<ukive::Button*>(widget);
+            ukive::Button *vsyncButton = static_cast<ukive::Button*>(v);
             if (vsyncButton->getText() == L"VSYNC ON")
             {
                 ukive::Application::setVSync(false);

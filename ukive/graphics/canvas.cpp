@@ -12,8 +12,8 @@
 
 namespace ukive {
 
-    Canvas::Canvas(Window *win, float width, float height) {
-        is_bmp_target_ = true;
+    Canvas::Canvas(Window *win, float width, float height)
+        :is_bmp_target_(true) {
 
         ComPtr<ID2D1BitmapRenderTarget> bmp_target;
         HRESULT hr = win->getRenderer()->getD2DDeviceContext()->CreateCompatibleRenderTarget(
@@ -30,17 +30,12 @@ namespace ukive {
     }
 
     Canvas::Canvas(ComPtr<ID2D1RenderTarget> renderTarget)
-    {
-        is_bmp_target_ = false;
+        :is_bmp_target_(false) {
         initCanvas(renderTarget);
     }
 
 
-    Canvas::~Canvas()
-    {
-        if (text_renderer_) {
-            delete text_renderer_;
-        }
+    Canvas::~Canvas() {
     }
 
     void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> renderTarget) {
@@ -56,34 +51,35 @@ namespace ukive {
 
     void Canvas::setOpacity(float opacity)
     {
-        if (opacity == opacity_)
+        if (opacity == opacity_) {
             return;
+        }
 
         opacity_ = opacity;
 
-        if (text_renderer_)
+        if (text_renderer_) {
             text_renderer_->setOpacity(opacity_);
+        }
+
+        solid_brush_->SetOpacity(opacity_);
+        bitmap_brush_->SetOpacity(opacity_);
     }
 
-    float Canvas::getOpacity()
-    {
+    float Canvas::getOpacity() {
         return opacity_;
     }
 
 
-    void Canvas::beginDraw()
-    {
+    void Canvas::beginDraw() {
         render_target_->BeginDraw();
     }
 
-    void Canvas::endDraw()
-    {
+    void Canvas::endDraw() {
         render_target_->EndDraw();
     }
 
 
-    void Canvas::popClip()
-    {
+    void Canvas::popClip() {
         render_target_->PopAxisAlignedClip();
     }
 
@@ -97,18 +93,15 @@ namespace ukive {
 
     void Canvas::pushLayer(ID2D1Geometry *clipGeometry)
     {
-        if (layer_counter_ > 0)
-        {
+        if (layer_counter_ > 0) {
             ++layer_counter_;
             return;
         }
 
-        ComPtr<ID2D1DeviceContext> d2dDC
-            = render_target_.cast<ID2D1DeviceContext>();
-        if (d2dDC == nullptr)
+        auto d2d_dc = render_target_.cast<ID2D1DeviceContext>();
+        if (d2d_dc == nullptr)
         {
-            if (layer_ == nullptr)
-            {
+            if (layer_ == nullptr) {
                 HRESULT hr = render_target_->CreateLayer(&layer_);
                 if (FAILED(hr))
                     throw std::runtime_error("Canvas-Constructor(): Create layer failed.");
@@ -118,9 +111,8 @@ namespace ukive {
                 D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry),
                 layer_.get());
         }
-        else
-        {
-            d2dDC->PushLayer(
+        else {
+            d2d_dc->PushLayer(
                 D2D1::LayerParameters1(D2D1::InfiniteRect(), clipGeometry),
                 nullptr);
         }
@@ -130,8 +122,7 @@ namespace ukive {
 
     void Canvas::pushLayer(const RectF &content_bound, ID2D1Geometry *clipGeometry)
     {
-        if (layer_counter_ > 0)
-        {
+        if (layer_counter_ > 0) {
             ++layer_counter_;
             return;
         }
@@ -140,9 +131,8 @@ namespace ukive {
             content_bound.left, content_bound.top,
             content_bound.right, content_bound.bottom };
 
-        ComPtr<ID2D1DeviceContext> d2dDC
-            = render_target_.cast<ID2D1DeviceContext>();
-        if (d2dDC == nullptr)
+        auto d2d_dc = render_target_.cast<ID2D1DeviceContext>();
+        if (d2d_dc == nullptr)
         {
             if (layer_ == nullptr)
             {
@@ -157,7 +147,7 @@ namespace ukive {
         }
         else
         {
-            d2dDC->PushLayer(
+            d2d_dc->PushLayer(
                 D2D1::LayerParameters1(d2d_rect, clipGeometry),
                 nullptr);
         }
@@ -167,8 +157,7 @@ namespace ukive {
 
     void Canvas::popLayer()
     {
-        if (layer_counter_ > 1)
-        {
+        if (layer_counter_ > 1) {
             --layer_counter_;
             return;
         }
@@ -181,12 +170,12 @@ namespace ukive {
 
     void Canvas::save()
     {
-        ID2D1Factory *factory = nullptr;
+        ComPtr<ID2D1Factory> factory;
         render_target_->GetFactory(&factory);
 
-        ID2D1DrawingStateBlock *drawingStateBlock;
+        ComPtr<ID2D1DrawingStateBlock> drawingStateBlock;
         factory->CreateDrawingStateBlock(&drawingStateBlock);
-        render_target_->SaveDrawingState(drawingStateBlock);
+        render_target_->SaveDrawingState(drawingStateBlock.get());
 
         opacity_stack_.push(opacity_);
         drawing_state_stack_.push(drawingStateBlock);
@@ -194,8 +183,9 @@ namespace ukive {
 
     void Canvas::restore()
     {
-        if (drawing_state_stack_.empty())
+        if (drawing_state_stack_.empty()) {
             return;
+        }
 
         opacity_ = opacity_stack_.top();
 
@@ -212,12 +202,15 @@ namespace ukive {
         opacity_stack_.pop();
         drawing_state_stack_.pop();
 
-        if (text_renderer_)
+        if (text_renderer_) {
             text_renderer_->setOpacity(opacity_);
+        }
+
+        solid_brush_->SetOpacity(opacity_);
+        bitmap_brush_->SetOpacity(opacity_);
     }
 
-    ID2D1RenderTarget *Canvas::getRT()
-    {
+    ID2D1RenderTarget *Canvas::getRT() {
         return render_target_.get();
     }
 
@@ -229,7 +222,7 @@ namespace ukive {
                 return std::shared_ptr<Bitmap>();
             }
 
-            ID2D1Bitmap *bitmap = nullptr;
+            ComPtr<ID2D1Bitmap> bitmap;
             if (FAILED(bmp_target->GetBitmap(&bitmap))) {
                 Log::e(L"Canvas", L"failed to extract bitmap.");
                 return std::shared_ptr<Bitmap>();
@@ -242,43 +235,36 @@ namespace ukive {
     }
 
 
-    void Canvas::scale(float sx, float sy)
-    {
+    void Canvas::scale(float sx, float sy) {
         scale(sx, sy, 0.f, 0.f);
     }
 
-    void Canvas::scale(float sx, float sy, float cx, float cy)
-    {
+    void Canvas::scale(float sx, float sy, float cx, float cy) {
         matrix_.postScale(sx, sy, cx, cy);
         render_target_->SetTransform(matrix_.getNative());
     }
 
-    void Canvas::rotate(float angle)
-    {
+    void Canvas::rotate(float angle) {
         rotate(angle, 0.f, 0.f);
     }
 
-    void Canvas::rotate(float angle, float cx, float cy)
-    {
+    void Canvas::rotate(float angle, float cx, float cy) {
         matrix_.postRotate(angle, cx, cy);
         render_target_->SetTransform(matrix_.getNative());
     }
 
-    void Canvas::translate(float dx, float dy)
-    {
+    void Canvas::translate(float dx, float dy) {
         matrix_.postTranslate(dx, dy);
         render_target_->SetTransform(matrix_.getNative());
     }
 
 
-    void Canvas::setMatrix(const Matrix &matrix)
-    {
+    void Canvas::setMatrix(const Matrix &matrix) {
         matrix_ = matrix;
         render_target_->SetTransform(matrix_.getNative());
     }
 
-    Matrix Canvas::getMatrix()
-    {
+    Matrix Canvas::getMatrix() {
         return matrix_;
     }
 
@@ -443,7 +429,8 @@ namespace ukive {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
-        render_target_->FillEllipse(D2D1::Ellipse(D2D1::Point2F(cx, cy), radiusX, radiusY), solid_brush_.get());
+        render_target_->FillEllipse(
+            D2D1::Ellipse(D2D1::Point2F(cx, cy), radiusX, radiusY), solid_brush_.get());
     }
 
 
@@ -520,7 +507,8 @@ namespace ukive {
             layoutRect.left, layoutRect.top, layoutRect.right, layoutRect.bottom };
 
         solid_brush_->SetColor(d2d_color);
-        render_target_->DrawTextW(text.c_str(), text.length(), textFormat, d2d_layout_rect, solid_brush_.get());
+        render_target_->DrawTextW(
+            text.c_str(), text.length(), textFormat, d2d_layout_rect, solid_brush_.get());
     }
 
     void Canvas::drawTextLayout(
@@ -547,7 +535,7 @@ namespace ukive {
         }
 
         text_renderer_->setTextColor(color);
-        textLayout->Draw(v, text_renderer_, x, y);
+        textLayout->Draw(v, text_renderer_.get(), x, y);
     }
 
 }

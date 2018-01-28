@@ -26,9 +26,7 @@ namespace ukive {
             int parentWidth, int parentHeight,
             int parentWidthMode, int parentHeightMode);
 
-        void measureRestrainedChild(
-            View *child, RestraintLayoutParams *lp,
-            int parentWidth, int parentHeight, int parentWidthMode, int parentHeightMode);
+        void checkRestrainedChildrenWeight();
 
         void getRestrainedChildWidth(
             View *child, RestraintLayoutParams *lp,

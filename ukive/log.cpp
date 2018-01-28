@@ -30,6 +30,26 @@ namespace ukive {
         ::OutputDebugString(msg.c_str());
     }
 
+    Log::Log(const char *file_name, int line_number, int level)
+        :level_(level),
+        file_name_(file_name),
+        line_number_(line_number) {
+    }
+
+    Log::~Log() {
+        std::string msg;
+        msg.append(file_name_)
+            .append("(")
+            .append(std::to_string(line_number_))
+            .append("): ")
+            .append(stream_.str())
+            .append("\n");
+        ::OutputDebugStringA(msg.c_str());
+    }
+
+    std::ostringstream& Log::stream() {
+        return stream_;
+    }
 
     void Log::debugBreak() {
         __debugbreak();

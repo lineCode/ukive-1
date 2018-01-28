@@ -14,28 +14,6 @@ namespace ukive {
 
     class TsfEditor : public ITextStoreACP, public ITfContextOwnerCompositionSink
     {
-    private:
-        struct ADVISE_SINK {
-            IUnknown *punkID;
-            ITextStoreACPSink *textStoreACPSink;
-            DWORD dwMask;
-        };
-
-        struct LockRecord {
-            DWORD dwLockFlags;
-        };
-
-        LONG mRefCount;
-
-        bool mHasLock;
-        DWORD mCurLockType;
-        ADVISE_SINK mAdviseSink;
-        InputConnection *mInputConnection;
-
-        std::queue<std::shared_ptr<LockRecord>> mReqQueue;
-
-        TsViewCookie mViewCookie;
-
     public:
         TsfEditor(TsViewCookie tvc);
         ~TsfEditor();
@@ -119,9 +97,30 @@ namespace ukive {
             __RPC__in_opt ITfCompositionView *pComposition) override;
 
         //IUnknown methods.
-        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj) override;
         STDMETHODIMP_(ULONG) AddRef() override;
         STDMETHODIMP_(ULONG) Release() override;
+        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj) override;
+
+    private:
+        struct SinkRecord {
+            IUnknown *punk_id;
+            ITextStoreACPSink *sink;
+            DWORD mask;
+        };
+
+        struct LockRecord {
+            DWORD lock_flags;
+        };
+
+        ULONG ref_count_;
+
+        bool has_lock_;
+        DWORD cur_lock_type_;
+        SinkRecord sink_record_;
+        InputConnection *input_conn_;
+        std::queue<std::shared_ptr<LockRecord>> req_queue_;
+
+        TsViewCookie mViewCookie;
     };
 
 }

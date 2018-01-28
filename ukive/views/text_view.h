@@ -18,13 +18,13 @@ namespace ukive {
 
 
     ///<summary>
-    ///文本编辑器，使用TSF。
+    /// 文本编辑器，使用 TSF。
     ///</summary>
     class TextView : public View,
         public Editable::EditWatcher, public TextActionModeCallback
     {
     private:
-        //为支持撤销而创建的结构体（未完成）。
+        // 为支持撤销而创建的结构体（未完成）。
         struct UndoBlock
         {
             std::wstring text;
@@ -140,8 +140,8 @@ namespace ukive {
         void onBeginProcess();
         void onEndProcess();
 
-        virtual void onAttachedToWindow() override;
-        virtual void onDetachedFromWindow() override;
+        void onAttachedToWindow() override;
+        void onDetachedFromWindow() override;
 
         void autoWrap(bool enable);
         void setIsEditable(bool editable);
@@ -162,13 +162,13 @@ namespace ukive {
         void setLineSpacing(bool uniform, float spacingMultiple);
 
         std::wstring getText();
-        Editable *getEditable();
+        Editable* getEditable();
         float getTextSize();
 
         void setSelection(unsigned int position);
         void setSelection(unsigned int start, unsigned int end);
         void drawSelection(unsigned int start, unsigned int end);
-        std::wstring getSelection();
+        string16 getSelection();
         int getSelectionStart();
         int getSelectionEnd();
         bool hasSelection();
@@ -181,21 +181,21 @@ namespace ukive {
         void computeVisibleRegion(RectF *visibleRegon);
 
     protected:
-        virtual void onDraw(Canvas *canvas) override;
-        virtual void onMeasure(int width, int height, int widthSpec, int heightSpec) override;
-        virtual bool onInputEvent(InputEvent *e) override;
+        void onDraw(Canvas *canvas) override;
+        void onMeasure(int width, int height, int widthSpec, int heightSpec) override;
+        bool onInputEvent(InputEvent *e) override;
 
-        virtual void onLayout(
+        void onLayout(
             bool changed, bool sizeChanged,
             int left, int top, int right, int bottom) override;
-        virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight) override;
-        virtual void onFocusChanged(bool getFocus) override;
-        virtual void onWindowFocusChanged(bool windowFocus) override;
+        void onSizeChanged(int width, int height, int oldWidth, int oldHeight) override;
+        void onFocusChanged(bool getFocus) override;
+        void onWindowFocusChanged(bool windowFocus) override;
 
-        virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
+        void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
 
-        virtual bool onCheckIsTextEditor() override;
-        virtual InputConnection *onCreateInputConnection() override;
+        bool onCheckIsTextEditor() override;
+        InputConnection *onCreateInputConnection() override;
 
     public:
         void onTextChanged(

@@ -40,6 +40,9 @@ namespace ukive {
         endHandledEdge = NONE;
         bottomHandledEdge = NONE;
 
+        vertical_weight = 0;
+        horizontal_weight = 0;
+
         verticalPercent = .5f;
         horizontalPercent = .5f;
     }
@@ -96,6 +99,14 @@ namespace ukive {
     bool RestraintLayoutParams::hasBottom()
     {
         return bottomHandledEdge != NONE;
+    }
+
+    bool RestraintLayoutParams::hasVerticalWeight() {
+        return vertical_weight != 0;
+    }
+
+    bool RestraintLayoutParams::hasHorizontalWeight() {
+        return horizontal_weight != 0;
     }
 
     bool RestraintLayoutParams::hasVerticalCouple()

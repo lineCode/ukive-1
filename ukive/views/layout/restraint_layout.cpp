@@ -12,31 +12,27 @@ namespace ukive {
         : ViewGroup(wnd) {}
 
 
-    LayoutParams *RestraintLayout::generateLayoutParams(const LayoutParams &lp)
-    {
+    LayoutParams *RestraintLayout::generateLayoutParams(const LayoutParams &lp) {
         return new RestraintLayoutParams(lp);
     }
 
-    LayoutParams *RestraintLayout::generateDefaultLayoutParams()
-    {
+    LayoutParams *RestraintLayout::generateDefaultLayoutParams() {
         return new RestraintLayoutParams(
-            LayoutParams::FIT_CONTENT,
-            LayoutParams::FIT_CONTENT);
+            LayoutParams::FIT_CONTENT, LayoutParams::FIT_CONTENT);
     }
 
-    bool RestraintLayout::checkLayoutParams(LayoutParams *lp)
-    {
+    bool RestraintLayout::checkLayoutParams(LayoutParams *lp) {
         return typeid(*lp) == typeid(RestraintLayoutParams);
     }
 
 
-    View *RestraintLayout::getChildById(int id)
-    {
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
+    View *RestraintLayout::getChildById(int id) {
+        size_t count = getChildCount();
+        for (size_t i = 0; i < count; ++i) {
             View *child = getChildAt(i);
-            if (child->getId() == id)
+            if (child->getId() == id) {
                 return child;
+            }
         }
 
         throw std::runtime_error("child view id not existed.");
@@ -44,8 +40,8 @@ namespace ukive {
 
     void RestraintLayout::clearMeasureFlag()
     {
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
+        size_t count = getChildCount();
+        for (size_t i = 0; i < count; ++i) {
             View *child = getChildAt(i);
             RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
             lp->isWidthMeasured = lp->isHeightMeasured = false;
@@ -58,12 +54,14 @@ namespace ukive {
         int parentWidth, int parentHeight,
         int parentWidthMode, int parentHeightMode)
     {
-        for (std::size_t i = 0; i < getChildCount(); ++i)
+        size_t count = getChildCount();
+        for (size_t i = 0; i < count; ++i)
         {
             View *child = getChildAt(i);
-            RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
-            if (lp->isWidthMeasured)
+            RestraintLayoutParams *lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
+            if (lp->isWidthMeasured) {
                 continue;
+            }
 
             int childWidth = 0;
             int childWidthMode = 0;
@@ -78,18 +76,18 @@ namespace ukive {
             lp->specWidthMode = childWidthMode;
         }
 
-        for (std::size_t i = 0; i < getChildCount(); ++i)
+        for (size_t i = 0; i < count; ++i)
         {
             View *child = getChildAt(i);
             RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
-            if (lp->isWidthMeasured && lp->isHeightMeasured)
+            if (lp->isWidthMeasured && lp->isHeightMeasured) {
                 continue;
+            }
 
             int childHeight = 0;
             int childHeightMode = 0;
 
-            if (!lp->isHeightMeasured)
-            {
+            if (!lp->isHeightMeasured) {
                 getRestrainedChildHeight(
                     child, lp,
                     parentHeight, parentHeightMode,
@@ -99,8 +97,7 @@ namespace ukive {
                 lp->specHeight = childHeight;
                 lp->specHeightMode = childHeightMode;
             }
-            else
-            {
+            else {
                 childHeight = lp->specHeight;
                 childHeightMode = lp->specHeightMode;
             }
@@ -109,51 +106,12 @@ namespace ukive {
         }
     }
 
-    void RestraintLayout::measureRestrainedChild(
-        View *child, RestraintLayoutParams *lp,
-        int parentWidth, int parentHeight, int parentWidthMode, int parentHeightMode)
-    {
-        int childWidth = 0;
-        int childWidthSpec = 0;
-
-        int childHeight = 0;
-        int childHeightSpec = 0;
-
-        if (!lp->isWidthMeasured)
-        {
-            getRestrainedChildWidth(
-                child, lp,
-                parentWidth, parentWidthMode,
-                &childWidth, &childWidthSpec);
-
-            lp->isWidthMeasured = true;
-            lp->specWidth = childWidth;
-            lp->specWidthMode = childWidthSpec;
+    void RestraintLayout::checkRestrainedChildrenWeight() {
+        size_t count = getChildCount();
+        for (size_t i = 0; i < count; ++i) {
+            View *child = getChildAt(i);
+            RestraintLayoutParams *lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
         }
-        else
-        {
-            childWidth = lp->specWidth;
-            childWidthSpec = lp->specWidthMode;
-        }
-
-        if (!lp->isHeightMeasured)
-        {
-            getRestrainedChildHeight(
-                child, lp,
-                parentHeight, parentHeightMode,
-                &childHeight, &childHeightSpec);
-
-            lp->isHeightMeasured = true;
-            lp->specHeight = childHeight;
-            lp->specHeightMode = childHeightSpec;
-        }
-        else
-        {
-            childHeight = lp->specHeight;
-            childHeightSpec = lp->specHeightMode;
-        }
-
-        child->measure(childWidth, childHeight, childWidthSpec, childHeightSpec);
     }
 
     void RestraintLayout::getRestrainedChildWidth(
@@ -171,19 +129,17 @@ namespace ukive {
             int size = std::max(0,
                 parentWidth - horizontalPadding - horizontalMargins);
 
-            //child有固定的大小。
-            if (lp->width > 0)
-            {
+            // child 有固定的大小。
+            if (lp->width > 0) {
                 childWidth = lp->width;
                 childWidthMode = EXACTLY;
                 lp->horiCoupleHandlerType = RestraintLayoutParams::CH_FIXED;
             }
-            //child将填充handler couple之间的区域。
-            else
-            {
-                //handler couple绑定于父View。
-                if (lp->startHandledId == this->getId()
-                    && lp->endHandledId == this->getId())
+            // child 将填充 handler couple 之间的区域。
+            else {
+                // handler couple 绑定于父 View。
+                if (lp->startHandledId == getId()
+                    && lp->endHandledId == getId())
                 {
                     switch (parentWidthMode)
                     {
@@ -213,8 +169,8 @@ namespace ukive {
                     }
                     case UNKNOWN:
                     {
-                        //此处，由于不知道父View的大小，无法填充handler couple之间的区域。
-                        //让View自己决定大小即可。
+                        // 此处，由于不知道父 View 的大小，无法填充 handler couple 之间的区域。
+                        // 让 View 自己决定大小即可。
                         childWidth = size;
                         childWidthMode = UNKNOWN;
                         lp->horiCoupleHandlerType = RestraintLayoutParams::CH_FILL;
@@ -222,19 +178,19 @@ namespace ukive {
                     }
                     }
                 }
-                //handler对没有绑定于父View。这意味着它与其他子View绑定。
-                //此时必须先测量绑定到的View，然后才能测量该View。将使用
-                //递归完成此过程，为此需要额外的变量来记录某一View是否已测量。
+                // handler couple 没有绑定于父 View。这意味着它与其他子 View 绑定。
+                // 此时必须先测量绑定到的 View，然后才能测量该 View。将使用
+                // 递归完成此过程，为此需要额外的变量来记录某一 View 是否已测量。
                 else
                 {
-                    //左右Handler绑定在同一个View上。
+                    // 左右 Handler 绑定在同一个 View 上。
                     if (lp->startHandledId == lp->endHandledId)
                     {
                         int measuredTargetWidth = 0;
                         View *target = getChildById(lp->startHandledId);
                         RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-                        //测量此target view的宽度。
+                        // 测量此 target view 的宽度。
                         int targetWidth;
                         int targetWidthMode;
                         if (!targetLp->isWidthMeasured)
@@ -262,8 +218,8 @@ namespace ukive {
                             targetHeightMode = targetLp->specHeightMode;
                         }
 
-                        //让target view测量自身。
-                        //这将会使target view的onMeasure()方法多调用一次。
+                        // 让 target view 测量自身。
+                        // 这将会使 target view 的 onMeasure() 方法多调用一次。
                         target->measure(
                             targetWidth, targetHeight,
                             targetWidthMode, targetHeightMode);
@@ -288,7 +244,7 @@ namespace ukive {
                         if (parentWidthMode == EXACTLY
                             || parentWidthMode == FIT)
                         {
-                            //前向遍历。
+                            // 前向遍历。
                             int measuredStartMargin = lp->leftMargin;
                             RestraintLayoutParams *childLp = lp;
                             while (childLp->hasStart()
@@ -297,7 +253,7 @@ namespace ukive {
                                 View *target = getChildById(childLp->startHandledId);
                                 RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-                                //测量此target view的宽度。
+                                // 测量此 target view 的宽度。
                                 int targetWidth;
                                 int targetWidthMode;
                                 if (!targetLp->isWidthMeasured)
@@ -325,8 +281,8 @@ namespace ukive {
                                     targetHeightMode = targetLp->specHeightMode;
                                 }
 
-                                //让target view测量自身。
-                                //这将会使target view的onMeasure()方法多调用一次。
+                                // 让 target view 测量自身。
+                                // 这将会使 target view 的 onMeasure() 方法多调用一次。
                                 target->measure(
                                     targetWidth, targetHeight,
                                     targetWidthMode, targetHeightMode);
@@ -347,7 +303,7 @@ namespace ukive {
                                 childLp = targetLp;
                             }
 
-                            //后向遍历。
+                            // 后向遍历。
                             int measuredEndMargin = lp->rightMargin;
                             childLp = lp;
                             while (childLp->hasEnd()
@@ -356,7 +312,7 @@ namespace ukive {
                                 View *target = getChildById(childLp->endHandledId);
                                 RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-                                //测量此target view的宽度。
+                                // 测量此 target view 的宽度。
                                 int targetWidth;
                                 int targetWidthMode;
                                 if (!targetLp->isWidthMeasured)
@@ -384,8 +340,8 @@ namespace ukive {
                                     targetHeightMode = targetLp->specHeightMode;
                                 }
 
-                                //让target view测量自身。
-                                //这将会使target view的onMeasure()方法多调用一次。
+                                // 让 target view 测量自身。
+                                // 这将会使 target view 的 onMeasure() 方法多调用一次。
                                 target->measure(
                                     targetWidth, targetHeight,
                                     targetWidthMode, targetHeightMode);
@@ -441,8 +397,8 @@ namespace ukive {
         }
         else
         {
-            this->getChildMeasure(
-                parentWidth, parentWidthMode,
+            getChildMeasure(
+                parentWidth, UNKNOWN,
                 horizontalMargins + horizontalPadding,
                 lp->width, &childWidth, &childWidthMode);
         }
@@ -466,17 +422,17 @@ namespace ukive {
             int size = std::max(0,
                 parentHeight - verticalPadding - verticalMargins);
 
-            //child有固定的大小。
+            // child 有固定的大小。
             if (lp->height > 0)
             {
                 childHeight = lp->height;
                 childHeightMode = EXACTLY;
                 lp->vertCoupleHandlerType = RestraintLayoutParams::CH_FIXED;
             }
-            //child将填充handler couple之间的区域。
+            // child 将填充 handler couple 之间的区域。
             else
             {
-                //handler couple绑定于父View。
+                // handler couple 绑定于父 View。
                 if (lp->topHandledId == this->getId()
                     && lp->bottomHandledId == this->getId())
                 {
@@ -508,8 +464,8 @@ namespace ukive {
                     }
                     case UNKNOWN:
                     {
-                        //此处，由于不知道父View的大小，无法填充handler对之间的区域。
-                        //让View自己决定大小即可。
+                        // 此处，由于不知道父 View 的大小，无法填充 handler couple 之间的区域。
+                        // 让 View 自己决定大小即可。
                         childHeight = size;
                         childHeightMode = UNKNOWN;
                         lp->vertCoupleHandlerType = RestraintLayoutParams::CH_FILL;
@@ -517,19 +473,19 @@ namespace ukive {
                     }
                     }
                 }
-                //handler对没有绑定于父View。这意味着它与其他子View绑定。
-                //此时必须先测量绑定到的View，然后才能测量该View。将使用
-                //递归完成此过程，为此需要额外的变量来记录某一View是否已测量。
+                // handler couple 没有绑定于父 View。这意味着它与其他子 View 绑定。
+                // 此时必须先测量绑定到的 View，然后才能测量该 View。将使用
+                // 递归完成此过程，为此需要额外的变量来记录某一 View 是否已测量。
                 else
                 {
-                    //上下Handler绑定在同一个View上。
+                    // 上下 Handler 绑定在同一个 View 上。
                     if (lp->topHandledId == lp->bottomHandledId)
                     {
                         int measuredTargetHeight = 0;
                         View *target = getChildById(lp->topHandledId);
                         RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-                        //测量此target view的高度。
+                        // 测量此 target view 的高度。
                         int targetHeight;
                         int targetHeightMode;
                         if (!targetLp->isHeightMeasured)
@@ -557,8 +513,8 @@ namespace ukive {
                             targetWidthMode = targetLp->specWidthMode;
                         }
 
-                        //让target view测量自身。
-                        //这将会使target view的onMeasure()方法多调用一次。
+                        // 让 target view 测量自身。
+                        // 这将会使 target view 的 onMeasure() 方法多调用一次。
                         target->measure(
                             targetWidth, targetHeight,
                             targetWidthMode, targetHeightMode);
@@ -583,7 +539,7 @@ namespace ukive {
                         if (parentHeightMode == EXACTLY
                             || parentHeightMode == FIT)
                         {
-                            //上向遍历。
+                            // 上向遍历。
                             int measuredTopMargin = lp->topMargin;
                             RestraintLayoutParams *childLp = lp;
                             while (childLp->hasTop()
@@ -592,7 +548,7 @@ namespace ukive {
                                 View *target = getChildById(childLp->topHandledId);
                                 RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-                                //测量此target view的高度。
+                                // 测量此 target view 的高度。
                                 int targetHeight;
                                 int targetHeightMode;
                                 if (!targetLp->isHeightMeasured)
@@ -620,8 +576,8 @@ namespace ukive {
                                     targetWidthMode = targetLp->specWidthMode;
                                 }
 
-                                //让target view测量自身。
-                                //这将会使target view的onMeasure()方法多调用一次。
+                                // 让 target view 测量自身。
+                                // 这将会使 target view 的 onMeasure() 方法多调用一次。
                                 target->measure(
                                     targetWidth, targetHeight,
                                     targetWidthMode, targetHeightMode);
@@ -642,7 +598,7 @@ namespace ukive {
                                 childLp = targetLp;
                             }
 
-                            //下向遍历。
+                            // 下向遍历。
                             int measuredBottomMargin = lp->bottomMargin;
                             childLp = lp;
                             while (childLp->hasBottom()
@@ -651,7 +607,7 @@ namespace ukive {
                                 View *target = getChildById(childLp->bottomHandledId);
                                 RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-                                //测量此target view的高度。
+                                // 测量此 target view 的高度。
                                 int targetHeight;
                                 int targetHeightMode;
                                 if (!targetLp->isHeightMeasured)
@@ -679,8 +635,8 @@ namespace ukive {
                                     targetWidthMode = targetLp->specWidthMode;
                                 }
 
-                                //让target view测量自身。
-                                //这将会使target view的onMeasure()方法多调用一次。
+                                // 让 target view 测量自身。
+                                // 这将会使 target view 的 onMeasure() 方法多调用一次。
                                 target->measure(
                                     targetWidth, targetHeight,
                                     targetWidthMode, targetHeightMode);
@@ -699,8 +655,8 @@ namespace ukive {
                                 childLp = targetLp;
                             }
 
-                            //TODO:这里不应该用parentHeight，而应该使用最后遍历到的view
-                            //作为边界来计算。此处假定最终绑定到parent边界。
+                            // TODO: 这里不应该用 parentHeight，而应该使用最后遍历到的 view
+                            // 作为边界来计算。此处假定最终绑定到 parent 边界。
                             childHeight = std::max(0, parentHeight - verticalPadding
                                 - measuredTopMargin - measuredBottomMargin);
 
@@ -736,8 +692,8 @@ namespace ukive {
         }
         else
         {
-            this->getChildMeasure(
-                parentHeight, parentHeightMode,
+            getChildMeasure(
+                parentHeight, UNKNOWN,
                 verticalMargins + verticalPadding,
                 lp->height, &childHeight, &childHeightMode);
         }
@@ -869,7 +825,7 @@ namespace ukive {
     {
         int wrappedWidth = 0;
 
-        for (std::size_t i = 0; i < getChildCount(); ++i)
+        for (size_t i = 0; i < getChildCount(); ++i)
         {
             View *child = getChildAt(i);
             RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
@@ -893,7 +849,7 @@ namespace ukive {
     {
         int wrappedHeight = 0;
 
-        for (std::size_t i = 0; i < getChildCount(); ++i)
+        for (size_t i = 0; i < getChildCount(); ++i)
         {
             View *child = getChildAt(i);
             RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
@@ -992,19 +948,14 @@ namespace ukive {
                 break;
             }
         }
-        else
-        {
-            if (lp->hasTop())
-            {
+        else {
+            if (lp->hasTop()) {
                 childTop += lp->topMargin;
                 childBottom = childTop + child->getMeasuredHeight();
-            }
-            else if (lp->hasBottom())
-            {
+            } else if (lp->hasBottom()) {
                 childBottom -= lp->bottomMargin;
                 childTop = childBottom - child->getMeasuredHeight();
-            }
-            else
+            } else
                 childBottom = childTop + child->getMeasuredHeight();
         }
 
@@ -1112,7 +1063,7 @@ namespace ukive {
         int verticalPadding = getPaddingTop() + getPaddingBottom();
 
         clearMeasureFlag();
-        this->measureRestrainedChildren(width, height, widthMode, heightMode);
+        measureRestrainedChildren(width, height, widthMode, heightMode);
 
         switch (widthMode)
         {
@@ -1150,7 +1101,7 @@ namespace ukive {
             break;
         }
 
-        this->setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredDimension(finalWidth, finalHeight);
     }
 
     void RestraintLayout::onLayout(
@@ -1160,7 +1111,7 @@ namespace ukive {
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
         int verticalPadding = getPaddingTop() + getPaddingBottom();
 
-        for (std::size_t i = 0; i < getChildCount(); ++i)
+        for (size_t i = 0; i < getChildCount(); ++i)
         {
             View *child = getChildAt(i);
             RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();

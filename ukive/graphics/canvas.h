@@ -110,7 +110,7 @@ namespace ukive {
         float opacity_;
         Matrix matrix_;
 
-        TextRenderer *text_renderer_;
+        ComPtr<TextRenderer> text_renderer_;
 
         ComPtr<ID2D1Layer> layer_;
         ComPtr<ID2D1RenderTarget> render_target_;

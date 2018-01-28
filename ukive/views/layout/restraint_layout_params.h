@@ -30,8 +30,8 @@ namespace ukive {
         RestraintLayoutParams(const LayoutParams &lp);
         ~RestraintLayoutParams();
 
-        //保存在一次测量过程中与该LayoutParams绑定的View
-        //的测量信息。注意记得在测量过程开始前清除该标记。
+        // 保存在一次测量过程中与该 LayoutParams 绑定的 View
+        // 的测量信息。注意记得在测量过程开始前清除该标记。
         int specWidth;
         int specWidthMode;
         int specHeight;
@@ -39,12 +39,15 @@ namespace ukive {
         bool isWidthMeasured;
         bool isHeightMeasured;
 
-        //保存在一次布局过程中与该LayoutParams绑定的View
-        //的布局信息。注意记得在布局过程开始前清除该标记。
+        // 保存在一次布局过程中与该 LayoutParams 绑定的 View
+        // 的布局信息。注意记得在布局过程开始前清除该标记。
         int left, right;
         int top, bottom;
         bool isVertLayouted;
         bool isHoriLayouted;
+
+        int vertical_weight;
+        int horizontal_weight;
 
         float verticalPercent;
         float horizontalPercent;
@@ -76,54 +79,22 @@ namespace ukive {
                 :built_(false), lp_(new RestraintLayoutParams(width, height)) {}
             ~Builder() { if (!built_)delete lp_; }
 
-            Builder& start(int margin = 0) {
-                lp_->startHandle(-1, START, margin);
-                return *this;
-            }
-            Builder& start(Edge handleEdge, int margin = 0) {
-                lp_->startHandle(-1, handleEdge, margin);
-                return *this;
-            }
-            Builder& start(int handleId, Edge handleEdge, int margin = 0) {
+            Builder& start(int handleId, Edge handleEdge = START, int margin = 0) {
                 lp_->startHandle(handleId, handleEdge, margin);
                 return *this;
             }
 
-            Builder& top(int margin = 0) {
-                lp_->topHandle(-1, TOP, margin);
-                return *this;
-            }
-            Builder& top(Edge handleEdge, int margin = 0) {
-                lp_->topHandle(-1, handleEdge, margin);
-                return *this;
-            }
-            Builder& top(int handleId, Edge handleEdge, int margin = 0) {
+            Builder& top(int handleId, Edge handleEdge = TOP, int margin = 0) {
                 lp_->topHandle(handleId, handleEdge, margin);
                 return *this;
             }
 
-            Builder& end(int margin = 0) {
-                lp_->endHandle(-1, END, margin);
-                return *this;
-            }
-            Builder& end(Edge handleEdge, int margin = 0) {
-                lp_->endHandle(-1, handleEdge, margin);
-                return *this;
-            }
-            Builder& end(int handleId, Edge handleEdge, int margin = 0) {
+            Builder& end(int handleId, Edge handleEdge = END, int margin = 0) {
                 lp_->endHandle(handleId, handleEdge, margin);
                 return *this;
             }
 
-            Builder& bottom(int margin = 0) {
-                lp_->bottomHandle(-1, BOTTOM, margin);
-                return *this;
-            }
-            Builder& bottom(Edge handleEdge, int margin = 0) {
-                lp_->bottomHandle(-1, handleEdge, margin);
-                return *this;
-            }
-            Builder& bottom(int handleId, Edge handleEdge, int margin = 0) {
+            Builder& bottom(int handleId, Edge handleEdge = BOTTOM, int margin = 0) {
                 lp_->bottomHandle(handleId, handleEdge, margin);
                 return *this;
             }
@@ -142,6 +113,9 @@ namespace ukive {
         bool hasTop();
         bool hasEnd();
         bool hasBottom();
+
+        bool hasVerticalWeight();
+        bool hasHorizontalWeight();
 
         bool hasVerticalCouple();
         bool hasHorizontalCouple();

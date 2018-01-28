@@ -11,9 +11,9 @@
 namespace ukive {
 
     TextRenderer::TextRenderer(ComPtr<ID2D1RenderTarget> renderTarget)
-        :mRefCount(1),
-        mOpacity(1.f)
-    {
+        :ref_count_(1),
+        mOpacity(1.f) {
+
         mDefaultTextColor = Color::Black;
         mDefaultUnderlineColor = Color::Black;
         mDefaultStrikethroughColor = Color::Black;
@@ -28,29 +28,24 @@ namespace ukive {
     }
 
 
-    TextRenderer::~TextRenderer()
-    {
+    TextRenderer::~TextRenderer() {
     }
 
 
-    void TextRenderer::setOpacity(float opacity)
-    {
+    void TextRenderer::setOpacity(float opacity) {
         mOpacity = opacity;
         mSolidBrush->SetOpacity(opacity);
     }
 
-    void TextRenderer::setTextColor(Color color)
-    {
+    void TextRenderer::setTextColor(Color color) {
         mDefaultTextColor = color;
     }
 
-    void TextRenderer::setUnderlineColor(Color color)
-    {
+    void TextRenderer::setUnderlineColor(Color color) {
         mDefaultUnderlineColor = color;
     }
 
-    void TextRenderer::setStrikethroughColor(Color color)
-    {
+    void TextRenderer::setStrikethroughColor(Color color) {
         mDefaultStrikethroughColor = color;
     }
 
@@ -253,26 +248,6 @@ namespace ukive {
         return E_NOTIMPL;
     }
 
-
-    STDMETHODIMP_(unsigned long) TextRenderer::AddRef()
-    {
-        return InterlockedIncrement(&mRefCount);
-    }
-
-
-    STDMETHODIMP_(unsigned long) TextRenderer::Release()
-    {
-        unsigned long newCount = InterlockedDecrement(&mRefCount);
-
-        if (newCount == 0)
-        {
-            delete this;
-            return 0;
-        }
-
-        return newCount;
-    }
-
     /******************************************************************
     *                                                                 *
     *  CustomTextRenderer::IsPixelSnappingDisabled                    *
@@ -285,9 +260,8 @@ namespace ukive {
 
     STDMETHODIMP TextRenderer::IsPixelSnappingDisabled(
         __maybenull void* clientDrawingContext,
-        __out BOOL* isDisabled
-    )
-    {
+        __out BOOL* isDisabled) {
+
         *isDisabled = FALSE;
         return S_OK;
     }
@@ -302,9 +276,8 @@ namespace ukive {
 
     STDMETHODIMP TextRenderer::GetCurrentTransform(
         __maybenull void* clientDrawingContext,
-        __out DWRITE_MATRIX* transform
-    )
-    {
+        __out DWRITE_MATRIX* transform) {
+
         //forward the render target's transform
         mRenderTarget->GetTransform(reinterpret_cast<D2D1_MATRIX_3X2_F*>(transform));
         return S_OK;
@@ -320,9 +293,8 @@ namespace ukive {
 
     STDMETHODIMP TextRenderer::GetPixelsPerDip(
         __maybenull void* clientDrawingContext,
-        __out FLOAT* pixelsPerDip
-    )
-    {
+        __out FLOAT* pixelsPerDip) {
+
         float x, yUnused;
 
         mRenderTarget->GetDpi(&x, &yUnused);
@@ -331,39 +303,40 @@ namespace ukive {
         return S_OK;
     }
 
-    /******************************************************************
-    *                                                                 *
-    *  CustomTextRenderer::QueryInterface                             *
-    *                                                                 *
-    *  Query interface implementation                                 *
-    *                                                                 *
-    ******************************************************************/
+    STDMETHODIMP_(ULONG) TextRenderer::AddRef() {
+        return InterlockedIncrement(&ref_count_);
+    }
+
+    STDMETHODIMP_(ULONG) TextRenderer::Release() {
+        auto rc = InterlockedDecrement(&ref_count_);
+        if (rc == 0) {
+            delete this;
+        }
+
+        return rc;
+    }
 
     STDMETHODIMP TextRenderer::QueryInterface(
-        IID const& riid,
-        void** ppvObject
-    )
-    {
-        if (__uuidof(IDWriteTextRenderer) == riid)
-        {
+        IID const& riid, void** ppvObject) {
+
+        if (ppvObject == nullptr) {
+            return E_INVALIDARG;
+        }
+
+        if (__uuidof(IDWriteTextRenderer) == riid) {
             *ppvObject = this;
         }
-        else if (__uuidof(IDWritePixelSnapping) == riid)
-        {
+        else if (__uuidof(IDWritePixelSnapping) == riid) {
             *ppvObject = this;
         }
-        else if (__uuidof(IUnknown) == riid)
-        {
+        else if (__uuidof(IUnknown) == riid) {
             *ppvObject = this;
         }
-        else
-        {
-            *ppvObject = 0;
-            return E_FAIL;
+        else {
+            return E_NOINTERFACE;
         }
 
         AddRef();
-
         return S_OK;
     }
 

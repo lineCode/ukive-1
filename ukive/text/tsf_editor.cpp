@@ -11,77 +11,77 @@
 namespace ukive {
 
     TsfEditor::TsfEditor(TsViewCookie tvc)
-        :mViewCookie(tvc) {
-        mRefCount = 1;
-        mInputConnection = nullptr;
-        mCurLockType = 0;
-        mHasLock = false;
+        :ref_count_(1),
+        mViewCookie(tvc),
+        input_conn_(nullptr),
+        cur_lock_type_(0),
+        has_lock_(false) {
 
-        mAdviseSink.dwMask = 0;
-        mAdviseSink.punkID = nullptr;
-        mAdviseSink.textStoreACPSink = nullptr;
+        sink_record_.mask = 0;
+        sink_record_.punk_id = nullptr;
+        sink_record_.sink = nullptr;
     }
 
 
-    TsfEditor::~TsfEditor()
-    {
+    TsfEditor::~TsfEditor() {
     }
 
 
-    void TsfEditor::setInputConnection(InputConnection *ic)
-    {
-        mInputConnection = ic;
+    void TsfEditor::setInputConnection(InputConnection *ic) {
+        input_conn_ = ic;
     }
 
     void TsfEditor::notifyTextChanged(bool correction, long start, long oldEnd, long newEnd)
     {
-        if (mInputConnection && mAdviseSink.textStoreACPSink && !mHasLock)
-        {
+        if (input_conn_ && sink_record_.sink && !has_lock_) {
             TS_TEXTCHANGE textChange;
             textChange.acpStart = start;
             textChange.acpOldEnd = oldEnd;
             textChange.acpNewEnd = newEnd;
 
-            mAdviseSink.textStoreACPSink->OnTextChange(
+            sink_record_.sink->OnTextChange(
                 correction ? TS_ST_CORRECTION : 0, &textChange);
         }
     }
 
     void TsfEditor::notifyTextLayoutChanged(TsLayoutCode reason)
     {
-        if (mInputConnection && mAdviseSink.textStoreACPSink)
-            mAdviseSink.textStoreACPSink->OnLayoutChange(reason, mViewCookie);
+        if (input_conn_ && sink_record_.sink) {
+            sink_record_.sink->OnLayoutChange(reason, mViewCookie);
+        }
     }
 
     void TsfEditor::notifyTextSelectionChanged()
     {
-        if (mInputConnection && mAdviseSink.textStoreACPSink && !mHasLock)
-            mAdviseSink.textStoreACPSink->OnSelectionChange();
+        if (input_conn_ && sink_record_.sink && !has_lock_) {
+            sink_record_.sink->OnSelectionChange();
+        }
     }
 
     void TsfEditor::notifyStatusChanged(DWORD flags)
     {
-        if (mInputConnection && mAdviseSink.textStoreACPSink)
-            mAdviseSink.textStoreACPSink->OnStatusChange(flags);
+        if (input_conn_ && sink_record_.sink) {
+            sink_record_.sink->OnStatusChange(flags);
+        }
     }
 
     void TsfEditor::notifyAttrsChanged(
         long start, long end,
         unsigned long attrsCount, const TS_ATTRID *attrs)
     {
-        if (mInputConnection && mAdviseSink.textStoreACPSink)
-            mAdviseSink.textStoreACPSink->OnAttrsChange(start, end, attrsCount, attrs);
+        if (input_conn_ && sink_record_.sink)
+            sink_record_.sink->OnAttrsChange(start, end, attrsCount, attrs);
     }
 
 
     bool TsfEditor::hasReadOnlyLock()
     {
-        return ((mCurLockType & TS_LF_READ) == TS_LF_READ);
+        return ((cur_lock_type_ & TS_LF_READ) == TS_LF_READ);
     }
 
     bool TsfEditor::hasReadWriteLock()
     {
-        return ((mCurLockType & TS_LF_READWRITE) == TS_LF_READWRITE);
+        return ((cur_lock_type_ & TS_LF_READWRITE) == TS_LF_READWRITE);
     }
 
 
@@ -100,8 +100,8 @@ namespace ukive {
             return E_INVALIDARG;
         }
 
-        if (punkID == mAdviseSink.punkID) {
-            mAdviseSink.dwMask = dwMask;
+        if (punkID == sink_record_.punk_id) {
+            sink_record_.mask = dwMask;
             return S_OK;
         }
 
@@ -116,9 +116,9 @@ namespace ukive {
         //        longer required.
 
         if (IsEqualIID(riid, IID_ITextStoreACPSink)) {
-            punk->QueryInterface(IID_ITextStoreACPSink, (LPVOID*)&mAdviseSink.textStoreACPSink);
-            mAdviseSink.punkID = punkID;
-            mAdviseSink.dwMask = dwMask;
+            punk->QueryInterface(IID_ITextStoreACPSink, (LPVOID*)&sink_record_.sink);
+            sink_record_.punk_id = punkID;
+            sink_record_.mask = dwMask;
             punkID->AddRef();
             punkID->Release();
 
@@ -130,16 +130,16 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::UnadviseSink(IUnknown *punk)
     {
-        if (mAdviseSink.punkID) {
-            mAdviseSink.punkID->Release();
-            mAdviseSink.punkID = nullptr;
+        if (sink_record_.punk_id) {
+            sink_record_.punk_id->Release();
+            sink_record_.punk_id = nullptr;
         }
 
-        if (mAdviseSink.textStoreACPSink) {
-            mAdviseSink.textStoreACPSink->Release();
-            mAdviseSink.textStoreACPSink = nullptr;
+        if (sink_record_.sink) {
+            sink_record_.sink->Release();
+            sink_record_.sink = nullptr;
         }
-        mAdviseSink.dwMask = 0;
+        sink_record_.mask = 0;
 
         return S_OK;
     }
@@ -148,11 +148,12 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"RequestLock()\n");
 
-        if (!mInputConnection)
+        if (!input_conn_) {
             return E_FAIL;
+        }
 
         //The document is locked.
-        if (!mReqQueue.empty() || mHasLock)
+        if (!req_queue_.empty() || has_lock_)
         {
             if ((dwLockFlags & TS_LF_SYNC) == TS_LF_SYNC)
             {
@@ -164,40 +165,40 @@ namespace ukive {
                 *phrSession = TS_S_ASYNC;
 
                 LockRecord *record = new LockRecord();
-                record->dwLockFlags = dwLockFlags;
+                record->lock_flags = dwLockFlags;
 
-                mReqQueue.push(std::shared_ptr<LockRecord>(record));
+                req_queue_.push(std::shared_ptr<LockRecord>(record));
 
                 return S_OK;
             }
         }
 
-        mInputConnection->onBeginProcess();
+        input_conn_->onBeginProcess();
 
-        mHasLock = true;
-        mCurLockType = dwLockFlags;
+        has_lock_ = true;
+        cur_lock_type_ = dwLockFlags;
 
-        *phrSession = mAdviseSink.textStoreACPSink->OnLockGranted(dwLockFlags);
+        *phrSession = sink_record_.sink->OnLockGranted(dwLockFlags);
 
-        mHasLock = false;
-        mCurLockType = 0;
-        mInputConnection->onEndProcess();
+        has_lock_ = false;
+        cur_lock_type_ = 0;
+        input_conn_->onEndProcess();
 
-        while (!mReqQueue.empty())
+        while (!req_queue_.empty())
         {
-            auto lockRecord = mReqQueue.front();
-            mReqQueue.pop();
+            auto lockRecord = req_queue_.front();
+            req_queue_.pop();
 
-            mInputConnection->onBeginProcess();
+            input_conn_->onBeginProcess();
 
-            mHasLock = true;
-            mCurLockType = ((lockRecord->dwLockFlags & TS_LF_READ) == TS_LF_READ);
+            has_lock_ = true;
+            cur_lock_type_ = ((lockRecord->lock_flags & TS_LF_READ) == TS_LF_READ);
 
-            *phrSession = mAdviseSink.textStoreACPSink->OnLockGranted(lockRecord->dwLockFlags);
+            *phrSession = sink_record_.sink->OnLockGranted(lockRecord->lock_flags);
 
-            mHasLock = false;
-            mCurLockType = 0;
-            mInputConnection->onEndProcess();
+            has_lock_ = false;
+            cur_lock_type_ = 0;
+            input_conn_->onEndProcess();
         }
 
         return S_OK;
@@ -207,18 +208,20 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetStatus-\n");
 
-        if (pdcs == 0)
+        if (pdcs == nullptr) {
             return E_INVALIDARG;
+        }
 
         pdcs->dwStaticFlags = TS_SS_REGIONS;
 
-        if (mInputConnection == nullptr)
+        if (input_conn_ == nullptr) {
             pdcs->dwDynamicFlags = TS_SD_LOADING;
-        else {
-            if (mInputConnection->isReadOnly())
+        } else {
+            if (input_conn_->isReadOnly()) {
                 pdcs->dwDynamicFlags = TS_SD_READONLY;
-            else
+            } else {
                 pdcs->dwDynamicFlags = 0;
+            }
         }
 
         Log::d(L"TsfEditor", L"GetStatus()\n");
@@ -232,11 +235,12 @@ namespace ukive {
 
         Log::d(L"TsfEditor", L"QueryInsert\n");
 
-        long length = mInputConnection->getTextLength();
-        if (acpTestStart < 0 || acpTestStart > length || acpTestEnd < 0 || acpTestEnd > length)
+        long length = input_conn_->getTextLength();
+        if (acpTestStart < 0 || acpTestStart > length || acpTestEnd < 0 || acpTestEnd > length) {
             return E_INVALIDARG;
+        }
 
-        mInputConnection->determineInsert(acpTestStart, acpTestEnd, cch,
+        input_conn_->determineInsert(acpTestStart, acpTestEnd, cch,
             pacpResultStart, pacpResultEnd);
 
         return S_OK;
@@ -248,17 +252,17 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetSelection-");
 
-        if (!this->hasReadOnlyLock())
+        if (!this->hasReadOnlyLock()) {
             return TS_E_NOLOCK;
+        }
 
-        if (!mInputConnection->getSelection(ulIndex, ulCount, pSelection, pcFetched))
+        if (!input_conn_->getSelection(ulIndex, ulCount, pSelection, pcFetched)) {
             return TS_E_NOSELECTION;
+        }
 
-        std::wstringstream ss;
-        ss << "GetSelection("
+        /*DLOG(1) << "GetSelection("
             << pSelection->acpStart << ", "
-            << pSelection->acpEnd << ")\n";
-        Log::d(L"TsfEditor", ss.str());
+            << pSelection->acpEnd << ")";*/
 
         return S_OK;
     }
@@ -269,11 +273,13 @@ namespace ukive {
         ss << "SetSelection(" << pSelection->acpStart << ", " << pSelection->acpEnd << ")\n";
         Log::d(L"TsfEditor", ss.str());
 
-        if (!this->hasReadWriteLock())
+        if (!this->hasReadWriteLock()) {
             return TS_E_NOLOCK;
+        }
 
-        if (!mInputConnection->setSelection(ulCount, pSelection))
+        if (!input_conn_->setSelection(ulCount, pSelection)) {
             return E_FAIL;
+        }
 
         return S_OK;
     }
@@ -294,36 +300,34 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetText-");
 
-        if (!this->hasReadOnlyLock())
+        if (!this->hasReadOnlyLock()) {
             return TS_E_NOLOCK;
+        }
 
-        long length = mInputConnection->getTextLength();
-        if (acpStart < 0 || acpStart > length || acpEnd < -1 || acpEnd > length)
+        long length = input_conn_->getTextLength();
+        if (acpStart < 0 || acpStart > length || acpEnd < -1 || acpEnd > length) {
             return TF_E_INVALIDPOS;
+        }
 
-        if (cchPlainReq == 0)
-        {
+        if (cchPlainReq == 0) {
             *pcchPlainRet = 0;
             *pacpNext = acpEnd;
-        }
-        else
-        {
-            std::wstring reqText = mInputConnection->getText(acpStart, acpEnd, cchPlainReq);
+        } else {
+            std::wstring reqText = input_conn_->getText(acpStart, acpEnd, cchPlainReq);
             reqText._Copy_s(pchPlain, cchPlainReq, reqText.length());
             *pcchPlainRet = reqText.length();
 
-            if (acpEnd == -1)
+            if (acpEnd == -1) {
                 *pacpNext = reqText.length();
-            else
+            } else {
                 *pacpNext = acpEnd;
+            }
         }
 
-        if (cRunInfoReq == 0)
+        if (cRunInfoReq == 0) {
             *pcRunInfoRet = 0;
-        else
-        {
-            for (ULONG i = 0; i < cRunInfoReq; ++i)
-            {
+        } else {
+            for (ULONG i = 0; i < cRunInfoReq; ++i) {
                 ULONG count = prgRunInfo[i].uCount;
                 TsRunType type = prgRunInfo[i].type;
             }
@@ -347,23 +351,27 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"SetText-");
 
-        if (dwFlags == TS_ST_CORRECTION)
+        if (dwFlags == TS_ST_CORRECTION) {
             return S_OK;
+        }
 
-        if (mInputConnection->isReadOnly())
+        if (input_conn_->isReadOnly()) {
             return TS_E_READONLY;
+        }
 
-        long length = mInputConnection->getTextLength();
-        if (acpStart < 0 || acpStart > length || acpEnd < 0 || acpEnd > length)
+        long length = input_conn_->getTextLength();
+        if (acpStart < 0 || acpStart > length || acpEnd < 0 || acpEnd > length) {
             return TS_E_INVALIDPOS;
+        }
 
-        if (!this->hasReadWriteLock())
+        if (!this->hasReadWriteLock()) {
             return TS_E_NOLOCK;
+        }
 
         std::wstring newText = L"";
         newText.append(pchText, cch);
 
-        mInputConnection->setText(acpStart, acpEnd, newText);
+        input_conn_->setText(acpStart, acpEnd, newText);
 
         pChange->acpStart = acpStart;
         pChange->acpOldEnd = acpEnd;
@@ -386,8 +394,9 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetFormattedText\n");
 
-        if (!this->hasReadWriteLock())
+        if (!this->hasReadWriteLock()) {
             return TS_E_NOLOCK;
+        }
 
         return S_OK;
     }
@@ -461,7 +470,7 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetEndACP\n");
 
-        *pacp = mInputConnection->getTextLength();
+        *pacp = input_conn_->getTextLength();
 
         return S_OK;
     }
@@ -479,8 +488,9 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetACPFromPoint\n");
 
-        if (!mInputConnection->getTextPositionAtPoint(pt, dwFlags, pacp))
+        if (!input_conn_->getTextPositionAtPoint(pt, dwFlags, pacp)) {
             return TS_E_INVALIDPOINT;
+        }
 
         return S_OK;
     }
@@ -489,15 +499,18 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"GetTextExt-");
 
-        if ((mCurLockType & TS_LF_READ) != TS_LF_READ)
+        if ((cur_lock_type_ & TS_LF_READ) != TS_LF_READ) {
             return TS_E_NOLOCK;
+        }
 
-        long length = mInputConnection->getTextLength();
-        if (acpStart < 0 || acpStart > length || acpEnd < 0 || acpEnd > length)
+        long length = input_conn_->getTextLength();
+        if (acpStart < 0 || acpStart > length || acpEnd < 0 || acpEnd > length) {
             return TS_E_INVALIDPOS;
+        }
 
-        if (!mInputConnection->getTextBound(acpStart, acpEnd, prc, pfClipped))
+        if (!input_conn_->getTextBound(acpStart, acpEnd, prc, pfClipped)) {
             return TS_E_NOLAYOUT;
+        }
 
         std::wstringstream ss;
         ss << "GetTextExt(" << vcView << ", "
@@ -513,7 +526,7 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetScreenExt(TsViewCookie vcView, RECT *prc)
     {
-        mInputConnection->getTextViewBound(prc);
+        input_conn_->getTextViewBound(prc);
 
         std::wstringstream ss;
         ss << "GetScreenExt(" << vcView << ", "
@@ -528,7 +541,7 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetWnd(TsViewCookie vcView, HWND *phwnd)
     {
-        *phwnd = mInputConnection->getWindowHandle();
+        *phwnd = input_conn_->getWindowHandle();
 
         std::wstringstream ss;
         ss << "GetWnd(" << vcView << ", " << *phwnd << ")" << std::endl;
@@ -543,16 +556,18 @@ namespace ukive {
     {
         Log::d(L"TsfEditor", L"InsertTextAtSelection-");
 
-        if (cch != 0 && pchText == 0)
+        if (cch != 0 && pchText == 0) {
             return E_INVALIDARG;
+        }
 
-        if (!this->hasReadWriteLock())
+        if (!hasReadWriteLock()) {
             return TS_E_NOLOCK;
+        }
 
         std::wstring text = L"";
         text.append(pchText, cch);
 
-        mInputConnection->insertTextAtSelection(dwFlags, text, pacpStart, pacpEnd, pChange);
+        input_conn_->insertTextAtSelection(dwFlags, text, pacpStart, pacpEnd, pChange);
 
         std::wstringstream ss;
         ss << "InsertTextAtSelection(" << dwFlags << ", "
@@ -575,66 +590,53 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::OnStartComposition(
         __RPC__in_opt ITfCompositionView *pComposition,
-        __RPC__out BOOL *pfOk)
-    {
-        *pfOk = TRUE;
+        __RPC__out BOOL *pfOk) {
 
+        *pfOk = TRUE;
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::OnUpdateComposition(
         __RPC__in_opt ITfCompositionView *pComposition,
-        __RPC__in_opt ITfRange *pRangeNew)
-    {
+        __RPC__in_opt ITfRange *pRangeNew) {
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::OnEndComposition(
-        __RPC__in_opt ITfCompositionView *pComposition)
-    {
+        __RPC__in_opt ITfCompositionView *pComposition) {
         return S_OK;
     }
 
-
-    STDMETHODIMP TsfEditor::QueryInterface(REFIID riid, void **ppvObj)
-    {
-        if (ppvObj == nullptr) {
-            return E_INVALIDARG;
-        }
-
-        *ppvObj = nullptr;
-
-        if (IsEqualIID(riid, IID_IUnknown)) {
-            *ppvObj = reinterpret_cast<IUnknown*>(this);
-        }
-        else if (IsEqualIID(riid, __uuidof(ITextStoreACP))) {
-            *ppvObj = static_cast<ITextStoreACP*>(this);
-        }
-        else if (IsEqualIID(riid, __uuidof(ITfContextOwnerCompositionSink)))
-        {
-            *ppvObj = static_cast<ITfContextOwnerCompositionSink*>(this);
-        }
-
-        if (*ppvObj) {
-            AddRef();
-            return S_OK;
-        }
-
-        return E_NOINTERFACE;
-    }
-
     STDMETHODIMP_(ULONG) TsfEditor::AddRef(void) {
-        return InterlockedIncrement(&mRefCount);
+        return InterlockedIncrement(&ref_count_);
     }
 
     STDMETHODIMP_(ULONG) TsfEditor::Release(void) {
-        LONG cr = InterlockedDecrement(&mRefCount);
-
-        if (mRefCount == 0) {
+        auto cr = InterlockedDecrement(&ref_count_);
+        if (cr == 0) {
             delete this;
         }
 
         return cr;
+    }
+
+    STDMETHODIMP TsfEditor::QueryInterface(REFIID riid, void **ppvObj) {
+        if (ppvObj == nullptr) {
+            return E_INVALIDARG;
+        }
+
+        if (IsEqualIID(riid, IID_IUnknown)) {
+            *ppvObj = reinterpret_cast<IUnknown*>(this);
+        } else if (IsEqualIID(riid, __uuidof(ITextStoreACP))) {
+            *ppvObj = static_cast<ITextStoreACP*>(this);
+        } else if (IsEqualIID(riid, __uuidof(ITfContextOwnerCompositionSink))) {
+            *ppvObj = static_cast<ITfContextOwnerCompositionSink*>(this);
+        } else {
+            return E_NOINTERFACE;
+        }
+
+        AddRef();
+        return S_OK;
     }
 
 }

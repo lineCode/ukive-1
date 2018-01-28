@@ -10,17 +10,6 @@ namespace ukive {
 
     class TextRenderer : public IDWriteTextRenderer
     {
-    private:
-        ULONG mRefCount;
-        float mOpacity;
-
-        Color mDefaultTextColor;
-        Color mDefaultUnderlineColor;
-        Color mDefaultStrikethroughColor;
-
-        ComPtr<ID2D1RenderTarget> mRenderTarget;
-        ComPtr<ID2D1SolidColorBrush> mSolidBrush;
-
     public:
         TextRenderer(ComPtr<ID2D1RenderTarget> renderTarget);
         ~TextRenderer();
@@ -32,18 +21,15 @@ namespace ukive {
 
         STDMETHOD(IsPixelSnappingDisabled)(
             __maybenull void* clientDrawingContext,
-            __out BOOL* isDisabled
-            );
+            __out BOOL* isDisabled);
 
         STDMETHOD(GetCurrentTransform)(
             __maybenull void* clientDrawingContext,
-            __out DWRITE_MATRIX* transform
-            );
+            __out DWRITE_MATRIX* transform);
 
         STDMETHOD(GetPixelsPerDip)(
             __maybenull void* clientDrawingContext,
-            __out FLOAT* pixelsPerDip
-            );
+            __out FLOAT* pixelsPerDip);
 
         STDMETHOD(DrawGlyphRun)(
             __maybenull void* clientDrawingContext,
@@ -52,24 +38,21 @@ namespace ukive {
             DWRITE_MEASURING_MODE measuringMode,
             __in DWRITE_GLYPH_RUN const* glyphRun,
             __in DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
-            IUnknown* clientDrawingEffect
-            );
+            IUnknown* clientDrawingEffect);
 
         STDMETHOD(DrawUnderline)(
             __maybenull void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
             __in DWRITE_UNDERLINE const* underline,
-            IUnknown* clientDrawingEffect
-            );
+            IUnknown* clientDrawingEffect);
 
         STDMETHOD(DrawStrikethrough)(
             __maybenull void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
             __in DWRITE_STRIKETHROUGH const* strikethrough,
-            IUnknown* clientDrawingEffect
-            );
+            IUnknown* clientDrawingEffect);
 
         STDMETHOD(DrawInlineObject)(
             __maybenull void* clientDrawingContext,
@@ -78,16 +61,24 @@ namespace ukive {
             IDWriteInlineObject* inlineObject,
             BOOL isSideways,
             BOOL isRightToLeft,
-            IUnknown* clientDrawingEffect
-            );
+            IUnknown* clientDrawingEffect);
 
-    public:
-        unsigned long STDMETHODCALLTYPE AddRef();
-        unsigned long STDMETHODCALLTYPE Release();
+        ULONG STDMETHODCALLTYPE AddRef();
+        ULONG STDMETHODCALLTYPE Release();
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            IID const& riid,
-            void** ppvObject
+            IID const& riid, void** ppvObject
         );
+
+    private:
+        ULONG ref_count_;
+        float mOpacity;
+
+        Color mDefaultTextColor;
+        Color mDefaultUnderlineColor;
+        Color mDefaultStrikethroughColor;
+
+        ComPtr<ID2D1RenderTarget> mRenderTarget;
+        ComPtr<ID2D1SolidColorBrush> mSolidBrush;
     };
 
 }

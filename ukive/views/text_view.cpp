@@ -474,15 +474,14 @@ namespace ukive {
     {
         View::onFocusChanged(getFocus);
 
-        if (getFocus)
-        {
-            if (mIsEditable)
+        if (getFocus) {
+            if (mIsEditable) {
                 mTextBlink->show();
-        }
-        else
-        {
-            if (mTextActionMode != nullptr)
+            }
+        } else {
+            if (mTextActionMode != nullptr) {
                 mTextActionMode->close();
+            }
 
             mTextBlink->hide();
             mBaseText->setSelection(mBaseText->getSelectionStart());
@@ -494,18 +493,16 @@ namespace ukive {
     {
         View::onWindowFocusChanged(windowFocus);
 
-        if (hasFocus())
-        {
-            if (windowFocus)
-            {
-                if (mIsEditable && !hasSelection())
+        if (hasFocus()) {
+            if (windowFocus) {
+                if (mIsEditable && !hasSelection()) {
                     mTextBlink->show();
-            }
-            else
-            {
+                }
+            } else {
                 mTextBlink->hide();
-                if (mTextActionMode != nullptr)
+                if (mTextActionMode != nullptr) {
                     mTextActionMode->close();
+                }
             }
         }
     }
@@ -631,8 +628,9 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        if (mTextActionMode && changed)
+        if (mTextActionMode && changed) {
             mTextActionMode->invalidatePosition();
+        }
     }
 
     void TextView::onSizeChanged(int width, int height, int oldWidth, int oldHeight)
@@ -1143,8 +1141,9 @@ namespace ukive {
         mTextLayout->HitTestPoint(
             textX, textY, &isTrailingHit, &isInside, &metrics);
 
-        if (hitPos)
+        if (hitPos) {
             *hitPos = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
+        }
 
         return isInside == TRUE ? true : false;
     }
@@ -1160,14 +1159,16 @@ namespace ukive {
         mTextLayout->HitTestPoint(
             textX, textY, &isTrailingHit, &isInside, &metrics);
 
-        if (hitPos)
+        if (hitPos) {
             *hitPos = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
+        }
 
         if (isInside == TRUE)
         {
             if (metrics.textPosition >= position
-                && metrics.textPosition <= position + length - 1)
+                && metrics.textPosition <= position + length - 1) {
                 return true;
+            }
         }
 
         return false;
@@ -1175,8 +1176,9 @@ namespace ukive {
 
     RectF TextView::getSelectionBound(unsigned int start, unsigned int end)
     {
-        if (end < start)
+        if (end < start) {
             return RectF();
+        }
 
         RectF bound;
 
@@ -1204,8 +1206,9 @@ namespace ukive {
                 0, 0,
                 &hitTextMetricsCount);
 
-            if (hitTextMetricsCount < 1)
+            if (hitTextMetricsCount < 1) {
                 return RectF();
+            }
 
             hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
             mTextLayout->HitTestTextRange(
@@ -1216,8 +1219,7 @@ namespace ukive {
 
             for (UINT i = 0; i < hitTextMetricsCount; i++)
             {
-                if (i == 0)
-                {
+                if (i == 0) {
                     bound.left = hitTextMetrics[i].left;
                     bound.top = hitTextMetrics[i].top;
                     bound.right = hitTextMetrics[i].left + hitTextMetrics[i].width;

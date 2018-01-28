@@ -265,7 +265,7 @@ namespace ukive {
         if (is_enable_mouse_track_) {
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof(tme);
-            tme.dwFlags = TME_LEAVE | TME_HOVER;
+            tme.dwFlags = TME_LEAVE;// | TME_HOVER;
             tme.hwndTrack = hWnd_;// 指定要 追踪 的窗口
             tme.dwHoverTime = 1000;  // 鼠标在按钮上停留超过 1s ，才认为状态为 HOVER
             ::_TrackMouseEvent(&tme); // 开启 Windows 的 WM_MOUSELEAVE ， WM_MOUSEHOVER 事件支持
@@ -512,6 +512,14 @@ namespace ukive {
             break;
         }
 
+        case WM_SETFOCUS: {
+            break;
+        }
+
+        case WM_KILLFOCUS: {
+            break;
+        }
+
         case WM_MOVE: {
             int x_px = LOWORD(lParam);
             int y_px = HIWORD(lParam);
@@ -581,7 +589,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -601,7 +609,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -616,7 +624,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -631,7 +639,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -646,7 +654,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -661,7 +669,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -680,7 +688,7 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -690,7 +698,7 @@ namespace ukive {
             ev.setEvent(InputEvent::EVM_LEAVE_WIN);
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -700,7 +708,7 @@ namespace ukive {
             ev.setEvent(InputEvent::EVM_HOVER);
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }
@@ -720,7 +728,7 @@ namespace ukive {
             ev.setMouseRawY(pt.y);
 
             if (onInputEvent(&ev)) {
-                return TRUE;
+                return 0;
             }
             break;
         }

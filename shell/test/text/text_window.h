@@ -41,7 +41,7 @@ namespace shell {
             TextWindow *mWindow;
         public:
             FontItemClickListener(TextWindow *w) { mWindow = w; }
-            void onClick(ukive::View *widget) override;
+            void onClick(ukive::View *v) override;
         };
 
         class FormatItemClickListener : public ukive::OnClickListener
@@ -50,7 +50,7 @@ namespace shell {
             TextWindow *mWindow;
         public:
             FormatItemClickListener(TextWindow *w) { mWindow = w; }
-            void onClick(ukive::View *widget) override;
+            void onClick(ukive::View *v) override;
         };
 
     private:

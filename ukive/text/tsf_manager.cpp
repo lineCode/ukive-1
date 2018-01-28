@@ -173,7 +173,6 @@ namespace ukive {
         return S_OK;
     }
 
-
     HRESULT TsfManager::setupSinks() {
         HRESULT hr = E_FAIL;
 
@@ -236,54 +235,13 @@ namespace ukive {
 
 
     TsfSink::TsfSink(TsfManager *tsfMgr)
-        :mRefCount(1),
+        :ref_count_(1),
         mTsfMgr(tsfMgr) {}
 
     TsfSink::~TsfSink() {}
 
-
-    STDAPI TsfSink::QueryInterface(REFIID riid, void **ppvObj) {
-        if (ppvObj == NULL)
-            return E_INVALIDARG;
-
-        *ppvObj = NULL;
-
-        if (IsEqualIID(riid, IID_IUnknown)) {
-            *ppvObj = reinterpret_cast<IUnknown *>(this);
-        }
-        else if (IsEqualIID(riid, __uuidof(ITfInputProcessorProfileActivationSink)))
-        {
-            *ppvObj = (ITfInputProcessorProfileActivationSink*)this;
-        }
-        else if (IsEqualIID(riid, __uuidof(ITfCompartmentEventSink)))
-        {
-            *ppvObj = (ITfCompartmentEventSink*)this;
-        }
-
-        if (*ppvObj) {
-            AddRef();
-            return S_OK;
-        }
-
-        return E_NOINTERFACE;
-    }
-
-    STDAPI_(ULONG) TsfSink::AddRef() {
-        return InterlockedIncrement(&mRefCount);
-    }
-
-    STDAPI_(ULONG) TsfSink::Release() {
-        LONG cr = InterlockedDecrement(&mRefCount);
-
-        if (mRefCount == 0)
-            delete this;
-
-        return cr;
-    }
-
-
     //切换输入法时响应
-    STDAPI TsfSink::OnActivated(DWORD dwProfileType, LANGID langid, REFCLSID clsid, REFGUID catid, REFGUID guidProfile, HKL hkl, DWORD dwFlags)
+    STDMETHODIMP TsfSink::OnActivated(DWORD dwProfileType, LANGID langid, REFCLSID clsid, REFGUID catid, REFGUID guidProfile, HKL hkl, DWORD dwFlags)
     {
         switch (dwProfileType)
         {
@@ -308,7 +266,39 @@ namespace ukive {
     }
 
     //同一输入法中-英切换，日-英切换等等
-    STDAPI TsfSink::OnChange(REFGUID rguid) {
+    STDMETHODIMP TsfSink::OnChange(REFGUID rguid) {
+        return S_OK;
+    }
+
+    STDMETHODIMP_(ULONG) TsfSink::AddRef() {
+        return InterlockedIncrement(&ref_count_);
+    }
+
+    STDMETHODIMP_(ULONG) TsfSink::Release() {
+        auto cr = InterlockedDecrement(&ref_count_);
+        if (cr == 0) {
+            delete this;
+        }
+
+        return cr;
+    }
+
+    STDMETHODIMP TsfSink::QueryInterface(REFIID riid, void **ppvObj) {
+        if (ppvObj == nullptr) {
+            return E_INVALIDARG;
+        }
+
+        if (IsEqualIID(riid, IID_IUnknown)) {
+            *ppvObj = reinterpret_cast<IUnknown *>(this);
+        } else if (IsEqualIID(riid, __uuidof(ITfInputProcessorProfileActivationSink))) {
+            *ppvObj = (ITfInputProcessorProfileActivationSink*)this;
+        } else if (IsEqualIID(riid, __uuidof(ITfCompartmentEventSink))) {
+            *ppvObj = (ITfCompartmentEventSink*)this;
+        } else {
+            return E_NOINTERFACE;
+        }
+
+        AddRef();
         return S_OK;
     }
 
