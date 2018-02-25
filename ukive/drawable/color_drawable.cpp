@@ -6,31 +6,26 @@
 namespace ukive {
 
     ColorDrawable::ColorDrawable(Color color)
-        :Drawable()
-    {
-        color_ = color;
+        :Drawable(),
+        color_(color) {
     }
 
 
-    ColorDrawable::~ColorDrawable()
-    {
+    ColorDrawable::~ColorDrawable() {
     }
 
 
-    void ColorDrawable::draw(Canvas *canvas)
-    {
-        canvas->fillRect(this->getBounds(), color_);
+    void ColorDrawable::draw(Canvas *canvas) {
+        canvas->fillRect(getBounds().toRectF(), color_);
     }
 
 
-    float ColorDrawable::getOpacity()
-    {
+    float ColorDrawable::getOpacity() const {
         return color_.a;
     }
 
 
-    Color ColorDrawable::getColor()
-    {
+    Color ColorDrawable::getColor() const {
         return color_;
     }
 

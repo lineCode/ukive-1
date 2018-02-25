@@ -28,6 +28,9 @@ namespace ukive {
         void setOpacity(float opacity);
         float getOpacity();
 
+        void clear();
+        void clear(const Color& color);
+
         void beginDraw();
         void endDraw();
 

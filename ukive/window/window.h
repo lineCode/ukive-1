@@ -107,6 +107,8 @@ namespace ukive {
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);
+        virtual void onSetFocus();
+        virtual void onKillFocus();
         virtual void onDraw(const Rect &rect);
         virtual void onMove(int x, int y);
         virtual void onResize(

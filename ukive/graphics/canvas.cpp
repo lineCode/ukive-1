@@ -23,9 +23,6 @@ namespace ukive {
             return;
         }
 
-        bmp_target->BeginDraw();
-        bmp_target->Clear(D2D1::ColorF(0, 0));
-
         initCanvas(bmp_target.cast<ID2D1RenderTarget>());
     }
 
@@ -69,13 +66,24 @@ namespace ukive {
         return opacity_;
     }
 
+    void Canvas::clear() {
+        render_target_->Clear();
+    }
+
+    void Canvas::clear(const Color& color) {
+        D2D1_COLOR_F d2d_color = { color.r, color.g, color.b, color.a };
+        render_target_->Clear(d2d_color);
+    }
+
 
     void Canvas::beginDraw() {
         render_target_->BeginDraw();
     }
 
     void Canvas::endDraw() {
-        render_target_->EndDraw();
+        if (FAILED(render_target_->EndDraw())) {
+            Log::e(L"Canvas", L"failed to end draw.");
+        }
     }
 
 
@@ -217,10 +225,6 @@ namespace ukive {
     std::shared_ptr<Bitmap> Canvas::extractBitmap() {
         if (is_bmp_target_) {
             auto bmp_target = render_target_.cast<ID2D1BitmapRenderTarget>();
-            if (FAILED(bmp_target->EndDraw())) {
-                Log::e(L"Canvas", L"failed to extract bitmap.");
-                return std::shared_ptr<Bitmap>();
-            }
 
             ComPtr<ID2D1Bitmap> bitmap;
             if (FAILED(bmp_target->GetBitmap(&bitmap))) {
@@ -277,10 +281,11 @@ namespace ukive {
 
         D2D1_RECT_F rect = D2D1::RectF(0, 0, width, height);
 
+        auto mode = render_target_->GetAntialiasMode();
         render_target_->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
         render_target_->FillOpacityMask(
             mask->getNative().get(), bitmap_brush_.get(), D2D1_OPACITY_MASK_CONTENT_GRAPHICS, rect, rect);
-        render_target_->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+        render_target_->SetAntialiasMode(mode);
     }
 
 

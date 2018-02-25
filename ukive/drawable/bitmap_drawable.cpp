@@ -8,41 +8,30 @@
 namespace ukive {
 
     BitmapDrawable::BitmapDrawable(std::shared_ptr<Bitmap> bitmap)
-        :mBitmap(bitmap), mOpacity(1.f) {}
+        :bitmap_(bitmap), opacity_(1.f) {}
 
 
-    void BitmapDrawable::setOpacity(float opt)
-    {
-        if (opt < 0.f)
-            opt = 0.f;
-
-        if (opt > 1.f)
-            opt = 1.f;
-
-        mOpacity = opt;
+    void BitmapDrawable::setOpacity(float opt) {
+        opacity_ = opt;
     }
-
 
     void BitmapDrawable::draw(Canvas *canvas) {
-        canvas->drawBitmap(getBounds(), mOpacity, mBitmap.get());
+        canvas->drawBitmap(getBounds().toRectF(), opacity_, bitmap_.get());
     }
 
-    float BitmapDrawable::getOpacity() {
-        return mOpacity;
+    float BitmapDrawable::getOpacity() const {
+        return opacity_;
     }
 
-    int BitmapDrawable::getIncWidth() {
-        return mBitmap->getWidth();
+    int BitmapDrawable::getIncWidth() const {
+        return bitmap_->getWidth();
     }
 
-    int BitmapDrawable::getIncHeight() {
-        return mBitmap->getHeight();
+    int BitmapDrawable::getIncHeight() const {
+        return bitmap_->getHeight();
     }
 
-
-    std::shared_ptr<Bitmap> BitmapDrawable::getBitmap()
-    {
-        return mBitmap;
+    std::shared_ptr<Bitmap> BitmapDrawable::getBitmap() const {
+        return bitmap_;
     }
-
 }

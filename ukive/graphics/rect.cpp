@@ -114,6 +114,10 @@ namespace ukive {
         this->bottom -= bottom;
     }
 
+    RectF Rect::toRectF() {
+        return RectF(left, top, right - left, bottom - top);
+    }
+
 
     // RectF
     RectF::RectF()

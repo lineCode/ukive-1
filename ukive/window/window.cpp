@@ -461,15 +461,10 @@ namespace ukive {
         {
         case WA_ACTIVE:
         case WA_CLICKACTIVE:
-            base_layout_->dispatchWindowFocusChanged(true);
             /*if (focus_holder_backup_)
             focus_holder_backup_->requestFocus();*/
             break;
         case WA_INACTIVE:
-            while (mouse_holder_ref_ > 0) {
-                releaseMouse();
-            }
-            base_layout_->dispatchWindowFocusChanged(false);
             /*if (focus_holder_)
             {
             InputEvent ev;
@@ -481,6 +476,17 @@ namespace ukive {
             }*/
             break;
         }
+    }
+
+    void Window::onSetFocus() {
+        base_layout_->dispatchWindowFocusChanged(true);
+    }
+
+    void Window::onKillFocus() {
+        while (mouse_holder_ref_ > 0) {
+            releaseMouse();
+        }
+        base_layout_->dispatchWindowFocusChanged(false);
     }
 
     void Window::onDraw(const Rect &rect) {

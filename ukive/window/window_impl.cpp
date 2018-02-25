@@ -303,6 +303,14 @@ namespace ukive {
         delegate_->onActivate(param);
     }
 
+    void WindowImpl::onSetFocus() {
+        delegate_->onSetFocus();
+    }
+
+    void WindowImpl::onKillFocus() {
+        delegate_->onKillFocus();
+    }
+
     void WindowImpl::onDraw(const Rect &rect) {
         delegate_->onDraw(rect);
     }
@@ -513,10 +521,12 @@ namespace ukive {
         }
 
         case WM_SETFOCUS: {
+            onSetFocus();
             break;
         }
 
         case WM_KILLFOCUS: {
+            onKillFocus();
             break;
         }
 

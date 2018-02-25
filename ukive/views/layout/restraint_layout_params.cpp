@@ -4,31 +4,26 @@
 namespace ukive {
 
     RestraintLayoutParams::RestraintLayoutParams()
-        : LayoutParams(FIT_CONTENT, FIT_CONTENT)
-    {
+        : LayoutParams(FIT_CONTENT, FIT_CONTENT) {
         initLayoutParams();
     }
 
     RestraintLayoutParams::RestraintLayoutParams(int width, int height)
-        : LayoutParams(width, height)
-    {
+        : LayoutParams(width, height) {
         initLayoutParams();
     }
 
     RestraintLayoutParams::RestraintLayoutParams(const LayoutParams &lp)
-        : LayoutParams(lp)
-    {
+        : LayoutParams(lp) {
         initLayoutParams();
     }
 
 
-    RestraintLayoutParams::~RestraintLayoutParams()
-    {
+    RestraintLayoutParams::~RestraintLayoutParams() {
     }
 
 
-    void RestraintLayoutParams::initLayoutParams()
-    {
+    void RestraintLayoutParams::initLayoutParams() {
         isWidthMeasured = false;
         isHeightMeasured = false;
 
@@ -48,32 +43,28 @@ namespace ukive {
     }
 
 
-    RestraintLayoutParams* RestraintLayoutParams::startHandle(int handleId, int handleEdge, int margin)
-    {
+    RestraintLayoutParams* RestraintLayoutParams::startHandle(int handleId, int handleEdge, int margin) {
         startHandledId = handleId;
         startHandledEdge = handleEdge;
         leftMargin = margin;
         return this;
     }
 
-    RestraintLayoutParams* RestraintLayoutParams::topHandle(int handleId, int handleEdge, int margin)
-    {
+    RestraintLayoutParams* RestraintLayoutParams::topHandle(int handleId, int handleEdge, int margin) {
         topHandledId = handleId;
         topHandledEdge = handleEdge;
         topMargin = margin;
         return this;
     }
 
-    RestraintLayoutParams* RestraintLayoutParams::endHandle(int handleId, int handleEdge, int margin)
-    {
+    RestraintLayoutParams* RestraintLayoutParams::endHandle(int handleId, int handleEdge, int margin) {
         endHandledId = handleId;
         endHandledEdge = handleEdge;
         rightMargin = margin;
         return this;
     }
 
-    RestraintLayoutParams* RestraintLayoutParams::bottomHandle(int handleId, int handleEdge, int margin)
-    {
+    RestraintLayoutParams* RestraintLayoutParams::bottomHandle(int handleId, int handleEdge, int margin) {
         bottomHandledId = handleId;
         bottomHandledEdge = handleEdge;
         bottomMargin = margin;
@@ -81,23 +72,19 @@ namespace ukive {
     }
 
 
-    bool RestraintLayoutParams::hasStart()
-    {
+    bool RestraintLayoutParams::hasStart() {
         return startHandledEdge != NONE;
     }
 
-    bool RestraintLayoutParams::hasTop()
-    {
+    bool RestraintLayoutParams::hasTop() {
         return topHandledEdge != NONE;
     }
 
-    bool RestraintLayoutParams::hasEnd()
-    {
+    bool RestraintLayoutParams::hasEnd() {
         return endHandledEdge != NONE;
     }
 
-    bool RestraintLayoutParams::hasBottom()
-    {
+    bool RestraintLayoutParams::hasBottom() {
         return bottomHandledEdge != NONE;
     }
 
@@ -109,14 +96,12 @@ namespace ukive {
         return horizontal_weight != 0;
     }
 
-    bool RestraintLayoutParams::hasVerticalCouple()
-    {
+    bool RestraintLayoutParams::hasVerticalCouple() {
         return (topHandledEdge != NONE
             && bottomHandledEdge != NONE);
     }
 
-    bool RestraintLayoutParams::hasHorizontalCouple()
-    {
+    bool RestraintLayoutParams::hasHorizontalCouple() {
         return (startHandledEdge != NONE
             && endHandledEdge != NONE);
     }

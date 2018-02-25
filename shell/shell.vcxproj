@@ -100,6 +100,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)test\shadow\shadow_props.xml" "$(SolutionDir)build\$(Configuration)\" /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -168,6 +171,9 @@
     <ClCompile Include="test\emulator\emulator_window.cpp" />
     <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
+    <ClCompile Include="test\shadow\shadow_effect.cpp" />
+    <ClCompile Include="test\shadow\shadow_transform.cpp" />
+    <ClCompile Include="test\shadow\shadow_window.cpp" />
     <ClCompile Include="test\test_window.cpp" />
     <ClCompile Include="test\text\text_window.cpp" />
   </ItemGroup>
@@ -194,6 +200,9 @@
     <ClInclude Include="test\emulator\emulator_window.h" />
     <ClInclude Include="test\frame\custom_non_client_frame.h" />
     <ClInclude Include="test\list\test_adapter.h" />
+    <ClInclude Include="test\shadow\shadow_effect.h" />
+    <ClInclude Include="test\shadow\shadow_transform.h" />
+    <ClInclude Include="test\shadow\shadow_window.h" />
     <ClInclude Include="test\test_window.h" />
     <ClInclude Include="test\text\text_window.h" />
   </ItemGroup>
@@ -206,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="test\animation\wallpaper_props.xml" />
+    <Xml Include="test\shadow\shadow_props.xml" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="hlsl\assist_pixel_shader.hlsl">
@@ -223,6 +233,12 @@
     <FxCompile Include="hlsl\model_vertex_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="hlsl\shadow_pixel_shader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <DisableOptimizations Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DisableOptimizations>
+      <EnableDebuggingInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</EnableDebuggingInformation>
     </FxCompile>
     <FxCompile Include="hlsl\terrain_pixel_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

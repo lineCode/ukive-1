@@ -6,26 +6,18 @@
 namespace ukive {
 
     EditTextDrawable::EditTextDrawable()
-        :Drawable()
-    {
-        panel_line_width_ = 2;
-        panel_line_color_ = Color::Grey400;
-    }
+        :Drawable(),
+        panel_line_width_(2),
+        panel_line_color_(Color::Grey400) {}
 
-    EditTextDrawable::~EditTextDrawable()
-    {
-    }
+    EditTextDrawable::~EditTextDrawable() {}
 
 
-    bool EditTextDrawable::onFocusChanged(bool focus)
-    {
-        if (focus)
-        {
+    bool EditTextDrawable::onFocusChanged(bool focus) {
+        if (focus) {
             panel_line_width_ = 2;
             panel_line_color_ = Color::Blue500;
-        }
-        else
-        {
+        } else {
             panel_line_width_ = 2;
             panel_line_color_ = Color::Grey400;
         }
@@ -45,7 +37,7 @@ namespace ukive {
             panel_line_color_);
     }
 
-    float EditTextDrawable::getOpacity() {
+    float EditTextDrawable::getOpacity() const {
         return 1.f;
     }
 

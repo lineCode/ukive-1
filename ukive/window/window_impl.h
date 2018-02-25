@@ -72,6 +72,8 @@ namespace ukive {
         void onCreate();
         void onShow(bool show);
         void onActivate(int param);
+        void onSetFocus();
+        void onKillFocus();
         void onDraw(const Rect &rect);
         void onMove(int x, int y);
         void onResize(

@@ -6,127 +6,123 @@
 
 namespace ukive {
 
-    ShapeDrawable::ShapeDrawable(int shape)
+    ShapeDrawable::ShapeDrawable(Shape shape)
         :Drawable(),
-        mShape(shape)
-    {
-        mWidth = -1;
-        mHeight = -1;
-
-        mHasSolid = false;
-        mHasStroke = false;
-        mRoundRadius = 1.f;
-        mStrokeWidth = 1.f;
-
-        mSolidColor = Color(0, 0.f);
-        mStrokeColor = Color(0, 0.f);
+        shape_(shape),
+        width_(-1),
+        height_(-1),
+        has_solid_(false),
+        has_stroke_(false),
+        round_radius_(1.f),
+        stroke_width_(1.f),
+        solid_color_(0, 0.f),
+        stroke_color_(0, 0.f) {
     }
 
 
-    ShapeDrawable::~ShapeDrawable()
-    {
+    ShapeDrawable::~ShapeDrawable() {
     }
 
 
-    void ShapeDrawable::setSize(int width, int height)
-    {
-        mWidth = width;
-        mHeight = height;
+    void ShapeDrawable::setSize(int width, int height) {
+        width_ = width;
+        height_ = height;
     }
 
-    void ShapeDrawable::setRadius(float radius)
-    {
-        mRoundRadius = radius;
+    void ShapeDrawable::setRadius(float radius) {
+        round_radius_ = radius;
     }
 
-    void ShapeDrawable::setSolidEnable(bool enable)
-    {
-        mHasSolid = enable;
+    void ShapeDrawable::setSolidEnable(bool enable) {
+        has_solid_ = enable;
     }
 
-    void ShapeDrawable::setSolidColor(Color color)
-    {
-        mSolidColor = color;
+    void ShapeDrawable::setSolidColor(Color color) {
+        solid_color_ = color;
     }
 
-    void ShapeDrawable::setStrokeEnable(bool enable)
-    {
-        mHasStroke = enable;
+    void ShapeDrawable::setStrokeEnable(bool enable) {
+        has_stroke_ = enable;
     }
 
-    void ShapeDrawable::setStrokeWidth(float width)
-    {
-        mStrokeWidth = width;
+    void ShapeDrawable::setStrokeWidth(float width) {
+        stroke_width_ = width;
     }
 
-    void ShapeDrawable::setStrokeColor(Color color)
-    {
-        mStrokeColor = color;
+    void ShapeDrawable::setStrokeColor(Color color) {
+        stroke_color_ = color;
     }
 
 
     void ShapeDrawable::draw(Canvas *canvas)
     {
-        if (!mHasSolid && !mHasStroke)
+        if (!has_solid_ && !has_stroke_) {
             return;
+        }
 
-        RectF bound;
-        if (mWidth == -1 || mHeight == -1)
+        Rect bound;
+        if (width_ == -1 || height_ == -1) {
             bound = getBounds();
-        else
-            bound = RectF(0, 0, mWidth, mHeight);
+        } else {
+            bound = Rect(0, 0, width_, height_);
+        }
 
-        switch (mShape)
+        switch (shape_)
         {
-        case SHAPE_RECT:
+        case RECT:
         {
-            if (mHasSolid)
-                canvas->fillRect(bound, mSolidColor);
-            if (mHasStroke)
-                canvas->drawRect(bound, mStrokeColor);
+            if (has_solid_) {
+                canvas->fillRect(bound.toRectF(), solid_color_);
+            }
+            if (has_stroke_) {
+                canvas->drawRect(bound.toRectF(), stroke_color_);
+            }
             break;
         }
-        case SHAPE_ROUND_RECT:
+        case ROUND_RECT:
         {
-            if (mHasSolid)
-                canvas->fillRoundRect(bound, mRoundRadius, mSolidColor);
-            if (mHasStroke)
-                canvas->drawRoundRect(bound, mStrokeWidth, mRoundRadius, mStrokeColor);
+            if (has_solid_) {
+                canvas->fillRoundRect(bound.toRectF(), round_radius_, solid_color_);
+            }
+            if (has_stroke_) {
+                canvas->drawRoundRect(bound.toRectF(), stroke_width_, round_radius_, stroke_color_);
+            }
             break;
         }
-        case SHAPE_OVAL:
+        case OVAL:
         {
             float cx = (bound.right - bound.left) / 2.f;
             float cy = (bound.bottom - bound.top) / 2.f;
 
-            if (mHasSolid)
+            if (has_solid_) {
                 canvas->fillOval(
-                    cx, cy, cx, cy, mSolidColor);
-            if (mHasStroke)
+                    cx, cy, cx, cy, solid_color_);
+            }
+            if (has_stroke_) {
                 canvas->drawOval(
-                    cx, cy, cx, cy, mStrokeColor);
+                    cx, cy, cx, cy, stroke_color_);
+            }
             break;
         }
         }
     }
 
-    float ShapeDrawable::getOpacity()
+    float ShapeDrawable::getOpacity() const
     {
-        if ((mHasSolid && mSolidColor.a != 0.f)
-            || (mHasStroke && mStrokeColor.a != 0.f && mStrokeWidth != 0.f))
+        if ((has_solid_ && solid_color_.a != 0.f)
+            || (has_stroke_ && stroke_color_.a != 0.f && stroke_width_ != 0.f)) {
             return 1.f;
-        else
+        } else {
             return 0.f;
+        }
     }
 
-    int ShapeDrawable::getIncWidth()
-    {
-        return mWidth;
+    int ShapeDrawable::getIncWidth() const {
+        return width_;
     }
 
-    int ShapeDrawable::getIncHeight()
-    {
-        return mHeight;
+    int ShapeDrawable::getIncHeight() const {
+        return height_;
     }
 
 }

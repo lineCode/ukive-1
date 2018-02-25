@@ -4,6 +4,8 @@
 
 namespace ukive {
 
+    class RectF;
+
     class Rect {
     public:
         Rect();
@@ -28,6 +30,8 @@ namespace ukive {
 
         void insets(const Rect &insets);
         void insets(int left, int top, int right, int bottom);
+
+        RectF toRectF();
 
         int left;
         int top;

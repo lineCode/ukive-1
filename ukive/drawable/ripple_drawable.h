@@ -41,6 +41,7 @@ namespace ukive {
             int newValue, int previousValue) override;
 
     protected:
+        void onBoundChanged(const Rect& new_bound) override;
         bool onStateChanged(int newState, int prevState) override;
 
     private:
@@ -56,6 +57,9 @@ namespace ukive {
         Animator *mLeaveAnimator;
 
         Animator *mRippleAnimator;
+
+        std::unique_ptr<Canvas> mask_off_;
+        std::unique_ptr<Canvas> content_off_;
     };
 
 }

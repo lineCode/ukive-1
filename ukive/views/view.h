@@ -181,6 +181,9 @@ namespace ukive {
     protected:
         void performClick();
 
+        bool needDrawBackground();
+        bool needDrawForeground();
+
         void drawBackground(Canvas *canvas);
         void drawForeground(Canvas *canvas);
 

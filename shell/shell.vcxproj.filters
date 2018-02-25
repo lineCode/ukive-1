@@ -38,6 +38,9 @@
     <Filter Include="test\emulator">
       <UniqueIdentifier>{a8ecb2be-23d0-45b0-bca9-34a710e22936}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\shadow">
+      <UniqueIdentifier>{76bae05f-bc9e-473a-8b84-cae5f471b311}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -102,6 +105,15 @@
     </ClCompile>
     <ClCompile Include="direct3d\graph_creator.cpp">
       <Filter>direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="test\shadow\shadow_effect.cpp">
+      <Filter>test\shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="test\shadow\shadow_transform.cpp">
+      <Filter>test\shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="test\shadow\shadow_window.cpp">
+      <Filter>test\shadow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +183,15 @@
     <ClInclude Include="direct3d\graph_creator.h">
       <Filter>direct3d</Filter>
     </ClInclude>
+    <ClInclude Include="test\shadow\shadow_effect.h">
+      <Filter>test\shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="test\shadow\shadow_transform.h">
+      <Filter>test\shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="test\shadow\shadow_window.h">
+      <Filter>test\shadow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\shell.ico">
@@ -188,6 +209,9 @@
   <ItemGroup>
     <Xml Include="test\animation\wallpaper_props.xml">
       <Filter>test\animation</Filter>
+    </Xml>
+    <Xml Include="test\shadow\shadow_props.xml">
+      <Filter>test\shadow</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +234,9 @@
       <Filter>hlsl</Filter>
     </FxCompile>
     <FxCompile Include="hlsl\wallpaper_pixel_shader.hlsl">
+      <Filter>hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="hlsl\shadow_pixel_shader.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
   </ItemGroup>

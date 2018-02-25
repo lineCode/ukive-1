@@ -63,6 +63,7 @@ namespace ukive {
         delete click_performer_;
 
         if (input_connection_ != nullptr) {
+            input_connection_->popEditor();
             delete input_connection_;
         }
     }
@@ -579,19 +580,25 @@ namespace ukive {
         canvas->scale(mScaleX, mScaleY, bounds_.left + mPivotX, bounds_.top + mPivotY);
         canvas->translate(mTranslateX, mTranslateY);
 
-        // 将背景绘制到 bgBitmap 上
-        Canvas offscreen(getWindow(), getWidth(), getHeight());
-        offscreen.setOpacity(canvas->getOpacity());
-        drawBackground(&offscreen);
-        auto bgBitmap = offscreen.extractBitmap();
-
-        bool hasBg = (bgBitmap != nullptr);
+        bool hasBg = needDrawBackground();
         bool hasShadow = (hasBg && (elevation_ > 0.f));
+
+        std::shared_ptr<Bitmap> bgBitmap;
+        if (hasShadow) {
+            // 将背景绘制到 bgBitmap 上
+            Canvas offscreen(getWindow(), getWidth(), getHeight());
+            offscreen.beginDraw();
+            offscreen.clear();
+            offscreen.setOpacity(canvas->getOpacity());
+            drawBackground(&offscreen);
+            offscreen.endDraw();
+            bgBitmap = offscreen.extractBitmap();
+        }
 
         // 若有，使用 layer 应用 reveal 动画
         // 若某一 view 正在进行 reveal 动画，则其 child 无法应用 reveal 动画
         if (mHasReveal) {
-            //圆形 reveal 动画。
+            // 圆形 reveal 动画。
             if (mRevealType == ViewAnimator::REVEAL_CIRCULE) {
                 ComPtr<ID2D1EllipseGeometry> circleGeo;
                 Application::getGraphicDeviceManager()->getD2DFactory()->CreateEllipseGeometry(
@@ -605,7 +612,10 @@ namespace ukive {
                     canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
 
                     Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    offscreen.beginDraw();
+                    offscreen.clear();
                     offscreen.fillGeometry(circleGeo.get(), bmp_brush.get());
+                    offscreen.endDraw();
                     auto bgRevealedBitmap = offscreen.extractBitmap();
 
                     window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
@@ -615,7 +625,7 @@ namespace ukive {
                 canvas->pushLayer(circleGeo.get());
 
                 if (hasBg && !hasShadow) {
-                    canvas->drawBitmap(bgBitmap.get());
+                    drawBackground(canvas);
                 }
             }
             // 矩形 reveal 动画
@@ -634,7 +644,10 @@ namespace ukive {
                     canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
 
                     Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    offscreen.beginDraw();
+                    offscreen.clear();
                     offscreen.fillGeometry(rectGeo.get(), bmp_brush.get());
+                    offscreen.endDraw();
                     auto bgRevealedBitmap = offscreen.extractBitmap();
 
                     window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
@@ -644,18 +657,19 @@ namespace ukive {
                 canvas->pushLayer(rectGeo.get());
 
                 if (hasBg && !hasShadow) {
-                    canvas->drawBitmap(bgBitmap.get());
+                    drawBackground(canvas);
                 }
             }
-        }
-        // 没有 reveal 动画，直接绘制背景和阴影
-        else {
+        } else {
+            // 没有 reveal 动画，直接绘制背景和阴影
             if (hasBg) {
                 if (hasShadow) {
                     window_->getRenderer()->drawShadow(
                         elevation_, canvas->getOpacity(), bgBitmap->getNative().get());
+                    canvas->drawBitmap(bgBitmap.get());
+                } else {
+                    drawBackground(canvas);
                 }
-                canvas->drawBitmap(bgBitmap.get());
             }
         }
 
@@ -680,33 +694,40 @@ namespace ukive {
         // 绘制前景
         drawForeground(canvas);
 
-        if (mHasReveal)
+        if (mHasReveal) {
             canvas->popLayer();
+        }
 
         canvas->restore();
     }
 
+    bool View::needDrawBackground() {
+        return (bg_drawable_ != nullptr
+            && bg_drawable_->getOpacity() > 0.f);
+    }
+
+    bool View::needDrawForeground() {
+        return (fg_drawable_ != nullptr
+            && fg_drawable_->getOpacity() > 0.f);
+    }
+
     void View::drawBackground(Canvas *canvas) {
-        if (bg_drawable_ != nullptr
-            && bg_drawable_->getOpacity() != 0.f) {
-            bg_drawable_->setBounds(0.f, 0.f, bounds_.width(), bounds_.height());
+        if (needDrawBackground()) {
+            bg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             bg_drawable_->draw(canvas);
         }
     }
 
     void View::drawForeground(Canvas *canvas) {
-        if (fg_drawable_ != nullptr
-            && fg_drawable_->getOpacity() != 0.f) {
-            fg_drawable_->setBounds(0.f, 0.f, bounds_.width(), bounds_.height());
+        if (needDrawForeground()) {
+            fg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             fg_drawable_->draw(canvas);
         }
     }
 
-
     void View::measure(int width, int height, int widthMode, int heightMode) {
         onMeasure(width, height, widthMode, heightMode);
     }
-
 
     void View::layout(int left, int top, int right, int bottom) {
         bool sizeChanged = false;
@@ -732,7 +753,6 @@ namespace ukive {
 
         is_layouted_ = true;
     }
-
 
     void View::invalidate() {
         invalidate(bounds_);
@@ -901,7 +921,7 @@ namespace ukive {
             }
             return can_consume_mouse_event_;
 
-        case InputEvent::EVM_LEAVE_OBJ:
+        case InputEvent::EVM_LEAVE_VIEW:
             if (fg_drawable_) {
                 shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
             }

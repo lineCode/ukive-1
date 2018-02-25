@@ -334,7 +334,7 @@ namespace ukive {
                         e->setEvent(InputEvent::EV_CANCEL);
                     }
                     else {
-                        e->setEvent(InputEvent::EVM_LEAVE_OBJ);
+                        e->setEvent(InputEvent::EVM_LEAVE_VIEW);
                     }
 
                     child->dispatchInputEvent(e);

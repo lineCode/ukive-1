@@ -655,7 +655,7 @@ namespace ukive {
 
         switch (e->getEvent())
         {
-        case InputEvent::EVM_LEAVE_OBJ:
+        case InputEvent::EVM_LEAVE_VIEW:
         {
             setCurrentCursor(Cursor::ARROW);
             return true;
@@ -722,8 +722,9 @@ namespace ukive {
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
                         e->getMouseY() - getPaddingTop() + getScrollY()) || mIsEditable))
                     setCurrentCursor(Cursor::IBEAM);
-                else
+                else {
                     setCurrentCursor(Cursor::ARROW);
+                }
             }
             else if (e->getMouseKey() == InputEvent::MK_RIGHT)
             {
@@ -731,8 +732,9 @@ namespace ukive {
                 mPrevY = e->getMouseY();
                 mIsMouseRightKeyDown = false;
 
-                if (mIsEditable || mIsSelectable)
+                if (mIsEditable || mIsSelectable) {
                     mTextActionMode = getWindow()->startTextActionMode(this);
+                }
             }
             return true;
         }
@@ -748,8 +750,7 @@ namespace ukive {
 
                 mLastSelection = end;
 
-                if (start > end)
-                {
+                if (start > end) {
                     unsigned int tmp = start;
                     start = end;
                     end = tmp;
@@ -765,9 +766,9 @@ namespace ukive {
                         e->getMouseY() - getPaddingTop() + getScrollY()) || mIsEditable))
                 {
                     setCurrentCursor(Cursor::IBEAM);
-                }
-                else
+                } else {
                     setCurrentCursor(Cursor::ARROW);
+                }
             }
             return true;
         }
@@ -776,14 +777,9 @@ namespace ukive {
         {
             int originDy = -(int)mTextSize * e->getMouseWheel();
 
-            if (mLineSpacingMethod
-                == DWRITE_LINE_SPACING_METHOD_DEFAULT)
-            {
+            if (mLineSpacingMethod == DWRITE_LINE_SPACING_METHOD_DEFAULT) {
                 originDy = -(int)mTextSize * e->getMouseWheel();
-            }
-            else if (mLineSpacingMethod
-                == DWRITE_LINE_SPACING_METHOD_UNIFORM)
-            {
+            } else if (mLineSpacingMethod == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
                 originDy = -(int)(mTextSize * mLineSpacingMultiple) * e->getMouseWheel();
             }
 
@@ -795,8 +791,9 @@ namespace ukive {
         {
             mTextKeyListener->onKeyDown(
                 mBaseText, mIsEditable, mIsSelectable, e->getKeyboardKey());
-            if (mIsEditable && mIsSelectable)
+            if (mIsEditable && mIsSelectable) {
                 blinkNavigator(e->getKeyboardKey());
+            }
             break;
         }
 
@@ -813,21 +810,20 @@ namespace ukive {
         return false;
     }
 
-    bool TextView::onCheckIsTextEditor()
-    {
+    bool TextView::onCheckIsTextEditor() {
         return mIsEditable;
     }
 
-    InputConnection *TextView::onCreateInputConnection()
-    {
+    InputConnection *TextView::onCreateInputConnection() {
         return mInputConnection;
     }
 
 
     void TextView::autoWrap(bool enable)
     {
-        if (mIsAutoWrap == enable)
+        if (mIsAutoWrap == enable) {
             return;
+        }
 
         mIsAutoWrap = enable;
         mTextLayout->SetWordWrapping(
@@ -839,19 +835,18 @@ namespace ukive {
 
     void TextView::setIsEditable(bool editable)
     {
-        if (editable == mIsEditable)
+        if (editable == mIsEditable) {
             return;
+        }
 
         mIsEditable = editable;
 
-        if (editable)
-        {
+        if (editable) {
             setFocusable(true);
-            if (hasFocus())
+            if (hasFocus()) {
                 mTextBlink->show();
-        }
-        else
-        {
+            }
+        } else {
             setFocusable(mIsSelectable);
             mTextBlink->hide();
         }
@@ -859,21 +854,18 @@ namespace ukive {
 
     void TextView::setIsSelectable(bool selectable)
     {
-        if (selectable == mIsSelectable)
+        if (selectable == mIsSelectable) {
             return;
+        }
 
         mIsSelectable = selectable;
 
-        if (selectable)
-        {
+        if (selectable) {
             setFocusable(true);
-        }
-        else
-        {
+        } else {
             setFocusable(mIsEditable);
 
-            if (!mSelectionList.empty())
-            {
+            if (!mSelectionList.empty()) {
                 mSelectionList.clear();
                 invalidate();
             }
@@ -881,24 +873,20 @@ namespace ukive {
     }
 
 
-    bool TextView::isAutoWrap()
-    {
+    bool TextView::isAutoWrap() {
         return mIsAutoWrap;
     }
 
-    bool TextView::isEditable()
-    {
+    bool TextView::isEditable() {
         return mIsEditable;
     }
 
-    bool TextView::isSelectable()
-    {
+    bool TextView::isSelectable() {
         return mIsSelectable;
     }
 
 
-    void TextView::setText(std::wstring text)
-    {
+    void TextView::setText(std::wstring text) {
         mBaseText->replace(text, 0, mBaseText->length());
         mBaseText->setSelection(0);
     }
@@ -906,8 +894,9 @@ namespace ukive {
     void TextView::setTextSize(int size)
     {
         size = static_cast<int>(std::round(getWindow()->dpToPx(size)));
-        if (size == mTextSize)
+        if (size == mTextSize) {
             return;
+        }
 
         mTextSize = size;
 
@@ -920,15 +909,16 @@ namespace ukive {
         invalidate();
     }
 
-    void TextView::setTextColor(Color color)
-    {
+    void TextView::setTextColor(Color color) {
         mTextColor = color;
         invalidate();
     }
 
     void TextView::setTextAlignment(DWRITE_TEXT_ALIGNMENT alignment)
     {
-        if (mTextAlignment == alignment) return;
+        if (mTextAlignment == alignment) {
+            return;
+        }
 
         mTextAlignment = alignment;
         mTextLayout->SetTextAlignment(alignment);
@@ -936,7 +926,9 @@ namespace ukive {
 
     void TextView::setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment)
     {
-        if (mParagraphAlignment == alignment) return;
+        if (mParagraphAlignment == alignment) {
+            return;
+        }
 
         mParagraphAlignment = alignment;
         mTextLayout->SetParagraphAlignment(alignment);
@@ -944,8 +936,9 @@ namespace ukive {
 
     void TextView::setTextStyle(DWRITE_FONT_STYLE style)
     {
-        if (mTextStyle == style)
+        if (mTextStyle == style) {
             return;
+        }
 
         mTextStyle = style;
 
@@ -961,8 +954,9 @@ namespace ukive {
 
     void TextView::setTextWeight(DWRITE_FONT_WEIGHT weight)
     {
-        if (mTextWeight == weight)
+        if (mTextWeight == weight) {
             return;
+        }
 
         mTextWeight = weight;
 

@@ -231,7 +231,7 @@ namespace ukive {
 
         switch (e->getEvent())
         {
-        case InputEvent::EVM_LEAVE_OBJ:
+        case InputEvent::EVM_LEAVE_VIEW:
         {
             startZoomOutAnimation();
             break;

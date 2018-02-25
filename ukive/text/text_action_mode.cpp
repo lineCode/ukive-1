@@ -30,7 +30,7 @@ namespace ukive {
         menu_impl_->setMenuItemHeight(menu_item_height_);
 
         ShapeDrawable *shapeDrawable
-            = new ShapeDrawable(ShapeDrawable::SHAPE_ROUND_RECT);
+            = new ShapeDrawable(ShapeDrawable::ROUND_RECT);
         shapeDrawable->setRadius(2.f);
         shapeDrawable->setSolidEnable(true);
         shapeDrawable->setSolidColor(Color::White);

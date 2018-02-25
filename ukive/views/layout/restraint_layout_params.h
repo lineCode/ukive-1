@@ -106,7 +106,7 @@ namespace ukive {
 
         private:
             bool built_;
-            RestraintLayoutParams *lp_;
+            RestraintLayoutParams* lp_;
         };
 
         bool hasStart();

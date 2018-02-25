@@ -47,8 +47,7 @@ namespace ukive {
     }
 
 
-    void RippleDrawable::setTintColor(Color tint)
-    {
+    void RippleDrawable::setTintColor(Color tint) {
         mTintColor = tint;
     }
 
@@ -58,39 +57,54 @@ namespace ukive {
         auto bound = getBounds();
         Color color(mAlpha, 0.f, 0.f, 0.f);
 
-        //绘制底色、alpha和ripple。
-        Canvas offscreen(owner_win_, bound.right - bound.left, bound.bottom - bound.top);
-        offscreen.setOpacity(canvas->getOpacity());
-        offscreen.fillRect(bound, mTintColor);
-        offscreen.fillRect(bound, color);
+        // 绘制底色、alpha 和 ripple。
+        content_off_->beginDraw();
+        content_off_->clear();
+        content_off_->setOpacity(canvas->getOpacity());
+        content_off_->fillRect(bound.toRectF(), mTintColor);
+        content_off_->fillRect(bound.toRectF(), color);
 
-        if (getState() == STATE_HOVERED
-            && getPrevState() == STATE_PRESSED) {
+        if ((getState() == STATE_HOVERED && getPrevState() == STATE_PRESSED)
+            || (getState() == STATE_NONE && getPrevState() == STATE_HOVERED)) {
 
             Color rippleColor = Color(0U,
                 (float)mRippleAnimator->getValue(1));
 
-            offscreen.fillCircle(
+            content_off_->fillCircle(
                 start_x_, start_y_,
                 mRippleAnimator->getValue(0), rippleColor);
         }
-        auto contentBitmap = offscreen.extractBitmap();
+        content_off_->endDraw();
+        auto contentBitmap = content_off_->extractBitmap();
 
         if (mDrawableList.empty()) {
             canvas->drawBitmap(contentBitmap.get());
-        }
-        else {
-            //绘制mask，以该mask确定背景形状以及ripple的扩散边界。
-            Canvas offscreen(owner_win_, bound.right - bound.left, bound.bottom - bound.top);
-            offscreen.setOpacity(canvas->getOpacity());
-            LayerDrawable::draw(&offscreen);
-            auto maskBitmap = offscreen.extractBitmap();
+        } else {
+            // 绘制 mask，以该 mask 确定背景形状以及 ripple 的扩散边界。
+            mask_off_->beginDraw();
+            mask_off_->clear();
+            mask_off_->setOpacity(canvas->getOpacity());
+            LayerDrawable::draw(mask_off_.get());
+            mask_off_->endDraw();
+            auto maskBitmap = mask_off_->extractBitmap();
 
             canvas->drawBitmap(maskBitmap.get());
             canvas->fillOpacityMask(
-                bound.right - bound.left, bound.bottom - bound.top,
+                bound.width(), bound.height(),
                 maskBitmap.get(), contentBitmap.get());
         }
+    }
+
+    void RippleDrawable::onBoundChanged(const Rect& new_bound) {
+        LayerDrawable::onBoundChanged(new_bound);
+
+        mask_off_.reset();
+        mask_off_ = std::make_unique<Canvas>(
+            owner_win_, new_bound.width(), new_bound.height());
+
+        content_off_.reset();
+        content_off_ = std::make_unique<Canvas>(
+            owner_win_, new_bound.width(), new_bound.height());
     }
 
     bool RippleDrawable::onStateChanged(int newState, int prevState)

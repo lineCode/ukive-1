@@ -13,7 +13,7 @@ namespace ukive {
         static const int EVM_MOVE = 3;
         static const int EVM_WHEEL = 4;
         static const int EVM_LEAVE_WIN = 5;
-        static const int EVM_LEAVE_OBJ = 6;
+        static const int EVM_LEAVE_VIEW = 6;
         static const int EVM_HOVER = 7;
         static const int EVM_SCROLL_ENTER = 8;
 

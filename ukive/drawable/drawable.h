@@ -21,28 +21,28 @@ namespace ukive {
         Drawable();
         virtual ~Drawable() = default;
 
-        void setBounds(RectF &rect);
+        void setBounds(const Rect &rect);
         void setBounds(int left, int top, int right, int bottom);
 
         bool setState(int state);
         void setHotspot(int x, int y);
         bool setParentFocus(bool focus);
 
-        int getState();
-        int getPrevState();
-        RectF &getBounds();
+        int getState() const;
+        int getPrevState() const;
+        Rect getBounds() const;
 
         virtual void draw(Canvas *canvas) = 0;
 
-        virtual float getOpacity();
+        virtual float getOpacity() const;
 
-        virtual int getIncWidth();
-        virtual int getIncHeight();
+        virtual int getIncWidth() const;
+        virtual int getIncHeight() const;
 
     protected:
         virtual bool onFocusChanged(bool focus);
-        virtual void onBoundChanged(RectF &newBound);
-        virtual bool onStateChanged(int newState, int prevState);
+        virtual void onBoundChanged(const Rect& new_bound);
+        virtual bool onStateChanged(int new_state, int prev_state);
 
         int start_x_, start_y_;
 
@@ -50,7 +50,7 @@ namespace ukive {
         int state_;
         int prev_state_;
         bool is_parent_has_focus_;
-        RectF bounds_;
+        Rect bounds_;
     };
 
 }

@@ -127,12 +127,10 @@ namespace ukive {
         float shadow_alpha;
         if (alpha == 0.f) {
             shadow_alpha = 0.f;
-        }
-        else if (alpha == 1.f) {
+        } else if (alpha == 1.f) {
             shadow_alpha = .38f;
-        }
-        else {
-            shadow_alpha = static_cast<float>(.38f*::pow(2, 8 * (alpha - 1)) / 1.f);
+        } else {
+            shadow_alpha = static_cast<float>(.38f * std::pow(2, 8 * (alpha - 1)) / 1.f);
         }
 
         shadow_effect_->SetInput(0, bitmap);

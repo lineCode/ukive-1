@@ -17,7 +17,7 @@ namespace ukive {
 
         void draw(Canvas *canvas) override;
 
-        float getOpacity() override;
+        float getOpacity() const override;
 
     private:
         float panel_line_width_;

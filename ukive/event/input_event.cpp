@@ -147,7 +147,7 @@ namespace ukive {
             || event_type_ == EVM_MOVE
             || event_type_ == EVM_WHEEL
             || event_type_ == EVM_LEAVE_WIN
-            || event_type_ == EVM_LEAVE_OBJ
+            || event_type_ == EVM_LEAVE_VIEW
             || event_type_ == EVM_SCROLL_ENTER
             || event_type_ == EVM_HOVER);
     }

@@ -53,8 +53,9 @@ namespace ukive {
 
     void InputConnection::pushEditor()
     {
-        if (!mIsInitialized || mIsEditorPushed)
+        if (!mIsInitialized || mIsEditorPushed) {
             return;
+        }
 
         HRESULT hr = mDocumentMgr->Push(mEditorContext.get());
         if (FAILED(hr)) {
@@ -67,8 +68,9 @@ namespace ukive {
 
     void InputConnection::popEditor()
     {
-        if (!mIsInitialized || !mIsEditorPushed)
+        if (!mIsInitialized || !mIsEditorPushed) {
             return;
+        }
 
         HRESULT hr = mDocumentMgr->Pop(TF_POPF_ALL);
         if (FAILED(hr)) {
@@ -81,19 +83,15 @@ namespace ukive {
 
     bool InputConnection::mount()
     {
-        if (!mIsInitialized)
-            return false;
+        DLOG(1) << "mount";
 
-        TsfManager *tsfMgr = Application::getTsfManager();
-
-        ComPtr<ITfContext> top_context;
-        HRESULT hr = mDocumentMgr->GetTop(&top_context);
-        if (FAILED(hr) || top_context.get() != mEditorContext.get()) {
-            Log::e(L"InputConnection", L"mount() failed.\n");
+        if (!mIsInitialized) {
             return false;
         }
 
-        hr = tsfMgr->getThreadManager()->SetFocus(mDocumentMgr.get());
+        TsfManager *tsfMgr = Application::getTsfManager();
+
+        HRESULT hr = tsfMgr->getThreadManager()->SetFocus(mDocumentMgr.get());
         if (FAILED(hr)) {
             Log::e(L"InputConnection", L"mount() failed.\n");
             return false;
@@ -104,6 +102,8 @@ namespace ukive {
 
     bool InputConnection::unmount()
     {
+        DLOG(1) << "unmount";
+
         if (!mIsInitialized) {
             return false;
         }
@@ -121,8 +121,9 @@ namespace ukive {
 
     bool InputConnection::terminateComposition()
     {
-        if (!mIsInitialized)
+        if (!mIsInitialized) {
             return false;
+        }
 
         HRESULT hr = mCompServices->TerminateComposition(nullptr);
         if (FAILED(hr)) {
@@ -134,39 +135,32 @@ namespace ukive {
     }
 
 
-    void InputConnection::notifyStatusChanged(DWORD flags)
-    {
+    void InputConnection::notifyStatusChanged(DWORD flags) {
         mTsfEditor->notifyStatusChanged(flags);
     }
 
-    void InputConnection::notifyTextChanged(bool correction, long start, long oldEnd, long newEnd)
-    {
+    void InputConnection::notifyTextChanged(bool correction, long start, long oldEnd, long newEnd) {
         mTsfEditor->notifyTextChanged(correction, start, oldEnd, newEnd);
     }
 
-    void InputConnection::notifyTextLayoutChanged(TsLayoutCode reason)
-    {
+    void InputConnection::notifyTextLayoutChanged(TsLayoutCode reason) {
         mTsfEditor->notifyTextLayoutChanged(reason);
     }
 
-    void InputConnection::notifyTextSelectionChanged()
-    {
+    void InputConnection::notifyTextSelectionChanged() {
         mTsfEditor->notifyTextSelectionChanged();
     }
 
 
-    void InputConnection::onBeginProcess()
-    {
+    void InputConnection::onBeginProcess() {
         mTextView->onBeginProcess();
     }
 
-    void InputConnection::onEndProcess()
-    {
+    void InputConnection::onEndProcess() {
         mTextView->onEndProcess();
     }
 
-    bool InputConnection::isReadOnly()
-    {
+    bool InputConnection::isReadOnly() {
         return !mTextView->isEditable();
     }
 
@@ -182,8 +176,9 @@ namespace ukive {
         unsigned long startIndex, unsigned long maxCount,
         TS_SELECTION_ACP *selections, unsigned long *fetchedCount)
     {
-        if (startIndex != TF_DEFAULT_SELECTION || maxCount != 1)
+        if (startIndex != TF_DEFAULT_SELECTION || maxCount != 1) {
             return false;
+        }
 
         int selStart = mTextView->getSelectionStart();
         int selEnd = mTextView->getSelectionEnd();
@@ -200,16 +195,18 @@ namespace ukive {
 
     bool InputConnection::setSelection(unsigned long count, const TS_SELECTION_ACP *selections)
     {
-        if (count != 1)
+        if (count != 1) {
             return false;
+        }
 
         int selStart = selections[0].acpStart;
         int selEnd = selections[0].acpEnd;
 
-        if (selStart == selEnd)
+        if (selStart == selEnd) {
             mTextView->getEditable()->setSelectionForceNotify(selStart);
-        else
+        } else {
             mTextView->getEditable()->setSelectionForceNotify(selStart, selEnd);
+        }
 
         return true;
     }
@@ -218,37 +215,35 @@ namespace ukive {
     {
         std::wstring totalText = mTextView->getText();
 
-        if (end == -1)
-        {
-            if (static_cast<unsigned long>(start + maxLength) <= totalText.length())
+        if (end == -1) {
+            if (static_cast<unsigned long>(start + maxLength) <= totalText.length()) {
                 return totalText.substr(start, maxLength);
-            else
+            } else {
                 return totalText.substr(start, totalText.length() - start);
-        }
-        else
-        {
-            if (end - start >= maxLength)
+            }
+        } else {
+            if (end - start >= maxLength) {
                 return totalText.substr(start, maxLength);
-            else
+            } else {
                 return totalText.substr(start, end - start);
+            }
         }
     }
 
     void InputConnection::setText(long start, long end, std::wstring newText)
     {
-        if (start == end)
+        if (start == end) {
             mTextView->getEditable()->insert(newText, start);
-        else
+        } else {
             mTextView->getEditable()->replace(newText, start, end - start);
+        }
     }
 
-    long InputConnection::getTextLength()
-    {
+    long InputConnection::getTextLength() {
         return mTextView->getText().length();
     }
 
-    bool InputConnection::getTextPositionAtPoint(const POINT *pt, DWORD dwFlags, long *pacp)
-    {
+    bool InputConnection::getTextPositionAtPoint(const POINT *pt, DWORD dwFlags, long *pacp) {
         return true;
     }
 
@@ -301,8 +296,7 @@ namespace ukive {
         }
     }
 
-    HWND InputConnection::getWindowHandle()
-    {
+    HWND InputConnection::getWindowHandle() {
         return mTextView->getWindow()->getHandle();
     }
 
