@@ -540,10 +540,8 @@ namespace ukive {
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
         int verticalPadding = getPaddingTop() + getPaddingBottom();
 
-        switch (widthSpec)
-        {
-        case FIT:
-        {
+        switch (widthSpec) {
+        case FIT: {
             mTextLayout->SetMaxWidth(
                 static_cast<float>(width - horizontalPadding));
 
@@ -554,8 +552,7 @@ namespace ukive {
 
             finalWidth = std::max(finalWidth, getMinimumWidth());
 
-            if (width != finalWidth)
-            {
+            if (width != finalWidth) {
                 mTextLayout->SetMaxWidth(
                     static_cast<float>(finalWidth - horizontalPadding));
             }

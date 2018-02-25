@@ -1,5 +1,6 @@
 ﻿#include "button.h"
 
+#include "ukive/window/window.h"
 #include "ukive/drawable/shape_drawable.h"
 #include "ukive/drawable/ripple_drawable.h"
 #include "ukive/graphics/color.h"
@@ -16,7 +17,7 @@ namespace ukive {
     void Button::initButton()
     {
         shape_drawable_ = new ShapeDrawable(ShapeDrawable::ROUND_RECT);
-        shape_drawable_->setRadius(2.f);
+        shape_drawable_->setRadius(getWindow()->dpToPx(2.f));
         shape_drawable_->setSolidEnable(true);
         shape_drawable_->setSolidColor(Color::White);
 
@@ -28,9 +29,13 @@ namespace ukive {
         setIsEditable(false);
         setIsSelectable(false);
 
-        setPadding(24, 6, 24, 6);
+        setPadding(
+            getWindow()->dpToPx(24),
+            getWindow()->dpToPx(6),
+            getWindow()->dpToPx(24),
+            getWindow()->dpToPx(6));
         setBackground(ripple_background_);
-        setElevation(2.0f);
+        setElevation(getWindow()->dpToPx(2.0f));
     }
 
     void Button::setButtonColor(Color color)
