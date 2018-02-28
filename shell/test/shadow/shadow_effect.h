@@ -1,11 +1,12 @@
 #ifndef SHELL_TEST_SHADOW_SHADOW_EFFECT_H_
 #define SHELL_TEST_SHADOW_SHADOW_EFFECT_H_
 
-#include <codecvt>
 #include <initguid.h>
 #include <d2d1effects_1.h>
 #include <d2d1effectauthor.h>
 #include <d2d1effecthelpers.h>
+
+#include "ukive/utils/com_ptr.h"
 
 
 namespace shell {
@@ -13,11 +14,12 @@ namespace shell {
     class ShadowTransform;
 
     enum SHADOW_EFFECT_PROP {
-        SHADOW_EFFECT_PROP_ALPHA,
+        SHADOW_EFFECT_PROP_ALPHA = 0,
         SHADOW_EFFECT_PROP_SHAPE,
         SHADOW_EFFECT_PROP_BOUNDS,
         SHADOW_EFFECT_PROP_OFFSET,
-        SHADOW_EFFECT_PROP_ELEVATION
+        SHADOW_EFFECT_PROP_ELEVATION,
+        SHADOW_EFFECT_PROP_CORNER_RADIUS
     };
 
     typedef enum {
@@ -51,15 +53,17 @@ namespace shell {
 
         HRESULT SetAlpha(float alpha);
         HRESULT SetShape(SHADOW_SHAPE shape);
-        HRESULT SetBounds(D2D_VECTOR_4F offset);
+        HRESULT SetBounds(D2D_VECTOR_4F bounds);
         HRESULT SetOffset(D2D_VECTOR_2F offset);
         HRESULT SetElevation(float elevation);
+        HRESULT SetCornerRadius(float radius);
 
         float GetAlpha() const;
         SHADOW_SHAPE GetShape() const;
         D2D_VECTOR_4F GetBounds() const;
         D2D_VECTOR_2F GetOffset() const;
         float GetElevation() const;
+        float GetCornerRadius() const;
 
         IFACEMETHODIMP_(ULONG) AddRef();
         IFACEMETHODIMP_(ULONG) Release();
@@ -69,8 +73,18 @@ namespace shell {
         // 构造函数必须私有以保证其不被外界调用。
         ShadowEffect();
 
+        HRESULT CreateGaussStencil(ID2D1EffectContext* ec);
+
         ULONG ref_count_;
-        ShadowTransform* transform_;
+        ukive::ComPtr<ShadowTransform> transform_;
+        ukive::ComPtr<ID2D1ResourceTexture> texture_;
+
+        float alpha_;
+        float elevation_;
+        float corner_radius_;
+        SHADOW_SHAPE shape_;
+        D2D_VECTOR_4F bounds_;
+        D2D_VECTOR_2F offset_;
     };
 
 }

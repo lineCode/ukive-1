@@ -40,8 +40,8 @@ namespace shell {
     private:
         ukive::Button* ce_button_;
 
-        ukive::ComPtr<ID2D1Effect> mEffect;
-        ukive::Animator *mAnimator;
+        ukive::Animator* animator_;
+        ukive::ComPtr<ID2D1Effect> effect_;
     };
 
 }

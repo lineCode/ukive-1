@@ -38,7 +38,6 @@ namespace ukive {
     void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> renderTarget) {
         opacity_ = 1.f;
         layer_counter_ = 0;
-        text_renderer_ = nullptr;
 
         render_target_ = renderTarget;
         render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);

@@ -4,7 +4,6 @@
 namespace ukive {
 
     WICManager::WICManager() {
-        wic_factory_ = nullptr;
     }
 
 

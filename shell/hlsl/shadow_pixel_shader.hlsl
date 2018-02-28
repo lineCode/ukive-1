@@ -1,69 +1,62 @@
-#define SIGMA     3
-#define RADIUS    9
-#define DIAMETER  19
-
-#define OFFSET_X  0
-#define OFFSET_Y  0
-
-#define ROUND_RECT_RADIUS  8
+#define RADIUS    12
+#define DIAMETER  (RADIUS * 2 + 1)
 
 
-cbuffer constants : register(b0)
-{
-    float4 bound : packoffset(c0);
+Texture2D stencil : register(t0);
+
+cbuffer constants : register(b0) {
+    float4 bounds_ : packoffset(c0);
+    float2 offset_ : packoffset(c1);
+    float alpha_ : packoffset(c1.z);
+    float elevation_ : packoffset(c1.w);
+    float corner_radius_ : packoffset(c2);
 };
 
-bool isInRect(float2 p) {
-    float4 effective = bound;
-    effective.xy += RADIUS;
-    effective.zw -= RADIUS;
-
-    return (p.x >= effective.x && p.x <= effective.z
-        && p.y >= effective.y && p.y <= effective.w);
+bool isInRect(float x, float y) {
+    return (x >= bounds_.x && x <= bounds_.z
+        && y >= bounds_.y && y <= bounds_.w);
 }
 
 bool isInRoundRect(float x, float y) {
-    float4 effective = bound;
-    effective.xy += RADIUS;
-    effective.zw -= RADIUS;
+    float4 effective = bounds_;
 
     if (x >= effective.x && x <= effective.z
         && y >= effective.y && y <= effective.w) {
 
-        float dx = x - (effective.x + ROUND_RECT_RADIUS);
-        float dy = y - (effective.y + ROUND_RECT_RADIUS);
+        float dx = x - (effective.x + corner_radius_);
+        float dy = y - (effective.y + corner_radius_);
         if (dx < 0 && dy < 0) {
-            if (pow(dx, 2) + pow(dy, 2) <= pow(ROUND_RECT_RADIUS, 2)) {
+            if (pow(dx, 2) + pow(dy, 2) < pow(corner_radius_ - 1, 2)) {
                 return true;
             } else {
                 return false;
             }
         }
 
-        dx = x - (effective.z - ROUND_RECT_RADIUS);
-        dy = y - (effective.y + ROUND_RECT_RADIUS);
+        dx = x - (effective.z - corner_radius_);
+        dy = y - (effective.y + corner_radius_);
         if (dx > 0 && dy < 0) {
-            if (pow(dx, 2) + pow(dy, 2) <= pow(ROUND_RECT_RADIUS, 2)) {
+            if (pow(dx, 2) + pow(dy, 2) < pow(corner_radius_ - 1, 2)) {
                 return true;
             } else {
                 return false;
             }
         }
 
-        dx = x - (effective.x + ROUND_RECT_RADIUS);
-        dy = y - (effective.w - ROUND_RECT_RADIUS);
+        dx = x - (effective.x + corner_radius_);
+        dy = y - (effective.w - corner_radius_);
         if (dx < 0 && dy > 0) {
-            if (pow(dx, 2) + pow(dy, 2) <= pow(ROUND_RECT_RADIUS, 2)) {
+            if (pow(dx, 2) + pow(dy, 2) < pow(corner_radius_ - 1, 2)) {
                 return true;
             } else {
                 return false;
             }
         }
 
-        dx = x - (effective.z - ROUND_RECT_RADIUS);
-        dy = y - (effective.w - ROUND_RECT_RADIUS);
+        dx = x - (effective.z - corner_radius_);
+        dy = y - (effective.w - corner_radius_);
         if (dx > 0 && dy > 0) {
-            if (pow(dx, 2) + pow(dy, 2) <= pow(ROUND_RECT_RADIUS, 2)) {
+            if (pow(dx, 2) + pow(dy, 2) < pow(corner_radius_ - 1, 2)) {
                 return true;
             } else {
                 return false;
@@ -77,30 +70,21 @@ bool isInRoundRect(float x, float y) {
 }
 
 bool isInOval(float x, float y) {
-    float4 effective = bound;
-    effective.xy += RADIUS;
-    effective.zw -= RADIUS;
+    float rx = (bounds_.z - bounds_.x) / 2;
+    float ry = (bounds_.w - bounds_.y) / 2;
+    float cx = (bounds_.z + bounds_.x) / 2;
+    float cy = (bounds_.w + bounds_.y) / 2;
 
-    float rx = (effective.z - effective.x) / 2;
-    float ry = (effective.w - effective.y) / 2;
-    float cx = (effective.z + effective.x) / 2;
-    float cy = (effective.w + effective.y) / 2;
-
-    return pow(x - cx, 2) / pow(rx, 2) + pow(y - cy, 2) / pow(ry, 2) <= 1;
+    return pow(x - cx, 2) / pow(rx, 2) + pow(y - cy, 2) / pow(ry, 2) < 1;
 }
 
 bool isInOutline(float x, float y) {
     return isInRoundRect(x, y);
 }
 
-float getWeight(float x, float y) {
-    float exponent = -(pow(x, 2) + pow(y, 2)) / (2 * pow(SIGMA, 2));
-    return 1 / (2 * 3.14f * pow(SIGMA, 2)) * exp(exponent);
-}
-
 float4 getColor(float x, float y) {
     if (isInOutline(x, y)) {
-        return float4(0, 0, 0, 0.4);
+        return float4(0, 0, 0, alpha_);
     } else {
         return float4(0, 0, 0, 0);
     }
@@ -113,39 +97,37 @@ float4 main(
     float4 sceneSpaceOutput : SCENE_POSITION,  // µ±Ç°ÏñËØ×ø±ê¡£
     float4 texelSpaceInput0 : TEXCOORD0) : SV_Target
 {
-    float sceneWidth = bound.z - bound.x;
-    float sceneHeight = bound.w - bound.y;
-
     float x = sceneSpaceOutput.x;
     float y = sceneSpaceOutput.y;
-
-    float total_weight = 0;
-    float weight_matrix[DIAMETER][DIAMETER];
-    for (int i = 0; i < DIAMETER; ++i) {
-        for (int j = 0; j < DIAMETER; ++j) {
-            float w = getWeight(abs(j - RADIUS), abs(i - RADIUS));
-            weight_matrix[i][j] = w;
-            total_weight += w;
-        }
-    }
-
-    for (i = 0; i < DIAMETER; ++i) {
-        for (int j = 0; j < DIAMETER; ++j) {
-            weight_matrix[i][j] /= total_weight;
-        }
+    if (isInOutline(x + offset_.x, y + offset_.y)) {
+        discard;
+        return float4(0, 0, 0, 0);
     }
 
     float total_alpha = 0;
-    for (i = 0; i < DIAMETER; ++i) {
+    for (int i = 0; i < DIAMETER; ++i) {
         for (int j = 0; j < DIAMETER; ++j) {
             float4 color = getColor(j - RADIUS + x, i - RADIUS + y);
-            total_alpha += color.w * weight_matrix[i][j];
+
+            int index_x = j;
+            int index_y = i;
+            if (i > RADIUS) {
+                index_y = 2 * RADIUS - i;
+            }
+            if (j > RADIUS) {
+                index_x = 2 * RADIUS - j;
+            }
+
+            if (index_x < index_y) {
+                int tmp = index_x;
+                index_x = index_y;
+                index_y = tmp;
+            }
+
+            float weight = stencil.Load(int3(index_x, index_y, 0)).x;
+            total_alpha += color.w * weight;
         }
     }
 
-    if (isInOutline(x + OFFSET_X, y + OFFSET_Y)) {
-        return float4(0, 0, 0, 0);
-    } else {
-        return float4(0, 0, 0, total_alpha);  // r g b a
-    }
+    return float4(0, 0, 0, total_alpha); // r g b a
 }

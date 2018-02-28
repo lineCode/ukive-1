@@ -291,7 +291,7 @@ namespace shell {
         \n►按住Shift键和鼠标左键拖动可旋转摄像机。\
         \n►按住Ctrl键和鼠标左键拖动可移动摄像机");
         helperTV->setTextSize(14);
-        helperTV->setBackground(new ukive::EditTextDrawable());
+        helperTV->setBackground(new ukive::EditTextDrawable(this));
         helperTV->setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
 
         auto helperTVLp = Rlp::Builder(

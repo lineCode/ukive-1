@@ -4,6 +4,11 @@
 #include <d2d1effectauthor.h>
 #include <d2d1effecthelpers.h>
 
+#include "ukive/utils/com_ptr.h"
+
+#include "shadow_effect.h"
+
+
 // Example GUID used to uniquely identify HLSL shader. Passed to Direct2D during
 // shader load, and used by the transform to identify the shader for the
 // ID2D1DrawInfo::SetPixelShader method. The effect author should create a
@@ -19,6 +24,14 @@ namespace shell {
     public:
         ShadowTransform();
         ~ShadowTransform();
+
+        HRESULT SetAlpha(float alpha);
+        HRESULT SetShape(SHADOW_SHAPE shape);
+        HRESULT SetBounds(D2D_VECTOR_4F bounds);
+        HRESULT SetOffset(D2D_VECTOR_2F offset);
+        HRESULT SetElevation(float elevation);
+        HRESULT SetCornerRadius(float radius);
+        HRESULT SetTexture(ID2D1ResourceTexture* texture, UINT32 extent);
 
         IFACEMETHODIMP_(UINT32) GetInputCount() const override;
 
@@ -48,11 +61,19 @@ namespace shell {
 
     private:
         ULONG ref_count_;
+
+        LONG expanded_;
         D2D1_RECT_L input_rect_;
+        ID2D1DrawInfo* draw_info_;
+        UINT32 texture_extent_;
 
         // ÏñËØ×ÅÉ«Æ÷µÄ ConstantBuffer¡£
         struct {
-            float bound[4];
+            float bounds[4];
+            float offset[2];
+            float alpha;
+            float elevation;
+            float corner_radius;
         } const_buffer_;
     };
 

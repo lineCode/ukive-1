@@ -7,10 +7,12 @@
 
 namespace ukive {
 
+    class Window;
+
     class EditTextDrawable : public Drawable
     {
     public:
-        EditTextDrawable();
+        EditTextDrawable(Window* win);
         ~EditTextDrawable();
 
         bool onFocusChanged(bool focus) override;
@@ -20,7 +22,9 @@ namespace ukive {
         float getOpacity() const override;
 
     private:
-        float panel_line_width_;
+        Window* owner_win_;
+
+        int panel_line_width_;
         Color panel_line_color_;
     };
 

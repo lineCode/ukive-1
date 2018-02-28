@@ -24,11 +24,11 @@ namespace shell {
         HRESULT hr = ShadowEffect::Register(d2d_factory.get());
         DCHECK(SUCCEEDED(hr));
 
-        hr = getRenderer()->getD2DDeviceContext()->CreateEffect(CLSID_ShadowEffect, &mEffect);
+        hr = getRenderer()->getD2DDeviceContext()->CreateEffect(CLSID_ShadowEffect, &effect_);
         DCHECK(SUCCEEDED(hr));
 
-        mAnimator = new ukive::Animator(getAnimationManager());
-        mAnimator->start();
+        animator_ = new ukive::Animator(getAnimationManager());
+        animator_->start();
 
         using Rlp = ukive::RestraintLayoutParams;
 
@@ -45,8 +45,8 @@ namespace shell {
         de_button->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
         de_button->setElevation(0);
 
-        Rlp* de_button_lp = Rlp::Builder(200, 100)
-            .start(layout->getId(), Rlp::START, 100).top(layout->getId())
+        auto de_button_lp = Rlp::Builder(dpToPx(200), dpToPx(100))
+            .start(layout->getId(), Rlp::START, dpToPx(100)).top(layout->getId())
             .bottom(layout->getId()).build();
         layout->addView(de_button, de_button_lp);
 
@@ -58,7 +58,7 @@ namespace shell {
         ce_button_->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
         ce_button_->setElevation(0);
 
-        Rlp* ce_button_lp = Rlp::Builder(200, 100)
+        auto ce_button_lp = Rlp::Builder(dpToPx(200), dpToPx(100))
             .start(de_button->getId(), Rlp::END).top(layout->getId())
             .end(layout->getId()).bottom(layout->getId()).build();
         layout->addView(ce_button_, ce_button_lp);
@@ -67,15 +67,28 @@ namespace shell {
     void ShadowWindow::onDrawCanvas(ukive::Canvas *canvas) {
         Window::onDrawCanvas(canvas);
 
-        /*getRenderer()->getD2DDeviceContext()->DrawImage(
-            mEffect.get(), D2D1::Point2F(ce_button_->getLeft(), ce_button_->getTop()));*/
+        auto bounds = ce_button_->getBounds();
+        effect_->SetValue(
+            SHADOW_EFFECT_PROP_BOUNDS,
+            D2D1::Vector4F(bounds.left, bounds.top, bounds.right, bounds.bottom));
+        effect_->SetValue(
+            SHADOW_EFFECT_PROP_OFFSET,
+            D2D1::Vector2F(0, 4));
+        effect_->SetValue(
+            SHADOW_EFFECT_PROP_ALPHA, 0.38f);
+        effect_->SetValue(
+            SHADOW_EFFECT_PROP_ELEVATION, dpToPx(8));
+        effect_->SetValue(
+            SHADOW_EFFECT_PROP_CORNER_RADIUS, dpToPx(16.f));
+
+        getRenderer()->getD2DDeviceContext()->DrawImage(effect_.get());
     }
 
     void ShadowWindow::onDestroy() {
         Window::onDestroy();
 
-        mAnimator->stop();
-        delete mAnimator;
+        animator_->stop();
+        delete animator_;
     }
 
     bool ShadowWindow::onInputEvent(ukive::InputEvent *e) {

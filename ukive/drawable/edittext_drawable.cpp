@@ -1,24 +1,28 @@
 #include "edittext_drawable.h"
 
+#include "ukive/window/window.h"
 #include "ukive/graphics/canvas.h"
 
 
 namespace ukive {
 
-    EditTextDrawable::EditTextDrawable()
+    EditTextDrawable::EditTextDrawable(Window* win)
         :Drawable(),
-        panel_line_width_(2),
-        panel_line_color_(Color::Grey400) {}
+        owner_win_(win),
+        panel_line_color_(Color::Grey400) {
+
+        panel_line_width_ = std::ceil(win->dpToPx(1.5f));
+    }
 
     EditTextDrawable::~EditTextDrawable() {}
 
 
     bool EditTextDrawable::onFocusChanged(bool focus) {
         if (focus) {
-            panel_line_width_ = 2;
+            //panel_line_width_ = 2;
             panel_line_color_ = Color::Blue500;
         } else {
-            panel_line_width_ = 2;
+            //panel_line_width_ = 2;
             panel_line_color_ = Color::Grey400;
         }
 
@@ -32,7 +36,7 @@ namespace ukive {
 
         canvas->fillRect(
             RectF(
-                bound.left, bound.bottom - 2,
+                bound.left, bound.bottom - panel_line_width_,
                 bound.width(), panel_line_width_),
             panel_line_color_);
     }
