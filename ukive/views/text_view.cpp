@@ -387,7 +387,7 @@ namespace ukive {
     void TextView::makeNewTextFormat()
     {
         mTextFormat.reset();
-        getWindow()->getRenderer()->createTextFormat(
+        ukive::Renderer::createTextFormat(
             mFontFamilyName,
             mTextSize,
             L"en-US",
@@ -402,7 +402,7 @@ namespace ukive {
         range.startPosition = 0;
         range.length = mBaseText->length();
 
-        getWindow()->getRenderer()->createTextLayout(
+        ukive::Renderer::createTextLayout(
             mBaseText->toString(),
             mTextFormat.get(),
             maxWidth,

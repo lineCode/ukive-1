@@ -4,6 +4,8 @@
 
 #include "ukive/utils/hresult_utils.h"
 
+#define RADIUS 64
+
 
 namespace shell {
 
@@ -58,7 +60,6 @@ namespace shell {
 
     HRESULT ShadowTransform::SetElevation(float elevation) {
         const_buffer_.elevation = elevation;
-        expanded_ = std::ceil(elevation) * 2;
 
         RH(draw_info_->SetPixelShaderConstantBuffer(
             reinterpret_cast<BYTE*>(&const_buffer_), sizeof(const_buffer_)));
@@ -100,10 +101,10 @@ namespace shell {
             return E_INVALIDARG;
         }
 
-        (*pOutputRect).left = input_rect_.left - expanded_;
-        (*pOutputRect).top = input_rect_.top - expanded_;
-        (*pOutputRect).right = input_rect_.right + expanded_;
-        (*pOutputRect).bottom = input_rect_.bottom + expanded_;
+        (*pOutputRect).left = input_rect_.left - RADIUS;
+        (*pOutputRect).top = input_rect_.top - RADIUS;
+        (*pOutputRect).right = input_rect_.right + RADIUS;
+        (*pOutputRect).bottom = input_rect_.bottom + RADIUS;
 
         // Indicate that the image's opacity has not changed.
         *pOutputOpaqueSubRect = pInputOpaqueSubRects[0];

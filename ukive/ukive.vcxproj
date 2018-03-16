@@ -179,8 +179,10 @@
     <ClInclude Include="graphics\cursor.h" />
     <ClInclude Include="graphics\device_lost_notifier.h" />
     <ClInclude Include="graphics\direct3d\scene.h" />
+    <ClInclude Include="graphics\direct3d\space.h" />
     <ClInclude Include="graphics\drawing_object_manager.h" />
     <ClInclude Include="graphics\graphic_device_manager.h" />
+    <ClInclude Include="graphics\layered_renderer.h" />
     <ClInclude Include="graphics\matrix.h" />
     <ClInclude Include="graphics\rect.h" />
     <ClInclude Include="graphics\renderer.h" />
@@ -284,8 +286,10 @@
     <ClCompile Include="graphics\color.cpp" />
     <ClCompile Include="graphics\cursor.cpp" />
     <ClCompile Include="graphics\direct3d\scene.cpp" />
+    <ClCompile Include="graphics\direct3d\space.cpp" />
     <ClCompile Include="graphics\drawing_object_manager.cpp" />
     <ClCompile Include="graphics\graphic_device_manager.cpp" />
+    <ClCompile Include="graphics\layered_renderer.cpp" />
     <ClCompile Include="graphics\matrix.cpp" />
     <ClCompile Include="graphics\rect.cpp" />
     <ClCompile Include="graphics\renderer.cpp" />

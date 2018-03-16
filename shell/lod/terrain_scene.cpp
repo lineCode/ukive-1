@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "ukive/event/input_event.h"
-#include "ukive/graphics/renderer.h"
+#include "ukive/graphics/direct3d/space.h"
 #include "ukive/graphics/drawing_object_manager.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/direct3d_view.h"
@@ -45,13 +45,13 @@ namespace shell {
 
         mLodGenerator = new LodGenerator(8192, 5);
 
-        HRESULT hr = ukive::Renderer::createVertexBuffer(
+        HRESULT hr = ukive::Space::createVertexBuffer(
             mLodGenerator->getVertices(), sizeof(TerrainVertexData),
             mLodGenerator->getVertexCount(), mVertexBuffer);
         if (FAILED(hr))
             throw std::runtime_error("");
 
-        hr = ukive::Renderer::createIndexBuffer(
+        hr = ukive::Space::createIndexBuffer(
             mLodGenerator->getIndices(),
             mLodGenerator->getMaxIndexCount(), mIndexBuffer);
         if (FAILED(hr))
@@ -76,7 +76,7 @@ namespace shell {
             ->getByTag(kNormalCube);
         if (object != nullptr)
         {
-            D3D11_MAPPED_SUBRESOURCE source = ukive::Renderer::lockResource(object->vertexBuffer);
+            D3D11_MAPPED_SUBRESOURCE source = ukive::Space::lockResource(object->vertexBuffer);
             if (source.pData != nullptr)
             {
                 auto *modelVertexData = (ModelVertexData*)source.pData;
@@ -91,7 +91,7 @@ namespace shell {
                     modelVertexData[i].texcoord = ((ModelVertexData*)object->vertices)[i].texcoord;
                 }
 
-                ukive::Renderer::unlockResource(object->vertexBuffer);
+                ukive::Space::unlockResource(object->vertexBuffer);
             }
         }
     }
@@ -99,7 +99,7 @@ namespace shell {
     void TerrainScene::updateLodTerrain()
     {
         D3D11_MAPPED_SUBRESOURCE source
-            = ukive::Renderer::lockResource(mIndexBuffer);
+            = ukive::Space::lockResource(mIndexBuffer);
         if (source.pData != nullptr)
         {
             int* indices = (int*)source.pData;
@@ -111,7 +111,7 @@ namespace shell {
 
             mLodGenerator->renderLodTerrain(*vPosition, wvpMatrix, indices);
 
-            ukive::Renderer::unlockResource(mIndexBuffer);
+            ukive::Space::unlockResource(mIndexBuffer);
         }
     }
 
@@ -200,13 +200,13 @@ namespace shell {
 
             mLodGenerator = new LodGenerator(8192, level);
 
-            HRESULT hr = ukive::Renderer::createVertexBuffer(
+            HRESULT hr = ukive::Space::createVertexBuffer(
                 mLodGenerator->getVertices(), sizeof(TerrainVertexData),
                 mLodGenerator->getVertexCount(), mVertexBuffer);
             if (FAILED(hr))
                 throw std::runtime_error("");
 
-            hr = ukive::Renderer::createIndexBuffer(
+            hr = ukive::Space::createIndexBuffer(
                 mLodGenerator->getIndices(),
                 mLodGenerator->getMaxIndexCount(), mIndexBuffer);
             if (FAILED(hr))
@@ -381,14 +381,14 @@ namespace shell {
         mAssistConfigure->active();
         mAssistConfigure->setMatrix(wvpMatrixTransposed);
 
-        ukive::Renderer::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-        ukive::Renderer::drawObjects(getDrawingObjectManager()->getByTag(kWorldAxis));
+        ukive::Space::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+        ukive::Space::drawObjects(getDrawingObjectManager()->getByTag(kWorldAxis));
 
         mTerrainConfigure->active();
         mTerrainConfigure->setMatrix(wvpMatrixTransposed);
 
-        ukive::Renderer::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        ukive::Renderer::draw(mVertexBuffer, mIndexBuffer, sizeof(TerrainVertexData), mLodGenerator->getIndexCount());
+        ukive::Space::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        ukive::Space::draw(mVertexBuffer, mIndexBuffer, sizeof(TerrainVertexData), mLodGenerator->getIndexCount());
 
         //ukive::Renderer::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         //ukive::Renderer::drawObjects(getDrawingObjectManager()->getByTag(155));

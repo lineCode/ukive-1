@@ -1,4 +1,4 @@
-#define RADIUS    12
+#define RADIUS    64
 #define DIAMETER  (RADIUS * 2 + 1)
 
 
@@ -79,7 +79,7 @@ bool isInOval(float x, float y) {
 }
 
 bool isInOutline(float x, float y) {
-    return isInRoundRect(x, y);
+    return isInRect(x, y);
 }
 
 float4 getColor(float x, float y) {

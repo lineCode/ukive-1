@@ -1,5 +1,6 @@
 ﻿#include "text_window.h"
 
+#include "ukive/log.h"
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/layout/linear_layout.h"
@@ -60,7 +61,7 @@ namespace shell {
         editorTV->setId(ID_TV_EDITOR);
         editorTV->setIsEditable(true);
         editorTV->setIsSelectable(true);
-        editorTV->setFontFamilyName(L"Consolas");
+        //editorTV->setFontFamilyName(L"Consolas");
         editorTV->setTextSize(14);
         editorTV->setPadding(18, 18, 18, 18);
         editorTV->setLineSpacing(true, 1.2f);

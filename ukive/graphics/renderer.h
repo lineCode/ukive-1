@@ -2,7 +2,7 @@
 #define UKIVE_GRAPHICS_RENDERER_H_
 
 #include <functional>
-#include <list>
+#include <vector>
 
 #include "ukive/graphics/drawing_object_manager.h"
 #include "ukive/graphics/graphic_device_manager.h"
@@ -15,7 +15,6 @@ namespace ukive {
 
     class Canvas;
     class Window;
-    class GraphicDeviceManager;
     class SwapChainResizeNotifier;
 
     class Renderer
@@ -24,27 +23,18 @@ namespace ukive {
         Renderer();
         ~Renderer();
 
-        HRESULT init(Window *window);
+        HRESULT init(Window* window);
         HRESULT resize();
         bool render(
             Color bkColor,
             std::function<void()> renderCallback);
         void close();
 
-        HRESULT drawShadow(float elevation, float alpha, ID2D1Bitmap *bitmap);
+        HRESULT drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap);
 
-        static void drawObjects(DrawingObjectManager::DrawingObject *object);
-        static void draw(ID3D11Buffer* vertices, ID3D11Buffer* indices, int structSize, int indexCount);
-
-        void addSwapChainResizeNotifier(SwapChainResizeNotifier *notifier);
-        void removeSwapChainResizeNotifier(SwapChainResizeNotifier *notifier);
+        void addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
+        void removeSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
         void removeAllSwapChainResizeNotifier();
-
-        static void setVertexShader(ID3D11VertexShader *shader);
-        static void setPixelShader(ID3D11PixelShader *shader);
-        static void setInputLayout(ID3D11InputLayout *inputLayout);
-        static void setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology);
-        static void setConstantBuffers(UINT startSlot, UINT NumBuffers, ID3D11Buffer *const *ppConstantBuffers);
 
         ComPtr<ID2D1Effect> getShadowEffect();
         ComPtr<ID2D1Effect> getAffineTransEffect();
@@ -52,48 +42,38 @@ namespace ukive {
         ComPtr<ID2D1DeviceContext> getD2DDeviceContext();
 
         HRESULT createBitmapRenderTarget(
-            IDXGISurface *dxgiSurface, ID2D1Bitmap1 **bitmap);
+            IDXGISurface* dxgiSurface, ID2D1Bitmap1** bitmap);
         HRESULT createCompatBitmapRenderTarget(
-            float width, float height, ID2D1BitmapRenderTarget **bRT);
+            float width, float height, ID2D1BitmapRenderTarget** bRT);
         HRESULT createDXGISurfaceRenderTarget(
-            IDXGISurface *dxgiSurface, ID2D1RenderTarget **renderTarget);
+            IDXGISurface* dxgiSurface, ID2D1RenderTarget** renderTarget);
         HRESULT createWindowRenderTarget(
             HWND handle, unsigned int width, unsigned int height,
-            ID2D1HwndRenderTarget **renderTarget);
+            ID2D1HwndRenderTarget** renderTarget);
 
         static HRESULT createTextFormat(
             const string16 fontFamilyName,
             float fontSize, string16 localeName,
-            IDWriteTextFormat **textFormat);
+            IDWriteTextFormat** textFormat);
         static HRESULT createTextLayout(
-            const string16 text, IDWriteTextFormat *textFormat,
+            const string16 text, IDWriteTextFormat* textFormat,
             float maxWidth, float maxHeight,
-            IDWriteTextLayout **textLayout);
-
-        static HRESULT createVertexShader(
-            const string16 fileName,
-            D3D11_INPUT_ELEMENT_DESC *polygonLayout,
-            UINT numElements,
-            ID3D11VertexShader **vertexShader,
-            ID3D11InputLayout **inputLayout);
-        static HRESULT createPixelShader(
-            const string16 fileName,
-            ID3D11PixelShader **pixelShader);
-
-        static HRESULT createVertexBuffer(
-            void *vertices, UINT structSize, UINT vertexCount, ID3D11Buffer *&vertexBuffer);
-        static HRESULT createIndexBuffer(int *indices, UINT indexCount, ID3D11Buffer *&indexBuffer);
-        static HRESULT createConstantBuffer(UINT size, ID3D11Buffer **buffer);
-
-        static D3D11_MAPPED_SUBRESOURCE lockResource(ID3D11Resource *resource);
-        static void unlockResource(ID3D11Resource *resource);
+            IDWriteTextLayout** textLayout);
 
     private:
         HRESULT createRenderResource();
         void releaseRenderResource();
 
-        Window *owner_window_;
-        std::list<SwapChainResizeNotifier*> sc_resize_notifier_list_;
+        HRESULT createLayeredBRT();
+        HRESULT createSoftwareBRT();
+        HRESULT createSwapchainBRT();
+
+        HRESULT ResizeLayeredBRT();
+        HRESULT ResizeSoftwareBRT();
+        HRESULT ResizeSwapchainBRT();
+
+        Window* owner_window_;
+        std::vector<SwapChainResizeNotifier*> sc_resize_notifier_list_;
 
         ComPtr<IDXGISwapChain1> swapchain_;
         ComPtr<ID2D1Bitmap1> bitmap_render_target_;

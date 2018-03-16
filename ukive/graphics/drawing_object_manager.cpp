@@ -1,6 +1,6 @@
 ﻿#include "drawing_object_manager.h"
 
-#include "ukive/graphics/renderer.h"
+#include "ukive/graphics/direct3d/space.h"
 #include "ukive/utils/hresult_utils.h"
 #include "ukive/log.h"
 
@@ -39,14 +39,14 @@ namespace ukive {
         dObject->vertexStructSize = structSize;
         dObject->indexCount = indexCount;
 
-        HRESULT hr = Renderer::createVertexBuffer(
+        HRESULT hr = Space::createVertexBuffer(
             vertices, dObject->vertexStructSize, vertexCount, dObject->vertexBuffer);
         if (FAILED(hr)) {
             Log::e(L"DrawingObjectManager", L"invalid params.");
             return;
         }
 
-        hr = Renderer::createIndexBuffer(
+        hr = Space::createIndexBuffer(
             indices, indexCount, dObject->indexBuffer);
         if (FAILED(hr)) {
             Log::e(L"DrawingObjectManager", L"invalid params.");

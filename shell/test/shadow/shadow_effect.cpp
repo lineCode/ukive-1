@@ -7,8 +7,8 @@
 #include "ukive/log.h"
 #include "shadow_transform.h"
 
-#define RADIUS 12
-#define ELEVATION 16
+#define RADIUS 64
+#define ELEVATION (RADIUS / 2)
 
 
 namespace {
@@ -167,7 +167,7 @@ namespace shell {
 
         HRESULT hr = pFactory->RegisterEffectFromString(
             CLSID_ShadowEffect,  // GUID defined in class header file.
-            contents.c_str(),    // UCS-2BE BOM ±àÂë¡£²»½ÓÊÜ UTF-8 ±àÂë¡£
+            contents.c_str(),    // UCS-2BE BOM ±àÂë¡£
             bindings,            // The previously-defined property bindings array.
             ARRAYSIZE(bindings), // Number of entries in the property bindings array.
             CreateEffect         // Static method that returns an instance of the effect's class.

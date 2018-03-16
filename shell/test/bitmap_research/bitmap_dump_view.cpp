@@ -45,7 +45,7 @@ namespace shell {
         scale_factor_ = 1.f;
         cell_width_ = kCellWidth;
 
-        getWindow()->getRenderer()->createTextFormat(
+        ukive::Renderer::createTextFormat(
             L"Consolas", 15, L"en-US", &text_format_);
         text_format_->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
         text_format_->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);

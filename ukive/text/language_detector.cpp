@@ -64,8 +64,7 @@ namespace ukive {
             for (DWORD i = 0; i < bag.dwRangesCount; ++i)
             {
                 MAPPING_DATA_RANGE range = bag.prgResultRanges[i];
-                std::wstring language((wchar_t*)range.pData, range.dwDataSize / 2);
-                range.dwStartIndex;
+                std::wstring language((wchar_t*)range.pData);
             }
 
             result = ::MappingFreePropertyBag(&bag);

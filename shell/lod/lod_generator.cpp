@@ -3,23 +3,23 @@
 #include <cmath>
 #include <fstream>
 
+#include "ukive/log.h"
+
 #include "shell/lod/qtree_node.h"
 #include "shell/lod/terrain_configure.h"
 
 
 namespace shell {
 
-    LodGenerator::LodGenerator(float edgeLength, int maxLevel)
-    {
-        if (edgeLength <= 0 || maxLevel < 1)
-            throw std::invalid_argument("LodGenerator-Constructor(): invalid params.");
+    LodGenerator::LodGenerator(float edgeLength, int maxLevel) {
+        DCHECK(edgeLength > 0 && maxLevel >= 1);
 
         COE_ROUGH = 2.f;
         COE_DISTANCE = 30.f;
 
         mMaxLevel = maxLevel;
         mRowVertexCount = std::pow(2, mMaxLevel) + 1;
-        mVertexCount = mRowVertexCount*mRowVertexCount;
+        mVertexCount = mRowVertexCount * mRowVertexCount;
 
         mFlag = new char[mVertexCount];
         std::memset(mFlag, 0, mVertexCount);
@@ -28,8 +28,9 @@ namespace shell {
         altitudeFileName.append(L"\\altitude.raw");
 
         std::ifstream reader(altitudeFileName, std::ios::binary);
-        if (reader.fail())
+        if (reader.fail()) {
             throw std::runtime_error("LodGenerator-Constructor(): read file failed.");
+        }
         auto cpos = reader.tellg();
         reader.seekg(0, std::ios_base::end);
         size_t charSize = (size_t)reader.tellg();
@@ -39,8 +40,7 @@ namespace shell {
         reader.read(mAltitude, charSize);
 
         mVertices = new TerrainVertexData[mVertexCount];
-        for (int i = 0; i < mVertexCount; ++i)
-        {
+        for (int i = 0; i < mVertexCount; ++i) {
             int row = i / mRowVertexCount;
             int column = i % mRowVertexCount;
 
@@ -66,24 +66,20 @@ namespace shell {
         determineRoughAndBound(mRootQueue);
     }
 
-    LodGenerator::~LodGenerator()
-    {
-        if (mRootQueue)
-        {
+    LodGenerator::~LodGenerator() {
+        if (mRootQueue) {
             QTreeNode* curQueue = mRootQueue;
             QTreeNode* nextQueue = nullptr;
 
-            do
-            {
-                while (curQueue)
-                {
+            do {
+                while (curQueue) {
                     QTreeNode* node = curQueue;
                     curQueue = curQueue->next;
 
-                    for (int i = 0; i < 4; ++i)
-                    {
-                        if (node->child[i])
+                    for (int i = 0; i < 4; ++i) {
+                        if (node->child[i]) {
                             enqueue(nextQueue, node->child[i]);
+                        }
                     }
 
                     delete node;
@@ -101,16 +97,13 @@ namespace shell {
     }
 
 
-    inline void LodGenerator::enqueue(QTreeNode*& queue, QTreeNode* node)
-    {
+    inline void LodGenerator::enqueue(QTreeNode*& queue, QTreeNode* node) {
         node->next = queue;
         queue = node;
     }
 
-    inline QTreeNode* LodGenerator::dequeue(QTreeNode*& queue)
-    {
-        if (queue)
-        {
+    inline QTreeNode* LodGenerator::dequeue(QTreeNode*& queue) {
+        if (queue) {
             QTreeNode* node = queue;
             queue = queue->next;
             return node;
@@ -119,10 +112,8 @@ namespace shell {
         return nullptr;
     }
 
-    inline void LodGenerator::clearQueue(QTreeNode*& queue)
-    {
-        while (queue)
-        {
+    inline void LodGenerator::clearQueue(QTreeNode*& queue) {
+        while (queue) {
             QTreeNode* node = queue;
             queue = queue->next;
             delete node;
@@ -130,44 +121,37 @@ namespace shell {
     }
 
 
-    inline int LodGenerator::calInnerStep(QTreeNode* node)
-    {
+    inline int LodGenerator::calInnerStep(QTreeNode* node) {
         return (mRowVertexCount - 1) / std::pow(2, node->level + 1);
     }
 
-    inline int LodGenerator::calNeighborStep(QTreeNode* node)
-    {
+    inline int LodGenerator::calNeighborStep(QTreeNode* node) {
         return (mRowVertexCount - 1) / std::pow(2, node->level);
     }
 
-    inline int LodGenerator::calChildStep(QTreeNode* node)
-    {
+    inline int LodGenerator::calChildStep(QTreeNode* node) {
         return (mRowVertexCount - 1) / std::pow(2, node->level + 2);
     }
 
 
-    void LodGenerator::generateQuadTree()
-    {
+    void LodGenerator::generateQuadTree() {
         int level = 0;
-        QTreeNode *curQueue = nullptr;
-        QTreeNode *nextQueue = nullptr;
+        QTreeNode* curQueue = nullptr;
+        QTreeNode* nextQueue = nullptr;
 
         mRootQueue = new QTreeNode();
         generateRootNodeData(mRootQueue);
 
         curQueue = mRootQueue;
 
-        while (level < mMaxLevel - 1)
-        {
-            QTreeNode *iterator = curQueue;
-            while (iterator)
-            {
+        while (level < mMaxLevel - 1) {
+            QTreeNode* iterator = curQueue;
+            while (iterator) {
                 QTreeNode* parent = iterator;
                 iterator = iterator->next;
 
-                for (int i = 0; i < 4; ++i)
-                {
-                    QTreeNode *child = new QTreeNode();
+                for (int i = 0; i < 4; ++i) {
+                    QTreeNode* child = new QTreeNode();
                     generateChildNodeData(parent, child, level + 1, i);
 
                     parent->child[i] = child;
@@ -182,8 +166,7 @@ namespace shell {
         }
     }
 
-    void LodGenerator::generateRootNodeData(QTreeNode* root)
-    {
+    void LodGenerator::generateRootNodeData(QTreeNode* root) {
         root->level = 0;
         root->indexX = (mRowVertexCount - 1) / 2;
         root->indexY = (mRowVertexCount - 1) / 2;
@@ -221,14 +204,14 @@ namespace shell {
     }
 
 
-    void LodGenerator::determineRoughAndBound(QTreeNode *node)
+    void LodGenerator::determineRoughAndBound(QTreeNode* node)
     {
         //使用stack和while循环代替递归，防止调用栈溢出。
 
         //用于保存递归上下文的结构体。
         struct Snapshot
         {
-            QTreeNode *node;
+            QTreeNode* node;
 
             float d0, d1, d2, d3, d4;
             float d5, d6, d7, d8;
@@ -238,13 +221,13 @@ namespace shell {
             dx::XMFLOAT3 maxC;
 
             int stage;
-            Snapshot *behind;
+            Snapshot* behind;
         };
 
         //栈顶指针。
-        Snapshot *recursionStack = nullptr;
+        Snapshot* recursionStack = nullptr;
 
-        Snapshot *current = new Snapshot();
+        Snapshot* current = new Snapshot();
         current->node = node;
         current->stage = 0;
         current->behind = nullptr;
@@ -296,14 +279,11 @@ namespace shell {
                     float y = vData[i]->position.y;
                     float z = vData[i]->position.z;
 
-                    if (i == 0)
-                    {
+                    if (i == 0) {
                         minX = maxX = x;
                         minY = maxY = y;
                         minZ = maxZ = z;
-                    }
-                    else
-                    {
+                    } else {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
 
@@ -334,22 +314,20 @@ namespace shell {
                     dx::XMLoadFloat3(&vData[0]->position)));
                 current->nodeSize = dx::XMVectorGetX(length);
 
-                if (current->node->child[0])
-                {
+                if (current->node->child[0]) {
                     current->stage = 1;
                     current->behind = recursionStack;
                     recursionStack = current;
 
                     //递归，第一个子节点。
-                    Snapshot *next = new Snapshot();
+                    Snapshot* next = new Snapshot();
                     next->node = current->node->child[0];
                     next->stage = 0;
                     next->behind = recursionStack;
                     recursionStack = next;
-                }
-                else
-                {
+                } else {
                     current->maxD = current->d0;
+
                     if (current->d1 > current->maxD) current->maxD = current->d1;
                     if (current->d2 > current->maxD) current->maxD = current->d2;
                     if (current->d3 > current->maxD) current->maxD = current->d3;
@@ -366,26 +344,21 @@ namespace shell {
             case 1:  //第一次调用返回后。
             {
                 current->d5 = diff;
-                if (mincoord.x < current->minC.x)
-                    current->minC.x = mincoord.x;
-                if (mincoord.y < current->minC.y)
-                    current->minC.y = mincoord.y;
-                if (mincoord.z < current->minC.z)
-                    current->minC.z = mincoord.z;
 
-                if (maxcoord.x > current->maxC.x)
-                    current->maxC.x = maxcoord.x;
-                if (maxcoord.y > current->maxC.y)
-                    current->maxC.y = maxcoord.y;
-                if (maxcoord.z > current->maxC.z)
-                    current->maxC.z = maxcoord.z;
+                if (mincoord.x < current->minC.x) current->minC.x = mincoord.x;
+                if (mincoord.y < current->minC.y) current->minC.y = mincoord.y;
+                if (mincoord.z < current->minC.z) current->minC.z = mincoord.z;
+
+                if (maxcoord.x > current->maxC.x) current->maxC.x = maxcoord.x;
+                if (maxcoord.y > current->maxC.y) current->maxC.y = maxcoord.y;
+                if (maxcoord.z > current->maxC.z) current->maxC.z = maxcoord.z;
 
                 current->stage = 2;
                 current->behind = recursionStack;
                 recursionStack = current;
 
                 //递归，第二个子节点。
-                Snapshot *next = new Snapshot();
+                Snapshot* next = new Snapshot();
                 next->node = current->node->child[1];
                 next->stage = 0;
                 next->behind = recursionStack;
@@ -397,26 +370,21 @@ namespace shell {
             case 2:  //第二次调用返回后。
             {
                 current->d6 = diff;
-                if (mincoord.x < current->minC.x)
-                    current->minC.x = mincoord.x;
-                if (mincoord.y < current->minC.y)
-                    current->minC.y = mincoord.y;
-                if (mincoord.z < current->minC.z)
-                    current->minC.z = mincoord.z;
 
-                if (maxcoord.x > current->maxC.x)
-                    current->maxC.x = maxcoord.x;
-                if (maxcoord.y > current->maxC.y)
-                    current->maxC.y = maxcoord.y;
-                if (maxcoord.z > current->maxC.z)
-                    current->maxC.z = maxcoord.z;
+                if (mincoord.x < current->minC.x) current->minC.x = mincoord.x;
+                if (mincoord.y < current->minC.y) current->minC.y = mincoord.y;
+                if (mincoord.z < current->minC.z) current->minC.z = mincoord.z;
+
+                if (maxcoord.x > current->maxC.x) current->maxC.x = maxcoord.x;
+                if (maxcoord.y > current->maxC.y) current->maxC.y = maxcoord.y;
+                if (maxcoord.z > current->maxC.z) current->maxC.z = maxcoord.z;
 
                 current->stage = 3;
                 current->behind = recursionStack;
                 recursionStack = current;
 
                 //递归，第三个子节点。
-                Snapshot *next = new Snapshot();
+                Snapshot* next = new Snapshot();
                 next->node = current->node->child[2];
                 next->stage = 0;
                 next->behind = recursionStack;
@@ -428,19 +396,14 @@ namespace shell {
             case 3:  //第三次调用返回后。
             {
                 current->d7 = diff;
-                if (mincoord.x < current->minC.x)
-                    current->minC.x = mincoord.x;
-                if (mincoord.y < current->minC.y)
-                    current->minC.y = mincoord.y;
-                if (mincoord.z < current->minC.z)
-                    current->minC.z = mincoord.z;
 
-                if (maxcoord.x > current->maxC.x)
-                    current->maxC.x = maxcoord.x;
-                if (maxcoord.y > current->maxC.y)
-                    current->maxC.y = maxcoord.y;
-                if (maxcoord.z > current->maxC.z)
-                    current->maxC.z = maxcoord.z;
+                if (mincoord.x < current->minC.x) current->minC.x = mincoord.x;
+                if (mincoord.y < current->minC.y) current->minC.y = mincoord.y;
+                if (mincoord.z < current->minC.z) current->minC.z = mincoord.z;
+
+                if (maxcoord.x > current->maxC.x) current->maxC.x = maxcoord.x;
+                if (maxcoord.y > current->maxC.y) current->maxC.y = maxcoord.y;
+                if (maxcoord.z > current->maxC.z) current->maxC.z = maxcoord.z;
 
                 current->stage = 4;
                 current->behind = recursionStack;
@@ -458,23 +421,17 @@ namespace shell {
 
             case 4:   //第四次调用返回后。
             {
-                if (current->node->child[0])
-                {
+                if (current->node->child[0]) {
                     current->d8 = diff;
                     current->maxD = current->d0;
-                    if (mincoord.x < current->minC.x)
-                        current->minC.x = mincoord.x;
-                    if (mincoord.y < current->minC.y)
-                        current->minC.y = mincoord.y;
-                    if (mincoord.z < current->minC.z)
-                        current->minC.z = mincoord.z;
 
-                    if (maxcoord.x > current->maxC.x)
-                        current->maxC.x = maxcoord.x;
-                    if (maxcoord.y > current->maxC.y)
-                        current->maxC.y = maxcoord.y;
-                    if (maxcoord.z > current->maxC.z)
-                        current->maxC.z = maxcoord.z;
+                    if (mincoord.x < current->minC.x) current->minC.x = mincoord.x;
+                    if (mincoord.y < current->minC.y) current->minC.y = mincoord.y;
+                    if (mincoord.z < current->minC.z) current->minC.z = mincoord.z;
+
+                    if (maxcoord.x > current->maxC.x) current->maxC.x = maxcoord.x;
+                    if (maxcoord.y > current->maxC.y) current->maxC.y = maxcoord.y;
+                    if (maxcoord.z > current->maxC.z) current->maxC.z = maxcoord.z;
 
                     if (current->d1 > current->maxD) current->maxD = current->d1;
                     if (current->d2 > current->maxD) current->maxD = current->d2;
@@ -512,25 +469,26 @@ namespace shell {
         bool bottomAdjacent = false;
 
         if (node->indexX - step < 0
-            || mFlag[node->indexY*mRowVertexCount + node->indexX - step] != 0)
+            || mFlag[node->indexY*mRowVertexCount + node->indexX - step] != 0) {
             leftAdjacent = true;
+        }
 
         if (node->indexY - step < 0
-            || mFlag[(node->indexY - step)*mRowVertexCount + node->indexX] != 0)
+            || mFlag[(node->indexY - step)*mRowVertexCount + node->indexX] != 0) {
             topAdjacent = true;
+        }
 
         if (node->indexX + step > mRowVertexCount - 1
-            || mFlag[node->indexY*mRowVertexCount + node->indexX + step] != 0)
+            || mFlag[node->indexY*mRowVertexCount + node->indexX + step] != 0) {
             rightAdjacent = true;
+        }
 
         if (node->indexY + step > mRowVertexCount - 1
-            || mFlag[(node->indexY + step)*mRowVertexCount + node->indexX] != 0)
+            || mFlag[(node->indexY + step)*mRowVertexCount + node->indexX] != 0) {
             bottomAdjacent = true;
+        }
 
-        return (leftAdjacent
-            && topAdjacent
-            && rightAdjacent
-            && bottomAdjacent);
+        return (leftAdjacent && topAdjacent && rightAdjacent && bottomAdjacent);
     }
 
     bool LodGenerator::assessNodeCanDivide(
@@ -562,8 +520,9 @@ namespace shell {
     {
         int step = calNeighborStep(node);
 
-        if (!indexBuffer)
+        if (!indexBuffer) {
             indexBuffer = mIndices;
+        }
 
         bool skipLeft = false;
         bool skipTop = false;
@@ -571,20 +530,24 @@ namespace shell {
         bool skipBottom = false;
 
         if (node->indexX - step < 0
-            || mFlag[node->indexY*mRowVertexCount + node->indexX - step] == 0)
+            || mFlag[node->indexY*mRowVertexCount + node->indexX - step] == 0) {
             skipLeft = true;
+        }
 
         if (node->indexY - step < 0
-            || mFlag[(node->indexY - step)*mRowVertexCount + node->indexX] == 0)
+            || mFlag[(node->indexY - step)*mRowVertexCount + node->indexX] == 0) {
             skipTop = true;
+        }
 
         if (node->indexX + step > mRowVertexCount - 1
-            || mFlag[node->indexY*mRowVertexCount + node->indexX + step] == 0)
+            || mFlag[node->indexY*mRowVertexCount + node->indexX + step] == 0) {
             skipRight = true;
+        }
 
         if (node->indexY + step > mRowVertexCount - 1
-            || mFlag[(node->indexY + step)*mRowVertexCount + node->indexX] == 0)
+            || mFlag[(node->indexY + step)*mRowVertexCount + node->indexX] == 0) {
             skipBottom = true;
+        }
 
         int nodeStep = calInnerStep(node);
 
@@ -594,8 +557,7 @@ namespace shell {
         int leftBottomIndex = (node->indexY + nodeStep)*mRowVertexCount + node->indexX - nodeStep;
         int rightBottomIndex = (node->indexY + nodeStep)*mRowVertexCount + node->indexX + nodeStep;
 
-        if (!skipLeft)
-        {
+        if (!skipLeft) {
             int leftIndex = node->indexY*mRowVertexCount + node->indexX - nodeStep;
 
             indexBuffer[mIndexCount++] = centerIndex;
@@ -605,16 +567,13 @@ namespace shell {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = leftIndex;
             indexBuffer[mIndexCount++] = leftTopIndex;
-        }
-        else
-        {
+        } else {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = leftBottomIndex;
             indexBuffer[mIndexCount++] = leftTopIndex;
         }
 
-        if (!skipTop)
-        {
+        if (!skipTop) {
             int topIndex = (node->indexY - nodeStep)*mRowVertexCount + node->indexX;
 
             indexBuffer[mIndexCount++] = centerIndex;
@@ -624,16 +583,13 @@ namespace shell {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = topIndex;
             indexBuffer[mIndexCount++] = rightTopIndex;
-        }
-        else
-        {
+        } else {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = leftTopIndex;
             indexBuffer[mIndexCount++] = rightTopIndex;
         }
 
-        if (!skipRight)
-        {
+        if (!skipRight) {
             int rightIndex = node->indexY*mRowVertexCount + node->indexX + nodeStep;
 
             indexBuffer[mIndexCount++] = centerIndex;
@@ -643,16 +599,13 @@ namespace shell {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = rightIndex;
             indexBuffer[mIndexCount++] = rightBottomIndex;
-        }
-        else
-        {
+        } else {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = rightTopIndex;
             indexBuffer[mIndexCount++] = rightBottomIndex;
         }
 
-        if (!skipBottom)
-        {
+        if (!skipBottom) {
             int bottomIndex = (node->indexY + nodeStep)*mRowVertexCount + node->indexX;
 
             indexBuffer[mIndexCount++] = centerIndex;
@@ -662,9 +615,7 @@ namespace shell {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = bottomIndex;
             indexBuffer[mIndexCount++] = leftBottomIndex;
-        }
-        else
-        {
+        } else {
             indexBuffer[mIndexCount++] = centerIndex;
             indexBuffer[mIndexCount++] = rightBottomIndex;
             indexBuffer[mIndexCount++] = leftBottomIndex;
@@ -689,49 +640,38 @@ namespace shell {
         plane[5] = dx::XMVectorAdd(col3, col1);
 
         dx::XMFLOAT3 p, q;
-        for (unsigned int i = 0; i < 6; i++)
-        {
+        for (unsigned int i = 0; i < 6; i++) {
             plane[i] = dx::XMVector4Normalize(plane[i]);
 
             dx::XMFLOAT4 planeStore;
             dx::XMStoreFloat4(&planeStore, plane[i]);
 
-            if (planeStore.x > 0)
-            {
+            if (planeStore.x > 0) {
                 q.x = node->maxcoord.x;
                 p.x = node->mincoord.x;
-            }
-            else
-            {
+            } else {
                 p.x = node->maxcoord.x;
                 q.x = node->mincoord.x;
             }
 
-            if (planeStore.y > 0)
-            {
+            if (planeStore.y > 0) {
                 q.y = node->maxcoord.y;
                 p.y = node->mincoord.y;
-            }
-            else
-            {
+            } else {
                 p.y = node->maxcoord.y;
                 q.y = node->mincoord.y;
             }
 
-            if (planeStore.z > 0)
-            {
+            if (planeStore.z > 0) {
                 q.z = node->maxcoord.z;
                 p.z = node->mincoord.z;
-            }
-            else
-            {
+            } else {
                 p.z = node->maxcoord.z;
                 q.z = node->mincoord.z;
             }
 
             dx::XMVECTOR dot = dx::XMVector3Dot(plane[i], dx::XMLoadFloat3(&q));
-            if (dx::XMVectorGetX(dot) + planeStore.w < 0)
-            {
+            if (dx::XMVectorGetX(dot) + planeStore.w < 0) {
                 result = true;
                 break;
             }
@@ -743,7 +683,7 @@ namespace shell {
     void LodGenerator::constructNodeBound(QTreeNode *node, dx::XMFLOAT3 *bound)
     {
         int innerStep = calInnerStep(node);
-        TerrainVertexData *vData[9];
+        TerrainVertexData* vData[9];
 
         vData[0] = &mVertices[
             (node->indexY - innerStep)*mRowVertexCount + node->indexX - innerStep];
@@ -772,34 +712,24 @@ namespace shell {
         float minZ = 0.f;
         float maxZ = 0.f;
 
-        for (int i = 0; i < 9; ++i)
-        {
-            if (i == 0)
-            {
+        for (int i = 0; i < 9; ++i) {
+            if (i == 0) {
                 minX = maxX = vData[i]->position.x;
                 minY = maxY = vData[i]->position.y;
                 minZ = maxZ = vData[i]->position.z;
-            }
-            else
-            {
+            } else {
                 float x = vData[i]->position.x;
                 float y = vData[i]->position.y;
                 float z = vData[i]->position.z;
 
-                if (x < minX)
-                    minX = x;
-                if (x > maxX)
-                    maxX = x;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
 
-                if (y < minY)
-                    minY = y;
-                if (y > maxY)
-                    maxY = y;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
 
-                if (z < minZ)
-                    minZ = z;
-                if (z > maxZ)
-                    maxZ = z;
+                if (z < minZ) minZ = z;
+                if (z > maxZ) maxZ = z;
             }
         }
 
@@ -876,55 +806,45 @@ namespace shell {
         }
     }
 
-    void LodGenerator::setCoefficient(float c1, float c2)
-    {
+    void LodGenerator::setCoefficient(float c1, float c2) {
         COE_ROUGH = c1;
         COE_DISTANCE = c2;
     }
 
-    int LodGenerator::getLevel()
-    {
+    int LodGenerator::getLevel() {
         return mMaxLevel;
     }
 
-    float LodGenerator::getCoef1()
-    {
+    float LodGenerator::getCoef1() {
         return COE_ROUGH;
     }
 
-    float LodGenerator::getCoef2()
-    {
+    float LodGenerator::getCoef2() {
         return COE_DISTANCE;
     }
 
 
-    TerrainVertexData *LodGenerator::getVertices()
-    {
+    TerrainVertexData *LodGenerator::getVertices() {
         return mVertices;
     }
 
-    int LodGenerator::getVertexCount()
-    {
+    int LodGenerator::getVertexCount() {
         return mVertexCount;
     }
 
-    int LodGenerator::getRowVertexCount()
-    {
+    int LodGenerator::getRowVertexCount() {
         return mRowVertexCount;
     }
 
-    int* LodGenerator::getIndices()
-    {
+    int* LodGenerator::getIndices() {
         return mIndices;
     }
 
-    int LodGenerator::getIndexCount()
-    {
+    int LodGenerator::getIndexCount() {
         return mIndexCount;
     }
 
-    int LodGenerator::getMaxIndexCount()
-    {
+    int LodGenerator::getMaxIndexCount() {
         return mMaxIndexCount;
     }
 

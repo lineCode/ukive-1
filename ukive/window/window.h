@@ -40,7 +40,7 @@ namespace ukive {
         void close();
         void center();
 
-        void setTitle(const string16 &title);
+        void setTitle(const string16& title);
         void setX(int x);
         void setY(int y);
         void setPosition(int x, int y);
@@ -50,7 +50,7 @@ namespace ukive {
         void setMinWidth(int min_width);
         void setMinHeight(int min_height);
         void setCurrentCursor(Cursor cursor);
-        void setContentView(View *content);
+        void setContentView(View* content);
         void setBackgroundColor(Color color);
         void setStartupWindow(bool enable);
 
@@ -62,28 +62,28 @@ namespace ukive {
         int getMinHeight();
         int getClientWidth();
         int getClientHeight();
-        BaseLayout *getBaseLayout();
+        BaseLayout* getBaseLayout();
         Color getBackgroundColor();
-        Cycler *getCycler();
-        Renderer *getRenderer();
+        Cycler* getCycler();
+        Renderer* getRenderer();
         HWND getHandle();
-        AnimationManager *getAnimationManager();
+        AnimationManager* getAnimationManager();
 
         bool isShowing();
         bool isCursorInClient();
         bool isStartupWindow();
 
-        void captureMouse(View *v);
+        void captureMouse(View* v);
         void releaseMouse();
 
         //当一个widget获取到焦点时，应调用此方法。
-        void captureKeyboard(View *v);
+        void captureKeyboard(View* v);
         //当一个widget放弃焦点时，应调用此方法。
         void releaseKeyboard();
 
-        View *getMouseHolder();
+        View* getMouseHolder();
         unsigned int getMouseHolderRef();
-        View *getKeyboardHolder();
+        View* getKeyboardHolder();
 
         void invalidate();
         void invalidate(int left, int top, int right, int bottom);
@@ -96,33 +96,33 @@ namespace ukive {
         View* findViewById(int id);
 
         ContextMenu* startContextMenu(
-            ContextMenuCallback *callback, View *anchor, View::Gravity gravity);
-        TextActionMode* startTextActionMode(TextActionModeCallback *callback);
+            ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
+        TextActionMode* startTextActionMode(TextActionModeCallback* callback);
 
         float dpToPx(float dp);
         float pxToDp(int px);
 
-        virtual void onPreCreate(ClassInfo *info,
-            int *win_style, int *win_ex_style);
+        virtual void onPreCreate(ClassInfo* info,
+            int* win_style, int* win_ex_style);
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);
         virtual void onSetFocus();
         virtual void onKillFocus();
-        virtual void onDraw(const Rect &rect);
+        virtual void onDraw(const Rect& rect);
         virtual void onMove(int x, int y);
         virtual void onResize(
             int param, int width, int height,
             int client_width, int client_height);
-        virtual bool onMoving(Rect *rect);
-        virtual bool onResizing(int edge, Rect *rect);
+        virtual bool onMoving(Rect* rect);
+        virtual bool onResizing(int edge, Rect* rect);
         virtual bool onClose();
         virtual void onDestroy();
-        virtual bool onInputEvent(InputEvent *e);
+        virtual bool onInputEvent(InputEvent* e);
         virtual void onDpiChanged(int dpi_x, int dpi_y);
-        virtual bool onDataCopy(unsigned int id, unsigned int size, void *data);
+        virtual bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
-        virtual void onDrawCanvas(Canvas *canvas);
+        virtual void onDrawCanvas(Canvas* canvas);
 
     private:
         static const int SCHEDULE_RENDER = 0;
@@ -131,33 +131,33 @@ namespace ukive {
         class UpdateCycler : public Cycler
         {
         public:
-            UpdateCycler(Window *window)
+            UpdateCycler(Window* window)
                 :win_(window) {}
 
-            void handleMessage(Message *msg) override;
+            void handleMessage(Message* msg) override;
         private:
-            Window * win_;
+            Window*  win_;
         };
 
         class AnimStateChangedListener
             : public AnimationManager::OnStateChangedListener
         {
         public:
-            AnimStateChangedListener(Window *window)
+            AnimStateChangedListener(Window* window)
                 :win_(window) {}
 
             void onStateChanged(
                 UI_ANIMATION_MANAGER_STATUS newStatus,
                 UI_ANIMATION_MANAGER_STATUS previousStatus) override;
         private:
-            Window * win_;
+            Window*  win_;
         };
 
         class AnimTimerEventListener
             : public AnimationManager::OnTimerEventListener
         {
         public:
-            AnimTimerEventListener(Window *window)
+            AnimTimerEventListener(Window* window)
                 :window_(window) {}
 
             void onPreUpdate() override;
@@ -165,31 +165,31 @@ namespace ukive {
             void onRenderingTooSlow(unsigned int fps) override;
 
         private:
-            Window *window_;
+            Window* window_;
         };
 
 
         std::unique_ptr<WindowImpl> impl_;
 
-        Canvas *canvas_;
-        Renderer *renderer_;
+        Canvas* canvas_;
+        Renderer* renderer_;
 
-        Cycler *labour_cycler_;
-        BaseLayout *base_layout_;
+        Cycler* labour_cycler_;
+        BaseLayout* base_layout_;
 
-        View *mouse_holder_;
-        View *focus_holder_;
-        View *focus_holder_backup_;
+        View* mouse_holder_;
+        View* focus_holder_;
+        View* focus_holder_backup_;
         unsigned int mouse_holder_ref_;
 
         std::shared_ptr<ContextMenu> context_menu_;
         std::shared_ptr<TextActionMode> text_action_mode_;
 
-        AnimationManager *mAnimationManager;
-        AnimationManager::OnStateChangedListener *mStateChangedListener;
+        AnimationManager* mAnimationManager;
+        AnimationManager::OnStateChangedListener* mStateChangedListener;
 
-        AnimStateChangedListener *mAnimStateChangedListener;
-        AnimTimerEventListener *mAnimTimerEventListener;
+        AnimStateChangedListener* mAnimStateChangedListener;
+        AnimTimerEventListener* mAnimTimerEventListener;
 
         Color background_color_;
         bool is_startup_window_;

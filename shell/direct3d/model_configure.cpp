@@ -1,6 +1,6 @@
 ﻿#include "model_configure.h"
 
-#include "ukive/graphics/renderer.h"
+#include "ukive/graphics/direct3d/space.h"
 #include "ukive/utils/hresult_utils.h"
 #include "ukive/utils/string_utils.h"
 
@@ -56,18 +56,18 @@ namespace shell {
 
         ukive::string16 shaderFileName(::_wgetcwd(nullptr, 0));
 
-        RH(ukive::Renderer::createVertexShader(
+        RH(ukive::Space::createVertexShader(
             shaderFileName + L"\\model_vertex_shader.cso",
             polygonLayout, numElements, &mVertexShader, &mInputLayout));
 
-        RH(ukive::Renderer::createPixelShader(
+        RH(ukive::Space::createPixelShader(
             shaderFileName + L"\\model_pixel_shader.cso",
             &mPixelShader));
 
-        RH(ukive::Renderer::createConstantBuffer(
+        RH(ukive::Space::createConstantBuffer(
             sizeof(MatrixConstBuffer), &mMatrixConstBuffer));
 
-        RH(ukive::Renderer::createConstantBuffer(
+        RH(ukive::Space::createConstantBuffer(
             sizeof(PhongLightConstBuffer), &mModelLightConstBuffer));
 
         return S_OK;
@@ -75,16 +75,16 @@ namespace shell {
 
     void ModelConfigure::active()
     {
-        ukive::Renderer::setVertexShader(mVertexShader.get());
-        ukive::Renderer::setPixelShader(mPixelShader.get());
-        ukive::Renderer::setInputLayout(mInputLayout.get());
+        ukive::Space::setVertexShader(mVertexShader.get());
+        ukive::Space::setPixelShader(mPixelShader.get());
+        ukive::Space::setInputLayout(mInputLayout.get());
     }
 
     void ModelConfigure::reset()
     {
-        ukive::Renderer::setVertexShader(mVertexShader.get());
-        ukive::Renderer::setPixelShader(mPixelShader.get());
-        ukive::Renderer::setInputLayout(mInputLayout.get());
+        ukive::Space::setVertexShader(mVertexShader.get());
+        ukive::Space::setPixelShader(mPixelShader.get());
+        ukive::Space::setInputLayout(mInputLayout.get());
     }
 
     void ModelConfigure::close()
@@ -95,11 +95,11 @@ namespace shell {
     {
         D3D11_MAPPED_SUBRESOURCE resource;
 
-        resource = ukive::Renderer::lockResource(mMatrixConstBuffer.get());
+        resource = ukive::Space::lockResource(mMatrixConstBuffer.get());
         ((MatrixConstBuffer*)resource.pData)->mWVP = matrix;
-        ukive::Renderer::unlockResource(mMatrixConstBuffer.get());
+        ukive::Space::unlockResource(mMatrixConstBuffer.get());
 
-        ukive::Renderer::setConstantBuffers(0, 1, &mMatrixConstBuffer);
+        ukive::Space::setConstantBuffers(0, 1, &mMatrixConstBuffer);
     }
 
 }
