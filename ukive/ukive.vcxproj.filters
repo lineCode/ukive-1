@@ -276,6 +276,15 @@
     <ClCompile Include="graphics\direct3d\space.cpp">
       <Filter>graphics\direct3d</Filter>
     </ClCompile>
+    <ClCompile Include="views\list\view_holder_recycler.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\overlay_scroll_bar.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\point.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -591,6 +600,15 @@
     </ClInclude>
     <ClInclude Include="graphics\direct3d\space.h">
       <Filter>graphics\direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\view_holder_recycler.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\overlay_scroll_bar.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\point.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

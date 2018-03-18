@@ -172,11 +172,11 @@ namespace shell {
     }
 
     bool BitmapDumpView::isCellVisible(const ukive::RectF &rect) {
-        ukive::Rect real_rect(rect.left, rect.top,
+        ukive::RectF real_rect(rect.left, rect.top,
             rect.right - rect.left, rect.bottom - rect.top);
         matrix_.transformRect(&real_rect);
 
-        return getContentBoundsInThis().intersect(real_rect);
+        return getContentBoundsInThis().intersect(real_rect.toRect());
     }
 
 }

@@ -11,32 +11,8 @@
 namespace ukive {
 
     class ListView;
-
-    class ViewRecycler
-    {
-    public:
-        ViewRecycler(ViewGroup *parent)
-            :parent_(parent) {}
-
-        void AddViewHolder(ListAdapter::ViewHolder *holder);
-        void AddViewHolder(ListAdapter::ViewHolder *holder, size_t pos);
-        void AddRecycledViewHolder(ListAdapter::ViewHolder *holder);
-        void RecycleViewHolder(View *item_view);
-        void RecycleViewHolders(size_t start_pos);
-        void RecycleViewHolders(size_t start_pos, size_t length);
-        ListAdapter::ViewHolder* ReuseViewHolder();
-        ListAdapter::ViewHolder* ReuseViewHolder(size_t pos);
-        ListAdapter::ViewHolder* GetVisibleViewHolder(size_t pos);
-
-        size_t Size();
-        void ClearAll();
-
-    private:
-        ViewGroup *parent_;
-
-        std::list<ListAdapter::ViewHolder*> visible_view_holder_;
-        std::vector<ListAdapter::ViewHolder*> recycled_view_holder_;
-    };
+    class ViewHolderRecycler;
+    class OverlayScrollBar;
 
     class ListOperator
     {
@@ -91,7 +67,6 @@ namespace ukive {
         void initListView();
 
         int DetermineVerticalScroll(int dy);
-
         void OffsetChildViewTopAndBottom(int dy);
 
         ListAdapter::ViewHolder* GetFirstVisibleViewHolder();
@@ -100,6 +75,7 @@ namespace ukive {
         void RecycleTopViews(int offset);
         void RecycleBottomViews(int offset);
 
+        void UpdateOverlayScrollBar();
         void RecordCurPositionAndOffset();
 
         int FillTopChildViews(int dy);
@@ -109,10 +85,12 @@ namespace ukive {
         void ScrollToPosition(size_t position, int offset = 0);
         void SmoothScrollToPosition(size_t position, int offset = 0);
 
-        // Overriden from ListScrollDelegate:
+        void ScrollByScrollBar(int dy);
+
+        // ListScrollDelegate:
         //void OnScroll(float dx, float dy) OVERRIDE;
 
-        // Overriden from ListDataSetListener:
+        // ListDataSetListener:
         void OnDataSetChanged() override;
         void OnItemRangeInserted(size_t start_position, size_t length) override;
         void OnItemRangeChanged(size_t start_position, size_t length) override;
@@ -125,11 +103,10 @@ namespace ukive {
         int cur_offset_in_position_;
         bool initial_layouted_;
 
-        std::unique_ptr<ListAdapter> list_adapter_;
-
-        ViewRecycler *view_recycler_;
-
         std::vector<Operation> op_list_;
+        std::unique_ptr<ListAdapter> list_adapter_;
+        std::unique_ptr<OverlayScrollBar> scroll_bar_;
+        std::unique_ptr<ViewHolderRecycler> view_recycler_;
     };
 
 }

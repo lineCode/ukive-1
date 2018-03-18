@@ -6,7 +6,7 @@
 
 namespace ukive {
 
-    class Rect;
+    class RectF;
 
     class Matrix {
     public:
@@ -46,7 +46,7 @@ namespace ukive {
         void preSkew(float angle_x, float angle_y, float cx, float cy);
         void postSkew(float angle_x, float angle_y, float cx, float cy);
 
-        void transformRect(Rect *rect);
+        void transformRect(RectF* rect);
 
     private:
         D2D1::Matrix3x2F matrix_native_;

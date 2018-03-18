@@ -44,10 +44,10 @@ namespace ukive {
             CENTER_VERTICAL,
         };
 
-        View(Window *w);
+        View(Window* w);
         virtual ~View();
 
-        ViewAnimator *animate();
+        ViewAnimator* animate();
 
         void setId(int id);
         void setX(double x);
@@ -72,10 +72,10 @@ namespace ukive {
         void setScrollY(int y);
         void setVisibility(int visibility);
         void setEnabled(bool enable);
-        void setBackground(Drawable *drawable);
-        void setForeground(Drawable *drawable);
+        void setBackground(Drawable* drawable);
+        void setForeground(Drawable* drawable);
         void setPadding(int left, int top, int right, int bottom);
-        void setLayoutParams(LayoutParams *params);
+        void setLayoutParams(LayoutParams* params);
         void setIsInputEventAtLast(bool isInput);
         void setPressed(bool pressed);
         void setCurrentCursor(Cursor cursor);
@@ -83,14 +83,12 @@ namespace ukive {
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
         void setCanConsumeMouseEvent(bool enable);
-
         void setMinimumWidth(int width);
         void setMinimumHeight(int height);
+        void setOnClickListener(OnClickListener* l);
 
-        void setOnClickListener(OnClickListener *l);
-
-        //设置该 view 的父 view，该方法由框架调用。
-        void setParent(View *parent);
+        // Invoked by framework.
+        void setParent(View* parent);
 
         void offsetTopAndBottom(int dy);
         void offsetLeftAndRight(int dx);
@@ -127,21 +125,29 @@ namespace ukive {
         int getPaddingRight();
         int getPaddingBottom();
 
-        LayoutParams *getLayoutParams();
-        View *getParent();
+        LayoutParams* getLayoutParams();
+        View* getParent();
 
-        Window *getWindow();
-        Drawable *getBackground();
-        Drawable *getForeground();
+        Window* getWindow();
+        Drawable* getBackground();
+        Drawable* getForeground();
 
+        // bounds relative to parent.
         Rect getBounds();
+
+        // bounds relative to window.
         Rect getBoundsInWindow();
+
+        // bounds relative to screen.
         Rect getBoundsInScreen();
 
+        // getBounds() with paddings.
         Rect getContentBounds();
+
+        // getContentBounds() relative to (0, 0)
         Rect getContentBoundsInThis();
 
-        virtual View *findViewById(int id);
+        virtual View* findViewById(int id);
 
         bool isEnabled();
         bool isAttachedToWindow();
@@ -150,15 +156,15 @@ namespace ukive {
         bool hasFocus();
         bool isFocusable();
         bool isLayouted();
-        bool isLocalMouseInThis(InputEvent *e);
-        bool isParentMouseInThis(InputEvent *e);
+        bool isLocalMouseInThis(InputEvent* e);
+        bool isParentMouseInThis(InputEvent* e);
         bool isReceiveOutsideInputEvent();
         bool canConsumeMouseEvent();
 
         void scrollTo(int x, int y);
         void scrollBy(int dx, int dy);
 
-        void draw(Canvas *canvas);
+        void draw(Canvas* canvas);
         void measure(int width, int height, int widthMode, int heightMode);
         void layout(int left, int top, int right, int bottom);
 
@@ -171,7 +177,7 @@ namespace ukive {
         void discardFocus();
         void discardPendingOperations();
 
-        virtual bool dispatchInputEvent(InputEvent *e);
+        virtual bool dispatchInputEvent(InputEvent* e);
         virtual void dispatchWindowFocusChanged(bool windowFocus);
         virtual void dispatchWindowDpiChanged(int dpi_x, int dpi_y);
 
@@ -179,31 +185,31 @@ namespace ukive {
         virtual void onDetachedFromWindow();
 
     protected:
+        void setMeasuredDimension(int width, int height);
+
         void performClick();
 
         bool needDrawBackground();
         bool needDrawForeground();
 
-        void drawBackground(Canvas *canvas);
-        void drawForeground(Canvas *canvas);
+        void drawBackground(Canvas* canvas);
+        void drawForeground(Canvas* canvas);
 
-        void setMeasuredDimension(int width, int height);
-
-        virtual void dispatchDraw(Canvas *canvas);
+        virtual void dispatchDraw(Canvas* canvas);
         virtual void dispatchDiscardFocus();
         virtual void dispatchDiscardPendingOperations();
 
-        virtual void onDraw(Canvas *canvas);
+        virtual void onDraw(Canvas* canvas);
         virtual void onMeasure(
             int width, int height,
             int widthMode, int heightMode);
         virtual void onLayout(
             bool changed, bool size_changed,
             int left, int top, int right, int bottom);
-        virtual bool onInputEvent(InputEvent *e);
+        virtual bool onInputEvent(InputEvent* e);
 
         virtual bool onCheckIsTextEditor();
-        virtual InputConnection *onCreateInputConnection();
+        virtual InputConnection* onCreateInputConnection();
 
         virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight);
         virtual void onVisibilityChanged(int visibility);
@@ -216,13 +222,13 @@ namespace ukive {
         class ClickPerformer
             : public Executable {
         public:
-            ClickPerformer(View *v)
+            ClickPerformer(View* v)
                 :view_(v) {}
             void run() override {
                 view_->performClick();
             }
         private:
-            View *view_;
+            View* view_;
         };
 
 
@@ -252,7 +258,7 @@ namespace ukive {
         bool is_receive_outside_input_event_;
         bool can_consume_mouse_event_;
 
-        Window *window_;
+        Window* window_;
         std::unique_ptr<Drawable> bg_drawable_;
         std::unique_ptr<Drawable> fg_drawable_;
 
@@ -275,11 +281,11 @@ namespace ukive {
 
         std::unique_ptr<ViewAnimator> animator_;
 
-        View *parent_;
-        LayoutParams *layout_params_;
-        OnClickListener *click_listener_;
-        ClickPerformer *click_performer_;
-        InputConnection *input_connection_;
+        View* parent_;
+        LayoutParams* layout_params_;
+        OnClickListener* click_listener_;
+        ClickPerformer* click_performer_;
+        InputConnection* input_connection_;
     };
 
 }

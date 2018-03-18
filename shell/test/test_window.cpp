@@ -48,7 +48,8 @@ namespace shell {
 
         ::SetLayeredWindowAttributes(getHandle(), 0, 255, LWA_ALPHA);
 
-        inflateGroup();
+        //inflateGroup();
+        inflateListView();
     }
 
     void TestWindow::inflateGroup() {

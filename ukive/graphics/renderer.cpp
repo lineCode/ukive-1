@@ -122,27 +122,27 @@ namespace ukive {
 
 
     HRESULT Renderer::createLayeredBRT() {
-
+        return S_OK;
     }
 
     HRESULT Renderer::createSoftwareBRT() {
-
+        return S_OK;
     }
 
     HRESULT Renderer::createSwapchainBRT() {
-
+        return S_OK;
     }
 
     HRESULT Renderer::ResizeLayeredBRT() {
-
+        return S_OK;
     }
 
     HRESULT Renderer::ResizeSoftwareBRT() {
-
+        return S_OK;
     }
 
     HRESULT Renderer::ResizeSwapchainBRT() {
-
+        return S_OK;
     }
 
 

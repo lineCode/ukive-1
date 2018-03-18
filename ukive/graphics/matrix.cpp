@@ -129,7 +129,7 @@ namespace ukive {
         return matrix_native_;
     }
 
-    void Matrix::transformRect(Rect *rect) {
+    void Matrix::transformRect(RectF* rect) {
         D2D1_POINT_2F left_top_point = { rect->left, rect->top };
         D2D1_POINT_2F right_bottom_point = { rect->right, rect->bottom };
         left_top_point = matrix_native_.TransformPoint(left_top_point);

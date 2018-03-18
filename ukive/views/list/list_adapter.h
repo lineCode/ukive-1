@@ -15,10 +15,9 @@ namespace ukive {
         virtual ~ListDataSetChangedListener() = default;
 
         virtual void OnDataSetChanged() = 0;
-
-        virtual void OnItemRangeInserted(size_t start_position, size_t length) {}
-        virtual void OnItemRangeChanged(size_t start_position, size_t length) {}
-        virtual void OnItemRangeRemoved(size_t start_position, size_t length) {}
+        virtual void OnItemRangeInserted(size_t start_position, size_t length) { OnDataSetChanged(); }
+        virtual void OnItemRangeChanged(size_t start_position, size_t length) { OnDataSetChanged(); }
+        virtual void OnItemRangeRemoved(size_t start_position, size_t length) { OnDataSetChanged(); }
     };
 
     class ListAdapter
@@ -27,29 +26,21 @@ namespace ukive {
         class ViewHolder
         {
         public:
-            View *item_view;
+            View* item_view;
+            int item_id;
             int adapter_position;
             bool recycled;
 
-            ViewHolder(View *v)
-                :item_view(v),
-                adapter_position(-1),
-                recycled(false) {}
-
-            virtual ~ViewHolder() {
-                if (recycled)
-                    delete item_view;
-            }
+            ViewHolder(View* v);
+            virtual ~ViewHolder();
         };
 
-        ListAdapter()
-            :listener_(0) {}
+        ListAdapter();
         virtual ~ListAdapter() = default;
 
         void setListener(ListDataSetChangedListener *listener) { listener_ = listener; }
 
         void notifyDataChanged();
-
         void notifyItemChanged(int position);
         void notifyItemInserted(int position);
         void notifyItemRemoved(int position);
@@ -59,7 +50,7 @@ namespace ukive {
 
         virtual ViewHolder *onCreateViewHolder(ViewGroup *parent, int position) = 0;
         virtual void onBindViewHolder(ViewHolder *holder, int position) = 0;
-        virtual int getItemId(int position) { return position; }
+        virtual int getItemId(int position) { return 0; }
         virtual size_t getItemCount() = 0;
 
     private:

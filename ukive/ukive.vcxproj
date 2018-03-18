@@ -184,6 +184,7 @@
     <ClInclude Include="graphics\graphic_device_manager.h" />
     <ClInclude Include="graphics\layered_renderer.h" />
     <ClInclude Include="graphics\matrix.h" />
+    <ClInclude Include="graphics\point.h" />
     <ClInclude Include="graphics\rect.h" />
     <ClInclude Include="graphics\renderer.h" />
     <ClInclude Include="graphics\swapchain_resize_notifier.h" />
@@ -245,6 +246,8 @@
     <ClInclude Include="views\layout\view_group.h" />
     <ClInclude Include="views\list\list_adapter.h" />
     <ClInclude Include="views\list\list_view.h" />
+    <ClInclude Include="views\list\overlay_scroll_bar.h" />
+    <ClInclude Include="views\list\view_holder_recycler.h" />
     <ClInclude Include="views\scroll_view.h" />
     <ClInclude Include="views\seek_bar.h" />
     <ClInclude Include="views\seek_value_changed_listener.h" />
@@ -291,6 +294,7 @@
     <ClCompile Include="graphics\graphic_device_manager.cpp" />
     <ClCompile Include="graphics\layered_renderer.cpp" />
     <ClCompile Include="graphics\matrix.cpp" />
+    <ClCompile Include="graphics\point.cpp" />
     <ClCompile Include="graphics\rect.cpp" />
     <ClCompile Include="graphics\renderer.cpp" />
     <ClCompile Include="graphics\wic_manager.cpp" />
@@ -342,6 +346,8 @@
     <ClCompile Include="views\layout\view_group.cpp" />
     <ClCompile Include="views\list\list_adapter.cpp" />
     <ClCompile Include="views\list\list_view.cpp" />
+    <ClCompile Include="views\list\overlay_scroll_bar.cpp" />
+    <ClCompile Include="views\list\view_holder_recycler.cpp" />
     <ClCompile Include="views\scroll_view.cpp" />
     <ClCompile Include="views\seek_bar.cpp" />
     <ClCompile Include="views\spinner_view.cpp" />

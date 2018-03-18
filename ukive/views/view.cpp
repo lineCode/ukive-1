@@ -159,11 +159,6 @@ namespace ukive {
         }
     }
 
-    void View::setMeasuredDimension(int width, int height) {
-        measured_width_ = width;
-        measured_height_ = height;
-    }
-
     void View::setVisibility(int visibility) {
         if (visibility == visibility_)
             return;
@@ -278,6 +273,11 @@ namespace ukive {
 
     void View::setParent(View *parent) {
         parent_ = parent;
+    }
+
+    void View::setMeasuredDimension(int width, int height) {
+        measured_width_ = width;
+        measured_height_ = height;
     }
 
     void View::offsetTopAndBottom(int dy) {

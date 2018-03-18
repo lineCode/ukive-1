@@ -3,6 +3,28 @@
 
 namespace ukive {
 
+    ////////////////////////////////////////////////////////////////
+    // ListAdapter::ViewHolder
+
+    ListAdapter::ViewHolder::ViewHolder(View *v)
+        :item_view(v),
+        item_id(-1),
+        adapter_position(-1),
+        recycled(false) {}
+
+    ListAdapter::ViewHolder::~ViewHolder() {
+        if (recycled) {
+            delete item_view;
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////
+    // ListAdapter
+
+    ListAdapter::ListAdapter()
+        :listener_(nullptr) {}
+
     void ListAdapter::notifyDataChanged() {
         if (listener_) {
             listener_->OnDataSetChanged();
