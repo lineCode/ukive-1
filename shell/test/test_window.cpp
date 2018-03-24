@@ -38,35 +38,33 @@ namespace shell {
 
 
     void TestWindow::onPreCreate(
-        ukive::ClassInfo *info,
-        int *win_style, int *win_ex_style) {
-        *win_ex_style |= WS_EX_LAYERED;
+        ukive::ClassInfo* info,
+        int* win_style, int* win_ex_style) {
+        //*win_ex_style |= WS_EX_LAYERED;
     }
 
     void TestWindow::onCreate() {
         Window::onCreate();
 
-        ::SetLayeredWindowAttributes(getHandle(), 0, 255, LWA_ALPHA);
+        //::SetLayeredWindowAttributes(getHandle(), 0, 255, LWA_ALPHA);
 
-        //inflateGroup();
-        inflateListView();
+        inflateGroup();
+        //inflateListView();
     }
 
     void TestWindow::inflateGroup() {
-        ukive::ScrollView *scrollView = new ukive::ScrollView(this);
+        ukive::ScrollView* scrollView = new ukive::ScrollView(this);
         scrollView->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
         setContentView(scrollView);
 
-        ukive::LinearLayout *linearLayout = new ukive::LinearLayout(this);
+        ukive::LinearLayout* linearLayout = new ukive::LinearLayout(this);
         scrollView->addView(linearLayout,
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
-
         DXGI_OUTPUT_DESC outputDesc;
         DXGI_ADAPTER_DESC adapterDesc;
-
         auto adapter = ukive::Application::getGraphicDeviceManager()->getCurAdapter();
         auto output = ukive::Application::getGraphicDeviceManager()->getCurOutput();
         adapter->GetDesc(&adapterDesc);
@@ -80,13 +78,13 @@ namespace shell {
             .append(L"\n").append(L"Monitor: ").append(outputName);
 
 
-        ukive::TextView *deviceTextView = new ukive::TextView(this);
+        ukive::TextView* deviceTextView = new ukive::TextView(this);
         deviceTextView->setIsSelectable(false);
         deviceTextView->setIsEditable(false);
         deviceTextView->setText(deviceDesc);
         deviceTextView->setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6));
 
-        ukive::LayoutParams *deviceTextParams = new ukive::LayoutParams(
+        ukive::LayoutParams* deviceTextParams = new ukive::LayoutParams(
             ukive::LayoutParams::FIT_CONTENT,
             ukive::LayoutParams::FIT_CONTENT);
         deviceTextParams->leftMargin = deviceTextParams->rightMargin
@@ -95,13 +93,13 @@ namespace shell {
         linearLayout->addView(deviceTextView, deviceTextParams);
 
 
-        ukive::LayoutParams *textParams = new ukive::LayoutParams(
+        ukive::LayoutParams* textParams = new ukive::LayoutParams(
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::FIT_CONTENT);
         textParams->leftMargin = textParams->rightMargin
             = textParams->topMargin = textParams->bottomMargin = dpToPx(12);
 
-        ukive::TextView *textView = new ukive::TextView(this);
+        ukive::TextView* textView = new ukive::TextView(this);
         textView->setId(kTextViewId);
         textView->setIsSelectable(true);
         textView->setIsEditable(true);
@@ -110,22 +108,22 @@ namespace shell {
         textView->setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6));
         textView->setElevation(3.f);
 
-        ukive::UnderlineSpan *span = new ukive::UnderlineSpan(3, 5);
+        ukive::UnderlineSpan* span = new ukive::UnderlineSpan(3, 5);
         textView->getEditable()->addSpan(span);
 
         linearLayout->addView(textView, textParams);
 
         std::wstring imgFileName(::_wgetcwd(nullptr, 0));
         auto bitmap = ukive::BitmapFactory::decodeFile(this, imgFileName + L"\\freshpaint.png");
-        ukive::ImageView *imageView = new ukive::ImageView(this);
+        ukive::ImageView* imageView = new ukive::ImageView(this);
         imageView->setId(kImageViewId);
         imageView->setImageBitmap(bitmap);
 
         linearLayout->addView(imageView);
 
 
-        ukive::Button *button = new ukive::Button(this);
-        ukive::LayoutParams *buttonParams = new ukive::LayoutParams(
+        ukive::Button* button = new ukive::Button(this);
+        ukive::LayoutParams* buttonParams = new ukive::LayoutParams(
             ukive::LayoutParams::FIT_CONTENT,
             ukive::LayoutParams::FIT_CONTENT);
         buttonParams->leftMargin = buttonParams->rightMargin
@@ -135,21 +133,21 @@ namespace shell {
     }
 
     void TestWindow::inflateListView() {
-        ukive::LinearLayout *linearLayout = new ukive::LinearLayout(this);
+        ukive::LinearLayout* linearLayout = new ukive::LinearLayout(this);
         linearLayout->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
         setContentView(linearLayout);
 
-        TestAdapter *adapter = new TestAdapter();
+        TestAdapter* adapter = new TestAdapter();
         for (int i = 0; i < 8; ++i) {
             adapter->AddItem(0, L"test", L"test test");
         }
 
-        ukive::ListView *list_view = new ukive::ListView(this);
+        ukive::ListView* list_view = new ukive::ListView(this);
         list_view->setAdapter(adapter);
 
-        ukive::LayoutParams *lp = new ukive::LayoutParams(
+        ukive::LayoutParams* lp = new ukive::LayoutParams(
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::MATCH_PARENT);
         lp->leftMargin = lp->rightMargin

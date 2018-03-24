@@ -7,7 +7,7 @@
 #include "ukive/log.h"
 #include "shadow_transform.h"
 
-#define RADIUS 64
+#define RADIUS 128
 #define ELEVATION (RADIUS / 2)
 
 

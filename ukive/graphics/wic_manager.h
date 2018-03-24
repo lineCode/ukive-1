@@ -17,6 +17,8 @@ namespace ukive {
         HRESULT init();
         void close();
 
+        ComPtr<IWICBitmap> createBitmap(unsigned int width, unsigned int height);
+
         HRESULT convertForD2D(IWICBitmapSource *src, IWICBitmapSource **dst);
         HRESULT decodeFile(const string16 &file_name, IWICBitmapSource **out_src);
         HRESULT getBitmapFromSource(IWICBitmapSource *src, IWICBitmap **out_bitmap);

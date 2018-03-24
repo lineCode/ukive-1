@@ -15,7 +15,7 @@ namespace shell {
 
     ukive::ListAdapter::ViewHolder* TestAdapter::onCreateViewHolder(ukive::ViewGroup *parent, int position) {
         ukive::RestraintLayout *layout = new ukive::RestraintLayout(parent->getWindow());
-        layout->setBackground(new ukive::ColorDrawable(ukive::Color::White));
+        layout->setBackground(new ukive::ColorDrawable(ukive::Color::Blue100));
         layout->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT));
 

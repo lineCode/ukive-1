@@ -26,7 +26,7 @@ namespace ukive {
     const int kDefaultWindowExStyle = WS_EX_APPWINDOW;
 
 
-    WindowImpl::WindowImpl(Window *win)
+    WindowImpl::WindowImpl(Window* win)
         :delegate_(win),
         hWnd_(NULL),
         x_(kDefaultX),
@@ -260,8 +260,7 @@ namespace ukive {
         ::ReleaseCapture();
     }
 
-    void WindowImpl::setMouseTrack()
-    {
+    void WindowImpl::setMouseTrack() {
         if (is_enable_mouse_track_) {
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof(tme);
@@ -287,7 +286,7 @@ namespace ukive {
     }
 
 
-    void WindowImpl::onPreCreate(ClassInfo *info, int *win_style, int *win_ex_style) {
+    void WindowImpl::onPreCreate(ClassInfo* info, int* win_style, int* win_ex_style) {
         delegate_->onPreCreate(info, win_style, win_ex_style);
     }
 
@@ -340,11 +339,11 @@ namespace ukive {
         delegate_->onResize(param, width, height, client_width, client_height);
     }
 
-    bool WindowImpl::onMoving(Rect *rect) {
+    bool WindowImpl::onMoving(Rect* rect) {
         return delegate_->onMoving(rect);
     }
 
-    bool WindowImpl::onResizing(WPARAM edge, Rect *rect) {
+    bool WindowImpl::onResizing(WPARAM edge, Rect* rect) {
         return delegate_->onResizing(edge, rect);
     }
 
@@ -359,12 +358,11 @@ namespace ukive {
         delegate_->onDestroy();
     }
 
-    bool WindowImpl::onInputEvent(InputEvent *e) {
+    bool WindowImpl::onInputEvent(InputEvent* e) {
         // 追踪鼠标，以便产生 EVM_LEAVE_WIN 事件。
         if (e->getEvent() == InputEvent::EVM_LEAVE_WIN) {
             is_enable_mouse_track_ = true;
-        }
-        else if (e->getEvent() == InputEvent::EVM_MOVE) {
+        } else if (e->getEvent() == InputEvent::EVM_MOVE) {
             setMouseTrack();
         }
 
@@ -375,7 +373,7 @@ namespace ukive {
         delegate_->onDpiChanged(dpi_x, dpi_y);
     }
 
-    bool WindowImpl::onDataCopy(unsigned int id, unsigned int size, void *data) {
+    bool WindowImpl::onDataCopy(unsigned int id, unsigned int size, void* data) {
         return delegate_->onDataCopy(id, size, data);
     }
 
@@ -388,6 +386,7 @@ namespace ukive {
 
         switch (uMsg) {
         case WM_NCCREATE: {
+            onCreate();
             non_client_frame_.reset(new DefaultNonClientFrame());
             nc_result = non_client_frame_->onNcCreate(delegate_, &nc_handled);
             if (nc_handled) {
@@ -397,7 +396,6 @@ namespace ukive {
         }
 
         case WM_CREATE:
-            onCreate();
             return TRUE;
 
         case 0xAE:
@@ -552,7 +550,7 @@ namespace ukive {
         }
 
         case WM_MOVING: {
-            RECT *raw_rect = reinterpret_cast<RECT*>(lParam);
+            RECT* raw_rect = reinterpret_cast<RECT*>(lParam);
             Rect rect(
                 raw_rect->left, raw_rect->top,
                 raw_rect->right - raw_rect->left,
@@ -571,7 +569,7 @@ namespace ukive {
         }
 
         case WM_SIZING: {
-            RECT *raw_rect = reinterpret_cast<RECT*>(lParam);
+            RECT* raw_rect = reinterpret_cast<RECT*>(lParam);
             Rect rect(
                 raw_rect->left, raw_rect->top,
                 raw_rect->right - raw_rect->left,
@@ -826,7 +824,7 @@ namespace ukive {
         if (message == WM_NCCALCSIZE && wParam == TRUE)
         {
             // Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
-            NCCALCSIZE_PARAMS *pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
+            NCCALCSIZE_PARAMS* pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
             RECT newW;
             ::CopyRect(&newW, &pncsp->rgrc[0]);
@@ -915,8 +913,8 @@ namespace ukive {
         {
             //::EnableNonClientDpiScaling(hWnd);
 
-            CREATESTRUCTW *cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
-            WindowImpl *window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
+            CREATESTRUCTW* cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
+            WindowImpl* window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
             if (window == nullptr) {
                 Log::e(L"WindowImpl", L"null window creating param.");
             }
@@ -927,7 +925,7 @@ namespace ukive {
             return window->messageHandler(uMsg, wParam, lParam);
         }
 
-        WindowImpl *window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        WindowImpl* window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
         if (window == nullptr) {
             return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
@@ -940,7 +938,7 @@ namespace ukive {
         /*hr = DwmIsCompositionEnabled(&dwmEnabled);
         if (SUCCEEDED(hr))
         {
-        lRet = sUWCVtr->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
+        lRet = window->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
         }*/
 
         // Winproc worker for the rest of the application.

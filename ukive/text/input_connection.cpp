@@ -83,8 +83,6 @@ namespace ukive {
 
     bool InputConnection::mount()
     {
-        DLOG(1) << "mount";
-
         if (!mIsInitialized) {
             return false;
         }
@@ -102,8 +100,6 @@ namespace ukive {
 
     bool InputConnection::unmount()
     {
-        DLOG(1) << "unmount";
-
         if (!mIsInitialized) {
             return false;
         }

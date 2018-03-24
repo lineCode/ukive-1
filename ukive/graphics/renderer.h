@@ -17,8 +17,7 @@ namespace ukive {
     class Window;
     class SwapChainResizeNotifier;
 
-    class Renderer
-    {
+    class Renderer {
     public:
         Renderer();
         ~Renderer();
@@ -42,7 +41,10 @@ namespace ukive {
         ComPtr<ID2D1DeviceContext> getD2DDeviceContext();
 
         HRESULT createBitmapRenderTarget(
-            IDXGISurface* dxgiSurface, ID2D1Bitmap1** bitmap);
+            IWICBitmap* wic_bitmap, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
+        HRESULT createBitmapRenderTarget(
+            IDXGISurface* dxgiSurface, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
+
         HRESULT createCompatBitmapRenderTarget(
             float width, float height, ID2D1BitmapRenderTarget** bRT);
         HRESULT createDXGISurfaceRenderTarget(
@@ -64,13 +66,19 @@ namespace ukive {
         HRESULT createRenderResource();
         void releaseRenderResource();
 
-        HRESULT createLayeredBRT();
+        HRESULT createHardwareBRT();
         HRESULT createSoftwareBRT();
         HRESULT createSwapchainBRT();
 
-        HRESULT ResizeLayeredBRT();
-        HRESULT ResizeSoftwareBRT();
-        HRESULT ResizeSwapchainBRT();
+        HRESULT resizeHardwareBRT();
+        HRESULT resizeSoftwareBRT();
+        HRESULT resizeSwapchainBRT();
+
+        HRESULT drawLayered();
+        HRESULT drawSwapchain();
+
+        bool is_layered_;
+        bool is_hardware_acc_;
 
         Window* owner_window_;
         std::vector<SwapChainResizeNotifier*> sc_resize_notifier_list_;

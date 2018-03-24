@@ -31,6 +31,12 @@ namespace ukive {
 
     class Log {
     public:
+        enum Severity {
+            INFO,
+            WARNING,
+            FATAL
+        };
+
         static void i(const string16 &tag, const string16 &msg);
         static void d(const string16 &tag, const string16 &msg);
         static void w(const string16 &tag, const string16 &msg);
@@ -39,14 +45,13 @@ namespace ukive {
 
         static void debugBreak();
 
-        Log(const char *file_name, int line_number, int level);
+        Log(const char *file_name, int line_number, Severity level);
         ~Log();
 
         std::ostringstream& stream();
 
     private:
-
-        int level_;
+        Severity level_;
         int line_number_;
         std::string file_name_;
         std::ostringstream stream_;

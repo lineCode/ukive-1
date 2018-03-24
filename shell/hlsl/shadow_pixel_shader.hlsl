@@ -1,4 +1,4 @@
-#define RADIUS    64
+#define RADIUS    128
 #define DIAMETER  (RADIUS * 2 + 1)
 
 

@@ -270,9 +270,6 @@
     <ClCompile Include="graphics\direct3d\scene.cpp">
       <Filter>graphics\direct3d</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\layered_renderer.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\direct3d\space.cpp">
       <Filter>graphics\direct3d</Filter>
     </ClCompile>
@@ -594,9 +591,6 @@
     </ClInclude>
     <ClInclude Include="graphics\direct3d\scene.h">
       <Filter>graphics\direct3d</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\layered_renderer.h">
-      <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="graphics\direct3d\space.h">
       <Filter>graphics\direct3d</Filter>

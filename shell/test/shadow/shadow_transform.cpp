@@ -4,7 +4,7 @@
 
 #include "ukive/utils/hresult_utils.h"
 
-#define RADIUS 64
+#define RADIUS 128
 
 
 namespace shell {

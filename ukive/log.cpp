@@ -30,7 +30,7 @@ namespace ukive {
         ::OutputDebugString(msg.c_str());
     }
 
-    Log::Log(const char *file_name, int line_number, int level)
+    Log::Log(const char *file_name, int line_number, Severity level)
         :level_(level),
         file_name_(file_name),
         line_number_(line_number) {
@@ -45,6 +45,17 @@ namespace ukive {
             .append(stream_.str())
             .append("\n");
         ::OutputDebugStringA(msg.c_str());
+
+        switch (level_) {
+        case Severity::INFO:
+            break;
+        case Severity::WARNING:
+            debugBreak();
+            break;
+        case Severity::FATAL:
+            debugBreak();
+            break;
+        }
     }
 
     std::ostringstream& Log::stream() {

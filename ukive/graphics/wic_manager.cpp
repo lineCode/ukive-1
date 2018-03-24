@@ -1,5 +1,7 @@
 ﻿#include "wic_manager.h"
 
+#include "ukive/log.h"
+
 
 namespace ukive {
 
@@ -26,10 +28,18 @@ namespace ukive {
         return hr;
     }
 
-
     void WICManager::close() {
     }
 
+    ComPtr<IWICBitmap> WICManager::createBitmap(unsigned int width, unsigned int height) {
+        ComPtr<IWICBitmap> bmp;
+        HRESULT hr = wic_factory_->CreateBitmap(
+            width, height, GUID_WICPixelFormat32bppPBGRA,
+            WICBitmapCacheOnLoad, &bmp);
+        DCHECK(SUCCEEDED(hr));
+
+        return bmp;
+    }
 
     HRESULT WICManager::convertForD2D(IWICBitmapSource *src, IWICBitmapSource **dst) {
         HRESULT hr;

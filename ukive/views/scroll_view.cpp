@@ -8,7 +8,7 @@
 
 namespace ukive {
 
-    ScrollView::ScrollView(Window *wnd)
+    ScrollView::ScrollView(Window* wnd)
         :ViewGroup(wnd)
     {
     }
@@ -16,7 +16,7 @@ namespace ukive {
 
     bool ScrollView::canScroll()
     {
-        View *widget = getChildAt(0);
+        View* widget = getChildAt(0);
         if (widget && widget->getVisibility() != View::VANISHED)
         {
             if (getMeasuredHeight() < widget->getMeasuredHeight())
@@ -28,7 +28,7 @@ namespace ukive {
 
     int ScrollView::computeScrollRange()
     {
-        View *widget = getChildAt(0);
+        View* widget = getChildAt(0);
         if (widget && widget->getVisibility() != View::VANISHED)
             return widget->getMeasuredHeight();
         return 0;
@@ -36,7 +36,7 @@ namespace ukive {
 
     int ScrollView::computeScrollExtend()
     {
-        View *widget = getChildAt(0);
+        View* widget = getChildAt(0);
         if (widget && widget->getVisibility() != View::VANISHED)
             return (widget->getMeasuredHeight() - getMeasuredHeight());
         return 0;
@@ -82,7 +82,7 @@ namespace ukive {
         {
         case FIT:
         {
-            View *widget = this->getChildAt(0);
+            View* widget = this->getChildAt(0);
             if (widget && widget->getVisibility() != View::VANISHED)
             {
                 int childWidth = widget->getMeasuredWidth();
@@ -94,7 +94,7 @@ namespace ukive {
 
         case UNKNOWN:
         {
-            View *widget = this->getChildAt(0);
+            View* widget = this->getChildAt(0);
             if (widget && widget->getVisibility() != View::VANISHED)
             {
                 int childWidth = widget->getMeasuredWidth();
@@ -112,7 +112,7 @@ namespace ukive {
         {
         case FIT:
         {
-            View *widget = this->getChildAt(0);
+            View* widget = this->getChildAt(0);
             if (widget && widget->getVisibility() != View::VANISHED)
             {
                 int childHeight = widget->getMeasuredHeight();
@@ -124,7 +124,7 @@ namespace ukive {
 
         case UNKNOWN:
         {
-            View *widget = this->getChildAt(0);
+            View* widget = this->getChildAt(0);
             if (widget && widget->getVisibility() != View::VANISHED)
             {
                 int childHeight = widget->getMeasuredHeight();
@@ -145,10 +145,10 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        View *widget = this->getChildAt(0);
+        View* widget = this->getChildAt(0);
         if (widget && widget->getVisibility() != View::VANISHED)
         {
-            LayoutParams *lp = widget->getLayoutParams();
+            LayoutParams* lp = widget->getLayoutParams();
 
             int width = widget->getMeasuredWidth();
             int height = widget->getMeasuredHeight();
@@ -157,10 +157,8 @@ namespace ukive {
             int childTop = getPaddingTop() + lp->topMargin;
 
             widget->layout(
-                childleft,
-                childTop,
-                width + childleft,
-                height + childTop);
+                childleft, childTop,
+                width + childleft, height + childTop);
         }
     }
 
@@ -168,27 +166,27 @@ namespace ukive {
         int width, int height, int oldWidth, int oldHeight)
     {
         if (width > 0 && height > 0
-            && oldWidth > 0 && oldHeight > 0)
-        {
+            && oldWidth > 0 && oldHeight > 0) {
             int changed = 0;
 
-            if (canScroll())
-            {
-                if (getScrollY() < 0)
+            if (canScroll()) {
+                if (getScrollY() < 0) {
                     changed = -getScrollY();
+                }
 
                 int extend = this->computeScrollExtend();
-                if (getScrollY() > extend)
+                if (getScrollY() > extend) {
                     changed = extend - getScrollY();
-            }
-            else
-            {
-                if (getScrollY() != 0)
+                }
+            } else {
+                if (getScrollY() != 0) {
                     changed = -getScrollY();
+                }
             }
 
-            if (changed != 0)
+            if (changed != 0) {
                 scrollBy(0, changed);
+            }
         }
     }
 
@@ -205,9 +203,9 @@ namespace ukive {
     }
 
 
-    bool ScrollView::onInputEvent(InputEvent *e)
+    bool ScrollView::onInputEvent(InputEvent* e)
     {
-        ViewGroup::onInputEvent(e);
+        bool consumed = ViewGroup::onInputEvent(e);
 
         switch (e->getEvent())
         {
@@ -215,13 +213,13 @@ namespace ukive {
             mMouseXCache = e->getMouseX();
             mMouseYCache = e->getMouseY();
             processVerticalScroll(30 * e->getMouseWheel());
-            return true;
+            consumed |= true;
         }
 
-        return false;
+        return consumed;
     }
 
-    bool ScrollView::onInterceptMouseEvent(InputEvent *e)
+    bool ScrollView::onInterceptMouseEvent(InputEvent* e)
     {
         return false;
     }

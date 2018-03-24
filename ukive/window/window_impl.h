@@ -20,7 +20,7 @@ namespace ukive {
 
     class WindowImpl {
     public:
-        WindowImpl(Window *win);
+        WindowImpl(Window* win);
         ~WindowImpl();
 
         void init();
@@ -31,7 +31,7 @@ namespace ukive {
         void close();
         void center();
 
-        void setTitle(const string16 &title);
+        void setTitle(const string16& title);
         void setBounds(int x, int y, int width, int height);
         void setCurrentCursor(Cursor cursor);
 
@@ -63,31 +63,30 @@ namespace ukive {
 
     private:
         LRESULT CALLBACK messageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam);
-        LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool *pfCallDWP);
+        LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP);
         LRESULT HitTestNCA(HWND hWnd, WPARAM wParam, LPARAM lParam, int leftExt, int topExt, int rightExt, int bottomExt);
 
         void onPreCreate(
-            ClassInfo *info,
-            int *win_style, int *win_ex_style);
+            ClassInfo* info, int* win_style, int* win_ex_style);
         void onCreate();
         void onShow(bool show);
         void onActivate(int param);
         void onSetFocus();
         void onKillFocus();
-        void onDraw(const Rect &rect);
+        void onDraw(const Rect& rect);
         void onMove(int x, int y);
         void onResize(
             int param, int width, int height,
             int client_width, int client_height);
-        bool onMoving(Rect *rect);
-        bool onResizing(WPARAM edge, Rect *rect);
+        bool onMoving(Rect* rect);
+        bool onResizing(WPARAM edge, Rect* rect);
         bool onClose();
         void onDestroy();
-        bool onInputEvent(InputEvent *e);
+        bool onInputEvent(InputEvent* e);
         void onDpiChanged(int dpi_x, int dpi_y);
-        bool onDataCopy(unsigned int id, unsigned int size, void *data);
+        bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
-        Window *delegate_;
+        Window* delegate_;
         std::unique_ptr<NonClientFrame> non_client_frame_;
 
         HWND hWnd_;

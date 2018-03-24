@@ -10,34 +10,33 @@ namespace ukive {
 
     ImageView::ImageView(Window *wnd)
         :View(wnd),
-        mBitmapDrawable(nullptr) {}
+        bitmap_drawable_(nullptr) {}
 
-    ImageView::~ImageView()
-    {
+    ImageView::~ImageView() {
     }
 
 
-    void ImageView::onMeasure(int width, int height, int widthSpec, int heightSpec)
-    {
+    void ImageView::onMeasure(int width, int height, int widthSpec, int heightSpec) {
         int finalWidth = 0;
         int finalHeight = 0;
 
         int verticalPadding = getPaddingTop() + getPaddingBottom();
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
 
-        switch (widthSpec)
-        {
+        switch (widthSpec) {
         case FIT:
-            if (mBitmapDrawable != 0)
-                finalWidth = mBitmapDrawable->getIncWidth();
+            if (bitmap_drawable_ != nullptr) {
+                finalWidth = bitmap_drawable_->getIncWidth();
+            }
 
             finalWidth = std::max(getMinimumWidth(), finalWidth + horizontalPadding);
             finalWidth = std::min(width, finalWidth);
             break;
 
         case UNKNOWN:
-            if (mBitmapDrawable != 0)
-                finalWidth = mBitmapDrawable->getIncWidth();
+            if (bitmap_drawable_ != nullptr) {
+                finalWidth = bitmap_drawable_->getIncWidth();
+            }
 
             finalWidth = std::max(getMinimumWidth(), finalWidth + horizontalPadding);
             break;
@@ -47,19 +46,20 @@ namespace ukive {
             break;
         }
 
-        switch (heightSpec)
-        {
+        switch (heightSpec) {
         case FIT:
-            if (mBitmapDrawable != 0)
-                finalHeight = mBitmapDrawable->getIncHeight();
+            if (bitmap_drawable_ != nullptr) {
+                finalHeight = bitmap_drawable_->getIncHeight();
+            }
 
             finalHeight = std::max(getMinimumHeight(), finalHeight + verticalPadding);
             finalHeight = std::min(height, finalHeight);
             break;
 
         case UNKNOWN:
-            if (mBitmapDrawable != 0)
-                finalHeight = mBitmapDrawable->getIncHeight();
+            if (bitmap_drawable_ != nullptr) {
+                finalHeight = bitmap_drawable_->getIncHeight();
+            }
 
             finalHeight = std::max(getMinimumHeight(), finalHeight + verticalPadding);
             break;
@@ -72,31 +72,27 @@ namespace ukive {
         setMeasuredDimension(finalWidth, finalHeight);
     }
 
-    void ImageView::onDraw(Canvas *canvas)
-    {
+    void ImageView::onDraw(Canvas *canvas) {
         View::onDraw(canvas);
 
-        if (mBitmapDrawable)
-            mBitmapDrawable->draw(canvas);
+        if (bitmap_drawable_) {
+            bitmap_drawable_->draw(canvas);
+        }
     }
 
-    bool ImageView::onInputEvent(InputEvent *e)
-    {
-        View::onInputEvent(e);
-
-        return false;
+    bool ImageView::onInputEvent(InputEvent *e) {
+        return View::onInputEvent(e);
     }
 
-    void ImageView::onSizeChanged(int width, int height, int oldWidth, int oldHeight)
-    {
+    void ImageView::onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
     }
 
 
     void ImageView::setImageBitmap(std::shared_ptr<Bitmap> bitmap)
     {
         if (bitmap != nullptr) {
-            mBitmapDrawable = new BitmapDrawable(bitmap);
-            mBitmapDrawable->setBounds(0, 0, bitmap->getWidth(), bitmap->getHeight());
+            bitmap_drawable_ = new BitmapDrawable(bitmap);
+            bitmap_drawable_->setBounds(0, 0, bitmap->getWidth(), bitmap->getHeight());
         }
     }
 

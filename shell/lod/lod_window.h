@@ -48,6 +48,10 @@ namespace shell {
         LodWindow();
         ~LodWindow();
 
+        void onPreCreate(
+            ukive::ClassInfo* info,
+            int* win_style, int* win_ex_style) override;
+
         void onCreate() override;
 
         void onClick(ukive::View* widget);

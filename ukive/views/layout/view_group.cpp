@@ -107,17 +107,16 @@ namespace ukive {
     void ViewGroup::addView(std::size_t index, View *v, LayoutParams *params)
     {
         if (v == nullptr) {
-            throw std::invalid_argument(
-                "ViewGroup-addView(): You cannot add a null view to ViewGroup.");
+            DLOG(Log::WARNING) << "You cannot add a null View to ViewGroup.";
+            return;
         }
         if (index > view_list_.size()) {
-            throw std::invalid_argument(
-                "ViewGroup-addView(): invalid index");
+            DLOG(Log::WARNING) << "ViewGroup-addView(): Invalid index";
+            return;
         }
 
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it) {
+            it != view_list_.end(); ++it) {
             if ((*it)->getId() == v->getId()) {
                 return;
             }
@@ -128,8 +127,8 @@ namespace ukive {
             if (params == nullptr) {
                 params = generateDefaultLayoutParams();
                 if (params == nullptr) {
-                    throw std::logic_error(
-                        "ViewGroup-addView(): You cannot add a null view to ViewGroup.");
+                    DLOG(Log::WARNING) << "Cannot generate default LayoutParams.";
+                    return;
                 }
             }
         }
@@ -143,8 +142,7 @@ namespace ukive {
 
         if (index == view_list_.size()) {
             view_list_.push_back(v);
-        }
-        else {
+        } else {
             view_list_.insert(view_list_.begin() + index, v);
         }
 
@@ -163,9 +161,8 @@ namespace ukive {
         }
 
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it)
-        {
+            it != view_list_.end(); ++it) {
+
             if ((*it)->getId() == v->getId()) {
                 v->discardFocus();
                 v->discardPendingOperations();
@@ -209,13 +206,11 @@ namespace ukive {
         std::queue<View*> nextQueue;
 
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it) {
+            it != view_list_.end(); ++it) {
 
             if ((*it)->getId() == id) {
                 return (*it);
-            }
-            else {
+            } else {
                 View *widget = (*it)->findViewById(id);
                 if (widget) {
                     return widget;
@@ -233,8 +228,8 @@ namespace ukive {
 
     View *ViewGroup::getChildById(int id) {
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it) {
+            it != view_list_.end(); ++it) {
+
             if ((*it)->getId() == id) {
                 return (*it);
             }
@@ -271,7 +266,7 @@ namespace ukive {
 
     bool ViewGroup::dispatchMouseEvent(InputEvent *e) {
         bool consumed = false;
-        bool isIntercepted = false;
+        bool intercepted = false;
 
         e->setMouseX(e->getMouseX() - getLeft() + getScrollX());
         e->setMouseY(e->getMouseY() - getTop() + getScrollY());
@@ -280,20 +275,19 @@ namespace ukive {
             || this->onInterceptMouseEvent(e)) {
 
             consumed = this->onInputEvent(e);
-            isIntercepted = true;
+            intercepted = true;
             e->setEvent(InputEvent::EV_CANCEL);
         }
 
-        //从Widget列表的尾部开始遍历。因为最近添加的Widget在列表尾部，
-        //而最近添加的Widget可能会处于其他之前添加的Widget的上面（在绘制
-        //Widget是从列表头开始的），这样一来与坐标相关的事件就可能发生在
-        //多个Widget交叠的区域，此时应该将该事件先发送至最上层的Widget，
-        //为此从Widget列表的尾部开始遍历。
-        //随后根据子Widget的dispatchInputEvent()方法的返回值来决定是否将
-        //该事件传递给下层的Widget。
+        // 从 View 列表的尾部开始遍历。因为最近添加的 View 在列表尾部，
+        // 而最近添加的 View 可能会处于其他之前添加的 View 的上面（在绘制
+        //  View 是从列表头开始的），这样一来与坐标相关的事件就可能发生在
+        // 多个 View 交叠的区域，此时应该将该事件先发送至最上层的 View ，
+        // 为此从 View 列表的尾部开始遍历。
+        // 随后根据子 View 的dispatchInputEvent()方法的返回值来决定是否将
+        // 该事件传递给下层的 View。
         for (auto it = view_list_.rbegin();
-            it != view_list_.rend();
-            ++it) {
+            it != view_list_.rend(); ++it) {
 
             View *child = (*it);
             if (child->getVisibility() != View::VISIBLE
@@ -312,8 +306,7 @@ namespace ukive {
                     consumed = child->dispatchInputEvent(e);
                     child->setIsInputEventAtLast(true);
                 }
-            }
-            else if (child->isReceiveOutsideInputEvent()
+            } else if (child->isReceiveOutsideInputEvent()
                 && e->getEvent() != InputEvent::EVM_LEAVE_WIN
                 && e->getEvent() != InputEvent::EV_CANCEL) {
 
@@ -325,8 +318,7 @@ namespace ukive {
 
                     e->setOutside(false);
                 }
-            }
-            else {
+            } else {
                 if (child->isInputEventAtLast()) {
                     int savedEvent = e->getEvent();
 
@@ -347,8 +339,8 @@ namespace ukive {
             e->setMouseY(my);
         }
 
-        if (!isIntercepted && !consumed) {
-            consumed = this->onInputEvent(e);
+        if (!intercepted && !consumed) {
+            consumed = onInputEvent(e);
         }
 
         return consumed;
@@ -363,7 +355,7 @@ namespace ukive {
             return this->onInputEvent(e);
         }
 
-        //键盘事件不参与分发。
+        // 键盘事件不参与分发。
         return false;
     }
 
@@ -372,11 +364,9 @@ namespace ukive {
 
         if (e->isMouseEvent() && !e->isMouseCaptured()) {
             consumed = this->dispatchMouseEvent(e);
-        }
-        else if (e->isKeyboardEvent()) {
+        } else if (e->isKeyboardEvent()) {
             consumed = this->dispatchKeyboardEvent(e);
-        }
-        else {
+        } else {
             consumed = this->onInputEvent(e);
         }
 
@@ -387,8 +377,7 @@ namespace ukive {
         onWindowFocusChanged(windowFocus);
 
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it) {
+            it != view_list_.end(); ++it) {
             (*it)->dispatchWindowFocusChanged(windowFocus);
         }
     }
@@ -397,8 +386,7 @@ namespace ukive {
         onWindowDpiChanged(dpi_x, dpi_y);
 
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it) {
+            it != view_list_.end(); ++it) {
             (*it)->dispatchWindowDpiChanged(dpi_x, dpi_y);
         }
     }
@@ -428,8 +416,7 @@ namespace ukive {
         }
     }
 
-    void ViewGroup::drawChildren(Canvas *canvas)
-    {
+    void ViewGroup::drawChildren(Canvas *canvas) {
         for (auto it = view_list_.begin();
             it != view_list_.end();
             ++it) {
@@ -441,8 +428,8 @@ namespace ukive {
     void ViewGroup::getChildMeasure(
         int parentSize, int parentSizeMode,
         int padding, int childDimension,
-        int *childSize, int *childSizeMode)
-    {
+        int *childSize, int *childSizeMode) {
+
         int size = std::max(0, parentSize - padding);
 
         int resultSize = 0;
@@ -455,12 +442,10 @@ namespace ukive {
             if (childDimension >= 0) {
                 resultSize = childDimension;
                 resultSpec = EXACTLY;
-            }
-            else if (childDimension == LayoutParams::MATCH_PARENT) {
+            } else if (childDimension == LayoutParams::MATCH_PARENT) {
                 resultSize = size;
                 resultSpec = FIT;
-            }
-            else if (childDimension == LayoutParams::FIT_CONTENT) {
+            } else if (childDimension == LayoutParams::FIT_CONTENT) {
                 resultSize = size;
                 resultSpec = FIT;
             }
@@ -472,12 +457,10 @@ namespace ukive {
             if (childDimension >= 0) {
                 resultSize = childDimension;
                 resultSpec = EXACTLY;
-            }
-            else if (childDimension == LayoutParams::MATCH_PARENT) {
+            } else if (childDimension == LayoutParams::MATCH_PARENT) {
                 resultSize = size;
                 resultSpec = EXACTLY;
-            }
-            else if (childDimension == LayoutParams::FIT_CONTENT) {
+            } else if (childDimension == LayoutParams::FIT_CONTENT) {
                 resultSize = size;
                 resultSpec = FIT;
             }
@@ -489,12 +472,10 @@ namespace ukive {
             if (childDimension >= 0) {
                 resultSize = childDimension;
                 resultSpec = EXACTLY;
-            }
-            else if (childDimension == LayoutParams::MATCH_PARENT) {
+            } else if (childDimension == LayoutParams::MATCH_PARENT) {
                 resultSize = size;
                 resultSpec = UNKNOWN;
-            }
-            else if (childDimension == LayoutParams::FIT_CONTENT) {
+            } else if (childDimension == LayoutParams::FIT_CONTENT) {
                 resultSize = size;
                 resultSpec = UNKNOWN;
             }
@@ -509,8 +490,8 @@ namespace ukive {
     void ViewGroup::measureChild(
         View *child,
         int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode)
-    {
+        int parentWidthMode, int parentHeightMode) {
+
         LayoutParams *childParams = child->getLayoutParams();
 
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
@@ -538,8 +519,8 @@ namespace ukive {
     void ViewGroup::measureChildWithMargins(
         View *child,
         int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode)
-    {
+        int parentWidthMode, int parentHeightMode) {
+
         LayoutParams *childParams = child->getLayoutParams();
 
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
@@ -569,11 +550,10 @@ namespace ukive {
 
     void ViewGroup::measureChildren(
         int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode)
-    {
+        int parentWidthMode, int parentHeightMode) {
+
         for (auto it = view_list_.begin();
-            it != view_list_.end();
-            ++it) {
+            it != view_list_.end(); ++it) {
 
             if ((*it)->getVisibility() != View::VANISHED) {
                 measureChild(
@@ -584,8 +564,8 @@ namespace ukive {
 
     void ViewGroup::measureChildrenWithMargins(
         int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode)
-    {
+        int parentWidthMode, int parentHeightMode) {
+
         for (auto it = view_list_.begin();
             it != view_list_.end(); ++it) {
 

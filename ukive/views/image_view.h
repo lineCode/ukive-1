@@ -11,22 +11,20 @@ namespace ukive {
     class Bitmap;
     class BitmapDrawable;
 
-    class ImageView : public View
-    {
-    private:
-        BitmapDrawable *mBitmapDrawable;
-
+    class ImageView : public View {
     public:
-        ImageView(Window *w);
+        ImageView(Window* w);
         ~ImageView();
 
-        virtual void onMeasure(int width, int height, int widthSpec, int heightSpec);
-        virtual void onDraw(Canvas *canvas);
-        virtual bool onInputEvent(InputEvent *e);
-
-        virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight);
+        void onMeasure(int width, int height, int widthSpec, int heightSpec) override;
+        void onSizeChanged(int width, int height, int oldWidth, int oldHeight) override;
+        void onDraw(Canvas* canvas) override;
+        bool onInputEvent(InputEvent* e) override;
 
         void setImageBitmap(std::shared_ptr<Bitmap> bitmap);
+
+    private:
+        BitmapDrawable* bitmap_drawable_;
     };
 
 }
