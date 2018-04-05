@@ -17,7 +17,7 @@ namespace ukive {
         HRESULT hr;
 
         hr = CoCreateInstance(
-            CLSID_WICImagingFactory,
+            CLSID_WICImagingFactory1,
             0,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&wic_factory_));

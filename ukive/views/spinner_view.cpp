@@ -7,8 +7,7 @@ namespace ukive {
         :TextView(wnd) {
     }
 
-    SpinnerView::~SpinnerView()
-    {
+    SpinnerView::~SpinnerView() {
     }
 
 }

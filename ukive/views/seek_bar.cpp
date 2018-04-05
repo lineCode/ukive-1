@@ -28,7 +28,7 @@ namespace ukive {
         mMaximum = 100.f;
         mSeekPercent = 0.f;
         mIsMouseLeftKeyAvailable = false;
-        mListener = nullptr;
+        listener_ = nullptr;
 
         mThumbInAnimator = new Animator(getWindow()->getAnimationManager());
         mThumbOutAnimator = new Animator(getWindow()->getAnimationManager());
@@ -66,9 +66,9 @@ namespace ukive {
         {
             mSeekPercent = percent;
 
-            if (notify && mListener) {
-                mListener->onSeekValueChanged(this, mSeekPercent*mMaximum);
-                mListener->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
+            if (notify && listener_) {
+                listener_->onSeekValueChanged(this, mSeekPercent*mMaximum);
+                listener_->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
             }
 
             invalidate();
@@ -80,7 +80,7 @@ namespace ukive {
     }
 
     void SeekBar::setOnSeekValueChangedListener(OnSeekValueChangedListener* l) {
-        mListener = l;
+        listener_ = l;
     }
 
 
@@ -125,10 +125,10 @@ namespace ukive {
         mSeekPercent = std::max(0.f, mouseInTrack / trackWidth);
         mSeekPercent = std::min(1.f, mSeekPercent);
 
-        if (mListener)
+        if (listener_)
         {
-            mListener->onSeekValueChanged(this, mSeekPercent*mMaximum);
-            mListener->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
+            listener_->onSeekValueChanged(this, mSeekPercent*mMaximum);
+            listener_->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
         }
     }
 

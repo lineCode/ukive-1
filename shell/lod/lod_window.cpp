@@ -17,6 +17,31 @@
 #include "shell/lod/terrain_scene.h"
 
 
+namespace {
+    enum {
+        ID_LOD_INFO = 0x010,
+        ID_RIGHT_RESTRAIN,
+
+        ID_C1_LABEL,
+        ID_C1_SEEKBAR,
+        ID_C1_VALUE,
+
+        ID_C2_LABEL,
+        ID_C2_SEEKBAR,
+        ID_C2_VALUE,
+
+        ID_SPLIT_LABEL,
+        ID_SPLIT_SEEKBAR,
+        ID_SPLIT_VALUE,
+
+        ID_SUBMIT_BUTTON,
+        ID_VSYNC_BUTTON,
+
+        ID_MONITOR,
+        ID_HELPER,
+    };
+}
+
 namespace shell {
 
     LodWindow::LodWindow()
@@ -30,11 +55,10 @@ namespace shell {
     void LodWindow::onPreCreate(
         ukive::ClassInfo* info,
         int* win_style, int* win_ex_style) {
-        *win_ex_style |= WS_EX_LAYERED;
+        //*win_ex_style |= WS_EX_LAYERED;
     }
 
-    void LodWindow::onCreate()
-    {
+    void LodWindow::onCreate() {
         Window::onCreate();
 
         //root layout.
@@ -57,7 +81,7 @@ namespace shell {
         lodView->setBackground(new ukive::ColorDrawable(ukive::Color::White));
         lodView->setElevation(dpToPx(2));
 
-        mLodView = lodView;
+        lod_view_ = lodView;
 
         //right view.
         ukive::RestraintLayout *rightLayout = new ukive::RestraintLayout(this);
@@ -80,8 +104,7 @@ namespace shell {
     }
 
 
-    void LodWindow::inflateCtlLayout(ukive::RestraintLayout *rightLayout)
-    {
+    void LodWindow::inflateCtlLayout(ukive::RestraintLayout *rightLayout) {
         using Rlp = ukive::RestraintLayoutParams;
 
         /////////////////////////////第一行//////////////////////////////////
@@ -101,11 +124,11 @@ namespace shell {
         rightLayout->addView(c1Label, c1LabelLp);
 
         //c1 seekbar.
-        ukive::SeekBar *c1SeekBar = new ukive::SeekBar(this);
-        c1SeekBar->setId(ID_C1_SEEKBAR);
-        c1SeekBar->setMaximum(60.f);
-        c1SeekBar->setProgress(2.f - 1.f);
-        c1SeekBar->setOnSeekValueChangedListener(this);
+        c1_seekbar_ = new ukive::SeekBar(this);
+        c1_seekbar_->setId(ID_C1_SEEKBAR);
+        c1_seekbar_->setMaximum(60.f);
+        c1_seekbar_->setProgress(2.f - 1.f);
+        c1_seekbar_->setOnSeekValueChangedListener(this);
 
         auto c1SeekBarLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
@@ -114,16 +137,15 @@ namespace shell {
             .end(ID_C1_VALUE, Rlp::START, dpToPx(4))
             .bottom(ID_C1_LABEL).build();
 
-        mC1SeekBar = c1SeekBar;
-        rightLayout->addView(c1SeekBar, c1SeekBarLp);
+        rightLayout->addView(c1_seekbar_, c1SeekBarLp);
 
         //c1 value.
-        auto c1Value = new ukive::TextView(this);
-        c1Value->setId(ID_C1_VALUE);
-        c1Value->setIsEditable(false);
-        c1Value->setIsSelectable(false);
-        c1Value->setText(L"2.00");
-        c1Value->setTextSize(13);
+        c1_value_tv_ = new ukive::TextView(this);
+        c1_value_tv_->setId(ID_C1_VALUE);
+        c1_value_tv_->setIsEditable(false);
+        c1_value_tv_->setIsSelectable(false);
+        c1_value_tv_->setText(L"2.00");
+        c1_value_tv_->setTextSize(13);
 
         auto c1ValueLp = Rlp::Builder(
             dpToPx(36), Rlp::FIT_CONTENT)
@@ -131,8 +153,7 @@ namespace shell {
             .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
             .bottom(ID_C1_LABEL).build();
 
-        mC1ValueTV = c1Value;
-        rightLayout->addView(c1Value, c1ValueLp);
+        rightLayout->addView(c1_value_tv_, c1ValueLp);
 
         /////////////////////////////第二行//////////////////////////////////
         //c2 label.
@@ -151,11 +172,11 @@ namespace shell {
         rightLayout->addView(c2Label, c2LabelLp);
 
         //c2 seekbar.
-        ukive::SeekBar *c2SeekBar = new ukive::SeekBar(this);
-        c2SeekBar->setId(ID_C2_SEEKBAR);
-        c2SeekBar->setMaximum(60.f);
-        c2SeekBar->setProgress(30.f - 1.f);
-        c2SeekBar->setOnSeekValueChangedListener(this);
+        c2_seekbar_ = new ukive::SeekBar(this);
+        c2_seekbar_->setId(ID_C2_SEEKBAR);
+        c2_seekbar_->setMaximum(60.f);
+        c2_seekbar_->setProgress(30.f - 1.f);
+        c2_seekbar_->setOnSeekValueChangedListener(this);
 
         auto c2SeekBarLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
@@ -164,16 +185,15 @@ namespace shell {
             .end(ID_C2_VALUE, Rlp::START, dpToPx(4))
             .bottom(ID_C2_LABEL).build();
 
-        mC2SeekBar = c2SeekBar;
-        rightLayout->addView(c2SeekBar, c2SeekBarLp);
+        rightLayout->addView(c2_seekbar_, c2SeekBarLp);
 
         //c2 value.
-        ukive::TextView *c2Value = new ukive::TextView(this);
-        c2Value->setId(ID_C2_VALUE);
-        c2Value->setIsEditable(false);
-        c2Value->setIsSelectable(false);
-        c2Value->setText(L"30.00");
-        c2Value->setTextSize(13);
+        c2_value_tv_ = new ukive::TextView(this);
+        c2_value_tv_->setId(ID_C2_VALUE);
+        c2_value_tv_->setIsEditable(false);
+        c2_value_tv_->setIsSelectable(false);
+        c2_value_tv_->setText(L"30.00");
+        c2_value_tv_->setTextSize(13);
 
         auto c2ValueLp = Rlp::Builder(
             dpToPx(36), Rlp::FIT_CONTENT)
@@ -181,8 +201,7 @@ namespace shell {
             .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
             .bottom(ID_C2_LABEL).build();
 
-        mC2ValueTV = c2Value;
-        rightLayout->addView(c2Value, c2ValueLp);
+        rightLayout->addView(c2_value_tv_, c2ValueLp);
 
         /////////////////////////////第三行//////////////////////////////////
         //split label.
@@ -201,11 +220,11 @@ namespace shell {
         rightLayout->addView(splitLabel, splitLabelLp);
 
         //split seekbar.
-        ukive::SeekBar *splitSeekBar = new ukive::SeekBar(this);
-        splitSeekBar->setId(ID_SPLIT_SEEKBAR);
-        splitSeekBar->setMaximum(10.f);
-        splitSeekBar->setProgress(5.f - 1.f);
-        splitSeekBar->setOnSeekValueChangedListener(this);
+        split_seekbar_ = new ukive::SeekBar(this);
+        split_seekbar_->setId(ID_SPLIT_SEEKBAR);
+        split_seekbar_->setMaximum(10.f);
+        split_seekbar_->setProgress(5.f - 1.f);
+        split_seekbar_->setOnSeekValueChangedListener(this);
 
         auto splitSeekBarLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
@@ -214,16 +233,15 @@ namespace shell {
             .end(ID_SPLIT_VALUE, Rlp::START, dpToPx(4))
             .bottom(ID_SPLIT_LABEL).build();
 
-        mSplitSeekBar = splitSeekBar;
-        rightLayout->addView(splitSeekBar, splitSeekBarLp);
+        rightLayout->addView(split_seekbar_, splitSeekBarLp);
 
         //split value.
-        auto splitValue = new ukive::TextView(this);
-        splitValue->setId(ID_SPLIT_VALUE);
-        splitValue->setIsEditable(false);
-        splitValue->setIsSelectable(false);
-        splitValue->setText(L"5");
-        splitValue->setTextSize(13);
+        split_value_tv_ = new ukive::TextView(this);
+        split_value_tv_->setId(ID_SPLIT_VALUE);
+        split_value_tv_->setIsEditable(false);
+        split_value_tv_->setIsSelectable(false);
+        split_value_tv_->setText(L"5");
+        split_value_tv_->setTextSize(13);
 
         auto splitValueLp = Rlp::Builder(
             dpToPx(36), Rlp::FIT_CONTENT)
@@ -231,8 +249,7 @@ namespace shell {
             .top(ID_SPLIT_LABEL)
             .bottom(ID_SPLIT_LABEL).build();
 
-        mSplitValueTV = splitValue;
-        rightLayout->addView(splitValue, splitValueLp);
+        rightLayout->addView(split_value_tv_, splitValueLp);
 
 
         //submit button.
@@ -314,13 +331,13 @@ namespace shell {
         {
         case ID_SUBMIT_BUTTON:
         {
-            float c1 = mC1SeekBar->getProgress() + 1.f;
-            float c2 = mC2SeekBar->getProgress() + 1.f;
-            int splitCount = static_cast<int>(mSplitSeekBar->getProgress()) + 1;
+            float c1 = c1_seekbar_->getProgress() + 1.f;
+            float c2 = c2_seekbar_->getProgress() + 1.f;
+            int splitCount = static_cast<int>(split_seekbar_->getProgress()) + 1;
 
             terrain_scene_->recreate(splitCount);
             terrain_scene_->reevaluate(c1, c2);
-            mLodView->invalidate();
+            lod_view_->invalidate();
 
             break;
         }
@@ -350,11 +367,11 @@ namespace shell {
         switch (seekBar->getId())
         {
         case ID_C1_SEEKBAR:
-            mC1ValueTV->setText(ukive::Float::toString(1.f + value, 2));
+            c1_value_tv_->setText(ukive::Float::toString(1.f + value, 2));
             break;
 
         case ID_C2_SEEKBAR:
-            mC2ValueTV->setText(ukive::Float::toString(1.f + value, 2));
+            c2_value_tv_->setText(ukive::Float::toString(1.f + value, 2));
             break;
         }
     }
@@ -364,7 +381,7 @@ namespace shell {
         switch (seekBar->getId())
         {
         case ID_SPLIT_SEEKBAR:
-            mSplitValueTV->setText(std::to_wstring(1 + value));
+            split_value_tv_->setText(std::to_wstring(1 + value));
             break;
         }
     }

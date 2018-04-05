@@ -9,140 +9,122 @@
 
 namespace ukive {
 
-    TextBlink::TextBlink(View *widget)
-        :mColor(Color::Black)
-    {
-        mTargetView = widget;
-        mBlinkCycler = new Cycler();
+    TextBlink::TextBlink(View* v)
+        :color_(Color::Black),
+        target_view_(v),
+        is_located_(false),
+        is_cancelled_(true),
+        blink_mask_(false) {
 
-        mLocated = false;
-        mCancelled = true;
-        mBlinkMask = false;
-
-        mThickness = widget->getWindow()->dpToPx(2);
+        blink_cycler_ = new Cycler();
+        thickness_ = v->getWindow()->dpToPx(2);
     }
 
     TextBlink::~TextBlink()
     {
-        mCancelled = true;
-        mBlinkCycler->removeCallbacks(this);
-        delete mBlinkCycler;
+        is_cancelled_ = true;
+        blink_cycler_->removeCallbacks(this);
+        delete blink_cycler_;
     }
 
 
-    void TextBlink::draw(Canvas *canvas)
-    {
-        if (mBlinkMask && mLocated)
-        {
-            canvas->fillRect(RectF(
-                static_cast<float>(mBlinkRect.left),
-                static_cast<float>(mBlinkRect.top),
-                static_cast<float>(mBlinkRect.width()),
-                static_cast<float>(mBlinkRect.height())),
-                mColor);
+    void TextBlink::draw(Canvas *canvas) {
+        if (blink_mask_ && is_located_) {
+            canvas->fillRect(blink_rect_.toRectF(), color_);
         }
     }
 
 
-    void TextBlink::show()
-    {
-        if (!mLocated)
+    void TextBlink::show() {
+        if (!is_located_) {
             return;
+        }
 
-        mCancelled = false;
-        mBlinkMask = false;
+        is_cancelled_ = false;
+        blink_mask_ = false;
 
-        mBlinkCycler->removeCallbacks(this);
-        mBlinkCycler->post(this);
+        blink_cycler_->removeCallbacks(this);
+        blink_cycler_->post(this);
     }
 
-    void TextBlink::hide()
-    {
-        mCancelled = true;
-        mBlinkCycler->removeCallbacks(this);
+    void TextBlink::hide() {
+        is_cancelled_ = true;
+        blink_cycler_->removeCallbacks(this);
 
-        mBlinkMask = false;
-        mTargetView->invalidate();
+        blink_mask_ = false;
+        target_view_->invalidate();
     }
 
-    void TextBlink::locate(float xCenter, float top, float bottom)
-    {
+    void TextBlink::locate(float xCenter, float top, float bottom) {
         int topInt = std::floor(top);
         int bottomInt = std::ceil(bottom);
 
-        int leftInt = std::round(xCenter - mThickness / 2.f);
-        int rightInt = leftInt + mThickness;
+        int leftInt = std::round(xCenter - thickness_ / 2.f);
+        int rightInt = leftInt + thickness_;
 
-        //防止blink被截断。
-        if (leftInt < 0)
-        {
+        // 防止blink被截断。
+        if (leftInt < 0) {
             rightInt += -leftInt;
             leftInt = 0;
         }
 
-        if (topInt == mBlinkRect.top
-            && bottomInt == mBlinkRect.bottom
-            && leftInt == mBlinkRect.left
-            && rightInt == mBlinkRect.right)
+        if (topInt == blink_rect_.top
+            && bottomInt == blink_rect_.bottom
+            && leftInt == blink_rect_.left
+            && rightInt == blink_rect_.right) {
             return;
+        }
 
         bool shouldShow = false;
 
-        if (!mCancelled)
-        {
+        if (!is_cancelled_) {
             hide();
             shouldShow = true;
         }
 
-        mBlinkRect.left = leftInt;
-        mBlinkRect.top = topInt;
-        mBlinkRect.right = rightInt;
-        mBlinkRect.bottom = bottomInt;
+        blink_rect_.left = leftInt;
+        blink_rect_.top = topInt;
+        blink_rect_.right = rightInt;
+        blink_rect_.bottom = bottomInt;
 
-        mLocated = true;
+        is_located_ = true;
 
-        if (shouldShow)
+        if (shouldShow) {
             show();
+        }
     }
 
 
-    void TextBlink::setColor(Color color)
-    {
-        mColor = color;
+    void TextBlink::setColor(Color color) {
+        color_ = color;
     }
 
-    void TextBlink::setThickness(float thickness)
-    {
-        mThickness = thickness;
-    }
-
-
-    bool TextBlink::isShowing()
-    {
-        return !mCancelled;
-    }
-
-    Color TextBlink::getColor()
-    {
-        return mColor;
-    }
-
-    float TextBlink::getThickness()
-    {
-        return mThickness;
+    void TextBlink::setThickness(float thickness) {
+        thickness_ = thickness;
     }
 
 
-    void TextBlink::run()
-    {
-        if (!mCancelled)
-        {
-            mBlinkMask = !mBlinkMask;
+    bool TextBlink::isShowing() {
+        return !is_cancelled_;
+    }
 
-            mTargetView->invalidate();
+    Color TextBlink::getColor() {
+        return color_;
+    }
 
-            mBlinkCycler->removeCallbacks(this);
-            mBlinkCycler->postDelayed(this, 500);
+    float TextBlink::getThickness() {
+        return thickness_;
+    }
+
+
+    void TextBlink::run() {
+        if (!is_cancelled_) {
+            blink_mask_ = !blink_mask_;
+
+            target_view_->invalidate();
+
+            blink_cycler_->removeCallbacks(this);
+            blink_cycler_->postDelayed(this, 500);
         }
     }
 

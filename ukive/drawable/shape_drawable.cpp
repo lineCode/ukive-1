@@ -54,8 +54,7 @@ namespace ukive {
     }
 
 
-    void ShapeDrawable::draw(Canvas *canvas)
-    {
+    void ShapeDrawable::draw(Canvas* canvas) {
         if (!has_solid_ && !has_stroke_) {
             return;
         }
@@ -67,10 +66,8 @@ namespace ukive {
             bound = Rect(0, 0, width_, height_);
         }
 
-        switch (shape_)
-        {
-        case RECT:
-        {
+        switch (shape_) {
+        case RECT: {
             if (has_solid_) {
                 canvas->fillRect(bound.toRectF(), solid_color_);
             }
@@ -79,8 +76,7 @@ namespace ukive {
             }
             break;
         }
-        case ROUND_RECT:
-        {
+        case ROUND_RECT: {
             if (has_solid_) {
                 canvas->fillRoundRect(bound.toRectF(), round_radius_, solid_color_);
             }
@@ -89,26 +85,22 @@ namespace ukive {
             }
             break;
         }
-        case OVAL:
-        {
+        case OVAL: {
             float cx = (bound.right - bound.left) / 2.f;
             float cy = (bound.bottom - bound.top) / 2.f;
 
             if (has_solid_) {
-                canvas->fillOval(
-                    cx, cy, cx, cy, solid_color_);
+                canvas->fillOval(cx, cy, cx, cy, solid_color_);
             }
             if (has_stroke_) {
-                canvas->drawOval(
-                    cx, cy, cx, cy, stroke_color_);
+                canvas->drawOval(cx, cy, cx, cy, stroke_color_);
             }
             break;
         }
         }
     }
 
-    float ShapeDrawable::getOpacity() const
-    {
+    float ShapeDrawable::getOpacity() const {
         if ((has_solid_ && solid_color_.a != 0.f)
             || (has_stroke_ && stroke_color_.a != 0.f && stroke_width_ != 0.f)) {
             return 1.f;

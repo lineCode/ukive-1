@@ -9,8 +9,8 @@ namespace ukive {
     class AnimationManagerEventHandler : public IUIAnimationManagerEventHandler
     {
     private:
-        ULONG mRefCount;
-        AnimationManager::OnStateChangedListener *mListener;
+        ULONG ref_count_;
+        AnimationManager::OnStateChangedListener *listener_;
 
     public:
         AnimationManagerEventHandler(

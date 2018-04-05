@@ -16,26 +16,25 @@
 namespace ukive {
 
     TextActionMode::TextActionMode(
-        Window *window, TextActionModeCallback *callback)
-    {
-        is_finished_ = true;
+        Window* window, TextActionModeCallback* callback)
+        :window_(window),
+        callback_(callback),
+        is_finished_(false) {
+
         menu_width_ = window->dpToPx(92);
         menu_item_height_ = window->dpToPx(36);
-
-        window_ = window;
-        callback_ = callback;
 
         menu_impl_ = new MenuImpl(window);
         menu_impl_->setCallback(this);
         menu_impl_->setMenuItemHeight(menu_item_height_);
 
-        ShapeDrawable *shapeDrawable
+        ShapeDrawable* shapeDrawable
             = new ShapeDrawable(ShapeDrawable::ROUND_RECT);
         shapeDrawable->setRadius(2.f);
         shapeDrawable->setSolidEnable(true);
         shapeDrawable->setSolidColor(Color::White);
 
-        inner_window_ = std::shared_ptr<InnerWindow>(new InnerWindow(window));
+        inner_window_ = std::make_shared<InnerWindow>(window);
         inner_window_->setElevation(window->dpToPx(2.f));
         inner_window_->setContentView(menu_impl_);
         inner_window_->setOutsideTouchable(true);
@@ -43,45 +42,39 @@ namespace ukive {
         inner_window_->setWidth(menu_width_);
     }
 
-    TextActionMode::~TextActionMode()
-    {
+    TextActionMode::~TextActionMode() {
     }
 
 
-    void TextActionMode::onCreateMenu(Menu *menu)
-    {
+    void TextActionMode::onCreateMenu(Menu* menu) {
     }
 
-    void TextActionMode::onPrepareMenu(Menu *menu)
-    {
+    void TextActionMode::onPrepareMenu(Menu* menu) {
     }
 
-    bool TextActionMode::onMenuItemClicked(Menu *menu, MenuItem *item)
-    {
+    bool TextActionMode::onMenuItemClicked(Menu* menu, MenuItem* item) {
         return callback_->onActionItemClicked(this, item);
     }
 
 
-    Menu *TextActionMode::getMenu()
-    {
+    Menu* TextActionMode::getMenu() {
         return menu_impl_;
     }
 
 
-    void TextActionMode::invalidateMenu()
-    {
+    void TextActionMode::invalidateMenu() {
         callback_->onPrepareActionMode(this, menu_impl_);
     }
 
-    void TextActionMode::invalidatePosition()
-    {
-        int x, y;
+    void TextActionMode::invalidatePosition() {
+        int x = 0, y = 0;
         callback_->onGetContentPosition(&x, &y);
 
         int windowWidth = window_->getClientWidth();
         int windowHeight = window_->getClientHeight();
-        if (x + menu_width_ > windowWidth)
+        if (x + menu_width_ > windowWidth) {
             x -= menu_width_;
+        }
 
         inner_window_->update(x, y);
     }
@@ -115,14 +108,13 @@ namespace ukive {
 
 
     void TextActionMode::showAsync() {
-        int x, y;
+        int x = 0, y = 0;
         callback_->onGetContentPosition(&x, &y);
 
         int cCenterX = 0, cCenterY = 0;
         int windowWidth = window_->getClientWidth();
         int windowHeight = window_->getClientHeight();
-        if (x + menu_width_ > windowWidth)
-        {
+        if (x + menu_width_ > windowWidth) {
             cCenterX = menu_width_;
             cCenterY = 0;
             x -= menu_width_;
@@ -136,24 +128,20 @@ namespace ukive {
 
     void TextActionMode::closeAsync() {
         class DismissAnimListener
-            : public Animator::OnAnimatorListener
-        {
-        private:
-            std::shared_ptr<InnerWindow> window;
+            : public Animator::OnAnimatorListener {
         public:
             DismissAnimListener(std::shared_ptr<InnerWindow> w)
-            {
-                window = w;
+                :window(w) {
             }
-            void onAnimationStart(Animator *animator) {}
-            void onAnimationEnd(Animator *animator)
-            {
+            void onAnimationStart(Animator* animator) {}
+            void onAnimationEnd(Animator* animator) {
                 window->dismiss();
             }
-            void onAnimationCancel(Animator *animator)
-            {
+            void onAnimationCancel(Animator* animator) {
                 window->dismiss();
             }
+        private:
+            std::shared_ptr<InnerWindow> window;
         }*animListener = new DismissAnimListener(inner_window_);
 
         inner_window_->getDecorView()->animate()->

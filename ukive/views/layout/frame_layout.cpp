@@ -7,22 +7,20 @@
 
 namespace ukive {
 
-    FrameLayout::FrameLayout(Window *wnd)
+    FrameLayout::FrameLayout(Window* wnd)
         :ViewGroup(wnd) {}
 
 
-    void FrameLayout::onMeasure(int width, int height, int widthSpec, int heightSpec)
-    {
+    void FrameLayout::onMeasure(int width, int height, int widthSpec, int heightSpec) {
         int finalWidth = 0;
         int finalHeight = 0;
 
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
         int verticalPadding = getPaddingTop() + getPaddingBottom();
 
-        this->measureChildrenWithMargins(width, height, widthSpec, heightSpec);
+        measureChildrenWithMargins(width, height, widthSpec, heightSpec);
 
-        switch (widthSpec)
-        {
+        switch (widthSpec) {
         case FIT:
             finalWidth = getWrappedWidth();
             finalWidth = std::min(finalWidth + horizontalPadding, width);
@@ -39,8 +37,7 @@ namespace ukive {
             break;
         }
 
-        switch (heightSpec)
-        {
+        switch (heightSpec) {
         case FIT:
             finalHeight = getWrappedHeight();
             finalHeight = std::min(finalHeight + verticalPadding, height);
@@ -57,7 +54,7 @@ namespace ukive {
             break;
         }
 
-        this->setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredDimension(finalWidth, finalHeight);
     }
 
 
@@ -65,25 +62,22 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        View *widget;
-        LayoutParams *lp;
+        View* child = nullptr;
+        LayoutParams* lp = nullptr;
 
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
-            widget = getChildAt(i);
-            if (widget->getVisibility() != View::VANISHED)
-            {
-                lp = widget->getLayoutParams();
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            child = getChildAt(i);
+            if (child->getVisibility() != View::VANISHED) {
+                lp = child->getLayoutParams();
 
-                int width = widget->getMeasuredWidth();
-                int height = widget->getMeasuredHeight();
+                int width = child->getMeasuredWidth();
+                int height = child->getMeasuredHeight();
 
                 int left = getPaddingLeft() + lp->leftMargin;
                 int top = getPaddingTop() + lp->topMargin;
 
-                widget->layout(
-                    left,
-                    top,
+                child->layout(
+                    left, top,
                     width + left,
                     height + top);
             }

@@ -9,8 +9,8 @@ namespace ukive {
     class AnimationTimerHandler : public IUIAnimationTimerEventHandler
     {
     private:
-        ULONG mRefCount;
-        AnimationManager::OnTimerEventListener *mListener;
+        ULONG ref_count_;
+        AnimationManager::OnTimerEventListener *listener_;
 
     public:
         AnimationTimerHandler(

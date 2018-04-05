@@ -4,9 +4,17 @@
 
 namespace ukive {
 
-    class LayoutParams
-    {
+    class LayoutParams {
     public:
+        enum {
+            FIT_CONTENT = -1,
+            MATCH_PARENT = -2,
+        };
+
+        LayoutParams(int width, int height);
+        LayoutParams(const LayoutParams& lp) = default;
+        virtual ~LayoutParams() = default;
+
         int width;
         int height;
 
@@ -14,14 +22,6 @@ namespace ukive {
         int topMargin;
         int rightMargin;
         int bottomMargin;
-
-        const static int FIT_CONTENT = -1;
-        const static int MATCH_PARENT = -2;
-
-    public:
-        LayoutParams(int width, int height);
-        LayoutParams(const LayoutParams &lp);
-        virtual ~LayoutParams();
     };
 
 }

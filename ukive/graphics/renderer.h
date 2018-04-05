@@ -24,9 +24,7 @@ namespace ukive {
 
         HRESULT init(Window* window);
         HRESULT resize();
-        bool render(
-            Color bkColor,
-            std::function<void()> renderCallback);
+        bool render(Color bg_color, std::function<void()> callback);
         void close();
 
         HRESULT drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap);
@@ -34,11 +32,6 @@ namespace ukive {
         void addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
         void removeSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
         void removeAllSwapChainResizeNotifier();
-
-        ComPtr<ID2D1Effect> getShadowEffect();
-        ComPtr<ID2D1Effect> getAffineTransEffect();
-        ComPtr<IDXGISwapChain1> getSwapChain();
-        ComPtr<ID2D1DeviceContext> getD2DDeviceContext();
 
         HRESULT createBitmapRenderTarget(
             IWICBitmap* wic_bitmap, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
@@ -52,6 +45,11 @@ namespace ukive {
         HRESULT createWindowRenderTarget(
             HWND handle, unsigned int width, unsigned int height,
             ID2D1HwndRenderTarget** renderTarget);
+
+        ComPtr<ID2D1Effect> getShadowEffect();
+        ComPtr<ID2D1Effect> getAffineTransEffect();
+        ComPtr<IDXGISwapChain1> getSwapChain();
+        ComPtr<ID2D1DeviceContext> getD2DDeviceContext();
 
         static HRESULT createTextFormat(
             const string16 fontFamilyName,

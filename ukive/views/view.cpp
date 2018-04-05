@@ -8,6 +8,7 @@
 #include "ukive/animation/view_animator.h"
 #include "ukive/text/input_connection.h"
 #include "ukive/views/click_listener.h"
+#include "ukive/views/layout/layout_params.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
 #include "ukive/application.h"
@@ -17,7 +18,7 @@
 
 namespace ukive {
 
-    View::View(Window *w)
+    View::View(Window* w)
         :window_(w),
         id_(Application::getViewUID()),
         min_width_(0),
@@ -38,10 +39,8 @@ namespace ukive {
         is_receive_outside_input_event_(false),
         can_consume_mouse_event_(true),
         parent_(nullptr),
-        layout_params_(nullptr),
         input_connection_(nullptr),
         click_listener_(nullptr),
-        animator_(nullptr),
         click_performer_(new ClickPerformer(this)),
         mAlpha(1.0),
         mScaleX(1.0),
@@ -69,7 +68,7 @@ namespace ukive {
     }
 
 
-    ViewAnimator *View::animate() {
+    ViewAnimator* View::animate() {
         if (animator_ == nullptr) {
             animator_ = std::make_unique<ViewAnimator>(this);
         }
@@ -189,12 +188,12 @@ namespace ukive {
         invalidate();
     }
 
-    void View::setBackground(Drawable *drawable) {
+    void View::setBackground(Drawable* drawable) {
         bg_drawable_.reset(drawable);
         invalidate();
     }
 
-    void View::setForeground(Drawable *drawable) {
+    void View::setForeground(Drawable* drawable) {
         fg_drawable_.reset(drawable);
         invalidate();
     }
@@ -211,11 +210,13 @@ namespace ukive {
         invalidate();
     }
 
-    void View::setLayoutParams(LayoutParams *params) {
-        if (params == nullptr)
-            throw std::invalid_argument("setLayoutParams: null param");
+    void View::setLayoutParams(LayoutParams* params) {
+        if (params == nullptr) {
+            DLOG(Log::WARNING) << "null param";
+            return;
+        }
 
-        layout_params_ = params;
+        layout_params_.reset(params);
 
         requestLayout();
         invalidate();
@@ -271,7 +272,7 @@ namespace ukive {
             window_->releaseMouse();
     }
 
-    void View::setParent(View *parent) {
+    void View::setParent(View* parent) {
         parent_ = parent;
     }
 
@@ -302,156 +303,156 @@ namespace ukive {
         min_height_ = height;
     }
 
-    void View::setOnClickListener(OnClickListener *l) {
+    void View::setOnClickListener(OnClickListener* l) {
         click_listener_ = l;
     }
 
 
-    int View::getId() {
+    int View::getId() const {
         return id_;
     }
 
-    double View::getX() {
+    double View::getX() const {
         return bounds_.left + getTranslateX();
     }
 
-    double View::getY() {
+    double View::getY() const {
         return bounds_.top + getTranslateY();
     }
 
-    double View::getAlpha() {
+    double View::getAlpha() const {
         return mAlpha;
     }
 
-    double View::getScaleX() {
+    double View::getScaleX() const {
         return mScaleX;
     }
 
-    double View::getScaleY() {
+    double View::getScaleY() const {
         return mScaleY;
     }
 
-    double View::getTranslateX() {
+    double View::getTranslateX() const {
         return mTranslateX;
     }
 
-    double View::getTranslateY() {
+    double View::getTranslateY() const {
         return mTranslateY;
     }
 
-    double View::getPivotX() {
+    double View::getPivotX() const {
         return mPivotX;
     }
 
-    double View::getPivotY() {
+    double View::getPivotY() const {
         return mPivotY;
     }
 
-    int View::getScrollX() {
+    int View::getScrollX() const {
         return scroll_x_;
     }
 
-    int View::getScrollY() {
+    int View::getScrollY() const {
         return scroll_y_;
     }
 
-    int View::getLeft() {
+    int View::getLeft() const {
         return bounds_.left;
     }
 
-    int View::getTop() {
+    int View::getTop() const {
         return bounds_.top;
     }
 
-    int View::getRight() {
+    int View::getRight() const {
         return bounds_.right;
     }
 
-    int View::getBottom() {
+    int View::getBottom() const {
         return bounds_.bottom;
     }
 
-    int View::getWidth() {
+    int View::getWidth() const {
         return bounds_.width();
     }
 
-    int View::getHeight() {
+    int View::getHeight() const {
         return bounds_.height();
     }
 
-    int View::getMeasuredWidth() {
+    int View::getMeasuredWidth() const {
         return measured_width_;
     }
 
-    int View::getMeasuredHeight() {
+    int View::getMeasuredHeight() const {
         return measured_height_;
     }
 
-    int View::getMinimumWidth() {
+    int View::getMinimumWidth() const {
         return min_width_;
     }
 
-    int View::getMinimumHeight() {
+    int View::getMinimumHeight() const {
         return min_height_;
     }
 
-    float View::getElevation() {
+    float View::getElevation() const {
         return elevation_;
     }
 
-    int View::getVisibility() {
+    int View::getVisibility() const {
         return visibility_;
     }
 
 
-    int View::getPaddingLeft() {
+    int View::getPaddingLeft() const {
         return padding_.left;
     }
 
-    int View::getPaddingTop() {
+    int View::getPaddingTop() const {
         return padding_.top;
     }
 
-    int View::getPaddingRight() {
+    int View::getPaddingRight() const {
         return padding_.right;
     }
 
-    int View::getPaddingBottom() {
+    int View::getPaddingBottom() const {
         return padding_.bottom;
     }
 
 
-    LayoutParams *View::getLayoutParams() {
-        return layout_params_;
+    LayoutParams* View::getLayoutParams() const {
+        return layout_params_.get();
     }
 
-    View *View::getParent() {
+    View* View::getParent() const {
         return parent_;
     }
 
 
-    Window *View::getWindow() {
+    Window* View::getWindow() const {
         return window_;
     }
 
 
-    Drawable *View::getBackground() {
+    Drawable* View::getBackground() const {
         return bg_drawable_.get();
     }
 
-    Drawable *View::getForeground() {
+    Drawable* View::getForeground() const {
         return fg_drawable_.get();
     }
 
 
-    Rect View::getBounds() {
+    Rect View::getBounds() const {
         return bounds_;
     }
 
-    Rect View::getBoundsInWindow() {
+    Rect View::getBoundsInWindow() const {
         Rect bound = getBounds();
 
-        View *parent = parent_;
+        View* parent = parent_;
         while (parent) {
             Rect parentBound = parent->getBounds();
             bound.left += parentBound.left;
@@ -465,7 +466,7 @@ namespace ukive {
         return bound;
     }
 
-    Rect View::getBoundsInScreen() {
+    Rect View::getBoundsInScreen() const {
         Rect bound = getBoundsInWindow();
 
         POINT pt;
@@ -485,13 +486,13 @@ namespace ukive {
         return bound;
     }
 
-    Rect View::getContentBounds() {
+    Rect View::getContentBounds() const {
         Rect content_bounds = bounds_;
         content_bounds.insets(padding_);
         return content_bounds;
     }
 
-    Rect View::getContentBoundsInThis() {
+    Rect View::getContentBoundsInThis() const {
         int content_width = bounds_.width() - padding_.width();
         int content_height = bounds_.height() - padding_.height();
         return Rect(
@@ -500,53 +501,53 @@ namespace ukive {
     }
 
 
-    View *View::findViewById(int id) {
+    View* View::findViewById(int id) {
         return nullptr;
     }
 
 
-    bool View::isEnabled() {
+    bool View::isEnabled() const {
         return is_enabled_;
     }
 
-    bool View::isAttachedToWindow() {
+    bool View::isAttachedToWindow() const {
         return is_attached_to_window_;
     }
 
-    bool View::isInputEventAtLast() {
+    bool View::isInputEventAtLast() const {
         return is_input_event_at_last_;
     }
 
-    bool View::isPressed() {
+    bool View::isPressed() const {
         return is_pressed_;
     }
 
-    bool View::hasFocus() {
+    bool View::hasFocus() const {
         return has_focus_;
     }
 
-    bool View::isFocusable() {
+    bool View::isFocusable() const {
         return is_focusable_;
     }
 
-    bool View::isLayouted() {
+    bool View::isLayouted() const {
         return is_layouted_;
     }
 
-    bool View::isLocalMouseInThis(InputEvent *e) {
+    bool View::isLocalMouseInThis(InputEvent* e) const {
         return (e->getMouseX() >= 0 && e->getMouseX() <= getWidth()
             && e->getMouseY() >= 0 && e->getMouseY() <= getHeight());
     }
 
-    bool View::isParentMouseInThis(InputEvent *e) {
+    bool View::isParentMouseInThis(InputEvent* e) const {
         return bounds_.hit(e->getMouseX(), e->getMouseY());
     }
 
-    bool View::isReceiveOutsideInputEvent() {
+    bool View::isReceiveOutsideInputEvent() const {
         return is_receive_outside_input_event_;
     }
 
-    bool View::canConsumeMouseEvent() {
+    bool View::canConsumeMouseEvent() const {
         return can_consume_mouse_event_;
     }
 
@@ -573,7 +574,7 @@ namespace ukive {
     }
 
 
-    void View::draw(Canvas *canvas) {
+    void View::draw(Canvas* canvas) {
         // 应用动画变量
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
@@ -711,14 +712,14 @@ namespace ukive {
             && fg_drawable_->getOpacity() > 0.f);
     }
 
-    void View::drawBackground(Canvas *canvas) {
+    void View::drawBackground(Canvas* canvas) {
         if (needDrawBackground()) {
             bg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             bg_drawable_->draw(canvas);
         }
     }
 
-    void View::drawForeground(Canvas *canvas) {
+    void View::drawForeground(Canvas* canvas) {
         if (needDrawForeground()) {
             fg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             fg_drawable_->draw(canvas);
@@ -787,7 +788,7 @@ namespace ukive {
         }
 
         //先取消其他 view 的焦点。
-        View *prevHolder = window_->getKeyboardHolder();
+        View* prevHolder = window_->getKeyboardHolder();
         if (prevHolder != nullptr) {
             prevHolder->discardFocus();
         }
@@ -816,7 +817,7 @@ namespace ukive {
     }
 
 
-    void View::dispatchDraw(Canvas *canvas) {
+    void View::dispatchDraw(Canvas* canvas) {
     }
 
     void View::dispatchDiscardFocus() {
@@ -826,7 +827,7 @@ namespace ukive {
     }
 
 
-    bool View::dispatchInputEvent(InputEvent *e) {
+    bool View::dispatchInputEvent(InputEvent* e) {
         e->setMouseX(e->getMouseX() - bounds_.left);
         e->setMouseY(e->getMouseY() - bounds_.top);
 
@@ -863,10 +864,10 @@ namespace ukive {
     }
 
 
-    void View::onDraw(Canvas *canvas) {
+    void View::onDraw(Canvas* canvas) {
     }
 
-    bool View::onInputEvent(InputEvent *e) {
+    bool View::onInputEvent(InputEvent* e) {
         bool shouldRefresh = false;
 
         switch (e->getEvent()) {

@@ -23,8 +23,10 @@
 
 
 namespace {
-    const int kTextViewId = 1001;
-    const int kImageViewId = 1002;
+    enum {
+        kTextViewId = 1001,
+        kImageViewId,
+    };
 }
 
 namespace shell {

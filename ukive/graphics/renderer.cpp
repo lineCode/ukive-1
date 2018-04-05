@@ -65,12 +65,10 @@ namespace ukive {
         return hr;
     }
 
-    bool Renderer::render(
-        Color bk_color, std::function<void()> callback)
-    {
+    bool Renderer::render(Color bg_color, std::function<void()> callback) {
         d2d_dc_->BeginDraw();
         D2D1_COLOR_F color = {
-            bk_color.r, bk_color.g, bk_color.b, bk_color.a };
+            bg_color.r, bg_color.g, bg_color.b, bg_color.a };
         d2d_dc_->Clear(color);
 
         callback();
@@ -114,9 +112,8 @@ namespace ukive {
             CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
         DCHECK(SUCCEEDED(hr));
 
-        ComPtr<IDXGISurface> dxgi_surface;
-        hr = d3d_texture->QueryInterface(&dxgi_surface);
-        DCHECK(SUCCEEDED(hr));
+        auto dxgi_surface  = d3d_texture.cast<IDXGISurface>();
+        DCHECK(dxgi_surface != nullptr);
 
         hr = createBitmapRenderTarget(dxgi_surface.get(), &bitmap_render_target_, true);
         DCHECK(SUCCEEDED(hr));
@@ -170,16 +167,14 @@ namespace ukive {
         d2d_dc_->SetTarget(nullptr);
         bitmap_render_target_.reset();
 
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it) {
-            (*it)->onPreSwapChainResize();
+        for (auto notifier : sc_resize_notifier_list_) {
+            notifier->onPreSwapChainResize();
         }
 
         RH(createHardwareBRT());
 
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it) {
-            (*it)->onPostSwapChainResize();
+        for (auto notifier : sc_resize_notifier_list_) {
+            notifier->onPostSwapChainResize();
         }
 
         return S_OK;
@@ -195,9 +190,8 @@ namespace ukive {
         d2d_dc_->SetTarget(nullptr);
         bitmap_render_target_.reset();
 
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it) {
-            (*it)->onPreSwapChainResize();
+        for (auto notifier : sc_resize_notifier_list_) {
+            notifier->onPreSwapChainResize();
         }
 
         RH(swapchain_->ResizeBuffers(
@@ -209,9 +203,8 @@ namespace ukive {
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
 
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it) {
-            (*it)->onPostSwapChainResize();
+        for (auto notifier : sc_resize_notifier_list_) {
+            notifier->onPostSwapChainResize();
         }
 
         return S_OK;
@@ -255,8 +248,7 @@ namespace ukive {
     }
 
 
-    HRESULT Renderer::drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap)
-    {
+    HRESULT Renderer::drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap) {
         //在 Alpha 动画时，令阴影更快消退。
         float shadow_alpha;
         if (alpha == 0.f) {
@@ -292,8 +284,7 @@ namespace ukive {
 
             if ((*it) == notifier) {
                 it = sc_resize_notifier_list_.erase(it);
-            }
-            else {
+            } else {
                 ++it;
             }
         }
@@ -302,24 +293,6 @@ namespace ukive {
     void Renderer::removeAllSwapChainResizeNotifier() {
         sc_resize_notifier_list_.clear();
     }
-
-
-    ComPtr<ID2D1Effect> Renderer::getShadowEffect() {
-        return shadow_effect_;
-    }
-
-    ComPtr<ID2D1Effect> Renderer::getAffineTransEffect() {
-        return affinetrans_effect_;
-    }
-
-    ComPtr<IDXGISwapChain1> Renderer::getSwapChain() {
-        return swapchain_;
-    }
-
-    ComPtr<ID2D1DeviceContext> Renderer::getD2DDeviceContext() {
-        return d2d_dc_;
-    }
-
 
     HRESULT Renderer::createBitmapRenderTarget(
         IWICBitmap* wic_bitmap, ID2D1Bitmap1** bitmap, bool gdi_compat) {
@@ -352,13 +325,12 @@ namespace ukive {
                 bmp_options,
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
-        return d2d_dc_->
-            CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
+        return d2d_dc_->CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
     }
 
     HRESULT Renderer::createCompatBitmapRenderTarget(
-        float width, float height, ID2D1BitmapRenderTarget** bRT)
-    {
+        float width, float height, ID2D1BitmapRenderTarget** bRT) {
+
         ComPtr<ID2D1BitmapRenderTarget> bmpRenderTarget;
         RH(d2d_dc_->CreateCompatibleRenderTarget(
             D2D1::SizeF(width, height), bRT));
@@ -367,8 +339,8 @@ namespace ukive {
     }
 
     HRESULT Renderer::createDXGISurfaceRenderTarget(
-        IDXGISurface* dxgiSurface, ID2D1RenderTarget** renderTarget)
-    {
+        IDXGISurface* dxgiSurface, ID2D1RenderTarget** renderTarget) {
+
         HRESULT hr = S_OK;
         auto gdm = Application::getGraphicDeviceManager();
 
@@ -381,8 +353,8 @@ namespace ukive {
     }
 
     HRESULT Renderer::createWindowRenderTarget(
-        HWND handle, unsigned int width, unsigned int height, ID2D1HwndRenderTarget** renderTarget)
-    {
+        HWND handle, unsigned int width, unsigned int height, ID2D1HwndRenderTarget** renderTarget) {
+
         HRESULT hr = S_OK;
         auto gdm = Application::getGraphicDeviceManager();
 
@@ -395,6 +367,22 @@ namespace ukive {
         return gdm->getD2DFactory()->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
             D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(width, height)),
             renderTarget);
+    }
+
+    ComPtr<ID2D1Effect> Renderer::getShadowEffect() {
+        return shadow_effect_;
+    }
+
+    ComPtr<ID2D1Effect> Renderer::getAffineTransEffect() {
+        return affinetrans_effect_;
+    }
+
+    ComPtr<IDXGISwapChain1> Renderer::getSwapChain() {
+        return swapchain_;
+    }
+
+    ComPtr<ID2D1DeviceContext> Renderer::getD2DDeviceContext() {
+        return d2d_dc_;
     }
 
     HRESULT Renderer::createTextFormat(

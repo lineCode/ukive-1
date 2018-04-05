@@ -33,12 +33,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     text_window->center();
     text_window->show();*/
 
-    /*auto lod_window = std::make_shared<shell::LodWindow>();
+    auto lod_window = std::make_shared<shell::LodWindow>();
     lod_window->setTitle(L"Test");
     lod_window->setWidth(ukive::Application::dpToPx(600));
     lod_window->setHeight(ukive::Application::dpToPx(500));
     lod_window->center();
-    lod_window->show();*/
+    lod_window->show();
 
     /*auto shadow_window = std::make_shared<shell::ShadowWindow>();
     shadow_window->setTitle(L"Test");
@@ -47,12 +47,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     shadow_window->center();
     shadow_window->show();*/
 
-    auto test_window = std::make_shared<shell::TestWindow>();
+    /*auto test_window = std::make_shared<shell::TestWindow>();
     test_window->setTitle(L"Test");
     test_window->setWidth(ukive::Application::dpToPx(600));
     test_window->setHeight(ukive::Application::dpToPx(600));
     test_window->center();
-    test_window->show();
+    test_window->show();*/
 
     app->run();
 

@@ -10,8 +10,7 @@ namespace ukive {
 
     class Bitmap;
 
-    class BitmapDrawable : public Drawable
-    {
+    class BitmapDrawable : public Drawable {
     public:
         BitmapDrawable(std::shared_ptr<Bitmap> bitmap);
         ~BitmapDrawable() = default;

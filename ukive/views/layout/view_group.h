@@ -8,31 +8,12 @@
 
 namespace ukive {
 
-    class ViewGroup : public View
-    {
-    private:
-        void initViewGroup();
-
-    protected:
-        virtual void dispatchDraw(Canvas *canvas) override;
-        virtual void dispatchDiscardFocus() override;
-        virtual void dispatchDiscardPendingOperations() override;
-
-        virtual bool dispatchMouseEvent(InputEvent *e);
-        virtual bool dispatchKeyboardEvent(InputEvent *e);
-
-        virtual LayoutParams *generateLayoutParams(const LayoutParams &lp);
-        virtual LayoutParams *generateDefaultLayoutParams();
-        virtual bool checkLayoutParams(LayoutParams *lp);
-
-        int getWrappedWidth();
-        int getWrappedHeight();
-
+    class ViewGroup : public View {
     public:
-        ViewGroup(Window *w);
+        ViewGroup(Window* w);
         ~ViewGroup();
 
-        bool dispatchInputEvent(InputEvent *e) override;
+        bool dispatchInputEvent(InputEvent* e) override;
         void dispatchWindowFocusChanged(bool windowFocus) override;
         void dispatchWindowDpiChanged(int dpi_x, int dpi_y) override;
 
@@ -40,39 +21,33 @@ namespace ukive {
             bool changed, bool sizeChanged,
             int left, int top, int right, int bottom) = 0;
 
-        virtual bool onInterceptInputEvent(InputEvent *e);
-        virtual bool onInterceptMouseEvent(InputEvent *e);
-        virtual bool onInterceptKeyboardEvent(InputEvent *e);
+        virtual bool onInterceptInputEvent(InputEvent* e);
+        virtual bool onInterceptMouseEvent(InputEvent* e);
+        virtual bool onInterceptKeyboardEvent(InputEvent* e);
 
         void onAttachedToWindow() override;
         void onDetachedFromWindow() override;
 
-        void addView(View *v, LayoutParams *params = nullptr);
-        void addView(std::size_t index, View *v, LayoutParams *params = nullptr);
-        void removeView(View *v, bool del = true);
+        void addView(View* v, LayoutParams* params = nullptr);
+        void addView(size_t index, View* v, LayoutParams* params = nullptr);
+        void removeView(View* v, bool del = true);
         void removeAllViews(bool del = true);
 
-        View *findViewById(int id) override;
+        size_t getChildCount();
+        View* getChildById(int id);
+        View* getChildAt(size_t index);
+        View* findViewById(int id) override;
 
-        static void getChildMeasure(
-            int parentSize, int parentSizeMode,
-            int padding, int childDimension,
-            int *childSize, int *childSizeMode);
-
-        std::size_t getChildCount();
-        View *getChildById(int id);
-        View *getChildAt(std::size_t index);
-
-        void drawChild(Canvas *canvas, View *child);
-        void drawChildren(Canvas *canvas);
+        void drawChild(Canvas* canvas, View* child);
+        void drawChildren(Canvas* canvas);
 
         void measureChild(
-            View *child,
+            View* child,
             int parentWidth, int parentHeight,
             int parentWidthMode, int parentHeightMode);
 
         void measureChildWithMargins(
-            View *child,
+            View* child,
             int parentWidth, int parentHeight,
             int parentWidthMode, int parentHeightMode);
 
@@ -83,6 +58,26 @@ namespace ukive {
         void measureChildrenWithMargins(
             int parentWidth, int parentHeight,
             int parentWidthMode, int parentHeightMode);
+
+        static void getChildMeasure(
+            int parentSize, int parentSizeMode,
+            int padding, int childDimension,
+            int* childSize, int* childSizeMode);
+
+    protected:
+        void dispatchDraw(Canvas* canvas) override;
+        void dispatchDiscardFocus() override;
+        void dispatchDiscardPendingOperations() override;
+
+        virtual bool dispatchMouseEvent(InputEvent* e);
+        virtual bool dispatchKeyboardEvent(InputEvent* e);
+
+        virtual bool checkLayoutParams(LayoutParams* lp);
+        virtual LayoutParams* generateDefaultLayoutParams();
+        virtual LayoutParams* generateLayoutParams(const LayoutParams &lp);
+
+        int getWrappedWidth();
+        int getWrappedHeight();
 
     private:
         std::vector<View*> view_list_;

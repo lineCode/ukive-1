@@ -93,73 +93,73 @@ namespace ukive {
         void offsetTopAndBottom(int dy);
         void offsetLeftAndRight(int dx);
 
-        double getX();
-        double getY();
-        double getAlpha();
-        double getScaleX();
-        double getScaleY();
-        double getTranslateX();
-        double getTranslateY();
-        double getPivotX();
-        double getPivotY();
+        double getX() const;
+        double getY() const;
+        double getAlpha() const;
+        double getScaleX() const;
+        double getScaleY() const;
+        double getTranslateX() const;
+        double getTranslateY() const;
+        double getPivotX() const;
+        double getPivotY() const;
 
-        int getId();
-        int getScrollX();
-        int getScrollY();
-        int getLeft();
-        int getTop();
-        int getRight();
-        int getBottom();
-        int getWidth();
-        int getHeight();
-        int getMeasuredWidth();
-        int getMeasuredHeight();
-        float getElevation();
-        int getVisibility();
+        int getId() const;
+        int getScrollX() const;
+        int getScrollY() const;
+        int getLeft() const;
+        int getTop() const;
+        int getRight() const;
+        int getBottom() const;
+        int getWidth() const;
+        int getHeight() const;
+        int getMeasuredWidth() const;
+        int getMeasuredHeight() const;
+        float getElevation() const;
+        int getVisibility() const;
 
-        int getMinimumWidth();
-        int getMinimumHeight();
+        int getMinimumWidth() const;
+        int getMinimumHeight() const;
 
-        int getPaddingLeft();
-        int getPaddingTop();
-        int getPaddingRight();
-        int getPaddingBottom();
+        int getPaddingLeft() const;
+        int getPaddingTop() const;
+        int getPaddingRight() const;
+        int getPaddingBottom() const;
 
-        LayoutParams* getLayoutParams();
-        View* getParent();
+        LayoutParams* getLayoutParams() const;
+        View* getParent() const;
 
-        Window* getWindow();
-        Drawable* getBackground();
-        Drawable* getForeground();
+        Window* getWindow() const;
+        Drawable* getBackground() const;
+        Drawable* getForeground() const;
 
         // bounds relative to parent.
-        Rect getBounds();
+        Rect getBounds() const;
 
         // bounds relative to window.
-        Rect getBoundsInWindow();
+        Rect getBoundsInWindow() const;
 
         // bounds relative to screen.
-        Rect getBoundsInScreen();
+        Rect getBoundsInScreen() const;
 
         // getBounds() with paddings.
-        Rect getContentBounds();
+        Rect getContentBounds() const;
 
         // getContentBounds() relative to (0, 0)
-        Rect getContentBoundsInThis();
+        Rect getContentBoundsInThis() const;
 
         virtual View* findViewById(int id);
 
-        bool isEnabled();
-        bool isAttachedToWindow();
-        bool isInputEventAtLast();
-        bool isPressed();
-        bool hasFocus();
-        bool isFocusable();
-        bool isLayouted();
-        bool isLocalMouseInThis(InputEvent* e);
-        bool isParentMouseInThis(InputEvent* e);
-        bool isReceiveOutsideInputEvent();
-        bool canConsumeMouseEvent();
+        bool isEnabled() const;
+        bool isAttachedToWindow() const;
+        bool isInputEventAtLast() const;
+        bool isPressed() const;
+        bool hasFocus() const;
+        bool isFocusable() const;
+        bool isLayouted() const;
+        bool isLocalMouseInThis(InputEvent* e) const;
+        bool isParentMouseInThis(InputEvent* e) const;
+        bool isReceiveOutsideInputEvent() const;
+        bool canConsumeMouseEvent() const;
 
         void scrollTo(int x, int y);
         void scrollBy(int dx, int dy);
@@ -280,9 +280,9 @@ namespace ukive {
         double mRevealHeightRadius;
 
         std::unique_ptr<ViewAnimator> animator_;
+        std::unique_ptr<LayoutParams> layout_params_;
 
         View* parent_;
-        LayoutParams* layout_params_;
         OnClickListener* click_listener_;
         ClickPerformer* click_performer_;
         InputConnection* input_connection_;

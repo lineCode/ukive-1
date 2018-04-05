@@ -8,32 +8,40 @@ namespace ukive {
     {
     public:
         // 鼠标事件。
-        static const int EVM_DOWN = 1;
-        static const int EVM_UP = 2;
-        static const int EVM_MOVE = 3;
-        static const int EVM_WHEEL = 4;
-        static const int EVM_LEAVE_WIN = 5;
-        static const int EVM_LEAVE_VIEW = 6;
-        static const int EVM_HOVER = 7;
-        static const int EVM_SCROLL_ENTER = 8;
+        enum {
+            EVM_DOWN = 1,
+            EVM_UP,
+            EVM_MOVE,
+            EVM_WHEEL,
+            EVM_LEAVE_WIN,
+            EVM_LEAVE_VIEW,
+            EVM_HOVER,
+            EVM_SCROLL_ENTER,
+        };
 
         // 键盘事件。
-        static const int EVK_DOWN = 100;
-        static const int EVK_UP = 101;
+        enum {
+            EVK_DOWN = (EVM_SCROLL_ENTER + 1),
+            EVK_UP,
+        };
 
         // 其他事件。
-        static const int EV_CANCEL = 400;
+        enum {
+            EV_CANCEL = (EVK_UP + 1),
+        };
 
         // 鼠标按键定义。
-        static const int MK_LEFT = 100;
-        static const int MK_MIDDLE = 101;
-        static const int MK_RIGHT = 102;
+        enum {
+            MK_LEFT = 0,
+            MK_MIDDLE,
+            MK_RIGHT,
+        };
 
         // 键盘按键定义使用windows本身的定义。
 
     public:
         InputEvent();
-        InputEvent(const InputEvent &source);
+        InputEvent(const InputEvent& source) = default;
         ~InputEvent();
 
         void setEvent(int ev);

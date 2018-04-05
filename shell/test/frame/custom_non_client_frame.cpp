@@ -75,8 +75,8 @@ namespace shell {
         mIsMousePressedInCloseButton = false;
 
         RECT rcWin;
-        GetWindowRect(window_->getHandle(), &rcWin);
-        OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+        ::GetWindowRect(window_->getHandle(), &rcWin);
+        ::OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
 
         createCaptionButtonRgn(rcWin.right, 0, 0);
 
@@ -94,19 +94,17 @@ namespace shell {
 
 
     LRESULT CustomNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
-        switch (wParam)
-        {
-        case SIZE_MAXIMIZED:
-        {
+        switch (wParam) {
+        case SIZE_MAXIMIZED: {
             RECT rcWin;
-            GetWindowRect(window_->getHandle(), &rcWin);
+            ::GetWindowRect(window_->getHandle(), &rcWin);
 
             int leftExtended = -rcWin.left;
             int topExtended = -rcWin.top;
             int rightExtended = rcWin.right - GetSystemMetrics(SM_CXFULLSCREEN);
             int bottomExtended = rcWin.bottom - (GetSystemMetrics(SM_CYFULLSCREEN) + GetSystemMetrics(SM_CYCAPTION));
 
-            OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+            ::OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
 
             title_rect_.left = kTitleLeftMargin + leftExtended - kLeftBorderWidth;
             title_rect_.top = topExtended - kTopBorderWidth;
@@ -115,11 +113,10 @@ namespace shell {
             break;
         }
 
-        case SIZE_RESTORED:
-        {
+        case SIZE_RESTORED: {
             RECT rcWin;
-            GetWindowRect(window_->getHandle(), &rcWin);
-            OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+            ::GetWindowRect(window_->getHandle(), &rcWin);
+            ::OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
 
             title_rect_.left = kTitleLeftMargin;
             title_rect_.top = 0;
@@ -144,13 +141,13 @@ namespace shell {
             || mIsMousePressedInCloseButton)
         {
             RECT rcWin;
-            GetWindowRect(window_->getHandle(), &rcWin);
+            ::GetWindowRect(window_->getHandle(), &rcWin);
 
             int xPos = GET_X_LPARAM(lParam);
             int yPos = GET_Y_LPARAM(lParam);
 
             POINT pt = { xPos, yPos };
-            ClientToScreen(window_->getHandle(), &pt);
+            ::ClientToScreen(window_->getHandle(), &pt);
             xPos = pt.x;
             yPos = pt.y;
 
@@ -172,8 +169,7 @@ namespace shell {
                     needRedraw = true;
                 }
             } else if (mIsMousePressedInCloseButton) {
-                if (close_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top))
-                {
+                if (close_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top)) {
                     close_button_color_ = kCloseButtonPressedColor;
                     needRedraw = true;
                 } else {
@@ -182,8 +178,9 @@ namespace shell {
                 }
             }
 
-            if (needRedraw)
+            if (needRedraw) {
                 drawCaptionAndBorder();
+            }
         }
 
         return TRUE;
@@ -195,30 +192,30 @@ namespace shell {
             || mIsMousePressedInCloseButton)
         {
             RECT rcWin;
-            GetWindowRect(window_->getHandle(), &rcWin);
+            ::GetWindowRect(window_->getHandle(), &rcWin);
 
             int xPos = GET_X_LPARAM(lParam);
             int yPos = GET_Y_LPARAM(lParam);
 
             POINT pt = { xPos, yPos };
-            ClientToScreen(window_->getHandle(), &pt);
+            ::ClientToScreen(window_->getHandle(), &pt);
             xPos = pt.x;
             yPos = pt.y;
 
             if (mIsMousePressedInMinButton
                 && min_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top))
             {
-                ShowWindow(window_->getHandle(), SW_MINIMIZE);
+                ::ShowWindow(window_->getHandle(), SW_MINIMIZE);
                 min_button_color_ = kMinButtonColor;
                 *handled = true;
-            }
-            else if (mIsMousePressedInMaxButton
+            } else if (mIsMousePressedInMaxButton
                 && max_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top))
             {
-                if (IsZoomed(window_->getHandle()))
-                    ShowWindow(window_->getHandle(), SW_NORMAL);
-                else
-                    ShowWindow(window_->getHandle(), SW_MAXIMIZE);
+                if (IsZoomed(window_->getHandle())) {
+                    ::ShowWindow(window_->getHandle(), SW_NORMAL);
+                } else {
+                    ::ShowWindow(window_->getHandle(), SW_MAXIMIZE);
+                }
 
                 max_button_color_ = kMaxButtonColor;
                 drawCaptionAndBorder();
@@ -229,9 +226,9 @@ namespace shell {
             {
                 window_->close();
                 *handled = true;
-            }
-            else
+            } else {
                 *handled = false;
+            }
 
             mIsMousePressedInMinButton = false;
             mIsMousePressedInMaxButton = false;
@@ -251,8 +248,9 @@ namespace shell {
 
     LRESULT CustomNonClientFrame::onNcActivate(WPARAM wParam, LPARAM lParam, bool* handled) {
         *handled = true;
-        if (wParam == FALSE)
+        if (wParam == FALSE) {
             drawCaptionAndBorder();
+        }
         return TRUE;
     }
 
@@ -260,7 +258,7 @@ namespace shell {
         *handled = true;
 
         RECT rcWin;
-        GetWindowRect(window_->getHandle(), &rcWin);
+        ::GetWindowRect(window_->getHandle(), &rcWin);
 
         int xPos = GET_X_LPARAM(lParam);
         int yPos = GET_Y_LPARAM(lParam);
@@ -272,8 +270,7 @@ namespace shell {
             && xPos < rcWin.left + kLeftBorderWidth + kResizeHandlerIndent)
         {
             col = 0;
-        }
-        else if (xPos >= rcWin.right - kRightBorderWidth - kResizeHandlerIndent
+        } else if (xPos >= rcWin.right - kRightBorderWidth - kResizeHandlerIndent
             && xPos < rcWin.right)
         {
             col = 2;
@@ -282,36 +279,29 @@ namespace shell {
         if (yPos >= rcWin.top && yPos < rcWin.top + kTopBorderWidth + kCaptionHeight)
         {
             isInCaptain = (yPos > rcWin.top + kTopBorderWidth + kResizeHandlerIndent);
-            if (min_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top))
-            {
+            if (min_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top)) {
                 return HTMINBUTTON;
-            }
-            else if (max_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top))
-            {
+            } else if (max_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top)) {
                 return HTMAXBUTTON;
-            }
-            else if (close_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top))
-            {
+            } else if (close_button_rect_.hit(xPos - rcWin.left, yPos - rcWin.top)) {
                 return HTCLOSE;
-            }
-            else if (xPos > rcWin.left + kLeftBorderWidth + kResizeHandlerIndent + 2
+            } else if (xPos > rcWin.left + kLeftBorderWidth + kResizeHandlerIndent + 2
                 && xPos <= rcWin.left + kLeftBorderWidth + kResizeHandlerIndent + 2 + 24
                 && isInCaptain)
             {
                 return HTSYSMENU;
-            }
-            else
-            {
+            } else {
                 min_button_color_ = kMinButtonColor;
                 max_button_color_ = kMaxButtonColor;
                 close_button_color_ = kCloseButtonColor;
                 drawCaptionAndBorder();
             }
 
-            if ((col == 0 || col == 2) && isInCaptain)
+            if ((col == 0 || col == 2) && isInCaptain) {
                 row = 1;
-            else
+            } else {
                 row = 0;
+            }
         }
         else if (yPos >= rcWin.bottom - kBottomBorderWidth - kResizeHandlerIndent
             && yPos < rcWin.bottom)
@@ -333,27 +323,24 @@ namespace shell {
         *handled = true;
         if (wParam == TRUE)
         {
-            NCCALCSIZE_PARAMS *ncp = (NCCALCSIZE_PARAMS*)lParam;
+            NCCALCSIZE_PARAMS* ncp = (NCCALCSIZE_PARAMS*)lParam;
             // 0: 新窗口位置
             // 1: 旧窗口位置
             // 2: 旧客户区位置
-            if (IsZoomed(window_->getHandle()))
-            {
+            if (::IsZoomed(window_->getHandle())) {
                 RECT rcWin;
-                GetWindowRect(window_->getHandle(), &rcWin);
+                ::GetWindowRect(window_->getHandle(), &rcWin);
 
                 int leftExtended = -rcWin.left;
                 int topExtended = -rcWin.top;
-                int rightExtended = rcWin.right - GetSystemMetrics(SM_CXFULLSCREEN);
-                int bottomExtended = rcWin.bottom - (GetSystemMetrics(SM_CYFULLSCREEN) + GetSystemMetrics(SM_CYCAPTION));
+                int rightExtended = rcWin.right - ::GetSystemMetrics(SM_CXFULLSCREEN);
+                int bottomExtended = rcWin.bottom - (::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION));
 
                 ncp->rgrc[0].left += leftExtended;
                 ncp->rgrc[0].top += kTopBorderWidth + kCaptionHeight;
                 ncp->rgrc[0].right -= rightExtended;
                 ncp->rgrc[0].bottom -= bottomExtended;
-            }
-            else
-            {
+            } else {
                 ncp->rgrc[0].left += kLeftBorderWidth;
                 ncp->rgrc[0].top += kTopBorderWidth + kCaptionHeight;
                 ncp->rgrc[0].right -= kRightBorderWidth;
@@ -378,61 +365,53 @@ namespace shell {
     }
 
     LRESULT CustomNonClientFrame::onNcLButtonDown(WPARAM wParam, LPARAM lParam, bool* handled) {
-        if (wParam == HTMINBUTTON)
-        {
+        if (wParam == HTMINBUTTON) {
             min_button_color_ = kMinButtonPressedColor;
             drawCaptionAndBorder();
             mIsMousePressedInMinButton = true;
             *handled = true;
-        }
-        else if (wParam == HTMAXBUTTON)
-        {
+        } else if (wParam == HTMAXBUTTON) {
             max_button_color_ = kMaxButtonPressedColor;
             drawCaptionAndBorder();
             mIsMousePressedInMaxButton = true;
             *handled = true;
-        }
-        else if (wParam == HTCLOSE)
-        {
+        } else if (wParam == HTCLOSE) {
             close_button_color_ = kCloseButtonPressedColor;
             drawCaptionAndBorder();
             mIsMousePressedInCloseButton = true;
             *handled = true;
-        }
-        else
+        } else {
             *handled = false;
+        }
 
-        if (*handled)
+        if (*handled) {
             SetCapture(window_->getHandle());
+        }
 
         return TRUE;
     }
 
     LRESULT CustomNonClientFrame::onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) {
-        if (wParam == HTMINBUTTON)
-        {
-            ShowWindow(window_->getHandle(), SW_MINIMIZE);
+        if (wParam == HTMINBUTTON) {
+            ::ShowWindow(window_->getHandle(), SW_MINIMIZE);
             min_button_color_ = kMinButtonColor;
             *handled = true;
-        }
-        else if (wParam == HTMAXBUTTON)
-        {
-            if (IsZoomed(window_->getHandle()))
-                ShowWindow(window_->getHandle(), SW_NORMAL);
-            else
-                ShowWindow(window_->getHandle(), SW_MAXIMIZE);
+        } else if (wParam == HTMAXBUTTON) {
+            if (IsZoomed(window_->getHandle())) {
+                ::ShowWindow(window_->getHandle(), SW_NORMAL);
+            } else {
+                ::ShowWindow(window_->getHandle(), SW_MAXIMIZE);
+            }
 
             max_button_color_ = kMaxButtonColor;
             drawCaptionAndBorder();
             *handled = true;
-        }
-        else if (wParam == HTCLOSE)
-        {
+        } else if (wParam == HTCLOSE) {
             window_->close();
             *handled = true;
-        }
-        else
+        } else {
             *handled = false;
+        }
 
         mIsMousePressedInMinButton = false;
         mIsMousePressedInMaxButton = false;
@@ -447,8 +426,7 @@ namespace shell {
     }
 
 
-    void CustomNonClientFrame::drawCaptionAndBorder()
-    {
+    void CustomNonClientFrame::drawCaptionAndBorder() {
         HDC hdc = ::GetWindowDC(window_->getHandle());
 
         RECT rcWin;

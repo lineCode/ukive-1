@@ -8,24 +8,21 @@ namespace ukive {
 
     class EffectSpan;
 
-    class DECLSPEC_UUID("06C2F086-4818-4DF9-880D-FF7C9F796AFA") TextDrawingEffect : public IUnknown
-    {
-    private:
-        ULONG mRefCount;
-
+    class DECLSPEC_UUID("06C2F086-4818-4DF9-880D-FF7C9F796AFA") TextDrawingEffect
+        : public IUnknown {
     public:
         TextDrawingEffect();
         ~TextDrawingEffect();
 
-        EffectSpan *mEffectSpan;
-
-    public:
-        unsigned long STDMETHODCALLTYPE AddRef();
-        unsigned long STDMETHODCALLTYPE Release();
+        ULONG STDMETHODCALLTYPE AddRef();
+        ULONG STDMETHODCALLTYPE Release();
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            IID const& riid,
-            void** ppvObject
-        );
+            IID const& riid, void** ppvObject);
+
+        EffectSpan* effect_span_;
+
+    private:
+        ULONG ref_count_;
     };
 
 }

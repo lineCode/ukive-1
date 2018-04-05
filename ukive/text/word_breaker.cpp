@@ -296,7 +296,7 @@ namespace ukive {
 
     WordStoreSink::WordStoreSink()
     {
-        mRefCount = 1;
+        ref_count_ = 1;
     }
 
     void WordStoreSink::clearWords()
@@ -352,14 +352,14 @@ namespace ukive {
 
     ULONG STDMETHODCALLTYPE WordStoreSink::AddRef()
     {
-        return InterlockedIncrement(&mRefCount);
+        return InterlockedIncrement(&ref_count_);
     }
 
     ULONG STDMETHODCALLTYPE WordStoreSink::Release()
     {
-        LONG cr = InterlockedDecrement(&mRefCount);
+        LONG cr = InterlockedDecrement(&ref_count_);
 
-        if (mRefCount == 0)
+        if (ref_count_ == 0)
             delete this;
 
         return cr;

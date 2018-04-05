@@ -4,18 +4,15 @@
 namespace ukive {
 
     InlineObjectSpan::InlineObjectSpan(unsigned int start, unsigned int end)
-        :Span(start, end)
-    {
+        :Span(start, end) {
     }
 
-    InlineObjectSpan::~InlineObjectSpan()
-    {
+    InlineObjectSpan::~InlineObjectSpan() {
     }
 
 
-    int InlineObjectSpan::getBaseType()
-    {
-        return Span::USPAN_BASE_TYPE_INLINEOBJECT;
+    int InlineObjectSpan::getBaseType() const {
+        return Span::INLINEOBJECT;
     }
 
 }

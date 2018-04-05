@@ -85,7 +85,7 @@ namespace ukive {
         };
 
     private:
-        ULONG mRefCount;
+        ULONG ref_count_;
         std::vector<std::shared_ptr<WordBlock>> mWordsList;
 
     public:

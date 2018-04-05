@@ -6,9 +6,9 @@ namespace ukive {
     AnimationVariableChangeHandler::AnimationVariableChangeHandler(
         Animator::OnValueChangedListener *listener, unsigned int varIndex)
     {
-        mRefCount = 1;
+        ref_count_ = 1;
         mVarIndex = varIndex;
-        mListener = listener;
+        listener_ = listener;
     }
 
 
@@ -23,8 +23,8 @@ namespace ukive {
         _In_  DOUBLE newValue,
         _In_  DOUBLE previousValue)
     {
-        if (mListener)
-            mListener->onValueChanged(mVarIndex, storyboard, variable, newValue, previousValue);
+        if (listener_)
+            listener_->onValueChanged(mVarIndex, storyboard, variable, newValue, previousValue);
 
         return S_OK;
     }
@@ -35,8 +35,8 @@ namespace ukive {
         _In_  INT32 newValue,
         _In_  INT32 previousValue)
     {
-        if (mListener)
-            mListener->onIntegerValueChanged(mVarIndex, storyboard, variable, newValue, previousValue);
+        if (listener_)
+            listener_->onIntegerValueChanged(mVarIndex, storyboard, variable, newValue, previousValue);
 
         return S_OK;
     }
@@ -44,12 +44,12 @@ namespace ukive {
 
     IFACEMETHODIMP_(ULONG) AnimationVariableChangeHandler::AddRef()
     {
-        return InterlockedIncrement(&mRefCount);
+        return InterlockedIncrement(&ref_count_);
     }
 
     IFACEMETHODIMP_(ULONG) AnimationVariableChangeHandler::Release()
     {
-        unsigned long newCount = InterlockedDecrement(&mRefCount);
+        unsigned long newCount = InterlockedDecrement(&ref_count_);
 
         if (newCount == 0)
         {

@@ -5,16 +5,16 @@ namespace ukive {
 
     AnimationTimerHandler::AnimationTimerHandler(
         AnimationManager::OnTimerEventListener *listener)
-        :mRefCount(1),
-        mListener(listener) {}
+        :ref_count_(1),
+        listener_(listener) {}
 
     AnimationTimerHandler::~AnimationTimerHandler() {}
 
 
     HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnPreUpdate()
     {
-        if (mListener) {
-            mListener->onPreUpdate();
+        if (listener_) {
+            listener_->onPreUpdate();
         }
 
         return S_OK;
@@ -22,8 +22,8 @@ namespace ukive {
 
     HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnPostUpdate()
     {
-        if (mListener) {
-            mListener->onPostUpdate();
+        if (listener_) {
+            listener_->onPostUpdate();
         }
 
         return S_OK;
@@ -32,8 +32,8 @@ namespace ukive {
     HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnRenderingTooSlow(
         UINT32 framesPerSecond)
     {
-        if (mListener) {
-            mListener->onRenderingTooSlow(framesPerSecond);
+        if (listener_) {
+            listener_->onRenderingTooSlow(framesPerSecond);
         }
 
         return S_OK;
@@ -42,12 +42,12 @@ namespace ukive {
 
     IFACEMETHODIMP_(ULONG) AnimationTimerHandler::AddRef()
     {
-        return InterlockedIncrement(&mRefCount);
+        return InterlockedIncrement(&ref_count_);
     }
 
     IFACEMETHODIMP_(ULONG) AnimationTimerHandler::Release()
     {
-        ULONG newCount = InterlockedDecrement(&mRefCount);
+        ULONG newCount = InterlockedDecrement(&ref_count_);
 
         if (newCount == 0) {
             delete this;

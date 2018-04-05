@@ -11,37 +11,37 @@ namespace ukive {
 
     class ScrollView : public ViewGroup
     {
+    public:
+        ScrollView(Window* w);
+
+        void onMeasure(
+            int width, int height,
+            int widthSpec, int heightSpec) override;
+
+        void onLayout(
+            bool changed, bool sizeChanged,
+            int left, int top, int right, int bottom) override;
+
+        void onSizeChanged(
+            int width, int height, int oldWidth, int oldHeight) override;
+
+        void onScrollChanged(
+            int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
+
+        bool onInputEvent(InputEvent* e) override;
+        bool onInterceptMouseEvent(InputEvent* e) override;
+
     private:
-        int mMouseXCache;
-        int mMouseYCache;
-
-        Scroller *mScroller;
-
         bool canScroll();
         int computeScrollRange();
         int computeScrollExtend();
 
         void processVerticalScroll(int dy);
 
-    public:
-        ScrollView(Window *w);
+        int mMouseXCache;
+        int mMouseYCache;
 
-        virtual void onMeasure(
-            int width, int height,
-            int widthSpec, int heightSpec) override;
-
-        virtual void onLayout(
-            bool changed, bool sizeChanged,
-            int left, int top, int right, int bottom) override;
-
-        virtual void onSizeChanged(
-            int width, int height, int oldWidth, int oldHeight) override;
-
-        virtual void onScrollChanged(
-            int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
-
-        virtual bool onInputEvent(InputEvent *e) override;
-        virtual bool onInterceptMouseEvent(InputEvent *e) override;
+        Scroller* mScroller;
     };
 
 }

@@ -4,25 +4,8 @@
 namespace ukive {
 
     LayoutParams::LayoutParams(int width, int height)
-    {
-        this->width = width;
-        this->height = height;
-        leftMargin = topMargin = rightMargin = bottomMargin = 0;
-    }
-
-    LayoutParams::LayoutParams(const LayoutParams &lp)
-    {
-        width = lp.width;
-        height = lp.height;
-
-        leftMargin = lp.leftMargin;
-        rightMargin = lp.rightMargin;
-        topMargin = lp.topMargin;
-        bottomMargin = lp.bottomMargin;
-    }
-
-    LayoutParams::~LayoutParams()
-    {
+        :width(width), height(height),
+        leftMargin(0), topMargin(0), rightMargin(0), bottomMargin(0) {
     }
 
 }

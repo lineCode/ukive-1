@@ -7,33 +7,31 @@
 namespace ukive {
 
     Scroller::Scroller(Window *wnd) {
-        mScrollAnimator = new Animator(wnd->getAnimationManager());
+        animator_ = new Animator(wnd->getAnimationManager());
     }
 
     Scroller::~Scroller() {
-        mScrollAnimator->stop();
-        delete mScrollAnimator;
+        animator_->stop();
+        delete animator_;
     }
 
 
-    void Scroller::fling(int startX, int startY, float velocityX, float velocityY)
-    {
-        mScrollAnimator->reset();
-        mScrollAnimator->addVariable(0, startX, INT32_MIN, INT32_MAX);
-        mScrollAnimator->addVariable(1, startY, INT32_MIN, INT32_MAX);
-        //mScrollAnimator->addTransition(0, UTransition::acc());
-        //mScrollAnimator->addTransition(1, UTransition::linearTransition(duration, startY + dy));
-        mScrollAnimator->start();
+    void Scroller::fling(int startX, int startY, float velocityX, float velocityY) {
+        animator_->reset();
+        animator_->addVariable(0, startX, INT32_MIN, INT32_MAX);
+        animator_->addVariable(1, startY, INT32_MIN, INT32_MAX);
+        //animator_->addTransition(0, UTransition::acc());
+        //animator_->addTransition(1, UTransition::linearTransition(duration, startY + dy));
+        animator_->start();
     }
 
-    void Scroller::startScroll(int startX, int startY, int dx, int dy, double duration)
-    {
-        mScrollAnimator->reset();
-        mScrollAnimator->addVariable(0, startX, INT32_MIN, INT32_MAX);
-        mScrollAnimator->addVariable(1, startY, INT32_MIN, INT32_MAX);
-        mScrollAnimator->addTransition(0, Transition::linearTransition(duration, startX + dx));
-        mScrollAnimator->addTransition(1, Transition::linearTransition(duration, startY + dy));
-        mScrollAnimator->start();
+    void Scroller::startScroll(int startX, int startY, int dx, int dy, double duration) {
+        animator_->reset();
+        animator_->addVariable(0, startX, INT32_MIN, INT32_MAX);
+        animator_->addVariable(1, startY, INT32_MIN, INT32_MAX);
+        animator_->addTransition(0, Transition::linearTransition(duration, startX + dx));
+        animator_->addTransition(1, Transition::linearTransition(duration, startY + dy));
+        animator_->start();
     }
 
 }

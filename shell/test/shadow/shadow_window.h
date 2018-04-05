@@ -38,6 +38,7 @@ namespace shell {
             int newValue, int previousValue) override;
 
     private:
+        ukive::Button* de_button_;
         ukive::Button* ce_button_;
 
         ukive::Animator* animator_;

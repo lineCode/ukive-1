@@ -7,8 +7,7 @@
 
 namespace ukive {
 
-    class ShapeDrawable : public Drawable
-    {
+    class ShapeDrawable : public Drawable {
     public:
         enum Shape {
             RECT,
@@ -28,7 +27,7 @@ namespace ukive {
         void setStrokeWidth(float width);
         void setStrokeColor(Color color);
 
-        void draw(Canvas *canvas) override;
+        void draw(Canvas* canvas) override;
 
         float getOpacity() const override;
         int getIncWidth() const override;

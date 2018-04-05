@@ -6,8 +6,8 @@ namespace ukive {
     AnimationManagerEventHandler::AnimationManagerEventHandler(
         AnimationManager::OnStateChangedListener *listener)
     {
-        mRefCount = 1;
-        mListener = listener;
+        ref_count_ = 1;
+        listener_ = listener;
     }
 
 
@@ -20,8 +20,8 @@ namespace ukive {
         _In_  UI_ANIMATION_MANAGER_STATUS newStatus,
         _In_  UI_ANIMATION_MANAGER_STATUS previousStatus)
     {
-        if (mListener)
-            mListener->onStateChanged(newStatus, previousStatus);
+        if (listener_)
+            listener_->onStateChanged(newStatus, previousStatus);
 
         return S_OK;
     }
@@ -29,12 +29,12 @@ namespace ukive {
 
     IFACEMETHODIMP_(ULONG) AnimationManagerEventHandler::AddRef()
     {
-        return InterlockedIncrement(&mRefCount);
+        return InterlockedIncrement(&ref_count_);
     }
 
     IFACEMETHODIMP_(ULONG) AnimationManagerEventHandler::Release()
     {
-        unsigned long newCount = InterlockedDecrement(&mRefCount);
+        unsigned long newCount = InterlockedDecrement(&ref_count_);
 
         if (newCount == 0)
         {

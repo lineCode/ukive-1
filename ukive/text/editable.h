@@ -12,20 +12,17 @@ namespace ukive {
 
     class Span;
 
-    class Editable
-    {
+    class Editable {
     public:
-        struct EditWatcher
-        {
-            enum SpanChange
-            {
+        struct EditWatcher {
+            enum SpanChange {
                 ADD,
                 REMOVE,
                 EDIT,
             };
 
             virtual void onTextChanged(
-                Editable *editable,
+                Editable* editable,
                 int start, int oldEnd, int newEnd) = 0;
 
             virtual void onSelectionChanged(
@@ -33,45 +30,26 @@ namespace ukive {
                 uint32_t os, uint32_t oe) = 0;
 
             virtual void onSpanChanged(
-                Span *span, SpanChange action) = 0;
+                Span* span, SpanChange action) = 0;
         };
 
-    private:
-        std::wstring mText;
-        std::list<EditWatcher*> mWatcherList;
-        std::vector<std::shared_ptr<Span>> mSpanList;
-
-        uint32_t mSelectionStart;
-        uint32_t mSelectionEnd;
-
-        void notifyTextChanged(
-            uint32_t start, uint32_t oldEnd, uint32_t newEnd);
-        void notifySelectionChanged(
-            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe);
-        void notifyEditWatcher(
-            int start, int oldEnd, int newEnd,
-            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe);
-        void notifySpanChanged(
-            Span *span, EditWatcher::SpanChange action);
-
-    public:
-        Editable(std::wstring text);
+        Editable(const std::wstring& text);
         ~Editable();
 
         uint32_t length();
 
-        void append(std::wstring text);
-        void insert(std::wstring text, uint32_t position);
+        void append(const std::wstring& text);
+        void insert(const std::wstring& text, uint32_t position);
         void remove(uint32_t start, uint32_t length);
-        void replace(std::wstring text, uint32_t start, uint32_t length);
+        void replace(const std::wstring& text, uint32_t start, uint32_t length);
         void clear();
 
         void replace(std::wstring find, std::wstring replacement);
         void replaceAll(std::wstring find, std::wstring replacement);
 
-        void insert(std::wstring text);
+        void insert(const std::wstring& text);
         void remove();
-        void replace(std::wstring text);
+        void replace(const std::wstring& text);
 
         void setSelection(uint32_t selection);
         void setSelection(uint32_t start, uint32_t end);
@@ -87,14 +65,32 @@ namespace ukive {
         wchar_t at(size_t pos);
         std::wstring toString();
 
-        void addSpan(Span *span);
+        void addSpan(Span* span);
         void removeSpan(std::size_t index);
         void removeAllSpan();
-        Span *getSpan(std::size_t index);
+        Span* getSpan(std::size_t index);
         std::size_t getSpanCount();
 
-        void addEditWatcher(EditWatcher *watcher);
-        void removeEditWatcher(EditWatcher *watcher);
+        void addEditWatcher(EditWatcher* watcher);
+        void removeEditWatcher(EditWatcher* watcher);
+
+    private:
+        void notifyTextChanged(
+            uint32_t start, uint32_t oldEnd, uint32_t newEnd);
+        void notifySelectionChanged(
+            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe);
+        void notifyEditWatcher(
+            int start, int oldEnd, int newEnd,
+            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe);
+        void notifySpanChanged(
+            Span* span, EditWatcher::SpanChange action);
+
+        std::wstring text_;
+        std::list<EditWatcher*> watchers_;
+        std::vector<std::shared_ptr<Span>> spans_;
+
+        uint32_t sel_beg_;
+        uint32_t sel_end_;
     };
 
 }

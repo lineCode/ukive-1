@@ -92,11 +92,11 @@ namespace shell {
         size_t charSize = (size_t)reader.tellg();
         reader.seekg(cpos);
 
-        char *shaderBuf = new char[charSize];
+        char* shaderBuf = new char[charSize];
         reader.read(shaderBuf, charSize);
 
         HRESULT hr = pContextInternal->LoadPixelShader(
-            GUID_ShadowPixelShader, (BYTE*)shaderBuf, charSize);
+            GUID_ShadowPixelShader, reinterpret_cast<BYTE*>(shaderBuf), charSize);
 
         delete[] shaderBuf;
 

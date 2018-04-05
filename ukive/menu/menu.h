@@ -13,7 +13,7 @@ namespace ukive {
     public:
         virtual ~Menu() = default;
 
-        virtual void setCallback(MenuCallback *callback) = 0;
+        virtual void setCallback(MenuCallback* callback) = 0;
         virtual MenuCallback* getCallback() = 0;
 
         virtual MenuItem* addItem(int id, int order, string16 title) = 0;

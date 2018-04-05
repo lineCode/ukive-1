@@ -11,23 +11,22 @@ namespace ukive {
 
     class Canvas;
 
-    class LayerDrawable : public Drawable
-    {
-    protected:
-        std::vector<std::shared_ptr<Drawable>> mDrawableList;
-
-        void onBoundChanged(const Rect& new_bound) override;
-
+    class LayerDrawable : public Drawable {
     public:
         LayerDrawable();
         ~LayerDrawable();
 
-        void addDrawable(Drawable *drawable);
-        void removeDrawable(Drawable *drawable);
+        void addDrawable(Drawable* drawable);
+        void removeDrawable(Drawable* drawable);
 
-        virtual void draw(Canvas *canvas);
+        virtual void draw(Canvas* canvas);
 
         virtual float getOpacity();
+
+    protected:
+        void onBoundChanged(const Rect& new_bound) override;
+
+        std::vector<std::shared_ptr<Drawable>> mDrawableList;
     };
 
 }

@@ -21,14 +21,14 @@ namespace ukive {
         public SharedHelper<TextActionMode>
     {
     public:
-        TextActionMode(Window *window, TextActionModeCallback *callback);
+        TextActionMode(Window* window, TextActionModeCallback* callback);
         ~TextActionMode();
 
-        void onCreateMenu(Menu *menu) override;
-        void onPrepareMenu(Menu *menu) override;
-        bool onMenuItemClicked(Menu *menu, MenuItem *item) override;
+        void onCreateMenu(Menu* menu) override;
+        void onPrepareMenu(Menu* menu) override;
+        bool onMenuItemClicked(Menu* menu, MenuItem* item) override;
 
-        Menu *getMenu();
+        Menu* getMenu();
 
         void invalidateMenu();
         void invalidatePosition();
@@ -44,10 +44,10 @@ namespace ukive {
         int menu_item_height_;
         bool is_finished_;
 
-        Window *window_;
-        TextActionModeCallback *callback_;
+        Window* window_;
+        TextActionModeCallback* callback_;
 
-        MenuImpl *menu_impl_;
+        MenuImpl* menu_impl_;
         std::shared_ptr<InnerWindow> inner_window_;
     };
 

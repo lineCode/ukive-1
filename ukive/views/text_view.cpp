@@ -1305,7 +1305,7 @@ namespace ukive {
 
         switch (span->getBaseType())
         {
-        case Span::USPAN_BASE_TYPE_TEXT:
+        case Span::TEXT:
         {
             switch (span->getType())
             {
@@ -1319,11 +1319,11 @@ namespace ukive {
             break;
         }
 
-        case Span::USPAN_BASE_TYPE_EFFECT:
+        case Span::EFFECT:
             if (action == SpanChange::ADD)
             {
                 TextDrawingEffect *tdEffect = new TextDrawingEffect();
-                tdEffect->mEffectSpan = (EffectSpan*)span;
+                tdEffect->effect_span_ = (EffectSpan*)span;
 
                 mTextLayout->SetDrawingEffect(tdEffect, range);
             }
@@ -1333,10 +1333,10 @@ namespace ukive {
             }
             break;
 
-        case Span::USPAN_BASE_TYPE_INTERACTABLE:
+        case Span::INTERACTABLE:
             break;
 
-        case Span::USPAN_BASE_TYPE_INLINEOBJECT:
+        case Span::INLINEOBJECT:
             break;
         }
     }

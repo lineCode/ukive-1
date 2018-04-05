@@ -6,41 +6,34 @@
 
 namespace ukive {
 
-    ViewAnimator::ViewAnimator(View *v)
-    {
-        duration_ = 0.2;
-        owner_view_ = v;
+    ViewAnimator::ViewAnimator(View* v)
+        :duration_(0.2),
+        owner_view_(v) {
 
-        animator_ = new Animator(
+        animator_ = std::make_unique<Animator>(
             owner_view_->getWindow()->getAnimationManager());
     }
 
-    ViewAnimator::~ViewAnimator()
-    {
-        delete animator_;
+    ViewAnimator::~ViewAnimator() {
     }
 
 
-    void ViewAnimator::start()
-    {
+    void ViewAnimator::start() {
         animator_->start();
     }
 
-    void ViewAnimator::cancel()
-    {
+    void ViewAnimator::cancel() {
         animator_->stop();
     }
 
-    ViewAnimator *ViewAnimator::setDuration(double duration)
-    {
+    ViewAnimator* ViewAnimator::setDuration(double duration) {
         duration_ = duration;
         return this;
     }
 
 
-    ViewAnimator *ViewAnimator::x(double x)
-    {
-        typedef std::numeric_limits<double> lim;
+    ViewAnimator* ViewAnimator::x(double x) {
+        using lim = std::numeric_limits<double>;
 
         animator_->addVariable(
             VIEW_ANIM_X, owner_view_->getX(),
@@ -52,9 +45,8 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::y(double y)
-    {
-        typedef std::numeric_limits<double> lim;
+    ViewAnimator* ViewAnimator::y(double y) {
+        using lim = std::numeric_limits<double>;
 
         animator_->addVariable(
             VIEW_ANIM_Y, owner_view_->getY(),
@@ -66,8 +58,7 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::alpha(double value)
-    {
+    ViewAnimator* ViewAnimator::alpha(double value) {
         animator_->addVariable(
             VIEW_ANIM_ALPHA, owner_view_->getAlpha(), 0, 1);
         animator_->addTransition(
@@ -77,9 +68,8 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::scaleX(double value)
-    {
-        typedef std::numeric_limits<double> lim;
+    ViewAnimator* ViewAnimator::scaleX(double value) {
+        using lim = std::numeric_limits<double>;
 
         animator_->addVariable(
             VIEW_ANIM_SCALE_X, owner_view_->getScaleX(),
@@ -91,9 +81,8 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::scaleY(double value)
-    {
-        typedef std::numeric_limits<double> lim;
+    ViewAnimator* ViewAnimator::scaleY(double value) {
+        using lim = std::numeric_limits<double>;
 
         animator_->addVariable(
             VIEW_ANIM_SCALE_Y, owner_view_->getScaleY(),
@@ -105,9 +94,8 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::translateX(double value)
-    {
-        typedef std::numeric_limits<double> lim;
+    ViewAnimator* ViewAnimator::translateX(double value) {
+        using lim = std::numeric_limits<double>;
 
         animator_->addVariable(
             VIEW_ANIM_TRANSLATE_X, owner_view_->getTranslateX(),
@@ -119,9 +107,8 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::translateY(double value)
-    {
-        typedef std::numeric_limits<double> lim;
+    ViewAnimator* ViewAnimator::translateY(double value) {
+        using lim = std::numeric_limits<double>;
 
         animator_->addVariable(
             VIEW_ANIM_TRANSLATE_Y, owner_view_->getTranslateY(),
@@ -133,21 +120,20 @@ namespace ukive {
         return this;
     }
 
-    ViewAnimator *ViewAnimator::setListener(Animator::OnAnimatorListener *l)
-    {
+    ViewAnimator* ViewAnimator::setListener(Animator::OnAnimatorListener* l) {
         animator_->setOnStateChangedListener(l);
         return this;
     }
 
 
-    Animator *ViewAnimator::createRectReveal(
-        View *v, double centerX, double centerY,
+    Animator* ViewAnimator::createRectReveal(
+        View* v, double centerX, double centerY,
         double startWidthRadius, double endWidthRadius,
-        double startHeightRadius, double endHeightRadius)
-    {
-        typedef std::numeric_limits<double> dLimit;
+        double startHeightRadius, double endHeightRadius) {
 
-        Animator *animator = new Animator(
+        using dLimit = std::numeric_limits<double>;
+
+        Animator* animator = new Animator(
             v->getWindow()->getAnimationManager());
         animator->addVariable(0, startWidthRadius, -(dLimit::max)(), (dLimit::max)());
         animator->addTransition(0, Transition::linearTransition(0.1, endWidthRadius));
@@ -162,48 +148,47 @@ namespace ukive {
         v->setRevealHeightRadius(startHeightRadius);
 
         class RevealValueListener
-            : public Animator::OnValueChangedListener
-        {
+            : public Animator::OnValueChangedListener {
         public:
-            RevealValueListener(View *w)
+            RevealValueListener(View* w)
                 :view_(w) {}
 
             void onValueChanged(
                 unsigned int varIndex,
-                IUIAnimationStoryboard *storyboard,
-                IUIAnimationVariable *variable,
+                IUIAnimationStoryboard* storyboard,
+                IUIAnimationVariable* variable,
                 double newValue, double previousValue)
             {
-                if (varIndex == 0)
+                if (varIndex == 0) {
                     view_->setRevealWidthRadius(newValue);
-                else if (varIndex == 1)
+                } else if (varIndex == 1) {
                     view_->setRevealHeightRadius(newValue);
+                }
             }
             void onIntegerValueChanged(
                 unsigned int varIndex,
-                IUIAnimationStoryboard *storyboard,
-                IUIAnimationVariable *variable,
+                IUIAnimationStoryboard* storyboard,
+                IUIAnimationVariable* variable,
                 int newValue, int previousValue) {}
         private:
-            View * view_;
+            View* view_;
         }*value_listener = new RevealValueListener(v);
 
         class RevealStateListener
-            : public Animator::OnAnimatorListener
-        {
+            : public Animator::OnAnimatorListener {
         public:
-            RevealStateListener(View *w)
+            RevealStateListener(View* w)
                 :view_(w) {}
 
-            void onAnimationStart(Animator *animator) {}
-            void onAnimationEnd(Animator *animator) {
+            void onAnimationStart(Animator* animator) {}
+            void onAnimationEnd(Animator* animator) {
                 view_->setHasReveal(false);
             }
-            void onAnimationCancel(Animator *animator) {
+            void onAnimationCancel(Animator* animator) {
                 view_->setHasReveal(false);
             }
         private:
-            View * view_;
+            View* view_;
         }*state_listener = new RevealStateListener(v);
 
         animator->setOnValueChangedListener(0, value_listener);
@@ -213,12 +198,12 @@ namespace ukive {
         return animator;
     }
 
-    Animator *ViewAnimator::createCirculeReveal(
-        View *v, double centerX, double centerY, double startRadius, double endRadius)
+    Animator* ViewAnimator::createCirculeReveal(
+        View* v, double centerX, double centerY, double startRadius, double endRadius)
     {
-        typedef std::numeric_limits<double> lim;
+        using lim = std::numeric_limits<double>;
 
-        Animator *animator = new Animator(
+        Animator* animator = new Animator(
             v->getWindow()->getAnimationManager());
         animator->addVariable(0, startRadius, -(lim::max)(), (lim::max)());
         animator->addTransition(0, Transition::linearTransition(0.15, endRadius));
@@ -230,49 +215,44 @@ namespace ukive {
         v->setRevealRadius(startRadius);
 
         class RevealValueListener
-            : public Animator::OnValueChangedListener
-        {
-        private:
-            View *view_;
+            : public Animator::OnValueChangedListener {
         public:
-            RevealValueListener(View *w)
+            RevealValueListener(View* w)
                 :view_(w) {}
 
             void onValueChanged(
                 unsigned int varIndex,
-                IUIAnimationStoryboard *storyboard,
-                IUIAnimationVariable *variable,
+                IUIAnimationStoryboard* storyboard,
+                IUIAnimationVariable* variable,
                 double newValue, double previousValue)
             {
                 view_->setRevealRadius(newValue);
             }
             void onIntegerValueChanged(
                 unsigned int varIndex,
-                IUIAnimationStoryboard *storyboard,
-                IUIAnimationVariable *variable,
+                IUIAnimationStoryboard* storyboard,
+                IUIAnimationVariable* variable,
                 int newValue, int previousValue) {}
+        private:
+            View* view_;
         }*valueListener = new RevealValueListener(v);
 
         class RevealStateListener
-            : public Animator::OnAnimatorListener
-        {
-        private:
-            View *view_;
+            : public Animator::OnAnimatorListener {
         public:
-            RevealStateListener(View *w)
+            RevealStateListener(View* w)
                 :view_(w) {}
 
-            void onAnimationStart(Animator *animator)
-            {
+            void onAnimationStart(Animator* animator) {
             }
-            void onAnimationEnd(Animator *animator)
-            {
+            void onAnimationEnd(Animator* animator) {
                 view_->setHasReveal(false);
             }
-            void onAnimationCancel(Animator *animator)
-            {
+            void onAnimationCancel(Animator* animator) {
                 view_->setHasReveal(false);
             }
+        private:
+            View* view_;
         }*stateListener = new RevealStateListener(v);
 
         animator->setOnValueChangedListener(0, valueListener);
@@ -284,12 +264,11 @@ namespace ukive {
 
     void ViewAnimator::onValueChanged(
         unsigned int varIndex,
-        IUIAnimationStoryboard *storyboard,
-        IUIAnimationVariable *variable,
+        IUIAnimationStoryboard* storyboard,
+        IUIAnimationVariable* variable,
         double newValue, double previousValue)
     {
-        switch (varIndex)
-        {
+        switch (varIndex) {
         case VIEW_ANIM_X:
             owner_view_->setX(newValue);
             break;
@@ -319,10 +298,9 @@ namespace ukive {
 
     void ViewAnimator::onIntegerValueChanged(
         unsigned int varIndex,
-        IUIAnimationStoryboard *storyboard,
-        IUIAnimationVariable *variable,
-        int newValue, int previousValue)
-    {
+        IUIAnimationStoryboard* storyboard,
+        IUIAnimationVariable* variable,
+        int newValue, int previousValue) {
     }
 
 }

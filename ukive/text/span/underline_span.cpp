@@ -4,18 +4,14 @@
 namespace ukive {
 
     UnderlineSpan::UnderlineSpan(unsigned int start, unsigned int end)
-        :TextSpan(start, end)
-    {
+        :TextSpan(start, end) {
+    }
+
+    UnderlineSpan::~UnderlineSpan() {
     }
 
 
-    UnderlineSpan::~UnderlineSpan()
-    {
-    }
-
-
-    int UnderlineSpan::getType()
-    {
+    int UnderlineSpan::getType() const {
         return Span::TEXT_UNDERLINE;
     }
 

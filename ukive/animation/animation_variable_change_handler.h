@@ -12,9 +12,9 @@ namespace ukive {
         public IUIAnimationVariableIntegerChangeHandler
     {
     private:
-        ULONG mRefCount;
+        ULONG ref_count_;
         unsigned int mVarIndex;
-        Animator::OnValueChangedListener *mListener;
+        Animator::OnValueChangedListener *listener_;
 
     public:
         AnimationVariableChangeHandler(

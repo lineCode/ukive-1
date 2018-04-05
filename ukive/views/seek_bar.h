@@ -61,7 +61,7 @@ namespace ukive {
 
         Animator* mThumbInAnimator;
         Animator* mThumbOutAnimator;
-        OnSeekValueChangedListener* mListener;
+        OnSeekValueChangedListener* listener_;
     };
 
 }

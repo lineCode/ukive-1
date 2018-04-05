@@ -6,8 +6,7 @@
 
 namespace ukive {
 
-    class SystemClock
-    {
+    class SystemClock {
     public:
         SystemClock();
         ~SystemClock();

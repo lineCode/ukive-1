@@ -8,22 +8,9 @@ namespace ukive {
         is_mouse_captured_(false) {
     }
 
-    InputEvent::InputEvent(const InputEvent &source) {
-        mouse_x_ = source.mouse_x_;
-        mouse_y_ = source.mouse_y_;
-        mouse_raw_x_ = source.mouse_raw_x_;
-        mouse_raw_y_ = source.mouse_raw_y_;
-        mouse_wheel_ = source.mouse_wheel_;
-        mouse_key_ = source.mouse_key_;
-        virtual_key_ = source.virtual_key_;
-        event_type_ = source.event_type_;
-        is_outside_ = source.is_outside_;
-        is_mouse_captured_ = source.is_mouse_captured_;
-    }
-
-
     InputEvent::~InputEvent() {
     }
+
 
     void InputEvent::setEvent(int ev) {
         event_type_ = ev;

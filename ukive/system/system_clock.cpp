@@ -6,7 +6,6 @@ namespace ukive {
     SystemClock::SystemClock() {
     }
 
-
     SystemClock::~SystemClock() {
     }
 

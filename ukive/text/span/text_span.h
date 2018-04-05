@@ -6,13 +6,12 @@
 
 namespace ukive {
 
-    class TextSpan : public Span
-    {
+    class TextSpan : public Span {
     public:
         TextSpan(unsigned int start, unsigned int end);
-        virtual ~TextSpan();
+        ~TextSpan();
 
-        int getBaseType();
+        int getBaseType() const override;
     };
 
 }

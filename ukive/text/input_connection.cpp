@@ -11,85 +11,77 @@
 
 namespace ukive {
 
-    DWORD InputConnection::cookie_ = 0xeec;
-
-    InputConnection::InputConnection(TextView *textView)
-    {
-        mTextView = textView;
-
-        mTsfEditor = nullptr;
-        mIsInitialized = false;
-        mIsEditorPushed = false;
+    InputConnection::InputConnection(TextView* textView)
+        :text_view_(textView),
+        tsf_editor_(nullptr),
+        is_initialized_(false),
+        is_editor_pushed_(false) {
     }
 
     InputConnection::~InputConnection() {
     }
 
 
-    HRESULT InputConnection::initialization()
-    {
-        if (mIsInitialized) {
+    HRESULT InputConnection::initialization() {
+        if (is_initialized_) {
             return S_OK;
         }
 
-        TsfManager *tsfMgr = Application::getTsfManager();
+        TsfManager* tsfMgr = Application::getTsfManager();
 
-        mTsfEditor = new TsfEditor(cookie_++);
-        mTsfEditor->setInputConnection(this);
+        tsf_editor_ = new TsfEditor(0xbeef);
+        tsf_editor_->setInputConnection(this);
 
-        RH(tsfMgr->getThreadManager()->CreateDocumentMgr(&mDocumentMgr));
+        RH(tsfMgr->getThreadManager()->CreateDocumentMgr(&doc_mgr_));
 
-        RH(mDocumentMgr->CreateContext(tsfMgr->getClientId(), 0,
-            static_cast<ITextStoreACP*>(mTsfEditor),
-            &mEditorContext, &mEditorCookie));
+        RH(doc_mgr_->CreateContext(tsfMgr->getClientId(), 0,
+            static_cast<ITextStoreACP*>(tsf_editor_),
+            &editor_context_, &editor_cookie_));
 
-        RH(mEditorContext->QueryInterface(
-            IID_ITfContextOwnerCompositionServices, reinterpret_cast<void**>(&mCompServices)));
+        RH(editor_context_->QueryInterface(
+            IID_ITfContextOwnerCompositionServices, reinterpret_cast<void**>(&comp_service_)));
 
-        mIsInitialized = true;
+        is_initialized_ = true;
 
         return S_OK;
     }
 
-    void InputConnection::pushEditor()
-    {
-        if (!mIsInitialized || mIsEditorPushed) {
+    void InputConnection::pushEditor() {
+        if (!is_initialized_ || is_editor_pushed_) {
             return;
         }
 
-        HRESULT hr = mDocumentMgr->Push(mEditorContext.get());
+        HRESULT hr = doc_mgr_->Push(editor_context_.get());
         if (FAILED(hr)) {
             Log::e(L"InputConnection", L"pushEditor() failed.\n");
             return;
         }
 
-        mIsEditorPushed = true;
+        is_editor_pushed_ = true;
     }
 
-    void InputConnection::popEditor()
-    {
-        if (!mIsInitialized || !mIsEditorPushed) {
+    void InputConnection::popEditor() {
+        if (!is_initialized_ || !is_editor_pushed_) {
             return;
         }
 
-        HRESULT hr = mDocumentMgr->Pop(TF_POPF_ALL);
+        HRESULT hr = doc_mgr_->Pop(TF_POPF_ALL);
         if (FAILED(hr)) {
             Log::e(L"InputConnection", L"popEditor() failed.\n");
             return;
         }
 
-        mIsEditorPushed = false;
+        is_editor_pushed_ = false;
     }
 
-    bool InputConnection::mount()
-    {
-        if (!mIsInitialized) {
+    bool InputConnection::mount() {
+        if (!is_initialized_) {
             return false;
         }
 
-        TsfManager *tsfMgr = Application::getTsfManager();
+        TsfManager* tsfMgr = Application::getTsfManager();
 
-        HRESULT hr = tsfMgr->getThreadManager()->SetFocus(mDocumentMgr.get());
+        HRESULT hr = tsfMgr->getThreadManager()->SetFocus(doc_mgr_.get());
         if (FAILED(hr)) {
             Log::e(L"InputConnection", L"mount() failed.\n");
             return false;
@@ -98,13 +90,12 @@ namespace ukive {
         return true;
     }
 
-    bool InputConnection::unmount()
-    {
-        if (!mIsInitialized) {
+    bool InputConnection::unmount() {
+        if (!is_initialized_) {
             return false;
         }
 
-        TsfManager *tsfMgr = Application::getTsfManager();
+        TsfManager* tsfMgr = Application::getTsfManager();
 
         HRESULT hr = tsfMgr->getThreadManager()->SetFocus(nullptr);
         if (FAILED(hr)) {
@@ -115,13 +106,12 @@ namespace ukive {
         return true;
     }
 
-    bool InputConnection::terminateComposition()
-    {
-        if (!mIsInitialized) {
+    bool InputConnection::terminateComposition() {
+        if (!is_initialized_) {
             return false;
         }
 
-        HRESULT hr = mCompServices->TerminateComposition(nullptr);
+        HRESULT hr = comp_service_->TerminateComposition(nullptr);
         if (FAILED(hr)) {
             Log::e(L"InputConnection", L"terminateComposition() failed.\n");
             return false;
@@ -132,52 +122,52 @@ namespace ukive {
 
 
     void InputConnection::notifyStatusChanged(DWORD flags) {
-        mTsfEditor->notifyStatusChanged(flags);
+        tsf_editor_->notifyStatusChanged(flags);
     }
 
     void InputConnection::notifyTextChanged(bool correction, long start, long oldEnd, long newEnd) {
-        mTsfEditor->notifyTextChanged(correction, start, oldEnd, newEnd);
+        tsf_editor_->notifyTextChanged(correction, start, oldEnd, newEnd);
     }
 
     void InputConnection::notifyTextLayoutChanged(TsLayoutCode reason) {
-        mTsfEditor->notifyTextLayoutChanged(reason);
+        tsf_editor_->notifyTextLayoutChanged(reason);
     }
 
     void InputConnection::notifyTextSelectionChanged() {
-        mTsfEditor->notifyTextSelectionChanged();
+        tsf_editor_->notifyTextSelectionChanged();
     }
 
 
     void InputConnection::onBeginProcess() {
-        mTextView->onBeginProcess();
+        text_view_->onBeginProcess();
     }
 
     void InputConnection::onEndProcess() {
-        mTextView->onEndProcess();
+        text_view_->onEndProcess();
     }
 
     bool InputConnection::isReadOnly() {
-        return !mTextView->isEditable();
+        return !text_view_->isEditable();
     }
 
     void InputConnection::determineInsert(
         long start, long end, unsigned long repLength,
-        long *resStart, long *resEnd)
-    {
+        long* resStart, long* resEnd) {
+
         *resStart = start;
         *resEnd = end;
     }
 
     bool InputConnection::getSelection(
         unsigned long startIndex, unsigned long maxCount,
-        TS_SELECTION_ACP *selections, unsigned long *fetchedCount)
-    {
+        TS_SELECTION_ACP* selections, unsigned long* fetchedCount) {
+
         if (startIndex != TF_DEFAULT_SELECTION || maxCount != 1) {
             return false;
         }
 
-        int selStart = mTextView->getSelectionStart();
-        int selEnd = mTextView->getSelectionEnd();
+        int selStart = text_view_->getSelectionStart();
+        int selEnd = text_view_->getSelectionEnd();
 
         selections[0].acpStart = selStart;
         selections[0].acpEnd = selEnd;
@@ -189,8 +179,7 @@ namespace ukive {
         return true;
     }
 
-    bool InputConnection::setSelection(unsigned long count, const TS_SELECTION_ACP *selections)
-    {
+    bool InputConnection::setSelection(unsigned long count, const TS_SELECTION_ACP* selections) {
         if (count != 1) {
             return false;
         }
@@ -199,17 +188,16 @@ namespace ukive {
         int selEnd = selections[0].acpEnd;
 
         if (selStart == selEnd) {
-            mTextView->getEditable()->setSelectionForceNotify(selStart);
+            text_view_->getEditable()->setSelectionForceNotify(selStart);
         } else {
-            mTextView->getEditable()->setSelectionForceNotify(selStart, selEnd);
+            text_view_->getEditable()->setSelectionForceNotify(selStart, selEnd);
         }
 
         return true;
     }
 
-    std::wstring InputConnection::getText(long start, long end, long maxLength)
-    {
-        std::wstring totalText = mTextView->getText();
+    std::wstring InputConnection::getText(long start, long end, long maxLength) {
+        std::wstring totalText = text_view_->getText();
 
         if (end == -1) {
             if (static_cast<unsigned long>(start + maxLength) <= totalText.length()) {
@@ -226,43 +214,40 @@ namespace ukive {
         }
     }
 
-    void InputConnection::setText(long start, long end, std::wstring newText)
-    {
+    void InputConnection::setText(long start, long end, std::wstring newText) {
         if (start == end) {
-            mTextView->getEditable()->insert(newText, start);
+            text_view_->getEditable()->insert(newText, start);
         } else {
-            mTextView->getEditable()->replace(newText, start, end - start);
+            text_view_->getEditable()->replace(newText, start, end - start);
         }
     }
 
     long InputConnection::getTextLength() {
-        return mTextView->getText().length();
+        return text_view_->getText().length();
     }
 
-    bool InputConnection::getTextPositionAtPoint(const POINT *pt, DWORD dwFlags, long *pacp) {
+    bool InputConnection::getTextPositionAtPoint(const POINT* pt, DWORD dwFlags, long* pacp) {
         return true;
     }
 
-    bool InputConnection::getTextBound(long start, long end, RECT *prc, BOOL *pfClipped)
-    {
-        Rect bound = mTextView->getBoundsInScreen();
-        RectF textBound = mTextView->getSelectionBound(start, end);
+    bool InputConnection::getTextBound(long start, long end, RECT* prc, BOOL* pfClipped) {
+        Rect bound = text_view_->getBoundsInScreen();
+        RectF textBound = text_view_->getSelectionBound(start, end);
 
         prc->left = static_cast<long>(
-            bound.left + textBound.left + mTextView->getPaddingLeft() - mTextView->getScrollX());
+            bound.left + textBound.left + text_view_->getPaddingLeft() - text_view_->getScrollX());
         prc->top = static_cast<long>(
-            bound.top + textBound.top + mTextView->getPaddingTop() - mTextView->getScrollY());
+            bound.top + textBound.top + text_view_->getPaddingTop() - text_view_->getScrollY());
         prc->right = static_cast<long>(
-            bound.left + textBound.right + mTextView->getPaddingLeft() - mTextView->getScrollX());
+            bound.left + textBound.right + text_view_->getPaddingLeft() - text_view_->getScrollX());
         prc->bottom = static_cast<long>(
-            bound.top + textBound.bottom + mTextView->getPaddingTop() - mTextView->getScrollY());
+            bound.top + textBound.bottom + text_view_->getPaddingTop() - text_view_->getScrollY());
 
         return true;
     }
 
-    void InputConnection::getTextViewBound(RECT *prc)
-    {
-        Rect bound = mTextView->getBoundsInScreen();
+    void InputConnection::getTextViewBound(RECT* prc) {
+        Rect bound = text_view_->getBoundsInScreen();
         prc->left = bound.left;
         prc->top = bound.top;
         prc->right = bound.right;
@@ -271,13 +256,12 @@ namespace ukive {
 
     void InputConnection::insertTextAtSelection(
         DWORD dwFlags, std::wstring text,
-        LONG *pacpStart, LONG *pacpEnd, TS_TEXTCHANGE *pChange)
+        LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange)
     {
-        switch (dwFlags)
-        {
+        switch (dwFlags) {
         case 0:
-            *pacpStart = mTextView->getSelectionStart();
-            *pacpEnd = mTextView->getSelectionEnd();
+            *pacpStart = text_view_->getSelectionStart();
+            *pacpEnd = text_view_->getSelectionEnd();
             break;
 
         case TF_IAS_NOQUERY:
@@ -286,14 +270,14 @@ namespace ukive {
             break;
 
         case TF_IAS_QUERYONLY:
-            *pacpStart = mTextView->getSelectionStart();
-            *pacpEnd = mTextView->getSelectionEnd();
+            *pacpStart = text_view_->getSelectionStart();
+            *pacpEnd = text_view_->getSelectionEnd();
             break;
         }
     }
 
     HWND InputConnection::getWindowHandle() {
-        return mTextView->getWindow()->getHandle();
+        return text_view_->getWindow()->getHandle();
     }
 
 }

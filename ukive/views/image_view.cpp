@@ -8,7 +8,7 @@
 
 namespace ukive {
 
-    ImageView::ImageView(Window *wnd)
+    ImageView::ImageView(Window* wnd)
         :View(wnd),
         bitmap_drawable_(nullptr) {}
 
@@ -72,7 +72,7 @@ namespace ukive {
         setMeasuredDimension(finalWidth, finalHeight);
     }
 
-    void ImageView::onDraw(Canvas *canvas) {
+    void ImageView::onDraw(Canvas* canvas) {
         View::onDraw(canvas);
 
         if (bitmap_drawable_) {
@@ -80,7 +80,7 @@ namespace ukive {
         }
     }
 
-    bool ImageView::onInputEvent(InputEvent *e) {
+    bool ImageView::onInputEvent(InputEvent* e) {
         return View::onInputEvent(e);
     }
 
@@ -88,8 +88,7 @@ namespace ukive {
     }
 
 
-    void ImageView::setImageBitmap(std::shared_ptr<Bitmap> bitmap)
-    {
+    void ImageView::setImageBitmap(std::shared_ptr<Bitmap> bitmap) {
         if (bitmap != nullptr) {
             bitmap_drawable_ = new BitmapDrawable(bitmap);
             bitmap_drawable_->setBounds(0, 0, bitmap->getWidth(), bitmap->getHeight());

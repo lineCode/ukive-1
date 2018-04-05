@@ -14,8 +14,7 @@ namespace ukive {
     }
 
 
-    void Button::initButton()
-    {
+    void Button::initButton() {
         shape_drawable_ = new ShapeDrawable(ShapeDrawable::ROUND_RECT);
         shape_drawable_->setRadius(getWindow()->dpToPx(2.f));
         shape_drawable_->setSolidEnable(true);
@@ -38,8 +37,7 @@ namespace ukive {
         setElevation(getWindow()->dpToPx(2.0f));
     }
 
-    void Button::setButtonColor(Color color)
-    {
+    void Button::setButtonColor(Color color) {
         shape_drawable_->setSolidColor(color);
     }
 

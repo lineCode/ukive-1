@@ -8,14 +8,13 @@ namespace ukive {
     class MenuItem;
     class TextActionMode;
 
-    class TextActionModeCallback
-    {
+    class TextActionModeCallback {
     public:
-        virtual bool onCreateActionMode(TextActionMode *mode, Menu *menu) = 0;
-        virtual bool onPrepareActionMode(TextActionMode *mode, Menu *menu) = 0;
-        virtual bool onActionItemClicked(TextActionMode *mode, MenuItem *item) = 0;
-        virtual void onDestroyActionMode(TextActionMode *mode) = 0;
-        virtual void onGetContentPosition(int *x, int *y) = 0;
+        virtual bool onCreateActionMode(TextActionMode* mode, Menu* menu) = 0;
+        virtual bool onPrepareActionMode(TextActionMode* mode, Menu* menu) = 0;
+        virtual bool onActionItemClicked(TextActionMode* mode, MenuItem* item) = 0;
+        virtual void onDestroyActionMode(TextActionMode* mode) = 0;
+        virtual void onGetContentPosition(int* x, int* y) = 0;
     };
 
 }
