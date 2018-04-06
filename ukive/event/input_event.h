@@ -71,7 +71,7 @@ namespace ukive {
 
         /// <summary>
         /// 当鼠标事件发生于Widget外部时，该方法返回true。
-        /// 只有当Widget的setReceiveOutsideInputEvent()方法以true为参数
+        /// 只有当 View 的 setReceiveOutsideInputEvent() 方法以 true 为参数
         /// 调用之后，此方法才有效。
         /// </summary>
         bool isOutside();

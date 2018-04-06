@@ -24,7 +24,7 @@ namespace ukive {
 
         HRESULT init(Window* window);
         HRESULT resize();
-        bool render(Color bg_color, std::function<void()> callback);
+        bool render(const Color& bg_color, std::function<void()> callback);
         void close();
 
         HRESULT drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap);
@@ -37,14 +37,6 @@ namespace ukive {
             IWICBitmap* wic_bitmap, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
         HRESULT createBitmapRenderTarget(
             IDXGISurface* dxgiSurface, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
-
-        HRESULT createCompatBitmapRenderTarget(
-            float width, float height, ID2D1BitmapRenderTarget** bRT);
-        HRESULT createDXGISurfaceRenderTarget(
-            IDXGISurface* dxgiSurface, ID2D1RenderTarget** renderTarget);
-        HRESULT createWindowRenderTarget(
-            HWND handle, unsigned int width, unsigned int height,
-            ID2D1HwndRenderTarget** renderTarget);
 
         ComPtr<ID2D1Effect> getShadowEffect();
         ComPtr<ID2D1Effect> getAffineTransEffect();

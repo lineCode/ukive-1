@@ -65,7 +65,7 @@ namespace ukive {
         return hr;
     }
 
-    bool Renderer::render(Color bg_color, std::function<void()> callback) {
+    bool Renderer::render(const Color& bg_color, std::function<void()> callback) {
         d2d_dc_->BeginDraw();
         D2D1_COLOR_F color = {
             bg_color.r, bg_color.g, bg_color.b, bg_color.a };
@@ -326,47 +326,6 @@ namespace ukive {
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
         return d2d_dc_->CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
-    }
-
-    HRESULT Renderer::createCompatBitmapRenderTarget(
-        float width, float height, ID2D1BitmapRenderTarget** bRT) {
-
-        ComPtr<ID2D1BitmapRenderTarget> bmpRenderTarget;
-        RH(d2d_dc_->CreateCompatibleRenderTarget(
-            D2D1::SizeF(width, height), bRT));
-
-        return S_OK;
-    }
-
-    HRESULT Renderer::createDXGISurfaceRenderTarget(
-        IDXGISurface* dxgiSurface, ID2D1RenderTarget** renderTarget) {
-
-        HRESULT hr = S_OK;
-        auto gdm = Application::getGraphicDeviceManager();
-
-        D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-            D2D1_RENDER_TARGET_TYPE_DEFAULT,
-            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-            96, 96, D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE);
-
-        return gdm->getD2DFactory()->CreateDxgiSurfaceRenderTarget(dxgiSurface, props, renderTarget);
-    }
-
-    HRESULT Renderer::createWindowRenderTarget(
-        HWND handle, unsigned int width, unsigned int height, ID2D1HwndRenderTarget** renderTarget) {
-
-        HRESULT hr = S_OK;
-        auto gdm = Application::getGraphicDeviceManager();
-
-        D2D1_RENDER_TARGET_PROPERTIES renderTargetProperties = D2D1::RenderTargetProperties();
-        // Set the DPI to be the default system DPI to allow direct mapping
-        // between image pixels and desktop pixels in different system DPI settings
-        renderTargetProperties.dpiX = 96;
-        renderTargetProperties.dpiY = 96;
-
-        return gdm->getD2DFactory()->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
-            D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(width, height)),
-            renderTarget);
     }
 
     ComPtr<ID2D1Effect> Renderer::getShadowEffect() {

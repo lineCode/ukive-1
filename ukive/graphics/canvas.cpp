@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "ukive/application.h"
+#include "ukive/graphics/bitmap_factory.h"
 #include "ukive/text/text_renderer.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
@@ -12,7 +14,7 @@
 
 namespace ukive {
 
-    Canvas::Canvas(Window *win, float width, float height)
+    Canvas::Canvas(Window* win, int width, int height)
         :is_bmp_target_(true) {
 
         ComPtr<ID2D1BitmapRenderTarget> bmp_target;
@@ -45,8 +47,7 @@ namespace ukive {
     }
 
 
-    void Canvas::setOpacity(float opacity)
-    {
+    void Canvas::setOpacity(float opacity) {
         if (opacity == opacity_) {
             return;
         }
@@ -80,7 +81,8 @@ namespace ukive {
     }
 
     void Canvas::endDraw() {
-        if (FAILED(render_target_->EndDraw())) {
+        HRESULT hr = render_target_->EndDraw();
+        if (FAILED(hr)) {
             Log::e(L"Canvas", L"failed to end draw.");
         }
     }
@@ -90,24 +92,21 @@ namespace ukive {
         render_target_->PopAxisAlignedClip();
     }
 
-    void Canvas::pushClip(const RectF &rect)
-    {
+    void Canvas::pushClip(const RectF& rect) {
         D2D1_RECT_F d2d_rect = { rect.left, rect.top, rect.right, rect.bottom };
         render_target_->PushAxisAlignedClip(
             d2d_rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     }
 
 
-    void Canvas::pushLayer(ID2D1Geometry *clipGeometry)
-    {
+    void Canvas::pushLayer(ID2D1Geometry* clipGeometry) {
         if (layer_counter_ > 0) {
             ++layer_counter_;
             return;
         }
 
         auto d2d_dc = render_target_.cast<ID2D1DeviceContext>();
-        if (d2d_dc == nullptr)
-        {
+        if (d2d_dc == nullptr) {
             if (layer_ == nullptr) {
                 HRESULT hr = render_target_->CreateLayer(&layer_);
                 if (FAILED(hr))
@@ -117,8 +116,7 @@ namespace ukive {
             render_target_->PushLayer(
                 D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry),
                 layer_.get());
-        }
-        else {
+        } else {
             d2d_dc->PushLayer(
                 D2D1::LayerParameters1(D2D1::InfiniteRect(), clipGeometry),
                 nullptr);
@@ -127,8 +125,7 @@ namespace ukive {
         ++layer_counter_;
     }
 
-    void Canvas::pushLayer(const RectF &content_bound, ID2D1Geometry *clipGeometry)
-    {
+    void Canvas::pushLayer(const RectF& content_bound, ID2D1Geometry* clipGeometry) {
         if (layer_counter_ > 0) {
             ++layer_counter_;
             return;
@@ -139,21 +136,18 @@ namespace ukive {
             content_bound.right, content_bound.bottom };
 
         auto d2d_dc = render_target_.cast<ID2D1DeviceContext>();
-        if (d2d_dc == nullptr)
-        {
-            if (layer_ == nullptr)
-            {
+        if (d2d_dc == nullptr) {
+            if (layer_ == nullptr) {
                 HRESULT hr = render_target_->CreateLayer(&layer_);
-                if (FAILED(hr))
+                if (FAILED(hr)) {
                     throw std::runtime_error("Canvas-Constructor(): Create layer failed.");
+                }
             }
 
             render_target_->PushLayer(
                 D2D1::LayerParameters(d2d_rect, clipGeometry),
                 layer_.get());
-        }
-        else
-        {
+        } else {
             d2d_dc->PushLayer(
                 D2D1::LayerParameters1(d2d_rect, clipGeometry),
                 nullptr);
@@ -162,8 +156,7 @@ namespace ukive {
         ++layer_counter_;
     }
 
-    void Canvas::popLayer()
-    {
+    void Canvas::popLayer() {
         if (layer_counter_ > 1) {
             --layer_counter_;
             return;
@@ -175,8 +168,7 @@ namespace ukive {
     }
 
 
-    void Canvas::save()
-    {
+    void Canvas::save() {
         ComPtr<ID2D1Factory> factory;
         render_target_->GetFactory(&factory);
 
@@ -188,15 +180,14 @@ namespace ukive {
         drawing_state_stack_.push(drawingStateBlock);
     }
 
-    void Canvas::restore()
-    {
+    void Canvas::restore() {
         if (drawing_state_stack_.empty()) {
             return;
         }
 
         opacity_ = opacity_stack_.top();
 
-        ID2D1DrawingStateBlock *drawingStateBlock
+        ID2D1DrawingStateBlock* drawingStateBlock
             = drawing_state_stack_.top().get();
 
         D2D1_DRAWING_STATE_DESCRIPTION desc;
@@ -217,7 +208,7 @@ namespace ukive {
         bitmap_brush_->SetOpacity(opacity_);
     }
 
-    ID2D1RenderTarget *Canvas::getRT() {
+    ID2D1RenderTarget* Canvas::getRT() {
         return render_target_.get();
     }
 
@@ -234,7 +225,7 @@ namespace ukive {
             return std::make_shared<Bitmap>(bitmap);
         }
 
-        return std::shared_ptr<Bitmap>();
+        return {};
     }
 
 
@@ -262,7 +253,7 @@ namespace ukive {
     }
 
 
-    void Canvas::setMatrix(const Matrix &matrix) {
+    void Canvas::setMatrix(const Matrix& matrix) {
         matrix_ = matrix;
         render_target_->SetTransform(matrix_.getNative());
     }
@@ -274,8 +265,8 @@ namespace ukive {
 
     void Canvas::fillOpacityMask(
         float width, float height,
-        Bitmap *mask, Bitmap *content)
-    {
+        Bitmap* mask, Bitmap* content) {
+
         bitmap_brush_->SetBitmap(content->getNative().get());
 
         D2D1_RECT_F rect = D2D1::RectF(0, 0, width, height);
@@ -288,8 +279,7 @@ namespace ukive {
     }
 
 
-    void Canvas::drawRect(const RectF &rect, const Color &color)
-    {
+    void Canvas::drawRect(const RectF& rect, const Color& color) {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect = {
@@ -299,8 +289,7 @@ namespace ukive {
         render_target_->DrawRectangle(d2d_rect, solid_brush_.get());
     }
 
-    void Canvas::drawRect(const RectF &rect, float strokeWidth, const Color &color)
-    {
+    void Canvas::drawRect(const RectF& rect, float strokeWidth, const Color& color) {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect = {
@@ -311,8 +300,7 @@ namespace ukive {
     }
 
 
-    void Canvas::fillRect(const RectF &rect, const Color &color)
-    {
+    void Canvas::fillRect(const RectF& rect, const Color& color) {
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect = {
@@ -324,8 +312,8 @@ namespace ukive {
 
 
     void Canvas::drawRoundRect(
-        const RectF &rect, float radius, const Color &color)
-    {
+        const RectF& rect, float radius, const Color& color) {
+
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect = {
@@ -337,9 +325,9 @@ namespace ukive {
     }
 
     void Canvas::drawRoundRect(
-        const RectF &rect, float strokeWidth,
-        float radius, const Color &color)
-    {
+        const RectF& rect, float strokeWidth,
+        float radius, const Color& color) {
+
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect = {
@@ -351,8 +339,8 @@ namespace ukive {
     }
 
     void Canvas::fillRoundRect(
-        const RectF &rect, float radius, const Color &color)
-    {
+        const RectF& rect, float radius, const Color& color) {
+
         D2D1_COLOR_F d2d_color = {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect = {
@@ -364,22 +352,19 @@ namespace ukive {
     }
 
 
-    void Canvas::drawCircle(float cx, float cy, float radius, const Color &color)
-    {
+    void Canvas::drawCircle(float cx, float cy, float radius, const Color& color) {
         drawOval(cx, cy, radius, radius, color);
     }
 
-    void Canvas::drawCircle(float cx, float cy, float radius, float strokeWidth, const Color &color)
-    {
+    void Canvas::drawCircle(float cx, float cy, float radius, float strokeWidth, const Color& color) {
         drawOval(cx, cy, radius, radius, strokeWidth, color);
     }
 
-    void Canvas::fillCircle(float cx, float cy, float radius, const Color &color)
-    {
+    void Canvas::fillCircle(float cx, float cy, float radius, const Color& color) {
         fillOval(cx, cy, radius, radius, color);
     }
 
-    void Canvas::drawCircle(const RectF &rect, const Color &color) {
+    void Canvas::drawCircle(const RectF& rect, const Color& color) {
         float cx = rect.left + rect.width() / 2;
         float cy = rect.top + rect.height() / 2;
         float radius = std::min(rect.width() / 2, rect.height() / 2);
@@ -387,7 +372,7 @@ namespace ukive {
         drawOval(cx, cy, radius, radius, color);
     }
 
-    void Canvas::drawCircle(const RectF &rect, float strokeWidth, const Color &color) {
+    void Canvas::drawCircle(const RectF& rect, float strokeWidth, const Color& color) {
         float cx = rect.left + rect.width() / 2;
         float cy = rect.top + rect.height() / 2;
         float radius = std::min(rect.width() / 2, rect.height() / 2);
@@ -395,7 +380,7 @@ namespace ukive {
         drawOval(cx, cy, radius, radius, strokeWidth, color);
     }
 
-    void Canvas::fillCircle(const RectF &rect, const Color &color) {
+    void Canvas::fillCircle(const RectF& rect, const Color& color) {
         float cx = rect.left + rect.width() / 2;
         float cy = rect.top + rect.height() / 2;
         float radius = std::min(rect.width() / 2, rect.height() / 2);
@@ -404,8 +389,7 @@ namespace ukive {
     }
 
 
-    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, const Color &color)
-    {
+    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, const Color& color) {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
@@ -416,8 +400,7 @@ namespace ukive {
             solid_brush_.get());
     }
 
-    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, const Color &color)
-    {
+    void Canvas::drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, const Color& color) {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
@@ -428,8 +411,7 @@ namespace ukive {
             solid_brush_.get(), strokeWidth);
     }
 
-    void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, const Color &color)
-    {
+    void Canvas::fillOval(float cx, float cy, float radiusX, float radiusY, const Color& color) {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
@@ -438,13 +420,12 @@ namespace ukive {
     }
 
 
-    void Canvas::fillGeometry(ID2D1Geometry *geo, ID2D1Brush *brush) {
+    void Canvas::fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush) {
         render_target_->FillGeometry(geo, brush);
     }
 
 
-    void Canvas::drawBitmap(Bitmap *bitmap)
-    {
+    void Canvas::drawBitmap(Bitmap* bitmap) {
         if (bitmap == nullptr) {
             return;
         }
@@ -454,8 +435,7 @@ namespace ukive {
         drawBitmap(srcRect, srcRect, 1.f, bitmap);
     }
 
-    void Canvas::drawBitmap(float x, float y, Bitmap *bitmap)
-    {
+    void Canvas::drawBitmap(float x, float y, Bitmap* bitmap) {
         if (bitmap == nullptr) {
             return;
         }
@@ -468,8 +448,7 @@ namespace ukive {
         drawBitmap(srcRect, dstRect, 1.f, bitmap);
     }
 
-    void Canvas::drawBitmap(const RectF &dst, float opacity, Bitmap *bitmap)
-    {
+    void Canvas::drawBitmap(const RectF& dst, float opacity, Bitmap* bitmap) {
         if (bitmap == nullptr) {
             return;
         }
@@ -479,8 +458,7 @@ namespace ukive {
         drawBitmap(srcRect, dst, opacity, bitmap);
     }
 
-    void Canvas::drawBitmap(const RectF &src, const RectF &dst, float opacity, Bitmap *bitmap)
-    {
+    void Canvas::drawBitmap(const RectF& src, const RectF& dst, float opacity, Bitmap* bitmap) {
         if (bitmap == nullptr) {
             return;
         }
@@ -498,9 +476,9 @@ namespace ukive {
 
 
     void Canvas::drawText(
-        std::wstring text, IDWriteTextFormat *textFormat,
-        const RectF &layoutRect, const Color &color)
-    {
+        std::wstring text, IDWriteTextFormat* textFormat,
+        const RectF& layoutRect, const Color& color) {
+
         if (textFormat == nullptr) {
             return;
         }
@@ -517,8 +495,8 @@ namespace ukive {
 
     void Canvas::drawTextLayout(
         float x, float y,
-        IDWriteTextLayout *textLayout, const Color &color)
-    {
+        IDWriteTextLayout* textLayout, const Color& color) {
+
         if (textLayout == nullptr) {
             return;
         }
@@ -530,9 +508,9 @@ namespace ukive {
     }
 
     void Canvas::drawTextLayoutWithEffect(
-        View *v, float x, float y,
-        IDWriteTextLayout *textLayout, const Color &color)
-    {
+        View* v, float x, float y,
+        IDWriteTextLayout* textLayout, const Color& color) {
+
         if (text_renderer_ == nullptr) {
             text_renderer_ = new TextRenderer(render_target_);
             text_renderer_->setOpacity(opacity_);

@@ -395,33 +395,38 @@ namespace ukive {
             break;
         }
 
-        case WM_CREATE:
+        case WM_CREATE: {
             return TRUE;
+        }
 
         case 0xAE:
-        case 0xAF:
+        case 0xAF: {
             nc_result = non_client_frame_->onInterceptDrawClassic(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
-        case WM_NCPAINT:
+        case WM_NCPAINT: {
             nc_result = non_client_frame_->onNcPaint(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
-        case WM_PAINT:
+        case WM_PAINT: {
             break;
+        }
 
-        case WM_NCACTIVATE:
+        case WM_NCACTIVATE: {
             nc_result = non_client_frame_->onNcActivate(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
         case WM_NCHITTEST: {
             nc_result = non_client_frame_->onNcHitTest(wParam, lParam, &nc_handled);
@@ -431,47 +436,54 @@ namespace ukive {
             break;
         }
 
-        case WM_NCCALCSIZE:
+        case WM_NCCALCSIZE: {
             nc_result = non_client_frame_->onNcCalSize(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
-        case WM_NCLBUTTONDOWN:
+        case WM_NCLBUTTONDOWN: {
             nc_result = non_client_frame_->onNcLButtonDown(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
-        case WM_NCLBUTTONUP:
+        case WM_NCLBUTTONUP: {
             nc_result = non_client_frame_->onNcLButtonUp(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
-        case WM_CLOSE:
+        case WM_CLOSE: {
             if (onClose()) {
                 break;
             }
             return 0;
+        }
 
-        case WM_DESTROY:
+        case WM_DESTROY: {
             onDestroy();
             return 0;
+        }
 
-        case WM_NCDESTROY:
+        case WM_NCDESTROY: {
             nc_result = non_client_frame_->onNcDestroy(&nc_handled);
             if (nc_handled) {
                 return nc_result;
             }
             break;
+        }
 
-        case WM_SHOWWINDOW:
+        case WM_SHOWWINDOW: {
             onShow((BOOL)wParam == TRUE ? true : false);
             break;
+        }
 
         case WM_ACTIVATE: {
             onActivate(LOWORD(wParam));
@@ -507,8 +519,9 @@ namespace ukive {
             return FALSE;
         }
 
-        case WM_ERASEBKGND:
+        case WM_ERASEBKGND: {
             return TRUE;
+        }
 
         case WM_SETCURSOR: {
             if (isCursorInClient()) {
@@ -762,22 +775,38 @@ namespace ukive {
             }
             break;
         }
+
+        case WM_CHAR: {
+            break;
+        }
+
+        case WM_UNICHAR: {
+            break;
+        }
+
+        case WM_GESTURE: {
+            break;
+        }
+
+        case WM_TOUCH: {
+            break;
+        }
         }
 
         return ::DefWindowProc(hWnd_, uMsg, wParam, lParam);
     }
 
-    LRESULT WindowImpl::processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP)
-    {
-        LRESULT lRet = 0;
-        HRESULT hr = S_OK;
-        bool fCallDWP = true; // Pass on to DefWindowProc?
+    LRESULT WindowImpl::processDWMProc(
+        HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP) {
 
-        fCallDWP = !::DwmDefWindowProc(hWnd, message, wParam, lParam, &lRet);
+        LRESULT ret = 0;
+        HRESULT hr = S_OK;
+        bool call_dwp = true; // Pass on to DefWindowProc?
+
+        call_dwp = !::DwmDefWindowProc(hWnd, message, wParam, lParam, &ret);
 
         // Handle window creation.
-        if (message == WM_CREATE)
-        {
+        if (message == WM_CREATE) {
             RECT rcClient;
             ::GetWindowRect(hWnd, &rcClient);
 
@@ -788,13 +817,12 @@ namespace ukive {
                 rcClient.right - rcClient.left, rcClient.bottom - rcClient.top,
                 SWP_FRAMECHANGED);
 
-            fCallDWP = true;
-            lRet = 0;
+            call_dwp = true;
+            ret = 0;
         }
 
         // Handle window activation.
-        if (message == WM_ACTIVATE)
-        {
+        if (message == WM_ACTIVATE) {
             // Extend the frame into the client area.
             MARGINS margins;
 
@@ -804,25 +832,21 @@ namespace ukive {
             margins.cyTopHeight = 8;
 
             hr = ::DwmExtendFrameIntoClientArea(hWnd, &margins);
-
-            if (!SUCCEEDED(hr))
-            {
+            if (!SUCCEEDED(hr)) {
                 // Handle error.
             }
 
-            fCallDWP = true;
-            lRet = 0;
+            call_dwp = true;
+            ret = 0;
         }
 
-        if (message == WM_PAINT)
-        {
-            fCallDWP = true;
-            lRet = 0;
+        if (message == WM_PAINT) {
+            call_dwp = true;
+            ret = 0;
         }
 
         // Handle the non-client size message.
-        if (message == WM_NCCALCSIZE && wParam == TRUE)
-        {
+        if (message == WM_NCCALCSIZE && wParam == TRUE) {
             // Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
             NCCALCSIZE_PARAMS* pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
 
@@ -834,31 +858,29 @@ namespace ukive {
             pncsp->rgrc[0].right = newW.right - 0;
             pncsp->rgrc[0].bottom = newW.bottom - 0;
 
-            lRet = 0;
+            ret = 0;
 
             // No need to pass the message on to the DefWindowProc.
-            fCallDWP = false;
+            call_dwp = false;
         }
 
         // Handle hit testing in the NCA if not handled by DwmDefWindowProc.
-        if ((message == WM_NCHITTEST) && (lRet == 0))
-        {
-            lRet = HitTestNCA(hWnd, wParam, lParam, 8, 8, 8, 8);
-
-            if (lRet != HTNOWHERE)
-            {
-                fCallDWP = false;
+        if ((message == WM_NCHITTEST) && (ret == 0)) {
+            ret = HitTestNCA(hWnd, wParam, lParam, 8, 8, 8, 8);
+            if (ret != HTNOWHERE) {
+                call_dwp = false;
             }
         }
 
-        *pfCallDWP = fCallDWP;
+        *pfCallDWP = call_dwp;
 
-        return lRet;
+        return ret;
     }
 
-    LRESULT WindowImpl::HitTestNCA(HWND hWnd, WPARAM wParam, LPARAM lParam,
-        int leftExt, int topExt, int rightExt, int bottomExt)
-    {
+    LRESULT WindowImpl::HitTestNCA(
+        HWND hWnd, WPARAM wParam, LPARAM lParam,
+        int leftExt, int topExt, int rightExt, int bottomExt) {
+
         // Get the point coordinates for the hit test.
         POINT ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 
@@ -876,23 +898,17 @@ namespace ukive {
         //bool fOnResizeBorder = false;
 
         // Determine if the point is at the top or bottom of the window.
-        if (ptMouse.y >= rcWindow.top && ptMouse.y < rcWindow.top + topExt)
-        {
+        if (ptMouse.y >= rcWindow.top && ptMouse.y < rcWindow.top + topExt) {
             //fOnResizeBorder = (ptMouse.y < (rcWindow.top - rcFrame.top));
             uRow = 0;
-        }
-        else if (ptMouse.y < rcWindow.bottom && ptMouse.y >= rcWindow.bottom - bottomExt)
-        {
+        } else if (ptMouse.y < rcWindow.bottom && ptMouse.y >= rcWindow.bottom - bottomExt) {
             uRow = 2;
         }
 
         // Determine if the point is at the left or right of the window.
-        if (ptMouse.x >= rcWindow.left && ptMouse.x < rcWindow.left + leftExt)
-        {
+        if (ptMouse.x >= rcWindow.left && ptMouse.x < rcWindow.left + leftExt) {
             uCol = 0; // left side
-        }
-        else if (ptMouse.x < rcWindow.right && ptMouse.x >= rcWindow.right - rightExt)
-        {
+        } else if (ptMouse.x < rcWindow.right && ptMouse.x >= rcWindow.right - rightExt) {
             uCol = 2; // right side
         }
 
@@ -909,9 +925,9 @@ namespace ukive {
 
     LRESULT CALLBACK WindowImpl::WndProc(
         HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-        if (uMsg == WM_NCCREATE)
-        {
+        if (uMsg == WM_NCCREATE) {
             //::EnableNonClientDpiScaling(hWnd);
+            ::RegisterTouchWindow(hWnd, TWF_WANTPALM);
 
             CREATESTRUCTW* cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
             WindowImpl* window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
@@ -938,7 +954,7 @@ namespace ukive {
         /*hr = DwmIsCompositionEnabled(&dwmEnabled);
         if (SUCCEEDED(hr))
         {
-        lRet = window->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
+        ret = window->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
         }*/
 
         // Winproc worker for the rest of the application.

@@ -6,29 +6,31 @@
 namespace ukive {
 
     WICManager::WICManager() {
-    }
-
-
-    WICManager::~WICManager() {
-    }
-
-
-    HRESULT WICManager::init() {
-        HRESULT hr;
-
-        hr = CoCreateInstance(
+        HRESULT hr = CoCreateInstance(
             CLSID_WICImagingFactory1,
             0,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&wic_factory_));
         if (FAILED(hr)) {
-            return hr;
+            LOG(Log::FATAL) << "Failed to create WIC factory: " << hr;
         }
-
-        return hr;
     }
 
-    void WICManager::close() {
+    WICManager::~WICManager() {
+    }
+
+
+    ComPtr<IWICBitmap> WICManager::createBitmap(IWICBitmapSource* src) {
+        ComPtr<IWICBitmap> bitmap;
+        HRESULT hr = wic_factory_->CreateBitmapFromSource(
+            src,
+            WICBitmapCacheOnDemand,
+            &bitmap);
+        if (SUCCEEDED(hr)) {
+            return bitmap;
+        }
+
+        return {};
     }
 
     ComPtr<IWICBitmap> WICManager::createBitmap(unsigned int width, unsigned int height) {
@@ -41,72 +43,290 @@ namespace ukive {
         return bmp;
     }
 
-    HRESULT WICManager::convertForD2D(IWICBitmapSource *src, IWICBitmapSource **dst) {
-        HRESULT hr;
-        IWICFormatConverter *converter = 0;
-
-        // Format convert the frame to 32bppPBGRA
-        hr = wic_factory_->CreateFormatConverter(&converter);
-
-        if (SUCCEEDED(hr)) {
-            hr = converter->Initialize(
-                src,                          // Input bitmap to convert
-                GUID_WICPixelFormat32bppPBGRA,   // Destination pixel format
-                WICBitmapDitherTypeNone,         // Specified dither pattern
-                0,                            // Specify a particular palette
-                0.f,                             // Alpha threshold
-                WICBitmapPaletteTypeCustom       // Palette translation type
-            );
+    WICBitmaps WICManager::decodeFile(const string16& file_name) {
+        if (!wic_factory_) {
+            return {};
         }
 
-        if (SUCCEEDED(hr)) {
-            *dst = converter;
-        }
-
-        return hr;
-    }
-
-
-    HRESULT WICManager::decodeFile(const string16 &file_name, IWICBitmapSource **out_src) {
-        HRESULT hr;
         ComPtr<IWICBitmapDecoder> decoder;
-
-        hr = wic_factory_->CreateDecoderFromFilename(
+        HRESULT hr = wic_factory_->CreateDecoderFromFilename(
             file_name.c_str(),                     // Image to be decoded
-            0,                                     // Do not prefer a particular vendor
+            nullptr,                               // Do not prefer a particular vendor
             GENERIC_READ,                          // Desired read access to the file
-            WICDecodeMetadataCacheOnDemand,        // Cache metadata when needed
-            &decoder);                             // Pointer to the decoder
-
-        // Retrieve the first frame of the image from the decoder
-        IWICBitmapFrameDecode *frame = nullptr;
-
-        if (SUCCEEDED(hr)) {
-            hr = decoder->GetFrame(0, &frame);
+            WICDecodeMetadataCacheOnLoad,          // Cache metadata on load
+            &decoder);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            return {};
         }
 
-        if (SUCCEEDED(hr)) {
-            *out_src = frame;
+        return ProcessDecoder(decoder);
+    }
+
+    WICBitmaps WICManager::decodeMemory(const BYTE* buffer, size_t size) {
+        if (!wic_factory_) {
+            return {};
         }
 
-        return hr;
+        ComPtr<IWICStream> stream;
+        HRESULT hr = wic_factory_->CreateStream(&stream);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            return {};
+        }
+
+        hr = stream->InitializeFromMemory(const_cast<BYTE*>(buffer), size);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            return {};
+        }
+
+        ComPtr<IWICBitmapDecoder> decoder;
+        hr = wic_factory_->CreateDecoderFromStream(
+            stream.get(), nullptr, WICDecodeMetadataCacheOnLoad, &decoder);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            return {};
+        }
+
+        return ProcessDecoder(decoder);
     }
 
 
-    HRESULT WICManager::getBitmapFromSource(IWICBitmapSource *src, IWICBitmap **out_bitmap) {
-        HRESULT hr;
-        IWICBitmap *bitmap = nullptr;
+    void WICManager::GetGlobalMetadata(
+        ComPtr<IWICBitmapDecoder> decoder,
+        WICBitmaps& bmps) {
 
-        hr = wic_factory_->CreateBitmapFromSource(
-            src,
-            WICBitmapCacheOnDemand,
-            &bitmap);
-
+        ComPtr<IWICMetadataQueryReader> reader;
+        HRESULT hr = decoder->GetMetadataQueryReader(&reader);
         if (SUCCEEDED(hr)) {
-            *out_bitmap = bitmap;
+            PROPVARIANT prop_var;
+            PropVariantInit(&prop_var);
+            hr = reader->GetMetadataByName(L"/logscrdesc/Width", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                bmps.width = prop_var.uiVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/logscrdesc/Height", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                bmps.height = prop_var.uiVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/logscrdesc/GlobalColorTableFlag", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_BOOL && prop_var.boolVal) {
+                PropVariantClear(&prop_var);
+                hr = reader->GetMetadataByName(L"/logscrdesc/BackgroundColorIndex", &prop_var);
+                if (SUCCEEDED(hr) && prop_var.vt == VT_UI1) {
+                    UINT bg_index = prop_var.bVal;
+                    ComPtr<IWICPalette> palette;
+                    hr = wic_factory_->CreatePalette(&palette);
+                    if (SUCCEEDED(hr)) {
+                        hr = decoder->CopyPalette(palette.get());
+                    }
+
+                    if (SUCCEEDED(hr)) {
+                        UINT color_count = 0;
+                        hr = palette->GetColorCount(&color_count);
+                        if (SUCCEEDED(hr) && color_count > 0) {
+                            UINT actual_count = 0;
+                            WICColor* color_table = new WICColor[color_count];
+                            hr = palette->GetColors(color_count, color_table, &actual_count);
+                            if (SUCCEEDED(hr) && actual_count > 0 && bg_index < actual_count) {
+                                bmps.bg_color = Color(color_table[bg_index]);
+                            }
+                            delete[] color_table;
+                        }
+                    }
+                }
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/logscrdesc/PixelAspectRatio", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI1) {
+                UINT ratio = prop_var.bVal;
+                if (ratio != 0) {
+                    float pixel_ratio = (ratio + 15.f) / 64.f;
+                    if (pixel_ratio > 1.f) {
+                        bmps.height = static_cast<int>(bmps.height / pixel_ratio);
+                    } else {
+                        bmps.width = static_cast<int>(bmps.width * pixel_ratio);
+                    }
+                }
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/appext/application", &prop_var);
+            if (SUCCEEDED(hr)
+                && prop_var.vt == (VT_UI1 | VT_VECTOR)
+                && prop_var.caub.cElems == 11
+                && (!memcmp(prop_var.caub.pElems, "NETSCAPE2.0", prop_var.caub.cElems) ||
+                    !memcmp(prop_var.caub.pElems, "ANIMEXTS1.0", prop_var.caub.cElems))) {
+
+                PropVariantClear(&prop_var);
+                hr = reader->GetMetadataByName(L"/appext/data", &prop_var);
+                if (SUCCEEDED(hr)
+                    && (prop_var.vt == (VT_UI1 | VT_VECTOR)
+                        && prop_var.caub.cElems >= 4
+                        && prop_var.caub.pElems[0] > 0
+                        && prop_var.caub.pElems[1] == 1)) {
+                    bmps.loop_count = MAKEWORD(prop_var.caub.pElems[2],
+                        prop_var.caub.pElems[3]);
+                }
+            }
+            PropVariantClear(&prop_var);
+        }
+    }
+
+    void WICManager::GetFrameMetadata(
+        ComPtr<IWICBitmapFrameDecode> decoder,
+        WICFrame& frame) {
+
+        ComPtr<IWICMetadataQueryReader> reader;
+        HRESULT hr = decoder->GetMetadataQueryReader(&reader);
+        if (SUCCEEDED(hr)) {
+            PROPVARIANT prop_var;
+            PropVariantInit(&prop_var);
+            hr = reader->GetMetadataByName(L"/grctlext/Disposal", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI1) {
+                frame.disposal = prop_var.bVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/grctlext/Delay", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                frame.frame_interval = prop_var.uiVal * 10;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/imgdesc/Left", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                frame.left = prop_var.uiVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/imgdesc/Top", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                frame.top = prop_var.uiVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/imgdesc/Width", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                frame.width = prop_var.uiVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/imgdesc/Height", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_UI2) {
+                frame.height = prop_var.uiVal;
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/imgdesc/InterlaceFlag", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_BOOL) {
+                auto v_interlace = prop_var.boolVal;
+                if (v_interlace) {
+                    frame.interlace = true;
+                } else {
+                    frame.interlace = false;
+                }
+            }
+
+            PropVariantClear(&prop_var);
+            hr = reader->GetMetadataByName(L"/imgdesc/SortFlag", &prop_var);
+            if (SUCCEEDED(hr) && prop_var.vt == VT_BOOL) {
+                auto v_sort = prop_var.boolVal;
+                if (v_sort) {
+                    frame.sort = true;
+                } else {
+                    frame.sort = false;
+                }
+            }
+            PropVariantClear(&prop_var);
+        }
+    }
+
+    WICBitmaps WICManager::ProcessDecoder(
+        ComPtr<IWICBitmapDecoder> decoder) {
+
+        UINT frame_count = 0;
+        HRESULT hr = decoder->GetFrameCount(&frame_count);
+        if (FAILED(hr) || frame_count < 1) {
+            DCHECK(false);
+            return {};
         }
 
-        return hr;
+        WICBitmaps bmps;
+        GetGlobalMetadata(decoder, bmps);
+
+        for (UINT i = 0; i < frame_count; ++i) {
+            ComPtr<IWICBitmapFrameDecode> frame_decoder;
+            HRESULT hr = decoder->GetFrame(i, &frame_decoder);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                continue;
+            }
+
+            ComPtr<IWICFormatConverter> converter;
+            // Format convert the frame to 32bppPBGRA
+            hr = wic_factory_->CreateFormatConverter(&converter);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                continue;
+            }
+
+            auto source = frame_decoder.cast<IWICBitmapSource>();
+            if (source == nullptr) {
+                DCHECK(false);
+                continue;
+            }
+
+            hr = converter->Initialize(
+                source.get(),                          // Input bitmap to convert
+                GUID_WICPixelFormat32bppPBGRA,         // Destination pixel format
+                WICBitmapDitherTypeNone,               // Specified dither pattern
+                nullptr,                               // Specify a particular palette
+                0.f,                                   // Alpha threshold
+                WICBitmapPaletteTypeCustom             // Palette translation type
+            );
+            if (FAILED(hr)) {
+                DCHECK(false);
+                continue;
+            }
+
+            auto wic_bitmap = converter.cast<IWICBitmapSource>();
+            if (wic_bitmap == nullptr) {
+                DCHECK(false);
+                continue;
+            }
+
+            WICFrame wic_frame;
+            GetFrameMetadata(frame_decoder, wic_frame);
+            wic_frame.bitmap = wic_bitmap;
+
+            bmps.frames.push_back(wic_frame);
+        }
+
+        if (bmps.width == 0 || bmps.height == 0) {
+            if (!bmps.frames.empty()) {
+                UINT width = 0;
+                UINT height = 0;
+                HRESULT hr = bmps.frames.front().bitmap->GetSize(&width, &height);
+                if (SUCCEEDED(hr)) {
+                    bmps.width = width;
+                    bmps.height = height;
+                }
+            }
+        }
+
+        if (bmps.width == 0 || bmps.height == 0) {
+            DCHECK(false);
+            return {};
+        }
+
+        return bmps;
     }
 
 }

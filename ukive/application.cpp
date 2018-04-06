@@ -74,10 +74,6 @@ namespace ukive {
         graphic_device_manager_->init();
 
         wic_manager_.reset(new WICManager());
-        hr = wic_manager_->init();
-        if (FAILED(hr)) {
-            Log::e(L"Application", L"Init WIC failed.");
-        }
 
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
@@ -94,7 +90,6 @@ namespace ukive {
         tsf_manager_->close();
         tsf_manager_.reset();
 
-        wic_manager_->close();
         wic_manager_.reset();
 
         graphic_device_manager_->shutdown();

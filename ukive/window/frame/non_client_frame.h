@@ -10,7 +10,7 @@ namespace ukive {
 
     class NonClientFrame {
     public:
-        virtual ~NonClientFrame() {}
+        virtual ~NonClientFrame() = default;
 
         virtual int onNcCreate(Window* w, bool* handled) = 0;
         virtual int onNcDestroy(bool* handled) = 0;

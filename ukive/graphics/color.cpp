@@ -7,7 +7,7 @@
 namespace ukive {
 
     Color::Color()
-        :a(1.f), r(0.f), g(0.f), b(0.f) {}
+        :a(0.f), r(0.f), g(0.f), b(0.f) {}
 
     Color::Color(const Color& color)
         :a(color.a), r(color.r), g(color.g), b(color.b) {}

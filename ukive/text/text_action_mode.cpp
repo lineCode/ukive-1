@@ -19,7 +19,7 @@ namespace ukive {
         Window* window, TextActionModeCallback* callback)
         :window_(window),
         callback_(callback),
-        is_finished_(false) {
+        is_finished_(true) {
 
         menu_width_ = window->dpToPx(92);
         menu_item_height_ = window->dpToPx(36);
