@@ -131,13 +131,13 @@ namespace ukive {
         double startWidthRadius, double endWidthRadius,
         double startHeightRadius, double endHeightRadius) {
 
-        using dLimit = std::numeric_limits<double>;
+        using lim = std::numeric_limits<double>;
 
         Animator* animator = new Animator(
             v->getWindow()->getAnimationManager());
-        animator->addVariable(0, startWidthRadius, -(dLimit::max)(), (dLimit::max)());
+        animator->addVariable(0, startWidthRadius, -(lim::max)(), (lim::max)());
         animator->addTransition(0, Transition::linearTransition(0.1, endWidthRadius));
-        animator->addVariable(1, startHeightRadius, -(dLimit::max)(), (dLimit::max)());
+        animator->addVariable(1, startHeightRadius, -(lim::max)(), (lim::max)());
         animator->addTransition(1, Transition::linearTransition(0.2, endHeightRadius));
 
         v->setHasReveal(true);

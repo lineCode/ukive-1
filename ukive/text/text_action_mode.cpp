@@ -131,17 +131,17 @@ namespace ukive {
             : public Animator::OnAnimatorListener {
         public:
             DismissAnimListener(std::shared_ptr<InnerWindow> w)
-                :window(w) {
+                :window_(w) {
             }
             void onAnimationStart(Animator* animator) {}
             void onAnimationEnd(Animator* animator) {
-                window->dismiss();
+                window_->dismiss();
             }
             void onAnimationCancel(Animator* animator) {
-                window->dismiss();
+                window_->dismiss();
             }
         private:
-            std::shared_ptr<InnerWindow> window;
+            std::shared_ptr<InnerWindow> window_;
         }*animListener = new DismissAnimListener(inner_window_);
 
         inner_window_->getDecorView()->animate()->

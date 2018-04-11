@@ -49,7 +49,6 @@ namespace ukive {
         void startZoomInAnimation();
         void startZoomOutAnimation();
 
-
         int mSeekTrackHeight;
         int mSeekThumbMinDiameter;
         int mSeekThumbMaxDiameter;

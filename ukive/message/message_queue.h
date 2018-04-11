@@ -10,21 +10,20 @@ namespace ukive {
     class Message;
     class Executable;
 
-    class MessageQueue
-    {
+    class MessageQueue {
     public:
         MessageQueue();
         ~MessageQueue();
 
         void quit();
 
-        bool enqueue(Message *msg);
-        Message *dequeue();
-        void remove(Cycler *c, void *data);
-        void remove(Cycler *c, int what, void *data);
-        void remove(Cycler *c, Executable *exec, void *data);
-        bool contains(Cycler *c, int what, void *data);
-        bool contains(Cycler *c, Executable *exec, void *data);
+        bool enqueue(Message* msg);
+        Message* dequeue();
+        void remove(Cycler* c, void* data);
+        void remove(Cycler* c, int what, void* data);
+        void remove(Cycler* c, Executable* exec, void* data);
+        bool contains(Cycler* c, int what, void* data);
+        bool contains(Cycler* c, Executable* exec, void* data);
 
         void addBarrier();
         void removeBarrier();
@@ -34,7 +33,7 @@ namespace ukive {
 
         bool is_quitting_;
         bool has_barrier_;
-        Message *message_;
+        Message* message_;
         std::mutex queue_sync_;
     };
 

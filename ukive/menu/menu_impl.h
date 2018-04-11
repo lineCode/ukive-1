@@ -12,14 +12,13 @@ namespace ukive {
     class Window;
     class MenuCallback;
 
-    class MenuImpl : public LinearLayout, public Menu, public OnClickListener
-    {
+    class MenuImpl : public LinearLayout, public Menu, public OnClickListener {
     public:
-        MenuImpl(Window *w);
+        MenuImpl(Window* w);
 
         void setMenuItemHeight(int height);
 
-        void setCallback(MenuCallback *callback) override;
+        void setCallback(MenuCallback* callback) override;
         MenuCallback* getCallback() override;
 
         MenuItem* addItem(int id, int order, string16 title) override;
@@ -28,13 +27,13 @@ namespace ukive {
         MenuItem* findItem(int id) override;
         size_t getItemCount() override;
 
-        void onClick(View *v) override;
+        void onClick(View* v) override;
 
     private:
         void initMenu();
 
         int item_height_;
-        MenuCallback *callback_;
+        MenuCallback* callback_;
     };
 
 }

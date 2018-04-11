@@ -28,7 +28,7 @@ namespace ukive {
     }
 
 
-    void TextBlink::draw(Canvas *canvas) {
+    void TextBlink::draw(Canvas* canvas) {
         if (blink_mask_ && is_located_) {
             canvas->fillRect(blink_rect_.toRectF(), color_);
         }

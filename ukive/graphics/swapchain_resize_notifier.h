@@ -4,8 +4,7 @@
 
 namespace ukive {
 
-    class SwapChainResizeNotifier
-    {
+    class SwapChainResizeNotifier {
     public:
         virtual ~SwapChainResizeNotifier() = default;
 

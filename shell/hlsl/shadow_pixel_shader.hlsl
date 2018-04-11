@@ -2,7 +2,7 @@
 #define DIAMETER  (RADIUS * 2 + 1)
 
 
-Texture2D stencil : register(t0);
+Texture1D stencil : register(t0);
 
 cbuffer constants : register(b0) {
     float4 bounds_ : packoffset(c0);
@@ -104,29 +104,28 @@ float4 main(
         return float4(0, 0, 0, 0);
     }
 
-    float total_alpha = 0;
+    float tmp_alpha = 0;
     for (int i = 0; i < DIAMETER; ++i) {
-        for (int j = 0; j < DIAMETER; ++j) {
-            float4 color = getColor(j - RADIUS + x, i - RADIUS + y);
+        float4 color = getColor(i - RADIUS + x, y);
 
-            int index_x = j;
-            int index_y = i;
-            if (i > RADIUS) {
-                index_y = 2 * RADIUS - i;
-            }
-            if (j > RADIUS) {
-                index_x = 2 * RADIUS - j;
-            }
-
-            if (index_x < index_y) {
-                int tmp = index_x;
-                index_x = index_y;
-                index_y = tmp;
-            }
-
-            float weight = stencil.Load(int3(index_x, index_y, 0)).x;
-            total_alpha += color.w * weight;
+        int index_x = i;
+        if (i > RADIUS) {
+            index_x = 2 * RADIUS - i;
         }
+
+        float weight = stencil.Load(int2(index_x, 0)).x;
+        tmp_alpha += color.w * weight;
+    }
+
+    float total_alpha = 0;
+    for (int j = 0; j < DIAMETER; ++j) {
+        int index_y = j;
+        if (j > RADIUS) {
+            index_y = 2 * RADIUS - j;
+        }
+
+        float weight = stencil.Load(int2(index_y, 0)).x;
+        total_alpha += tmp_alpha * weight;
     }
 
     return float4(0, 0, 0, total_alpha); // r g b a

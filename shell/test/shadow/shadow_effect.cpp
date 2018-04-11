@@ -12,10 +12,17 @@
 
 
 namespace {
+
+    float getWeight(float x, float sigma) {
+        float exponent = -std::pow(x, 2) / (2 * std::pow(sigma, 2));
+        return std::exp(exponent) / (std::sqrt(2 * 3.1416f) * sigma);
+    }
+
     float getWeight(float x, float y, float sigma) {
         float exponent = -(std::pow(x, 2) + std::pow(y, 2)) / (2 * std::pow(sigma, 2));
-        return 1 / (2 * 3.14f * std::pow(sigma, 2)) * std::exp(exponent);
+        return std::exp(exponent) / (2 * 3.1416f * std::pow(sigma, 2));
     }
+
 }
 
 
@@ -32,7 +39,46 @@ namespace shell {
         offset_({ 0 }) {}
 
 
-    HRESULT ShadowEffect::CreateGaussStencil(ID2D1EffectContext* ec) {
+    HRESULT ShadowEffect::CreateGaussStencil1D(ID2D1EffectContext* ec) {
+        UINT32 extent[1] = { RADIUS + 1 };
+        D2D1_EXTEND_MODE mode[1] = { D2D1_EXTEND_MODE_CLAMP };
+
+        D2D1_RESOURCE_TEXTURE_PROPERTIES props;
+        props.extents = extent;
+        props.dimensions = 1;
+        props.bufferPrecision = D2D1_BUFFER_PRECISION_32BPC_FLOAT;
+        props.channelDepth = D2D1_CHANNEL_DEPTH_1;
+        props.filter = D2D1_FILTER_MIN_MAG_MIP_POINT;
+        props.extendModes = mode;
+
+        float total_weight = 0;
+        float weight_matrix[RADIUS + 1];
+        for (int i = 0; i < RADIUS + 1; ++i) {
+            float w = getWeight(RADIUS - i, ELEVATION);
+            weight_matrix[i] = w;
+            if (i != RADIUS) {
+                total_weight += w;
+            }
+        }
+
+        total_weight *= 2;
+        total_weight += weight_matrix[RADIUS];
+        for (int i = 0; i < RADIUS + 1; ++i) {
+            weight_matrix[i] /= total_weight;
+        }
+
+        HRESULT hr = ec->CreateResourceTexture(
+            nullptr, &props, reinterpret_cast<BYTE*>(weight_matrix),
+            nullptr, sizeof(float) * (RADIUS + 1), &texture_);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            return hr;
+        }
+
+        return S_OK;
+    }
+
+    HRESULT ShadowEffect::CreateGaussStencil2D(ID2D1EffectContext* ec) {
         UINT32 extent[2] = { RADIUS + 1, RADIUS + 1 };
         D2D1_EXTEND_MODE mode[2] = { D2D1_EXTEND_MODE_CLAMP, D2D1_EXTEND_MODE_CLAMP };
 
@@ -105,7 +151,7 @@ namespace shell {
             return hr;
         }
 
-        CreateGaussStencil(pContextInternal);
+        CreateGaussStencil1D(pContextInternal);
 
         transform_ = new ShadowTransform();
         // Connects the effect's input to the transform's input, and connects

@@ -207,9 +207,6 @@
     <ClCompile Include="views\text_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
-    <ClCompile Include="views\text_view2.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="views\view.cpp">
       <Filter>views</Filter>
     </ClCompile>
@@ -527,9 +524,6 @@
       <Filter>views</Filter>
     </ClInclude>
     <ClInclude Include="views\text_view.h">
-      <Filter>views</Filter>
-    </ClInclude>
-    <ClInclude Include="views\text_view2.h">
       <Filter>views</Filter>
     </ClInclude>
     <ClInclude Include="views\view.h">

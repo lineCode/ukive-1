@@ -5,7 +5,7 @@
 
 namespace ukive {
 
-    Editable::Editable(const std::wstring& text)
+    Editable::Editable(const string16& text)
         :text_(text),
         sel_beg_(0),
         sel_end_(0) {
@@ -70,11 +70,11 @@ namespace ukive {
     }
 
 
-    void Editable::append(const std::wstring& text) {
+    void Editable::append(const string16& text) {
         insert(text, text_.length());
     }
 
-    void Editable::insert(const std::wstring& text, uint32_t position) {
+    void Editable::insert(const string16& text, uint32_t position) {
         if (!text.empty()) {
             text_.insert(position, text);
             notifyTextChanged(position, position, position + text.length());
@@ -87,7 +87,7 @@ namespace ukive {
         }
     }
 
-    void Editable::replace(const std::wstring& text, uint32_t start, uint32_t length) {
+    void Editable::replace(const string16& text, uint32_t start, uint32_t length) {
         text_.replace(start, length, text);
         notifyTextChanged(start, start + 1, start + text.length() - length + 1);
     }
@@ -115,24 +115,24 @@ namespace ukive {
     }
 
 
-    void Editable::replace(std::wstring find, std::wstring replacement) {
+    void Editable::replace(const string16& find, const string16& replacement) {
         size_t first = text_.find(find);
-        if (first != std::wstring::npos) {
+        if (first != string16::npos) {
             text_.replace(first, find.length(), replacement);
             notifyTextChanged(first, first + 1, first + replacement.length() - find.length() + 1);
         }
     }
 
-    void Editable::replaceAll(std::wstring find, std::wstring replacement) {
+    void Editable::replaceAll(const string16& find, const string16& replacement) {
         size_t first = text_.find(find);
-        while (first != std::wstring::npos) {
+        while (first != string16::npos) {
             text_.replace(first, find.length(), replacement);
             first = text_.find(find, first + replacement.length());
         }
     }
 
 
-    void Editable::insert(const std::wstring& text) {
+    void Editable::insert(const string16& text) {
         uint32_t oldStart = sel_beg_;
         uint32_t oldEnd = sel_end_;
 
@@ -151,7 +151,7 @@ namespace ukive {
         replace(L"");
     }
 
-    void Editable::replace(const std::wstring& text) {
+    void Editable::replace(const string16& text) {
         uint32_t oldStart = sel_beg_;
         uint32_t oldEnd = sel_end_;
 
@@ -192,7 +192,7 @@ namespace ukive {
         if (end > text_.length()) end = text_.length();
 
         if (start > end) {
-            uint32_t tmp = start;
+            auto tmp = start;
             start = end;
             end = tmp;
         }
@@ -219,7 +219,7 @@ namespace ukive {
         return sel_beg_ != sel_end_;
     }
 
-    std::wstring Editable::getSelection() {
+    string16 Editable::getSelection() {
         if (sel_beg_ == sel_end_) {
             return L"";
         }
@@ -232,7 +232,7 @@ namespace ukive {
         return text_.at(pos);
     }
 
-    std::wstring Editable::toString() {
+    string16 Editable::toString() {
         return text_;
     }
 
@@ -260,7 +260,7 @@ namespace ukive {
         }
     }
 
-    Span* Editable::getSpan(std::size_t index) {
+    Span* Editable::getSpan(size_t index) {
         return spans_.at(index).get();
     }
 

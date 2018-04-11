@@ -8,22 +8,19 @@
 
 namespace ukive {
 
-    class AnimationManager
-    {
+    class AnimationManager {
     public:
-        static IUIAnimationTransitionLibrary *sTransitionLibrary;
-        static IUIAnimationTransitionFactory *sTransitionFactory;
+        static IUIAnimationTransitionLibrary* sTransitionLibrary;
+        static IUIAnimationTransitionFactory* sTransitionFactory;
 
-        class OnStateChangedListener
-        {
+        class OnStateChangedListener {
         public:
             virtual void onStateChanged(
                 UI_ANIMATION_MANAGER_STATUS newStatus,
                 UI_ANIMATION_MANAGER_STATUS previousStatus) = 0;
         };
 
-        class OnTimerEventListener
-        {
+        class OnTimerEventListener {
         public:
             virtual void onPreUpdate() = 0;
             virtual void onPostUpdate() = 0;
@@ -48,16 +45,16 @@ namespace ukive {
 
         void connectTimer(bool enable);
 
-        void setTimerEventListener(OnTimerEventListener *l);
-        void setOnStateChangedListener(OnStateChangedListener *l);
+        void setTimerEventListener(OnTimerEventListener* l);
+        void setOnStateChangedListener(OnStateChangedListener* l);
 
-        IUIAnimationManager *getAnimationManager();
-        IUIAnimationTimer *getAnimationTimer();
-        IUIAnimationTransitionLibrary *getTransitionLibrary();
+        IUIAnimationManager* getAnimationManager();
+        IUIAnimationTimer* getAnimationTimer();
+        IUIAnimationTransitionLibrary* getTransitionLibrary();
 
     private:
-        ComPtr<IUIAnimationManager> mAnimationManager;
-        ComPtr<IUIAnimationTimer> mAnimationTimer;
+        ComPtr<IUIAnimationTimer> anim_timer_;
+        ComPtr<IUIAnimationManager> anim_mgr_;
     };
 
 }

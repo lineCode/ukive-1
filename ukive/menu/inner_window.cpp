@@ -121,7 +121,7 @@ namespace ukive {
 
 
     void InnerWindow::show(int x, int y) {
-        if (content_view_ == nullptr || is_showing_) {
+        if (!content_view_ || is_showing_) {
             return;
         }
 

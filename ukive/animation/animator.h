@@ -19,25 +19,25 @@ namespace ukive {
         public:
             virtual void onValueChanged(
                 unsigned int varIndex,
-                IUIAnimationStoryboard *storyboard,
-                IUIAnimationVariable *variable,
+                IUIAnimationStoryboard* storyboard,
+                IUIAnimationVariable* variable,
                 double newValue, double previousValue) = 0;
             virtual void onIntegerValueChanged(
                 unsigned int varIndex,
-                IUIAnimationStoryboard *storyboard,
-                IUIAnimationVariable *variable,
+                IUIAnimationStoryboard* storyboard,
+                IUIAnimationVariable* variable,
                 int newValue, int previousValue) = 0;
         };
 
         class OnAnimatorListener {
         public:
-            virtual void onAnimationStart(Animator *animator) = 0;
-            virtual void onAnimationEnd(Animator *animator) = 0;
-            virtual void onAnimationCancel(Animator *animator) = 0;
+            virtual void onAnimationStart(Animator* animator) = 0;
+            virtual void onAnimationEnd(Animator* animator) = 0;
+            virtual void onAnimationCancel(Animator* animator) = 0;
         };
 
     public:
-        Animator(AnimationManager *mgr);
+        Animator(AnimationManager* mgr);
         ~Animator();
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace ukive {
         /// </summary>
         void startTransition(unsigned int varIndex, std::shared_ptr<Transition> transition);
 
-        void setOnStateChangedListener(OnAnimatorListener *l);
+        void setOnStateChangedListener(OnAnimatorListener* l);
         void setOnValueChangedListener(
-            unsigned int varIndex, OnValueChangedListener *l);
+            unsigned int varIndex, OnValueChangedListener* l);
 
         double getValue(unsigned int varIndex);
         int getIntValue(unsigned int varIndex);
@@ -103,17 +103,17 @@ namespace ukive {
             unsigned int varIndex, std::shared_ptr<Transition> transition,
             UI_ANIMATION_KEYFRAME startKey, UI_ANIMATION_KEYFRAME endKey);
         bool addKey(
-            UI_ANIMATION_KEYFRAME existed, double offset, UI_ANIMATION_KEYFRAME *newKey);
+            UI_ANIMATION_KEYFRAME existed, double offset, UI_ANIMATION_KEYFRAME* newKey);
         bool addKey(
-            std::shared_ptr<Transition> transition, UI_ANIMATION_KEYFRAME *newKey);
+            std::shared_ptr<Transition> transition, UI_ANIMATION_KEYFRAME* newKey);
 
         bool hasVariable(unsigned int varIndex);
         bool removeVariable(unsigned int varIndex);
 
     private:
-        AnimationManager* mAnimationManager;
+        AnimationManager* anim_mgr_;
         ComPtr<IUIAnimationStoryboard> mStoryboard;
-        AnimatorStateHandler *mAnimatorStateListener;
+        AnimatorStateHandler* mAnimatorStateListener;
 
         std::map<unsigned int, ComPtr<IUIAnimationVariable>> mVariableList;
     };

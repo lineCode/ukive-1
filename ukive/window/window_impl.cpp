@@ -25,6 +25,9 @@ namespace ukive {
     const int kDefaultWindowStyle = WS_OVERLAPPEDWINDOW;
     const int kDefaultWindowExStyle = WS_EX_APPWINDOW;
 
+    const int WM_NCDRAWCLASSIC1 = 0xAE;
+    const int WM_NCDRAWCLASSIC2 = 0xAF;
+
 
     WindowImpl::WindowImpl(Window* win)
         :delegate_(win),
@@ -41,6 +44,7 @@ namespace ukive {
         cursor_(Cursor::ARROW),
         is_created_(false),
         is_showing_(false),
+        is_translucent_(false),
         is_enable_mouse_track_(true) {}
 
     WindowImpl::~WindowImpl() {}
@@ -54,6 +58,10 @@ namespace ukive {
 
         int win_style = kDefaultWindowStyle;
         int win_ex_style = kDefaultWindowExStyle;
+
+        if (is_translucent_) {
+            win_ex_style |= WS_EX_LAYERED;
+        }
 
         onPreCreate(&info, &win_style, &win_ex_style);
 
@@ -168,6 +176,38 @@ namespace ukive {
         ::SetCursor(native_cursor);
     }
 
+    void WindowImpl::setTranslucent(bool translucent) {
+        if (is_created_) {
+            ::SetLastError(0);
+            auto ex_style = ::GetWindowLongPtr(hWnd_, GWL_EXSTYLE);
+            if (ex_style == 0) {
+                auto err_no = ::GetLastError();
+                if (err_no != 0) {
+                    LOG(Log::WARNING) << "Failed to get window style: " << err_no;
+                    return;
+                }
+            }
+
+            if (translucent) {
+                ex_style |= WS_EX_LAYERED;
+            } else {
+                ex_style &= ~WS_EX_LAYERED;
+            }
+
+            ::SetLastError(0);
+            auto result = ::SetWindowLongPtr(hWnd_, GWL_EXSTYLE, ex_style);
+            if (result == 0) {
+                auto err_no = ::GetLastError();
+                if (err_no != 0) {
+                    LOG(Log::WARNING) << "Failed to set window style: " << err_no;
+                    return;
+                }
+            }
+        }
+
+        is_translucent_ = translucent;
+    }
+
     string16 WindowImpl::getTitle() {
         return title_;
     }
@@ -250,6 +290,10 @@ namespace ukive {
             && cursorPos.x <= clientInScreenRect.right
             && cursorPos.y >= clientInScreenRect.top
             && cursorPos.y <= clientInScreenRect.bottom);
+    }
+
+    bool WindowImpl::isTranslucent() {
+        return is_translucent_;
     }
 
     void WindowImpl::setMouseCaptureRaw() {
@@ -373,6 +417,12 @@ namespace ukive {
         delegate_->onDpiChanged(dpi_x, dpi_y);
     }
 
+    void WindowImpl::onStyleChanged(bool normal, bool ext, const STYLESTRUCT* ss) {
+        if (ext) {
+            int i = 0;
+        }
+    }
+
     bool WindowImpl::onDataCopy(unsigned int id, unsigned int size, void* data) {
         return delegate_->onDataCopy(id, size, data);
     }
@@ -399,8 +449,8 @@ namespace ukive {
             return TRUE;
         }
 
-        case 0xAE:
-        case 0xAF: {
+        case WM_NCDRAWCLASSIC1:
+        case WM_NCDRAWCLASSIC2: {
             nc_result = non_client_frame_->onInterceptDrawClassic(wParam, lParam, &nc_handled);
             if (nc_handled) {
                 return nc_result;
@@ -503,6 +553,13 @@ namespace ukive {
                 prcNewWindow->bottom - prcNewWindow->top,
                 SWP_NOZORDER | SWP_NOACTIVATE);
             onDpiChanged(new_dpi_x, new_dpi_y);
+            break;
+        }
+
+        case WM_STYLECHANGED: {
+            onStyleChanged(
+                wParam & GWL_STYLE, wParam & GWL_EXSTYLE,
+                reinterpret_cast<const STYLESTRUCT*>(lParam));
             break;
         }
 

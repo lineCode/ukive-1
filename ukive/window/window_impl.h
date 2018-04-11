@@ -34,6 +34,7 @@ namespace ukive {
         void setTitle(const string16& title);
         void setBounds(int x, int y, int width, int height);
         void setCurrentCursor(Cursor cursor);
+        void setTranslucent(bool translucent);
 
         string16 getTitle();
         int getX();
@@ -49,6 +50,7 @@ namespace ukive {
         bool isCreated();
         bool isShowing();
         bool isCursorInClient();
+        bool isTranslucent();
 
         void setMouseCaptureRaw();
         void releaseMouseCaptureRaw();
@@ -84,6 +86,7 @@ namespace ukive {
         void onDestroy();
         bool onInputEvent(InputEvent* e);
         void onDpiChanged(int dpi_x, int dpi_y);
+        void onStyleChanged(bool normal, bool ext, const STYLESTRUCT* ss);
         bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
         Window* delegate_;
@@ -100,6 +103,7 @@ namespace ukive {
 
         bool is_created_;
         bool is_showing_;
+        bool is_translucent_;
         bool is_enable_mouse_track_;
     };
 

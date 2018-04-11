@@ -24,7 +24,7 @@ namespace ukive {
 
     int Application::view_uid_ = 10000;
     bool Application::vsync_enabled_ = true;
-    Application *Application::instance_ = nullptr;
+    Application* Application::instance_ = nullptr;
 
 
     Application::Application() {
@@ -33,14 +33,14 @@ namespace ukive {
         instance_ = this;
     }
 
-    Application::Application(wchar_t *cl) {
+    Application::Application(wchar_t* cl) {
         parseCommandLine(cl);
         initApplication();
 
         instance_ = this;
     }
 
-    Application::Application(int argc, wchar_t *argv[]) {
+    Application::Application(int argc, wchar_t* argv[]) {
         for (int i = 0; i < argc; ++i)
             command_list_.push_back(argv[i]);
         initApplication();
@@ -97,7 +97,7 @@ namespace ukive {
         ::CoUninitialize();
     }
 
-    void Application::parseCommandLine(wchar_t *cmdLine) {
+    void Application::parseCommandLine(wchar_t* cmdLine) {
         if (cmdLine == nullptr) {
             return;
         }
@@ -179,11 +179,11 @@ namespace ukive {
         return ::GetModuleHandle(NULL);
     }
 
-    WICManager *Application::getWICManager() {
+    WICManager* Application::getWICManager() {
         return instance_->wic_manager_.get();
     }
 
-    TsfManager *Application::getTsfManager() {
+    TsfManager* Application::getTsfManager() {
         return instance_->tsf_manager_.get();
     }
 

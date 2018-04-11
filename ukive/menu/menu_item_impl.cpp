@@ -6,17 +6,16 @@
 
 namespace ukive {
 
-    MenuItemImpl::MenuItemImpl(Window *w, int menuId, std::int32_t order)
+    MenuItemImpl::MenuItemImpl(Window* w, int menuId, int32_t order)
         :TextView(w),
-        mOrder(order),
-        mMenuId(menuId),
-        mIsVisible(true) {
+        order_(order),
+        menu_id_(menuId),
+        is_visible_(true) {
         initMenuItem();
     }
 
 
-    void MenuItemImpl::initMenuItem()
-    {
+    void MenuItemImpl::initMenuItem() {
         setTextSize(13);
         setIsEditable(false);
         setIsSelectable(false);
@@ -27,48 +26,40 @@ namespace ukive {
     }
 
 
-    void MenuItemImpl::setItemTitle(std::wstring title)
-    {
-        mTitle = title;
+    void MenuItemImpl::setItemTitle(const string16& title) {
+        title_ = title;
         setText(title);
     }
 
-    void MenuItemImpl::setItemVisible(bool visible)
-    {
-        if (mIsVisible == visible) return;
+    void MenuItemImpl::setItemVisible(bool visible) {
+        if (is_visible_ == visible) return;
 
-        mIsVisible = visible;
+        is_visible_ = visible;
         setVisibility(visible ? View::VISIBLE : View::VANISHED);
     }
 
-    void MenuItemImpl::setItemEnabled(bool enable)
-    {
+    void MenuItemImpl::setItemEnabled(bool enable) {
         setEnabled(enable);
     }
 
 
-    int MenuItemImpl::getItemId()
-    {
-        return mMenuId;
+    int MenuItemImpl::getItemId() {
+        return menu_id_;
     }
 
-    std::int32_t MenuItemImpl::getItemOrder()
-    {
-        return mOrder;
+    int32_t MenuItemImpl::getItemOrder() {
+        return order_;
     }
 
-    std::wstring MenuItemImpl::getItemTitle()
-    {
+    string16 MenuItemImpl::getItemTitle() {
         return getText();
     }
 
-    bool MenuItemImpl::isItemVisible()
-    {
-        return mIsVisible;
+    bool MenuItemImpl::isItemVisible() {
+        return is_visible_;
     }
 
-    bool MenuItemImpl::isItemEnabled()
-    {
+    bool MenuItemImpl::isItemEnabled() {
         return isEnabled();
     }
 

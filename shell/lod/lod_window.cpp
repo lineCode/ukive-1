@@ -55,7 +55,6 @@ namespace shell {
     void LodWindow::onPreCreate(
         ukive::ClassInfo* info,
         int* win_style, int* win_ex_style) {
-        //*win_ex_style |= WS_EX_LAYERED;
     }
 
     void LodWindow::onCreate() {

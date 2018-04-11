@@ -18,7 +18,7 @@ namespace ukive {
         TextBlink(View* v);
         ~TextBlink();
 
-        void draw(Canvas *canvas);
+        void draw(Canvas* canvas);
 
         void show();
         void hide();

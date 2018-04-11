@@ -6,12 +6,7 @@
 
 namespace ukive {
 
-    class AnimationManagerEventHandler : public IUIAnimationManagerEventHandler
-    {
-    private:
-        ULONG ref_count_;
-        AnimationManager::OnStateChangedListener *listener_;
-
+    class AnimationManagerEventHandler : public IUIAnimationManagerEventHandler {
     public:
         AnimationManagerEventHandler(
             AnimationManager::OnStateChangedListener *listener);
@@ -24,6 +19,10 @@ namespace ukive {
         IFACEMETHODIMP_(ULONG) AddRef();
         IFACEMETHODIMP_(ULONG) Release();
         IFACEMETHODIMP QueryInterface(_In_ REFIID riid, _Outptr_ void** ppOutput);
+
+    private:
+        ULONG ref_count_;
+        AnimationManager::OnStateChangedListener *listener_;
     };
 
 }

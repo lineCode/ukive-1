@@ -25,7 +25,7 @@ namespace ukive {
             CLSID_UIAnimationManager,
             NULL,
             CLSCTX_INPROC_SERVER,
-            IID_PPV_ARGS(&mAnimationManager));
+            IID_PPV_ARGS(&anim_mgr_));
         if (FAILED(hr)) {
             return hr;
         }
@@ -34,7 +34,7 @@ namespace ukive {
             CLSID_UIAnimationTimer,
             NULL,
             CLSCTX_INPROC_SERVER,
-            IID_PPV_ARGS(&mAnimationTimer));
+            IID_PPV_ARGS(&anim_timer_));
         if (FAILED(hr)) {
             return hr;
         }
@@ -76,34 +76,34 @@ namespace ukive {
 
 
     void AnimationManager::pause() {
-        mAnimationManager->Pause();
+        anim_mgr_->Pause();
     }
 
     void AnimationManager::resume() {
-        mAnimationManager->Resume();
+        anim_mgr_->Resume();
     }
 
     void AnimationManager::finish(double second) {
-        mAnimationManager->FinishAllStoryboards(second);
+        anim_mgr_->FinishAllStoryboards(second);
     }
 
     void AnimationManager::abandon() {
-        mAnimationManager->AbandonAllStoryboards();
+        anim_mgr_->AbandonAllStoryboards();
     }
 
     bool AnimationManager::isBusy() {
         UI_ANIMATION_MANAGER_STATUS status;
-        HRESULT hr = mAnimationManager->GetStatus(&status);
+        HRESULT hr = anim_mgr_->GetStatus(&status);
 
         return (status == UI_ANIMATION_MANAGER_BUSY);
     }
 
     bool AnimationManager::update() {
         UI_ANIMATION_SECONDS secondsNow;
-        HRESULT hr = mAnimationTimer->GetTime(&secondsNow);
+        HRESULT hr = anim_timer_->GetTime(&secondsNow);
 
         if (SUCCEEDED(hr)) {
-            hr = mAnimationManager->Update(secondsNow);
+            hr = anim_mgr_->Update(secondsNow);
         }
 
         return SUCCEEDED(hr);
@@ -114,16 +114,15 @@ namespace ukive {
         HRESULT hr;
         if (enable) {
             IUIAnimationTimerUpdateHandler *pTimerUpdateHandler;
-            hr = mAnimationManager->QueryInterface(IID_PPV_ARGS(&pTimerUpdateHandler));
+            hr = anim_mgr_->QueryInterface(IID_PPV_ARGS(&pTimerUpdateHandler));
             if (SUCCEEDED(hr)) {
-                hr = mAnimationTimer->SetTimerUpdateHandler(
+                hr = anim_timer_->SetTimerUpdateHandler(
                     pTimerUpdateHandler,
                     UI_ANIMATION_IDLE_BEHAVIOR_DISABLE);
                 pTimerUpdateHandler->Release();
             }
-        }
-        else {
-            hr = mAnimationTimer->SetTimerUpdateHandler(
+        } else {
+            hr = anim_timer_->SetTimerUpdateHandler(
                 0, UI_ANIMATION_IDLE_BEHAVIOR_DISABLE);
         }
     }
@@ -131,33 +130,31 @@ namespace ukive {
 
     void AnimationManager::setTimerEventListener(OnTimerEventListener *l) {
         if (l == nullptr) {
-            mAnimationTimer->SetTimerEventHandler(0);
-        }
-        else {
+            anim_timer_->SetTimerEventHandler(0);
+        } else {
             AnimationTimerHandler *handler = new AnimationTimerHandler(l);
-            mAnimationTimer->SetTimerEventHandler(handler);
+            anim_timer_->SetTimerEventHandler(handler);
             handler->Release();
         }
     }
 
     void AnimationManager::setOnStateChangedListener(OnStateChangedListener *l) {
         if (l == nullptr) {
-            mAnimationManager->SetManagerEventHandler(0);
-        }
-        else {
+            anim_mgr_->SetManagerEventHandler(0);
+        } else {
             AnimationManagerEventHandler *handler = new AnimationManagerEventHandler(l);
-            mAnimationManager->SetManagerEventHandler(handler);
+            anim_mgr_->SetManagerEventHandler(handler);
             handler->Release();
         }
     }
 
 
     IUIAnimationManager *AnimationManager::getAnimationManager() {
-        return mAnimationManager.get();
+        return anim_mgr_.get();
     }
 
     IUIAnimationTimer *AnimationManager::getAnimationTimer() {
-        return mAnimationTimer.get();
+        return anim_timer_.get();
     }
 
     IUIAnimationTransitionLibrary *AnimationManager::getTransitionLibrary() {

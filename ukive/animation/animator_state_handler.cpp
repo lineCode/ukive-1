@@ -89,7 +89,7 @@ namespace ukive {
         } else if (__uuidof(IUnknown) == riid) {
             *ppOutput = this;
         } else {
-            *ppOutput = NULL;
+            *ppOutput = nullptr;
             return E_NOINTERFACE;
         }
 

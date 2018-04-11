@@ -4,85 +4,77 @@
 namespace ukive {
 
     AnimationVariableChangeHandler::AnimationVariableChangeHandler(
-        Animator::OnValueChangedListener *listener, unsigned int varIndex)
-    {
-        ref_count_ = 1;
-        mVarIndex = varIndex;
-        listener_ = listener;
+        Animator::OnValueChangedListener* listener, unsigned int varIndex)
+        :ref_count_(1),
+        var_index_(varIndex),
+        listener_(listener) {
     }
 
 
-    AnimationVariableChangeHandler::~AnimationVariableChangeHandler()
-    {
+    AnimationVariableChangeHandler::~AnimationVariableChangeHandler() {
     }
 
 
     HRESULT STDMETHODCALLTYPE AnimationVariableChangeHandler::OnValueChanged(
-        _In_  IUIAnimationStoryboard *storyboard,
-        _In_  IUIAnimationVariable *variable,
+        _In_  IUIAnimationStoryboard* storyboard,
+        _In_  IUIAnimationVariable* variable,
         _In_  DOUBLE newValue,
-        _In_  DOUBLE previousValue)
-    {
-        if (listener_)
-            listener_->onValueChanged(mVarIndex, storyboard, variable, newValue, previousValue);
+        _In_  DOUBLE previousValue) {
+
+        if (listener_) {
+            listener_->onValueChanged(var_index_, storyboard, variable, newValue, previousValue);
+        }
 
         return S_OK;
     }
 
     HRESULT STDMETHODCALLTYPE AnimationVariableChangeHandler::OnIntegerValueChanged(
-        _In_  IUIAnimationStoryboard *storyboard,
-        _In_  IUIAnimationVariable *variable,
+        _In_  IUIAnimationStoryboard* storyboard,
+        _In_  IUIAnimationVariable* variable,
         _In_  INT32 newValue,
-        _In_  INT32 previousValue)
-    {
-        if (listener_)
-            listener_->onIntegerValueChanged(mVarIndex, storyboard, variable, newValue, previousValue);
+        _In_  INT32 previousValue) {
+
+        if (listener_) {
+            listener_->onIntegerValueChanged(var_index_, storyboard, variable, newValue, previousValue);
+        }
 
         return S_OK;
     }
 
 
-    IFACEMETHODIMP_(ULONG) AnimationVariableChangeHandler::AddRef()
-    {
+    IFACEMETHODIMP_(ULONG) AnimationVariableChangeHandler::AddRef() {
         return InterlockedIncrement(&ref_count_);
     }
 
-    IFACEMETHODIMP_(ULONG) AnimationVariableChangeHandler::Release()
-    {
-        unsigned long newCount = InterlockedDecrement(&ref_count_);
-
-        if (newCount == 0)
-        {
+    IFACEMETHODIMP_(ULONG) AnimationVariableChangeHandler::Release() {
+        auto nc = InterlockedDecrement(&ref_count_);
+        if (nc == 0) {
             delete this;
-            return 0;
         }
 
-        return newCount;
+        return nc;
     }
 
     IFACEMETHODIMP AnimationVariableChangeHandler::QueryInterface(
-        _In_ REFIID riid, _Outptr_ void** ppOutput)
-    {
-        if (__uuidof(IUIAnimationVariableChangeHandler) == riid)
-        {
+        _In_ REFIID riid, _Outptr_ void** ppOutput) {
+
+        if (ppOutput == nullptr) {
+            return E_POINTER;
+        }
+
+        if (__uuidof(IUIAnimationVariableChangeHandler) == riid) {
             *ppOutput = this;
         }
-        if (__uuidof(IUIAnimationVariableIntegerChangeHandler) == riid)
-        {
+        if (__uuidof(IUIAnimationVariableIntegerChangeHandler) == riid) {
             *ppOutput = this;
-        }
-        else if (__uuidof(IUnknown) == riid)
-        {
+        } else if (__uuidof(IUnknown) == riid) {
             *ppOutput = this;
-        }
-        else
-        {
-            *ppOutput = 0;
-            return E_FAIL;
+        } else {
+            *ppOutput = nullptr;
+            return E_NOINTERFACE;
         }
 
         AddRef();
-
         return S_OK;
     }
 

@@ -8,7 +8,7 @@
 namespace ukive {
 
     std::mutex MessageLooper::mLooperSync;
-    MessageLooper *MessageLooper::mMainLooper = nullptr;
+    MessageLooper* MessageLooper::mMainLooper = nullptr;
     thread_local std::shared_ptr<MessageLooper> MessageLooper::looper_;
 
 
@@ -25,7 +25,7 @@ namespace ukive {
         mMsgQueue->quit();
     }
 
-    MessageQueue *MessageLooper::getQueue() {
+    MessageQueue* MessageLooper::getQueue() {
         return mMsgQueue;
     }
 
@@ -50,17 +50,17 @@ namespace ukive {
     }
 
     void MessageLooper::loop() {
-        MessageLooper *looper = myLooper();
+        MessageLooper* looper = myLooper();
         if (!looper)
             throw std::logic_error(
                 "MessageLooper-loop(): No Looper; Looper.prepare() wasn't called on this thread.");
 
-        MessageQueue *queue = looper->getQueue();
+        MessageQueue* queue = looper->getQueue();
 
         queue->addBarrier();
 
         while (true) {
-            Message *msg = queue->dequeue();
+            Message* msg = queue->dequeue();
             if (!msg)
                 break;
 
@@ -71,15 +71,15 @@ namespace ukive {
         queue->removeBarrier();
     }
 
-    MessageQueue *MessageLooper::myQueue() {
+    MessageQueue* MessageLooper::myQueue() {
         return myLooper()->getQueue();
     }
 
-    MessageLooper *MessageLooper::myLooper() {
+    MessageLooper* MessageLooper::myLooper() {
         return looper_.get();
     }
 
-    MessageLooper *MessageLooper::getMainLooper() {
+    MessageLooper* MessageLooper::getMainLooper() {
         std::lock_guard<std::mutex> lk(mLooperSync);
         return mMainLooper;
     }
@@ -89,7 +89,7 @@ namespace ukive {
         mMsgQueue->addBarrier();
 
         while (true) {
-            Message *msg = mMsgQueue->dequeue();
+            Message* msg = mMsgQueue->dequeue();
             if (msg == 0)
                 break;
 

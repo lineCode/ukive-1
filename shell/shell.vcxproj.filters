@@ -73,15 +73,6 @@
     <ClCompile Include="test\text\text_window.cpp">
       <Filter>test\text</Filter>
     </ClCompile>
-    <ClCompile Include="test\animation\wallpaper_effect.cpp">
-      <Filter>test\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="test\animation\wallpaper_transform.cpp">
-      <Filter>test\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="test\animation\wallpaper_window.cpp">
-      <Filter>test\animation</Filter>
-    </ClCompile>
     <ClCompile Include="lod\terrain_configure.cpp">
       <Filter>lod</Filter>
     </ClCompile>
@@ -117,9 +108,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="DeclareDPIAware.manifest" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="resources\resource.h">
       <Filter>resources</Filter>
     </ClInclude>
@@ -149,15 +137,6 @@
     </ClInclude>
     <ClInclude Include="test\text\text_window.h">
       <Filter>test\text</Filter>
-    </ClInclude>
-    <ClInclude Include="test\animation\wallpaper_effect.h">
-      <Filter>test\animation</Filter>
-    </ClInclude>
-    <ClInclude Include="test\animation\wallpaper_transform.h">
-      <Filter>test\animation</Filter>
-    </ClInclude>
-    <ClInclude Include="test\animation\wallpaper_window.h">
-      <Filter>test\animation</Filter>
     </ClInclude>
     <ClInclude Include="lod\terrain_configure.h">
       <Filter>lod</Filter>
@@ -207,9 +186,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="test\animation\wallpaper_props.xml">
-      <Filter>test\animation</Filter>
-    </Xml>
     <Xml Include="test\shadow\shadow_props.xml">
       <Filter>test\shadow</Filter>
     </Xml>
@@ -233,11 +209,11 @@
     <FxCompile Include="hlsl\terrain_vertex_shader.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
-    <FxCompile Include="hlsl\wallpaper_pixel_shader.hlsl">
-      <Filter>hlsl</Filter>
-    </FxCompile>
     <FxCompile Include="hlsl\shadow_pixel_shader.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="application.manifest" />
   </ItemGroup>
 </Project>

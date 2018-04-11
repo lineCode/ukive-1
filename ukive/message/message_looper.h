@@ -16,24 +16,24 @@ namespace ukive {
         ~MessageLooper();
 
         void quit();
-        MessageQueue *getQueue();
+        MessageQueue* getQueue();
 
         static void prepare();
         static void prepareMainLooper();
         static void loop();
-        static MessageQueue *myQueue();
-        static MessageLooper *myLooper();
-        static MessageLooper *getMainLooper();
+        static MessageQueue* myQueue();
+        static MessageLooper* myLooper();
+        static MessageLooper* getMainLooper();
 
         void receiveMessage();
 
     private:
         MessageLooper();
 
-        MessageQueue *mMsgQueue;
+        MessageQueue* mMsgQueue;
 
         static std::mutex mLooperSync;
-        static MessageLooper *mMainLooper;
+        static MessageLooper* mMainLooper;
         static thread_local std::shared_ptr<MessageLooper> looper_;
     };
 

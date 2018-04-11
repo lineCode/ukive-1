@@ -11,9 +11,9 @@ namespace ukive {
     public:
         virtual ~MenuCallback() = default;
 
-        virtual void onCreateMenu(Menu *menu) = 0;
-        virtual void onPrepareMenu(Menu *menu) = 0;
-        virtual bool onMenuItemClicked(Menu *menu, MenuItem *item) = 0;
+        virtual void onCreateMenu(Menu* menu) = 0;
+        virtual void onPrepareMenu(Menu* menu) = 0;
+        virtual bool onMenuItemClicked(Menu* menu, MenuItem* item) = 0;
     };
 
 }

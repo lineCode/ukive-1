@@ -162,9 +162,6 @@
     <ClCompile Include="lod\terrain_configure.cpp" />
     <ClCompile Include="lod\terrain_scene.cpp" />
     <ClCompile Include="lod\lod_generator.cpp" />
-    <ClCompile Include="test\animation\wallpaper_effect.cpp" />
-    <ClCompile Include="test\animation\wallpaper_transform.cpp" />
-    <ClCompile Include="test\animation\wallpaper_window.cpp" />
     <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp" />
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
     <ClCompile Include="test\emulator\emulator_view.cpp" />
@@ -178,7 +175,7 @@
     <ClCompile Include="test\text\text_window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="DeclareDPIAware.manifest" />
+    <Manifest Include="application.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct3d\assist_configure.h" />
@@ -191,9 +188,6 @@
     <ClInclude Include="lod\terrain_scene.h" />
     <ClInclude Include="lod\lod_generator.h" />
     <ClInclude Include="resources\resource.h" />
-    <ClInclude Include="test\animation\wallpaper_effect.h" />
-    <ClInclude Include="test\animation\wallpaper_transform.h" />
-    <ClInclude Include="test\animation\wallpaper_window.h" />
     <ClInclude Include="test\bitmap_research\bitmap_dump_view.h" />
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
     <ClInclude Include="test\emulator\emulator_view.h" />
@@ -214,7 +208,6 @@
     <ResourceCompile Include="resources\shell.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="test\animation\wallpaper_props.xml" />
     <Xml Include="test\shadow\shadow_props.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -246,10 +239,6 @@
     </FxCompile>
     <FxCompile Include="hlsl\terrain_vertex_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="hlsl\wallpaper_pixel_shader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
     </FxCompile>
   </ItemGroup>

@@ -73,7 +73,8 @@ namespace shell {
         // 构造函数必须私有以保证其不被外界调用。
         ShadowEffect();
 
-        HRESULT CreateGaussStencil(ID2D1EffectContext* ec);
+        HRESULT CreateGaussStencil1D(ID2D1EffectContext* ec);
+        HRESULT CreateGaussStencil2D(ID2D1EffectContext* ec);
 
         ULONG ref_count_;
         ukive::ComPtr<ShadowTransform> transform_;

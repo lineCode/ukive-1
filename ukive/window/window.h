@@ -52,6 +52,7 @@ namespace ukive {
         void setCurrentCursor(Cursor cursor);
         void setContentView(View* content);
         void setBackgroundColor(Color color);
+        void setTranslucent(bool translucent);
         void setStartupWindow(bool enable);
 
         int getX();
@@ -71,6 +72,7 @@ namespace ukive {
 
         bool isShowing();
         bool isCursorInClient();
+        bool isTranslucent();
         bool isStartupWindow();
 
         void captureMouse(View* v);
@@ -128,20 +130,18 @@ namespace ukive {
         static const int SCHEDULE_RENDER = 0;
         static const int SCHEDULE_LAYOUT = 1;
 
-        class UpdateCycler : public Cycler
-        {
+        class UpdateCycler : public Cycler {
         public:
             UpdateCycler(Window* window)
                 :win_(window) {}
 
             void handleMessage(Message* msg) override;
         private:
-            Window*  win_;
+            Window* win_;
         };
 
         class AnimStateChangedListener
-            : public AnimationManager::OnStateChangedListener
-        {
+            : public AnimationManager::OnStateChangedListener {
         public:
             AnimStateChangedListener(Window* window)
                 :win_(window) {}
@@ -150,12 +150,11 @@ namespace ukive {
                 UI_ANIMATION_MANAGER_STATUS newStatus,
                 UI_ANIMATION_MANAGER_STATUS previousStatus) override;
         private:
-            Window*  win_;
+            Window* win_;
         };
 
         class AnimTimerEventListener
-            : public AnimationManager::OnTimerEventListener
-        {
+            : public AnimationManager::OnTimerEventListener {
         public:
             AnimTimerEventListener(Window* window)
                 :window_(window) {}
@@ -185,7 +184,7 @@ namespace ukive {
         std::shared_ptr<ContextMenu> context_menu_;
         std::shared_ptr<TextActionMode> text_action_mode_;
 
-        AnimationManager* mAnimationManager;
+        AnimationManager* anim_mgr_;
         AnimationManager::OnStateChangedListener* mStateChangedListener;
 
         AnimStateChangedListener* mAnimStateChangedListener;

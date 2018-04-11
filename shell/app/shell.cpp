@@ -37,6 +37,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     lod_window->setTitle(L"Test");
     lod_window->setWidth(ukive::Application::dpToPx(600));
     lod_window->setHeight(ukive::Application::dpToPx(500));
+    //lod_window->setTranslucent(true);
     lod_window->center();
     lod_window->show();
 

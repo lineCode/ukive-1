@@ -69,7 +69,7 @@ namespace shell {
     void ShadowWindow::onDrawCanvas(ukive::Canvas *canvas) {
         Window::onDrawCanvas(canvas);
 
-        /*auto bounds = ce_button_->getBounds();
+        auto bounds = ce_button_->getBounds();
         effect_->SetValue(
             SHADOW_EFFECT_PROP_BOUNDS,
             D2D1::Vector4F(bounds.left, bounds.top, bounds.right, bounds.bottom));
@@ -81,9 +81,9 @@ namespace shell {
         effect_->SetValue(
             SHADOW_EFFECT_PROP_ELEVATION, 16.f);
         effect_->SetValue(
-            SHADOW_EFFECT_PROP_CORNER_RADIUS, dpToPx(2.f));*/
+            SHADOW_EFFECT_PROP_CORNER_RADIUS, dpToPx(2.f));
 
-       //getRenderer()->getD2DDeviceContext()->DrawImage(effect_.get());
+       getRenderer()->getD2DDeviceContext()->DrawImage(effect_.get());
     }
 
     void ShadowWindow::onDestroy() {

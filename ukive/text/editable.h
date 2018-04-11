@@ -33,23 +33,23 @@ namespace ukive {
                 Span* span, SpanChange action) = 0;
         };
 
-        Editable(const std::wstring& text);
+        Editable(const string16& text);
         ~Editable();
 
         uint32_t length();
 
-        void append(const std::wstring& text);
-        void insert(const std::wstring& text, uint32_t position);
+        void append(const string16& text);
+        void insert(const string16& text, uint32_t position);
         void remove(uint32_t start, uint32_t length);
-        void replace(const std::wstring& text, uint32_t start, uint32_t length);
+        void replace(const string16& text, uint32_t start, uint32_t length);
         void clear();
 
-        void replace(std::wstring find, std::wstring replacement);
-        void replaceAll(std::wstring find, std::wstring replacement);
+        void replace(const string16& find, const string16& replacement);
+        void replaceAll(const string16& find, const string16& replacement);
 
-        void insert(const std::wstring& text);
+        void insert(const string16& text);
         void remove();
-        void replace(const std::wstring& text);
+        void replace(const string16& text);
 
         void setSelection(uint32_t selection);
         void setSelection(uint32_t start, uint32_t end);
@@ -60,10 +60,10 @@ namespace ukive {
         uint32_t getSelectionStart();
         uint32_t getSelectionEnd();
         bool hasSelection();
-        std::wstring getSelection();
+        string16 getSelection();
 
         wchar_t at(size_t pos);
-        std::wstring toString();
+        string16 toString();
 
         void addSpan(Span* span);
         void removeSpan(std::size_t index);
@@ -85,7 +85,7 @@ namespace ukive {
         void notifySpanChanged(
             Span* span, EditWatcher::SpanChange action);
 
-        std::wstring text_;
+        string16 text_;
         std::list<EditWatcher*> watchers_;
         std::vector<std::shared_ptr<Span>> spans_;
 

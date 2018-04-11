@@ -13,43 +13,42 @@ namespace ukive {
     class Message;
     class MessageLooper;
 
-    class Cycler
-    {
+    class Cycler {
     public:
         Cycler();
-        Cycler(MessageLooper *looper);
+        Cycler(MessageLooper* looper);
         virtual ~Cycler();
 
-        void post(Executable *exec);
-        void postDelayed(Executable *exec, uint64_t millis);
-        void postAtTime(Executable *exec, uint64_t at_time_millis);
+        void post(Executable* exec);
+        void postDelayed(Executable* exec, uint64_t millis);
+        void postAtTime(Executable* exec, uint64_t at_time_millis);
 
-        void post(const std::function<void()> &func, int what = -1);
-        void postDelayed(const std::function<void()> &func, uint64_t millis, int what = -1);
-        void postAtTime(const std::function<void()> &func, uint64_t at_time_millis, int what = -1);
+        void post(const std::function<void()>& func, int what = -1);
+        void postDelayed(const std::function<void()>& func, uint64_t millis, int what = -1);
+        void postAtTime(const std::function<void()>& func, uint64_t at_time_millis, int what = -1);
 
-        bool hasCallbacks(Executable *exec);
-        void removeCallbacks(Executable *exec);
+        bool hasCallbacks(Executable* exec);
+        void removeCallbacks(Executable* exec);
 
-        void sendMessage(Message *msg);
-        void sendMessageDelayed(Message *msg, uint64_t millis);
-        void sendMessageAtTime(Message *msg, uint64_t at_time_millis);
+        void sendMessage(Message* msg);
+        void sendMessageDelayed(Message* msg, uint64_t millis);
+        void sendMessageAtTime(Message* msg, uint64_t at_time_millis);
         void sendEmptyMessage(int what);
         void sendEmptyMessageDelayed(int what, uint64_t millis);
         void sendEmptyMessageAtTime(int what, uint64_t at_time_millis);
 
-        void enqueueMessage(Message *msg);
+        void enqueueMessage(Message* msg);
 
         bool hasMessages(int what);
-        bool hasMessages(int what, void *data);
+        bool hasMessages(int what, void* data);
         void removeMessages(int what);
-        void removeMessages(int what, void *data);
+        void removeMessages(int what, void* data);
 
-        void dispatchMessage(Message *msg);
-        virtual void handleMessage(Message *msg);
+        void dispatchMessage(Message* msg);
+        virtual void handleMessage(Message* msg);
 
     private:
-        MessageLooper *looper_;
+        MessageLooper* looper_;
     };
 
 }

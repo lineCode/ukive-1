@@ -8,10 +8,10 @@
 namespace ukive {
 
     Animator::Animator(AnimationManager* mgr) {
-        mAnimationManager = mgr;
+        anim_mgr_ = mgr;
         mAnimatorStateListener = new AnimatorStateHandler(this);
 
-        HRESULT hr = mAnimationManager->getAnimationManager()
+        HRESULT hr = anim_mgr_->getAnimationManager()
             ->CreateStoryboard(&mStoryboard);
         if (FAILED(hr)) {
             DLOG(Log::FATAL) << "create storyboard failed.";
@@ -28,7 +28,7 @@ namespace ukive {
 
     void Animator::start() {
         UI_ANIMATION_SECONDS time;
-        mAnimationManager->getAnimationTimer()->GetTime(&time);
+        anim_mgr_->getAnimationTimer()->GetTime(&time);
         mStoryboard->Schedule(time);
     }
 
@@ -51,7 +51,7 @@ namespace ukive {
 
         mStoryboard->Abandon();
         mStoryboard.reset();
-        HRESULT hr = mAnimationManager->getAnimationManager()
+        HRESULT hr = anim_mgr_->getAnimationManager()
             ->CreateStoryboard(&mStoryboard);
         if (FAILED(hr)) {
             DLOG(Log::FATAL) << "create storyboard failed.";
@@ -67,9 +67,9 @@ namespace ukive {
         }
 
         UI_ANIMATION_SECONDS time;
-        mAnimationManager->getAnimationTimer()->GetTime(&time);
+        anim_mgr_->getAnimationTimer()->GetTime(&time);
 
-        mAnimationManager->getAnimationManager()->
+        anim_mgr_->getAnimationManager()->
             ScheduleTransition(it->second.get(), transition->getTransition().get(), time);
     }
 
@@ -189,7 +189,7 @@ namespace ukive {
 
         ComPtr<IUIAnimationVariable> aVariable;
 
-        HRESULT hr = mAnimationManager->getAnimationManager()->
+        HRESULT hr = anim_mgr_->getAnimationManager()->
             CreateAnimationVariable(initValue, &aVariable);
         if (FAILED(hr)) {
             return false;

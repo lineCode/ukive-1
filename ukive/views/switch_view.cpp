@@ -3,18 +3,16 @@
 
 namespace ukive {
 
-    SwitchView::SwitchView(Window *wnd)
+    SwitchView::SwitchView(Window* wnd)
         :View(wnd) {
         initSwitchView();
     }
 
-    SwitchView::~SwitchView()
-    {
+    SwitchView::~SwitchView() {
     }
 
 
-    void SwitchView::initSwitchView()
-    {
+    void SwitchView::initSwitchView() {
     }
 
 }

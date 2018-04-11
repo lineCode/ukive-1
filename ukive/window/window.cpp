@@ -32,7 +32,7 @@ namespace ukive {
         mouse_holder_ref_(0),
         canvas_(nullptr),
         renderer_(nullptr),
-        mAnimationManager(nullptr),
+        anim_mgr_(nullptr),
         mAnimStateChangedListener(nullptr),
         mAnimTimerEventListener(nullptr),
         background_color_(Color::White) {
@@ -112,6 +112,10 @@ namespace ukive {
         invalidate();
     }
 
+    void Window::setTranslucent(bool translucent) {
+        impl_->setTranslucent(translucent);
+    }
+
     void Window::setStartupWindow(bool enable) {
         is_startup_window_ = enable;
     }
@@ -169,7 +173,7 @@ namespace ukive {
     }
 
     AnimationManager* Window::getAnimationManager() {
-        return mAnimationManager;
+        return anim_mgr_;
     }
 
     bool Window::isShowing() {
@@ -178,6 +182,10 @@ namespace ukive {
 
     bool Window::isCursorInClient() {
         return impl_->isCursorInClient();
+    }
+
+    bool Window::isTranslucent() {
+        return impl_->isTranslucent();
     }
 
     bool Window::isStartupWindow() {
@@ -427,17 +435,17 @@ namespace ukive {
         UBaseLayoutParams::MATCH_PARENT, 50);
         base_layout_->addContent(titleBar, titleBarLp);*/
 
-        mAnimationManager = new AnimationManager();
-        HRESULT hr = mAnimationManager->init();
+        anim_mgr_ = new AnimationManager();
+        HRESULT hr = anim_mgr_->init();
         if (FAILED(hr))
             throw std::runtime_error("UWindow-onCreate(): init animation manager failed.");
 
         mAnimStateChangedListener = new AnimStateChangedListener(this);
-        mAnimationManager->setOnStateChangedListener(mAnimStateChangedListener);
+        anim_mgr_->setOnStateChangedListener(mAnimStateChangedListener);
 
-        //mAnimationManager->connectTimer(true);
+        //anim_mgr_->connectTimer(true);
         mAnimTimerEventListener = new AnimTimerEventListener(this);
-        //mAnimationManager->setTimerEventListener(mAnimTimerEventListener);
+        //anim_mgr_->setTimerEventListener(mAnimTimerEventListener);
 
         renderer_ = new Renderer();
         hr = renderer_->init(this);
@@ -621,9 +629,9 @@ namespace ukive {
         delete mAnimTimerEventListener;
         delete mAnimStateChangedListener;
 
-        mAnimationManager->setOnStateChangedListener(nullptr);
-        mAnimationManager->close();
-        delete mAnimationManager;
+        anim_mgr_->setOnStateChangedListener(nullptr);
+        anim_mgr_->close();
+        delete anim_mgr_;
         delete labour_cycler_;
 
         WindowManager::getInstance()->removeWindow(this);

@@ -6,12 +6,7 @@
 
 namespace ukive {
 
-    class AnimationTimerHandler : public IUIAnimationTimerEventHandler
-    {
-    private:
-        ULONG ref_count_;
-        AnimationManager::OnTimerEventListener *listener_;
-
+    class AnimationTimerHandler : public IUIAnimationTimerEventHandler {
     public:
         AnimationTimerHandler(
             AnimationManager::OnTimerEventListener *listener);
@@ -25,6 +20,10 @@ namespace ukive {
         IFACEMETHODIMP_(ULONG) AddRef();
         IFACEMETHODIMP_(ULONG) Release();
         IFACEMETHODIMP QueryInterface(_In_ REFIID riid, _Outptr_ void** ppOutput);
+
+    private:
+        ULONG ref_count_;
+        AnimationManager::OnTimerEventListener *listener_;
     };
 
 }

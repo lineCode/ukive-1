@@ -21,6 +21,8 @@ namespace ukive {
 
     HRESULT Renderer::init(Window* window) {
         owner_window_ = window;
+        is_layered_ = owner_window_->isTranslucent();
+
         d2d_dc_ = Application::getGraphicDeviceManager()->createD2DDeviceContext();
 
         return createRenderResource();

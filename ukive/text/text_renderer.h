@@ -8,16 +8,15 @@
 
 namespace ukive {
 
-    class TextRenderer : public IDWriteTextRenderer
-    {
+    class TextRenderer : public IDWriteTextRenderer {
     public:
-        TextRenderer(ComPtr<ID2D1RenderTarget> renderTarget);
+        TextRenderer(ComPtr<ID2D1RenderTarget> rt);
         ~TextRenderer();
 
         void setOpacity(float opacity);
-        void setTextColor(Color color);
-        void setUnderlineColor(Color color);
-        void setStrikethroughColor(Color color);
+        void setTextColor(const Color& color);
+        void setUnderlineColor(const Color& color);
+        void setStrikethroughColor(const Color& color);
 
         STDMETHOD(IsPixelSnappingDisabled)(
             __maybenull void* clientDrawingContext,
@@ -66,19 +65,18 @@ namespace ukive {
         ULONG STDMETHODCALLTYPE AddRef();
         ULONG STDMETHODCALLTYPE Release();
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            IID const& riid, void** ppvObject
-        );
+            IID const& riid, void** ppvObject);
 
     private:
         ULONG ref_count_;
-        float mOpacity;
+        float opacity_;
 
-        Color mDefaultTextColor;
-        Color mDefaultUnderlineColor;
-        Color mDefaultStrikethroughColor;
+        Color def_text_color_;
+        Color def_underline_color_;
+        Color def_strikethrough_color_;
 
-        ComPtr<ID2D1RenderTarget> mRenderTarget;
-        ComPtr<ID2D1SolidColorBrush> mSolidBrush;
+        ComPtr<ID2D1RenderTarget> rt_;
+        ComPtr<ID2D1SolidColorBrush> brush_;
     };
 
 }
