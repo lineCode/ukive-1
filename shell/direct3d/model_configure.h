@@ -13,44 +13,21 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    struct ModelVertexData
-    {
+    struct ModelVertexData {
         dx::XMFLOAT3 position;
         dx::XMFLOAT4 color;
         dx::XMFLOAT3 normal;
         dx::XMFLOAT2 texcoord;
 
         ModelVertexData()
-        {
-            position = dx::XMFLOAT3(0, 0, 0);
-            color = dx::XMFLOAT4(0, 0, 0, 1);
-            normal = dx::XMFLOAT3(0, 0, 0);
-            texcoord = dx::XMFLOAT2(0, 0);
-        }
+            :position(dx::XMFLOAT3(0, 0, 0)),
+            color(dx::XMFLOAT4(0, 0, 0, 1)),
+            normal(dx::XMFLOAT3(0, 0, 0)),
+            texcoord(dx::XMFLOAT2(0, 0)) {}
     };
 
 
-    class ModelConfigure
-    {
-    private:
-        struct MatrixConstBuffer
-        {
-            dx::XMFLOAT4X4 mWVP;
-        };
-
-        struct PhongLightConstBuffer
-        {
-            dx::XMFLOAT4X4 mWVP;
-        };
-
-    private:
-        ukive::ComPtr<ID3D11VertexShader> mVertexShader;
-        ukive::ComPtr<ID3D11PixelShader> mPixelShader;
-        ukive::ComPtr<ID3D11InputLayout> mInputLayout;
-
-        ukive::ComPtr<ID3D11Buffer> mMatrixConstBuffer;
-        ukive::ComPtr<ID3D11Buffer> mModelLightConstBuffer;
-
+    class ModelConfigure {
     public:
         ModelConfigure();
         ~ModelConfigure();
@@ -61,6 +38,22 @@ namespace shell {
         void close();
 
         void setMatrix(dx::XMFLOAT4X4 matrix);
+
+    private:
+        struct MatrixConstBuffer {
+            dx::XMFLOAT4X4 wvp;
+        };
+
+        struct PhongLightConstBuffer {
+            dx::XMFLOAT4X4 wvp;
+        };
+
+        ukive::ComPtr<ID3D11InputLayout> input_layout_;
+        ukive::ComPtr<ID3D11PixelShader> pixel_shader_;
+        ukive::ComPtr<ID3D11VertexShader> vertex_shader_;
+
+        ukive::ComPtr<ID3D11Buffer> const_buffer_;
+        ukive::ComPtr<ID3D11Buffer> light_const_buffer_;
     };
 
 }

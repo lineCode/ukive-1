@@ -29,15 +29,23 @@ namespace ukive {
     }
 
     HRESULT Renderer::createRenderResource() {
-        RH(d2d_dc_->CreateEffect(CLSID_D2D1Shadow, &shadow_effect_));
-        RH(d2d_dc_->CreateEffect(CLSID_D2D12DAffineTransform, &affinetrans_effect_));
+        HRESULT hr = d2d_dc_->CreateEffect(CLSID_D2D1Shadow, &shadow_effect_);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create shadow effect: " << hr;
+        }
 
-        HRESULT hr = S_OK;
+        hr = d2d_dc_->CreateEffect(CLSID_D2D12DAffineTransform, &affinetrans_effect_);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create affinetrans effect: " << hr;
+        }
+
         if (is_layered_) {
             if (is_hardware_acc_) {
-                hr = createHardwareBRT();
+                createHardwareBRT();
             } else {
-                hr = createSoftwareBRT();
+                createSoftwareBRT();
             }
         } else {
             hr = createSwapchainBRT();
@@ -83,6 +91,7 @@ namespace ukive {
 
         hr = d2d_dc_->EndDraw();
         if (FAILED(hr)) {
+            DCHECK(false);
             Log::e(L"Render", L"failed to draw d2d content.");
         }
 
@@ -98,7 +107,7 @@ namespace ukive {
     }
 
 
-    HRESULT Renderer::createHardwareBRT() {
+    void Renderer::createHardwareBRT() {
         D3D11_TEXTURE2D_DESC tex_desc = { 0 };
         tex_desc.ArraySize = 1;
         tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
@@ -117,23 +126,16 @@ namespace ukive {
         auto dxgi_surface  = d3d_texture.cast<IDXGISurface>();
         DCHECK(dxgi_surface != nullptr);
 
-        hr = createBitmapRenderTarget(dxgi_surface.get(), &bitmap_render_target_, true);
-        DCHECK(SUCCEEDED(hr));
-
+        bitmap_render_target_ = createBitmapRenderTarget(dxgi_surface.get(), true);
         d2d_dc_->SetTarget(bitmap_render_target_.get());
-
-        return S_OK;
     }
 
-    HRESULT Renderer::createSoftwareBRT() {
+    void Renderer::createSoftwareBRT() {
         auto wic_bmp = Application::getWICManager()->createBitmap(
             owner_window_->getClientWidth(),
             owner_window_->getClientHeight());
 
-        HRESULT hr = createBitmapRenderTarget(wic_bmp.get(), &bitmap_render_target_, true);
-        DCHECK(SUCCEEDED(hr));
-
-        return S_OK;
+        bitmap_render_target_ = createBitmapRenderTarget(wic_bmp.get(), true);
     }
 
     HRESULT Renderer::createSwapchainBRT() {
@@ -151,14 +153,23 @@ namespace ukive {
 
         auto gdm = Application::getGraphicDeviceManager();
 
-        RH(gdm->getDXGIFactory()->CreateSwapChainForHwnd(
+        HRESULT hr = gdm->getDXGIFactory()->CreateSwapChainForHwnd(
             gdm->getD3DDevice().get(),
             owner_window_->getHandle(),
-            &swapChainDesc, nullptr, nullptr, &swapchain_));
+            &swapChainDesc, nullptr, nullptr, &swapchain_);
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to create swap chain: " << hr;
+            return hr;
+        }
 
         ComPtr<IDXGISurface> back_buffer;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer)));
-        RH(createBitmapRenderTarget(back_buffer.get(), &bitmap_render_target_));
+        hr = swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer));
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to query DXGI surface: " << hr;
+            return hr;
+        }
+
+        bitmap_render_target_ = createBitmapRenderTarget(back_buffer.get());
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
 
@@ -169,13 +180,13 @@ namespace ukive {
         d2d_dc_->SetTarget(nullptr);
         bitmap_render_target_.reset();
 
-        for (auto notifier : sc_resize_notifier_list_) {
+        for (auto notifier : sc_resize_notifiers_) {
             notifier->onPreSwapChainResize();
         }
 
-        RH(createHardwareBRT());
+        createHardwareBRT();
 
-        for (auto notifier : sc_resize_notifier_list_) {
+        for (auto notifier : sc_resize_notifiers_) {
             notifier->onPostSwapChainResize();
         }
 
@@ -185,27 +196,37 @@ namespace ukive {
     HRESULT Renderer::resizeSoftwareBRT() {
         d2d_dc_->SetTarget(nullptr);
         bitmap_render_target_.reset();
-        return createSoftwareBRT();
+        createSoftwareBRT();
+
+        return S_OK;
     }
 
     HRESULT Renderer::resizeSwapchainBRT() {
         d2d_dc_->SetTarget(nullptr);
         bitmap_render_target_.reset();
 
-        for (auto notifier : sc_resize_notifier_list_) {
+        for (auto notifier : sc_resize_notifiers_) {
             notifier->onPreSwapChainResize();
         }
 
-        RH(swapchain_->ResizeBuffers(
-            0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
+        HRESULT hr = swapchain_->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to resize swap chain: " << hr;
+            return hr;
+        }
 
         ComPtr<IDXGISurface> back_buffer;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer)));
-        RH(createBitmapRenderTarget(back_buffer.get(), &bitmap_render_target_));
+        hr = swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer));
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to query DXGI surface: " << hr;
+            return hr;
+        }
+
+        bitmap_render_target_ = createBitmapRenderTarget(back_buffer.get());
 
         d2d_dc_->SetTarget(bitmap_render_target_.get());
 
-        for (auto notifier : sc_resize_notifier_list_) {
+        for (auto notifier : sc_resize_notifiers_) {
             notifier->onPostSwapChainResize();
         }
 
@@ -262,13 +283,13 @@ namespace ukive {
         }
 
         shadow_effect_->SetInput(0, bitmap);
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_OPTIMIZATION, D2D1_SHADOW_OPTIMIZATION_BALANCED));
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, elevation));
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, shadow_alpha)));
+        shadow_effect_->SetValue(D2D1_SHADOW_PROP_OPTIMIZATION, D2D1_SHADOW_OPTIMIZATION_BALANCED);
+        shadow_effect_->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, elevation);
+        shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, shadow_alpha));
 
         D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(0, 0);// elevation / 1.5f);
         affinetrans_effect_->SetInputEffect(0, shadow_effect_.get());
-        RH(affinetrans_effect_->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, matrix));
+        affinetrans_effect_->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, matrix);
 
         d2d_dc_->DrawImage(affinetrans_effect_.get());
 
@@ -277,15 +298,15 @@ namespace ukive {
 
 
     void Renderer::addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier) {
-        sc_resize_notifier_list_.push_back(notifier);
+        sc_resize_notifiers_.push_back(notifier);
     }
 
     void Renderer::removeSwapChainResizeNotifier(SwapChainResizeNotifier* notifier) {
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end();) {
+        for (auto it = sc_resize_notifiers_.begin();
+            it != sc_resize_notifiers_.end();) {
 
             if ((*it) == notifier) {
-                it = sc_resize_notifier_list_.erase(it);
+                it = sc_resize_notifiers_.erase(it);
             } else {
                 ++it;
             }
@@ -293,11 +314,11 @@ namespace ukive {
     }
 
     void Renderer::removeAllSwapChainResizeNotifier() {
-        sc_resize_notifier_list_.clear();
+        sc_resize_notifiers_.clear();
     }
 
-    HRESULT Renderer::createBitmapRenderTarget(
-        IWICBitmap* wic_bitmap, ID2D1Bitmap1** bitmap, bool gdi_compat) {
+    ComPtr<ID2D1Bitmap1> Renderer::createBitmapRenderTarget(
+        IWICBitmap* wic_bitmap, bool gdi_compat) {
 
         D2D1_BITMAP_OPTIONS bmp_options
             = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
@@ -310,11 +331,18 @@ namespace ukive {
                 bmp_options,
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
-        return d2d_dc_->CreateBitmapFromWicBitmap(wic_bitmap, bitmapProperties, bitmap);
+        ComPtr<ID2D1Bitmap1> bitmap;
+        HRESULT hr = d2d_dc_->CreateBitmapFromWicBitmap(wic_bitmap, bitmapProperties, &bitmap);
+        if (FAILED(hr)) {
+            LOG(Log::WARNING) << "Failed to create bitmap from WIC bitmap: " << hr;
+            return {};
+        }
+
+        return bitmap;
     }
 
-    HRESULT Renderer::createBitmapRenderTarget(
-        IDXGISurface* dxgiSurface, ID2D1Bitmap1** bitmap, bool gdi_compat) {
+    ComPtr<ID2D1Bitmap1> Renderer::createBitmapRenderTarget(
+        IDXGISurface* dxgiSurface, bool gdi_compat) {
 
         D2D1_BITMAP_OPTIONS bmp_options
             = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
@@ -327,7 +355,121 @@ namespace ukive {
                 bmp_options,
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
-        return d2d_dc_->CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, bitmap);
+        ComPtr<ID2D1Bitmap1> bitmap;
+        HRESULT hr = d2d_dc_->CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, &bitmap);
+        if (FAILED(hr)) {
+            LOG(Log::WARNING) << "Failed to create bitmap from DXGI surface: " << hr;
+            return {};
+        }
+
+        return bitmap;
+    }
+
+    ComPtr<ID2D1RenderTarget> Renderer::createWICRenderTarget(
+        IWICBitmap* wic_bitmap, bool dpi_awareness) {
+
+        ComPtr<ID2D1RenderTarget> render_target;
+        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
+        if (d2d_factory) {
+            float dpi_x = 96.f;
+            float dpi_y = 96.f;
+            if (dpi_awareness) {
+                d2d_factory->GetDesktopDpi(&dpi_x, &dpi_y);
+            }
+
+            const D2D1_PIXEL_FORMAT format =
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+            const D2D1_RENDER_TARGET_PROPERTIES properties
+                = D2D1::RenderTargetProperties(
+                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                    format, dpi_x, dpi_y,
+                    D2D1_RENDER_TARGET_USAGE_NONE);
+
+            HRESULT hr = d2d_factory->CreateWicBitmapRenderTarget(
+                wic_bitmap, properties, &render_target);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                LOG(Log::WARNING) << "Failed to create WICBitmap RenderTarget: " << hr
+                    << ", DpiX: " << dpi_x << ", DpiY: " << dpi_y;
+                return {};
+            }
+        }
+
+        return render_target;
+    }
+
+    ComPtr<ID2D1DCRenderTarget> Renderer::createDCRenderTarget() {
+        ComPtr<ID2D1DCRenderTarget> render_target;
+        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
+
+        if (d2d_factory) {
+            const D2D1_PIXEL_FORMAT format =
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                    D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+            // DPI 固定为 96
+            const D2D1_RENDER_TARGET_PROPERTIES properties =
+                D2D1::RenderTargetProperties(
+                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                    format);
+
+            HRESULT hr = d2d_factory->CreateDCRenderTarget(
+                &properties, &render_target);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                LOG(Log::WARNING) << "Failed to create DC RenderTarget: " << hr;
+                return {};
+            }
+        }
+
+        return render_target;
+    }
+
+    ComPtr<ID3D11Texture2D> Renderer::createTexture2D(int width, int height) {
+        auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
+
+        D3D11_TEXTURE2D_DESC tex_desc = { 0 };
+        tex_desc.ArraySize = 1;
+        tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        tex_desc.Width = width;
+        tex_desc.Height = height;
+        tex_desc.MipLevels = 1;
+        tex_desc.SampleDesc.Count = 1;
+        tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+
+        ComPtr<ID3D11Texture2D> d3d_texture;
+        HRESULT hr = d3d_device->CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create 2d texture: " << hr;
+            return {};
+        }
+
+        return d3d_texture;
+    }
+
+    ComPtr<ID2D1RenderTarget> Renderer::createDXGIRenderTarget(
+        IDXGISurface* surface, bool dpi_awareness) {
+
+        ComPtr<ID2D1RenderTarget> render_target;
+        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
+        if (d2d_factory) {
+            D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
+                D2D1_RENDER_TARGET_TYPE_DEFAULT,
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+                96, 96, D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE);
+
+            if (dpi_awareness) {
+                d2d_factory->GetDesktopDpi(&props.dpiX, &props.dpiY);
+            }
+
+            HRESULT hr = d2d_factory->CreateDxgiSurfaceRenderTarget(surface, props, &render_target);
+            DCHECK(SUCCEEDED(hr));
+        }
+
+        return render_target;
     }
 
     ComPtr<ID2D1Effect> Renderer::getShadowEffect() {
@@ -346,29 +488,47 @@ namespace ukive {
         return d2d_dc_;
     }
 
-    HRESULT Renderer::createTextFormat(
-        const string16 fontFamilyName,
-        float fontSize, string16 localeName,
-        IDWriteTextFormat** textFormat)
-    {
-        return Application::getGraphicDeviceManager()->getDWriteFactory()->CreateTextFormat(
-            fontFamilyName.c_str(), nullptr,
+    ComPtr<IDWriteTextFormat> Renderer::createTextFormat(
+        const string16& font_family_name,
+        float font_size, const string16& locale_name) {
+
+        auto dwrite_factory = Application::getGraphicDeviceManager()->getDWriteFactory();
+
+        ComPtr<IDWriteTextFormat> format;
+        HRESULT hr = dwrite_factory->CreateTextFormat(
+            font_family_name.c_str(), nullptr,
             DWRITE_FONT_WEIGHT_NORMAL,
             DWRITE_FONT_STYLE_NORMAL,
             DWRITE_FONT_STRETCH_NORMAL,
-            fontSize,
-            localeName.c_str(),
-            textFormat);
+            font_size,
+            locale_name.c_str(),
+            &format);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create text format: " << hr;
+            return {};
+        }
+
+        return format;
     }
 
-    HRESULT Renderer::createTextLayout(
-        const string16 text,
-        IDWriteTextFormat* textFormat,
-        float maxWidth, float maxHeight,
-        IDWriteTextLayout** textLayout)
-    {
-        return Application::getGraphicDeviceManager()->getDWriteFactory()->CreateTextLayout(
-            text.c_str(), text.length(), textFormat, maxWidth, maxHeight, textLayout);
+    ComPtr<IDWriteTextLayout> Renderer::createTextLayout(
+        const string16& text,
+        IDWriteTextFormat* format,
+        float max_width, float max_height) {
+
+        auto dwrite_factory = Application::getGraphicDeviceManager()->getDWriteFactory();
+
+        ComPtr<IDWriteTextLayout> layout;
+        HRESULT hr = dwrite_factory->CreateTextLayout(
+            text.c_str(), text.length(), format, max_width, max_height, &layout);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create text layout: " << hr;
+            return {};
+        }
+
+        return layout;
     }
 
 }

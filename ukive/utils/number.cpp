@@ -43,119 +43,34 @@ namespace ukive {
     }
 
 
-    int32_t Number::parseInt(string16 s, int radix) {
-        if (s.empty()) {
-            Log::e(L"Number", L"null");
+    int Number::parseInt(const string8& s, int radix) {
+        long result = std::strtol(s.c_str(), nullptr, radix);
+        if (errno == ERANGE) {
+            errno = 0;
             return 0;
         }
 
-        if (radix < MIN_RADIX || radix > MAX_RADIX) {
-            Log::e(L"Number", L"illegal radix.");
+        if (result > std::numeric_limits<int>::max()
+            || result < std::numeric_limits<int>::min()) {
             return 0;
         }
 
-        int32_t result = 0;
-        int32_t digit;
-        int32_t multmin;
-        size_t i = 0, len = s.length();
-        int32_t limit = -std::numeric_limits<int32_t>::max();
-        bool negative = false;
-
-        wchar_t firstChar = s.at(0);
-        if (firstChar < L'0') {
-            if (firstChar == L'-') {
-                negative = true;
-                limit = std::numeric_limits<int32_t>::min();
-            }
-            else if (firstChar != L'+') {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            i++;
-        }
-
-        multmin = limit / radix;
-
-        while (i < len) {
-            digit = Number::digit(s.at(i++), radix);
-            if (digit < 0) {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            if (result < multmin) {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            result *= radix;
-            if (result < limit + digit) {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            result -= digit;
-        }
-
-        return negative ? result : -result;
+        return static_cast<int>(result);
     }
 
-    int64_t Number::parseInt64(string16 s, int radix) {
-        if (s.empty()) {
-            Log::e(L"Number", L"null");
+    int Number::parseInt(const string16& s, int radix) {
+        long result = std::wcstol(s.c_str(), nullptr, radix);
+        if (errno == ERANGE) {
+            errno = 0;
             return 0;
         }
 
-        if (radix < MIN_RADIX || radix > MAX_RADIX) {
-            Log::e(L"Number", L"radix is illegal.");
+        if (result > std::numeric_limits<int>::max()
+            || result < std::numeric_limits<int>::min()) {
             return 0;
         }
 
-        int32_t digit;
-        size_t i = 0, len = s.length();
-        int64_t multmin;
-        int64_t result = 0;
-        int64_t limit = -(std::numeric_limits<int64_t>::max)();
-        bool negative = false;
-
-        wchar_t firstChar = s.at(0);
-        if (firstChar < L'0') {
-            if (firstChar == L'-') {
-                negative = true;
-                limit = (std::numeric_limits<int64_t>::min)();
-            }
-            else if (firstChar != L'+') {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            i++;
-        }
-        multmin = limit / radix;
-
-        while (i < len) {
-            digit = Number::digit(s.at(i++), radix);
-            if (digit < 0) {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            if (result < multmin) {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            result *= radix;
-            if (result < limit + digit) {
-                Log::e(L"Number", L"illegal number str");
-                return 0;
-            }
-
-            result -= digit;
-        }
-
-        return negative ? result : -result;
+        return static_cast<int>(result);
     }
 
 }

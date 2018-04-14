@@ -20,19 +20,19 @@ namespace shell {
 
     class GraphCreator {
     public:
-        GraphCreator(ukive::DrawingObjectManager* doMgr);
+        GraphCreator(ukive::DrawingObjectManager* mgr);
         ~GraphCreator();
 
-        void calculateNormalVector(ModelVertexData *vertices, int vertexCount, int *indices, int indexCount);
+        void calculateNormalVector(ModelVertexData* vertices, int vertexCount, int* indices, int indexCount);
 
-        void putLine(dx::XMFLOAT3 *point1, dx::XMFLOAT3 *point2, int tag);
+        void putLine(dx::XMFLOAT3* point1, dx::XMFLOAT3* point2, int tag);
         void putCube(int tag, float edgeLength);
         void putWorldAxis(int tag, float length);
-        void putMark(int tag, dx::XMFLOAT3 *mark, float length);
-        void putBlock(int tag, dx::XMFLOAT3 *posCenter, float radius);
+        void putMark(int tag, dx::XMFLOAT3* mark, float length);
+        void putBlock(int tag, dx::XMFLOAT3* posCenter, float radius);
 
     private:
-        ukive::DrawingObjectManager* drawing_object_manager_;
+        ukive::DrawingObjectManager* drawing_obj_mgr_;
     };
 
 }

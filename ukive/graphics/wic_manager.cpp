@@ -134,7 +134,7 @@ namespace ukive {
                             WICColor* color_table = new WICColor[color_count];
                             hr = palette->GetColors(color_count, color_table, &actual_count);
                             if (SUCCEEDED(hr) && actual_count > 0 && bg_index < actual_count) {
-                                bmps.bg_color = Color(color_table[bg_index]);
+                                bmps.bg_color = Color::ofARGB(color_table[bg_index]);
                             }
                             delete[] color_table;
                         }

@@ -7,43 +7,13 @@
 namespace ukive {
 
     Color::Color()
-        :a(0.f), r(0.f), g(0.f), b(0.f) {}
+        :r(0.f), g(0.f), b(0.f), a(0.f) {}
 
     Color::Color(const Color& color)
-        :a(color.a), r(color.r), g(color.g), b(color.b) {}
+        :r(color.r), g(color.g), b(color.b), a(color.a) {}
 
-    Color::Color(unsigned int r, unsigned int g, unsigned int b)
-        : a(1.f), r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
-
-    Color::Color(unsigned int a, unsigned int r, unsigned int g, unsigned int b)
-        : a(a / 255.f), r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
-
-    Color::Color(float r, float g, float b)
-        : a(1.f), r(r), g(g), b(b) {}
-
-    Color::Color(float a, float r, float g, float b)
-        : a(a), r(r), g(g), b(b) {}
-
-    Color::Color(unsigned int rgb, unsigned int a)
-        : a(a / 255.f) {
-        r = ((rgb & red_mask) >> red_shift) / 255.f;
-        g = ((rgb & green_mask) >> green_shift) / 255.f;
-        b = ((rgb & blue_mask) >> blue_shift) / 255.f;
-    }
-
-    Color::Color(unsigned int rgb, float a)
-        : a(a) {
-        r = ((rgb & red_mask) >> red_shift) / 255.f;
-        g = ((rgb & green_mask) >> green_shift) / 255.f;
-        b = ((rgb & blue_mask) >> blue_shift) / 255.f;
-    }
-
-    Color::Color(unsigned int argb) {
-        a = ((argb & alpha_mask) >> alpha_shift) / 255.f;
-        r = ((argb & red_mask) >> red_shift) / 255.f;
-        g = ((argb & green_mask) >> green_shift) / 255.f;
-        b = ((argb & blue_mask) >> blue_shift) / 255.f;
-    }
+    Color::Color(float r, float g, float b, float a)
+        :r(r), g(g), b(b), a(a) {}
 
     Color& Color::operator=(const Color& rhs) {
         r = rhs.r;
@@ -55,46 +25,65 @@ namespace ukive {
     }
 
 
-    Color Color::parse(string16 color) {
+    Color Color::parse(const string16& color) {
         if (color.empty() || color.at(0) != L'#') {
             Log::e(L"Color", L"unknown color");
             return Color::Red500;
         }
 
         if (color.length() == 7) {
-            unsigned int r = Number::parseInt(color.substr(1, 2), 16);
-            unsigned int g = Number::parseInt(color.substr(3, 2), 16);
-            unsigned int b = Number::parseInt(color.substr(5, 2), 16);
+            int r = Number::parseInt(color.substr(1, 2), 16);
+            int g = Number::parseInt(color.substr(3, 2), 16);
+            int b = Number::parseInt(color.substr(5, 2), 16);
 
-            return Color(r, g, b);
-        }
-        else if (color.length() == 9) {
-            unsigned int a = Number::parseInt(color.substr(1, 2), 16);
-            unsigned int r = Number::parseInt(color.substr(3, 2), 16);
-            unsigned int g = Number::parseInt(color.substr(5, 2), 16);
-            unsigned int b = Number::parseInt(color.substr(7, 2), 16);
+            return Color::ofInt(r, g, b);
+        } else if (color.length() == 9) {
+            int a = Number::parseInt(color.substr(1, 2), 16);
+            int r = Number::parseInt(color.substr(3, 2), 16);
+            int g = Number::parseInt(color.substr(5, 2), 16);
+            int b = Number::parseInt(color.substr(7, 2), 16);
 
-            return Color(a, r, g, b);
-        }
-        else {
+            return Color::ofInt(r, g, b, a);
+        } else {
             Log::e(L"Color", L"unknown color");
             return Color::Red500;
         }
     }
 
-    unsigned int Color::GetA(unsigned int argb) {
+    Color Color::ofInt(int r, int g, int b, int a) {
+        return Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
+    }
+
+    Color Color::ofRGB(unsigned int rgb, float a) {
+        return Color(
+            ((rgb & red_mask) >> red_shift) / 255.f,
+            ((rgb & green_mask) >> green_shift) / 255.f,
+            ((rgb & blue_mask) >> blue_shift) / 255.f,
+            a);
+    }
+
+    Color Color::ofARGB(unsigned int argb) {
+        return Color(
+            ((argb & red_mask) >> red_shift) / 255.f,
+            ((argb & green_mask) >> green_shift) / 255.f,
+            ((argb & blue_mask) >> blue_shift) / 255.f,
+            ((argb & alpha_mask) >> alpha_shift) / 255.f);
+    }
+
+
+    int Color::GetA(unsigned int argb) {
         return (argb & alpha_mask) >> alpha_shift;
     }
 
-    unsigned int Color::GetR(unsigned int argb) {
+    int Color::GetR(unsigned int argb) {
         return (argb & red_mask) >> red_shift;
     }
 
-    unsigned int Color::GetG(unsigned int argb) {
+    int Color::GetG(unsigned int argb) {
         return (argb & green_mask) >> green_shift;
     }
 
-    unsigned int Color::GetB(unsigned int argb) {
+    int Color::GetB(unsigned int argb) {
         return (argb & blue_mask) >> blue_shift;
     }
 

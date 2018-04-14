@@ -11,29 +11,19 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    struct AssistVertexData
-    {
+    struct AssistVertexData {
         dx::XMFLOAT3 position;
         dx::XMFLOAT4 color;
         dx::XMFLOAT2 texcoord;
 
         AssistVertexData()
-        {
-            position = dx::XMFLOAT3(0, 0, 0);
-            color = dx::XMFLOAT4(0, 0, 0, 1);
-            texcoord = dx::XMFLOAT2(0, 0);
-        }
+            :position(dx::XMFLOAT3(0, 0, 0)),
+            color(dx::XMFLOAT4(0, 0, 0, 1)),
+            texcoord(dx::XMFLOAT2(0, 0)) {}
     };
 
 
-    class AssistConfigure
-    {
-    private:
-        ukive::ComPtr<ID3D11VertexShader> mVertexShader;
-        ukive::ComPtr<ID3D11PixelShader> mPixelShader;
-        ukive::ComPtr<ID3D11InputLayout> mInputLayout;
-        ukive::ComPtr<ID3D11Buffer> mAssistConstBuffer;
-
+    class AssistConfigure {
     public:
         AssistConfigure();
         ~AssistConfigure();
@@ -47,8 +37,13 @@ namespace shell {
 
     private:
         struct AssistConstBuffer {
-            dx::XMFLOAT4X4 mWVP;
+            dx::XMFLOAT4X4 wvp;
         };
+
+        ukive::ComPtr<ID3D11Buffer> const_buffer_;
+        ukive::ComPtr<ID3D11InputLayout> input_layout_;
+        ukive::ComPtr<ID3D11PixelShader> pixel_shader_;
+        ukive::ComPtr<ID3D11VertexShader> vertex_shader_;
     };
 
 }

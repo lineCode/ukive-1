@@ -13,7 +13,6 @@ namespace ukive {
         owner_win_(win)
     {
         mAlpha = 0;
-        mTintColor = Color(0, 0.f);
 
         mDownAnimator = new Animator(win->getAnimationManager());
         mUpAnimator = new Animator(win->getAnimationManager());
@@ -55,7 +54,7 @@ namespace ukive {
     void RippleDrawable::draw(Canvas *canvas)
     {
         auto bound = getBounds();
-        Color color(mAlpha, 0.f, 0.f, 0.f);
+        Color color(0.f, 0.f, 0.f, mAlpha);
 
         // »æÖÆµ×É«¡¢alpha ºÍ ripple¡£
         content_off_->beginDraw();
@@ -67,8 +66,7 @@ namespace ukive {
         if ((getState() == STATE_HOVERED && getPrevState() == STATE_PRESSED)
             || (getState() == STATE_NONE && getPrevState() == STATE_HOVERED)) {
 
-            Color rippleColor = Color(0U,
-                (float)mRippleAnimator->getValue(1));
+            Color rippleColor = Color::ofRGB(0, mRippleAnimator->getValue(1));
 
             content_off_->fillCircle(
                 start_x_, start_y_,

@@ -230,7 +230,7 @@ namespace shell {
 
         dx::XMStoreFloat(&radius_, dx::XMVector3Length(lookVec));
 
-        //TODO:此处假设在变换前后up不变。当up在变换后改变，需要额外变量确定right。
+        // TODO:此处假设在变换前后 up 不变。当 up 在变换后改变，需要额外变量确定 right。
         dx::XMVECTOR rightVec = dx::XMVector3Cross(upVec, lookVec);
         upVec = dx::XMVector3Cross(lookVec, rightVec);
 
@@ -256,7 +256,7 @@ namespace shell {
 
         dx::XMStoreFloat(&radius_, dx::XMVector3Length(lookVec));
 
-        //TODO:此处假设在变换前后up不变。当up在变换后改变，需要额外变量确定right。
+        // TODO:此处假设在变换前后 up 不变。当 up 在变换后改变，需要额外变量确定 right。
         dx::XMVECTOR rightVec = dx::XMVector3Cross(upVec, lookVec);
         upVec = dx::XMVector3Cross(lookVec, rightVec);
 

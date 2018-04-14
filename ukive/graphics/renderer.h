@@ -4,7 +4,6 @@
 #include <functional>
 #include <vector>
 
-#include "ukive/graphics/drawing_object_manager.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/graphics/color.h"
 #include "ukive/utils/com_ptr.h"
@@ -33,31 +32,37 @@ namespace ukive {
         void removeSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
         void removeAllSwapChainResizeNotifier();
 
-        HRESULT createBitmapRenderTarget(
-            IWICBitmap* wic_bitmap, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
-        HRESULT createBitmapRenderTarget(
-            IDXGISurface* dxgiSurface, ID2D1Bitmap1** bitmap, bool gdi_compat = false);
+        ComPtr<ID2D1Bitmap1> createBitmapRenderTarget(
+            IWICBitmap* wic_bitmap, bool gdi_compat = false);
+        ComPtr<ID2D1Bitmap1> createBitmapRenderTarget(
+            IDXGISurface* dxgiSurface, bool gdi_compat = false);
+
+        static ComPtr<ID2D1RenderTarget> createWICRenderTarget(
+            IWICBitmap* wic_bitmap, bool dpi_awareness);
+        static ComPtr<ID2D1DCRenderTarget> createDCRenderTarget();
+
+        static ComPtr<ID3D11Texture2D> createTexture2D(int width, int height);
+        static ComPtr<ID2D1RenderTarget> createDXGIRenderTarget(
+            IDXGISurface* surface, bool dpi_awareness);
 
         ComPtr<ID2D1Effect> getShadowEffect();
         ComPtr<ID2D1Effect> getAffineTransEffect();
         ComPtr<IDXGISwapChain1> getSwapChain();
         ComPtr<ID2D1DeviceContext> getD2DDeviceContext();
 
-        static HRESULT createTextFormat(
-            const string16 fontFamilyName,
-            float fontSize, string16 localeName,
-            IDWriteTextFormat** textFormat);
-        static HRESULT createTextLayout(
-            const string16 text, IDWriteTextFormat* textFormat,
-            float maxWidth, float maxHeight,
-            IDWriteTextLayout** textLayout);
+        static ComPtr<IDWriteTextFormat> createTextFormat(
+            const string16& font_family_name,
+            float font_size, const string16& locale_name);
+        static ComPtr<IDWriteTextLayout> createTextLayout(
+            const string16& text, IDWriteTextFormat* format,
+            float max_width, float max_height);
 
     private:
         HRESULT createRenderResource();
         void releaseRenderResource();
 
-        HRESULT createHardwareBRT();
-        HRESULT createSoftwareBRT();
+        void createHardwareBRT();
+        void createSoftwareBRT();
         HRESULT createSwapchainBRT();
 
         HRESULT resizeHardwareBRT();
@@ -71,7 +76,7 @@ namespace ukive {
         bool is_hardware_acc_;
 
         Window* owner_window_;
-        std::vector<SwapChainResizeNotifier*> sc_resize_notifier_list_;
+        std::vector<SwapChainResizeNotifier*> sc_resize_notifiers_;
 
         ComPtr<IDXGISwapChain1> swapchain_;
         ComPtr<ID2D1Bitmap1> bitmap_render_target_;

@@ -159,8 +159,9 @@ namespace ukive {
     }
 
     void View::setVisibility(int visibility) {
-        if (visibility == visibility_)
+        if (visibility == visibility_) {
             return;
+        }
 
         visibility_ = visibility;
 
@@ -175,8 +176,9 @@ namespace ukive {
     }
 
     void View::setEnabled(bool enable) {
-        if (enable == is_enabled_)
+        if (enable == is_enabled_) {
             return;
+        }
 
         is_enabled_ = enable;
 
@@ -227,8 +229,9 @@ namespace ukive {
     }
 
     void View::setPressed(bool pressed) {
-        if (is_pressed_ == pressed)
+        if (is_pressed_ == pressed) {
             return;
+        }
 
         is_pressed_ = pressed;
 
@@ -240,8 +243,9 @@ namespace ukive {
     }
 
     void View::setFocusable(bool focusable) {
-        if (is_focusable_ == focusable)
+        if (is_focusable_ == focusable) {
             return;
+        }
 
         is_focusable_ = focusable;
 
@@ -268,8 +272,9 @@ namespace ukive {
     void View::setCanConsumeMouseEvent(bool enable) {
         can_consume_mouse_event_ = enable;
 
-        if (!enable)
+        if (!enable) {
             window_->releaseMouse();
+        }
     }
 
     void View::setParent(View* parent) {

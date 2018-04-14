@@ -17,6 +17,7 @@ namespace ukive {
     public:
         void init();
         void shutdown();
+        ComPtr<ID2D1DeviceContext> createD2DDeviceContext();
 
         void EnumSystemFonts();
 
@@ -30,14 +31,6 @@ namespace ukive {
         ComPtr<ID2D1Device> getD2DDevice();
         ComPtr<ID3D11Device> getD3DDevice();
         ComPtr<ID3D11DeviceContext> getD3DDeviceContext();
-
-        ComPtr<ID2D1DeviceContext> createD2DDeviceContext();
-
-        ComPtr<ID2D1RenderTarget> createWICRenderTarget(IWICBitmap* wic_bitmap, bool dpi_awareness);
-        ComPtr<ID2D1DCRenderTarget> createDCRenderTarget();
-
-        ComPtr<IDXGISurface> createDXGISurface(int width, int height);
-        ComPtr<ID2D1RenderTarget> createDXGIRenderTarget(IDXGISurface* surface, bool dpi_awareness);
 
     private:
         void initDXPersistance();

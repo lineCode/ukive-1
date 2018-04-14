@@ -369,11 +369,10 @@ namespace ukive {
 
     void TextView::makeNewTextFormat() {
         mTextFormat.reset();
-        ukive::Renderer::createTextFormat(
+        mTextFormat = ukive::Renderer::createTextFormat(
             mFontFamilyName,
             mTextSize,
-            L"en-US",
-            &mTextFormat);
+            L"en-US");
     }
 
     void TextView::makeNewTextLayout(float maxWidth, float maxHeight, bool autoWrap) {
@@ -383,12 +382,11 @@ namespace ukive {
         range.startPosition = 0;
         range.length = mBaseText->length();
 
-        ukive::Renderer::createTextLayout(
+        mTextLayout = ukive::Renderer::createTextLayout(
             mBaseText->toString(),
             mTextFormat.get(),
             maxWidth,
-            maxHeight,
-            &mTextLayout);
+            maxHeight);
 
         mTextLayout->SetLineSpacing(
             mLineSpacingMethod,

@@ -23,18 +23,35 @@ namespace shell {
     class ModelConfigure;
     class TerrainConfigure;
 
-    class TerrainScene : public ukive::Scene
-    {
+    class TerrainScene : public ukive::Scene {
+    public:
+        TerrainScene();
+        ~TerrainScene();
+
+        void recreate(int level);
+        void reevaluate(float c1, float c2);
+
+        void onSceneCreate(ukive::Direct3DView* d3d_view) override;
+        void onSceneResize(unsigned int width, unsigned int height) override;
+        void onSceneInput(ukive::InputEvent* e) override;
+        void onSceneRender() override;
+        void onSceneDestroy() override;
+
+        Camera* getCamera();
+        GraphCreator* getGraphCreator();
+        ukive::DrawingObjectManager* getDrawingObjectManager();
+
     private:
-        ukive::TextView *mLodInfoTV;
-        ID3D11Buffer* mIndexBuffer;
-        ID3D11Buffer* mVertexBuffer;
+        enum {
+            MOUSE_ACTION_NONE = 1,
+            MOUSE_ACTION_MOVED = 2,
+            MOUSE_ACTION_MOVING = 3,
+        };
 
-        Camera *mCamera;
-        GraphCreator *mGraphCreator;
-
-        ukive::Direct3DView* d3d_view_;
-        ukive::DrawingObjectManager *mDrawingObjectManager;
+        void updateCube();
+        void updateLodTerrain();
+        void elementAwareness(int ex, int ey);
+        void getPickLine(int sx, int sy, dx::XMVECTOR* lineOrig, dx::XMVECTOR* lineDir);
 
     private:
         int mPrevX;
@@ -51,37 +68,20 @@ namespace shell {
         bool mIsShiftKeyPressed;
         bool mIsMouseLeftKeyPressed;
 
-        const static int MOUSE_ACTION_NONE = 1;
-        const static int MOUSE_ACTION_MOVED = 2;
-        const static int MOUSE_ACTION_MOVING = 3;
+        LodGenerator* mLodGenerator;
+        AssistConfigure* mAssistConfigure;
+        ModelConfigure* mModelConfigure;
+        TerrainConfigure* mTerrainConfigure;
 
-    private:
-        LodGenerator *mLodGenerator;
-        AssistConfigure *mAssistConfigure;
-        ModelConfigure *mModelConfigure;
-        TerrainConfigure *mTerrainConfigure;
+        ukive::TextView* mLodInfoTV;
+        ukive::ComPtr<ID3D11Buffer> mIndexBuffer;
+        ukive::ComPtr<ID3D11Buffer> mVertexBuffer;
 
-        void updateCube();
-        void updateLodTerrain();
-        void elementAwareness(int ex, int ey);
-        void getPickLine(int sx, int sy, dx::XMVECTOR *lineOrig, dx::XMVECTOR *lineDir);
+        Camera* mCamera;
+        GraphCreator* mGraphCreator;
 
-    public:
-        TerrainScene();
-        ~TerrainScene();
-
-        void recreate(int level);
-        void reevaluate(float c1, float c2);
-
-        virtual void onSceneCreate(ukive::Direct3DView* d3d_view) override;
-        virtual void onSceneResize(unsigned int width, unsigned int height) override;
-        virtual void onSceneInput(ukive::InputEvent *e) override;
-        virtual void onSceneRender() override;
-        virtual void onSceneDestroy() override;
-
-        Camera *getCamera();
-        GraphCreator *getGraphCreator();
-        ukive::DrawingObjectManager *getDrawingObjectManager();
+        ukive::Direct3DView* d3d_view_;
+        ukive::DrawingObjectManager* mDrawingObjectManager;
     };
 
 }

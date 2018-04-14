@@ -10,13 +10,7 @@ namespace ukive {
     public:
         Color();
         Color(const Color& color);
-        Color(unsigned int r, unsigned int g, unsigned int b);
-        Color(unsigned int a, unsigned int r, unsigned int g, unsigned int b);
-        Color(float r, float g, float b);
-        Color(float a, float r, float g, float b);
-        Color(unsigned int rgb, unsigned int a);
-        Color(unsigned int rgb, float a);
-        Color(unsigned int argb);
+        Color(float r, float g, float b, float a = 1.f);
 
         Color& operator=(const Color& rhs);
 
@@ -26,16 +20,18 @@ namespace ukive {
         float b;
 
     public:
-        /**
-         * 解析颜色字符串。
-         * 支持的格式：#RRGGBB 或 #AARRGGBB
-        */
-        static Color parse(string16 color);
+        // 解析颜色字符串。
+        // 支持的格式：#RRGGBB 或 #AARRGGBB
+        static Color parse(const string16& color);
 
-        static unsigned int GetA(unsigned int argb);
-        static unsigned int GetR(unsigned int argb);
-        static unsigned int GetG(unsigned int argb);
-        static unsigned int GetB(unsigned int argb);
+        static Color ofInt(int r, int g, int b, int a = 255);
+        static Color ofRGB(unsigned int rgb, float a = 1.f);
+        static Color ofARGB(unsigned int argb);
+
+        static int GetA(unsigned int argb);
+        static int GetR(unsigned int argb);
+        static int GetG(unsigned int argb);
+        static int GetB(unsigned int argb);
 
         // Color Black.
         const static Color Black;
@@ -44,27 +40,27 @@ namespace ukive {
         // Color Transparent
         const static Color Transparent;
 
-        //Material Color Red.
+        // Material Color Red.
         static Color Red50, Red100, Red200, Red300, Red400,
             Red500, Red600, Red700, Red800, Red900;
 
-        //Material Color Yellow.
+        // Material Color Yellow.
         static Color Yellow50, Yellow100, Yellow200, Yellow300, Yellow400,
             Yellow500, Yellow600, Yellow700, Yellow800, Yellow900;
 
-        //Material Color Pink.
+        // Material Color Pink.
         static Color Pink50, Pink100, Pink200, Pink300, Pink400,
             Pink500, Pink600, Pink700, Pink800, Pink900;
 
-        //Material Color Green.
+        // Material Color Green.
         static Color Green50, Green100, Green200, Green300, Green400,
             Green500, Green600, Green700, Green800, Green900;
 
-        //Material Color Blue.
+        // Material Color Blue.
         static Color Blue50, Blue100, Blue200, Blue300, Blue400,
             Blue500, Blue600, Blue700, Blue800, Blue900;
 
-        //Material Color Grey.
+        // Material Color Grey.
         static Color Grey50, Grey100, Grey200, Grey300, Grey400,
             Grey500, Grey600, Grey700, Grey800, Grey900;
 

@@ -430,9 +430,9 @@ namespace ukive {
             return;
         }
 
-        RectF srcRect(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
+        RectF src(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
 
-        drawBitmap(srcRect, srcRect, 1.f, bitmap);
+        drawBitmap(src, src, 1.f, bitmap);
     }
 
     void Canvas::drawBitmap(float x, float y, Bitmap* bitmap) {
@@ -442,10 +442,10 @@ namespace ukive {
 
         auto width = bitmap->getWidth();
         auto height = bitmap->getHeight();
-        RectF srcRect(0.f, 0.f, width, height);
-        RectF dstRect(x, y, width + x, height + y);
+        RectF src(0.f, 0.f, width, height);
+        RectF dst(x, y, width, height);
 
-        drawBitmap(srcRect, dstRect, 1.f, bitmap);
+        drawBitmap(src, dst, 1.f, bitmap);
     }
 
     void Canvas::drawBitmap(const RectF& dst, float opacity, Bitmap* bitmap) {
@@ -453,9 +453,9 @@ namespace ukive {
             return;
         }
 
-        RectF srcRect(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
+        RectF src(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
 
-        drawBitmap(srcRect, dst, opacity, bitmap);
+        drawBitmap(src, dst, opacity, bitmap);
     }
 
     void Canvas::drawBitmap(const RectF& src, const RectF& dst, float opacity, Bitmap* bitmap) {

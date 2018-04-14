@@ -15,6 +15,18 @@ namespace ukive {
         shutdownDXDevice();
     }
 
+    ComPtr<ID2D1DeviceContext> GraphicDeviceManager::createD2DDeviceContext() {
+        ComPtr<ID2D1DeviceContext> dc;
+
+        HRESULT hr = d2d_device_->CreateDeviceContext(
+            D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &dc);
+        if (FAILED(hr)) {
+            Log::e(L"GraphicsDeviceManager", L"failed to create d2d device context.");
+        }
+
+        return dc;
+    }
+
 
     void GraphicDeviceManager::EnumSystemFonts() {
         ComPtr<IDWriteFontCollection> collection;
@@ -124,8 +136,8 @@ namespace ukive {
         HRESULT hr = ::D3D11CreateDevice(0,
             D3D_DRIVER_TYPE_HARDWARE,
             0, D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-            featureLevel, 4, D3D11_SDK_VERSION,
-            &d3d_device_, 0, &d3d_devicecontext_);
+            featureLevel, ARRAYSIZE(featureLevel), D3D11_SDK_VERSION,
+            &d3d_device_, nullptr, &d3d_devicecontext_);
         if (FAILED(hr)) {
             Log::e(L"GraphicsDeviceManager", L"failed to create d3d device.");
             return;
@@ -193,115 +205,4 @@ namespace ukive {
         return d3d_devicecontext_;
     }
 
-    ComPtr<ID2D1DeviceContext> GraphicDeviceManager::createD2DDeviceContext() {
-        ComPtr<ID2D1DeviceContext> dc;
-
-        HRESULT hr = d2d_device_->CreateDeviceContext(
-            D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &dc);
-        if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create d2d device context.");
-        }
-
-        return dc;
-    }
-
-    ComPtr<ID2D1RenderTarget> GraphicDeviceManager::createWICRenderTarget(
-        IWICBitmap* wic_bitmap, bool dpi_awareness) {
-
-        ComPtr<ID2D1RenderTarget> render_target;
-
-        if (d2d_factory_) {
-            float dpi_x = 96.f;
-            float dpi_y = 96.f;
-            if (dpi_awareness) {
-                d2d_factory_->GetDesktopDpi(&dpi_x, &dpi_y);
-            }
-
-            const D2D1_PIXEL_FORMAT format =
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
-
-            const D2D1_RENDER_TARGET_PROPERTIES properties
-                = D2D1::RenderTargetProperties(
-                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                    format, dpi_x, dpi_y,
-                    D2D1_RENDER_TARGET_USAGE_NONE);
-
-            HRESULT hr = d2d_factory_->CreateWicBitmapRenderTarget(
-                wic_bitmap, properties, &render_target);
-            if (FAILED(hr)) {
-                DCHECK(false);
-                LOG(Log::WARNING) << "Failed to create WICBitmap RenderTarget: " << hr
-                    << ", DpiX: " << dpi_x << ", DpiY: " << dpi_y;
-                return {};
-            }
-        }
-
-        return render_target;
-    }
-
-    ComPtr<ID2D1DCRenderTarget> GraphicDeviceManager::createDCRenderTarget() {
-        ComPtr<ID2D1DCRenderTarget> render_target;
-
-        if (d2d_factory_) {
-            const D2D1_PIXEL_FORMAT format =
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
-                    D2D1_ALPHA_MODE_PREMULTIPLIED);
-
-            // DPI ¹Ì¶¨Îª 96
-            const D2D1_RENDER_TARGET_PROPERTIES properties =
-                D2D1::RenderTargetProperties(
-                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                    format);
-
-            HRESULT hr = d2d_factory_->CreateDCRenderTarget(
-                &properties, &render_target);
-            if (FAILED(hr)) {
-                DCHECK(false);
-                LOG(Log::WARNING) << "Failed to create DC RenderTarget: " << hr;
-                return {};
-            }
-        }
-
-        return render_target;
-    }
-
-    ComPtr<IDXGISurface> GraphicDeviceManager::createDXGISurface(int width, int height) {
-        D3D11_TEXTURE2D_DESC tex_desc = { 0 };
-        tex_desc.ArraySize = 1;
-        tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-        tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        tex_desc.Width = width;
-        tex_desc.Height = height;
-        tex_desc.MipLevels = 1;
-        tex_desc.SampleDesc.Count = 1;
-        tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
-
-        ComPtr<ID3D11Texture2D> d3d_texture;
-        HRESULT hr = d3d_device_->CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
-        DCHECK(SUCCEEDED(hr));
-
-        ComPtr<IDXGISurface> dxgi_surface = d3d_texture.cast<IDXGISurface>();
-        DCHECK(dxgi_surface != nullptr);
-
-        return dxgi_surface;
-    }
-
-    ComPtr<ID2D1RenderTarget> GraphicDeviceManager::createDXGIRenderTarget(
-        IDXGISurface* surface, bool dpi_awareness) {
-
-        D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-            D2D1_RENDER_TARGET_TYPE_DEFAULT,
-            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-            96, 96, D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE);
-
-        if (dpi_awareness) {
-            d2d_factory_->GetDesktopDpi(&props.dpiX, &props.dpiY);
-        }
-
-        ComPtr<ID2D1RenderTarget> render_target;
-        HRESULT hr = d2d_factory_->CreateDxgiSurfaceRenderTarget(surface, props, &render_target);
-        DCHECK(SUCCEEDED(hr));
-
-        return render_target;
-    }
 }

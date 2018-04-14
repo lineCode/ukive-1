@@ -4,7 +4,7 @@
 
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/direct3d/space.h"
-#include "ukive/graphics/drawing_object_manager.h"
+#include "ukive/graphics/direct3d/drawing_object_manager.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/direct3d_view.h"
 #include "ukive/window/window.h"
@@ -45,23 +45,16 @@ namespace shell {
 
         mLodGenerator = new LodGenerator(8192, 5);
 
-        HRESULT hr = ukive::Space::createVertexBuffer(
+        mVertexBuffer = ukive::Space::createVertexBuffer(
             mLodGenerator->getVertices(), sizeof(TerrainVertexData),
-            mLodGenerator->getVertexCount(), mVertexBuffer);
-        if (FAILED(hr))
-            throw std::runtime_error("");
+            mLodGenerator->getVertexCount());
 
-        hr = ukive::Space::createIndexBuffer(
+        mIndexBuffer = ukive::Space::createIndexBuffer(
             mLodGenerator->getIndices(),
-            mLodGenerator->getMaxIndexCount(), mIndexBuffer);
-        if (FAILED(hr))
-            throw std::runtime_error("");
+            mLodGenerator->getMaxIndexCount());
     }
 
-    TerrainScene::~TerrainScene()
-    {
-        mIndexBuffer->Release();
-        mVertexBuffer->Release();
+    TerrainScene::~TerrainScene() {
         delete mLodGenerator;
 
         delete mDrawingObjectManager;
@@ -70,39 +63,33 @@ namespace shell {
     }
 
 
-    void TerrainScene::updateCube()
-    {
-        auto *object = this->getDrawingObjectManager()
-            ->getByTag(kNormalCube);
-        if (object != nullptr)
-        {
-            D3D11_MAPPED_SUBRESOURCE source = ukive::Space::lockResource(object->vertexBuffer);
-            if (source.pData != nullptr)
-            {
-                auto *modelVertexData = (ModelVertexData*)source.pData;
+    void TerrainScene::updateCube() {
+        auto object = getDrawingObjectManager()->getByTag(kNormalCube);
+        if (object) {
+            D3D11_MAPPED_SUBRESOURCE source = ukive::Space::lockResource(object->vertexBuffer.get());
+            if (source.pData) {
+                auto locked_vd = reinterpret_cast<ModelVertexData*>(source.pData);
+                auto object_vd = reinterpret_cast<ModelVertexData*>(object->vertices);
 
-                ((ModelVertexData*)object->vertices)[0].position.x += 0.1f;
+                object_vd[0].position.x += 0.1f;
 
-                for (unsigned int i = 0; i < object->vertexCount; ++i)
-                {
-                    modelVertexData[i].position = ((ModelVertexData*)object->vertices)[i].position;
-                    modelVertexData[i].color = ((ModelVertexData*)object->vertices)[i].color;
-                    modelVertexData[i].normal = ((ModelVertexData*)object->vertices)[i].normal;
-                    modelVertexData[i].texcoord = ((ModelVertexData*)object->vertices)[i].texcoord;
+                for (unsigned int i = 0; i < object->vertexCount; ++i) {
+                    locked_vd[i].position = object_vd[i].position;
+                    locked_vd[i].color = object_vd[i].color;
+                    locked_vd[i].normal = object_vd[i].normal;
+                    locked_vd[i].texcoord = object_vd[i].texcoord;
                 }
 
-                ukive::Space::unlockResource(object->vertexBuffer);
+                ukive::Space::unlockResource(object->vertexBuffer.get());
             }
         }
     }
 
-    void TerrainScene::updateLodTerrain()
-    {
+    void TerrainScene::updateLodTerrain() {
         D3D11_MAPPED_SUBRESOURCE source
-            = ukive::Space::lockResource(mIndexBuffer);
-        if (source.pData != nullptr)
-        {
-            int* indices = (int*)source.pData;
+            = ukive::Space::lockResource(mIndexBuffer.get());
+        if (source.pData) {
+            int* indices = reinterpret_cast<int*>(source.pData);
 
             const dx::XMFLOAT3 *vPosition = getCamera()->getCameraPos();
 
@@ -111,12 +98,11 @@ namespace shell {
 
             mLodGenerator->renderLodTerrain(*vPosition, wvpMatrix, indices);
 
-            ukive::Space::unlockResource(mIndexBuffer);
+            ukive::Space::unlockResource(mIndexBuffer.get());
         }
     }
 
-    void TerrainScene::elementAwareness(int ex, int ey)
-    {
+    void TerrainScene::elementAwareness(int ex, int ey) {
         dx::XMVECTOR ori;
         dx::XMVECTOR dir;
         getPickLine(ex, ey, &ori, &dir);
@@ -125,31 +111,24 @@ namespace shell {
         dx::XMVECTOR vPos;
         ukive::DrawingObjectManager::DrawingObject *object
             = getDrawingObjectManager()->getByTag(kNormalCube);
-        if (object)
-        {
+        if (object) {
             ModelVertexData *vData = (ModelVertexData*)object->vertices;
-            for (unsigned int i = 0; i < object->vertexCount; ++i)
-            {
+            for (unsigned int i = 0; i < object->vertexCount; ++i) {
                 bool hit = false;
                 dx::XMVECTOR pos = DirectX::XMLoadFloat3(&vData[i].position);
                 dx::XMVECTOR distance = DirectX::XMVector3LinePointDistance(
                     ori, DirectX::XMVectorAdd(ori, dir), pos);
-                if (DirectX::XMVectorGetX(distance) < 20.f)
-                {
+                if (DirectX::XMVectorGetX(distance) < 20.f) {
                     vPos = pos;
                     isHitVer = true;
                 }
             }
 
-            if (isHitVer)
-            {
+            if (isHitVer) {
                 //getGraphCreator()->putBlock(155, &vPos, 10.f);
                 d3d_view_->invalidate();
-            }
-            else
-            {
-                if (getDrawingObjectManager()->contains(155))
-                {
+            } else {
+                if (getDrawingObjectManager()->contains(155)) {
                     getDrawingObjectManager()->removeByTag(155);
                     d3d_view_->invalidate();
                 }
@@ -157,8 +136,7 @@ namespace shell {
         }
     }
 
-    void TerrainScene::getPickLine(int sx, int sy, dx::XMVECTOR *lineOrig, dx::XMVECTOR *lineDir)
-    {
+    void TerrainScene::getPickLine(int sx, int sy, dx::XMVECTOR *lineOrig, dx::XMVECTOR *lineDir) {
         float vx, vy;
         const dx::XMFLOAT4X4 *worldMatrix;
         const dx::XMFLOAT4X4 *viewMatrix;
@@ -190,39 +168,29 @@ namespace shell {
     }
 
 
-    void TerrainScene::recreate(int level)
-    {
-        if (level > 0 && level != mLodGenerator->getLevel())
-        {
-            mIndexBuffer->Release();
-            mVertexBuffer->Release();
+    void TerrainScene::recreate(int level) {
+        if (level > 0 && level != mLodGenerator->getLevel()) {
             delete mLodGenerator;
 
             mLodGenerator = new LodGenerator(8192, level);
 
-            HRESULT hr = ukive::Space::createVertexBuffer(
+            mVertexBuffer = ukive::Space::createVertexBuffer(
                 mLodGenerator->getVertices(), sizeof(TerrainVertexData),
-                mLodGenerator->getVertexCount(), mVertexBuffer);
-            if (FAILED(hr))
-                throw std::runtime_error("");
+                mLodGenerator->getVertexCount());
 
-            hr = ukive::Space::createIndexBuffer(
+            mIndexBuffer = ukive::Space::createIndexBuffer(
                 mLodGenerator->getIndices(),
-                mLodGenerator->getMaxIndexCount(), mIndexBuffer);
-            if (FAILED(hr))
-                throw std::runtime_error("");
+                mLodGenerator->getMaxIndexCount());
         }
     }
 
-    void TerrainScene::reevaluate(float c1, float c2)
-    {
+    void TerrainScene::reevaluate(float c1, float c2) {
         mLodGenerator->setCoefficient(c1, c2);
         updateLodTerrain();
     }
 
 
-    void TerrainScene::onSceneCreate(ukive::Direct3DView* d3d_view)
-    {
+    void TerrainScene::onSceneCreate(ukive::Direct3DView* d3d_view) {
         d3d_view_ = d3d_view;
 
         getCamera()->setCameraPosition(1024, 1024, -1024);
@@ -249,8 +217,7 @@ namespace shell {
     }
 
 
-    void TerrainScene::onSceneResize(unsigned int width, unsigned int height)
-    {
+    void TerrainScene::onSceneResize(unsigned int width, unsigned int height) {
         Scene::onSceneResize(width, height);
 
         mWidth = width;
@@ -262,15 +229,12 @@ namespace shell {
     }
 
 
-    void TerrainScene::onSceneInput(ukive::InputEvent *e)
-    {
+    void TerrainScene::onSceneInput(ukive::InputEvent *e) {
         Scene::onSceneInput(e);
 
-        switch (e->getEvent())
-        {
+        switch (e->getEvent()) {
         case ukive::InputEvent::EVM_DOWN:
-            if (e->getMouseKey() == ukive::InputEvent::MK_LEFT)
-            {
+            if (e->getMouseKey() == ukive::InputEvent::MK_LEFT) {
                 mIsMouseLeftKeyPressed = true;
                 mPrevX = e->getMouseX();
                 mPrevY = e->getMouseY();
@@ -278,24 +242,20 @@ namespace shell {
             break;
 
         case ukive::InputEvent::EVM_MOVE:
-            if (mIsMouseLeftKeyPressed == true)
-            {
+            if (mIsMouseLeftKeyPressed == true) {
                 mMouseActionMode = MOUSE_ACTION_MOVED;
 
                 int dx = e->getMouseX() - mPrevX;
                 int dy = e->getMouseY() - mPrevY;
 
-                if (::GetKeyState(VK_SHIFT) < 0)
-                {
+                if (::GetKeyState(VK_SHIFT) < 0) {
                     getCamera()->circuleCamera2(
                         (float)-dx / mWidth,
                         (float)-dy / mHeight);
 
                     updateLodTerrain();
                     d3d_view_->invalidate();
-                }
-                else if (::GetKeyState(VK_CONTROL) < 0)
-                {
+                } else if (::GetKeyState(VK_CONTROL) < 0) {
                     getCamera()->moveCamera((float)-dx, (float)dy);
 
                     updateLodTerrain();
@@ -304,16 +264,16 @@ namespace shell {
 
                 mPrevX = e->getMouseX();
                 mPrevY = e->getMouseY();
-            }
-            else
+            } else {
                 elementAwareness(e->getMouseX(), e->getMouseY());
+            }
             break;
 
         case ukive::InputEvent::EVM_UP:
-            if (e->getMouseKey() == ukive::InputEvent::MK_LEFT)
-            {
-                if (mMouseActionMode != MOUSE_ACTION_MOVED)
+            if (e->getMouseKey() == ukive::InputEvent::MK_LEFT) {
+                if (mMouseActionMode != MOUSE_ACTION_MOVED) {
                     updateCube();
+                }
 
                 mIsMouseLeftKeyPressed = false;
             }
@@ -322,17 +282,21 @@ namespace shell {
             break;
 
         case ukive::InputEvent::EVK_DOWN:
-            if (e->getKeyboardKey() == VK_SHIFT)
+            if (e->getKeyboardKey() == VK_SHIFT) {
                 mIsShiftKeyPressed = true;
-            if (e->getKeyboardKey() == VK_CONTROL)
+            }
+            if (e->getKeyboardKey() == VK_CONTROL) {
                 mIsCtrlKeyPressed = true;
+            }
             break;
 
         case ukive::InputEvent::EVK_UP:
-            if (e->getKeyboardKey() == VK_SHIFT)
+            if (e->getKeyboardKey() == VK_SHIFT) {
                 mIsShiftKeyPressed = false;
-            if (e->getKeyboardKey() == VK_CONTROL)
+            }
+            if (e->getKeyboardKey() == VK_CONTROL) {
                 mIsCtrlKeyPressed = false;
+            }
             break;
 
         case ukive::InputEvent::EVM_WHEEL:
@@ -343,33 +307,31 @@ namespace shell {
         }
     }
 
-    void TerrainScene::onSceneRender()
-    {
+    void TerrainScene::onSceneRender() {
         ULONG64 currentTime = ukive::SystemClock::upTimeMillis();
-        if (mPrevTime > 0)
-        {
+        if (mPrevTime > 0) {
             ++mFrameCounter;
-            if (currentTime - mPrevTime > 500)
-            {
+            if (currentTime - mPrevTime > 500) {
                 mFramePreSecond = (int)(((double)mFrameCounter / (currentTime - mPrevTime)) * 1000);
                 mFrameCounter = 0;
                 mPrevTime = currentTime;
             }
-        }
-        else
+        } else {
             mPrevTime = currentTime;
+        }
 
         std::wstringstream ss;
         ss << "FPS: " << mFramePreSecond
-            << "\nTerrain Size: " << mLodGenerator->getRowVertexCount() << "x" << mLodGenerator->getRowVertexCount()
+            << "\nTerrain Size: " << mLodGenerator->getRowVertexCount()
+            << "x" << mLodGenerator->getRowVertexCount()
             << "\nTriangle Count: " << mLodGenerator->getMaxIndexCount() / 3
             << "\nRendered Triangle Count: " << mLodGenerator->getIndexCount() / 3;
 
-        if (mLodInfoTV)
+        if (mLodInfoTV) {
             mLodInfoTV->setText(ss.str());
-        else
+        } else {
             mLodInfoTV = (ukive::TextView*)d3d_view_->getWindow()->findViewById(0x010);
-
+        }
 
         dx::XMFLOAT4X4 wvpMatrix;
         dx::XMFLOAT4X4 wvpMatrixTransposed;
@@ -388,7 +350,9 @@ namespace shell {
         mTerrainConfigure->setMatrix(wvpMatrixTransposed);
 
         ukive::Space::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        ukive::Space::draw(mVertexBuffer, mIndexBuffer, sizeof(TerrainVertexData), mLodGenerator->getIndexCount());
+        ukive::Space::draw(
+            mVertexBuffer.get(), mIndexBuffer.get(),
+            sizeof(TerrainVertexData), mLodGenerator->getIndexCount());
 
         //ukive::Renderer::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         //ukive::Renderer::drawObjects(getDrawingObjectManager()->getByTag(155));
@@ -422,15 +386,15 @@ namespace shell {
         }
     }
 
-    Camera *TerrainScene::getCamera() {
+    Camera* TerrainScene::getCamera() {
         return mCamera;
     }
 
-    GraphCreator *TerrainScene::getGraphCreator() {
+    GraphCreator* TerrainScene::getGraphCreator() {
         return mGraphCreator;
     }
 
-    ukive::DrawingObjectManager *TerrainScene::getDrawingObjectManager() {
+    ukive::DrawingObjectManager* TerrainScene::getDrawingObjectManager() {
         return mDrawingObjectManager;
     }
 

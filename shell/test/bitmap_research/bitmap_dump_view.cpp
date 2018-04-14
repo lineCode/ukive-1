@@ -45,8 +45,8 @@ namespace shell {
         scale_factor_ = 1.f;
         cell_width_ = kCellWidth;
 
-        ukive::Renderer::createTextFormat(
-            L"Consolas", 15, L"en-US", &text_format_);
+        text_format_ = ukive::Renderer::createTextFormat(
+            L"Consolas", 15, L"en-US");
         text_format_->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
         text_format_->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     }
@@ -94,7 +94,7 @@ namespace shell {
         for (int h = 0; h < bitmap_height_; ++h) {
             for (int w = 0; w < bitmap_width_; ++w) {
                 unsigned int color_int = pixels_[h][w];
-                ukive::Color color(color_int);
+                ukive::Color color = ukive::Color::ofARGB(color_int);
 
                 ukive::RectF cell_rect(
                     cur_x, cur_y, cell_width_, cell_width_);

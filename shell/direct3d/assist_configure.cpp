@@ -14,61 +14,57 @@ namespace shell {
     }
 
     HRESULT AssistConfigure::init() {
-        UINT numElements;
-        D3D11_INPUT_ELEMENT_DESC polygonLayout[3];
+        D3D11_INPUT_ELEMENT_DESC layout[3];
 
-        polygonLayout[0].SemanticName = "POSITION";
-        polygonLayout[0].SemanticIndex = 0;
-        polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-        polygonLayout[0].InputSlot = 0;
-        polygonLayout[0].AlignedByteOffset = 0;
-        polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[0].InstanceDataStepRate = 0;
+        layout[0].SemanticName = "POSITION";
+        layout[0].SemanticIndex = 0;
+        layout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+        layout[0].InputSlot = 0;
+        layout[0].AlignedByteOffset = 0;
+        layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[0].InstanceDataStepRate = 0;
 
-        polygonLayout[1].SemanticName = "COLOR";
-        polygonLayout[1].SemanticIndex = 0;
-        polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-        polygonLayout[1].InputSlot = 0;
-        polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[1].InstanceDataStepRate = 0;
+        layout[1].SemanticName = "COLOR";
+        layout[1].SemanticIndex = 0;
+        layout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+        layout[1].InputSlot = 0;
+        layout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+        layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[1].InstanceDataStepRate = 0;
 
-        polygonLayout[2].SemanticName = "TEXCOORD";
-        polygonLayout[2].SemanticIndex = 0;
-        polygonLayout[2].Format = DXGI_FORMAT_R32G32_FLOAT;
-        polygonLayout[2].InputSlot = 0;
-        polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[2].InstanceDataStepRate = 0;
+        layout[2].SemanticName = "TEXCOORD";
+        layout[2].SemanticIndex = 0;
+        layout[2].Format = DXGI_FORMAT_R32G32_FLOAT;
+        layout[2].InputSlot = 0;
+        layout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+        layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[2].InstanceDataStepRate = 0;
 
-        numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+        ukive::string16 shader_path(::_wgetcwd(nullptr, 0));
 
-        ukive::string16 shaderFileName(::_wgetcwd(nullptr, 0));
+        ukive::Space::createVertexShader(
+            shader_path + L"\\assist_vertex_shader.cso",
+            layout, ARRAYSIZE(layout), &vertex_shader_, &input_layout_);
 
-        RH(ukive::Space::createVertexShader(
-            shaderFileName + L"\\assist_vertex_shader.cso",
-            polygonLayout, numElements, &mVertexShader, &mInputLayout));
+        ukive::Space::createPixelShader(
+            shader_path + L"\\assist_pixel_shader.cso",
+            &pixel_shader_);
 
-        RH(ukive::Space::createPixelShader(
-            shaderFileName + L"\\assist_pixel_shader.cso",
-            &mPixelShader));
-
-        RH(ukive::Space::createConstantBuffer(
-            sizeof(AssistConstBuffer), &mAssistConstBuffer));
+        const_buffer_ = ukive::Space::createConstantBuffer(sizeof(AssistConstBuffer));
 
         return S_OK;
     }
 
     void AssistConfigure::active() {
-        ukive::Space::setVertexShader(mVertexShader.get());
-        ukive::Space::setPixelShader(mPixelShader.get());
-        ukive::Space::setInputLayout(mInputLayout.get());
+        ukive::Space::setVertexShader(vertex_shader_.get());
+        ukive::Space::setPixelShader(pixel_shader_.get());
+        ukive::Space::setInputLayout(input_layout_.get());
     }
 
     void AssistConfigure::reset() {
-        ukive::Space::setVertexShader(mVertexShader.get());
-        ukive::Space::setPixelShader(mPixelShader.get());
-        ukive::Space::setInputLayout(mInputLayout.get());
+        ukive::Space::setVertexShader(vertex_shader_.get());
+        ukive::Space::setPixelShader(pixel_shader_.get());
+        ukive::Space::setInputLayout(input_layout_.get());
     }
 
     void AssistConfigure::close() {
@@ -77,11 +73,11 @@ namespace shell {
     void AssistConfigure::setMatrix(dx::XMFLOAT4X4 matrix) {
         D3D11_MAPPED_SUBRESOURCE resource;
 
-        resource = ukive::Space::lockResource(mAssistConstBuffer.get());
-        ((AssistConstBuffer*)resource.pData)->mWVP = matrix;
-        ukive::Space::unlockResource(mAssistConstBuffer.get());
+        resource = ukive::Space::lockResource(const_buffer_.get());
+        (reinterpret_cast<AssistConstBuffer*>(resource.pData))->wvp = matrix;
+        ukive::Space::unlockResource(const_buffer_.get());
 
-        ukive::Space::setConstantBuffers(0, 1, &mAssistConstBuffer);
+        ukive::Space::setConstantBuffers(0, 1, &const_buffer_);
     }
 
 }

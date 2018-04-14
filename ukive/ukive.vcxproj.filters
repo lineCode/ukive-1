@@ -69,9 +69,6 @@
     <ClCompile Include="message\message_queue.cpp">
       <Filter>message</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\drawing_object_manager.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="animation\animation_manager.cpp">
       <Filter>animation</Filter>
     </ClCompile>
@@ -279,6 +276,9 @@
     <ClCompile Include="graphics\point.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp">
+      <Filter>graphics\direct3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -366,9 +366,6 @@
     </ClInclude>
     <ClInclude Include="utils\hresult_utils.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\drawing_object_manager.h">
-      <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="animation\animation_manager.h">
       <Filter>animation</Filter>
@@ -597,6 +594,9 @@
     </ClInclude>
     <ClInclude Include="graphics\point.h">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\direct3d\drawing_object_manager.h">
+      <Filter>graphics\direct3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -22,24 +22,21 @@ namespace ukive {
         void onPostSwapChainResize() override;
 
     protected:
-        void onMeasure(int width, int height, int widthSpec, int heightSpec) override;
+        void onMeasure(int width, int height, int width_spec, int height_spec) override;
         void onLayout(
             bool changed, bool size_changed,
             int left, int top, int right, int bottom) override;
-        void onSizeChanged(int width, int height, int oldWidth, int oldHeight) override;
+        void onSizeChanged(int width, int height, int old_width, int old_height) override;
         void onDraw(Canvas* canvas) override;
         bool onInputEvent(InputEvent* e) override;
 
     private:
-        void initDirect3DView();
-
-        HRESULT createState();
+        void createState();
         void releaseState();
 
-        void setViewports(
-            float x, float y, float width, float height);
+        void setViewports(float x, float y, float width, float height);
 
-        HRESULT createResourceView(unsigned int width, unsigned int height);
+        void createResourceView(int width, int height);
         void releaseResourceView();
 
         Scene* scene_;

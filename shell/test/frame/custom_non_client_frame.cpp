@@ -43,27 +43,8 @@ namespace shell {
         window_ = w;
         *handled = true;
 
-        const D2D1_PIXEL_FORMAT format =
-            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
-                D2D1_ALPHA_MODE_PREMULTIPLIED);
-
-        const D2D1_RENDER_TARGET_PROPERTIES properties =
-            D2D1::RenderTargetProperties(
-                D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                format);
-
-        auto factory = ukive::Application::getGraphicDeviceManager()->getD2DFactory();
-        HRESULT hr = factory->CreateDCRenderTarget(&properties, &dc_target_);
-        if (FAILED(hr)) {
-            ukive::Log::e(L"CustomNonClientFrame", L"Failed to create dc RT!");
-            return FALSE;
-        }
-
-        hr = ukive::Renderer::createTextFormat(L"Î¢ÈíÑÅºÚ", 15, L"zh-CN", &text_format_);
-        if (FAILED(hr)) {
-            ukive::Log::e(L"CustomNonClientFrame", L"Failed to create text format!");
-            return FALSE;
-        }
+        dc_target_ = ukive::Renderer::createDCRenderTarget();
+        text_format_ = ukive::Renderer::createTextFormat(L"Î¢ÈíÑÅºÚ", 15, L"zh-CN");
 
         //resources used to drawing Non-client.
         min_button_color_ = kMinButtonColor;

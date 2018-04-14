@@ -11,14 +11,11 @@ namespace ukive {
 
     class Number {
     public:
-        static const int MIN_RADIX = 2;
-        static const int MAX_RADIX = 36;
-
         static int digit(wchar_t code, int radix);
         static wchar_t character(int number);
 
-        static int32_t parseInt(string16 s, int radix);
-        static int64_t parseInt64(string16 s, int radix);
+        static int parseInt(const string8& s, int radix = 10);
+        static int parseInt(const string16& s, int radix = 10);
 
     private:
         Number();

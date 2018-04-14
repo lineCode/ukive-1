@@ -29,9 +29,9 @@ namespace shell {
         void scaleWorld(int direction);
         void rotateWorld(float dxAngle, float dyAngle);
 
-        //该方法有缺陷，请看方法内注释。
+        // 该方法有缺陷，请看方法内注释。
         void setCameraPosition(float x, float y, float z);
-        //该方法有缺陷，请看方法内注释。
+        // 该方法有缺陷，请看方法内注释。
         void setCameraLookAt(float x, float y, float z);
 
         const dx::XMFLOAT3* getCameraPos();

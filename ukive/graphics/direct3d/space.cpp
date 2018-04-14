@@ -2,6 +2,7 @@
 
 #include <fstream>
 
+#include "ukive/log.h"
 #include "ukive/application.h"
 #include "ukive/utils/hresult_utils.h"
 
@@ -17,7 +18,7 @@ namespace ukive {
 
         gdm->getD3DDeviceContext()->IASetVertexBuffers(
             0, 1, &object->vertexBuffer, &object->vertexStructSize, &object->vertexDataOffset);
-        gdm->getD3DDeviceContext()->IASetIndexBuffer(object->indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+        gdm->getD3DDeviceContext()->IASetIndexBuffer(object->indexBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
         gdm->getD3DDeviceContext()->DrawIndexed(object->indexCount, 0, 0);
     }
 
@@ -61,14 +62,20 @@ namespace ukive {
             startSlot, NumBuffers, ppConstantBuffers);
     }
 
-    HRESULT Space::createVertexShader(
-        const string16 fileName,
-        D3D11_INPUT_ELEMENT_DESC* polygonLayout,
-        UINT numElements,
-        ID3D11VertexShader** vertexShader,
-        ID3D11InputLayout** inputLayout) {
+    void Space::createVertexShader(
+        const string16& file_name,
+        D3D11_INPUT_ELEMENT_DESC* layout,
+        UINT layout_count,
+        ID3D11VertexShader** vertex_shader,
+        ID3D11InputLayout** input_layout) {
 
-        std::ifstream reader(fileName.c_str(), std::ios::binary);
+        std::ifstream reader(file_name.c_str(), std::ios::binary);
+        if (!reader) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to open file: " << file_name.c_str();
+            return;
+        }
+
         auto cpos = reader.tellg();
         reader.seekg(0, std::ios_base::end);
         size_t charSize = (size_t)reader.tellg();
@@ -79,23 +86,35 @@ namespace ukive {
 
         auto gdm = Application::getGraphicDeviceManager();
 
-        RH(gdm->getD3DDevice()->CreateVertexShader(
-            shaderBuf, charSize, 0, vertexShader));
+        HRESULT hr = gdm->getD3DDevice()->CreateVertexShader(
+            shaderBuf, charSize, 0, vertex_shader);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create vertex shader: " << hr;
+        }
 
-        RH(gdm->getD3DDevice()->CreateInputLayout(
-            polygonLayout, numElements,
-            shaderBuf, charSize, inputLayout));
+        hr = gdm->getD3DDevice()->CreateInputLayout(
+            layout, layout_count,
+            shaderBuf, charSize, input_layout);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create input layout: " << hr;
+        }
 
         delete[] shaderBuf;
-
-        return S_OK;
     }
 
-    HRESULT Space::createPixelShader(
-        const string16 fileName,
-        ID3D11PixelShader** pixelShader) {
+    void Space::createPixelShader(
+        const string16& file_name,
+        ID3D11PixelShader** pixel_shader) {
 
-        std::ifstream reader(fileName.c_str(), std::ios::binary);
+        std::ifstream reader(file_name.c_str(), std::ios::binary);
+        if (!reader) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to open file: " << file_name.c_str();
+            return;
+        }
+
         auto cpos = reader.tellg();
         reader.seekg(0, std::ios_base::end);
         size_t charSize = (size_t)reader.tellg();
@@ -104,80 +123,93 @@ namespace ukive {
         char* shaderBuf = new char[charSize];
         reader.read(shaderBuf, charSize);
 
-        RH(Application::getGraphicDeviceManager()->getD3DDevice()->CreatePixelShader(
-            shaderBuf, charSize, 0, pixelShader));
+        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()->CreatePixelShader(
+            shaderBuf, charSize, 0, pixel_shader);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create pixel shader: " << hr;
+        }
 
         delete[] shaderBuf;
-
-        return S_OK;
     }
 
 
-    HRESULT Space::createVertexBuffer(
-        void* vertices, UINT structSize, UINT vertexCount, ID3D11Buffer*& vertexBuffer) {
+    ComPtr<ID3D11Buffer> Space::createVertexBuffer(
+        void* vertices, UINT struct_size, UINT vertex_count) {
 
-        D3D11_BUFFER_DESC vertexBufferDesc;
-        D3D11_SUBRESOURCE_DATA vertexData;
+        D3D11_BUFFER_DESC vb_desc;
+        D3D11_SUBRESOURCE_DATA vertex_data;
 
-        vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        vertexBufferDesc.ByteWidth = structSize * vertexCount;
-        vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        vertexBufferDesc.MiscFlags = 0;
-        vertexBufferDesc.StructureByteStride = 0;
+        vb_desc.Usage = D3D11_USAGE_DYNAMIC;
+        vb_desc.ByteWidth = struct_size * vertex_count;
+        vb_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        vb_desc.MiscFlags = 0;
+        vb_desc.StructureByteStride = 0;
 
-        vertexData.pSysMem = vertices;
-        vertexData.SysMemPitch = 0;
-        vertexData.SysMemSlicePitch = 0;
+        vertex_data.pSysMem = vertices;
+        vertex_data.SysMemPitch = 0;
+        vertex_data.SysMemSlicePitch = 0;
 
-        RH(Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexBuffer));
+        ComPtr<ID3D11Buffer> vertex_buffer;
+        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()
+            ->CreateBuffer(&vb_desc, &vertex_data, &vertex_buffer);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create vertex buffer: " << hr;
+        }
 
-        return S_OK;
+        return vertex_buffer;
     }
 
-    HRESULT Space::createIndexBuffer(int* indices, UINT indexCount, ID3D11Buffer*& indexBuffer) {
-        D3D11_BUFFER_DESC indexBufferDesc;
-        D3D11_SUBRESOURCE_DATA indexData;
+    ComPtr<ID3D11Buffer> Space::createIndexBuffer(int* indices, UINT index_count) {
+        D3D11_BUFFER_DESC ib_desc;
+        D3D11_SUBRESOURCE_DATA index_data;
 
         // ÉèÖÃË÷Òý»º³åÃèÊö.
-        indexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        indexBufferDesc.ByteWidth = sizeof(int)* indexCount;
-        indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        indexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        indexBufferDesc.MiscFlags = 0;
-        indexBufferDesc.StructureByteStride = 0;
+        ib_desc.Usage = D3D11_USAGE_DYNAMIC;
+        ib_desc.ByteWidth = sizeof(int)* index_count;
+        ib_desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        ib_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        ib_desc.MiscFlags = 0;
+        ib_desc.StructureByteStride = 0;
 
         // Ö¸Ïò´æÁÙÊ±Ë÷Òý»º³å.
-        indexData.pSysMem = indices;
-        indexData.SysMemPitch = 0;
-        indexData.SysMemSlicePitch = 0;
+        index_data.pSysMem = indices;
+        index_data.SysMemPitch = 0;
+        index_data.SysMemSlicePitch = 0;
 
         // ´´½¨Ë÷Òý»º³å.
-        RH(Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer));
+        ComPtr<ID3D11Buffer> index_buffer;
+        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()
+            ->CreateBuffer(&ib_desc, &index_data, &index_buffer);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create index buffer: " << hr;
+        }
 
-        return S_OK;
+        return index_buffer;
     }
 
-    HRESULT Space::createConstantBuffer(UINT size, ID3D11Buffer** buffer) {
-        HRESULT hr = E_FAIL;
-        ID3D11Buffer* _buffer = 0;
-        D3D11_BUFFER_DESC constBufferDesc;
+    ComPtr<ID3D11Buffer> Space::createConstantBuffer(UINT size) {
+        D3D11_BUFFER_DESC cb_desc;
 
-        constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        constBufferDesc.ByteWidth = size;
-        constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        constBufferDesc.MiscFlags = 0;
-        constBufferDesc.StructureByteStride = 0;
+        cb_desc.Usage = D3D11_USAGE_DYNAMIC;
+        cb_desc.ByteWidth = size;
+        cb_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        cb_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+        cb_desc.MiscFlags = 0;
+        cb_desc.StructureByteStride = 0;
 
-        hr = Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&constBufferDesc, 0, &_buffer);
+        ComPtr<ID3D11Buffer> buffer;
+        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()
+            ->CreateBuffer(&cb_desc, 0, &buffer);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create const buffer: " << hr;
+        }
 
-        *buffer = _buffer;
-
-        return hr;
+        return buffer;
     }
 
     D3D11_MAPPED_SUBRESOURCE Space::lockResource(ID3D11Resource* resource) {
@@ -186,8 +218,9 @@ namespace ukive {
 
         hr = Application::getGraphicDeviceManager()->getD3DDeviceContext()
             ->Map(resource, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-        if (SUCCEEDED(hr))
+        if (SUCCEEDED(hr)) {
             return mappedResource;
+        }
 
         mappedResource.pData = nullptr;
         return mappedResource;

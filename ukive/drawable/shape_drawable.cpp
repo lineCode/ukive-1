@@ -14,9 +14,7 @@ namespace ukive {
         has_solid_(false),
         has_stroke_(false),
         round_radius_(1.f),
-        stroke_width_(1.f),
-        solid_color_(0, 0.f),
-        stroke_color_(0, 0.f) {
+        stroke_width_(1.f) {
     }
 
 
