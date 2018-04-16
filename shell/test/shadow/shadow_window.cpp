@@ -9,8 +9,14 @@
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/button.h"
+#include "ukive/graphics/bitmap.h"
 
 #include "shadow_effect.h"
+#include "ukive/graphics/direct3d/effects/shadow_effect.h"
+
+#define RADIUS 128
+#define BACKGROUND_SIZE 100
+#define TEXTURE_SIZE (BACKGROUND_SIZE + RADIUS * 2)
 
 
 namespace shell {
@@ -27,6 +33,45 @@ namespace shell {
         hr = getRenderer()->getD2DDeviceContext()->CreateEffect(CLSID_ShadowEffect, &effect_);
         DCHECK(SUCCEEDED(hr));
 
+        d3d_tex2d_ = ukive::Renderer::createTexture2D(TEXTURE_SIZE, TEXTURE_SIZE);
+
+        auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
+        if (!dxgi_surface) {
+            DCHECK(false);
+            LOG(ukive::Log::WARNING) << "Failed to query DXGI surface.";
+            return;
+        }
+
+        auto d2d_rt = ukive::Renderer::createDXGIRenderTarget(dxgi_surface.get(), false);
+
+        d2d_rt->BeginDraw();
+        d2d_rt->Clear();
+        ukive::Canvas canvas(d2d_rt);
+        canvas.translate(RADIUS, RADIUS);
+        canvas.fillRect(ukive::RectF(0, 0, BACKGROUND_SIZE, BACKGROUND_SIZE), ukive::Color::Red200);
+        //canvas.fillCircle(BACKGROUND_SIZE / 2.f, BACKGROUND_SIZE / 2.f, BACKGROUND_SIZE / 5.f, ukive::Color::Green200);
+        hr = d2d_rt->EndDraw();
+        DCHECK(SUCCEEDED(hr));
+
+        d3d_effect_ = new ukive::ShadowEffect(RADIUS);
+        d3d_effect_->setSize(TEXTURE_SIZE, TEXTURE_SIZE);
+        d3d_effect_->setContent(d3d_tex2d_.get());
+
+        d3d_effect_->draw();
+
+        D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
+            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+
+        auto d2d_dc = getRenderer()->getD2DDeviceContext();
+        hr = d2d_dc->CreateSharedBitmap(
+            __uuidof(IDXGISurface), d3d_effect_->getOutput().cast<IDXGISurface>().get(), &bmp_prop, &d3d_content_);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(ukive::Log::WARNING) << "Failed to create shared bitmap: " << hr;
+            return;
+        }
+
+
         using Rlp = ukive::RestraintLayoutParams;
 
         auto layout = new ukive::RestraintLayout(this);
@@ -40,7 +85,7 @@ namespace shell {
         de_button_->setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         de_button_->setTextSize(14);
         de_button_->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
-        de_button_->setElevation(16);
+        de_button_->setElevation(0);
 
         auto de_button_lp = Rlp::Builder(dpToPx(200), dpToPx(100))
             .start(layout->getId(), Rlp::START, dpToPx(100)).top(layout->getId())
@@ -63,13 +108,13 @@ namespace shell {
         animator_ = new ukive::Animator(getAnimationManager());
         animator_->addVariable(0, 16, 0, 100);
         animator_->setOnValueChangedListener(0, this);
-        animator_->startTransition(0, ukive::Transition::linearTransition(2, 256));
+        //animator_->startTransition(0, ukive::Transition::linearTransition(2, 256));
     }
 
     void ShadowWindow::onDrawCanvas(ukive::Canvas *canvas) {
         Window::onDrawCanvas(canvas);
 
-        auto bounds = ce_button_->getBounds();
+        /*auto bounds = ce_button_->getBounds();
         effect_->SetValue(
             SHADOW_EFFECT_PROP_BOUNDS,
             D2D1::Vector4F(bounds.left, bounds.top, bounds.right, bounds.bottom));
@@ -83,7 +128,10 @@ namespace shell {
         effect_->SetValue(
             SHADOW_EFFECT_PROP_CORNER_RADIUS, dpToPx(2.f));
 
-       getRenderer()->getD2DDeviceContext()->DrawImage(effect_.get());
+       getRenderer()->getD2DDeviceContext()->DrawImage(effect_.get());*/
+
+        ukive::Bitmap bmp(d3d_content_);
+        canvas->drawBitmap(100, 1, &bmp);
     }
 
     void ShadowWindow::onDestroy() {

@@ -81,13 +81,13 @@ namespace ukive {
         size_t charSize = (size_t)reader.tellg();
         reader.seekg(cpos);
 
-        char* shaderBuf = new char[charSize];
-        reader.read(shaderBuf, charSize);
+        std::unique_ptr<char[]> buf(new char[charSize]());
+        reader.read(buf.get(), charSize);
 
         auto gdm = Application::getGraphicDeviceManager();
 
         HRESULT hr = gdm->getD3DDevice()->CreateVertexShader(
-            shaderBuf, charSize, 0, vertex_shader);
+            buf.get(), charSize, 0, vertex_shader);
         if (FAILED(hr)) {
             DCHECK(false);
             LOG(Log::WARNING) << "Failed to create vertex shader: " << hr;
@@ -95,13 +95,11 @@ namespace ukive {
 
         hr = gdm->getD3DDevice()->CreateInputLayout(
             layout, layout_count,
-            shaderBuf, charSize, input_layout);
+            buf.get(), charSize, input_layout);
         if (FAILED(hr)) {
             DCHECK(false);
             LOG(Log::WARNING) << "Failed to create input layout: " << hr;
         }
-
-        delete[] shaderBuf;
     }
 
     void Space::createPixelShader(
@@ -120,17 +118,15 @@ namespace ukive {
         size_t charSize = (size_t)reader.tellg();
         reader.seekg(cpos);
 
-        char* shaderBuf = new char[charSize];
-        reader.read(shaderBuf, charSize);
+        std::unique_ptr<char[]> buf(new char[charSize]());
+        reader.read(buf.get(), charSize);
 
         HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()->CreatePixelShader(
-            shaderBuf, charSize, 0, pixel_shader);
+            buf.get(), charSize, 0, pixel_shader);
         if (FAILED(hr)) {
             DCHECK(false);
             LOG(Log::WARNING) << "Failed to create pixel shader: " << hr;
         }
-
-        delete[] shaderBuf;
     }
 
 

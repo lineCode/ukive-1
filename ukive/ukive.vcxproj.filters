@@ -279,6 +279,9 @@
     <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp">
       <Filter>graphics\direct3d</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\direct3d\effects\shadow_effect.cpp">
+      <Filter>graphics\direct3d\effects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -598,6 +601,9 @@
     <ClInclude Include="graphics\direct3d\drawing_object_manager.h">
       <Filter>graphics\direct3d</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\direct3d\effects\shadow_effect.h">
+      <Filter>graphics\direct3d\effects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -648,5 +654,19 @@
     <Filter Include="graphics\direct3d">
       <UniqueIdentifier>{9f042d8b-7913-4a2a-ab66-69969e03967e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphics\direct3d\effects">
+      <UniqueIdentifier>{6db64e0d-5acc-429c-b3bc-55195c4c0f18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\direct3d\hlsl">
+      <UniqueIdentifier>{b6700bbc-a76b-4523-845c-fef6a4494830}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_ps.hlsl">
+      <Filter>graphics\direct3d\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_vs.hlsl">
+      <Filter>graphics\direct3d\hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

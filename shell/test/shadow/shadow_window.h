@@ -11,6 +11,7 @@
 namespace ukive {
     class Button;
     class Canvas;
+    class ShadowEffect;
 }
 
 namespace shell {
@@ -43,6 +44,10 @@ namespace shell {
 
         ukive::Animator* animator_;
         ukive::ComPtr<ID2D1Effect> effect_;
+
+        ukive::ShadowEffect* d3d_effect_;
+        ukive::ComPtr<ID2D1Bitmap> d3d_content_;
+        ukive::ComPtr<ID3D11Texture2D> d3d_tex2d_;
     };
 
 }

@@ -437,6 +437,7 @@ namespace ukive {
         tex_desc.Height = height;
         tex_desc.MipLevels = 1;
         tex_desc.SampleDesc.Count = 1;
+        tex_desc.SampleDesc.Quality = 0;
         tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
 
         ComPtr<ID3D11Texture2D> d3d_texture;
