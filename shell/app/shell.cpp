@@ -33,20 +33,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     text_window->center();
     text_window->show();*/
 
-    //auto lod_window = std::make_shared<shell::LodWindow>();
-    //lod_window->setTitle(L"Test");
-    //lod_window->setWidth(ukive::Application::dpToPx(600));
-    //lod_window->setHeight(ukive::Application::dpToPx(500));
-    ////lod_window->setTranslucent(true);
-    //lod_window->center();
-    //lod_window->show();
+    auto lod_window = std::make_shared<shell::LodWindow>();
+    lod_window->setTitle(L"Test");
+    lod_window->setWidth(ukive::Application::dpToPx(600));
+    lod_window->setHeight(ukive::Application::dpToPx(500));
+    //lod_window->setTranslucent(true);
+    lod_window->center();
+    lod_window->show();
 
-    auto shadow_window = std::make_shared<shell::ShadowWindow>();
+    /*auto shadow_window = std::make_shared<shell::ShadowWindow>();
     shadow_window->setTitle(L"Test");
     shadow_window->setWidth(ukive::Application::dpToPx(600));
     shadow_window->setHeight(ukive::Application::dpToPx(400));
     shadow_window->center();
-    shadow_window->show();
+    shadow_window->show();*/
 
     /*auto test_window = std::make_shared<shell::TestWindow>();
     test_window->setTitle(L"Test");

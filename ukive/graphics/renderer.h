@@ -26,29 +26,16 @@ namespace ukive {
         bool render(const Color& bg_color, std::function<void()> callback);
         void close();
 
-        HRESULT drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap);
-
         void addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
         void removeSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);
         void removeAllSwapChainResizeNotifier();
 
-        ComPtr<ID2D1Bitmap1> createBitmapRenderTarget(
-            IWICBitmap* wic_bitmap, bool gdi_compat = false);
-        ComPtr<ID2D1Bitmap1> createBitmapRenderTarget(
-            IDXGISurface* dxgiSurface, bool gdi_compat = false);
-
-        static ComPtr<ID2D1RenderTarget> createWICRenderTarget(
-            IWICBitmap* wic_bitmap, bool dpi_awareness);
+        static ComPtr<ID2D1RenderTarget> createWICRenderTarget(IWICBitmap* wic_bitmap);
         static ComPtr<ID2D1DCRenderTarget> createDCRenderTarget();
 
         static ComPtr<ID3D11Texture2D> createTexture2D(int width, int height);
         static ComPtr<ID2D1RenderTarget> createDXGIRenderTarget(
-            IDXGISurface* surface, bool dpi_awareness);
-
-        ComPtr<ID2D1Effect> getShadowEffect();
-        ComPtr<ID2D1Effect> getAffineTransEffect();
-        ComPtr<IDXGISwapChain1> getSwapChain();
-        ComPtr<ID2D1DeviceContext> getD2DDeviceContext();
+            IDXGISurface* surface, bool gdi_compat);
 
         static ComPtr<IDWriteTextFormat> createTextFormat(
             const string16& font_family_name,
@@ -56,6 +43,9 @@ namespace ukive {
         static ComPtr<IDWriteTextLayout> createTextLayout(
             const string16& text, IDWriteTextFormat* format,
             float max_width, float max_height);
+
+        ComPtr<IDXGISwapChain> getSwapChain();
+        ComPtr<ID2D1RenderTarget> getRenderTarget();
 
     private:
         HRESULT createRenderResource();
@@ -78,12 +68,8 @@ namespace ukive {
         Window* owner_window_;
         std::vector<SwapChainResizeNotifier*> sc_resize_notifiers_;
 
-        ComPtr<IDXGISwapChain1> swapchain_;
-        ComPtr<ID2D1Bitmap1> bitmap_render_target_;
-        ComPtr<ID2D1DeviceContext> d2d_dc_;
-
-        ComPtr<ID2D1Effect> shadow_effect_;
-        ComPtr<ID2D1Effect> affinetrans_effect_;
+        ComPtr<IDXGISwapChain> swapchain_;
+        ComPtr<ID2D1RenderTarget> d2d_rt_;
     };
 
 }

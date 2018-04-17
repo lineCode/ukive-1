@@ -22,25 +22,11 @@ namespace ukive {
     HRESULT Renderer::init(Window* window) {
         owner_window_ = window;
         is_layered_ = owner_window_->isTranslucent();
-
-        d2d_dc_ = Application::getGraphicDeviceManager()->createD2DDeviceContext();
-
         return createRenderResource();
     }
 
     HRESULT Renderer::createRenderResource() {
-        HRESULT hr = d2d_dc_->CreateEffect(CLSID_D2D1Shadow, &shadow_effect_);
-        if (FAILED(hr)) {
-            DCHECK(false);
-            LOG(Log::WARNING) << "Failed to create shadow effect: " << hr;
-        }
-
-        hr = d2d_dc_->CreateEffect(CLSID_D2D12DAffineTransform, &affinetrans_effect_);
-        if (FAILED(hr)) {
-            DCHECK(false);
-            LOG(Log::WARNING) << "Failed to create affinetrans effect: " << hr;
-        }
-
+        HRESULT hr = S_OK;
         if (is_layered_) {
             if (is_hardware_acc_) {
                 createHardwareBRT();
@@ -55,10 +41,7 @@ namespace ukive {
     }
 
     void Renderer::releaseRenderResource() {
-        bitmap_render_target_.reset();
         swapchain_.reset();
-        shadow_effect_.reset();
-        affinetrans_effect_.reset();
     }
 
     HRESULT Renderer::resize() {
@@ -76,10 +59,10 @@ namespace ukive {
     }
 
     bool Renderer::render(const Color& bg_color, std::function<void()> callback) {
-        d2d_dc_->BeginDraw();
+        d2d_rt_->BeginDraw();
         D2D1_COLOR_F color = {
             bg_color.r, bg_color.g, bg_color.b, bg_color.a };
-        d2d_dc_->Clear(color);
+        d2d_rt_->Clear(color);
 
         callback();
 
@@ -89,7 +72,7 @@ namespace ukive {
             DCHECK(SUCCEEDED(hr));
         }
 
-        hr = d2d_dc_->EndDraw();
+        hr = d2d_rt_->EndDraw();
         if (FAILED(hr)) {
             DCHECK(false);
             Log::e(L"Render", L"failed to draw d2d content.");
@@ -126,8 +109,7 @@ namespace ukive {
         auto dxgi_surface  = d3d_texture.cast<IDXGISurface>();
         DCHECK(dxgi_surface != nullptr);
 
-        bitmap_render_target_ = createBitmapRenderTarget(dxgi_surface.get(), true);
-        d2d_dc_->SetTarget(bitmap_render_target_.get());
+        d2d_rt_ = createDXGIRenderTarget(dxgi_surface.get(), true);
     }
 
     void Renderer::createSoftwareBRT() {
@@ -135,28 +117,28 @@ namespace ukive {
             owner_window_->getClientWidth(),
             owner_window_->getClientHeight());
 
-        bitmap_render_target_ = createBitmapRenderTarget(wic_bmp.get(), true);
+        d2d_rt_ = createWICRenderTarget(wic_bmp.get());
     }
 
     HRESULT Renderer::createSwapchainBRT() {
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
+        DXGI_SWAP_CHAIN_DESC swapChainDesc;
         ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 
-        swapChainDesc.BufferCount = 2;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
         swapChainDesc.SampleDesc.Count = 1;
         swapChainDesc.SampleDesc.Quality = 0;
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferCount = 2;
+        swapChainDesc.OutputWindow = owner_window_->getHandle();
+        swapChainDesc.Windowed = TRUE;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-        swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-        swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 
         auto gdm = Application::getGraphicDeviceManager();
 
-        HRESULT hr = gdm->getDXGIFactory()->CreateSwapChainForHwnd(
+        HRESULT hr = gdm->getDXGIFactory()->CreateSwapChain(
             gdm->getD3DDevice().get(),
-            owner_window_->getHandle(),
-            &swapChainDesc, nullptr, nullptr, &swapchain_);
+            &swapChainDesc, &swapchain_);
         if (FAILED(hr)) {
             LOG(Log::FATAL) << "Failed to create swap chain: " << hr;
             return hr;
@@ -169,16 +151,13 @@ namespace ukive {
             return hr;
         }
 
-        bitmap_render_target_ = createBitmapRenderTarget(back_buffer.get());
-
-        d2d_dc_->SetTarget(bitmap_render_target_.get());
+        d2d_rt_ = createDXGIRenderTarget(back_buffer.get(), false);
 
         return S_OK;
     }
 
     HRESULT Renderer::resizeHardwareBRT() {
-        d2d_dc_->SetTarget(nullptr);
-        bitmap_render_target_.reset();
+        d2d_rt_.reset();
 
         for (auto notifier : sc_resize_notifiers_) {
             notifier->onPreSwapChainResize();
@@ -194,16 +173,14 @@ namespace ukive {
     }
 
     HRESULT Renderer::resizeSoftwareBRT() {
-        d2d_dc_->SetTarget(nullptr);
-        bitmap_render_target_.reset();
+        d2d_rt_.reset();
         createSoftwareBRT();
 
         return S_OK;
     }
 
     HRESULT Renderer::resizeSwapchainBRT() {
-        d2d_dc_->SetTarget(nullptr);
-        bitmap_render_target_.reset();
+        d2d_rt_.reset();
 
         for (auto notifier : sc_resize_notifiers_) {
             notifier->onPreSwapChainResize();
@@ -222,9 +199,7 @@ namespace ukive {
             return hr;
         }
 
-        bitmap_render_target_ = createBitmapRenderTarget(back_buffer.get());
-
-        d2d_dc_->SetTarget(bitmap_render_target_.get());
+        d2d_rt_ = createDXGIRenderTarget(back_buffer.get(), false);
 
         for (auto notifier : sc_resize_notifiers_) {
             notifier->onPostSwapChainResize();
@@ -234,7 +209,7 @@ namespace ukive {
     }
 
     HRESULT Renderer::drawLayered() {
-        auto gdi_rt = d2d_dc_.cast<ID2D1GdiInteropRenderTarget>();
+        auto gdi_rt = d2d_rt_.cast<ID2D1GdiInteropRenderTarget>();
         DCHECK(gdi_rt != nullptr);
 
         HDC hdc = NULL;
@@ -271,32 +246,6 @@ namespace ukive {
     }
 
 
-    HRESULT Renderer::drawShadow(float elevation, float alpha, ID2D1Bitmap* bitmap) {
-        //在 Alpha 动画时，令阴影更快消退。
-        float shadow_alpha;
-        if (alpha == 0.f) {
-            shadow_alpha = 0.f;
-        } else if (alpha == 1.f) {
-            shadow_alpha = .38f;
-        } else {
-            shadow_alpha = static_cast<float>(.38f * std::pow(2, 8 * (alpha - 1)) / 1.f);
-        }
-
-        shadow_effect_->SetInput(0, bitmap);
-        shadow_effect_->SetValue(D2D1_SHADOW_PROP_OPTIMIZATION, D2D1_SHADOW_OPTIMIZATION_BALANCED);
-        shadow_effect_->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, elevation);
-        shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, shadow_alpha));
-
-        D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(0, 0);// elevation / 1.5f);
-        affinetrans_effect_->SetInputEffect(0, shadow_effect_.get());
-        affinetrans_effect_->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, matrix);
-
-        d2d_dc_->DrawImage(affinetrans_effect_.get());
-
-        return S_OK;
-    }
-
-
     void Renderer::addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier) {
         sc_resize_notifiers_.push_back(notifier);
     }
@@ -317,81 +266,25 @@ namespace ukive {
         sc_resize_notifiers_.clear();
     }
 
-    ComPtr<ID2D1Bitmap1> Renderer::createBitmapRenderTarget(
-        IWICBitmap* wic_bitmap, bool gdi_compat) {
-
-        D2D1_BITMAP_OPTIONS bmp_options
-            = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
-        if (gdi_compat) {
-            bmp_options |= D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE;
-        }
-
-        D2D1_BITMAP_PROPERTIES1 bitmapProperties =
-            D2D1::BitmapProperties1(
-                bmp_options,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
-
-        ComPtr<ID2D1Bitmap1> bitmap;
-        HRESULT hr = d2d_dc_->CreateBitmapFromWicBitmap(wic_bitmap, bitmapProperties, &bitmap);
-        if (FAILED(hr)) {
-            LOG(Log::WARNING) << "Failed to create bitmap from WIC bitmap: " << hr;
-            return {};
-        }
-
-        return bitmap;
-    }
-
-    ComPtr<ID2D1Bitmap1> Renderer::createBitmapRenderTarget(
-        IDXGISurface* dxgiSurface, bool gdi_compat) {
-
-        D2D1_BITMAP_OPTIONS bmp_options
-            = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
-        if (gdi_compat) {
-            bmp_options |= D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE;
-        }
-
-        D2D1_BITMAP_PROPERTIES1 bitmapProperties =
-            D2D1::BitmapProperties1(
-                bmp_options,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
-
-        ComPtr<ID2D1Bitmap1> bitmap;
-        HRESULT hr = d2d_dc_->CreateBitmapFromDxgiSurface(dxgiSurface, bitmapProperties, &bitmap);
-        if (FAILED(hr)) {
-            LOG(Log::WARNING) << "Failed to create bitmap from DXGI surface: " << hr;
-            return {};
-        }
-
-        return bitmap;
-    }
-
-    ComPtr<ID2D1RenderTarget> Renderer::createWICRenderTarget(
-        IWICBitmap* wic_bitmap, bool dpi_awareness) {
+    ComPtr<ID2D1RenderTarget> Renderer::createWICRenderTarget(IWICBitmap* wic_bitmap) {
 
         ComPtr<ID2D1RenderTarget> render_target;
         auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
         if (d2d_factory) {
-            float dpi_x = 96.f;
-            float dpi_y = 96.f;
-            if (dpi_awareness) {
-                d2d_factory->GetDesktopDpi(&dpi_x, &dpi_y);
-            }
-
             const D2D1_PIXEL_FORMAT format =
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
             const D2D1_RENDER_TARGET_PROPERTIES properties
                 = D2D1::RenderTargetProperties(
                     D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                    format, dpi_x, dpi_y,
+                    format, 96, 96,
                     D2D1_RENDER_TARGET_USAGE_NONE);
 
             HRESULT hr = d2d_factory->CreateWicBitmapRenderTarget(
                 wic_bitmap, properties, &render_target);
             if (FAILED(hr)) {
                 DCHECK(false);
-                LOG(Log::WARNING) << "Failed to create WICBitmap RenderTarget: " << hr
-                    << ", DpiX: " << dpi_x << ", DpiY: " << dpi_y;
+                LOG(Log::WARNING) << "Failed to create WICBitmap RenderTarget: " << hr;
                 return {};
             }
         }
@@ -452,7 +345,7 @@ namespace ukive {
     }
 
     ComPtr<ID2D1RenderTarget> Renderer::createDXGIRenderTarget(
-        IDXGISurface* surface, bool dpi_awareness) {
+        IDXGISurface* surface, bool gdi_compat) {
 
         ComPtr<ID2D1RenderTarget> render_target;
         auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
@@ -460,33 +353,15 @@ namespace ukive {
             D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
                 D2D1_RENDER_TARGET_TYPE_DEFAULT,
                 D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-                96, 96, D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE);
-
-            if (dpi_awareness) {
-                d2d_factory->GetDesktopDpi(&props.dpiX, &props.dpiY);
-            }
+                96, 96, gdi_compat ? D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE : D2D1_RENDER_TARGET_USAGE_NONE);
 
             HRESULT hr = d2d_factory->CreateDxgiSurfaceRenderTarget(surface, props, &render_target);
-            DCHECK(SUCCEEDED(hr));
+            if (FAILED(hr)) {
+                DCHECK(false);
+            }
         }
 
         return render_target;
-    }
-
-    ComPtr<ID2D1Effect> Renderer::getShadowEffect() {
-        return shadow_effect_;
-    }
-
-    ComPtr<ID2D1Effect> Renderer::getAffineTransEffect() {
-        return affinetrans_effect_;
-    }
-
-    ComPtr<IDXGISwapChain1> Renderer::getSwapChain() {
-        return swapchain_;
-    }
-
-    ComPtr<ID2D1DeviceContext> Renderer::getD2DDeviceContext() {
-        return d2d_dc_;
     }
 
     ComPtr<IDWriteTextFormat> Renderer::createTextFormat(
@@ -530,6 +405,14 @@ namespace ukive {
         }
 
         return layout;
+    }
+
+    ComPtr<IDXGISwapChain> Renderer::getSwapChain() {
+        return swapchain_;
+    }
+
+    ComPtr<ID2D1RenderTarget> Renderer::getRenderTarget() {
+        return d2d_rt_;
     }
 
 }

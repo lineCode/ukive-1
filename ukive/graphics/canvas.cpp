@@ -14,28 +14,30 @@
 
 namespace ukive {
 
-    Canvas::Canvas(Window* win, int width, int height)
-        :is_bmp_target_(true) {
+    Canvas::Canvas(int width, int height)
+        :is_texture_target_(true) {
 
-        ComPtr<ID2D1BitmapRenderTarget> bmp_target;
-        HRESULT hr = win->getRenderer()->getD2DDeviceContext()->CreateCompatibleRenderTarget(
-            D2D1::SizeF(width, height), &bmp_target);
-        if (FAILED(hr)) {
-            Log::e(L"Canvas", L"cannot create bitmap render target.");
+        d3d_tex2d_ = ukive::Renderer::createTexture2D(width, height);
+        auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
+        if (!dxgi_surface) {
+            DCHECK(false);
+            LOG(ukive::Log::WARNING) << "Failed to query DXGI surface.";
             return;
         }
 
-        initCanvas(bmp_target.cast<ID2D1RenderTarget>());
+        auto off_d2d_rt = ukive::Renderer::createDXGIRenderTarget(dxgi_surface.get(), true);
+        initCanvas(off_d2d_rt);
     }
 
     Canvas::Canvas(ComPtr<ID2D1RenderTarget> renderTarget)
-        :is_bmp_target_(false) {
+        :is_texture_target_(false) {
+
         initCanvas(renderTarget);
     }
 
-
     Canvas::~Canvas() {
     }
+
 
     void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> renderTarget) {
         opacity_ = 1.f;
@@ -105,22 +107,17 @@ namespace ukive {
             return;
         }
 
-        auto d2d_dc = render_target_.cast<ID2D1DeviceContext>();
-        if (d2d_dc == nullptr) {
-            if (layer_ == nullptr) {
-                HRESULT hr = render_target_->CreateLayer(&layer_);
-                if (FAILED(hr))
-                    throw std::runtime_error("Canvas-Constructor(): Create layer failed.");
+        if (!layer_) {
+            HRESULT hr = render_target_->CreateLayer(&layer_);
+            if (FAILED(hr)) {
+                LOG(Log::WARNING) << "Failed to create layer: " << hr;
+                return;
             }
-
-            render_target_->PushLayer(
-                D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry),
-                layer_.get());
-        } else {
-            d2d_dc->PushLayer(
-                D2D1::LayerParameters1(D2D1::InfiniteRect(), clipGeometry),
-                nullptr);
         }
+
+        render_target_->PushLayer(
+            D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry),
+            layer_.get());
 
         ++layer_counter_;
     }
@@ -135,23 +132,17 @@ namespace ukive {
             content_bound.left, content_bound.top,
             content_bound.right, content_bound.bottom };
 
-        auto d2d_dc = render_target_.cast<ID2D1DeviceContext>();
-        if (d2d_dc == nullptr) {
-            if (layer_ == nullptr) {
-                HRESULT hr = render_target_->CreateLayer(&layer_);
-                if (FAILED(hr)) {
-                    throw std::runtime_error("Canvas-Constructor(): Create layer failed.");
-                }
+        if (!layer_) {
+            HRESULT hr = render_target_->CreateLayer(&layer_);
+            if (FAILED(hr)) {
+                LOG(Log::WARNING) << "Failed to create layer: " << hr;
+                return;
             }
-
-            render_target_->PushLayer(
-                D2D1::LayerParameters(d2d_rect, clipGeometry),
-                layer_.get());
-        } else {
-            d2d_dc->PushLayer(
-                D2D1::LayerParameters1(d2d_rect, clipGeometry),
-                nullptr);
         }
+
+        render_target_->PushLayer(
+            D2D1::LayerParameters(d2d_rect, clipGeometry),
+            layer_.get());
 
         ++layer_counter_;
     }
@@ -212,14 +203,21 @@ namespace ukive {
         return render_target_.get();
     }
 
-    std::shared_ptr<Bitmap> Canvas::extractBitmap() {
-        if (is_bmp_target_) {
-            auto bmp_target = render_target_.cast<ID2D1BitmapRenderTarget>();
+    ComPtr<ID3D11Texture2D> Canvas::getTexture() {
+        return d3d_tex2d_;
+    }
 
+    std::shared_ptr<Bitmap> Canvas::extractBitmap() {
+        if (is_texture_target_) {
             ComPtr<ID2D1Bitmap> bitmap;
-            if (FAILED(bmp_target->GetBitmap(&bitmap))) {
-                Log::e(L"Canvas", L"failed to extract bitmap.");
-                return std::shared_ptr<Bitmap>();
+            D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+            HRESULT hr = render_target_->CreateSharedBitmap(
+                __uuidof(IDXGISurface), d3d_tex2d_.cast<IDXGISurface>().get(), &bmp_prop, &bitmap);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                LOG(Log::WARNING) << "Failed to create shared bitmap: " << hr;
+                return {};
             }
 
             return std::make_shared<Bitmap>(bitmap);
@@ -446,6 +444,16 @@ namespace ukive {
         RectF dst(x, y, width, height);
 
         drawBitmap(src, dst, 1.f, bitmap);
+    }
+
+    void Canvas::drawBitmap(float opacity, Bitmap* bitmap) {
+        if (bitmap == nullptr) {
+            return;
+        }
+
+        RectF src(0.f, 0.f, bitmap->getWidth(), bitmap->getHeight());
+
+        drawBitmap(src, src, opacity, bitmap);
     }
 
     void Canvas::drawBitmap(const RectF& dst, float opacity, Bitmap* bitmap) {

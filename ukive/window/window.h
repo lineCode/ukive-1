@@ -11,6 +11,7 @@
 #include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
 #include "ukive/utils/weak_bind.h"
+#include "ukive/graphics/swapchain_resize_notifier.h"
 
 
 namespace ukive {
@@ -29,7 +30,7 @@ namespace ukive {
     class TextActionModeCallback;
     struct ClassInfo;
 
-    class Window {
+    class Window : public SwapChainResizeNotifier {
     public:
         Window();
         virtual ~Window();
@@ -104,7 +105,8 @@ namespace ukive {
         float dpToPx(float dp);
         float pxToDp(int px);
 
-        virtual void onPreCreate(ClassInfo* info,
+        virtual void onPreCreate(
+            ClassInfo* info,
             int* win_style, int* win_ex_style);
         virtual void onCreate();
         virtual void onShow(bool show);
@@ -125,6 +127,10 @@ namespace ukive {
         virtual bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
         virtual void onDrawCanvas(Canvas* canvas);
+
+    protected:
+        void onPreSwapChainResize() override;
+        void onPostSwapChainResize() override;
 
     private:
         static const int SCHEDULE_RENDER = 0;

@@ -97,12 +97,6 @@
     <ClCompile Include="direct3d\graph_creator.cpp">
       <Filter>direct3d</Filter>
     </ClCompile>
-    <ClCompile Include="test\shadow\shadow_effect.cpp">
-      <Filter>test\shadow</Filter>
-    </ClCompile>
-    <ClCompile Include="test\shadow\shadow_transform.cpp">
-      <Filter>test\shadow</Filter>
-    </ClCompile>
     <ClCompile Include="test\shadow\shadow_window.cpp">
       <Filter>test\shadow</Filter>
     </ClCompile>
@@ -162,12 +156,6 @@
     <ClInclude Include="direct3d\graph_creator.h">
       <Filter>direct3d</Filter>
     </ClInclude>
-    <ClInclude Include="test\shadow\shadow_effect.h">
-      <Filter>test\shadow</Filter>
-    </ClInclude>
-    <ClInclude Include="test\shadow\shadow_transform.h">
-      <Filter>test\shadow</Filter>
-    </ClInclude>
     <ClInclude Include="test\shadow\shadow_window.h">
       <Filter>test\shadow</Filter>
     </ClInclude>
@@ -186,11 +174,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="test\shadow\shadow_props.xml">
-      <Filter>test\shadow</Filter>
-    </Xml>
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="hlsl\assist_pixel_shader.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
@@ -207,9 +190,6 @@
       <Filter>hlsl</Filter>
     </FxCompile>
     <FxCompile Include="hlsl\terrain_vertex_shader.hlsl">
-      <Filter>hlsl</Filter>
-    </FxCompile>
-    <FxCompile Include="hlsl\shadow_pixel_shader.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
   </ItemGroup>

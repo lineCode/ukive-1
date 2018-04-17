@@ -144,7 +144,7 @@ namespace ukive {
 
         auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
         auto d3d_dc = Application::getGraphicDeviceManager()->getD3DDeviceContext();
-        auto d2d_dc = getWindow()->getRenderer()->getD2DDeviceContext();
+        auto d2d_rt = getWindow()->getRenderer()->getRenderTarget();
 
         // RTT
         D3D11_TEXTURE2D_DESC rtt_tex2d_desc;
@@ -188,7 +188,7 @@ namespace ukive {
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
-        hr = d2d_dc->CreateSharedBitmap(
+        hr = d2d_rt->CreateSharedBitmap(
             __uuidof(IDXGISurface), dxgi_surface.get(), &bmp_prop, &d3d_content_);
         if (FAILED(hr)) {
             DCHECK(false);

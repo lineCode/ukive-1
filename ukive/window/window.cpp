@@ -437,8 +437,10 @@ namespace ukive {
 
         anim_mgr_ = new AnimationManager();
         HRESULT hr = anim_mgr_->init();
-        if (FAILED(hr))
-            throw std::runtime_error("UWindow-onCreate(): init animation manager failed.");
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to init animation manager: " << hr;
+            return;
+        }
 
         mAnimStateChangedListener = new AnimStateChangedListener(this);
         anim_mgr_->setOnStateChangedListener(mAnimStateChangedListener);
@@ -449,12 +451,14 @@ namespace ukive {
 
         renderer_ = new Renderer();
         hr = renderer_->init(this);
-        if (FAILED(hr))
-            throw std::runtime_error("UWindow-onCreate(): Init DirectX renderer failed.");
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to init renderer: " << hr;
+            return;
+        }
 
-        auto deviceContext = renderer_->getD2DDeviceContext();
+        renderer_->addSwapChainResizeNotifier(this);
 
-        canvas_ = new Canvas(deviceContext.cast<ID2D1RenderTarget>());
+        canvas_ = new Canvas(renderer_->getRenderTarget());
 
         base_layout_->onAttachedToWindow();
     }
@@ -622,6 +626,7 @@ namespace ukive {
         delete canvas_;
         canvas_ = nullptr;
 
+        renderer_->removeSwapChainResizeNotifier(this);
         renderer_->close();
         delete renderer_;
         renderer_ = nullptr;
@@ -688,6 +693,15 @@ namespace ukive {
 
 
     void Window::onDrawCanvas(Canvas* canvas) {
+    }
+
+
+    void Window::onPreSwapChainResize() {
+        delete canvas_;
+    }
+
+    void Window::onPostSwapChainResize() {
+        canvas_ = new Canvas(renderer_->getRenderTarget());
     }
 
 

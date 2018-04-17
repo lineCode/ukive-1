@@ -15,18 +15,6 @@ namespace ukive {
         shutdownDXDevice();
     }
 
-    ComPtr<ID2D1DeviceContext> GraphicDeviceManager::createD2DDeviceContext() {
-        ComPtr<ID2D1DeviceContext> dc;
-
-        HRESULT hr = d2d_device_->CreateDeviceContext(
-            D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &dc);
-        if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create d2d device context.");
-        }
-
-        return dc;
-    }
-
 
     void GraphicDeviceManager::EnumSystemFonts() {
         ComPtr<IDWriteFontCollection> collection;
@@ -63,7 +51,7 @@ namespace ukive {
 
 
     void GraphicDeviceManager::initDXPersistance() {
-        HRESULT hr = D2D1CreateFactory(
+        HRESULT hr = ::D2D1CreateFactory(
             D2D1_FACTORY_TYPE_SINGLE_THREADED,
             &d2d_factory_);
         if (FAILED(hr)) {
@@ -71,7 +59,7 @@ namespace ukive {
             return;
         }
 
-        hr = DWriteCreateFactory(
+        hr = ::DWriteCreateFactory(
             DWRITE_FACTORY_TYPE_SHARED,
             __uuidof(IDWriteFactory),
             reinterpret_cast<IUnknown**>(&dwrite_factory_));
@@ -80,8 +68,8 @@ namespace ukive {
             return;
         }
 
-        hr = CreateDXGIFactory(
-            __uuidof(IDXGIFactory2),
+        hr = ::CreateDXGIFactory(
+            __uuidof(IDXGIFactory),
             reinterpret_cast<void**>(&dxgi_factory_));
         if (FAILED(hr)) {
             Log::e(L"GraphicsDeviceManager", L"failed to create dxgi factory.");
@@ -143,25 +131,14 @@ namespace ukive {
             return;
         }
 
-        hr = d3d_device_->QueryInterface(
-            __uuidof(IDXGIDevice2),
-            reinterpret_cast<void**>(&dxgi_device_));
+        hr = d3d_device_->QueryInterface(&dxgi_device_);
         if (FAILED(hr)) {
             Log::e(L"GraphicsDeviceManager", L"failed to create dxgi device.");
-            return;
-        }
-
-        hr = d2d_factory_->CreateDevice(
-            dxgi_device_.get(), &d2d_device_);
-        if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create d2d device.");
             return;
         }
     }
 
     void GraphicDeviceManager::shutdownDXDevice() {
-        d2d_device_.reset();
-
         d3d_devicecontext_.reset();
         d3d_device_.reset();
 
@@ -177,7 +154,7 @@ namespace ukive {
         return cur_adapter_;
     }
 
-    ComPtr<ID2D1Factory1> GraphicDeviceManager::getD2DFactory() {
+    ComPtr<ID2D1Factory> GraphicDeviceManager::getD2DFactory() {
         return d2d_factory_;
     }
 
@@ -185,16 +162,12 @@ namespace ukive {
         return dwrite_factory_;
     }
 
-    ComPtr<IDXGIFactory2> GraphicDeviceManager::getDXGIFactory() {
+    ComPtr<IDXGIFactory> GraphicDeviceManager::getDXGIFactory() {
         return dxgi_factory_;
     }
 
-    ComPtr<IDXGIDevice2> GraphicDeviceManager::getDXGIDevice() {
+    ComPtr<IDXGIDevice> GraphicDeviceManager::getDXGIDevice() {
         return dxgi_device_;
-    }
-
-    ComPtr<ID2D1Device> GraphicDeviceManager::getD2DDevice() {
-        return d2d_device_;
     }
 
     ComPtr<ID3D11Device> GraphicDeviceManager::getD3DDevice() {

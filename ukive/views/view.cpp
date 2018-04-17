@@ -14,6 +14,7 @@
 #include "ukive/application.h"
 #include "ukive/message/cycler.h"
 #include "ukive/graphics/bitmap_factory.h"
+#include "ukive/graphics/direct3d/effects/shadow_effect.h"
 
 
 namespace ukive {
@@ -42,6 +43,7 @@ namespace ukive {
         input_connection_(nullptr),
         click_listener_(nullptr),
         click_performer_(new ClickPerformer(this)),
+        shadow_effect_(std::make_unique<ShadowEffect>()),
         mAlpha(1.0),
         mScaleX(1.0),
         mScaleY(1.0),
@@ -260,6 +262,7 @@ namespace ukive {
         }
 
         elevation_ = elevation;
+        shadow_effect_->setRadius(elevation_ * 2);
 
         requestLayout();
         invalidate();
@@ -589,16 +592,18 @@ namespace ukive {
         bool hasBg = needDrawBackground();
         bool hasShadow = (hasBg && (elevation_ > 0.f));
 
-        std::shared_ptr<Bitmap> bgBitmap;
+        std::shared_ptr<Bitmap> bg_bmp;
+        ComPtr<ID3D11Texture2D> bg_texture;
         if (hasShadow) {
-            // 将背景绘制到 bgBitmap 上
-            Canvas offscreen(getWindow(), getWidth(), getHeight());
+            // 将背景绘制到 bg_bmp 上
+            Canvas offscreen(getWidth(), getHeight());
             offscreen.beginDraw();
             offscreen.clear();
             offscreen.setOpacity(canvas->getOpacity());
             drawBackground(&offscreen);
             offscreen.endDraw();
-            bgBitmap = offscreen.extractBitmap();
+            bg_bmp = offscreen.extractBitmap();
+            bg_texture = offscreen.getTexture();
         }
 
         // 若有，使用 layer 应用 reveal 动画
@@ -615,17 +620,20 @@ namespace ukive {
                 // 在 pushLayer 之前绘制阴影
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
-                    canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
+                    canvas->getRT()->CreateBitmapBrush(bg_bmp->getNative().get(), &bmp_brush);
 
-                    Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    Canvas offscreen(getWidth(), getHeight());
                     offscreen.beginDraw();
                     offscreen.clear();
                     offscreen.fillGeometry(circleGeo.get(), bmp_brush.get());
                     offscreen.endDraw();
-                    auto bgRevealedBitmap = offscreen.extractBitmap();
+                    auto revealed_bg_bmp = offscreen.extractBitmap();
+                    auto revealed_bg_texture = offscreen.getTexture();
 
-                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
-                    canvas->drawBitmap(bgRevealedBitmap.get());
+                    shadow_effect_->setContent(revealed_bg_texture.get());
+                    shadow_effect_->draw(canvas);
+
+                    canvas->drawBitmap(revealed_bg_bmp.get());
                 }
 
                 canvas->pushLayer(circleGeo.get());
@@ -633,9 +641,8 @@ namespace ukive {
                 if (hasBg && !hasShadow) {
                     drawBackground(canvas);
                 }
-            }
-            // 矩形 reveal 动画
-            else if (mRevealType == ViewAnimator::REVEAL_RECT) {
+            } else if (mRevealType == ViewAnimator::REVEAL_RECT) {
+                // 矩形 reveal 动画
                 ComPtr<ID2D1RectangleGeometry> rectGeo;
                 Application::getGraphicDeviceManager()->getD2DFactory()->CreateRectangleGeometry(
                     D2D1::RectF(
@@ -647,17 +654,20 @@ namespace ukive {
                 // 在 pushLayer 之前绘制阴影
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
-                    canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
+                    canvas->getRT()->CreateBitmapBrush(bg_bmp->getNative().get(), &bmp_brush);
 
-                    Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    Canvas offscreen(getWidth(), getHeight());
                     offscreen.beginDraw();
                     offscreen.clear();
                     offscreen.fillGeometry(rectGeo.get(), bmp_brush.get());
                     offscreen.endDraw();
-                    auto bgRevealedBitmap = offscreen.extractBitmap();
+                    auto revealed_bg_bmp = offscreen.extractBitmap();
+                    auto revealed_bg_texture = offscreen.getTexture();
 
-                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
-                    canvas->drawBitmap(bgRevealedBitmap.get());
+                    shadow_effect_->setContent(revealed_bg_texture.get());
+                    shadow_effect_->draw(canvas);
+
+                    canvas->drawBitmap(revealed_bg_bmp.get());
                 }
 
                 canvas->pushLayer(rectGeo.get());
@@ -670,9 +680,10 @@ namespace ukive {
             // 没有 reveal 动画，直接绘制背景和阴影
             if (hasBg) {
                 if (hasShadow) {
-                    window_->getRenderer()->drawShadow(
-                        elevation_, canvas->getOpacity(), bgBitmap->getNative().get());
-                    canvas->drawBitmap(bgBitmap.get());
+                    shadow_effect_->setContent(bg_texture.get());
+                    shadow_effect_->draw(canvas);
+
+                    canvas->drawBitmap(bg_bmp.get());
                 } else {
                     drawBackground(canvas);
                 }

@@ -10,15 +10,18 @@ namespace ukive {
 
     namespace dx = DirectX;
 
+    class Canvas;
+
     class ShadowEffect {
     public:
-        ShadowEffect(int radius);
+        ShadowEffect();
 
         void draw();
-        void setSize(int width, int height);
+        void draw(Canvas* c);
+        void setRadius(int radius);
         void setContent(ID3D11Texture2D* texture);
 
-        ComPtr<ID3D11Texture2D> getOutput();
+        ComPtr<ID2D1Bitmap> getOutput(ID2D1RenderTarget* rt);
 
     private:
         struct ConstBuffer {
@@ -27,7 +30,7 @@ namespace ukive {
 
         struct PSConstBuffer {
             int32_t vertical;
-            int32_t vertical2;
+            int32_t colored_shadow;
             int32_t vertical3;
             int32_t vertical4;
         };
@@ -52,8 +55,12 @@ namespace ukive {
 
         void createKernelTexture();
 
+        void setSize(int width, int height);
+
         int width_;
         int height_;
+        int view_width_;
+        int view_height_;
         int radius_;
         float elevation_;
 
@@ -85,7 +92,6 @@ namespace ukive {
         ukive::ComPtr<ID3D11VertexShader> vertex_shader_;
 
         D3D11_VIEWPORT viewport_;
-        ComPtr<ID3D11SamplerState> sampler_state_;
         ComPtr<ID3D11RasterizerState> rasterizer_state_;
     };
 

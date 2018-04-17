@@ -10,8 +10,7 @@ namespace ukive {
 
     RippleDrawable::RippleDrawable(Window *win)
         :LayerDrawable(),
-        owner_win_(win)
-    {
+        owner_win_(win) {
         mAlpha = 0;
 
         mDownAnimator = new Animator(win->getAnimationManager());
@@ -23,8 +22,7 @@ namespace ukive {
         mRippleAnimator = new Animator(win->getAnimationManager());
     }
 
-    RippleDrawable::~RippleDrawable()
-    {
+    RippleDrawable::~RippleDrawable() {
         mRippleAnimator->stop();
         delete mRippleAnimator;
 
@@ -51,8 +49,7 @@ namespace ukive {
     }
 
 
-    void RippleDrawable::draw(Canvas *canvas)
-    {
+    void RippleDrawable::draw(Canvas *canvas) {
         auto bound = getBounds();
         Color color(0.f, 0.f, 0.f, mAlpha);
 
@@ -98,30 +95,25 @@ namespace ukive {
 
         mask_off_.reset();
         mask_off_ = std::make_unique<Canvas>(
-            owner_win_, new_bound.width(), new_bound.height());
+            new_bound.width(), new_bound.height());
 
         content_off_.reset();
         content_off_ = std::make_unique<Canvas>(
-            owner_win_, new_bound.width(), new_bound.height());
+            new_bound.width(), new_bound.height());
     }
 
-    bool RippleDrawable::onStateChanged(int newState, int prevState)
-    {
-        switch (newState)
-        {
+    bool RippleDrawable::onStateChanged(int newState, int prevState) {
+        switch (newState) {
         case STATE_NONE:
         {
-            if (prevState == STATE_HOVERED)
-            {
+            if (prevState == STATE_HOVERED) {
                 mHoverAnimator->stop();
                 mAlpha = mHoverAnimator->getValue(0);
 
                 mLeaveAnimator->addVariable(0, mAlpha, 0, 1);
                 mLeaveAnimator->setOnValueChangedListener(0, static_cast<OnValueChangedListener*>(this));
                 mLeaveAnimator->startTransition(0, Transition::linearTransition(HOVER_LEAVE_SEC, 0));
-            }
-            else if (prevState == STATE_PRESSED)
-            {
+            } else if (prevState == STATE_PRESSED) {
                 mDownAnimator->stop();
                 mAlpha = mDownAnimator->getValue(0);
 
@@ -133,15 +125,12 @@ namespace ukive {
         }
 
         case STATE_HOVERED:
-            if (prevState == STATE_NONE)
-            {
+            if (prevState == STATE_NONE) {
                 mAlpha = 0;
                 mHoverAnimator->addVariable(0, 0, 0, 1);
                 mHoverAnimator->setOnValueChangedListener(0, static_cast<OnValueChangedListener*>(this));
                 mHoverAnimator->startTransition(0, Transition::linearTransition(HOVER_LEAVE_SEC, HOVER_ALPHA));
-            }
-            else if (prevState == STATE_PRESSED)
-            {
+            } else if (prevState == STATE_PRESSED) {
                 mDownAnimator->stop();
                 mAlpha = mDownAnimator->getValue(0);
 
@@ -174,8 +163,7 @@ namespace ukive {
         return false;
     }
 
-    float RippleDrawable::getOpacity()
-    {
+    float RippleDrawable::getOpacity() {
         return 1.0f;
     }
 
@@ -184,8 +172,8 @@ namespace ukive {
         unsigned int varIndex,
         IUIAnimationStoryboard *storyboard,
         IUIAnimationVariable *variable,
-        double newValue, double previousValue)
-    {
+        double newValue, double previousValue) {
+
         mAlpha = newValue;
     }
 
@@ -193,8 +181,7 @@ namespace ukive {
         unsigned int varIndex,
         IUIAnimationStoryboard *storyboard,
         IUIAnimationVariable *variable,
-        int newValue, int previousValue)
-    {
+        int newValue, int previousValue) {
 
     }
 

@@ -19,6 +19,7 @@ namespace ukive {
     class LayoutParams;
     class OnClickListener;
     class ViewAnimator;
+    class ShadowEffect;
 
     class View {
     public:
@@ -280,6 +281,7 @@ namespace ukive {
         double mRevealHeightRadius;
 
         std::unique_ptr<ViewAnimator> animator_;
+        std::unique_ptr<ShadowEffect> shadow_effect_;
         std::unique_ptr<LayoutParams> layout_params_;
 
         View* parent_;

@@ -16,11 +16,12 @@ namespace ukive {
     class RectF;
     class Bitmap;
     class Window;
+    class Renderer;
     class TextRenderer;
 
     class Canvas {
     public:
-        Canvas(Window* win, int width, int height);
+        Canvas(int width, int height);
         Canvas(ComPtr<ID2D1RenderTarget> renderTarget);
         ~Canvas();
 
@@ -45,7 +46,7 @@ namespace ukive {
 
         //临时方法。
         ID2D1RenderTarget* getRT();
-
+        ComPtr<ID3D11Texture2D> getTexture();
         std::shared_ptr<Bitmap> extractBitmap();
 
         void scale(float sx, float sy);
@@ -89,6 +90,7 @@ namespace ukive {
 
         void drawBitmap(Bitmap* bitmap);
         void drawBitmap(float x, float y, Bitmap* bitmap);
+        void drawBitmap(float opacity, Bitmap* bitmap);
         void drawBitmap(const RectF& dst, float opacity, Bitmap* bitmap);
         void drawBitmap(const RectF& src, const RectF& dst, float opacity, Bitmap* bitmap);
 
@@ -108,7 +110,7 @@ namespace ukive {
         void initCanvas(ComPtr<ID2D1RenderTarget> renderTarget);
 
         int layer_counter_;
-        bool is_bmp_target_;
+        bool is_texture_target_;
         float opacity_;
         Matrix matrix_;
 
@@ -118,6 +120,8 @@ namespace ukive {
         ComPtr<ID2D1RenderTarget> render_target_;
         ComPtr<ID2D1SolidColorBrush> solid_brush_;
         ComPtr<ID2D1BitmapBrush> bitmap_brush_;
+
+        ComPtr<ID3D11Texture2D> d3d_tex2d_;
 
         std::stack<float> opacity_stack_;
         std::stack<ComPtr<ID2D1DrawingStateBlock>> drawing_state_stack_;

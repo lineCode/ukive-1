@@ -4,6 +4,9 @@
 #include "ukive/log.h"
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/graphics/renderer.h"
+#include "ukive/window/window.h"
+#include "ukive/graphics/canvas.h"
+#include "ukive/graphics/bitmap.h"
 
 
 namespace {
@@ -17,14 +20,15 @@ namespace {
 
 namespace ukive {
 
-    ShadowEffect::ShadowEffect(int radius)
+    ShadowEffect::ShadowEffect()
         :width_(0),
-        height_(0) {
+        height_(0),
+        view_width_(0),
+        view_height_(0),
+        radius_(0),
+        elevation_(0.f) {
 
-        radius_ = radius;
-        elevation_ = radius_ / 2.f;
-
-        D3D11_INPUT_ELEMENT_DESC layout[2];
+        D3D11_INPUT_ELEMENT_DESC layout[1];
 
         layout[0].SemanticName = "POSITION";
         layout[0].SemanticIndex = 0;
@@ -33,14 +37,6 @@ namespace ukive {
         layout[0].AlignedByteOffset = 0;
         layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[0].InstanceDataStepRate = 0;
-
-        layout[1].SemanticName = "TEXCOORD";
-        layout[1].SemanticIndex = 0;
-        layout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-        layout[1].InputSlot = 0;
-        layout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        layout[1].InstanceDataStepRate = 0;
 
         ukive::string16 shader_path(::_wgetcwd(nullptr, 0));
 
@@ -77,31 +73,6 @@ namespace ukive {
             DCHECK(false);
             LOG(Log::WARNING) << "Failed to create rasterizer state: " << hr;
         }
-
-        D3D11_SAMPLER_DESC samplerDesc;
-        ZeroMemory(&samplerDesc, sizeof(samplerDesc));
-
-        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.MipLODBias = 0.0f;
-        samplerDesc.MaxAnisotropy = 1;
-        samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-        samplerDesc.BorderColor[0] = 0;
-        samplerDesc.BorderColor[1] = 0;
-        samplerDesc.BorderColor[2] = 0;
-        samplerDesc.BorderColor[3] = 0;
-        samplerDesc.MinLOD = 0;
-        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-        hr = device->CreateSamplerState(&samplerDesc, &sampler_state_);
-        if (FAILED(hr)) {
-            DCHECK(false);
-            LOG(Log::WARNING) << "Failed to create sampler state: " << hr;
-        }
-
-        createKernelTexture();
     }
 
 
@@ -114,7 +85,6 @@ namespace ukive {
         auto d3d_dc = Application::getGraphicDeviceManager()->getD3DDeviceContext();
 
         d3d_dc->RSSetState(rasterizer_state_.get());
-        d3d_dc->PSSetSamplers(0, 1, &sampler_state_);
         d3d_dc->RSSetViewports(1, &viewport_);
 
         {
@@ -138,6 +108,9 @@ namespace ukive {
         d3d_dc->PSSetConstantBuffers(0, 1, &ps_const_buffer_);
 
         // Render
+        FLOAT transparent[4] = {0, 0, 0, 0};
+        d3d_dc->ClearRenderTargetView(shadow1_rtv_.get(), transparent);
+
         UINT vertexDataOffset = 0;
         UINT vertexStructSize = sizeof(VertexData);
         d3d_dc->IASetVertexBuffers(0, 1, &vert_buffer_, &vertexStructSize, &vertexDataOffset);
@@ -156,7 +129,18 @@ namespace ukive {
         }
 
         // Render
+        d3d_dc->ClearRenderTargetView(shadow2_rtv_.get(), transparent);
         d3d_dc->DrawIndexed(6, 0, 0);
+    }
+
+    void ShadowEffect::draw(Canvas* c) {
+        draw();
+        auto shadow_bmp = getOutput(c->getRT());
+
+        c->save();
+        c->translate(-std::floor(elevation_ * 2), -std::floor(elevation_ * 2));
+        c->drawBitmap(c->getOpacity(), &Bitmap(shadow_bmp));
+        c->restore();
     }
 
     void ShadowEffect::setSize(int width, int height) {
@@ -220,7 +204,23 @@ namespace ukive {
         createTexture(shadow2_tex2d_, shadow2_rtv_, shadow2_srv_);
     }
 
+    void ShadowEffect::setRadius(int radius) {
+        if (radius == radius_ || radius <= 0) {
+            return;
+        }
+
+        radius_ = radius;
+        elevation_ = radius_ / 2.f;
+
+        createKernelTexture();
+    }
+
     void ShadowEffect::setContent(ID3D11Texture2D* texture) {
+        D3D11_TEXTURE2D_DESC desc;
+        texture->GetDesc(&desc);
+        view_width_ = desc.Width;
+        view_height_ = desc.Height;
+
         auto device = Application::getGraphicDeviceManager()->getD3DDevice();
 
         bg_srv_.reset();
@@ -238,10 +238,24 @@ namespace ukive {
             LOG(Log::WARNING) << "Failed to create RTV: " << hr;
             return;
         }
+
+        setSize(view_width_ + radius_ * 2, view_height_ + radius_ * 2);
     }
 
-    ComPtr<ID3D11Texture2D> ShadowEffect::getOutput() {
-        return shadow2_tex2d_;
+    ComPtr<ID2D1Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
+        D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
+            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+
+        ComPtr<ID2D1Bitmap> bitmap;
+        HRESULT hr = rt->CreateSharedBitmap(
+            __uuidof(IDXGISurface), shadow2_tex2d_.cast<IDXGISurface>().get(), &bmp_prop, &bitmap);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create shared bitmap: " << hr;
+            return {};
+        }
+
+        return bitmap;
     }
 
 
