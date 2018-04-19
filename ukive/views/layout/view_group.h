@@ -43,26 +43,26 @@ namespace ukive {
 
         void measureChild(
             View* child,
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
+            int parent_width, int parent_height,
+            int parent_width_mode, int parent_height_mode);
 
         void measureChildWithMargins(
             View* child,
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
+            int parent_width, int parent_height,
+            int parent_width_mode, int parent_height_mode);
 
         void measureChildren(
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
+            int parent_width, int parent_height,
+            int parent_width_mode, int parent_height_mode);
 
         void measureChildrenWithMargins(
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
+            int parent_width, int parent_height,
+            int parent_width_mode, int parent_height_mode);
 
         static void getChildMeasure(
-            int parentSize, int parentSizeMode,
-            int padding, int childDimension,
-            int* childSize, int* childSizeMode);
+            int parent_size, int parent_size_mode,
+            int padding, int child_dimension,
+            int* child_size, int* child_size_mode);
 
     protected:
         void dispatchDraw(Canvas* canvas) override;
@@ -74,7 +74,7 @@ namespace ukive {
 
         virtual bool checkLayoutParams(LayoutParams* lp);
         virtual LayoutParams* generateDefaultLayoutParams();
-        virtual LayoutParams* generateLayoutParams(const LayoutParams &lp);
+        virtual LayoutParams* generateLayoutParams(const LayoutParams& lp);
 
         int getWrappedWidth();
         int getWrappedHeight();

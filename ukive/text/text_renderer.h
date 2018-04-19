@@ -19,42 +19,42 @@ namespace ukive {
         void setStrikethroughColor(const Color& color);
 
         STDMETHOD(IsPixelSnappingDisabled)(
-            __maybenull void* clientDrawingContext,
-            __out BOOL* isDisabled);
+            void* clientDrawingContext,
+            BOOL* isDisabled);
 
         STDMETHOD(GetCurrentTransform)(
-            __maybenull void* clientDrawingContext,
-            __out DWRITE_MATRIX* transform);
+            void* clientDrawingContext,
+            DWRITE_MATRIX* transform);
 
         STDMETHOD(GetPixelsPerDip)(
-            __maybenull void* clientDrawingContext,
-            __out FLOAT* pixelsPerDip);
+            void* clientDrawingContext,
+            FLOAT* pixelsPerDip);
 
         STDMETHOD(DrawGlyphRun)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
             DWRITE_MEASURING_MODE measuringMode,
-            __in DWRITE_GLYPH_RUN const* glyphRun,
-            __in DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
+            DWRITE_GLYPH_RUN const* glyphRun,
+            DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
             IUnknown* clientDrawingEffect);
 
         STDMETHOD(DrawUnderline)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
-            __in DWRITE_UNDERLINE const* underline,
+            DWRITE_UNDERLINE const* underline,
             IUnknown* clientDrawingEffect);
 
         STDMETHOD(DrawStrikethrough)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
-            __in DWRITE_STRIKETHROUGH const* strikethrough,
+            DWRITE_STRIKETHROUGH const* strikethrough,
             IUnknown* clientDrawingEffect);
 
         STDMETHOD(DrawInlineObject)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT originX,
             FLOAT originY,
             IDWriteInlineObject* inlineObject,
@@ -65,7 +65,7 @@ namespace ukive {
         ULONG STDMETHODCALLTYPE AddRef();
         ULONG STDMETHODCALLTYPE Release();
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            IID const& riid, void** ppvObject);
+            REFIID riid, void** ppvObject);
 
     private:
         ULONG ref_count_;

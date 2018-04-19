@@ -60,12 +60,12 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawGlyphRun(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT baselineOriginX,
         FLOAT baselineOriginY,
         DWRITE_MEASURING_MODE measuringMode,
-        __in DWRITE_GLYPH_RUN const* glyphRun,
-        __in DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
+        DWRITE_GLYPH_RUN const* glyphRun,
+        DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
         IUnknown* clientDrawingEffect) {
 
         if (clientDrawingEffect) {
@@ -112,10 +112,10 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawUnderline(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT baselineOriginX,
         FLOAT baselineOriginY,
-        __in DWRITE_UNDERLINE const* underline,
+        DWRITE_UNDERLINE const* underline,
         IUnknown* clientDrawingEffect) {
 
         D2D1_RECT_F rect = D2D1::RectF(
@@ -124,7 +124,7 @@ namespace ukive {
             underline->width + baselineOriginX,
             underline->offset + underline->thickness + baselineOriginY);
 
-        if (clientDrawingEffect != nullptr) {
+        if (clientDrawingEffect) {
             ComPtr<TextDrawingEffect> drawingEffect;
             clientDrawingEffect->QueryInterface(&drawingEffect);
 
@@ -161,10 +161,10 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawStrikethrough(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT baselineOriginX,
         FLOAT baselineOriginY,
-        __in DWRITE_STRIKETHROUGH const* strikethrough,
+        DWRITE_STRIKETHROUGH const* strikethrough,
         IUnknown* clientDrawingEffect) {
 
         D2D1_RECT_F rect = D2D1::RectF(
@@ -173,7 +173,7 @@ namespace ukive {
             strikethrough->width + baselineOriginX,
             strikethrough->offset + strikethrough->thickness + baselineOriginY);
 
-        if (clientDrawingEffect != nullptr) {
+        if (clientDrawingEffect) {
             ComPtr<TextDrawingEffect> drawingEffect;
             HRESULT hr = clientDrawingEffect->QueryInterface(&drawingEffect);
             DCHECK(SUCCEEDED(hr));
@@ -211,7 +211,7 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawInlineObject(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT originX,
         FLOAT originY,
         IDWriteInlineObject* inlineObject,
@@ -234,8 +234,8 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::IsPixelSnappingDisabled(
-        __maybenull void* clientDrawingContext,
-        __out BOOL* isDisabled) {
+        void* clientDrawingContext,
+        BOOL* isDisabled) {
 
         *isDisabled = FALSE;
         return S_OK;
@@ -250,8 +250,8 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::GetCurrentTransform(
-        __maybenull void* clientDrawingContext,
-        __out DWRITE_MATRIX* transform) {
+        void* clientDrawingContext,
+        DWRITE_MATRIX* transform) {
 
         //forward the render target's transform
         rt_->GetTransform(reinterpret_cast<D2D1_MATRIX_3X2_F*>(transform));
@@ -267,8 +267,8 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::GetPixelsPerDip(
-        __maybenull void* clientDrawingContext,
-        __out FLOAT* pixelsPerDip) {
+        void* clientDrawingContext,
+        FLOAT* pixelsPerDip) {
 
         float x, yUnused;
 
@@ -292,7 +292,7 @@ namespace ukive {
     }
 
     STDMETHODIMP TextRenderer::QueryInterface(
-        IID const& riid, void** ppvObject) {
+        REFIID riid, void** ppvObject) {
 
         if (ppvObject == nullptr) {
             return E_POINTER;

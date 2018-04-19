@@ -4,7 +4,7 @@
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/window/window_manager.h"
-#include "ukive/views/layout/base_layout.h"
+#include "ukive/views/layout/root_layout.h"
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/menu/context_menu.h"
 #include "ukive/menu/context_menu_callback.h"
@@ -24,7 +24,7 @@ namespace ukive {
         min_width_(0),
         min_height_(0),
         is_startup_window_(false),
-        base_layout_(nullptr),
+        root_layout_(nullptr),
         labour_cycler_(nullptr),
         mouse_holder_(nullptr),
         focus_holder_(nullptr),
@@ -104,7 +104,7 @@ namespace ukive {
     }
 
     void Window::setContentView(View* content) {
-        base_layout_->addContent(content);
+        root_layout_->addContent(content);
     }
 
     void Window::setBackgroundColor(Color color) {
@@ -152,8 +152,8 @@ namespace ukive {
         return impl_->getClientHeight();
     }
 
-    BaseLayout* Window::getBaseLayout() {
-        return base_layout_;
+    RootLayout* Window::getRootLayout() {
+        return root_layout_;
     }
 
     Color Window::getBackgroundColor() {
@@ -201,7 +201,7 @@ namespace ukive {
         //与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
         if (mouse_holder_ref_ != 0
             && v != mouse_holder_) {
-            Log::e(L"Window", L"abnormal capture mouse!!\n");
+            DCHECK(false) << "abnormal capture mouse!!";
             return;
         }
 
@@ -230,12 +230,10 @@ namespace ukive {
 
     void Window::captureKeyboard(View* v) {
         focus_holder_ = v;
-        ::OutputDebugString(L"captureKeyboard!!\n");
     }
 
     void Window::releaseKeyboard() {
         focus_holder_ = nullptr;
-        ::OutputDebugString(L"releaseKeyboard!!\n");
     }
 
     View* Window::getMouseHolder() {
@@ -268,7 +266,7 @@ namespace ukive {
             return;
         }
 
-        LayoutParams* params = base_layout_->getLayoutParams();
+        LayoutParams* params = root_layout_->getLayoutParams();
 
         int width = getClientWidth();
         int height = getClientHeight();
@@ -285,8 +283,7 @@ namespace ukive {
                 widthSpec = View::EXACTLY;
                 break;
             }
-        }
-        else {
+        } else {
             width = params->width;
             widthSpec = View::EXACTLY;
         }
@@ -301,18 +298,17 @@ namespace ukive {
                 heightSpec = View::EXACTLY;
                 break;
             }
-        }
-        else {
+        } else {
             height = params->height;
             heightSpec = View::EXACTLY;
         }
 
-        base_layout_->measure(width, height, widthSpec, heightSpec);
+        root_layout_->measure(width, height, widthSpec, heightSpec);
 
-        int measuredWidth = base_layout_->getMeasuredWidth();
-        int measuredHeight = base_layout_->getMeasuredHeight();
+        int measuredWidth = root_layout_->getMeasuredWidth();
+        int measuredHeight = root_layout_->getMeasuredHeight();
 
-        base_layout_->layout(0, 0, measuredWidth, measuredHeight);
+        root_layout_->layout(0, 0, measuredWidth, measuredHeight);
     }
 
     void Window::performRefresh() {
@@ -335,7 +331,7 @@ namespace ukive {
 
 
     View* Window::findViewById(int id) {
-        return base_layout_->findViewById(id);
+        return root_layout_->findViewById(id);
     }
 
     ContextMenu* Window::startContextMenu(
@@ -422,18 +418,18 @@ namespace ukive {
     void Window::onCreate() {
         labour_cycler_ = new UpdateCycler(this);
 
-        base_layout_ = new BaseLayout(this);
-        base_layout_->setId(0);
-        base_layout_->setLayoutParams(
+        root_layout_ = new RootLayout(this);
+        root_layout_->setId(0);
+        root_layout_->setLayoutParams(
             new LayoutParams(
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
 
-        /*UFrameLayout* titleBar = new UFrameLayout(this);
-        titleBar->setBackground(new UColorDrawable(this, UColor::Blue100));
-        UBaseLayoutParams* titleBarLp = new UBaseLayoutParams(
-        UBaseLayoutParams::MATCH_PARENT, 50);
-        base_layout_->addContent(titleBar, titleBarLp);*/
+        /*FrameLayout* titleBar = new FrameLayout(this);
+        titleBar->setBackground(new ColorDrawable(this, Color::Blue100));
+        RootLayoutParams* titleBarLp = new RootLayoutParams(
+        RootLayoutParams::MATCH_PARENT, 50);
+        root_layout_->addContent(titleBar, titleBarLp);*/
 
         anim_mgr_ = new AnimationManager();
         HRESULT hr = anim_mgr_->init();
@@ -460,7 +456,7 @@ namespace ukive {
 
         canvas_ = new Canvas(renderer_->getRenderTarget());
 
-        base_layout_->onAttachedToWindow();
+        root_layout_->onAttachedToWindow();
     }
 
     void Window::onShow(bool show) {
@@ -489,14 +485,14 @@ namespace ukive {
     }
 
     void Window::onSetFocus() {
-        base_layout_->dispatchWindowFocusChanged(true);
+        root_layout_->dispatchWindowFocusChanged(true);
     }
 
     void Window::onKillFocus() {
         while (mouse_holder_ref_ > 0) {
             releaseMouse();
         }
-        base_layout_->dispatchWindowFocusChanged(false);
+        root_layout_->dispatchWindowFocusChanged(false);
     }
 
     void Window::onDraw(const Rect& rect) {
@@ -510,8 +506,8 @@ namespace ukive {
                 if (canvas_) {
                     onDrawCanvas(canvas_);
 
-                    if (base_layout_->isLayouted()) {
-                        base_layout_->draw(canvas_);
+                    if (root_layout_->isLayouted()) {
+                        root_layout_->draw(canvas_);
                     }
                 }
             });
@@ -621,7 +617,7 @@ namespace ukive {
     }
 
     void Window::onDestroy() {
-        delete base_layout_;
+        delete root_layout_;
 
         delete canvas_;
         canvas_ = nullptr;
@@ -672,7 +668,7 @@ namespace ukive {
                 return mouse_holder_->dispatchInputEvent(e);
             }
             else {
-                return base_layout_->dispatchInputEvent(e);
+                return root_layout_->dispatchInputEvent(e);
             }
         }
         else if (e->isKeyboardEvent()) {
@@ -684,7 +680,7 @@ namespace ukive {
     }
 
     void Window::onDpiChanged(int dpi_x, int dpi_y) {
-        base_layout_->dispatchWindowDpiChanged(dpi_x, dpi_y);
+        root_layout_->dispatchWindowDpiChanged(dpi_x, dpi_y);
     }
 
     bool Window::onDataCopy(unsigned int id, unsigned int size, void* data) {

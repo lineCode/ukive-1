@@ -93,12 +93,12 @@ namespace ukive {
     }
 
     void ViewGroup::addView(size_t index, View* v, LayoutParams* params) {
-        if (v == nullptr) {
-            DLOG(Log::WARNING) << "You cannot add a null View to ViewGroup.";
+        if (!v) {
+            DCHECK(false) << "You cannot add a null View to ViewGroup.";
             return;
         }
         if (index > view_list_.size()) {
-            DLOG(Log::WARNING) << "ViewGroup-addView(): Invalid index";
+            DCHECK(false) << "ViewGroup-addView(): Invalid index";
             return;
         }
 
@@ -403,8 +403,8 @@ namespace ukive {
 
     void ViewGroup::measureChild(
         View* child,
-        int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode) {
+        int parent_width, int parent_height,
+        int parent_width_mode, int parent_height_mode) {
 
         LayoutParams* child_lp = child->getLayoutParams();
 
@@ -417,12 +417,12 @@ namespace ukive {
         int childHeightSpec;
 
         getChildMeasure(
-            parentWidth, parentWidthMode,
+            parent_width, parent_width_mode,
             hori_padding,
             child_lp->width, &childWidth, &childWidthSpec);
 
         getChildMeasure(
-            parentHeight, parentHeightMode,
+            parent_height, parent_height_mode,
             vert_padding,
             child_lp->height, &childHeight, &childHeightSpec);
 
@@ -431,8 +431,8 @@ namespace ukive {
 
     void ViewGroup::measureChildWithMargins(
         View* child,
-        int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode) {
+        int parent_width, int parent_height,
+        int parent_width_mode, int parent_height_mode) {
 
         LayoutParams* child_lp = child->getLayoutParams();
 
@@ -448,12 +448,12 @@ namespace ukive {
         int childHeightSpec;
 
         getChildMeasure(
-            parentWidth, parentWidthMode,
+            parent_width, parent_width_mode,
             hori_margin + hori_padding,
             child_lp->width, &childWidth, &childWidthSpec);
 
         getChildMeasure(
-            parentHeight, parentHeightMode,
+            parent_height, parent_height_mode,
             vert_margin + vert_padding,
             child_lp->height, &childHeight, &childHeightSpec);
 
@@ -461,50 +461,50 @@ namespace ukive {
     }
 
     void ViewGroup::measureChildren(
-        int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode) {
+        int parent_width, int parent_height,
+        int parent_width_mode, int parent_height_mode) {
 
         for (auto child : view_list_) {
             if (child->getVisibility() != View::VANISHED) {
                 measureChild(
-                    child, parentWidth, parentHeight, parentWidthMode, parentHeightMode);
+                    child, parent_width, parent_height, parent_width_mode, parent_height_mode);
             }
         }
     }
 
     void ViewGroup::measureChildrenWithMargins(
-        int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode) {
+        int parent_width, int parent_height,
+        int parent_width_mode, int parent_height_mode) {
 
         for (auto child : view_list_) {
             if (child->getVisibility() != View::VANISHED) {
                 measureChildWithMargins(
-                    child, parentWidth, parentHeight, parentWidthMode, parentHeightMode);
+                    child, parent_width, parent_height, parent_width_mode, parent_height_mode);
             }
         }
     }
 
     void ViewGroup::getChildMeasure(
-        int parentSize, int parentSizeMode,
-        int padding, int childDimension,
-        int* childSize, int* childSizeMode) {
+        int parent_size, int parent_size_mode,
+        int padding, int child_dimension,
+        int* child_size, int* child_size_mode) {
 
-        int size = std::max(0, parentSize - padding);
+        int size = std::max(0, parent_size - padding);
 
         int result_size = 0;
         int result_spec = 0;
 
-        switch (parentSizeMode) {
+        switch (parent_size_mode) {
             // 父 ViewGroup 以其子 View 决定大小。
             // 此时，若子 View 的大小未给出，应测量自身。
         case FIT:
-            if (childDimension >= 0) {
-                result_size = childDimension;
+            if (child_dimension >= 0) {
+                result_size = child_dimension;
                 result_spec = EXACTLY;
-            } else if (childDimension == LayoutParams::MATCH_PARENT) {
+            } else if (child_dimension == LayoutParams::MATCH_PARENT) {
                 result_size = size;
                 result_spec = FIT;
-            } else if (childDimension == LayoutParams::FIT_CONTENT) {
+            } else if (child_dimension == LayoutParams::FIT_CONTENT) {
                 result_size = size;
                 result_spec = FIT;
             }
@@ -513,13 +513,13 @@ namespace ukive {
             // 父 ViewGroup 的大小已确定。
             // 此时，子 View 的度量模式不变。
         case EXACTLY:
-            if (childDimension >= 0) {
-                result_size = childDimension;
+            if (child_dimension >= 0) {
+                result_size = child_dimension;
                 result_spec = EXACTLY;
-            } else if (childDimension == LayoutParams::MATCH_PARENT) {
+            } else if (child_dimension == LayoutParams::MATCH_PARENT) {
                 result_size = size;
                 result_spec = EXACTLY;
-            } else if (childDimension == LayoutParams::FIT_CONTENT) {
+            } else if (child_dimension == LayoutParams::FIT_CONTENT) {
                 result_size = size;
                 result_spec = FIT;
             }
@@ -528,21 +528,21 @@ namespace ukive {
             // 父 ViewGroup 的大小未知。
             // 此时，除非子 View 的大小已给出，否则子 View 的度量模式也为未知。
         case UNKNOWN:
-            if (childDimension >= 0) {
-                result_size = childDimension;
+            if (child_dimension >= 0) {
+                result_size = child_dimension;
                 result_spec = EXACTLY;
-            } else if (childDimension == LayoutParams::MATCH_PARENT) {
+            } else if (child_dimension == LayoutParams::MATCH_PARENT) {
                 result_size = size;
                 result_spec = UNKNOWN;
-            } else if (childDimension == LayoutParams::FIT_CONTENT) {
+            } else if (child_dimension == LayoutParams::FIT_CONTENT) {
                 result_size = size;
                 result_spec = UNKNOWN;
             }
             break;
         }
 
-        *childSize = result_size;
-        *childSizeMode = result_spec;
+        *child_size = result_size;
+        *child_size_mode = result_spec;
     }
 
 }

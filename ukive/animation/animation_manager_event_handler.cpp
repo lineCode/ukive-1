@@ -4,7 +4,7 @@
 namespace ukive {
 
     AnimationManagerEventHandler::AnimationManagerEventHandler(
-        AnimationManager::OnStateChangedListener *listener)
+        AnimationManager::OnStateChangedListener* listener)
         :ref_count_(1),
         listener_(listener) {
     }
@@ -15,8 +15,8 @@ namespace ukive {
 
 
     HRESULT STDMETHODCALLTYPE AnimationManagerEventHandler::OnManagerStatusChanged(
-        _In_  UI_ANIMATION_MANAGER_STATUS newStatus,
-        _In_  UI_ANIMATION_MANAGER_STATUS previousStatus) {
+        UI_ANIMATION_MANAGER_STATUS newStatus,
+        UI_ANIMATION_MANAGER_STATUS previousStatus) {
 
         if (listener_) {
             listener_->onStateChanged(newStatus, previousStatus);
@@ -40,7 +40,7 @@ namespace ukive {
     }
 
     IFACEMETHODIMP AnimationManagerEventHandler::QueryInterface(
-        _In_ REFIID riid, _Outptr_ void** ppOutput) {
+        REFIID riid, void** ppOutput) {
 
         if (ppOutput == nullptr) {
             return E_POINTER;

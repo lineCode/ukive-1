@@ -16,10 +16,10 @@ namespace ukive {
 
 
     HRESULT STDMETHODCALLTYPE AnimationVariableChangeHandler::OnValueChanged(
-        _In_  IUIAnimationStoryboard* storyboard,
-        _In_  IUIAnimationVariable* variable,
-        _In_  DOUBLE newValue,
-        _In_  DOUBLE previousValue) {
+        IUIAnimationStoryboard* storyboard,
+        IUIAnimationVariable* variable,
+        DOUBLE newValue,
+        DOUBLE previousValue) {
 
         if (listener_) {
             listener_->onValueChanged(var_index_, storyboard, variable, newValue, previousValue);
@@ -29,10 +29,10 @@ namespace ukive {
     }
 
     HRESULT STDMETHODCALLTYPE AnimationVariableChangeHandler::OnIntegerValueChanged(
-        _In_  IUIAnimationStoryboard* storyboard,
-        _In_  IUIAnimationVariable* variable,
-        _In_  INT32 newValue,
-        _In_  INT32 previousValue) {
+        IUIAnimationStoryboard* storyboard,
+        IUIAnimationVariable* variable,
+        INT32 newValue,
+        INT32 previousValue) {
 
         if (listener_) {
             listener_->onIntegerValueChanged(var_index_, storyboard, variable, newValue, previousValue);
@@ -56,7 +56,7 @@ namespace ukive {
     }
 
     IFACEMETHODIMP AnimationVariableChangeHandler::QueryInterface(
-        _In_ REFIID riid, _Outptr_ void** ppOutput) {
+        REFIID riid, void** ppOutput) {
 
         if (ppOutput == nullptr) {
             return E_POINTER;

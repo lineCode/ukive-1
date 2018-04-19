@@ -19,19 +19,19 @@ namespace ukive {
 
 
     STDMETHODIMP_(unsigned long) TextDrawingEffect::Release() {
-        auto rc = InterlockedDecrement(&ref_count_);
-        if (rc == 0) {
+        auto nc = InterlockedDecrement(&ref_count_);
+        if (nc == 0) {
             delete this;
         }
 
-        return rc;
+        return nc;
     }
 
 
     STDMETHODIMP TextDrawingEffect::QueryInterface(
-        IID const& riid, void** ppvObject) {
+        REFIID riid, void** ppvObject) {
 
-        if (ppvObject == NULL) {
+        if (ppvObject == nullptr) {
             return E_POINTER;
         }
 
@@ -40,8 +40,8 @@ namespace ukive {
         } else if (__uuidof(IUnknown) == riid) {
             *ppvObject = this;
         } else {
-            *ppvObject = NULL;
-            return E_FAIL;
+            *ppvObject = nullptr;
+            return E_NOINTERFACE;
         }
 
         AddRef();

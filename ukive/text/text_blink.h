@@ -24,7 +24,7 @@ namespace ukive {
         void hide();
         void locate(float xCenter, float top, float bottom);
 
-        void setColor(Color color);
+        void setColor(const Color& color);
         void setThickness(float thickness);
 
         bool isShowing();

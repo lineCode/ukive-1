@@ -7,7 +7,7 @@
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
-#include "ukive/views/layout/base_layout_params.h"
+#include "ukive/views/layout/root_layout_params.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
 #include "ukive/drawable/ripple_drawable.h"
@@ -38,7 +38,7 @@ namespace shell {
         //root view.
         ukive::RestraintLayout *rootLayout = new ukive::RestraintLayout(this);
         rootLayout->setId(ID_LAYOUT_ROOT);
-        ukive::BaseLayoutParams *rightViewLp = new ukive::BaseLayoutParams(
+        ukive::RootLayoutParams *rightViewLp = new ukive::RootLayoutParams(
             ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT);
         rootLayout->setLayoutParams(rightViewLp);
 

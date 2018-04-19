@@ -1,8 +1,8 @@
 #include "inner_window.h"
 
 #include "ukive/event/input_event.h"
-#include "ukive/views/layout/base_layout.h"
-#include "ukive/views/layout/base_layout_params.h"
+#include "ukive/views/layout/root_layout.h"
+#include "ukive/views/layout/root_layout_params.h"
 #include "ukive/window/window.h"
 
 
@@ -131,14 +131,14 @@ namespace ukive {
 
         createDecorView();
 
-        BaseLayoutParams* baselp
-            = new BaseLayoutParams(width_, height_);
+        RootLayoutParams* baselp
+            = new RootLayoutParams(width_, height_);
         baselp->leftMargin = x;
         baselp->topMargin = y;
 
         decor_view_->setLayoutParams(baselp);
 
-        parent_->getBaseLayout()->addShade(decor_view_);
+        parent_->getRootLayout()->addShade(decor_view_);
 
         is_showing_ = true;
     }
@@ -158,8 +158,8 @@ namespace ukive {
             return;
         }
 
-        BaseLayoutParams* baselp
-            = (BaseLayoutParams*)decor_view_->getLayoutParams();
+        RootLayoutParams* baselp
+            = (RootLayoutParams*)decor_view_->getLayoutParams();
         baselp->leftMargin = x;
         baselp->topMargin = y;
 
@@ -171,7 +171,7 @@ namespace ukive {
 
     void InnerWindow::dismiss() {
         if (decor_view_ && is_showing_) {
-            parent_->getBaseLayout()->removeShade(decor_view_);
+            parent_->getRootLayout()->removeShade(decor_view_);
         }
         is_showing_ = false;
     }

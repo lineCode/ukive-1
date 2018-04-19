@@ -1,30 +1,18 @@
-﻿#include "base_layout.h"
+﻿#include "root_layout.h"
 
 #include <typeinfo>
 
 #include "ukive/views/layout/linear_layout.h"
 #include "ukive/views/layout/linear_layout_params.h"
-#include "ukive/views/layout/base_layout_params.h"
+#include "ukive/views/layout/root_layout_params.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
 
-    BaseLayout::BaseLayout(Window *w)
-        :FrameLayout(w) {
-        initBaseLayout();
-    }
-
-
-    BaseLayout::~BaseLayout() {
-        if (!shade_added_) {
-            delete shade_layout_;
-        }
-    }
-
-
-    void BaseLayout::initBaseLayout()
-    {
-        shade_added_ = false;
+    RootLayout::RootLayout(Window* w)
+        :FrameLayout(w),
+        shade_added_(false) {
 
         content_layout_ = new LinearLayout(getWindow());
         content_layout_->setOrientation(LinearLayout::VERTICAL);
@@ -42,26 +30,28 @@ namespace ukive {
                 LayoutParams::MATCH_PARENT));
     }
 
-
-    LayoutParams *BaseLayout::generateLayoutParams(const LayoutParams &lp) {
-        return new BaseLayoutParams(lp);
-    }
-
-    LayoutParams *BaseLayout::generateDefaultLayoutParams()
-    {
-        return new BaseLayoutParams(
-            BaseLayoutParams::MATCH_PARENT,
-            BaseLayoutParams::MATCH_PARENT);
-    }
-
-    bool BaseLayout::checkLayoutParams(LayoutParams *lp)
-    {
-        return typeid(*lp) == typeid(BaseLayoutParams);
+    RootLayout::~RootLayout() {
+        if (!shade_added_) {
+            delete shade_layout_;
+        }
     }
 
 
-    void BaseLayout::addShade(View *shade)
-    {
+    LayoutParams* RootLayout::generateLayoutParams(const LayoutParams &lp) {
+        return new RootLayoutParams(lp);
+    }
+
+    LayoutParams* RootLayout::generateDefaultLayoutParams() {
+        return new RootLayoutParams(
+            RootLayoutParams::MATCH_PARENT,
+            RootLayoutParams::MATCH_PARENT);
+    }
+
+    bool RootLayout::checkLayoutParams(LayoutParams* lp) {
+        return typeid(*lp) == typeid(RootLayoutParams);
+    }
+
+    void RootLayout::addShade(View* shade) {
         shade_layout_->addView(shade);
         if (shade_layout_->getChildCount() == 1) {
             addView(shade_layout_);
@@ -69,8 +59,7 @@ namespace ukive {
         }
     }
 
-    void BaseLayout::removeShade(View *shade)
-    {
+    void RootLayout::removeShade(View* shade) {
         shade_layout_->removeView(shade, false);
         if (shade_layout_->getChildCount() == 0) {
             removeView(shade_layout_, false);
@@ -78,14 +67,18 @@ namespace ukive {
         }
     }
 
-    void BaseLayout::addContent(View *content)
-    {
+    void RootLayout::addContent(View* content) {
         content_layout_->addView(content);
     }
 
 
-    View *BaseLayout::findViewById(int id)
-    {
+    void RootLayout::requestLayout() {
+        FrameLayout::requestLayout();
+
+        getWindow()->requestLayout();
+    }
+
+    View* RootLayout::findViewById(int id) {
         return content_layout_->findViewById(id);
     }
 

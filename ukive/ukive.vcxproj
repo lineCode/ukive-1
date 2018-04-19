@@ -246,8 +246,8 @@
     <ClInclude Include="views\click_listener.h" />
     <ClInclude Include="views\direct3d_view.h" />
     <ClInclude Include="views\image_view.h" />
-    <ClInclude Include="views\layout\base_layout.h" />
-    <ClInclude Include="views\layout\base_layout_params.h" />
+    <ClInclude Include="views\layout\root_layout.h" />
+    <ClInclude Include="views\layout\root_layout_params.h" />
     <ClInclude Include="views\layout\frame_layout.h" />
     <ClInclude Include="views\layout\layout_params.h" />
     <ClInclude Include="views\layout\linear_layout.h" />
@@ -345,8 +345,8 @@
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
-    <ClCompile Include="views\layout\base_layout.cpp" />
-    <ClCompile Include="views\layout\base_layout_params.cpp" />
+    <ClCompile Include="views\layout\root_layout.cpp" />
+    <ClCompile Include="views\layout\root_layout_params.cpp" />
     <ClCompile Include="views\layout\frame_layout.cpp" />
     <ClCompile Include="views\layout\layout_params.cpp" />
     <ClCompile Include="views\layout\linear_layout.cpp" />

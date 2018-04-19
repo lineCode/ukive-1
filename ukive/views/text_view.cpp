@@ -834,7 +834,7 @@ namespace ukive {
     }
 
     void TextView::setTextSize(int size) {
-        size = static_cast<int>(std::round(getWindow()->dpToPx(size)));
+        size = int(std::round(getWindow()->dpToPx(size)));
         if (size == mTextSize) {
             return;
         }
@@ -1181,8 +1181,9 @@ namespace ukive {
         requestLayout();
         invalidate();
 
-        if (mProcessRef == 0 && hasFocus() && mIsEditable)
+        if (mProcessRef == 0 && hasFocus() && mIsEditable) {
             mInputConnection->notifyTextChanged(false, start, oldEnd, newEnd);
+        }
 
         scrollToFit(false);
     }
@@ -1193,8 +1194,9 @@ namespace ukive {
 
         if (ns == ne) {
             if (os != oe) {
-                if (mTextActionMode != nullptr)
+                if (mTextActionMode) {
                     mTextActionMode->close();
+                }
 
                 mSelectionList.clear();
                 invalidate();
@@ -1210,8 +1212,9 @@ namespace ukive {
             drawSelection(ns, ne);
         }
 
-        if (mProcessRef == 0 && hasFocus() && mIsEditable)
+        if (mProcessRef == 0 && hasFocus() && mIsEditable) {
             mInputConnection->notifyTextSelectionChanged();
+        }
 
         scrollToFit(true);
     }
@@ -1224,14 +1227,14 @@ namespace ukive {
         range.length = span->getEnd() - span->getStart();
 
         switch (span->getBaseType()) {
-        case Span::TEXT:
-        {
+        case Span::TEXT: {
             switch (span->getType()) {
             case Span::TEXT_UNDERLINE:
-                if (action == SpanChange::ADD)
+                if (action == SpanChange::ADD) {
                     mTextLayout->SetUnderline(TRUE, range);
-                else if (action == SpanChange::REMOVE)
+                } else if (action == SpanChange::REMOVE) {
                     mTextLayout->SetUnderline(FALSE, range);
+                }
                 break;
             }
             break;
@@ -1274,12 +1277,14 @@ namespace ukive {
     }
 
     bool TextView::canSelectAll() {
-        if (mBaseText->length() == 0)
+        if (mBaseText->length() == 0) {
             return false;
+        }
 
         if (mBaseText->getSelectionStart() == 0
-            && mBaseText->getSelectionEnd() == mBaseText->length())
+            && mBaseText->getSelectionEnd() == mBaseText->length()) {
             return false;
+        }
 
         return true;
     }
@@ -1288,26 +1293,30 @@ namespace ukive {
         ClipboardManager::saveToClipboard(getSelection());
         mBaseText->replace(L"");
 
-        if (mTextActionMode != nullptr)
+        if (mTextActionMode) {
             mTextActionMode->close();
+        }
     }
 
     void TextView::performCopy() {
         ClipboardManager::saveToClipboard(getSelection());
 
-        if (mTextActionMode != nullptr)
+        if (mTextActionMode) {
             mTextActionMode->close();
+        }
     }
 
     void TextView::performPaste() {
         std::wstring content = ClipboardManager::getFromClipboard();
-        if (hasSelection())
+        if (hasSelection()) {
             mBaseText->replace(content);
-        else
+        } else {
             mBaseText->insert(content);
+        }
 
-        if (mTextActionMode != nullptr)
+        if (mTextActionMode) {
             mTextActionMode->close();
+        }
     }
 
     void TextView::performSelectAll() {

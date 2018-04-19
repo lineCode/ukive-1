@@ -42,16 +42,13 @@ namespace shell {
     void TestWindow::onPreCreate(
         ukive::ClassInfo* info,
         int* win_style, int* win_ex_style) {
-        //*win_ex_style |= WS_EX_LAYERED;
     }
 
     void TestWindow::onCreate() {
         Window::onCreate();
 
-        //::SetLayeredWindowAttributes(getHandle(), 0, 255, LWA_ALPHA);
-
-        inflateGroup();
-        //inflateListView();
+        //inflateGroup();
+        inflateListView();
     }
 
     void TestWindow::inflateGroup() {

@@ -25,7 +25,7 @@ namespace ukive {
 
         IFACEMETHODIMP_(ULONG) AddRef();
         IFACEMETHODIMP_(ULONG) Release();
-        IFACEMETHODIMP QueryInterface(_In_ REFIID riid, _Outptr_ void** ppOutput);
+        IFACEMETHODIMP QueryInterface(REFIID riid, void** ppOutput);
 
     private:
         ULONG ref_count_;

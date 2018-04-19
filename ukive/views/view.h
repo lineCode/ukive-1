@@ -23,18 +23,6 @@ namespace ukive {
 
     class View {
     public:
-        enum MeasureOption {
-            FIT,
-            EXACTLY,
-            UNKNOWN
-        };
-
-        enum Visibility {
-            VISIBLE,
-            INVISIBLE,
-            VANISHED
-        };
-
         enum Gravity {
             LEFT,
             TOP,
@@ -43,6 +31,18 @@ namespace ukive {
             CENTER,
             CENTER_HORIZONTAL,
             CENTER_VERTICAL,
+        };
+
+        enum Visibility {
+            VISIBLE,
+            INVISIBLE,
+            VANISHED
+        };
+
+        enum MeasureMode {
+            FIT,
+            EXACTLY,
+            UNKNOWN
         };
 
         View(Window* w);
@@ -169,10 +169,10 @@ namespace ukive {
         void measure(int width, int height, int widthMode, int heightMode);
         void layout(int left, int top, int right, int bottom);
 
-        void invalidate();
-        void invalidate(const Rect &rect);
-        void invalidate(int left, int top, int right, int bottom);
-        void requestLayout();
+        virtual void invalidate();
+        virtual void invalidate(const Rect &rect);
+        virtual void invalidate(int left, int top, int right, int bottom);
+        virtual void requestLayout();
 
         void requestFocus();
         void discardFocus();
@@ -220,8 +220,15 @@ namespace ukive {
         virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY);
 
     private:
-        class ClickPerformer
-            : public Executable {
+        enum Flags : uint32_t {
+            MEASURED_DIMENSION_SET = 1,
+            FORCE_LAYOUT = 1 << 1,
+            BOUNDS_SET = 1 << 2,
+            NEED_LAYOUT = 1 << 3,
+            INVALIDATED = 1 << 4,
+        };
+
+        class ClickPerformer : public Executable {
         public:
             ClickPerformer(View* v)
                 :view_(v) {}
@@ -237,11 +244,18 @@ namespace ukive {
         Rect bounds_;
         Rect padding_;
 
+        uint32_t flags_;
+
         int scroll_x_;
         int scroll_y_;
 
         int measured_width_;
         int measured_height_;
+
+        int old_pm_width_;
+        int old_pm_height_;
+        int old_pm_width_mode_;
+        int old_pm_height_mode_;
 
         int min_width_;
         int min_height_;
@@ -255,7 +269,6 @@ namespace ukive {
         bool is_input_event_at_last_;
         bool is_pressed_;
         bool is_focusable_;
-        bool is_layouted_;
         bool is_receive_outside_input_event_;
         bool can_consume_mouse_event_;
 

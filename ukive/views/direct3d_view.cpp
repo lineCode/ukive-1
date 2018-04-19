@@ -22,21 +22,19 @@ namespace ukive {
         setMinimumWidth(1);
         setMinimumHeight(1);
 
-        getWindow()->getRenderer()->addSwapChainResizeNotifier(this);
+        createStates();
         scene_->onSceneCreate(this);
     }
 
     Direct3DView::~Direct3DView() {
         scene_->onSceneDestroy();
 
-        releaseState();
-        releaseResourceView();
-
-        getWindow()->getRenderer()->removeSwapChainResizeNotifier(this);
+        releaseStates();
+        releaseResourceViews();
     }
 
 
-    void Direct3DView::createState() {
+    void Direct3DView::createStates() {
         auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
         auto d3d_dc = Application::getGraphicDeviceManager()->getD3DDeviceContext();
 
@@ -118,7 +116,7 @@ namespace ukive {
         }
     }
 
-    void Direct3DView::releaseState() {
+    void Direct3DView::releaseStates() {
         depth_stencil_state_.reset();
         rasterizer_state_.reset();
         sampler_state_.reset();
@@ -137,7 +135,7 @@ namespace ukive {
     }
 
 
-    void Direct3DView::createResourceView(int width, int height) {
+    void Direct3DView::createResourceViews(int width, int height) {
         if (width <= 0 || height <= 0) {
             return;
         }
@@ -241,23 +239,13 @@ namespace ukive {
         // d3d_device.get(), ddsFileName + L"\\top.dds", 0, &shader_resource_view_));
     }
 
-    void Direct3DView::releaseResourceView() {
+    void Direct3DView::releaseResourceViews() {
         d3d_content_.reset();
         d3d_content_surface_.reset();
         depth_stencil_buffer_.reset();
         render_target_view_.reset();
         depth_stencil_view_.reset();
         shader_resource_view_.reset();
-    }
-
-
-    void Direct3DView::onPreSwapChainResize() {
-        releaseState();
-        releaseResourceView();
-    }
-
-    void Direct3DView::onPostSwapChainResize() {
-        createState();
     }
 
 
@@ -288,25 +276,6 @@ namespace ukive {
         }
 
         setMeasuredDimension(final_width, final_height);
-    }
-
-    void Direct3DView::onLayout(
-        bool changed, bool size_changed,
-        int left, int top, int right, int bottom) {
-
-        int width = right - left - getPaddingLeft() - getPaddingRight();
-        int height = bottom - top - getPaddingTop() - getPaddingBottom();
-
-        if (d3d_content_) {
-            releaseResourceView();
-        }
-
-        createResourceView(width, height);
-
-        if (size_changed) {
-            setViewports(0, 0, width, height);
-            scene_->onSceneResize(width, height);
-        }
     }
 
     void Direct3DView::onDraw(Canvas* canvas) {
@@ -345,6 +314,15 @@ namespace ukive {
     void Direct3DView::onSizeChanged(
         int width, int height, int old_width, int old_height) {
         View::onSizeChanged(width, height, old_width, old_height);
+
+        int content_width = width - getPaddingLeft() - getPaddingRight();
+        int content_height = height - getPaddingTop() - getPaddingBottom();
+
+        releaseResourceViews();
+        createResourceViews(content_width, content_height);
+
+        setViewports(0, 0, content_width, content_height);
+        scene_->onSceneResize(content_width, content_height);
     }
 
 }

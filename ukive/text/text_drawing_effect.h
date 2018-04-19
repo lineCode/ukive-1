@@ -17,7 +17,7 @@ namespace ukive {
         ULONG STDMETHODCALLTYPE AddRef();
         ULONG STDMETHODCALLTYPE Release();
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            IID const& riid, void** ppvObject);
+            REFIID riid, void** ppvObject);
 
         EffectSpan* effect_span_;
 

@@ -22,10 +22,15 @@ namespace ukive {
     View::View(Window* w)
         :window_(w),
         id_(Application::getViewUID()),
+        flags_(0),
         min_width_(0),
         min_height_(0),
         measured_width_(0),
         measured_height_(0),
+        old_pm_width_(0),
+        old_pm_height_(0),
+        old_pm_width_mode_(UNKNOWN),
+        old_pm_height_mode_(UNKNOWN),
         scroll_x_(0),
         scroll_y_(0),
         elevation_(0.f),
@@ -34,7 +39,6 @@ namespace ukive {
         is_enabled_(true),
         is_pressed_(false),
         is_focusable_(false),
-        is_layouted_(false),
         is_attached_to_window_(false),
         is_input_event_at_last_(false),
         is_receive_outside_input_event_(false),
@@ -43,7 +47,6 @@ namespace ukive {
         input_connection_(nullptr),
         click_listener_(nullptr),
         click_performer_(new ClickPerformer(this)),
-        shadow_effect_(std::make_unique<ShadowEffect>()),
         mAlpha(1.0),
         mScaleX(1.0),
         mScaleY(1.0),
@@ -261,6 +264,10 @@ namespace ukive {
             return;
         }
 
+        if (!shadow_effect_) {
+            shadow_effect_ = std::make_unique<ShadowEffect>();
+        }
+
         elevation_ = elevation;
         shadow_effect_->setRadius(elevation_ * 2);
 
@@ -287,6 +294,8 @@ namespace ukive {
     void View::setMeasuredDimension(int width, int height) {
         measured_width_ = width;
         measured_height_ = height;
+
+        flags_ |= Flags::MEASURED_DIMENSION_SET;
     }
 
     void View::offsetTopAndBottom(int dy) {
@@ -539,7 +548,7 @@ namespace ukive {
     }
 
     bool View::isLayouted() const {
-        return is_layouted_;
+        return flags_ & Flags::BOUNDS_SET;
     }
 
     bool View::isLocalMouseInThis(InputEvent* e) const {
@@ -590,7 +599,7 @@ namespace ukive {
         canvas->translate(mTranslateX, mTranslateY);
 
         bool hasBg = needDrawBackground();
-        bool hasShadow = (hasBg && (elevation_ > 0.f));
+        bool hasShadow = (hasBg && (elevation_ > 0.f) && shadow_effect_);
 
         std::shared_ptr<Bitmap> bg_bmp;
         ComPtr<ID3D11Texture2D> bg_texture;
@@ -742,60 +751,88 @@ namespace ukive {
         }
     }
 
-    void View::measure(int width, int height, int widthMode, int heightMode) {
-        onMeasure(width, height, widthMode, heightMode);
-    }
+    void View::measure(int width, int height, int width_mode, int height_mode) {
+        if (flags_ & Flags::MEASURED_DIMENSION_SET) {
+            bool is_force_layout = (flags_ & Flags::FORCE_LAYOUT);
+            bool is_exactly_mode = (width_mode == EXACTLY && height_mode == EXACTLY);
+            bool is_spec_not_change =
+                (width == old_pm_width_ && height == old_pm_height_
+                    && width_mode == old_pm_width_mode_ && height_mode == old_pm_height_mode_);
 
-    void View::layout(int left, int top, int right, int bottom) {
-        bool sizeChanged = false;
-
-        Rect new_bounds(left, top, right - left, bottom - top);
-
-        int width = new_bounds.width();
-        int height = new_bounds.height();
-        int old_width = bounds_.width();
-        int old_height = bounds_.height();
-
-        bool changed = bounds_ != new_bounds;
-        if (changed) {
-            sizeChanged = old_width != width || old_height != height;
-            bounds_ = new_bounds;
-            if (sizeChanged) {
-                onSizeChanged(width, height, old_width, old_height);
+            if (!is_force_layout && is_exactly_mode && is_spec_not_change) {
+                return;
             }
         }
 
-        onLayout(changed, sizeChanged,
-            left, top, right, bottom);
+        flags_ &= ~Flags::MEASURED_DIMENSION_SET;
 
-        is_layouted_ = true;
+        onMeasure(width, height, width_mode, height_mode);
+
+        if (!(flags_ & Flags::MEASURED_DIMENSION_SET)) {
+            LOG(Log::FATAL) << "You must invoke setMeasuredDimension() in onMeasure()!";
+        }
+
+        flags_ |= Flags::NEED_LAYOUT;
+
+        old_pm_width_ = width;
+        old_pm_height_ = height;
+        old_pm_width_mode_ = width_mode;
+        old_pm_height_mode_ = height_mode;
+    }
+
+    void View::layout(int left, int top, int right, int bottom) {
+        bool size_changed = false;
+
+        Rect new_bounds(left, top, right - left, bottom - top);
+
+        bool changed = bounds_ != new_bounds;
+        if (changed) {
+            int width = new_bounds.width();
+            int height = new_bounds.height();
+            int old_width = bounds_.width();
+            int old_height = bounds_.height();
+
+            size_changed = old_width != width || old_height != height;
+            bounds_ = new_bounds;
+            if (size_changed) {
+                onSizeChanged(width, height, old_width, old_height);
+            }
+
+            invalidate();
+        }
+
+        if (changed || (flags_ & Flags::NEED_LAYOUT)) {
+            onLayout(changed, size_changed,
+                left, top, right, bottom);
+        }
+
+        flags_ |= Flags::BOUNDS_SET;
+        flags_ &= ~Flags::FORCE_LAYOUT;
+        flags_ &= ~Flags::NEED_LAYOUT;
     }
 
     void View::invalidate() {
         invalidate(bounds_);
     }
 
-    void View::invalidate(const Rect &rect) {
+    void View::invalidate(const Rect& rect) {
         invalidate(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     void View::invalidate(int left, int top, int right, int bottom) {
-        //TODO:应只刷新脏区域。
-        //this->getWindow()->performRefresh(left, top, right, bottom);
+        flags_ |= Flags::INVALIDATED;
 
-        //直接绘制。(实时)
-        //this->getWindow()->performRefresh();
-
-        //加入消息队列，等待下一帧。(非实时)
+        // TODO: we only need to refresh dirty region.
+        // add to queue
         getWindow()->invalidate();
     }
 
     void View::requestLayout() {
-        //直接布局。(实时)
-        //this->getWindow()->performLayout();
+        flags_ |= Flags::FORCE_LAYOUT;
 
-        //加入消息队列，等待下一帧。(非实时)
-        getWindow()->requestLayout();
+        if (parent_) {
+            parent_->requestLayout();
+        }
     }
 
     void View::requestFocus() {
@@ -803,13 +840,13 @@ namespace ukive {
             return;
         }
 
-        //先取消其他 view 的焦点。
-        View* prevHolder = window_->getKeyboardHolder();
-        if (prevHolder != nullptr) {
-            prevHolder->discardFocus();
+        // 先取消其他 view 的焦点。
+        View* prev_holder = window_->getKeyboardHolder();
+        if (prev_holder) {
+            prev_holder->discardFocus();
         }
 
-        //获取焦点。
+        // 获取焦点。
         window_->captureKeyboard(this);
 
         has_focus_ = true;
@@ -817,7 +854,6 @@ namespace ukive {
     }
 
     void View::discardFocus() {
-        //舍弃焦点(如果有的话)。
         if (has_focus_) {
             has_focus_ = false;
             window_->releaseKeyboard();
@@ -862,7 +898,7 @@ namespace ukive {
     void View::onAttachedToWindow() {
         is_attached_to_window_ = true;
 
-        if (input_connection_ != nullptr) {
+        if (input_connection_) {
             input_connection_->pushEditor();
         }
     }
@@ -870,11 +906,11 @@ namespace ukive {
     void View::onDetachedFromWindow() {
         is_attached_to_window_ = false;
 
-        if (input_connection_ != nullptr) {
+        if (input_connection_) {
             input_connection_->popEditor();
         }
 
-        if (animator_ != nullptr) {
+        if (animator_) {
             animator_->cancel();
         }
     }
@@ -884,7 +920,7 @@ namespace ukive {
     }
 
     bool View::onInputEvent(InputEvent* e) {
-        bool shouldRefresh = false;
+        bool should_refresh = false;
 
         switch (e->getEvent()) {
         case InputEvent::EVM_DOWN:
@@ -898,14 +934,14 @@ namespace ukive {
                 setPressed(true);
                 if (fg_drawable_) {
                     fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
+                    should_refresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
                 }
                 if (bg_drawable_) {
                     bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
+                    should_refresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
                 }
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
@@ -914,38 +950,38 @@ namespace ukive {
             if (!isPressed()) {
                 if (fg_drawable_) {
                     //fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                    should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
                 }
                 if (bg_drawable_) {
                     //bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                    should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
                 }
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
 
         case InputEvent::EVM_SCROLL_ENTER:
             if (fg_drawable_) {
-                shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
             }
             if (bg_drawable_) {
-                shouldRefresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
 
         case InputEvent::EVM_LEAVE_VIEW:
             if (fg_drawable_) {
-                shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
             }
             if (bg_drawable_) {
-                shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
@@ -964,11 +1000,11 @@ namespace ukive {
                 if (isLocalMouseInThis(e)) {
                     if (fg_drawable_) {
                         fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                        shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
                     }
                     if (bg_drawable_) {
                         bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                        shouldRefresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
                     }
 
                     if (pressed && click_listener_) {
@@ -978,14 +1014,14 @@ namespace ukive {
                 }
                 else {
                     if (fg_drawable_) {
-                        shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
                     }
                     if (bg_drawable_) {
-                        shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
                     }
                 }
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
@@ -996,12 +1032,12 @@ namespace ukive {
             }
             setPressed(false);
             if (fg_drawable_) {
-                shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
             }
             if (bg_drawable_) {
-                shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;

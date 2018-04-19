@@ -6,12 +6,11 @@
 
 namespace ukive {
 
-    class BaseLayoutParams : public LayoutParams
-    {
+    class RootLayoutParams : public LayoutParams {
     public:
-        BaseLayoutParams(int width, int height);
-        BaseLayoutParams(const LayoutParams &lp);
-        ~BaseLayoutParams();
+        RootLayoutParams(int width, int height);
+        RootLayoutParams(const LayoutParams& lp);
+        ~RootLayoutParams();
     };
 
 }

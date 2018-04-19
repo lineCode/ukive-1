@@ -10,34 +10,25 @@ namespace ukive {
 
     class Scene;
 
-    class Direct3DView :
-        public View,
-        public SwapChainResizeNotifier
-    {
+    class Direct3DView : public View {
     public:
         Direct3DView(Window* w, Scene* scene);
         ~Direct3DView();
 
-        void onPreSwapChainResize() override;
-        void onPostSwapChainResize() override;
-
     protected:
         void onMeasure(int width, int height, int width_spec, int height_spec) override;
-        void onLayout(
-            bool changed, bool size_changed,
-            int left, int top, int right, int bottom) override;
         void onSizeChanged(int width, int height, int old_width, int old_height) override;
         void onDraw(Canvas* canvas) override;
         bool onInputEvent(InputEvent* e) override;
 
     private:
-        void createState();
-        void releaseState();
+        void createStates();
+        void releaseStates();
 
         void setViewports(float x, float y, float width, float height);
 
-        void createResourceView(int width, int height);
-        void releaseResourceView();
+        void createResourceViews(int width, int height);
+        void releaseResourceViews();
 
         Scene* scene_;
 

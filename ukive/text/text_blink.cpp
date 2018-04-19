@@ -95,7 +95,7 @@ namespace ukive {
     }
 
 
-    void TextBlink::setColor(Color color) {
+    void TextBlink::setColor(const Color& color) {
         color_ = color;
     }
 

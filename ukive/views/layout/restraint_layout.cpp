@@ -9,28 +9,28 @@
 
 namespace ukive {
 
-    RestraintLayout::RestraintLayout(Window *wnd)
+    RestraintLayout::RestraintLayout(Window* wnd)
         : ViewGroup(wnd) {}
 
 
-    LayoutParams *RestraintLayout::generateLayoutParams(const LayoutParams &lp) {
+    LayoutParams* RestraintLayout::generateLayoutParams(const LayoutParams &lp) {
         return new RestraintLayoutParams(lp);
     }
 
-    LayoutParams *RestraintLayout::generateDefaultLayoutParams() {
+    LayoutParams* RestraintLayout::generateDefaultLayoutParams() {
         return new RestraintLayoutParams(
             LayoutParams::FIT_CONTENT, LayoutParams::FIT_CONTENT);
     }
 
-    bool RestraintLayout::checkLayoutParams(LayoutParams *lp) {
+    bool RestraintLayout::checkLayoutParams(LayoutParams* lp) {
         return typeid(*lp) == typeid(RestraintLayoutParams);
     }
 
 
-    View *RestraintLayout::getChildById(int id) {
+    View* RestraintLayout::getChildById(int id) {
         size_t count = getChildCount();
         for (size_t i = 0; i < count; ++i) {
-            View *child = getChildAt(i);
+            View* child = getChildAt(i);
             if (child->getId() == id) {
                 return child;
             }
@@ -39,12 +39,11 @@ namespace ukive {
         throw std::runtime_error("child view id not existed.");
     }
 
-    void RestraintLayout::clearMeasureFlag()
-    {
+    void RestraintLayout::clearMeasureFlag() {
         size_t count = getChildCount();
         for (size_t i = 0; i < count; ++i) {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
+            View* child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
             lp->isWidthMeasured = lp->isHeightMeasured = false;
             lp->isVertLayouted = lp->isHoriLayouted = false;
         }
@@ -56,10 +55,9 @@ namespace ukive {
         int parentWidthMode, int parentHeightMode)
     {
         size_t count = getChildCount();
-        for (size_t i = 0; i < count; ++i)
-        {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
+        for (size_t i = 0; i < count; ++i) {
+            View* child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
             if (lp->isWidthMeasured) {
                 continue;
             }
@@ -79,8 +77,8 @@ namespace ukive {
 
         for (size_t i = 0; i < count; ++i)
         {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
+            View* child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
             if (lp->isWidthMeasured && lp->isHeightMeasured) {
                 continue;
             }
@@ -110,14 +108,14 @@ namespace ukive {
     void RestraintLayout::checkRestrainedChildrenWeight() {
         size_t count = getChildCount();
         for (size_t i = 0; i < count; ++i) {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
+            View* child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
         }
     }
 
     void RestraintLayout::getRestrainedChildWidth(
-        View *child, RestraintLayoutParams *lp,
-        int parentWidth, int parentWidthMode, int *width, int *widthMode)
+        View* child, RestraintLayoutParams* lp,
+        int parentWidth, int parentWidthMode, int* width, int* widthMode)
     {
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
         int horizontalMargins = lp->leftMargin + lp->rightMargin;
@@ -188,8 +186,8 @@ namespace ukive {
                     if (lp->startHandledId == lp->endHandledId)
                     {
                         int measuredTargetWidth = 0;
-                        View *target = getChildById(lp->startHandledId);
-                        RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                        View* target = getChildById(lp->startHandledId);
+                        auto targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
                         // 测量此 target view 的宽度。
                         int targetWidth;
@@ -247,12 +245,12 @@ namespace ukive {
                         {
                             // 前向遍历。
                             int measuredStartMargin = lp->leftMargin;
-                            RestraintLayoutParams *childLp = lp;
+                            RestraintLayoutParams* childLp = lp;
                             while (childLp->hasStart()
                                 && childLp->startHandledId != this->getId())
                             {
-                                View *target = getChildById(childLp->startHandledId);
-                                RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                View* target = getChildById(childLp->startHandledId);
+                                auto targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
                                 // 测量此 target view 的宽度。
                                 int targetWidth;
@@ -310,8 +308,8 @@ namespace ukive {
                             while (childLp->hasEnd()
                                 && childLp->endHandledId != this->getId())
                             {
-                                View *target = getChildById(childLp->endHandledId);
-                                RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                View* target = getChildById(childLp->endHandledId);
+                                auto targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
                                 // 测量此 target view 的宽度。
                                 int targetWidth;
@@ -409,8 +407,8 @@ namespace ukive {
     }
 
     void RestraintLayout::getRestrainedChildHeight(
-        View *child, RestraintLayoutParams *lp,
-        int parentHeight, int parentHeightMode, int *height, int *heightSpec)
+        View* child, RestraintLayoutParams* lp,
+        int parentHeight, int parentHeightMode, int* height, int* heightSpec)
     {
         int verticalPadding = getPaddingTop() + getPaddingBottom();
         int verticalMargins = lp->topMargin + lp->bottomMargin;
@@ -420,8 +418,7 @@ namespace ukive {
 
         if (lp->hasVerticalCouple())
         {
-            int size = std::max(0,
-                parentHeight - verticalPadding - verticalMargins);
+            int size = std::max(0, parentHeight - verticalPadding - verticalMargins);
 
             // child 有固定的大小。
             if (lp->height > 0)
@@ -434,8 +431,7 @@ namespace ukive {
             else
             {
                 // handler couple 绑定于父 View。
-                if (lp->topHandledId == this->getId()
-                    && lp->bottomHandledId == this->getId())
+                if (lp->topHandledId == getId() && lp->bottomHandledId == getId())
                 {
                     switch (parentHeightMode)
                     {
@@ -448,8 +444,7 @@ namespace ukive {
                     }
                     case EXACTLY:
                     {
-                        if (lp->height == 0
-                            || lp->height == LayoutParams::MATCH_PARENT)
+                        if (lp->height == 0 || lp->height == LayoutParams::MATCH_PARENT)
                         {
                             childHeight = size;
                             childHeightMode = EXACTLY;
@@ -483,8 +478,8 @@ namespace ukive {
                     if (lp->topHandledId == lp->bottomHandledId)
                     {
                         int measuredTargetHeight = 0;
-                        View *target = getChildById(lp->topHandledId);
-                        RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                        View* target = getChildById(lp->topHandledId);
+                        RestraintLayoutParams* targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
                         // 测量此 target view 的高度。
                         int targetHeight;
@@ -537,17 +532,17 @@ namespace ukive {
                     }
                     else
                     {
-                        if (parentHeightMode == EXACTLY
-                            || parentHeightMode == FIT)
+                        if (parentHeightMode == EXACTLY || parentHeightMode == FIT)
                         {
                             // 上向遍历。
                             int measuredTopMargin = lp->topMargin;
-                            RestraintLayoutParams *childLp = lp;
+                            RestraintLayoutParams* childLp = lp;
                             while (childLp->hasTop()
                                 && childLp->topHandledId != this->getId())
                             {
-                                View *target = getChildById(childLp->topHandledId);
-                                RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                View* target = getChildById(childLp->topHandledId);
+                                auto targetLp
+                                    = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
                                 // 测量此 target view 的高度。
                                 int targetHeight;
@@ -583,15 +578,10 @@ namespace ukive {
                                     targetWidth, targetHeight,
                                     targetWidthMode, targetHeightMode);
 
-                                if (childLp->topHandledEdge
-                                    == RestraintLayoutParams::BOTTOM)
-                                {
+                                if (childLp->topHandledEdge == RestraintLayoutParams::BOTTOM) {
                                     measuredTopMargin += target->getMeasuredHeight()
                                         + (targetLp->hasTop() ? targetLp->topMargin : 0);
-                                }
-                                else if (childLp->topHandledEdge
-                                    == RestraintLayoutParams::TOP)
-                                {
+                                } else if (childLp->topHandledEdge == RestraintLayoutParams::TOP) {
                                     measuredTopMargin +=
                                         (targetLp->hasTop() ? targetLp->topMargin : 0);
                                 }
@@ -602,11 +592,10 @@ namespace ukive {
                             // 下向遍历。
                             int measuredBottomMargin = lp->bottomMargin;
                             childLp = lp;
-                            while (childLp->hasBottom()
-                                && childLp->bottomHandledId != this->getId())
+                            while (childLp->hasBottom() && childLp->bottomHandledId != getId())
                             {
-                                View *target = getChildById(childLp->bottomHandledId);
-                                RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                View* target = getChildById(childLp->bottomHandledId);
+                                RestraintLayoutParams* targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
                                 // 测量此 target view 的高度。
                                 int targetHeight;
@@ -642,13 +631,10 @@ namespace ukive {
                                     targetWidth, targetHeight,
                                     targetWidthMode, targetHeightMode);
 
-                                if (childLp->bottomHandledEdge == RestraintLayoutParams::TOP)
-                                {
+                                if (childLp->bottomHandledEdge == RestraintLayoutParams::TOP) {
                                     measuredBottomMargin += target->getMeasuredHeight()
                                         + (targetLp->hasBottom() ? targetLp->bottomMargin : 0);
-                                }
-                                else if (childLp->bottomHandledEdge == RestraintLayoutParams::BOTTOM)
-                                {
+                                } else if (childLp->bottomHandledEdge == RestraintLayoutParams::BOTTOM) {
                                     measuredBottomMargin +=
                                         (targetLp->hasBottom() ? targetLp->bottomMargin : 0);
                                 }
@@ -661,28 +647,19 @@ namespace ukive {
                             childHeight = std::max(0, parentHeight - verticalPadding
                                 - measuredTopMargin - measuredBottomMargin);
 
-                            if (lp->height == 0
-                                || lp->height == LayoutParams::MATCH_PARENT)
-                            {
-                                if (parentHeightMode == FIT)
-                                {
+                            if (lp->height == 0 || lp->height == LayoutParams::MATCH_PARENT) {
+                                if (parentHeightMode == FIT) {
                                     childHeightMode = FIT;
                                     lp->vertCoupleHandlerType = RestraintLayoutParams::CH_WRAP;
-                                }
-                                else if (parentHeightMode == EXACTLY)
-                                {
+                                } else if (parentHeightMode == EXACTLY) {
                                     childHeightMode = EXACTLY;
                                     lp->vertCoupleHandlerType = RestraintLayoutParams::CH_FILL;
                                 }
-                            }
-                            else if (lp->height == LayoutParams::FIT_CONTENT)
-                            {
+                            } else if (lp->height == LayoutParams::FIT_CONTENT) {
                                 childHeightMode = FIT;
                                 lp->vertCoupleHandlerType = RestraintLayoutParams::CH_WRAP;
                             }
-                        }
-                        else if (parentHeightMode == UNKNOWN)
-                        {
+                        } else if (parentHeightMode == UNKNOWN) {
                             childHeight = size;
                             childHeightMode = UNKNOWN;
                             lp->vertCoupleHandlerType = RestraintLayoutParams::CH_FILL;
@@ -690,146 +667,108 @@ namespace ukive {
                     }
                 }
             }
-        }
-        else
-        {
-            getChildMeasure(
-                parentHeight, UNKNOWN,
-                verticalMargins + verticalPadding,
-                lp->height, &childHeight, &childHeightMode);
+        } else {
+        getChildMeasure(
+            parentHeight, UNKNOWN,
+            verticalMargins + verticalPadding,
+            lp->height, &childHeight, &childHeightMode);
         }
 
         *height = childHeight;
         *heightSpec = childHeightMode;
     }
 
-    int RestraintLayout::getLeftSpacing(View *child, RestraintLayoutParams *lp)
-    {
-        int leftSpacing = 0;
-        RestraintLayoutParams *childLp = lp;
-        while (childLp->hasStart()
-            && childLp->startHandledId != this->getId())
-        {
-            View *target = getChildById(lp->startHandledId);
-            RestraintLayoutParams *targetLp
-                = (RestraintLayoutParams*)target->getLayoutParams();
+    int RestraintLayout::getLeftSpacing(View* child, RestraintLayoutParams* lp) {
+        int left_spacing = 0;
+        RestraintLayoutParams* childLp = lp;
+        while (childLp->hasStart() && childLp->startHandledId != getId()) {
+            View* target = getChildById(lp->startHandledId);
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
-            if (childLp->startHandledEdge
-                == RestraintLayoutParams::END)
-            {
-                leftSpacing += target->getMeasuredWidth()
+            if (childLp->startHandledEdge == RestraintLayoutParams::END) {
+                left_spacing += target->getMeasuredWidth()
                     + (targetLp->hasStart() ? targetLp->leftMargin : 0);
-            }
-            else if (childLp->startHandledEdge
-                == RestraintLayoutParams::START)
-            {
-                leftSpacing +=
+            } else if (childLp->startHandledEdge == RestraintLayoutParams::START) {
+                left_spacing +=
                     (targetLp->hasStart() ? targetLp->leftMargin : 0);
             }
 
             childLp = targetLp;
         }
 
-        return leftSpacing;
+        return left_spacing;
     }
 
-    int RestraintLayout::getTopSpacing(View *child, RestraintLayoutParams *lp)
-    {
-        int topSpacing = 0;
-        RestraintLayoutParams *childLp = lp;
-        while (childLp->hasTop()
-            && childLp->topHandledId != this->getId())
-        {
-            View *target = getChildById(lp->topHandledId);
-            RestraintLayoutParams *targetLp
-                = (RestraintLayoutParams*)target->getLayoutParams();
+    int RestraintLayout::getTopSpacing(View* child, RestraintLayoutParams* lp) {
+        int top_spacing = 0;
+        RestraintLayoutParams* childLp = lp;
+        while (childLp->hasTop() && childLp->topHandledId != getId()) {
+            View* target = getChildById(lp->topHandledId);
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
-            if (childLp->topHandledEdge
-                == RestraintLayoutParams::BOTTOM)
-            {
-                topSpacing += target->getMeasuredHeight()
+            if (childLp->topHandledEdge == RestraintLayoutParams::BOTTOM) {
+                top_spacing += target->getMeasuredHeight()
                     + (targetLp->hasTop() ? targetLp->topMargin : 0);
-            }
-            else if (childLp->topHandledEdge
-                == RestraintLayoutParams::TOP)
-            {
-                topSpacing +=
+            } else if (childLp->topHandledEdge == RestraintLayoutParams::TOP) {
+                top_spacing +=
                     (targetLp->hasTop() ? targetLp->topMargin : 0);
             }
 
             childLp = targetLp;
         }
 
-        return topSpacing;
+        return top_spacing;
     }
 
-    int RestraintLayout::getRightSpacing(View *child, RestraintLayoutParams *lp)
-    {
-        int rightSpacing = 0;
-        RestraintLayoutParams *childLp = lp;
-        while (childLp->hasEnd()
-            && childLp->endHandledId != this->getId())
-        {
-            View *target = getChildById(childLp->endHandledId);
-            RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+    int RestraintLayout::getRightSpacing(View* child, RestraintLayoutParams* lp) {
+        int right_spacing = 0;
+        RestraintLayoutParams* childLp = lp;
+        while (childLp->hasEnd() && childLp->endHandledId != getId()) {
+            View* target = getChildById(childLp->endHandledId);
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
-            if (childLp->endHandledEdge
-                == RestraintLayoutParams::START)
-            {
-                rightSpacing += target->getMeasuredWidth()
+            if (childLp->endHandledEdge == RestraintLayoutParams::START) {
+                right_spacing += target->getMeasuredWidth()
                     + (targetLp->hasEnd() ? targetLp->rightMargin : 0);
-            }
-            else if (childLp->endHandledEdge
-                == RestraintLayoutParams::END)
-            {
-                rightSpacing +=
+            } else if (childLp->endHandledEdge == RestraintLayoutParams::END) {
+                right_spacing +=
                     (targetLp->hasEnd() ? targetLp->rightMargin : 0);
             }
 
             childLp = targetLp;
         }
 
-        return rightSpacing;
+        return right_spacing;
     }
 
-    int RestraintLayout::getBottomSpacing(View *child, RestraintLayoutParams *lp)
-    {
-        int bottomSpacing = 0;
-        RestraintLayoutParams *childLp = lp;
-        while (childLp->hasBottom()
-            && childLp->bottomHandledId != this->getId())
-        {
-            View *target = getChildById(childLp->bottomHandledId);
-            RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+    int RestraintLayout::getBottomSpacing(View* child, RestraintLayoutParams* lp) {
+        int bottom_spacing = 0;
+        RestraintLayoutParams* child_lp = lp;
+        while (child_lp->hasBottom() && child_lp->bottomHandledId != getId()) {
+            auto target = getChildById(child_lp->bottomHandledId);
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
-            if (childLp->bottomHandledEdge
-                == RestraintLayoutParams::TOP)
-            {
-                bottomSpacing += target->getMeasuredHeight()
+            if (child_lp->bottomHandledEdge == RestraintLayoutParams::TOP) {
+                bottom_spacing += target->getMeasuredHeight()
                     + (targetLp->hasBottom() ? targetLp->bottomMargin : 0);
-            }
-            else if (childLp->bottomHandledEdge
-                == RestraintLayoutParams::BOTTOM)
-            {
-                bottomSpacing +=
+            } else if (child_lp->bottomHandledEdge == RestraintLayoutParams::BOTTOM) {
+                bottom_spacing +=
                     (targetLp->hasBottom() ? targetLp->bottomMargin : 0);
             }
 
-            childLp = targetLp;
+            child_lp = targetLp;
         }
 
-        return bottomSpacing;
+        return bottom_spacing;
     }
 
 
-    int RestraintLayout::measureWrappedWidth()
-    {
-        int wrappedWidth = 0;
+    int RestraintLayout::measureWrappedWidth() {
+        int wrapped_width = 0;
 
-        for (size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
 
             int startSpacing = getLeftSpacing(child, lp);
             int endSpacing = getRightSpacing(child, lp);
@@ -840,20 +779,18 @@ namespace ukive {
                 + (lp->hasStart() ? lp->leftMargin : 0)
                 + (lp->hasEnd() ? lp->rightMargin : 0);
 
-            wrappedWidth = std::max(wrappedWidth, chainWidth);
+            wrapped_width = std::max(wrapped_width, chainWidth);
         }
 
-        return wrappedWidth;
+        return wrapped_width;
     }
 
-    int RestraintLayout::measureWrappedHeight()
-    {
-        int wrappedHeight = 0;
+    int RestraintLayout::measureWrappedHeight() {
+        int wrapped_height = 0;
 
-        for (size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            auto child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
 
             int topSpacing = getTopSpacing(child, lp);
             int bottomSpacing = getBottomSpacing(child, lp);
@@ -863,82 +800,68 @@ namespace ukive {
                 + child->getMeasuredHeight()
                 + (lp->hasTop() ? lp->topMargin : 0)
                 + (lp->hasBottom() ? lp->bottomMargin : 0);
-            wrappedHeight = std::max(wrappedHeight, chainHeight);
+            wrapped_height = std::max(wrapped_height, chainHeight);
         }
 
-        return wrappedHeight;
+        return wrapped_height;
     }
 
 
     void RestraintLayout::layoutChild(
-        View *child, RestraintLayoutParams *lp,
+        View* child, RestraintLayoutParams* lp,
         int left, int top, int right, int bottom)
     {
-        if (!lp->isVertLayouted)
+        if (!lp->isVertLayouted) {
             layoutChildVertical(child, lp, top, bottom);
-        if (!lp->isHoriLayouted)
+        }
+        if (!lp->isHoriLayouted) {
             layoutChildHorizontal(child, lp, left, right);
+        }
 
         child->layout(lp->left, lp->top, lp->right, lp->bottom);
     }
 
 
     void RestraintLayout::layoutChildVertical(
-        View *child, RestraintLayoutParams *lp,
-        int top, int bottom)
+        View* child, RestraintLayoutParams* lp, int top, int bottom)
     {
         int childTop = top + getPaddingTop();
-        if (lp->hasTop()
-            && lp->topHandledId != this->getId())
-        {
-            View *target = getChildById(lp->topHandledId);
-            RestraintLayoutParams *targetLp
-                = (RestraintLayoutParams*)target->getLayoutParams();
+        if (lp->hasTop() && lp->topHandledId != getId()) {
+            auto target = getChildById(lp->topHandledId);
+            auto targetLp = reinterpret_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
-            if (!targetLp->isVertLayouted)
+            if (!targetLp->isVertLayouted) {
                 layoutChildVertical(target, targetLp, top, bottom);
-
-            if (lp->topHandledEdge
-                == RestraintLayoutParams::BOTTOM)
-            {
-                childTop = targetLp->bottom;
             }
-            else if (lp->topHandledEdge
-                == RestraintLayoutParams::TOP)
-            {
+
+            if (lp->topHandledEdge == RestraintLayoutParams::BOTTOM) {
+                childTop = targetLp->bottom;
+            } else if (lp->topHandledEdge == RestraintLayoutParams::TOP) {
                 childTop = targetLp->top;
             }
         }
 
         int childBottom = bottom - getPaddingBottom();
-        if (lp->hasBottom()
-            && lp->bottomHandledId != this->getId())
-        {
-            View *target = getChildById(lp->bottomHandledId);
-            RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+        if (lp->hasBottom() && lp->bottomHandledId != getId()) {
+            auto target = getChildById(lp->bottomHandledId);
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
-            if (!targetLp->isVertLayouted)
+            if (!targetLp->isVertLayouted) {
                 layoutChildVertical(target, targetLp, top, bottom);
-
-            if (lp->bottomHandledEdge
-                == RestraintLayoutParams::TOP)
-            {
-                childBottom = targetLp->top;
             }
-            else if (lp->bottomHandledEdge
-                == RestraintLayoutParams::BOTTOM)
-            {
+
+            if (lp->bottomHandledEdge == RestraintLayoutParams::TOP) {
+                childBottom = targetLp->top;
+            } else if (lp->bottomHandledEdge == RestraintLayoutParams::BOTTOM) {
                 childBottom = targetLp->bottom;
             }
         }
 
-        if (lp->hasVerticalCouple())
-        {
+        if (lp->hasVerticalCouple()) {
             childTop += lp->topMargin;
             childBottom -= lp->bottomMargin;
 
-            switch (lp->vertCoupleHandlerType)
-            {
+            switch (lp->vertCoupleHandlerType) {
             case RestraintLayoutParams::CH_FILL:
                 break;
             case RestraintLayoutParams::CH_WRAP:
@@ -948,8 +871,7 @@ namespace ukive {
                 childBottom = childTop + child->getMeasuredHeight();
                 break;
             }
-        }
-        else {
+        } else {
             if (lp->hasTop()) {
                 childTop += lp->topMargin;
                 childBottom = childTop + child->getMeasuredHeight();
@@ -966,61 +888,47 @@ namespace ukive {
     }
 
     void RestraintLayout::layoutChildHorizontal(
-        View *child, RestraintLayoutParams *lp,
+        View* child, RestraintLayoutParams* lp,
         int left, int right)
     {
         int childLeft = left + getPaddingLeft();
-        if (lp->hasStart()
-            && lp->startHandledId != this->getId())
-        {
-            View *target = getChildById(lp->startHandledId);
-            RestraintLayoutParams *targetLp
+        if (lp->hasStart() && lp->startHandledId != getId()) {
+            View* target = getChildById(lp->startHandledId);
+            RestraintLayoutParams* targetLp
                 = (RestraintLayoutParams*)target->getLayoutParams();
 
-            if (!targetLp->isHoriLayouted)
+            if (!targetLp->isHoriLayouted) {
                 layoutChildHorizontal(target, targetLp, left, right);
-
-            if (lp->startHandledEdge
-                == RestraintLayoutParams::END)
-            {
-                childLeft = targetLp->right;
             }
-            else if (lp->startHandledEdge
-                == RestraintLayoutParams::START)
-            {
+
+            if (lp->startHandledEdge == RestraintLayoutParams::END) {
+                childLeft = targetLp->right;
+            } else if (lp->startHandledEdge == RestraintLayoutParams::START) {
                 childLeft = targetLp->left;
             }
         }
 
         int childRight = right - getPaddingRight();
-        if (lp->hasEnd()
-            && lp->endHandledId != this->getId())
-        {
-            View *target = getChildById(lp->endHandledId);
-            RestraintLayoutParams *targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+        if (lp->hasEnd() && lp->endHandledId != getId()) {
+            View* target = getChildById(lp->endHandledId);
+            RestraintLayoutParams* targetLp = (RestraintLayoutParams*)target->getLayoutParams();
 
-            if (!targetLp->isHoriLayouted)
+            if (!targetLp->isHoriLayouted) {
                 layoutChildHorizontal(target, targetLp, left, right);
-
-            if (lp->endHandledEdge
-                == RestraintLayoutParams::START)
-            {
-                childRight = targetLp->left;
             }
-            else if (lp->endHandledEdge
-                == RestraintLayoutParams::END)
-            {
+
+            if (lp->endHandledEdge == RestraintLayoutParams::START) {
+                childRight = targetLp->left;
+            } else if (lp->endHandledEdge == RestraintLayoutParams::END) {
                 childRight = targetLp->right;
             }
         }
 
-        if (lp->hasHorizontalCouple())
-        {
+        if (lp->hasHorizontalCouple()) {
             childLeft += lp->leftMargin;
             childRight -= lp->rightMargin;
 
-            switch (lp->horiCoupleHandlerType)
-            {
+            switch (lp->horiCoupleHandlerType) {
             case RestraintLayoutParams::CH_FILL:
                 break;
             case RestraintLayoutParams::CH_WRAP:
@@ -1030,21 +938,16 @@ namespace ukive {
                 childRight = childLeft + child->getMeasuredWidth();
                 break;
             }
-        }
-        else
-        {
-            if (lp->hasStart())
-            {
+        } else {
+            if (lp->hasStart()) {
                 childLeft += lp->leftMargin;
                 childRight = childLeft + child->getMeasuredWidth();
-            }
-            else if (lp->hasEnd())
-            {
+            } else if (lp->hasEnd()) {
                 childRight -= lp->rightMargin;
                 childLeft = childRight - child->getMeasuredWidth();
-            }
-            else
+            } else {
                 childRight = childLeft + child->getMeasuredWidth();
+            }
         }
 
         lp->isHoriLayouted = true;
@@ -1057,8 +960,8 @@ namespace ukive {
         int width, int height,
         int widthMode, int heightMode)
     {
-        int finalWidth = 0;
-        int finalHeight = 0;
+        int final_width = 0;
+        int final_height = 0;
 
         int horizontalPadding = getPaddingLeft() + getPaddingRight();
         int verticalPadding = getPaddingTop() + getPaddingBottom();
@@ -1066,59 +969,55 @@ namespace ukive {
         clearMeasureFlag();
         measureRestrainedChildren(width, height, widthMode, heightMode);
 
-        switch (widthMode)
-        {
+        switch (widthMode) {
         case FIT:
-            finalWidth = measureWrappedWidth() + horizontalPadding;
-            finalWidth = std::min(width, finalWidth);
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
+            final_width = measureWrappedWidth() + horizontalPadding;
+            final_width = std::min(width, final_width);
+            final_width = std::max(getMinimumWidth(), final_width);
             break;
 
         case EXACTLY:
-            finalWidth = width;
+            final_width = width;
             break;
 
         case UNKNOWN:
-            finalWidth = measureWrappedWidth() + horizontalPadding;
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
+            final_width = measureWrappedWidth() + horizontalPadding;
+            final_width = std::max(getMinimumWidth(), final_width);
             break;
         }
 
-        switch (heightMode)
-        {
+        switch (heightMode) {
         case FIT:
-            finalHeight = measureWrappedHeight() + verticalPadding;
-            finalHeight = std::min(height, finalHeight);
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
+            final_height = measureWrappedHeight() + verticalPadding;
+            final_height = std::min(height, final_height);
+            final_height = std::max(getMinimumHeight(), final_height);
             break;
 
         case EXACTLY:
-            finalHeight = height;
+            final_height = height;
             break;
 
         case UNKNOWN:
-            finalHeight = measureWrappedHeight() + verticalPadding;
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
+            final_height = measureWrappedHeight() + verticalPadding;
+            final_height = std::max(getMinimumHeight(), final_height);
             break;
         }
 
-        setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredDimension(final_width, final_height);
     }
 
     void RestraintLayout::onLayout(
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        int horizontalPadding = getPaddingLeft() + getPaddingRight();
-        int verticalPadding = getPaddingTop() + getPaddingBottom();
+        int hori_padding = getPaddingLeft() + getPaddingRight();
+        int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        for (size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            RestraintLayoutParams *lp = (RestraintLayoutParams*)child->getLayoutParams();
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            auto child = getChildAt(i);
+            auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
 
-            layoutChild(child, lp, 0, 0,
-                right - left, bottom - top);
+            layoutChild(child, lp, 0, 0, right - left, bottom - top);
         }
     }
 

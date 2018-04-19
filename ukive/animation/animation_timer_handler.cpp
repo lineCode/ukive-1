@@ -52,7 +52,7 @@ namespace ukive {
     }
 
     IFACEMETHODIMP AnimationTimerHandler::QueryInterface(
-        _In_ REFIID riid, _Outptr_ void** ppOutput) {
+        REFIID riid, void** ppOutput) {
 
         if (ppOutput == nullptr) {
             return E_POINTER;

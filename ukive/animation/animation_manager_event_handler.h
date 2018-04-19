@@ -9,20 +9,20 @@ namespace ukive {
     class AnimationManagerEventHandler : public IUIAnimationManagerEventHandler {
     public:
         AnimationManagerEventHandler(
-            AnimationManager::OnStateChangedListener *listener);
+            AnimationManager::OnStateChangedListener* listener);
         ~AnimationManagerEventHandler();
 
         HRESULT STDMETHODCALLTYPE OnManagerStatusChanged(
-            _In_  UI_ANIMATION_MANAGER_STATUS newStatus,
-            _In_  UI_ANIMATION_MANAGER_STATUS previousStatus);
+            UI_ANIMATION_MANAGER_STATUS newStatus,
+            UI_ANIMATION_MANAGER_STATUS previousStatus);
 
         IFACEMETHODIMP_(ULONG) AddRef();
         IFACEMETHODIMP_(ULONG) Release();
-        IFACEMETHODIMP QueryInterface(_In_ REFIID riid, _Outptr_ void** ppOutput);
+        IFACEMETHODIMP QueryInterface(REFIID riid, void** ppOutput);
 
     private:
         ULONG ref_count_;
-        AnimationManager::OnStateChangedListener *listener_;
+        AnimationManager::OnStateChangedListener* listener_;
     };
 
 }

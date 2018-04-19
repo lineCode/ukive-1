@@ -22,7 +22,7 @@ namespace ukive {
     class Renderer;
     class InputEvent;
     class WindowImpl;
-    class BaseLayout;
+    class RootLayout;
     class AnimationManager;
     class ContextMenu;
     class ContextMenuCallback;
@@ -64,7 +64,7 @@ namespace ukive {
         int getMinHeight();
         int getClientWidth();
         int getClientHeight();
-        BaseLayout* getBaseLayout();
+        RootLayout* getRootLayout();
         Color getBackgroundColor();
         Cycler* getCycler();
         Renderer* getRenderer();
@@ -133,8 +133,10 @@ namespace ukive {
         void onPostSwapChainResize() override;
 
     private:
-        static const int SCHEDULE_RENDER = 0;
-        static const int SCHEDULE_LAYOUT = 1;
+        enum {
+            SCHEDULE_RENDER = 0,
+            SCHEDULE_LAYOUT = 1,
+        };
 
         class UpdateCycler : public Cycler {
         public:
@@ -180,7 +182,7 @@ namespace ukive {
         Renderer* renderer_;
 
         Cycler* labour_cycler_;
-        BaseLayout* base_layout_;
+        RootLayout* root_layout_;
 
         View* mouse_holder_;
         View* focus_holder_;
