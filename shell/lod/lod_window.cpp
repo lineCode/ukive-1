@@ -1,5 +1,7 @@
 ﻿#include "lod_window.h"
 
+#include <sstream>
+
 #include "ukive/application.h"
 #include "ukive/graphics/color.h"
 #include "ukive/views/layout/linear_layout.h"
@@ -13,8 +15,10 @@
 #include "ukive/drawable/edittext_drawable.h"
 #include "ukive/utils/float.h"
 #include "ukive/views/direct3d_view.h"
+#include "ukive/system/time_utils.h"
 
 #include "shell/lod/terrain_scene.h"
+#include "shell/lod/lod_generator.h"
 
 
 namespace {
@@ -46,9 +50,14 @@ namespace shell {
 
     LodWindow::LodWindow()
         :Window() {
+
+        mPrevTime = 0;
+        mFrameCounter = 0;
+        mFramePreSecond = 0;
     }
 
     LodWindow::~LodWindow() {
+        terrain_scene_->setRenderListener(nullptr);
     }
 
 
@@ -68,6 +77,7 @@ namespace shell {
             ukive::LayoutParams::MATCH_PARENT));
 
         terrain_scene_ = new TerrainScene();
+        terrain_scene_->setRenderListener(std::bind(&LodWindow::onRender, this));
 
         //3d view.
         ukive::Direct3DView* lodView = new ukive::Direct3DView(this, terrain_scene_);
@@ -284,12 +294,12 @@ namespace shell {
 
 
         //渲染参数显示器
-        auto renderInfoTV = new ukive::TextView(this);
-        renderInfoTV->setId(ID_LOD_INFO);
-        renderInfoTV->setIsEditable(false);
-        renderInfoTV->setIsSelectable(false);
-        renderInfoTV->setText(L"Render info.");
-        renderInfoTV->setTextSize(12);
+        render_info_ = new ukive::TextView(this);
+        render_info_->setId(ID_LOD_INFO);
+        render_info_->setIsEditable(false);
+        render_info_->setIsSelectable(false);
+        render_info_->setText(L"Render info.");
+        render_info_->setTextSize(12);
 
         auto renderInfoTVLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
@@ -297,7 +307,7 @@ namespace shell {
             .top(ID_VSYNC_BUTTON, Rlp::BOTTOM, dpToPx(16))
             .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8)).build();
 
-        rightLayout->addView(renderInfoTV, renderInfoTVLp);
+        rightLayout->addView(render_info_, renderInfoTVLp);
 
 
         //帮助说明
@@ -324,12 +334,9 @@ namespace shell {
     }
 
 
-    void LodWindow::onClick(ukive::View *v)
-    {
-        switch (v->getId())
-        {
-        case ID_SUBMIT_BUTTON:
-        {
+    void LodWindow::onClick(ukive::View *v) {
+        switch (v->getId()) {
+        case ID_SUBMIT_BUTTON: {
             float c1 = c1_seekbar_->getProgress() + 1.f;
             float c2 = c2_seekbar_->getProgress() + 1.f;
             int splitCount = static_cast<int>(split_seekbar_->getProgress()) + 1;
@@ -341,17 +348,13 @@ namespace shell {
             break;
         }
 
-        case ID_VSYNC_BUTTON:
-        {
+        case ID_VSYNC_BUTTON: {
             ukive::Button *vsyncButton = static_cast<ukive::Button*>(v);
-            if (vsyncButton->getText() == L"VSYNC ON")
-            {
+            if (vsyncButton->getText() == L"VSYNC ON") {
                 ukive::Application::setVSync(false);
                 vsyncButton->setText(L"VSYNC OFF");
                 vsyncButton->setButtonColor(ukive::Color::Yellow800);
-            }
-            else if (vsyncButton->getText() == L"VSYNC OFF")
-            {
+            } else if (vsyncButton->getText() == L"VSYNC OFF") {
                 ukive::Application::setVSync(true);
                 vsyncButton->setText(L"VSYNC ON");
                 vsyncButton->setButtonColor(ukive::Color::Blue500);
@@ -361,10 +364,8 @@ namespace shell {
         }
     }
 
-    void LodWindow::onSeekValueChanged(ukive::SeekBar *seekBar, float value)
-    {
-        switch (seekBar->getId())
-        {
+    void LodWindow::onSeekValueChanged(ukive::SeekBar *seekBar, float value) {
+        switch (seekBar->getId()) {
         case ID_C1_SEEKBAR:
             c1_value_tv_->setText(ukive::Float::toString(1.f + value, 2));
             break;
@@ -375,14 +376,36 @@ namespace shell {
         }
     }
 
-    void LodWindow::onSeekIntegerValueChanged(ukive::SeekBar *seekBar, int value)
-    {
-        switch (seekBar->getId())
-        {
+    void LodWindow::onSeekIntegerValueChanged(ukive::SeekBar *seekBar, int value) {
+        switch (seekBar->getId()) {
         case ID_SPLIT_SEEKBAR:
             split_value_tv_->setText(std::to_wstring(1 + value));
             break;
         }
     }
 
+    void LodWindow::onRender() {
+        ULONG64 currentTime = ukive::TimeUtils::upTimeMillis();
+        if (mPrevTime > 0) {
+            ++mFrameCounter;
+            if (currentTime - mPrevTime > 500) {
+                mFramePreSecond = (int)(((double)mFrameCounter / (currentTime - mPrevTime)) * 1000);
+                mFrameCounter = 0;
+                mPrevTime = currentTime;
+
+                std::wstringstream ss;
+                ss << "FPS: " << mFramePreSecond
+                    << "\nTerrain Size: " << terrain_scene_->getLodGenerator()->getRowVertexCount()
+                    << "x" << terrain_scene_->getLodGenerator()->getRowVertexCount()
+                    << "\nTriangle Count: " << terrain_scene_->getLodGenerator()->getMaxIndexCount() / 3
+                    << "\nRendered Triangle Count: " << terrain_scene_->getLodGenerator()->getIndexCount() / 3;
+
+                render_info_->setText(ss.str());
+            }
+        } else {
+            mPrevTime = currentTime;
+        }
+
+        //invalidate();
+    }
 }

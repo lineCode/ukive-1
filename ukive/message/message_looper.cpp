@@ -1,5 +1,6 @@
 ﻿#include "message_looper.h"
 
+#include "ukive/log.h"
 #include "ukive/message/cycler.h"
 #include "ukive/message/message.h"
 #include "ukive/message/message_queue.h"
@@ -7,34 +8,35 @@
 
 namespace ukive {
 
-    std::mutex MessageLooper::mLooperSync;
-    MessageLooper* MessageLooper::mMainLooper = nullptr;
+    std::mutex MessageLooper::looper_sync_;
+    MessageLooper* MessageLooper::main_looper_ = nullptr;
     thread_local std::shared_ptr<MessageLooper> MessageLooper::looper_;
 
 
     MessageLooper::MessageLooper() {
-        mMsgQueue = new MessageQueue();
+        msg_queue_ = new MessageQueue();
     }
 
     MessageLooper::~MessageLooper() {
-        delete mMsgQueue;
+        delete msg_queue_;
     }
 
 
     void MessageLooper::quit() {
-        mMsgQueue->quit();
+        msg_queue_->quit();
     }
 
     MessageQueue* MessageLooper::getQueue() {
-        return mMsgQueue;
+        return msg_queue_;
     }
 
 
     void MessageLooper::prepare() {
-        std::lock_guard<std::mutex> lk(mLooperSync);
+        std::lock_guard<std::mutex> lk(looper_sync_);
 
         if (looper_) {
-            throw std::logic_error("MessageLooper-prepare(): Only one Looper may be created per thread");
+            CHECK(Log::FATAL) << "Only one Looper may be created per thread!";
+            return;
         }
 
         looper_.reset(new MessageLooper());
@@ -42,18 +44,19 @@ namespace ukive {
 
     void MessageLooper::prepareMainLooper() {
         prepare();
-        std::lock_guard<std::mutex> lk(mLooperSync);
+        std::lock_guard<std::mutex> lk(looper_sync_);
 
-        if (mMainLooper)
-            throw std::logic_error("The main Looper has already been prepared.");
-        mMainLooper = myLooper();
+        if (main_looper_) {
+            CHECK(Log::FATAL) << "The main Looper has already been prepared!";
+        }
+        main_looper_ = myLooper();
     }
 
-    void MessageLooper::loop() {
+    bool MessageLooper::loop() {
         MessageLooper* looper = myLooper();
-        if (!looper)
-            throw std::logic_error(
-                "MessageLooper-loop(): No Looper; Looper.prepare() wasn't called on this thread.");
+        if (!looper) {
+            CHECK(Log::FATAL) << "No Looper; Looper.prepare() wasn't called on this thread!";
+        }
 
         MessageQueue* queue = looper->getQueue();
 
@@ -61,14 +64,17 @@ namespace ukive {
 
         while (true) {
             Message* msg = queue->dequeue();
-            if (!msg)
+            if (!msg) {
                 break;
+            }
 
             msg->target->dispatchMessage(msg);
             msg->recycle();
         }
 
         queue->removeBarrier();
+
+        return queue->hasMessage();
     }
 
     MessageQueue* MessageLooper::myQueue() {
@@ -80,23 +86,24 @@ namespace ukive {
     }
 
     MessageLooper* MessageLooper::getMainLooper() {
-        std::lock_guard<std::mutex> lk(mLooperSync);
-        return mMainLooper;
+        std::lock_guard<std::mutex> lk(looper_sync_);
+        return main_looper_;
     }
 
 
     void MessageLooper::receiveMessage() {
-        mMsgQueue->addBarrier();
+        msg_queue_->addBarrier();
 
         while (true) {
-            Message* msg = mMsgQueue->dequeue();
-            if (msg == 0)
+            Message* msg = msg_queue_->dequeue();
+            if (!msg) {
                 break;
+            }
 
             msg->target->dispatchMessage(msg);
         }
 
-        mMsgQueue->removeBarrier();
+        msg_queue_->removeBarrier();
     }
 
 }

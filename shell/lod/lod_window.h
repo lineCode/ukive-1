@@ -32,13 +32,19 @@ namespace shell {
 
         void onCreate() override;
 
-        void onClick(ukive::View* widget);
+        void onClick(ukive::View* widget) override;
 
-        void onSeekValueChanged(ukive::SeekBar* seekBar, float value);
-        void onSeekIntegerValueChanged(ukive::SeekBar* seekBar, int value);
+        void onSeekValueChanged(ukive::SeekBar* seekBar, float value) override;
+        void onSeekIntegerValueChanged(ukive::SeekBar* seekBar, int value) override;
+
+        void onRender();
 
     private:
         void inflateCtlLayout(ukive::RestraintLayout* rightLayout);
+
+        int mFrameCounter;
+        int mFramePreSecond;
+        ULONG64 mPrevTime;
 
         ukive::SeekBar* c1_seekbar_;
         ukive::SeekBar* c2_seekbar_;
@@ -46,6 +52,7 @@ namespace shell {
         ukive::TextView* c1_value_tv_;
         ukive::TextView* c2_value_tv_;
         ukive::TextView* split_value_tv_;
+        ukive::TextView* render_info_;
         ukive::Direct3DView* lod_view_;
 
         TerrainScene* terrain_scene_;

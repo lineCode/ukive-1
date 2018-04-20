@@ -1,6 +1,8 @@
 ﻿#ifndef SHELL_LOD_TERRAIN_SCENE_H_
 #define SHELL_LOD_TERRAIN_SCENE_H_
 
+#include <functional>
+
 #include "ukive/graphics/direct3d/scene.h"
 
 #include "shell/direct3d/graph_creator.h"
@@ -8,7 +10,6 @@
 
 
 namespace ukive {
-    class TextView;
     class InputEvent;
     class Direct3DView;
     class DrawingObjectManager;
@@ -28,6 +29,8 @@ namespace shell {
         TerrainScene();
         ~TerrainScene();
 
+        void setRenderListener(std::function<void()>&& l);
+
         void recreate(int level);
         void reevaluate(float c1, float c2);
 
@@ -40,6 +43,7 @@ namespace shell {
         Camera* getCamera();
         GraphCreator* getGraphCreator();
         ukive::DrawingObjectManager* getDrawingObjectManager();
+        LodGenerator* getLodGenerator();
 
     private:
         enum {
@@ -56,9 +60,6 @@ namespace shell {
     private:
         int mPrevX;
         int mPrevY;
-        int mFrameCounter;
-        int mFramePreSecond;
-        ULONG64 mPrevTime;
 
         unsigned int mWidth;
         unsigned int mHeight;
@@ -73,15 +74,16 @@ namespace shell {
         ModelConfigure* mModelConfigure;
         TerrainConfigure* mTerrainConfigure;
 
-        ukive::TextView* mLodInfoTV;
         ukive::ComPtr<ID3D11Buffer> mIndexBuffer;
         ukive::ComPtr<ID3D11Buffer> mVertexBuffer;
 
-        Camera* mCamera;
-        GraphCreator* mGraphCreator;
+        Camera* camera_;
+        GraphCreator* graph_creator_;
 
         ukive::Direct3DView* d3d_view_;
-        ukive::DrawingObjectManager* mDrawingObjectManager;
+        ukive::DrawingObjectManager* drawing_obj_mgr_;
+
+        std::function<void()> on_render_handler_;
     };
 
 }

@@ -13,8 +13,7 @@ namespace shell {
     class QTreeNode;
     struct TerrainVertexData;
 
-    class LodGenerator
-    {
+    class LodGenerator {
     public:
         LodGenerator(float edgeLength, int maxLevel);
         ~LodGenerator();
@@ -61,21 +60,21 @@ namespace shell {
         bool cullNodeWithBound(QTreeNode* node, dx::XMFLOAT4X4 wvpMatrix);
         void constructNodeBound(QTreeNode* node, dx::XMFLOAT3* bound);
 
-        int mMaxLevel;
-        int mVertexCount;
-        int mRowVertexCount;
+        int max_level_;
+        int vertex_count_;
+        int row_vertex_count_;
 
-        float COE_ROUGH;
-        float COE_DISTANCE;
-        QTreeNode* mRootQueue;
+        float coe_rough_;
+        float coe_distance_;
+        QTreeNode* root_queue_;
 
-        char* mFlag;
-        char* mAltitude;
-        TerrainVertexData* mVertices;
+        char* flags_;
+        char* altitude_;
+        TerrainVertexData* vertices_;
 
-        int* mIndices;
-        int mIndexCount;
-        int mMaxIndexCount;
+        int* indices_;
+        int index_count_;
+        int max_index_count_;
     };
 
 }

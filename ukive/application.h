@@ -51,7 +51,7 @@ namespace ukive {
     private:
         void initApplication();
         void cleanApplication();
-        void parseCommandLine(wchar_t* cmdLine);
+        void parseCommandLine(wchar_t* cmd_line);
 
         static int view_uid_;
         static bool vsync_enabled_;

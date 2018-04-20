@@ -214,10 +214,10 @@
     <ClInclude Include="message\message_looper.h" />
     <ClInclude Include="message\message_queue.h" />
     <ClInclude Include="system\clipboard_manager.h" />
-    <ClInclude Include="system\system_clock.h" />
+    <ClInclude Include="system\qpc_service.h" />
+    <ClInclude Include="system\time_utils.h" />
     <ClInclude Include="text\editable.h" />
     <ClInclude Include="text\input_connection.h" />
-    <ClInclude Include="text\language_detector.h" />
     <ClInclude Include="text\span\effect_span.h" />
     <ClInclude Include="text\span\inline_object_span.h" />
     <ClInclude Include="text\span\interactable_span.h" />
@@ -318,10 +318,10 @@
     <ClCompile Include="message\message_looper.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
-    <ClCompile Include="system\system_clock.cpp" />
+    <ClCompile Include="system\qpc_service.cpp" />
+    <ClCompile Include="system\time_utils.cpp" />
     <ClCompile Include="text\editable.cpp" />
     <ClCompile Include="text\input_connection.cpp" />
-    <ClCompile Include="text\language_detector.cpp" />
     <ClCompile Include="text\span\effect_span.cpp" />
     <ClCompile Include="text\span\inline_object_span.cpp" />
     <ClCompile Include="text\span\interactable_span.cpp" />

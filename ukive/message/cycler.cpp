@@ -2,7 +2,7 @@
 
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
-#include "ukive/system/system_clock.h"
+#include "ukive/system/time_utils.h"
 #include "ukive/utils/executable.h"
 
 
@@ -26,7 +26,7 @@ namespace ukive {
     }
 
     void Cycler::postDelayed(Executable* exec, uint64_t millis) {
-        postAtTime(exec, millis + SystemClock::upTimeMillis());
+        postAtTime(exec, millis + TimeUtils::upTimeMillis());
     }
 
     void Cycler::postAtTime(Executable* exec, uint64_t at_time_millis) {
@@ -42,7 +42,7 @@ namespace ukive {
     }
 
     void Cycler::postDelayed(const std::function<void()>& func, uint64_t millis, int what) {
-        postAtTime(func, millis + SystemClock::upTimeMillis());
+        postAtTime(func, millis + TimeUtils::upTimeMillis());
     }
 
     void Cycler::postAtTime(const std::function<void()>& func, uint64_t at_time_millis, int what) {
@@ -68,7 +68,7 @@ namespace ukive {
     }
 
     void Cycler::sendEmptyMessageDelayed(int what, uint64_t millis) {
-        sendEmptyMessageAtTime(what, millis + SystemClock::upTimeMillis());
+        sendEmptyMessageAtTime(what, millis + TimeUtils::upTimeMillis());
     }
 
     void Cycler::sendEmptyMessageAtTime(int what, uint64_t at_time_millis) {
@@ -83,7 +83,7 @@ namespace ukive {
     }
 
     void Cycler::sendMessageDelayed(Message* msg, uint64_t millis) {
-        sendMessageAtTime(msg, millis + SystemClock::upTimeMillis());
+        sendMessageAtTime(msg, millis + TimeUtils::upTimeMillis());
     }
 
     void Cycler::sendMessageAtTime(Message* msg, uint64_t at_time_millis) {

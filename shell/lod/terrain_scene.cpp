@@ -1,14 +1,11 @@
 ﻿#include "terrain_scene.h"
 
-#include <sstream>
-
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/graphics/direct3d/drawing_object_manager.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/direct3d_view.h"
 #include "ukive/window/window.h"
-#include "ukive/system/system_clock.h"
 
 #include "shell/lod/lod_generator.h"
 #include "shell/lod/terrain_configure.h"
@@ -26,22 +23,17 @@ namespace shell {
     namespace dx = DirectX;
 
     TerrainScene::TerrainScene() {
-        mPrevTime = 0;
-        mFrameCounter = 0;
-        mFramePreSecond = 0;
-        mLodInfoTV = nullptr;
-
         mMouseActionMode = MOUSE_ACTION_NONE;
         mIsCtrlKeyPressed = false;
         mIsShiftKeyPressed = false;
         mIsMouseLeftKeyPressed = false;
 
-        mDrawingObjectManager = new ukive::DrawingObjectManager();
+        drawing_obj_mgr_ = new ukive::DrawingObjectManager();
 
-        mGraphCreator = new GraphCreator(mDrawingObjectManager);
+        graph_creator_ = new GraphCreator(drawing_obj_mgr_);
 
-        mCamera = new Camera();
-        mCamera->init(1, 1);
+        camera_ = new Camera();
+        camera_->init(1, 1);
 
         mLodGenerator = new LodGenerator(8192, 5);
 
@@ -57,11 +49,15 @@ namespace shell {
     TerrainScene::~TerrainScene() {
         delete mLodGenerator;
 
-        delete mDrawingObjectManager;
-        delete mGraphCreator;
-        delete mCamera;
+        delete drawing_obj_mgr_;
+        delete graph_creator_;
+        delete camera_;
     }
 
+
+    void TerrainScene::setRenderListener(std::function<void()>&& l) {
+        on_render_handler_ = l;
+    }
 
     void TerrainScene::updateCube() {
         auto object = getDrawingObjectManager()->getByTag(kNormalCube);
@@ -142,9 +138,9 @@ namespace shell {
         const dx::XMFLOAT4X4 *viewMatrix;
         const dx::XMFLOAT4X4 *projectionMatrix;
 
-        worldMatrix = mCamera->getWorldMatrix();
-        viewMatrix = mCamera->getViewMatrix();
-        projectionMatrix = mCamera->getProjectionMatrix();
+        worldMatrix = camera_->getWorldMatrix();
+        viewMatrix = camera_->getViewMatrix();
+        projectionMatrix = camera_->getProjectionMatrix();
 
         vx = (2.0f * sx / mWidth - 1.0f) / projectionMatrix->_11;
         vy = (-2.0f * sy / mHeight + 1.0f) / projectionMatrix->_22;
@@ -223,7 +219,7 @@ namespace shell {
         mWidth = width;
         mHeight = height;
 
-        mCamera->resize(width, height);
+        camera_->resize(width, height);
 
         updateLodTerrain();
     }
@@ -308,30 +304,7 @@ namespace shell {
     }
 
     void TerrainScene::onSceneRender() {
-        ULONG64 currentTime = ukive::SystemClock::upTimeMillis();
-        if (mPrevTime > 0) {
-            ++mFrameCounter;
-            if (currentTime - mPrevTime > 500) {
-                mFramePreSecond = (int)(((double)mFrameCounter / (currentTime - mPrevTime)) * 1000);
-                mFrameCounter = 0;
-                mPrevTime = currentTime;
-            }
-        } else {
-            mPrevTime = currentTime;
-        }
-
-        std::wstringstream ss;
-        ss << "FPS: " << mFramePreSecond
-            << "\nTerrain Size: " << mLodGenerator->getRowVertexCount()
-            << "x" << mLodGenerator->getRowVertexCount()
-            << "\nTriangle Count: " << mLodGenerator->getMaxIndexCount() / 3
-            << "\nRendered Triangle Count: " << mLodGenerator->getIndexCount() / 3;
-
-        if (mLodInfoTV) {
-            mLodInfoTV->setText(ss.str());
-        } else {
-            mLodInfoTV = (ukive::TextView*)d3d_view_->getWindow()->findViewById(0x010);
-        }
+        on_render_handler_();
 
         dx::XMFLOAT4X4 wvpMatrix;
         dx::XMFLOAT4X4 wvpMatrixTransposed;
@@ -387,15 +360,19 @@ namespace shell {
     }
 
     Camera* TerrainScene::getCamera() {
-        return mCamera;
+        return camera_;
     }
 
     GraphCreator* TerrainScene::getGraphCreator() {
-        return mGraphCreator;
+        return graph_creator_;
     }
 
     ukive::DrawingObjectManager* TerrainScene::getDrawingObjectManager() {
-        return mDrawingObjectManager;
+        return drawing_obj_mgr_;
+    }
+
+    LodGenerator* TerrainScene::getLodGenerator() {
+        return mLodGenerator;
     }
 
 }

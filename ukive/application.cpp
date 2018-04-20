@@ -8,6 +8,8 @@
 #include "ukive/message/message_looper.h"
 #include "ukive/animation/animation_manager.h"
 #include "ukive/text/word_breaker.h"
+#include "ukive/system/qpc_service.h"
+
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -15,8 +17,6 @@
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxguid.lib")
-#pragma comment(lib, "Elscore.lib")
 #pragma comment(lib, "Shcore.lib")
 
 
@@ -97,32 +97,32 @@ namespace ukive {
         ::CoUninitialize();
     }
 
-    void Application::parseCommandLine(wchar_t* cmdLine) {
-        if (cmdLine == nullptr) {
+    void Application::parseCommandLine(wchar_t* cmd_line) {
+        if (!cmd_line) {
             return;
         }
 
-        std::wstring cmdString = cmdLine;
-        if (cmdString.empty()) {
+        std::wstring cmd_string = cmd_line;
+        if (cmd_string.empty()) {
             return;
         }
 
-        size_t i = cmdString.find(L" ");
+        size_t i = cmd_string.find(L" ");
         if (i == std::wstring::npos) {
-            command_list_.push_back(cmdString);
+            command_list_.push_back(cmd_string);
             return;
         }
 
-        size_t newStart = 0;
+        size_t new_start = 0;
 
         while (i != std::wstring::npos) {
-            std::wstring tmp = cmdString.substr(newStart, i - newStart);
+            std::wstring tmp = cmd_string.substr(new_start, i - new_start);
             command_list_.push_back(tmp);
 
-            newStart = i + 1;
-            i = cmdString.find(L" ", newStart);
+            new_start = i + 1;
+            i = cmd_string.find(L" ", new_start);
             if (i == std::wstring::npos) {
-                tmp = cmdString.substr(newStart, cmdString.length() - newStart);
+                tmp = cmd_string.substr(new_start, cmd_string.length() - new_start);
                 command_list_.push_back(tmp);
             }
         }
@@ -138,20 +138,33 @@ namespace ukive {
             if (vsync_enabled_) {
                 HRESULT hr = graphic_device_manager_->getCurOutput()->WaitForVBlank();
                 if (FAILED(hr)) {
-                    Log::e(L"Application", L"failed to wait vblank.");
+                    LOG(Log::WARNING) << "Failed to wait vblank: " << hr;
+                    ::Sleep(16);
                 }
             }
 
-            MessageLooper::loop();
-            while (::PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
+            bool has_message = MessageLooper::loop();
+            if (!has_message) {
+                DWORD result = ::MsgWaitForMultipleObjectsEx(
+                    0, NULL, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
+                if (result == WAIT_OBJECT_0) {
+                    int i = 0;
+                }
+            }
+
+            DWORD status = ::GetQueueStatus(QS_INPUT);
+            if (HIWORD(status) & QS_INPUT) {
+                int i = 0;
+            }
+
+            while (::PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
                 if (msg.message == WM_QUIT) {
                     done = true;
                     MessageLooper::myLooper()->quit();
                     break;
-                }
-                else {
+                } else {
                     ::TranslateMessage(&msg);
-                    ::DispatchMessageW(&msg);
+                    ::DispatchMessage(&msg);
                 }
             }
         }
@@ -196,11 +209,11 @@ namespace ukive {
         POINT pt = { 0, 0 };
         HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
 
-        unsigned int dpiX, dpiY;
+        UINT dpiX = 96, dpiY = 96;
         HRESULT hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
         if (FAILED(hr)) {
-            Log::e(L"Application", L"failed to get primary monitor dpi.");
-            return 0;
+            LOG(Log::WARNING) << "Failed to get primary monitor dpi: " << hr;
+            return 96;
         }
 
         return dpiX;

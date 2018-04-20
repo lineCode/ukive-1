@@ -2,7 +2,7 @@
 
 #include "ukive/log.h"
 #include "ukive/message/message.h"
-#include "ukive/system/system_clock.h"
+#include "ukive/system/time_utils.h"
 
 
 namespace ukive {
@@ -12,7 +12,6 @@ namespace ukive {
         is_quitting_(false),
         has_barrier_(false) {
     }
-
 
     MessageQueue::~MessageQueue() {
     }
@@ -25,6 +24,10 @@ namespace ukive {
         removeAllLocked();
     }
 
+    bool MessageQueue::hasMessage() {
+        std::lock_guard<std::mutex> lk(queue_sync_);
+        return message_ != nullptr;
+    }
 
     bool MessageQueue::enqueue(Message* msg) {
         if (!msg->target) {
@@ -67,21 +70,19 @@ namespace ukive {
     Message* MessageQueue::dequeue() {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        uint64_t now = SystemClock::upTimeMillis();
-        Message* prev = nullptr;
         Message* ptr = message_;
+        Message* prev = nullptr;
+        uint64_t now = TimeUtils::upTimeMillis();
 
-        //find barrier.
+        // find barrier
         while (ptr && ptr->target) {
             prev = ptr;
             ptr = ptr->next;
         }
 
-        if (!ptr) {
-            throw std::logic_error("MessageQueue-dequeue(): cannot find barrier.");
-        }
+        CHECK(ptr) << "Cannot find barrier!";
 
-        //over the barrier.
+        // over the barrier
         prev = ptr;
         ptr = ptr->next;
 
@@ -101,7 +102,7 @@ namespace ukive {
 
 
     void MessageQueue::remove(Cycler* c, void* data) {
-        if (c == nullptr) {
+        if (!c) {
             return;
         }
 
@@ -111,11 +112,10 @@ namespace ukive {
         Message* prev = nullptr;
         while (ptr) {
             if (ptr->target == c
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 
@@ -132,7 +132,7 @@ namespace ukive {
     }
 
     void MessageQueue::remove(Cycler* c, int what, void* data) {
-        if (c == nullptr) {
+        if (!c) {
             return;
         }
 
@@ -143,7 +143,7 @@ namespace ukive {
         while (ptr) {
             if (ptr->target == c
                 && ptr->what == what
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 if (prev) {
                     prev->next = ptr->next;
                 }
@@ -164,7 +164,7 @@ namespace ukive {
     }
 
     void MessageQueue::remove(Cycler* c, Executable* exec, void* data) {
-        if (c == nullptr) {
+        if (!c) {
             return;
         }
 
@@ -175,11 +175,10 @@ namespace ukive {
         while (ptr) {
             if (ptr->target == c
                 && ptr->callback == exec
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 
@@ -209,7 +208,7 @@ namespace ukive {
 
 
     bool MessageQueue::contains(Cycler* c, int what, void* data) {
-        if (c == nullptr) {
+        if (!c) {
             return false;
         }
 
@@ -219,7 +218,7 @@ namespace ukive {
         while (ptr) {
             if (ptr->target == c
                 && ptr->what == what
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 return true;
             }
             ptr = ptr->next;
@@ -229,7 +228,7 @@ namespace ukive {
     }
 
     bool MessageQueue::contains(Cycler* c, Executable* exec, void* data) {
-        if (c == nullptr) {
+        if (!c) {
             return false;
         }
 
@@ -271,11 +270,10 @@ namespace ukive {
         Message* ptr = message_;
         Message* prev = nullptr;
         while (ptr) {
-            if (ptr->target == nullptr) {
+            if (!ptr->target) {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 

@@ -16,6 +16,7 @@ namespace ukive {
         ~MessageQueue();
 
         void quit();
+        bool hasMessage();
 
         bool enqueue(Message* msg);
         Message* dequeue();

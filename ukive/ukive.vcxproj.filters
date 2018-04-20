@@ -48,9 +48,6 @@
     <ClCompile Include="system\clipboard_manager.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="system\system_clock.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\bitmap_factory.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -100,9 +97,6 @@
       <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="text\input_connection.cpp">
-      <Filter>text</Filter>
-    </ClCompile>
-    <ClCompile Include="text\language_detector.cpp">
       <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="text\text_action_mode.cpp">
@@ -282,6 +276,12 @@
     <ClCompile Include="views\layout\root_layout_params.cpp">
       <Filter>views\layout</Filter>
     </ClCompile>
+    <ClCompile Include="system\time_utils.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\qpc_service.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -335,9 +335,6 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="system\clipboard_manager.h">
-      <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="system\system_clock.h">
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="graphics\bitmap_factory.h">
@@ -401,9 +398,6 @@
       <Filter>text</Filter>
     </ClInclude>
     <ClInclude Include="text\input_connection.h">
-      <Filter>text</Filter>
-    </ClInclude>
-    <ClInclude Include="text\language_detector.h">
       <Filter>text</Filter>
     </ClInclude>
     <ClInclude Include="text\text_action_mode.h">
@@ -603,6 +597,12 @@
     </ClInclude>
     <ClInclude Include="views\layout\root_layout_params.h">
       <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="system\time_utils.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="system\qpc_service.h">
+      <Filter>system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

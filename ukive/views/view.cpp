@@ -868,16 +868,11 @@ namespace ukive {
         dispatchDiscardPendingOperations();
     }
 
+    void View::dispatchDraw(Canvas* canvas) {}
 
-    void View::dispatchDraw(Canvas* canvas) {
-    }
+    void View::dispatchDiscardFocus() {}
 
-    void View::dispatchDiscardFocus() {
-    }
-
-    void View::dispatchDiscardPendingOperations() {
-    }
-
+    void View::dispatchDiscardPendingOperations() {}
 
     bool View::dispatchInputEvent(InputEvent* e) {
         e->setMouseX(e->getMouseX() - bounds_.left);
@@ -915,9 +910,7 @@ namespace ukive {
         }
     }
 
-
-    void View::onDraw(Canvas* canvas) {
-    }
+    void View::onDraw(Canvas* canvas) {}
 
     bool View::onInputEvent(InputEvent* e) {
         bool should_refresh = false;
@@ -1056,7 +1049,6 @@ namespace ukive {
         int left, int top, int right, int bottom) {
     }
 
-
     bool View::onCheckIsTextEditor() {
         return false;
     }
@@ -1064,7 +1056,6 @@ namespace ukive {
     InputConnection* View::onCreateInputConnection() {
         return nullptr;
     }
-
 
     void View::onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
     }
@@ -1075,18 +1066,18 @@ namespace ukive {
     void View::onFocusChanged(bool getFocus) {
         if (getFocus) {
             if (onCheckIsTextEditor()) {
-                if (input_connection_ == nullptr) {
+                if (!input_connection_) {
                     input_connection_ = onCreateInputConnection();
                 }
 
-                if (input_connection_ != nullptr) {
+                if (input_connection_) {
                     input_connection_->initialization();
                     input_connection_->pushEditor();
                     input_connection_->mount();
                 }
             }
         } else {
-            if (input_connection_ != nullptr) {
+            if (input_connection_) {
                 input_connection_->unmount();
                 input_connection_->terminateComposition();
             }
@@ -1113,11 +1104,11 @@ namespace ukive {
 
         if (windowFocus) {
             if (onCheckIsTextEditor()) {
-                if (input_connection_ == nullptr) {
+                if (!input_connection_) {
                     input_connection_ = onCreateInputConnection();
                 }
 
-                if (input_connection_ != nullptr) {
+                if (input_connection_) {
                     HRESULT hr = input_connection_->initialization();
                     DCHECK(SUCCEEDED(hr));
                     input_connection_->pushEditor();
@@ -1125,7 +1116,7 @@ namespace ukive {
                 }
             }
         } else {
-            if (input_connection_ != nullptr) {
+            if (input_connection_) {
                 bool ret = input_connection_->unmount();
                 DCHECK(ret);
                 ret = input_connection_->terminateComposition();
