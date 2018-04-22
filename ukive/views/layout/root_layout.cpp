@@ -6,13 +6,15 @@
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/root_layout_params.h"
 #include "ukive/window/window.h"
+#include "ukive/views/debug_view.h"
 
 
 namespace ukive {
 
     RootLayout::RootLayout(Window* w)
         :FrameLayout(w),
-        shade_added_(false) {
+        shade_added_(false),
+        debug_view_(nullptr) {
 
         content_layout_ = new LinearLayout(getWindow());
         content_layout_->setOrientation(LinearLayout::VERTICAL);
@@ -54,7 +56,11 @@ namespace ukive {
     void RootLayout::addShade(View* shade) {
         shade_layout_->addView(shade);
         if (shade_layout_->getChildCount() == 1) {
-            addView(shade_layout_);
+            if (debug_view_) {
+                addView(1, shade_layout_);
+            } else {
+                addView(shade_layout_);
+            }
             shade_added_ = true;
         }
     }
@@ -65,6 +71,37 @@ namespace ukive {
             removeView(shade_layout_, false);
             shade_added_ = false;
         }
+    }
+
+    void RootLayout::addDebugView() {
+        if (!debug_view_) {
+            debug_view_ = new DebugView(getWindow());
+            debug_view_->setLayoutParams(
+                new LayoutParams(
+                    LayoutParams::MATCH_PARENT,
+                    LayoutParams::MATCH_PARENT));
+            debug_view_->setCanConsumeMouseEvent(false);
+            addView(debug_view_);
+        }
+    }
+
+    void RootLayout::removeDebugView() {
+        if (debug_view_) {
+            removeView(debug_view_);
+            debug_view_ = nullptr;
+        }
+    }
+
+    void RootLayout::toggleDebugView() {
+        if (debug_view_) {
+            removeDebugView();
+        } else {
+            addDebugView();
+        }
+    }
+
+    DebugView* RootLayout::getDebugView() {
+        return debug_view_;
     }
 
     void RootLayout::addContent(View* content) {

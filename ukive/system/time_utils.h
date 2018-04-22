@@ -1,7 +1,7 @@
 ﻿#ifndef UKIVE_SYSTEM_TIME_UTILS_H_
 #define UKIVE_SYSTEM_TIME_UTILS_H_
 
-#include <Windows.h>
+#include <cstdint>
 
 
 namespace ukive {
@@ -11,7 +11,14 @@ namespace ukive {
         TimeUtils();
         ~TimeUtils();
 
-        static ULONG64 upTimeMillis();
+        static uint64_t upTimeMillis();
+
+        static void enableHighResTimer();
+        static void disableHighResTimer();
+
+    private:
+        static int timer_res_;
+        static int op_counter_;
     };
 
 }

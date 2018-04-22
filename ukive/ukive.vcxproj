@@ -244,6 +244,7 @@
     <ClInclude Include="utils\weak_bind.h" />
     <ClInclude Include="views\button.h" />
     <ClInclude Include="views\click_listener.h" />
+    <ClInclude Include="views\debug_view.h" />
     <ClInclude Include="views\direct3d_view.h" />
     <ClInclude Include="views\image_view.h" />
     <ClInclude Include="views\layout\root_layout.h" />
@@ -343,6 +344,7 @@
     <ClCompile Include="utils\string_utils.cpp" />
     <ClCompile Include="utils\weak_bind.cpp" />
     <ClCompile Include="views\button.cpp" />
+    <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
     <ClCompile Include="views\layout\root_layout.cpp" />

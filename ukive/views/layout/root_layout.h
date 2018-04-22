@@ -7,6 +7,7 @@
 namespace ukive {
 
     class Window;
+    class DebugView;
     class LayoutParams;
     class LinearLayout;
 
@@ -17,6 +18,12 @@ namespace ukive {
 
         void addShade(View* shade);
         void removeShade(View* shade);
+
+        void addDebugView();
+        void removeDebugView();
+        void toggleDebugView();
+
+        DebugView* getDebugView();
 
         void addContent(View* content);
 
@@ -29,6 +36,7 @@ namespace ukive {
         bool checkLayoutParams(LayoutParams* lp) override;
 
     private:
+        DebugView* debug_view_;
         FrameLayout* shade_layout_;
         LinearLayout* content_layout_;
 

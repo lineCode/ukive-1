@@ -15,6 +15,9 @@
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/renderer.h"
+#include "ukive/system/qpc_service.h"
+#include "ukive/views/debug_view.h"
+#include "ukive/system/time_utils.h"
 
 
 namespace ukive {
@@ -303,12 +306,24 @@ namespace ukive {
             heightSpec = View::EXACTLY;
         }
 
+        QPCService qpc_service;
+        auto debug_view = root_layout_->getDebugView();
+        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::LAYOUT);
+        if (enable_qpc) {
+            qpc_service.Start();
+        }
+
         root_layout_->measure(width, height, widthSpec, heightSpec);
 
         int measuredWidth = root_layout_->getMeasuredWidth();
         int measuredHeight = root_layout_->getMeasuredHeight();
 
         root_layout_->layout(0, 0, measuredWidth, measuredHeight);
+
+        if (enable_qpc) {
+            auto duration = qpc_service.Stop();
+            debug_view->addDuration(duration);
+        }
     }
 
     void Window::performRefresh() {
@@ -316,8 +331,20 @@ namespace ukive {
             return;
         }
 
+        QPCService qpc_service;
+        auto debug_view = root_layout_->getDebugView();
+        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::FRAME);
+        if (enable_qpc) {
+            qpc_service.Start();
+        }
+
         Rect rect(0, 0, getWidth(), getHeight());
         onDraw(rect);
+
+        if (enable_qpc) {
+            auto duration = qpc_service.Stop();
+            debug_view->addDuration(duration);
+        }
     }
 
     void Window::performRefresh(int left, int top, int right, int bottom) {
@@ -513,7 +540,7 @@ namespace ukive {
             });
 
             if (!ret) {
-                Log::e(L"Window", L"failed to render.");
+                LOG(Log::FATAL) << "Failed to render.";
                 return;
             }
 
@@ -644,13 +671,13 @@ namespace ukive {
 
     bool Window::onInputEvent(InputEvent* e) {
         if (e->isMouseEvent()) {
-            //若有之前捕获过鼠标的Widget存在，则直接将所有事件
-            //直接发送至该Widget。
+            // 若有之前捕获过鼠标的 View 存在，则直接将所有事件
+            // 直接发送至该Widget。
             if (mouse_holder_
                 && mouse_holder_->getVisibility() == View::VISIBLE
                 && mouse_holder_->isEnabled()) {
 
-                //进行坐标变换，将目标Widget左上角映射为(0, 0)。
+                // 进行坐标变换，将目标 View 左上角映射为(0, 0)。
                 int totalLeft = 0;
                 int totalTop = 0;
                 View* parent = mouse_holder_->getParent();
@@ -666,14 +693,26 @@ namespace ukive {
                 e->setIsMouseCaptured(true);
 
                 return mouse_holder_->dispatchInputEvent(e);
-            }
-            else {
+            } else {
                 return root_layout_->dispatchInputEvent(e);
             }
-        }
-        else if (e->isKeyboardEvent()) {
-            if (focus_holder_)
+        } else if (e->isKeyboardEvent()) {
+            if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardKey() == 0x51) {
+                bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
+                bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);
+                if (isCtrlKeyPressed && isShiftKeyPressed) {
+                    root_layout_->toggleDebugView();
+                } else if (isCtrlKeyPressed && !isShiftKeyPressed) {
+                    auto debug_view = root_layout_->getDebugView();
+                    if (debug_view) {
+                        debug_view->toggleMode();
+                    }
+                }
+            }
+
+            if (focus_holder_) {
                 return focus_holder_->dispatchInputEvent(e);
+            }
         }
 
         return false;

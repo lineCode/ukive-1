@@ -8,7 +8,6 @@
 #include "ukive/message/message_looper.h"
 #include "ukive/animation/animation_manager.h"
 #include "ukive/text/word_breaker.h"
-#include "ukive/system/qpc_service.h"
 
 
 #pragma comment(lib, "comctl32.lib")
@@ -18,6 +17,7 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "Shcore.lib")
+#pragma comment(lib, "winmm.lib")
 
 
 namespace ukive {

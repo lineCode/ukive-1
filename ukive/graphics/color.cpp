@@ -95,7 +95,7 @@ namespace ukive {
     // Color Transparent.
     const Color Color::Transparent = Color::parse(L"#00000000");
 
-    //Material Color Red.
+    // Material Color Red.
     Color Color::Red50 = Color::parse(L"#FFEBEE");
     Color Color::Red100 = Color::parse(L"#FFCDD2");
     Color Color::Red200 = Color::parse(L"#EF9A9A");
@@ -107,7 +107,19 @@ namespace ukive {
     Color Color::Red800 = Color::parse(L"#C62828");
     Color Color::Red900 = Color::parse(L"#B71C1C");
 
-    //Material Color Yellow.
+    // Material Color Orange.
+    Color Color::Orange50 = Color::parse(L"#FFF3E0");
+    Color Color::Orange100 = Color::parse(L"#FFE0B2");
+    Color Color::Orange200 = Color::parse(L"#FFCC80");
+    Color Color::Orange300 = Color::parse(L"#FFB74D");
+    Color Color::Orange400 = Color::parse(L"#FFA726");
+    Color Color::Orange500 = Color::parse(L"#FF9800");
+    Color Color::Orange600 = Color::parse(L"#FB8C00");
+    Color Color::Orange700 = Color::parse(L"#F57C00");
+    Color Color::Orange800 = Color::parse(L"#EF6C00");
+    Color Color::Orange900 = Color::parse(L"#E65100");
+
+    // Material Color Yellow.
     Color Color::Yellow50 = Color::parse(L"#FFFDE7");
     Color Color::Yellow100 = Color::parse(L"#FFF9C4");
     Color Color::Yellow200 = Color::parse(L"#FFF59D");
@@ -119,7 +131,7 @@ namespace ukive {
     Color Color::Yellow800 = Color::parse(L"#F9A825");
     Color Color::Yellow900 = Color::parse(L"#F57F17");
 
-    //Material Color Pink.
+    // Material Color Pink.
     Color Color::Pink50 = Color::parse(L"#FCE4EC");
     Color Color::Pink100 = Color::parse(L"#F8BBD0");
     Color Color::Pink200 = Color::parse(L"#F48FB1");
@@ -131,7 +143,7 @@ namespace ukive {
     Color Color::Pink800 = Color::parse(L"#AD1457");
     Color Color::Pink900 = Color::parse(L"#880E4F");
 
-    //Material Color Green.
+    // Material Color Green.
     Color Color::Green50 = Color::parse(L"#E8F5E9");
     Color Color::Green100 = Color::parse(L"#C8E6C9");
     Color Color::Green200 = Color::parse(L"#A5D6A7");
@@ -143,7 +155,7 @@ namespace ukive {
     Color Color::Green800 = Color::parse(L"#2E7D32");
     Color Color::Green900 = Color::parse(L"#1B5E20");
 
-    //Material Color Blue.
+    // Material Color Blue.
     Color Color::Blue50 = Color::parse(L"#E3F2FD");
     Color Color::Blue100 = Color::parse(L"#BBDEFB");
     Color Color::Blue200 = Color::parse(L"#90CAF9");
@@ -155,7 +167,7 @@ namespace ukive {
     Color Color::Blue800 = Color::parse(L"#1565C0");
     Color Color::Blue900 = Color::parse(L"#0D47A1");
 
-    //Material Color Grey.
+    // Material Color Grey.
     Color Color::Grey50 = Color::parse(L"#FAFAFA");
     Color Color::Grey100 = Color::parse(L"#F5F5F5");
     Color Color::Grey200 = Color::parse(L"#EEEEEE");

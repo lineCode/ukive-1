@@ -282,6 +282,9 @@
     <ClCompile Include="system\qpc_service.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="views\debug_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -603,6 +606,9 @@
     </ClInclude>
     <ClInclude Include="system\qpc_service.h">
       <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="views\debug_view.h">
+      <Filter>views</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -51,15 +51,15 @@ namespace ukive {
             FATAL
         };
 
-        static void i(const string16 &tag, const string16 &msg);
-        static void d(const string16 &tag, const string16 &msg);
-        static void w(const string16 &tag, const string16 &msg);
-        static void e(const string16 &tag, const string16 &msg);
-        static void v(const string16 &tag, const string16 &msg);
+        static void i(const string16& tag, const string16& msg);
+        static void d(const string16& tag, const string16& msg);
+        static void w(const string16& tag, const string16& msg);
+        static void e(const string16& tag, const string16& msg);
+        static void v(const string16& tag, const string16& msg);
 
         static void debugBreak();
 
-        Log(const char *file_name, int line_number, Severity level);
+        Log(const char* file_name, int line_number, Severity level);
         ~Log();
 
         std::ostringstream& stream();

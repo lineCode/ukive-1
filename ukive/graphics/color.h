@@ -44,6 +44,10 @@ namespace ukive {
         static Color Red50, Red100, Red200, Red300, Red400,
             Red500, Red600, Red700, Red800, Red900;
 
+        // Material Color Orange.
+        static Color Orange50, Orange100, Orange200, Orange300, Orange400,
+            Orange500, Orange600, Orange700, Orange800, Orange900;
+
         // Material Color Yellow.
         static Color Yellow50, Yellow100, Yellow200, Yellow300, Yellow400,
             Yellow500, Yellow600, Yellow700, Yellow800, Yellow900;
