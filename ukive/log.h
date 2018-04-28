@@ -7,8 +7,13 @@
 #include "utils/string_utils.h"
 
 
+#define TO_WIDE_STRING(x) L##x
+#define _TO_WIDE_STRING(x) TO_WIDE_STRING(x)
+#define __WFILE__ _TO_WIDE_STRING(__FILE__)
+
+
 #define LOG_STREAM(level) \
-    ::ukive::Log(__FILE__, __LINE__, level).stream()
+    ::ukive::Log(__WFILE__, __LINE__, level).stream()
 
 #define VOIDABLE_STREAM(stream, condition) \
     !(condition) ? (void) 0 : ::ukive::LogVoidify() & (stream)
@@ -59,22 +64,22 @@ namespace ukive {
 
         static void debugBreak();
 
-        Log(const char* file_name, int line_number, Severity level);
+        Log(const wchar_t* file_name, int line_number, Severity level);
         ~Log();
 
-        std::ostringstream& stream();
+        std::wostringstream& stream();
 
     private:
         Severity level_;
         int line_number_;
-        std::string file_name_;
-        std::ostringstream stream_;
+        string16 file_name_;
+        std::wostringstream stream_;
     };
 
     class LogVoidify {
     public:
         LogVoidify() = default;
-        void operator&(std::ostream& s) {}
+        void operator&(std::wostream& s) {}
     };
 
 }

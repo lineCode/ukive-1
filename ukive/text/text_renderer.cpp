@@ -11,7 +11,7 @@
 
 namespace ukive {
 
-    TextRenderer::TextRenderer(ComPtr<ID2D1RenderTarget> rt)
+    TextRenderer::TextRenderer(const ComPtr<ID2D1RenderTarget>& rt)
         :rt_(rt),
         ref_count_(1),
         opacity_(1.f),
@@ -26,7 +26,6 @@ namespace ukive {
             def_text_color_.a, };
         rt_->CreateSolidColorBrush(color, &brush_);
     }
-
 
     TextRenderer::~TextRenderer() {
     }

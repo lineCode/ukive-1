@@ -203,7 +203,7 @@ namespace ukive {
         virtual void onDraw(Canvas* canvas);
         virtual void onMeasure(
             int width, int height,
-            int widthMode, int heightMode);
+            int width_mode, int height_mode);
         virtual void onLayout(
             bool changed, bool size_changed,
             int left, int top, int right, int bottom);
@@ -212,12 +212,12 @@ namespace ukive {
         virtual bool onCheckIsTextEditor();
         virtual InputConnection* onCreateInputConnection();
 
-        virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight);
+        virtual void onSizeChanged(int width, int height, int old_width, int old_height);
         virtual void onVisibilityChanged(int visibility);
-        virtual void onFocusChanged(bool getFocus);
-        virtual void onWindowFocusChanged(bool windowFocus);
+        virtual void onFocusChanged(bool get_focus);
+        virtual void onWindowFocusChanged(bool window_focus);
         virtual void onWindowDpiChanged(int dpi_x, int dpi_y);
-        virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY);
+        virtual void onScrollChanged(int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y);
 
     private:
         enum Flags : uint32_t {

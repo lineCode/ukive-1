@@ -1,5 +1,6 @@
 #include "view_holder_recycler.h"
 
+#include "ukive/log.h"
 #include "ukive/views/layout/view_group.h"
 #include "ukive/utils/stl_utils.h"
 
@@ -9,14 +10,18 @@ namespace ukive {
     ViewHolderRecycler::ViewHolderRecycler(ViewGroup* parent)
         :parent_(parent) {}
 
-    void ViewHolderRecycler::AddToParent(ListAdapter::ViewHolder* holder) {
+    void ViewHolderRecycler::addToParent(ListAdapter::ViewHolder* holder) {
+        DCHECK(holder);
+
         holder->recycled = false;
         visible_holders_.push_back(holder);
         parent_->addView(holder->item_view);
     }
 
-    void ViewHolderRecycler::AddToParent(ListAdapter::ViewHolder* holder, size_t pos) {
-        size_t index = 0;
+    void ViewHolderRecycler::addToParent(ListAdapter::ViewHolder* holder, int pos) {
+        DCHECK(holder && pos >= 0);
+
+        int index = 0;
         for (auto it = visible_holders_.begin();
             it != visible_holders_.end(); ++it) {
             if (index == pos) {
@@ -30,12 +35,16 @@ namespace ukive {
         }
     }
 
-    void ViewHolderRecycler::AddToRecycler(ListAdapter::ViewHolder* holder) {
+    void ViewHolderRecycler::addToRecycler(ListAdapter::ViewHolder* holder) {
+        DCHECK(holder);
+
         holder->recycled = true;
         recycled_holders_[holder->item_id].push_back(holder);
     }
 
-    void ViewHolderRecycler::RecycleFromParent(View* item_view) {
+    void ViewHolderRecycler::recycleFromParent(View* item_view) {
+        DCHECK(item_view);
+
         for (auto it = visible_holders_.begin();
             it != visible_holders_.end(); ++it) {
             auto holder = *it;
@@ -49,8 +58,10 @@ namespace ukive {
         }
     }
 
-    void ViewHolderRecycler::RecycleFromParent(size_t start_pos) {
-        size_t index = 0;
+    void ViewHolderRecycler::recycleFromParent(int start_pos) {
+        DCHECK(start_pos >= 0);
+
+        int index = 0;
         for (auto it = visible_holders_.begin();
             it != visible_holders_.end();) {
             if (index >= start_pos) {
@@ -67,17 +78,18 @@ namespace ukive {
         }
     }
 
-    void ViewHolderRecycler::RecycleFromParent(size_t start_pos, size_t length) {
+    void ViewHolderRecycler::recycleFromParent(int start_pos, int length) {
+        DCHECK(start_pos >= 0 && length > 0);
         if (length == 0) {
             return;
         }
 
-        size_t index = 0;
-        size_t length_index = 0;
+        int index = 0;
+        int length_index = 0;
         for (auto it = visible_holders_.begin();
             it != visible_holders_.end();) {
             if (index >= start_pos) {
-                ListAdapter::ViewHolder *holder = *it;
+                auto holder = *it;
                 holder->recycled = true;
                 recycled_holders_[holder->item_id].push_back(holder);
                 it = visible_holders_.erase(it);
@@ -95,7 +107,7 @@ namespace ukive {
         }
     }
 
-    ListAdapter::ViewHolder* ViewHolderRecycler::Reuse(int item_id) {
+    ListAdapter::ViewHolder* ViewHolderRecycler::reuse(int item_id) {
         if (recycled_holders_[item_id].empty()) {
             return nullptr;
         }
@@ -103,12 +115,14 @@ namespace ukive {
         auto holder = recycled_holders_[item_id].back();
         recycled_holders_[item_id].pop_back();
 
-        AddToParent(holder);
+        addToParent(holder);
 
         return holder;
     }
 
-    ListAdapter::ViewHolder* ViewHolderRecycler::Reuse(int item_id, size_t pos) {
+    ListAdapter::ViewHolder* ViewHolderRecycler::reuse(int item_id, int pos) {
+        DCHECK(pos >= 0);
+
         if (recycled_holders_[item_id].empty()) {
             return nullptr;
         }
@@ -116,13 +130,15 @@ namespace ukive {
         auto holder = recycled_holders_[item_id].back();
         recycled_holders_[item_id].pop_back();
 
-        AddToParent(holder, pos);
+        addToParent(holder, pos);
 
         return holder;
     }
 
-    ListAdapter::ViewHolder* ViewHolderRecycler::GetVisible(size_t pos) {
-        size_t index = 0;
+    ListAdapter::ViewHolder* ViewHolderRecycler::getVisible(int pos) {
+        DCHECK(pos >= 0);
+
+        int index = 0;
         for (auto it = visible_holders_.begin();
             it != visible_holders_.end(); ++it) {
             if (index == pos) {
@@ -134,15 +150,15 @@ namespace ukive {
         return nullptr;
     }
 
-    size_t ViewHolderRecycler::GetVisibleCount() {
+    int ViewHolderRecycler::getVisibleCount() {
         return visible_holders_.size();
     }
 
-    size_t ViewHolderRecycler::GetRecycledCount(int item_id) {
+    int ViewHolderRecycler::getRecycledCount(int item_id) {
         return recycled_holders_[item_id].size();
     }
 
-    void ViewHolderRecycler::ClearAll() {
+    void ViewHolderRecycler::clearAll() {
         STLDeleteElements(&visible_holders_);
 
         for (auto it = recycled_holders_.begin();

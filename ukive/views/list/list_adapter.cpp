@@ -6,7 +6,7 @@ namespace ukive {
     ////////////////////////////////////////////////////////////////
     // ListAdapter::ViewHolder
 
-    ListAdapter::ViewHolder::ViewHolder(View *v)
+    ListAdapter::ViewHolder::ViewHolder(View* v)
         :item_view(v),
         item_id(-1),
         adapter_position(-1),
@@ -27,43 +27,43 @@ namespace ukive {
 
     void ListAdapter::notifyDataChanged() {
         if (listener_) {
-            listener_->OnDataSetChanged();
+            listener_->onDataSetChanged();
         }
     }
 
     void ListAdapter::notifyItemChanged(int position) {
         if (listener_) {
-            listener_->OnItemRangeChanged(position, 1);
+            listener_->onItemRangeChanged(position, 1);
         }
     }
 
     void ListAdapter::notifyItemInserted(int position) {
         if (listener_) {
-            listener_->OnItemRangeInserted(position, 1);
+            listener_->onItemRangeInserted(position, 1);
         }
     }
 
     void ListAdapter::notifyItemRemoved(int position) {
         if (listener_) {
-            listener_->OnItemRangeRemoved(position, 1);
+            listener_->onItemRangeRemoved(position, 1);
         }
     }
 
     void ListAdapter::notifyItemRangeChanged(int start_position, int count) {
         if (listener_) {
-            listener_->OnItemRangeChanged(start_position, count);
+            listener_->onItemRangeChanged(start_position, count);
         }
     }
 
     void ListAdapter::notifyItemRangeInserted(int start_position, int count) {
         if (listener_) {
-            listener_->OnItemRangeInserted(start_position, count);
+            listener_->onItemRangeInserted(start_position, count);
         }
     }
 
     void ListAdapter::notifyItemRangeRemoved(int start_position, int count) {
         if (listener_) {
-            listener_->OnItemRangeRemoved(start_position, count);
+            listener_->onItemRangeRemoved(start_position, count);
         }
     }
 

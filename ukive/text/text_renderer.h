@@ -10,8 +10,8 @@ namespace ukive {
 
     class TextRenderer : public IDWriteTextRenderer {
     public:
-        TextRenderer(ComPtr<ID2D1RenderTarget> rt);
-        ~TextRenderer();
+        explicit TextRenderer(const ComPtr<ID2D1RenderTarget>& rt);
+        virtual ~TextRenderer();
 
         void setOpacity(float opacity);
         void setTextColor(const Color& color);
@@ -20,15 +20,15 @@ namespace ukive {
 
         STDMETHOD(IsPixelSnappingDisabled)(
             void* clientDrawingContext,
-            BOOL* isDisabled);
+            BOOL* isDisabled) override;
 
         STDMETHOD(GetCurrentTransform)(
             void* clientDrawingContext,
-            DWRITE_MATRIX* transform);
+            DWRITE_MATRIX* transform) override;
 
         STDMETHOD(GetPixelsPerDip)(
             void* clientDrawingContext,
-            FLOAT* pixelsPerDip);
+            FLOAT* pixelsPerDip) override;
 
         STDMETHOD(DrawGlyphRun)(
             void* clientDrawingContext,
@@ -37,21 +37,21 @@ namespace ukive {
             DWRITE_MEASURING_MODE measuringMode,
             DWRITE_GLYPH_RUN const* glyphRun,
             DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
-            IUnknown* clientDrawingEffect);
+            IUnknown* clientDrawingEffect) override;
 
         STDMETHOD(DrawUnderline)(
             void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
             DWRITE_UNDERLINE const* underline,
-            IUnknown* clientDrawingEffect);
+            IUnknown* clientDrawingEffect) override;
 
         STDMETHOD(DrawStrikethrough)(
             void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
             DWRITE_STRIKETHROUGH const* strikethrough,
-            IUnknown* clientDrawingEffect);
+            IUnknown* clientDrawingEffect) override;
 
         STDMETHOD(DrawInlineObject)(
             void* clientDrawingContext,
@@ -60,12 +60,12 @@ namespace ukive {
             IDWriteInlineObject* inlineObject,
             BOOL isSideways,
             BOOL isRightToLeft,
-            IUnknown* clientDrawingEffect);
+            IUnknown* clientDrawingEffect) override;
 
-        ULONG STDMETHODCALLTYPE AddRef();
-        ULONG STDMETHODCALLTYPE Release();
+        ULONG STDMETHODCALLTYPE AddRef() override;
+        ULONG STDMETHODCALLTYPE Release() override;
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            REFIID riid, void** ppvObject);
+            REFIID riid, void** ppvObject) override;
 
     private:
         ULONG ref_count_;

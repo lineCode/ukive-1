@@ -39,7 +39,7 @@ namespace ukive {
         static WICManager* getWICManager();
         static TsfManager* getTsfManager();
 
-        static int getViewUID();
+        static int getViewID();
 
         static int getPrimaryDpi();
 

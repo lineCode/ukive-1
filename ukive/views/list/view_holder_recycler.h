@@ -17,19 +17,19 @@ namespace ukive {
     public:
         ViewHolderRecycler(ViewGroup* parent);
 
-        void AddToParent(ListAdapter::ViewHolder* holder);
-        void AddToParent(ListAdapter::ViewHolder* holder, size_t pos);
-        void AddToRecycler(ListAdapter::ViewHolder* holder);
-        void RecycleFromParent(View* item_view);
-        void RecycleFromParent(size_t start_pos);
-        void RecycleFromParent(size_t start_pos, size_t length);
-        ListAdapter::ViewHolder* Reuse(int item_id);
-        ListAdapter::ViewHolder* Reuse(int item_id, size_t pos);
-        ListAdapter::ViewHolder* GetVisible(size_t pos);
+        void addToParent(ListAdapter::ViewHolder* holder);
+        void addToParent(ListAdapter::ViewHolder* holder, int pos);
+        void addToRecycler(ListAdapter::ViewHolder* holder);
+        void recycleFromParent(View* item_view);
+        void recycleFromParent(int start_pos);
+        void recycleFromParent(int start_pos, int length);
+        ListAdapter::ViewHolder* reuse(int item_id);
+        ListAdapter::ViewHolder* reuse(int item_id, int pos);
+        ListAdapter::ViewHolder* getVisible(int pos);
 
-        size_t GetVisibleCount();
-        size_t GetRecycledCount(int item_id);
-        void ClearAll();
+        int getVisibleCount();
+        int getRecycledCount(int item_id);
+        void clearAll();
 
     private:
         ViewGroup* parent_;

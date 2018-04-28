@@ -200,7 +200,7 @@ namespace ukive {
         return instance_->tsf_manager_.get();
     }
 
-    int Application::getViewUID() {
+    int Application::getViewID() {
         ++view_uid_;
         return view_uid_;
     }

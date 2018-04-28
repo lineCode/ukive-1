@@ -16,17 +16,17 @@ namespace ukive {
         OverlayScrollBar();
         ~OverlayScrollBar();
 
-        void Update(int content_height, float percent);
+        void update(int content_height, float percent);
 
-        void RegisterScrollHandler(std::function<void(int)> h);
+        void registerScrollHandler(std::function<void(int)> h);
 
-        void SetBounds(int x, int y, int width, int height);
-        void SetBounds(const Rect& bounds);
+        void setBounds(int x, int y, int width, int height);
+        void setBounds(const Rect& bounds);
 
-        void OnPaint(Canvas* canvas);
-        bool OnMousePressed(const Point& p);
-        void OnMouseMoved(const Point& p);
-        bool OnMouseDragged(const Point& p);
+        void onDraw(Canvas* canvas);
+        bool onMousePressed(const Point& p);
+        void onMouseMoved(const Point& p);
+        bool onMouseDragged(const Point& p);
 
     private:
         int content_height_;

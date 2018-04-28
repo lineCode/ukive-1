@@ -14,6 +14,7 @@ namespace ukive {
 
     class View;
     class RectF;
+    class PointF;
     class Bitmap;
     class Window;
     class Renderer;
@@ -62,29 +63,34 @@ namespace ukive {
             float width, float height,
             Bitmap* mask, Bitmap* content);
 
+        void drawLine(
+            const PointF& start, const PointF& end, const Color& color);
+        void drawLine(
+            const PointF& start, const PointF& end, float stroke_width, const Color& color);
+
         void drawRect(const RectF& rect, const Color& color);
-        void drawRect(const RectF& rect, float strokeWidth, const Color& color);
+        void drawRect(const RectF& rect, float stroke_width, const Color& color);
         void fillRect(const RectF& rect, const Color& color);
 
         void drawRoundRect(
             const RectF& rect, float radius, const Color& color);
         void drawRoundRect(
-            const RectF& rect, float strokeWidth,
+            const RectF& rect, float stroke_width,
             float radius, const Color& color);
         void fillRoundRect(
             const RectF& rect, float radius, const Color& color);
 
         void drawCircle(float cx, float cy, float radius, const Color& color);
-        void drawCircle(float cx, float cy, float radius, float strokeWidth, const Color& color);
+        void drawCircle(float cx, float cy, float radius, float stroke_width, const Color& color);
         void fillCircle(float cx, float cy, float radius, const Color& color);
 
         void drawCircle(const RectF& rect, const Color& color);
-        void drawCircle(const RectF& rect, float strokeWidth, const Color& color);
+        void drawCircle(const RectF& rect, float stroke_width, const Color& color);
         void fillCircle(const RectF& rect, const Color& color);
 
-        void drawOval(float cx, float cy, float radiusX, float radiusY, const Color& color);
-        void drawOval(float cx, float cy, float radiusX, float radiusY, float strokeWidth, const Color& color);
-        void fillOval(float cx, float cy, float radiusX, float radiusY, const Color& color);
+        void drawOval(float cx, float cy, float rx, float ry, const Color& color);
+        void drawOval(float cx, float cy, float rx, float ry, float stroke_width, const Color& color);
+        void fillOval(float cx, float cy, float rx, float ry, const Color& color);
 
         void fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush);
 
@@ -95,7 +101,7 @@ namespace ukive {
         void drawBitmap(const RectF& src, const RectF& dst, float opacity, Bitmap* bitmap);
 
         void drawText(
-            std::wstring text,
+            const string16& text,
             IDWriteTextFormat* textFormat,
             const RectF& layoutRect, const Color& color);
         void drawTextLayout(

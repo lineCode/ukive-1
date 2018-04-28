@@ -10,100 +10,59 @@
 
 namespace ukive {
 
-    class ListView;
-    class ViewHolderRecycler;
     class OverlayScrollBar;
+    class ViewHolderRecycler;
 
-    class ListOperator
-    {
+
+    class ListView : public ViewGroup, public ListDataSetChangedListener {
     public:
-        enum OpType {
-            INSERT,
-            CHANGE,
-            REMOVE
-        };
-
-        struct Operation {
-            OpType op;
-            size_t start_position;
-            size_t length;
-        };
-
-        ListOperator(ListView *view) {}
-
-        void AddOp(OpType op, size_t start_position, size_t length) {}
-
-    private:
-        std::vector<Operation> op_list_;
-    };
-
-
-    class ListView : public ViewGroup, public ListDataSetChangedListener
-    {
-    public:
-        ListView(Window *w);
+        ListView(Window* w);
 
         void onLayout(
-            bool changed, bool sizeChanged,
+            bool changed, bool size_changed,
             int left, int top, int right, int bottom) override;
-        bool onInputEvent(InputEvent *e) override;
+        bool onInputEvent(InputEvent* e) override;
 
-        void setAdapter(ListAdapter *adapter);
-        void ScrollToPosition(size_t position, int offset, bool smooth);
+        void onDraw(Canvas* canvas) override;
+
+        void setAdapter(ListAdapter* adapter);
+        void scrollToPosition(int position, int offset, bool smooth);
 
     private:
-        enum OpType {
-            INSERT,
-            CHANGE,
-            REMOVE
-        };
+        int determineVerticalScroll(int dy);
+        void offsetChildViewTopAndBottom(int dy);
 
-        struct Operation {
-            OpType op;
-            size_t start_position;
-            size_t length;
-        };
+        ListAdapter::ViewHolder* getFirstVisibleViewHolder();
+        ListAdapter::ViewHolder* getLastVisibleViewHolder();
 
-        void initListView();
+        void recycleTopViews(int offset);
+        void recycleBottomViews(int offset);
 
-        int DetermineVerticalScroll(int dy);
-        void OffsetChildViewTopAndBottom(int dy);
+        void updateOverlayScrollBar();
+        void recordCurPositionAndOffset();
 
-        ListAdapter::ViewHolder* GetFirstVisibleViewHolder();
-        ListAdapter::ViewHolder* GetLastVisibleViewHolder();
+        int fillTopChildViews(int dy);
+        int fillBottomChildViews(int dy);
 
-        void RecycleTopViews(int offset);
-        void RecycleBottomViews(int offset);
+        void locateToPosition(int position, int offset = 0);
+        void scrollToPosition(int position, int offset = 0);
+        void smoothScrollToPosition(int position, int offset = 0);
 
-        void UpdateOverlayScrollBar();
-        void RecordCurPositionAndOffset();
-
-        int FillTopChildViews(int dy);
-        int FillBottomChildViews(int dy);
-
-        void LocateToPosition(size_t position, int offset = 0);
-        void ScrollToPosition(size_t position, int offset = 0);
-        void SmoothScrollToPosition(size_t position, int offset = 0);
-
-        void ScrollByScrollBar(int dy);
+        void scrollByScrollBar(int dy);
 
         // ListScrollDelegate:
         //void OnScroll(float dx, float dy) OVERRIDE;
 
         // ListDataSetListener:
-        void OnDataSetChanged() override;
-        void OnItemRangeInserted(size_t start_position, size_t length) override;
-        void OnItemRangeChanged(size_t start_position, size_t length) override;
-        void OnItemRangeRemoved(size_t start_position, size_t length) override;
+        void onDataSetChanged() override;
+        void onItemRangeInserted(int start_position, int length) override;
+        void onItemRangeChanged(int start_position, int length) override;
+        void onItemRangeRemoved(int start_position, int length) override;
 
-        void AddOp(OpType op, size_t start_position, size_t length);
-        void ProcessOp();
-
-        size_t cur_position_;
+        int cur_position_;
         int cur_offset_in_position_;
         bool initial_layouted_;
 
-        std::vector<Operation> op_list_;
         std::unique_ptr<ListAdapter> list_adapter_;
         std::unique_ptr<OverlayScrollBar> scroll_bar_;
         std::unique_ptr<ViewHolderRecycler> view_recycler_;

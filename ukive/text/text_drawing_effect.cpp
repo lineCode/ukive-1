@@ -4,8 +4,8 @@
 namespace ukive {
 
     TextDrawingEffect::TextDrawingEffect()
-        :ref_count_(1),
-        effect_span_(nullptr) {
+        :effect_span_(nullptr),
+        ref_count_(1) {
     }
 
 
@@ -17,7 +17,6 @@ namespace ukive {
         return InterlockedIncrement(&ref_count_);
     }
 
-
     STDMETHODIMP_(unsigned long) TextDrawingEffect::Release() {
         auto nc = InterlockedDecrement(&ref_count_);
         if (nc == 0) {
@@ -26,7 +25,6 @@ namespace ukive {
 
         return nc;
     }
-
 
     STDMETHODIMP TextDrawingEffect::QueryInterface(
         REFIID riid, void** ppvObject) {

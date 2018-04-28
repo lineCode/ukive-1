@@ -21,7 +21,7 @@ namespace ukive {
 
     View::View(Window* w)
         :window_(w),
-        id_(Application::getViewUID()),
+        id_(Application::getViewID()),
         flags_(0),
         min_width_(0),
         min_height_(0),
@@ -66,7 +66,7 @@ namespace ukive {
     View::~View() {
         delete click_performer_;
 
-        if (input_connection_ != nullptr) {
+        if (input_connection_) {
             input_connection_->popEditor();
             delete input_connection_;
         }
@@ -74,7 +74,7 @@ namespace ukive {
 
 
     ViewAnimator* View::animate() {
-        if (animator_ == nullptr) {
+        if (!animator_) {
             animator_ = std::make_unique<ViewAnimator>(this);
         }
 
@@ -218,7 +218,7 @@ namespace ukive {
     }
 
     void View::setLayoutParams(LayoutParams* params) {
-        if (params == nullptr) {
+        if (!params) {
             DLOG(Log::WARNING) << "null param";
             return;
         }
@@ -1057,14 +1057,14 @@ namespace ukive {
         return nullptr;
     }
 
-    void View::onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+    void View::onSizeChanged(int width, int height, int old_width, int old_height) {
     }
 
     void View::onVisibilityChanged(int visibility) {
     }
 
-    void View::onFocusChanged(bool getFocus) {
-        if (getFocus) {
+    void View::onFocusChanged(bool get_focus) {
+        if (get_focus) {
             if (onCheckIsTextEditor()) {
                 if (!input_connection_) {
                     input_connection_ = onCreateInputConnection();
@@ -1085,10 +1085,10 @@ namespace ukive {
 
         bool shouldRefresh = false;
         if (bg_drawable_) {
-            shouldRefresh = bg_drawable_->setParentFocus(getFocus);
+            shouldRefresh = bg_drawable_->setParentFocus(get_focus);
         }
         if (fg_drawable_) {
-            shouldRefresh = fg_drawable_->setParentFocus(getFocus);
+            shouldRefresh = fg_drawable_->setParentFocus(get_focus);
         }
 
         if (shouldRefresh) {
@@ -1096,13 +1096,13 @@ namespace ukive {
         }
     }
 
-    void View::onWindowFocusChanged(bool windowFocus) {
+    void View::onWindowFocusChanged(bool window_focus) {
         if (!hasFocus()) {
             DCHECK(getWindow()->getKeyboardHolder() != this);
             return;
         }
 
-        if (windowFocus) {
+        if (window_focus) {
             if (onCheckIsTextEditor()) {
                 if (!input_connection_) {
                     input_connection_ = onCreateInputConnection();
@@ -1128,7 +1128,8 @@ namespace ukive {
     void View::onWindowDpiChanged(int dpi_x, int dpi_y) {
     }
 
-    void View::onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+    void View::onScrollChanged(
+        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {
     }
 
 }

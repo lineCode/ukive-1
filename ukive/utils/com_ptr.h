@@ -4,13 +4,12 @@
 namespace ukive {
 
     template <class T>
-    class ComPtr
-    {
+    class ComPtr {
     public:
         ComPtr()
             :ptr_(nullptr) {}
 
-        ComPtr(T *real)
+        ComPtr(T* real)
             :ptr_(real) {}
 
         ComPtr(const ComPtr& rhs) {
@@ -43,7 +42,7 @@ namespace ukive {
             return *this;
         }
 
-        ComPtr& operator =(T *real) {
+        ComPtr& operator =(T* real) {
             if (real == ptr_) {
                 return *this;
             }
@@ -82,7 +81,7 @@ namespace ukive {
 
         template<class Ct>
         ComPtr<Ct> cast() {
-            Ct *casted = nullptr;
+            Ct* casted = nullptr;
             ptr_->QueryInterface<Ct>(&casted);
             return ComPtr<Ct>(casted);
         }
@@ -95,7 +94,7 @@ namespace ukive {
         }
 
     private:
-        T *ptr_;
+        T* ptr_;
     };
 
 }

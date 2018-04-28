@@ -22,7 +22,7 @@ namespace ukive {
         int height = getContentBounds().height();
 
         int cur_x = width;
-        int base_height = height * 0.2f;
+        int base_height = getWindow()->dpToPx(64);
         float base_time = 0.f;
         if (mode_ == Mode::LAYOUT) {
             base_time = 4;

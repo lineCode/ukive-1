@@ -91,14 +91,14 @@ namespace ukive {
 
 
     int TextView::computeVerticalScrollRange() {
-        int textHeight = (int)std::ceil(getTextHeight());
+        int textHeight = std::ceil(getTextHeight());
         int contentHeight = getHeight() - getPaddingTop() - getPaddingBottom();
 
         return std::max(0, textHeight - contentHeight);
     }
 
     int TextView::computeHorizontalScrollRange() {
-        int textWidth = (int)std::ceil(getTextWidth());
+        int textWidth = std::ceil(getTextWidth());
         int contentWidth = getWidth() - getPaddingLeft() - getPaddingRight();
 
         return std::max(0, textWidth - contentWidth);
@@ -111,10 +111,10 @@ namespace ukive {
         DWRITE_HIT_TEST_METRICS metrics;
 
         mTextLayout->HitTestPoint(
-            0.f, (float)getScrollY(), &isTrailingHit, &isInside, &metrics);
+            0.f, getScrollY(), &isTrailingHit, &isInside, &metrics);
 
         mTextOffsetAtViewTop = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
-        mVerticalOffset = (float)getScrollY() - metrics.top;
+        mVerticalOffset = getScrollY() - metrics.top;
     }
 
     int TextView::computeVerticalScrollOffsetFromTextOffset(uint32_t tOff) {
@@ -124,7 +124,7 @@ namespace ukive {
         mTextLayout->HitTestTextRange(
             tOff, 0, 0.f, 0.f, &hitMetrics, 1, &actual);
 
-        return (int)hitMetrics.top - getScrollY();
+        return hitMetrics.top - getScrollY();
     }
 
     int TextView::determineVerticalScroll(int dy) {

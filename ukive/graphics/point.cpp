@@ -31,4 +31,33 @@ namespace ukive {
         this->y = y;
     }
 
+
+    PointF::PointF()
+        :x(0), y(0) {}
+
+    PointF::PointF(float x, float y)
+        : x(x), y(y) {}
+
+    PointF::PointF(const PointF& rhs)
+        : x(rhs.x), y(rhs.y) {}
+
+    PointF& PointF::operator=(const PointF& rhs) {
+        x = rhs.x;
+        y = rhs.y;
+        return *this;
+    }
+
+    bool PointF::operator==(const PointF& rhs) {
+        return (x == rhs.x && y == rhs.y);
+    }
+
+    bool PointF::operator!=(const PointF& rhs) {
+        return (x != rhs.x || y != rhs.y);
+    }
+
+    void PointF::set(float x, float y) {
+        this->x = x;
+        this->y = y;
+    }
+
 }

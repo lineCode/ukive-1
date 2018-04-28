@@ -9,22 +9,19 @@ namespace ukive {
     class View;
     class ViewGroup;
 
-    class ListDataSetChangedListener
-    {
+    class ListDataSetChangedListener {
     public:
         virtual ~ListDataSetChangedListener() = default;
 
-        virtual void OnDataSetChanged() = 0;
-        virtual void OnItemRangeInserted(size_t start_position, size_t length) { OnDataSetChanged(); }
-        virtual void OnItemRangeChanged(size_t start_position, size_t length) { OnDataSetChanged(); }
-        virtual void OnItemRangeRemoved(size_t start_position, size_t length) { OnDataSetChanged(); }
+        virtual void onDataSetChanged() = 0;
+        virtual void onItemRangeInserted(int start_position, int length) { onDataSetChanged(); }
+        virtual void onItemRangeChanged(int start_position, int length) { onDataSetChanged(); }
+        virtual void onItemRangeRemoved(int start_position, int length) { onDataSetChanged(); }
     };
 
-    class ListAdapter
-    {
+    class ListAdapter {
     public:
-        class ViewHolder
-        {
+        class ViewHolder {
         public:
             View* item_view;
             int item_id;
@@ -38,7 +35,7 @@ namespace ukive {
         ListAdapter();
         virtual ~ListAdapter() = default;
 
-        void setListener(ListDataSetChangedListener *listener) { listener_ = listener; }
+        void setListener(ListDataSetChangedListener* listener) { listener_ = listener; }
 
         void notifyDataChanged();
         void notifyItemChanged(int position);
@@ -48,13 +45,13 @@ namespace ukive {
         void notifyItemRangeInserted(int start_position, int count);
         void notifyItemRangeRemoved(int start_position, int count);
 
-        virtual ViewHolder *onCreateViewHolder(ViewGroup *parent, int position) = 0;
-        virtual void onBindViewHolder(ViewHolder *holder, int position) = 0;
+        virtual ViewHolder* onCreateViewHolder(ViewGroup* parent, int position) = 0;
+        virtual void onBindViewHolder(ViewHolder* holder, int position) = 0;
         virtual int getItemId(int position) { return 0; }
-        virtual size_t getItemCount() = 0;
+        virtual int getItemCount() = 0;
 
     private:
-        ListDataSetChangedListener *listener_;
+        ListDataSetChangedListener* listener_;
     };
 
 }

@@ -285,6 +285,21 @@
     <ClCompile Include="views\debug_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\rendering_command_list.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\paint.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\geometry.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\render_node\render_node.cpp">
+      <Filter>graphics\render_node</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\render_node\render_tree.cpp">
+      <Filter>graphics\render_node</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -610,6 +625,21 @@
     <ClInclude Include="views\debug_view.h">
       <Filter>views</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\rendering_command_list.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\paint.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\geometry.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\render_node\render_node.h">
+      <Filter>graphics\render_node</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\render_node\render_tree.h">
+      <Filter>graphics\render_node</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -665,6 +695,9 @@
     </Filter>
     <Filter Include="graphics\direct3d\hlsl">
       <UniqueIdentifier>{b6700bbc-a76b-4523-845c-fef6a4494830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\render_node">
+      <UniqueIdentifier>{bbfb6918-d6e4-4428-8a70-2e63ad352cc6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -107,11 +107,11 @@ namespace ukive {
         }
     }
 
-    void Rect::set(int left, int top, int right, int bottom) {
+    void Rect::set(int left, int top, int width, int height) {
         this->left = left;
         this->top = top;
-        this->right = right;
-        this->bottom = bottom;
+        this->right = left + width;
+        this->bottom = top + height;
     }
 
     void Rect::insets(const Rect& insets) {
@@ -236,11 +236,11 @@ namespace ukive {
         }
     }
 
-    void RectF::set(float left, float top, float right, float bottom) {
+    void RectF::set(float left, float top, float width, float height) {
         this->left = left;
         this->top = top;
-        this->right = right;
-        this->bottom = bottom;
+        this->right = left + width;
+        this->bottom = top + height;
     }
 
     void RectF::insets(const RectF& insets) {

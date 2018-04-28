@@ -20,6 +20,22 @@ namespace ukive {
         int y;
     };
 
+    class PointF {
+    public:
+        PointF();
+        PointF(float x, float y);
+        PointF(const PointF& rhs);
+
+        PointF& operator=(const PointF& rhs);
+        bool operator==(const PointF& rhs);
+        bool operator!=(const PointF& rhs);
+
+        void set(float x, float y);
+
+        float x;
+        float y;
+    };
+
 }
 
 #endif  // UKIVE_GRAPHICS_POINT_H_

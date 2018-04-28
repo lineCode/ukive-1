@@ -30,7 +30,7 @@ namespace ukive {
         void join(const Rect& rhs);
         void same(const Rect& rhs);
 
-        void set(int left, int top, int right, int bottom);
+        void set(int left, int top, int width, int height);
 
         void insets(const Rect& insets);
         void insets(int left, int top, int right, int bottom);
@@ -67,7 +67,7 @@ namespace ukive {
         void join(const RectF& rhs);
         void same(const RectF& rhs);
 
-        void set(float left, float top, float right, float bottom);
+        void set(float left, float top, float width, float height);
 
         void insets(const RectF& insets);
         void insets(float left, float top, float right, float bottom);

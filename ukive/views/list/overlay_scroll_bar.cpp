@@ -20,7 +20,7 @@ namespace ukive {
     OverlayScrollBar::~OverlayScrollBar() {}
 
 
-    void OverlayScrollBar::Update(int content_height, float percent) {
+    void OverlayScrollBar::update(int content_height, float percent) {
         content_height_ = content_height;
 
         if (content_height_ <= 0
@@ -47,17 +47,17 @@ namespace ukive {
             thumb_width, thumb_height);
     }
 
-    void OverlayScrollBar::RegisterScrollHandler(std::function<void(int)> h) {
+    void OverlayScrollBar::registerScrollHandler(std::function<void(int)> h) {
         scroll_handler_ = h;
     }
 
-    void OverlayScrollBar::SetBounds(int x, int y, int width, int height) {
+    void OverlayScrollBar::setBounds(int x, int y, int width, int height) {
         view_bounds_.set(x, y, width, height);
         scrollbar_bounds_.set(
             x + width - kScrollBarWidth, y, kScrollBarWidth, height);
     }
 
-    void OverlayScrollBar::SetBounds(const Rect& bounds) {
+    void OverlayScrollBar::setBounds(const Rect& bounds) {
         view_bounds_ = bounds;
         scrollbar_bounds_.set(
             bounds.right - kScrollBarWidth,
@@ -66,13 +66,13 @@ namespace ukive {
     }
 
 
-    void OverlayScrollBar::OnPaint(Canvas* canvas) {
+    void OverlayScrollBar::onDraw(Canvas* canvas) {
         if (!thumb_bounds_.empty()) {
-            canvas->fillRect(thumb_bounds_.toRectF(), Color::Blue100);
+            canvas->fillRect(std::move(thumb_bounds_.toRectF()), Color::Black);
         }
     }
 
-    bool OverlayScrollBar::OnMousePressed(const Point& p) {
+    bool OverlayScrollBar::onMousePressed(const Point& p) {
         if (scrollbar_bounds_.hit(p)) {
             dragging_start_ = p;
             thumb_bounds_start_ = thumb_bounds_;
@@ -83,9 +83,9 @@ namespace ukive {
         return false;
     }
 
-    void OverlayScrollBar::OnMouseMoved(const Point& p) {}
+    void OverlayScrollBar::onMouseMoved(const Point& p) {}
 
-    bool OverlayScrollBar::OnMouseDragged(const Point& p) {
+    bool OverlayScrollBar::onMouseDragged(const Point& p) {
         int distance_y = p.y - dragging_start_.y;
         int view_height = view_bounds_.height();
 

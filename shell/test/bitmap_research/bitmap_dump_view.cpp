@@ -4,7 +4,6 @@
 
 #include "ukive/graphics/canvas.h"
 #include "ukive/event/input_event.h"
-#include "ukive/drawable/color_drawable.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
 #include "ukive/graphics/rect.h"
@@ -162,6 +161,8 @@ namespace shell {
             break;
         case ukive::InputEvent::EVM_UP:
             is_mouse_down_ = false;
+            break;
+        default:
             break;
         }
         return View::onInputEvent(e);

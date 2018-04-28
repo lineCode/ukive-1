@@ -18,7 +18,7 @@ namespace ukive {
         void dispatchWindowDpiChanged(int dpi_x, int dpi_y) override;
 
         virtual void onLayout(
-            bool changed, bool sizeChanged,
+            bool changed, bool size_changed,
             int left, int top, int right, int bottom) = 0;
 
         virtual bool onInterceptInputEvent(InputEvent* e);

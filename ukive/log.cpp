@@ -30,21 +30,21 @@ namespace ukive {
         ::OutputDebugString(msg.c_str());
     }
 
-    Log::Log(const char *file_name, int line_number, Severity level)
+    Log::Log(const wchar_t* file_name, int line_number, Severity level)
         :level_(level),
         file_name_(file_name),
         line_number_(line_number) {
     }
 
     Log::~Log() {
-        std::string msg;
+        string16 msg;
         msg.append(file_name_)
-            .append("(")
-            .append(std::to_string(line_number_))
-            .append("): ")
+            .append(L"(")
+            .append(std::to_wstring(line_number_))
+            .append(L"): ")
             .append(stream_.str())
-            .append("\n");
-        ::OutputDebugStringA(msg.c_str());
+            .append(L"\n");
+        ::OutputDebugStringW(msg.c_str());
 
         switch (level_) {
         case Severity::INFO:
@@ -58,7 +58,7 @@ namespace ukive {
         }
     }
 
-    std::ostringstream& Log::stream() {
+    std::wostringstream& Log::stream() {
         return stream_;
     }
 

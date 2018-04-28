@@ -12,12 +12,12 @@ namespace ukive {
         : public IUnknown {
     public:
         TextDrawingEffect();
-        ~TextDrawingEffect();
+        virtual ~TextDrawingEffect();
 
-        ULONG STDMETHODCALLTYPE AddRef();
-        ULONG STDMETHODCALLTYPE Release();
+        ULONG STDMETHODCALLTYPE AddRef() override;
+        ULONG STDMETHODCALLTYPE Release() override;
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            REFIID riid, void** ppvObject);
+            REFIID riid, void** ppvObject) override;
 
         EffectSpan* effect_span_;
 
