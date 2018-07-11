@@ -6,6 +6,7 @@
 
 #include "shell/test/test_window.h"
 #include "shell/lod/lod_window.h"
+#include "shell/test/3d/motion_window.h"
 #include "shell/test/text/text_window.h"
 #include "shell/test/bitmap_research/bitmap_research_window.h"
 #include "shell/test/shadow/shadow_window.h"
@@ -46,12 +47,20 @@ int APIENTRY wWinMain(
     shadow_window->center();
     shadow_window->show();*/
 
-    auto test_window = std::make_shared<shell::TestWindow>();
+    /*auto test_window = std::make_shared<shell::TestWindow>();
     test_window->setTitle(L"Test");
     test_window->setWidth(ukive::Application::dpToPx(600));
     test_window->setHeight(ukive::Application::dpToPx(600));
     test_window->center();
-    test_window->show();
+    test_window->show();*/
+
+    auto thr_dimen_window = std::make_shared<shell::MotionWindow>();
+    thr_dimen_window->setTitle(L"3D Motion");
+    thr_dimen_window->setWidth(ukive::Application::dpToPx(600));
+    thr_dimen_window->setHeight(ukive::Application::dpToPx(600));
+    //thr_dimen_window->setTranslucent(true);
+    thr_dimen_window->center();
+    thr_dimen_window->show();
 
     app->run();
 

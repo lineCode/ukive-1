@@ -41,6 +41,9 @@
     <Filter Include="test\shadow">
       <UniqueIdentifier>{76bae05f-bc9e-473a-8b84-cae5f471b311}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\3d">
+      <UniqueIdentifier>{8cfa8f7b-f4e2-4aff-bd98-2cf54675f6ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -100,6 +103,9 @@
     <ClCompile Include="test\shadow\shadow_window.cpp">
       <Filter>test\shadow</Filter>
     </ClCompile>
+    <ClCompile Include="test\3d\motion_window.cpp">
+      <Filter>test\3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resources\resource.h">
@@ -158,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="test\shadow\shadow_window.h">
       <Filter>test\shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="test\3d\motion_window.h">
+      <Filter>test\3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

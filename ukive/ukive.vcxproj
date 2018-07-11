@@ -252,6 +252,7 @@
     <ClInclude Include="views\debug_view.h" />
     <ClInclude Include="views\direct3d_view.h" />
     <ClInclude Include="views\image_view.h" />
+    <ClInclude Include="views\layout\non_client_layout.h" />
     <ClInclude Include="views\layout\root_layout.h" />
     <ClInclude Include="views\layout\root_layout_params.h" />
     <ClInclude Include="views\layout\frame_layout.h" />
@@ -273,6 +274,7 @@
     <ClInclude Include="views\text_view.h" />
     <ClInclude Include="views\view.h" />
     <ClInclude Include="window\frame\default_non_client_frame.h" />
+    <ClInclude Include="window\frame\drawable_non_client_frame.h" />
     <ClInclude Include="window\frame\non_client_frame.h" />
     <ClInclude Include="window\window.h" />
     <ClInclude Include="window\window_class_manager.h" />
@@ -357,6 +359,7 @@
     <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
+    <ClCompile Include="views\layout\non_client_layout.cpp" />
     <ClCompile Include="views\layout\root_layout.cpp" />
     <ClCompile Include="views\layout\root_layout_params.cpp" />
     <ClCompile Include="views\layout\frame_layout.cpp" />
@@ -377,6 +380,7 @@
     <ClCompile Include="views\text_view.cpp" />
     <ClCompile Include="views\view.cpp" />
     <ClCompile Include="window\frame\default_non_client_frame.cpp" />
+    <ClCompile Include="window\frame\drawable_non_client_frame.cpp" />
     <ClCompile Include="window\window.cpp" />
     <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />

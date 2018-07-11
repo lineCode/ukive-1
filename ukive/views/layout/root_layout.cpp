@@ -2,6 +2,7 @@
 
 #include <typeinfo>
 
+#include "ukive/views/layout/frame_layout.h"
 #include "ukive/views/layout/linear_layout.h"
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/root_layout_params.h"
@@ -12,9 +13,9 @@
 namespace ukive {
 
     RootLayout::RootLayout(Window* w)
-        :FrameLayout(w),
-        shade_added_(false),
-        debug_view_(nullptr) {
+        :NonClientLayout(w),
+        debug_view_(nullptr),
+        shade_added_(false) {
 
         content_layout_ = new LinearLayout(getWindow());
         content_layout_->setOrientation(LinearLayout::VERTICAL);
@@ -100,7 +101,7 @@ namespace ukive {
         }
     }
 
-    DebugView* RootLayout::getDebugView() {
+    DebugView* RootLayout::getDebugView() const {
         return debug_view_;
     }
 
@@ -110,7 +111,7 @@ namespace ukive {
 
 
     void RootLayout::requestLayout() {
-        FrameLayout::requestLayout();
+        NonClientLayout::requestLayout();
 
         getWindow()->requestLayout();
     }

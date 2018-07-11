@@ -175,6 +175,7 @@
     <ClCompile Include="lod\terrain_configure.cpp" />
     <ClCompile Include="lod\terrain_scene.cpp" />
     <ClCompile Include="lod\lod_generator.cpp" />
+    <ClCompile Include="test\3d\motion_window.cpp" />
     <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp" />
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
     <ClCompile Include="test\emulator\emulator_view.cpp" />
@@ -186,7 +187,9 @@
     <ClCompile Include="test\text\text_window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="application.manifest" />
+    <Manifest Include="application.manifest">
+      <SubType>Designer</SubType>
+    </Manifest>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct3d\assist_configure.h" />
@@ -199,6 +202,7 @@
     <ClInclude Include="lod\terrain_scene.h" />
     <ClInclude Include="lod\lod_generator.h" />
     <ClInclude Include="resources\resource.h" />
+    <ClInclude Include="test\3d\motion_window.h" />
     <ClInclude Include="test\bitmap_research\bitmap_dump_view.h" />
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
     <ClInclude Include="test\emulator\emulator_view.h" />

@@ -36,21 +36,21 @@ namespace ukive {
         void setCurrentCursor(Cursor cursor);
         void setTranslucent(bool translucent);
 
-        string16 getTitle();
-        int getX();
-        int getY();
-        int getWidth();
-        int getHeight();
-        int getClientWidth();
-        int getClientHeight();
-        unsigned int getDpi();
-        HWND getHandle();
-        Cursor getCurrentCursor();
+        string16 getTitle() const;
+        int getX() const;
+        int getY() const;
+        int getWidth() const;
+        int getHeight() const;
+        int getClientWidth() const;
+        int getClientHeight() const;
+        unsigned int getDpi() const;
+        HWND getHandle() const;
+        Cursor getCurrentCursor() const;
 
-        bool isCreated();
-        bool isShowing();
-        bool isCursorInClient();
-        bool isTranslucent();
+        bool isCreated() const;
+        bool isShowing() const;
+        bool isCursorInClient() const;
+        bool isTranslucent() const;
 
         void setMouseCaptureRaw();
         void releaseMouseCaptureRaw();
@@ -66,7 +66,6 @@ namespace ukive {
     private:
         LRESULT CALLBACK messageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam);
         LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP);
-        LRESULT HitTestNCA(HWND hWnd, WPARAM wParam, LPARAM lParam, int leftExt, int topExt, int rightExt, int bottomExt);
 
         void onPreCreate(
             ClassInfo* info, int* win_style, int* win_ex_style);

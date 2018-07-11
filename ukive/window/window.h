@@ -32,6 +32,11 @@ namespace ukive {
 
     class Window : public SwapChainResizeNotifier {
     public:
+        enum FrameType {
+            FRAME_NATIVE,
+            FRAME_CUSTOM
+        };
+
         Window();
         virtual ~Window();
 
@@ -55,26 +60,28 @@ namespace ukive {
         void setBackgroundColor(Color color);
         void setTranslucent(bool translucent);
         void setStartupWindow(bool enable);
+        void setFrameType(FrameType type);
 
-        int getX();
-        int getY();
-        int getWidth();
-        int getHeight();
-        int getMinWidth();
-        int getMinHeight();
-        int getClientWidth();
-        int getClientHeight();
-        RootLayout* getRootLayout();
-        Color getBackgroundColor();
-        Cycler* getCycler();
-        Renderer* getRenderer();
-        HWND getHandle();
-        AnimationManager* getAnimationManager();
+        int getX() const;
+        int getY() const;
+        int getWidth() const;
+        int getHeight() const;
+        int getMinWidth() const;
+        int getMinHeight() const;
+        int getClientWidth() const;
+        int getClientHeight() const;
+        RootLayout* getRootLayout() const;
+        Color getBackgroundColor() const;
+        Cycler* getCycler() const;
+        Renderer* getRenderer() const;
+        HWND getHandle() const;
+        AnimationManager* getAnimationManager() const;
+        FrameType getFrameType() const;
 
-        bool isShowing();
-        bool isCursorInClient();
-        bool isTranslucent();
-        bool isStartupWindow();
+        bool isShowing() const;
+        bool isCursorInClient() const;
+        bool isTranslucent() const;
+        bool isStartupWindow() const;
 
         void captureMouse(View* v);
         void releaseMouse();
@@ -84,9 +91,9 @@ namespace ukive {
         //当一个widget放弃焦点时，应调用此方法。
         void releaseKeyboard();
 
-        View* getMouseHolder();
-        unsigned int getMouseHolderRef();
-        View* getKeyboardHolder();
+        View* getMouseHolder() const;
+        unsigned int getMouseHolderRef() const;
+        View* getKeyboardHolder() const;
 
         void invalidate();
         void invalidate(int left, int top, int right, int bottom);
@@ -201,6 +208,7 @@ namespace ukive {
         Color background_color_;
         bool is_startup_window_;
         int min_width_, min_height_;
+        FrameType frame_type_;
     };
 
 }

@@ -73,7 +73,6 @@ namespace shell {
         return TRUE;
     }
 
-
     LRESULT CustomNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
         switch (wParam) {
         case SIZE_MAXIMIZED: {
@@ -304,7 +303,7 @@ namespace shell {
         *handled = true;
         if (wParam == TRUE)
         {
-            NCCALCSIZE_PARAMS* ncp = (NCCALCSIZE_PARAMS*)lParam;
+            auto ncp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
             // 0: 新窗口位置
             // 1: 旧窗口位置
             // 2: 旧客户区位置

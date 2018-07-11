@@ -6,6 +6,8 @@ namespace ukive {
 
     class Executable {
     public:
+        virtual ~Executable() = default;
+
         virtual void run() = 0;
     };
 

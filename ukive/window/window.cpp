@@ -24,21 +24,22 @@ namespace ukive {
 
     Window::Window()
         :impl_(std::make_unique<WindowImpl>(this)),
-        min_width_(0),
-        min_height_(0),
-        is_startup_window_(false),
-        root_layout_(nullptr),
+        canvas_(nullptr),
+        renderer_(nullptr),
         labour_cycler_(nullptr),
+        root_layout_(nullptr),
         mouse_holder_(nullptr),
         focus_holder_(nullptr),
         focus_holder_backup_(nullptr),
         mouse_holder_ref_(0),
-        canvas_(nullptr),
-        renderer_(nullptr),
         anim_mgr_(nullptr),
         mAnimStateChangedListener(nullptr),
         mAnimTimerEventListener(nullptr),
-        background_color_(Color::White) {
+        background_color_(Color::White),
+        is_startup_window_(false),
+        min_width_(0),
+        min_height_(0),
+        frame_type_(FRAME_NATIVE) {
 
         WindowManager::getInstance()->addWindow(this);
     }
@@ -123,75 +124,83 @@ namespace ukive {
         is_startup_window_ = enable;
     }
 
-    int Window::getX() {
+    void Window::setFrameType(FrameType type) {
+        frame_type_ = type;
+    }
+
+    int Window::getX() const {
         return impl_->getX();
     }
 
-    int Window::getY() {
+    int Window::getY() const {
         return impl_->getY();
     }
 
-    int Window::getWidth() {
+    int Window::getWidth() const {
         return impl_->getWidth();
     }
 
-    int Window::getHeight() {
+    int Window::getHeight() const {
         return impl_->getHeight();
     }
 
-    int Window::getMinWidth() {
+    int Window::getMinWidth() const {
         return min_width_;
     }
 
-    int Window::getMinHeight() {
+    int Window::getMinHeight() const {
         return min_height_;
     }
 
-    int Window::getClientWidth() {
+    int Window::getClientWidth() const {
         return impl_->getClientWidth();
     }
 
-    int Window::getClientHeight() {
+    int Window::getClientHeight() const {
         return impl_->getClientHeight();
     }
 
-    RootLayout* Window::getRootLayout() {
+    RootLayout* Window::getRootLayout() const {
         return root_layout_;
     }
 
-    Color Window::getBackgroundColor() {
+    Color Window::getBackgroundColor() const {
         return background_color_;
     }
 
-    Cycler* Window::getCycler() {
+    Cycler* Window::getCycler() const {
         return labour_cycler_;
     }
 
-    Renderer* Window::getRenderer() {
+    Renderer* Window::getRenderer() const {
         return renderer_;
     }
 
-    HWND Window::getHandle() {
+    HWND Window::getHandle() const {
         return impl_->getHandle();
     }
 
-    AnimationManager* Window::getAnimationManager() {
+    AnimationManager* Window::getAnimationManager() const {
         return anim_mgr_;
     }
 
-    bool Window::isShowing() {
+    Window::FrameType Window::getFrameType() const {
+        return frame_type_;
+    }
+
+    bool Window::isShowing() const {
         return impl_->isShowing();
     }
 
-    bool Window::isCursorInClient() {
+    bool Window::isCursorInClient() const {
         return impl_->isCursorInClient();
     }
 
-    bool Window::isTranslucent() {
+    bool Window::isTranslucent() const {
         return impl_->isTranslucent();
     }
 
-    bool Window::isStartupWindow() {
+    bool Window::isStartupWindow() const {
         return is_startup_window_;
     }
 
@@ -239,15 +248,15 @@ namespace ukive {
         focus_holder_ = nullptr;
     }
 
-    View* Window::getMouseHolder() {
+    View* Window::getMouseHolder() const {
         return mouse_holder_;
     }
 
-    unsigned int Window::getMouseHolderRef() {
+    unsigned int Window::getMouseHolderRef() const {
         return mouse_holder_ref_;
     }
 
-    View* Window::getKeyboardHolder() {
+    View* Window::getKeyboardHolder() const {
         return focus_holder_;
     }
 
@@ -490,8 +499,7 @@ namespace ukive {
     }
 
     void Window::onActivate(int param) {
-        switch (param)
-        {
+        switch (param) {
         case WA_ACTIVE:
         case WA_CLICKACTIVE:
             /*if (focus_holder_backup_)
@@ -507,6 +515,8 @@ namespace ukive {
             focus_holder_backup_->dispatchInputEvent(&ev);
             focus_holder_->discardFocus();
             }*/
+            break;
+        default:
             break;
         }
     }
@@ -574,6 +584,8 @@ namespace ukive {
             break;
         case SIZE_MAXHIDE:
             break;
+        default:
+            break;
         }
 
         performLayout();
@@ -591,10 +603,8 @@ namespace ukive {
 
         int width = rect->right - rect->left;
         int height = rect->bottom - rect->top;
-        if (height < minHeight)
-        {
-            switch (edge)
-            {
+        if (height < minHeight) {
+            switch (edge) {
             case WMSZ_TOP:
             case WMSZ_TOPLEFT:
             case WMSZ_TOPRIGHT:
@@ -605,14 +615,14 @@ namespace ukive {
             case WMSZ_BOTTOMRIGHT:
                 rect->bottom = rect->top + minHeight;
                 break;
+            default:
+                break;
             }
             processed = true;
         }
 
-        if (width < minWidth)
-        {
-            switch (edge)
-            {
+        if (width < minWidth) {
+            switch (edge) {
             case WMSZ_LEFT:
             case WMSZ_TOPLEFT:
             case WMSZ_BOTTOMLEFT:
@@ -622,6 +632,8 @@ namespace ukive {
             case WMSZ_TOPRIGHT:
             case WMSZ_BOTTOMRIGHT:
                 rect->right = rect->left + minWidth;
+                break;
+            default:
                 break;
             }
             processed = true;
@@ -726,10 +738,8 @@ namespace ukive {
         return false;
     }
 
-
     void Window::onDrawCanvas(Canvas* canvas) {
     }
-
 
     void Window::onPreSwapChainResize() {
         delete canvas_;
@@ -747,6 +757,8 @@ namespace ukive {
             break;
         case SCHEDULE_LAYOUT:
             win_->performLayout();
+            break;
+        default:
             break;
         }
     }

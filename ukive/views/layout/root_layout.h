@@ -1,7 +1,7 @@
 ﻿#ifndef UKIVE_VIEWS_LAYOUT_BASE_LAYOUT_H_
 #define UKIVE_VIEWS_LAYOUT_BASE_LAYOUT_H_
 
-#include "ukive/views/layout/frame_layout.h"
+#include "ukive/views/layout/non_client_layout.h"
 
 
 namespace ukive {
@@ -9,9 +9,10 @@ namespace ukive {
     class Window;
     class DebugView;
     class LayoutParams;
+    class FrameLayout;
     class LinearLayout;
 
-    class RootLayout : public FrameLayout {
+    class RootLayout : public NonClientLayout {
     public:
         RootLayout(Window* w);
         ~RootLayout();
@@ -23,7 +24,7 @@ namespace ukive {
         void removeDebugView();
         void toggleDebugView();
 
-        DebugView* getDebugView();
+        DebugView* getDebugView() const;
 
         void addContent(View* content);
 

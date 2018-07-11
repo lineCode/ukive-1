@@ -8,6 +8,7 @@
 #include "ukive/window/window_class_manager.h"
 #include "ukive/window/frame/non_client_frame.h"
 #include "ukive/window/frame/default_non_client_frame.h"
+#include "ukive/window/frame/drawable_non_client_frame.h"
 #include "ukive/event/input_event.h"
 
 #include "shell/test/frame/custom_non_client_frame.h"
@@ -31,7 +32,8 @@ namespace ukive {
 
     WindowImpl::WindowImpl(Window* win)
         :delegate_(win),
-        hWnd_(NULL),
+        hWnd_(nullptr),
+        cursor_(Cursor::ARROW),
         x_(kDefaultX),
         y_(kDefaultY),
         prev_x_(kDefaultX),
@@ -41,7 +43,6 @@ namespace ukive {
         prev_width_(kDefaultWidth),
         prev_height_(kDefaultHeight),
         title_(kDefaultTitle),
-        cursor_(Cursor::ARROW),
         is_created_(false),
         is_showing_(false),
         is_translucent_(false),
@@ -53,8 +54,8 @@ namespace ukive {
     void WindowImpl::init() {
         ClassInfo info;
         info.style = kDefaultClassStyle;
-        info.icon = info.icon_small = ::LoadIcon(NULL, IDI_WINLOGO);
-        info.cursor = ::LoadCursor(NULL, IDC_ARROW);
+        info.icon = info.icon_small = ::LoadIcon(nullptr, IDI_WINLOGO);
+        info.cursor = ::LoadCursor(nullptr, IDC_ARROW);
 
         int win_style = kDefaultWindowStyle;
         int win_ex_style = kDefaultWindowExStyle;
@@ -208,39 +209,39 @@ namespace ukive {
         is_translucent_ = translucent;
     }
 
-    string16 WindowImpl::getTitle() {
+    string16 WindowImpl::getTitle() const {
         return title_;
     }
 
-    int WindowImpl::getX() {
+    int WindowImpl::getX() const {
         return x_;
     }
 
-    int WindowImpl::getY() {
+    int WindowImpl::getY() const {
         return y_;
     }
 
-    int WindowImpl::getWidth() {
+    int WindowImpl::getWidth() const {
         return width_;
     }
 
-    int WindowImpl::getHeight() {
+    int WindowImpl::getHeight() const {
         return height_;
     }
 
-    int WindowImpl::getClientWidth() {
+    int WindowImpl::getClientWidth() const {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
         return rect.right - rect.left;
     }
 
-    int WindowImpl::getClientHeight() {
+    int WindowImpl::getClientHeight() const {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
         return rect.bottom - rect.top;
     }
 
-    unsigned int WindowImpl::getDpi() {
+    unsigned int WindowImpl::getDpi() const {
         unsigned int dpi = ::GetDpiForWindow(hWnd_);
         if (dpi == 0) {
             Log::e(L"WindowImpl", L"failed to get window dpi.");
@@ -249,23 +250,23 @@ namespace ukive {
         return dpi;
     }
 
-    HWND WindowImpl::getHandle() {
+    HWND WindowImpl::getHandle() const {
         return hWnd_;
     }
 
-    Cursor WindowImpl::getCurrentCursor() {
+    Cursor WindowImpl::getCurrentCursor() const {
         return cursor_;
     }
 
-    bool WindowImpl::isCreated() {
+    bool WindowImpl::isCreated() const {
         return is_created_;
     }
 
-    bool WindowImpl::isShowing() {
+    bool WindowImpl::isShowing() const {
         return is_showing_;
     }
 
-    bool WindowImpl::isCursorInClient() {
+    bool WindowImpl::isCursorInClient() const {
         RECT clientRect;
         RECT clientInScreenRect;
         POINT cursorPos;
@@ -292,7 +293,7 @@ namespace ukive {
             && cursorPos.y <= clientInScreenRect.bottom);
     }
 
-    bool WindowImpl::isTranslucent() {
+    bool WindowImpl::isTranslucent() const {
         return is_translucent_;
     }
 
@@ -437,7 +438,11 @@ namespace ukive {
         switch (uMsg) {
         case WM_NCCREATE: {
             onCreate();
-            non_client_frame_.reset(new DefaultNonClientFrame());
+            if (delegate_->getFrameType() == Window::FRAME_CUSTOM) {
+                non_client_frame_.reset(new DrawableNonClientFrame());
+            } else {
+                non_client_frame_.reset(new DefaultNonClientFrame());
+            }
             nc_result = non_client_frame_->onNcCreate(delegate_, &nc_handled);
             if (nc_handled) {
                 return nc_result;
@@ -531,7 +536,7 @@ namespace ukive {
         }
 
         case WM_SHOWWINDOW: {
-            onShow((BOOL)wParam == TRUE ? true : false);
+            onShow(static_cast<BOOL>(wParam) == TRUE ? true : false);
             break;
         }
 
@@ -544,13 +549,13 @@ namespace ukive {
             int new_dpi_x = LOWORD(wParam);
             int new_dpi_y = HIWORD(wParam);
 
-            RECT* const prcNewWindow = (RECT*)lParam;
+            auto nw_rect = reinterpret_cast<RECT*>(lParam);
             SetWindowPos(hWnd_,
-                NULL,
-                prcNewWindow->left,
-                prcNewWindow->top,
-                prcNewWindow->right - prcNewWindow->left,
-                prcNewWindow->bottom - prcNewWindow->top,
+                nullptr,
+                nw_rect->left,
+                nw_rect->top,
+                nw_rect->right - nw_rect->left,
+                nw_rect->bottom - nw_rect->top,
                 SWP_NOZORDER | SWP_NOACTIVATE);
             onDpiChanged(new_dpi_x, new_dpi_y);
             break;
@@ -620,7 +625,7 @@ namespace ukive {
         }
 
         case WM_MOVING: {
-            RECT* raw_rect = reinterpret_cast<RECT*>(lParam);
+            auto raw_rect = reinterpret_cast<RECT*>(lParam);
             Rect rect(
                 raw_rect->left, raw_rect->top,
                 raw_rect->right - raw_rect->left,
@@ -639,7 +644,7 @@ namespace ukive {
         }
 
         case WM_SIZING: {
-            RECT* raw_rect = reinterpret_cast<RECT*>(lParam);
+            auto raw_rect = reinterpret_cast<RECT*>(lParam);
             Rect rect(
                 raw_rect->left, raw_rect->top,
                 raw_rect->right - raw_rect->left,
@@ -848,6 +853,9 @@ namespace ukive {
         case WM_TOUCH: {
             break;
         }
+
+        default:
+            break;
         }
 
         return ::DefWindowProc(hWnd_, uMsg, wParam, lParam);
@@ -869,7 +877,7 @@ namespace ukive {
 
             // Inform application of the frame change.
             ::SetWindowPos(hWnd,
-                0,
+                nullptr,
                 rcClient.left, rcClient.top,
                 rcClient.right - rcClient.left, rcClient.bottom - rcClient.top,
                 SWP_FRAMECHANGED);
@@ -883,10 +891,10 @@ namespace ukive {
             // Extend the frame into the client area.
             MARGINS margins;
 
-            margins.cxLeftWidth = 8;
-            margins.cxRightWidth = 8;
-            margins.cyBottomHeight = 8;
-            margins.cyTopHeight = 8;
+            margins.cxLeftWidth = 0;
+            margins.cxRightWidth = 0;
+            margins.cyBottomHeight = 0;
+            margins.cyTopHeight = 0;
 
             hr = ::DwmExtendFrameIntoClientArea(hWnd, &margins);
             if (!SUCCEEDED(hr)) {
@@ -902,82 +910,8 @@ namespace ukive {
             ret = 0;
         }
 
-        // Handle the non-client size message.
-        if (message == WM_NCCALCSIZE && wParam == TRUE) {
-            // Calculate new NCCALCSIZE_PARAMS based on custom NCA inset.
-            NCCALCSIZE_PARAMS* pncsp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-
-            RECT newW;
-            ::CopyRect(&newW, &pncsp->rgrc[0]);
-            //new window client.
-            pncsp->rgrc[0].left = newW.left + 0;
-            pncsp->rgrc[0].top = newW.top + 0;
-            pncsp->rgrc[0].right = newW.right - 0;
-            pncsp->rgrc[0].bottom = newW.bottom - 0;
-
-            ret = 0;
-
-            // No need to pass the message on to the DefWindowProc.
-            call_dwp = false;
-        }
-
-        // Handle hit testing in the NCA if not handled by DwmDefWindowProc.
-        if ((message == WM_NCHITTEST) && (ret == 0)) {
-            ret = HitTestNCA(hWnd, wParam, lParam, 8, 8, 8, 8);
-            if (ret != HTNOWHERE) {
-                call_dwp = false;
-            }
-        }
-
         *pfCallDWP = call_dwp;
-
         return ret;
-    }
-
-    LRESULT WindowImpl::HitTestNCA(
-        HWND hWnd, WPARAM wParam, LPARAM lParam,
-        int leftExt, int topExt, int rightExt, int bottomExt) {
-
-        // Get the point coordinates for the hit test.
-        POINT ptMouse = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-
-        // Get the window rectangle.
-        RECT rcWindow;
-        ::GetWindowRect(hWnd, &rcWindow);
-
-        // Get the frame rectangle, adjusted for the style without a caption.
-        //RECT rcFrame = { 0 };
-        //AdjustWindowRectEx(&rcFrame, WS_OVERLAPPEDWINDOW & ~WS_CAPTION, FALSE, NULL);
-
-        // Determine if the hit test is for resizing. Default middle (1,1).
-        USHORT uRow = 1;
-        USHORT uCol = 1;
-        //bool fOnResizeBorder = false;
-
-        // Determine if the point is at the top or bottom of the window.
-        if (ptMouse.y >= rcWindow.top && ptMouse.y < rcWindow.top + topExt) {
-            //fOnResizeBorder = (ptMouse.y < (rcWindow.top - rcFrame.top));
-            uRow = 0;
-        } else if (ptMouse.y < rcWindow.bottom && ptMouse.y >= rcWindow.bottom - bottomExt) {
-            uRow = 2;
-        }
-
-        // Determine if the point is at the left or right of the window.
-        if (ptMouse.x >= rcWindow.left && ptMouse.x < rcWindow.left + leftExt) {
-            uCol = 0; // left side
-        } else if (ptMouse.x < rcWindow.right && ptMouse.x >= rcWindow.right - rightExt) {
-            uCol = 2; // right side
-        }
-
-        // Hit test (HTTOPLEFT, ... HTBOTTOMRIGHT)
-        LRESULT hitTests[3][3] =
-        {
-            { HTTOPLEFT,    HTCAPTION,    HTTOPRIGHT },
-            { HTLEFT,       HTNOWHERE,     HTRIGHT },
-            { HTBOTTOMLEFT, HTBOTTOM, HTBOTTOMRIGHT },
-        };
-
-        return hitTests[uRow][uCol];
     }
 
     LRESULT CALLBACK WindowImpl::WndProc(
@@ -986,10 +920,11 @@ namespace ukive {
             //::EnableNonClientDpiScaling(hWnd);
             ::RegisterTouchWindow(hWnd, TWF_WANTPALM);
 
-            CREATESTRUCTW* cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
-            WindowImpl* window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
-            if (window == nullptr) {
-                Log::e(L"WindowImpl", L"null window creating param.");
+            auto cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
+            auto window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
+            if (!window) {
+                DCHECK(Log::FATAL) << "null window creating param.";
+                return FALSE;
             }
 
             window->hWnd_ = hWnd;
@@ -998,8 +933,8 @@ namespace ukive {
             return window->messageHandler(uMsg, wParam, lParam);
         }
 
-        WindowImpl* window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        if (window == nullptr) {
+        auto window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
+        if (!window) {
             return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
 
@@ -1008,18 +943,18 @@ namespace ukive {
         LRESULT lRet = 0;
         HRESULT hr = S_OK;
         // Winproc worker for custom frame issues.
-        /*hr = DwmIsCompositionEnabled(&dwmEnabled);
-        if (SUCCEEDED(hr))
+        hr = ::DwmIsCompositionEnabled(&dwmEnabled);
+        if (SUCCEEDED(hr) && dwmEnabled == TRUE)
         {
-        ret = window->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
-        }*/
+            //lRet = window->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
+        }
 
         // Winproc worker for the rest of the application.
         if (callDWP) {
             return window->messageHandler(uMsg, wParam, lParam);
         }
 
-        return 0;
+        return lRet;
     }
 
 }

@@ -12,49 +12,51 @@ namespace ukive {
 
 
     void FrameLayout::onMeasure(int width, int height, int widthSpec, int heightSpec) {
-        int finalWidth = 0;
-        int finalHeight = 0;
+        int final_width = 0;
+        int final_height = 0;
 
-        int horizontalPadding = getPaddingLeft() + getPaddingRight();
-        int verticalPadding = getPaddingTop() + getPaddingBottom();
+        int hori_padding = getPaddingLeft() + getPaddingRight();
+        int vert_padding = getPaddingTop() + getPaddingBottom();
 
         measureChildrenWithMargins(width, height, widthSpec, heightSpec);
 
         switch (widthSpec) {
         case FIT:
-            finalWidth = getWrappedWidth();
-            finalWidth = std::min(finalWidth + horizontalPadding, width);
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
+            final_width = getWrappedWidth();
+            final_width = std::min(final_width + hori_padding, width);
+            final_width = std::max(getMinimumWidth(), final_width);
             break;
 
         case UNKNOWN:
-            finalWidth = getWrappedWidth();
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
+            final_width = getWrappedWidth();
+            final_width = std::max(getMinimumWidth(), final_width);
             break;
 
         case EXACTLY:
-            finalWidth = width;
+        default:
+            final_width = width;
             break;
         }
 
         switch (heightSpec) {
         case FIT:
-            finalHeight = getWrappedHeight();
-            finalHeight = std::min(finalHeight + verticalPadding, height);
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
+            final_height = getWrappedHeight();
+            final_height = std::min(final_height + vert_padding, height);
+            final_height = std::max(getMinimumHeight(), final_height);
             break;
 
         case UNKNOWN:
-            finalHeight = getWrappedHeight();
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
+            final_height = getWrappedHeight();
+            final_height = std::max(getMinimumHeight(), final_height);
             break;
 
         case EXACTLY:
-            finalHeight = height;
+        default:
+            final_height = height;
             break;
         }
 
-        setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredDimension(final_width, final_height);
     }
 
 

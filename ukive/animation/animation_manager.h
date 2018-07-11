@@ -15,6 +15,8 @@ namespace ukive {
 
         class OnStateChangedListener {
         public:
+            virtual ~OnStateChangedListener() = default;
+
             virtual void onStateChanged(
                 UI_ANIMATION_MANAGER_STATUS newStatus,
                 UI_ANIMATION_MANAGER_STATUS previousStatus) = 0;
@@ -22,6 +24,8 @@ namespace ukive {
 
         class OnTimerEventListener {
         public:
+            virtual ~OnTimerEventListener() = default;
+
             virtual void onPreUpdate() = 0;
             virtual void onPostUpdate() = 0;
             virtual void onRenderingTooSlow(unsigned int fps) = 0;

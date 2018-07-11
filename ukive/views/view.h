@@ -166,7 +166,7 @@ namespace ukive {
         void scrollBy(int dx, int dy);
 
         void draw(Canvas* canvas);
-        void measure(int width, int height, int widthMode, int heightMode);
+        void measure(int width, int height, int width_mode, int height_mode);
         void layout(int left, int top, int right, int bottom);
 
         virtual void invalidate();
@@ -179,7 +179,7 @@ namespace ukive {
         void discardPendingOperations();
 
         virtual bool dispatchInputEvent(InputEvent* e);
-        virtual void dispatchWindowFocusChanged(bool windowFocus);
+        virtual void dispatchWindowFocusChanged(bool window_focus);
         virtual void dispatchWindowDpiChanged(int dpi_x, int dpi_y);
 
         virtual void onAttachedToWindow();

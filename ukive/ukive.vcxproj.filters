@@ -300,6 +300,12 @@
     <ClCompile Include="graphics\render_node\render_tree.cpp">
       <Filter>graphics\render_node</Filter>
     </ClCompile>
+    <ClCompile Include="window\frame\drawable_non_client_frame.cpp">
+      <Filter>window\frame</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\non_client_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -639,6 +645,12 @@
     </ClInclude>
     <ClInclude Include="graphics\render_node\render_tree.h">
       <Filter>graphics\render_node</Filter>
+    </ClInclude>
+    <ClInclude Include="window\frame\drawable_non_client_frame.h">
+      <Filter>window\frame</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\non_client_layout.h">
+      <Filter>views\layout</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
