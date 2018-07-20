@@ -13,7 +13,7 @@ namespace ukive {
     class DebugView : public View {
     public:
         enum Mode {
-            FRAME,
+            RENDER,
             LAYOUT
         };
 

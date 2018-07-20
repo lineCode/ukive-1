@@ -246,9 +246,6 @@
     <ClCompile Include="graphics\cursor.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="utils\weak_bind.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\direct3d\scene.cpp">
       <Filter>graphics\direct3d</Filter>
     </ClCompile>
@@ -305,6 +302,9 @@
     </ClCompile>
     <ClCompile Include="views\layout\non_client_layout.cpp">
       <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\event_handler.h">
+      <Filter>utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

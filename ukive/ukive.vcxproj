@@ -354,7 +354,7 @@
     <ClCompile Include="utils\number.cpp" />
     <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
-    <ClCompile Include="utils\weak_bind.cpp" />
+    <ClCompile Include="utils\event_handler.h" />
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />

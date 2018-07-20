@@ -342,7 +342,7 @@ namespace ukive {
 
         QPCService qpc_service;
         auto debug_view = root_layout_->getDebugView();
-        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::FRAME);
+        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::RENDER);
         if (enable_qpc) {
             qpc_service.Start();
         }
