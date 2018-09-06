@@ -12,10 +12,11 @@
 namespace ukive {
 
     InputConnection::InputConnection(TextView* textView)
-        :text_view_(textView),
-        tsf_editor_(nullptr),
-        is_initialized_(false),
-        is_editor_pushed_(false) {
+        : text_view_(textView),
+          tsf_editor_(nullptr),
+          editor_cookie_(0),
+          is_initialized_(false),
+          is_editor_pushed_(false) {
     }
 
     InputConnection::~InputConnection() {
@@ -53,7 +54,7 @@ namespace ukive {
 
         HRESULT hr = doc_mgr_->Push(editor_context_.get());
         if (FAILED(hr)) {
-            Log::e(L"InputConnection", L"pushEditor() failed.\n");
+            DLOG(Log::ERR) << "pushEditor() failed.";
             return;
         }
 
@@ -67,7 +68,7 @@ namespace ukive {
 
         HRESULT hr = doc_mgr_->Pop(TF_POPF_ALL);
         if (FAILED(hr)) {
-            Log::e(L"InputConnection", L"popEditor() failed.\n");
+            DLOG(Log::ERR) << "popEditor() failed.";
             return;
         }
 
@@ -79,11 +80,11 @@ namespace ukive {
             return false;
         }
 
-        TsfManager* tsfMgr = Application::getTsfManager();
+        auto mgr = Application::getTsfManager();
 
-        HRESULT hr = tsfMgr->getThreadManager()->SetFocus(doc_mgr_.get());
+        HRESULT hr = mgr->getThreadManager()->SetFocus(doc_mgr_.get());
         if (FAILED(hr)) {
-            Log::e(L"InputConnection", L"mount() failed.\n");
+            DLOG(Log::ERR) << "mount() failed.";
             return false;
         }
 
@@ -99,7 +100,7 @@ namespace ukive {
 
         HRESULT hr = tsfMgr->getThreadManager()->SetFocus(nullptr);
         if (FAILED(hr)) {
-            Log::e(L"InputConnection", L"unmount() failed.\n");
+            DLOG(Log::ERR) << "unmount() failed.";
             return false;
         }
 
@@ -113,7 +114,7 @@ namespace ukive {
 
         HRESULT hr = comp_service_->TerminateComposition(nullptr);
         if (FAILED(hr)) {
-            Log::e(L"InputConnection", L"terminateComposition() failed.\n");
+            DLOG(Log::ERR) << "terminateComposition() failed.";
             return false;
         }
 
@@ -146,7 +147,7 @@ namespace ukive {
         text_view_->onEndProcess();
     }
 
-    bool InputConnection::isReadOnly() {
+    bool InputConnection::isReadOnly() const {
         return !text_view_->isEditable();
     }
 
@@ -259,24 +260,41 @@ namespace ukive {
         LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange)
     {
         switch (dwFlags) {
-        case 0:
-            *pacpStart = text_view_->getSelectionStart();
-            *pacpEnd = text_view_->getSelectionEnd();
-            break;
+        case 0: {
+            int sel_start = text_view_->getSelectionStart();
+            int sel_end = text_view_->getSelectionEnd();
 
-        case TF_IAS_NOQUERY:
-            pacpStart = 0;
-            pacpEnd = 0;
+            *pacpStart = sel_start;
+            *pacpEnd = sel_end;
+
+            pChange->acpStart = sel_start;
+            pChange->acpOldEnd = sel_end;
+            pChange->acpNewEnd = sel_start + (text.length() - (sel_end - sel_start));
             break;
+        }
+
+        case TF_IAS_NOQUERY: {
+            int sel_start = text_view_->getSelectionStart();
+            int sel_end = text_view_->getSelectionEnd();
+
+            pChange->acpStart = sel_start;
+            pChange->acpOldEnd = sel_end;
+            pChange->acpNewEnd = sel_end;
+            break;
+        }
 
         case TF_IAS_QUERYONLY:
             *pacpStart = text_view_->getSelectionStart();
             *pacpEnd = text_view_->getSelectionEnd();
             break;
+
+        default:
+            DCHECK(false);
+            break;
         }
     }
 
-    HWND InputConnection::getWindowHandle() {
+    HWND InputConnection::getWindowHandle() const {
         return text_view_->getWindow()->getHandle();
     }
 

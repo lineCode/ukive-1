@@ -20,8 +20,8 @@ namespace ukive {
         HRESULT init();
         void close();
 
-        TfClientId getClientId();
-        ComPtr<ITfThreadMgr> getThreadManager();
+        TfClientId getClientId() const;
+        ComPtr<ITfThreadMgr> getThreadManager() const;
 
         HRESULT setupSinks();
         HRESULT releaseSinks();
@@ -46,7 +46,7 @@ namespace ukive {
     class TsfSink : public ITfInputProcessorProfileActivationSink, public ITfCompartmentEventSink {
     public:
         TsfSink(TsfManager* tsfMgr);
-        ~TsfSink();
+        virtual ~TsfSink();
 
         // ITfInputProcessorProfileActivationSink
         // Notification for keyboard input locale change

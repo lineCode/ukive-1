@@ -9,7 +9,7 @@ namespace ukive {
         ComPtr()
             :ptr_(nullptr) {}
 
-        ComPtr(T* real)
+        explicit ComPtr(T* real)
             :ptr_(real) {}
 
         ComPtr(const ComPtr& rhs) {
@@ -26,7 +26,7 @@ namespace ukive {
 
         ComPtr& operator =(const ComPtr& rhs) {
             //防止自身给自身赋值。
-            if (this == (ComPtr*)(&(int&)rhs)) {
+            if (this == &rhs) {
                 return *this;
             }
 
@@ -55,7 +55,7 @@ namespace ukive {
             return *this;
         }
 
-        T* operator ->() {
+        T* operator ->() const {
             return ptr_;
         }
 
@@ -63,12 +63,20 @@ namespace ukive {
             return &ptr_;
         }
 
-        bool operator ==(std::nullptr_t) const {
+        bool operator ==(nullptr_t) const {
             return ptr_ == nullptr;
         }
 
-        bool operator !=(std::nullptr_t) const {
+        bool operator ==(const ComPtr<T>& rhs) const {
+            return ptr_ == rhs.ptr_;
+        }
+
+        bool operator !=(nullptr_t) const {
             return ptr_ != nullptr;
+        }
+
+        bool operator !=(const ComPtr<T>& rhs) const {
+            return ptr_ != rhs.ptr_;
         }
 
         explicit operator bool() const {
@@ -82,7 +90,7 @@ namespace ukive {
         template<class Ct>
         ComPtr<Ct> cast() {
             Ct* casted = nullptr;
-            ptr_->QueryInterface<Ct>(&casted);
+            ptr_->template QueryInterface<Ct>(&casted);
             return ComPtr<Ct>(casted);
         }
 

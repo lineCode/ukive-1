@@ -7,7 +7,7 @@ namespace ukive {
         WordBreaker::sLangInfoList;
 
     WordBreaker::WordBreaker()
-    {
+        : mLangInfoIndex(0) {
         mIsReady = false;
     }
 
@@ -64,7 +64,7 @@ namespace ukive {
                         langInfo->noiseFile = noiseFile;
                     }
 
-                    delete noiseFile;
+                    delete[] noiseFile;
                 }
 
                 if (::RegGetValueW(
@@ -82,7 +82,7 @@ namespace ukive {
                         langInfo->stemmerClass = stemmerClass;
                     }
 
-                    delete stemmerClass;
+                    delete[] stemmerClass;
                 }
 
                 if (::RegGetValueW(
@@ -103,7 +103,7 @@ namespace ukive {
                     else
                         canPushBack = false;
 
-                    delete wBreakerClass;
+                    delete[] wBreakerClass;
                 }
 
                 if (canPushBack)
@@ -162,7 +162,7 @@ namespace ukive {
         wchar_t *buffer = new wchar_t[LOCALE_NAME_MAX_LENGTH];
         if (::GetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH) == 0)
         {
-            delete buffer;
+            delete[] buffer;
             return false;
         }
 
@@ -350,45 +350,37 @@ namespace ukive {
         return S_OK;
     }
 
-    ULONG STDMETHODCALLTYPE WordStoreSink::AddRef()
-    {
+    ULONG STDMETHODCALLTYPE WordStoreSink::AddRef() {
         return InterlockedIncrement(&ref_count_);
     }
 
-    ULONG STDMETHODCALLTYPE WordStoreSink::Release()
-    {
-        LONG cr = InterlockedDecrement(&ref_count_);
-
-        if (ref_count_ == 0)
+    ULONG STDMETHODCALLTYPE WordStoreSink::Release() {
+        auto cr = InterlockedDecrement(&ref_count_);
+        if (cr == 0) {
             delete this;
+        }
 
         return cr;
     }
 
     HRESULT STDMETHODCALLTYPE WordStoreSink::QueryInterface(
-        REFIID riid, void **ppvObject)
-    {
-        if (ppvObject == nullptr)
-            return E_INVALIDARG;
+        REFIID riid, void** ppvObject) {
 
-        *ppvObject = nullptr;
+        if (!ppvObject) {
+            return E_POINTER;
+        }
 
-        if (IsEqualIID(riid, IID_IUnknown))
-        {
+        if (IsEqualIID(riid, IID_IUnknown)) {
             *ppvObject = reinterpret_cast<IUnknown*>(this);
-        }
-        else if (IsEqualIID(riid, __uuidof(IWordSink)))
-        {
-            *ppvObject = (IWordSink*)this;
-        }
-
-        if (*ppvObject)
-        {
-            AddRef();
-            return S_OK;
+        } else if (IsEqualIID(riid, __uuidof(IWordSink))) {
+            *ppvObject = static_cast<IWordSink*>(this);
+        } else {
+            *ppvObject = nullptr;
+            return E_NOINTERFACE;
         }
 
-        return E_NOINTERFACE;
+        AddRef();
+        return S_OK;
     }
 
 }

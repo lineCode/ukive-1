@@ -7,6 +7,8 @@
 #include <memory>
 #include <queue>
 
+#include "ukive/utils/com_ptr.h"
+
 
 namespace ukive {
 
@@ -16,7 +18,7 @@ namespace ukive {
     {
     public:
         TsfEditor(TsViewCookie tvc);
-        ~TsfEditor();
+        virtual ~TsfEditor();
 
         void setInputConnection(InputConnection* ic);
 
@@ -26,30 +28,18 @@ namespace ukive {
         void notifyStatusChanged(DWORD flags);
         void notifyAttrsChanged(long start, long end, unsigned long attrsCount, const TS_ATTRID* attrs);
 
-        bool hasReadOnlyLock();
-        bool hasReadWriteLock();
+        bool hasReadOnlyLock() const;
+        bool hasReadWriteLock() const;
 
         //ITextStoreACP methods.
         STDMETHODIMP AdviseSink(REFIID riid, IUnknown* punk, DWORD dwMask) override;
         STDMETHODIMP UnadviseSink(IUnknown* punk) override;
-
-        //This method is called by the TSF manager to provide a document lock in order to modify the document.
-        //This method calls the ITextStoreACPSink::OnLockGranted method to create the document lock.
         STDMETHODIMP RequestLock(DWORD dwLockFlags, HRESULT* phrSession) override;
 
-        //This method obtains the document status.
-        //The document status is returned through the TS_STATUS structure.
         STDMETHODIMP GetStatus(TS_STATUS* pdcs) override;
-
-        //This method determines whether the specified start and end character positions are valid.
-        //Use this method to adjust an edit to a document before executing the edit.
-        //The method must not return values outside the range of the document.
         STDMETHODIMP QueryInsert(
             LONG acpTestStart, LONG acpTestEnd, ULONG cch,
             LONG* pacpResultStart, LONG* pacpResultEnd) override;
-
-        //This method returns the character position of a text selection in a document.
-        //This method supports multiple text selections. The caller must have a read-only lock on the document before calling this method.
         STDMETHODIMP GetSelection(
             ULONG ulIndex, ULONG ulCount,
             TS_SELECTION_ACP* pSelection, ULONG* pcFetched) override;
@@ -103,8 +93,8 @@ namespace ukive {
 
     private:
         struct SinkRecord {
-            IUnknown* punk_id;
-            ITextStoreACPSink* sink;
+            ComPtr<IUnknown> punk_id;
+            ComPtr<ITextStoreACPSink> sink;
             DWORD mask;
         };
 

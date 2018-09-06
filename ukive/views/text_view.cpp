@@ -215,13 +215,13 @@ namespace ukive {
     }
 
 
-    float TextView::getTextWidth() {
+    float TextView::getTextWidth() const {
         DWRITE_TEXT_METRICS metrics;
         mTextLayout->GetMetrics(&metrics);
         return metrics.width;
     }
 
-    float TextView::getTextHeight() {
+    float TextView::getTextHeight() const {
         DWRITE_TEXT_METRICS metrics;
         mTextLayout->GetMetrics(&metrics);
         return metrics.height;
@@ -815,15 +815,15 @@ namespace ukive {
     }
 
 
-    bool TextView::isAutoWrap() {
+    bool TextView::isAutoWrap() const {
         return mIsAutoWrap;
     }
 
-    bool TextView::isEditable() {
+    bool TextView::isEditable() const {
         return mIsEditable;
     }
 
-    bool TextView::isSelectable() {
+    bool TextView::isSelectable() const {
         return mIsSelectable;
     }
 
@@ -942,15 +942,15 @@ namespace ukive {
     }
 
 
-    std::wstring TextView::getText() {
+    string16 TextView::getText() const {
         return mBaseText->toString();
     }
 
-    Editable* TextView::getEditable() {
+    Editable* TextView::getEditable() const {
         return mBaseText;
     }
 
-    float TextView::getTextSize() {
+    float TextView::getTextSize() const {
         return mTextSize;
     }
 
@@ -965,22 +965,20 @@ namespace ukive {
 
     void TextView::drawSelection(unsigned int start, unsigned int end) {
         UINT hitTextMetricsCount = 0;
-        DWRITE_HIT_TEST_METRICS* hitTextMetrics;
-
         if (end - start <= 0) {
             return;
         }
 
         mTextLayout->HitTestTextRange(
             start, end - start,
-            0.f, 0.f, 0, 0,
+            0.f, 0.f, nullptr, 0,
             &hitTextMetricsCount);
 
         if (hitTextMetricsCount < 1) {
             return;
         }
 
-        hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
+        auto hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
         mTextLayout->HitTestTextRange(
             start, end - start,
             0.f, 0.f,
@@ -1018,29 +1016,29 @@ namespace ukive {
             mSelectionList.push_back(std::shared_ptr<SelectionBlock>(block));
         }
 
-        delete hitTextMetrics;
+        delete[] hitTextMetrics;
 
         invalidate();
     }
 
-    std::wstring TextView::getSelection() {
+    std::wstring TextView::getSelection() const {
         return mBaseText->getSelection();
     }
 
-    int TextView::getSelectionStart() {
+    int TextView::getSelectionStart() const {
         return mBaseText->getSelectionStart();
     }
 
-    int TextView::getSelectionEnd() {
+    int TextView::getSelectionEnd() const {
         return mBaseText->getSelectionEnd();
     }
 
-    bool TextView::hasSelection() {
+    bool TextView::hasSelection() const {
         return mBaseText->hasSelection();
     }
 
 
-    uint32_t TextView::getHitTextPosition(float textX, float textY) {
+    uint32_t TextView::getHitTextPosition(float textX, float textY) const {
         BOOL isInside;
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
@@ -1051,7 +1049,7 @@ namespace ukive {
         return metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
     }
 
-    bool TextView::isHitText(float textX, float textY, uint32_t* hitPos) {
+    bool TextView::isHitText(float textX, float textY, uint32_t* hitPos) const {
         BOOL isInside;
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
@@ -1068,7 +1066,7 @@ namespace ukive {
 
     bool TextView::isHitText(
         float textX, float textY,
-        uint32_t position, uint32_t length, uint32_t* hitPos) {
+        uint32_t position, uint32_t length, uint32_t* hitPos) const {
         BOOL isInside;
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
@@ -1090,7 +1088,7 @@ namespace ukive {
         return false;
     }
 
-    RectF TextView::getSelectionBound(unsigned int start, unsigned int end) {
+    RectF TextView::getSelectionBound(unsigned int start, unsigned int end) const {
         if (end < start) {
             return RectF();
         }
@@ -1110,7 +1108,6 @@ namespace ukive {
             bound.bottom = pointY + metrics.height;
         } else {
             UINT hitTextMetricsCount = 0;
-            DWRITE_HIT_TEST_METRICS* hitTextMetrics;
 
             mTextLayout->HitTestTextRange(
                 start, end - start,
@@ -1122,7 +1119,7 @@ namespace ukive {
                 return RectF();
             }
 
-            hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
+            auto hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
             mTextLayout->HitTestTextRange(
                 start, end - start,
                 0.f, 0.f,
@@ -1243,7 +1240,7 @@ namespace ukive {
         case Span::EFFECT:
             if (action == SpanChange::ADD) {
                 TextDrawingEffect* tdEffect = new TextDrawingEffect();
-                tdEffect->effect_span_ = (EffectSpan*)span;
+                tdEffect->effect_span_ = reinterpret_cast<EffectSpan*>(span);
 
                 mTextLayout->SetDrawingEffect(tdEffect, range);
             } else if (action == SpanChange::REMOVE) {
@@ -1260,15 +1257,15 @@ namespace ukive {
     }
 
 
-    bool TextView::canCut() {
+    bool TextView::canCut() const {
         return mIsEditable && mBaseText->hasSelection();
     }
 
-    bool TextView::canCopy() {
+    bool TextView::canCopy() const {
         return mBaseText->hasSelection();
     }
 
-    bool TextView::canPaste() {
+    bool TextView::canPaste() const {
         if (mIsEditable) {
             std::wstring content = ClipboardManager::getFromClipboard();
             return !content.empty();
@@ -1276,7 +1273,7 @@ namespace ukive {
         return false;
     }
 
-    bool TextView::canSelectAll() {
+    bool TextView::canSelectAll() const {
         if (mBaseText->length() == 0) {
             return false;
         }

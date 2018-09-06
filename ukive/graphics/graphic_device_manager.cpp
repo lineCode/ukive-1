@@ -121,9 +121,10 @@ namespace ukive {
             D3D_FEATURE_LEVEL_10_0
         };
 
-        HRESULT hr = ::D3D11CreateDevice(0,
+        HRESULT hr = ::D3D11CreateDevice(
+            nullptr,
             D3D_DRIVER_TYPE_HARDWARE,
-            0, D3D11_CREATE_DEVICE_BGRA_SUPPORT,
+            nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT,
             featureLevel, ARRAYSIZE(featureLevel), D3D11_SDK_VERSION,
             &d3d_device_, nullptr, &d3d_devicecontext_);
         if (FAILED(hr)) {
@@ -146,35 +147,35 @@ namespace ukive {
     }
 
 
-    ComPtr<IDXGIOutput> GraphicDeviceManager::getCurOutput() {
+    ComPtr<IDXGIOutput> GraphicDeviceManager::getCurOutput() const {
         return cur_output_;
     }
 
-    ComPtr<IDXGIAdapter> GraphicDeviceManager::getCurAdapter() {
+    ComPtr<IDXGIAdapter> GraphicDeviceManager::getCurAdapter() const {
         return cur_adapter_;
     }
 
-    ComPtr<ID2D1Factory> GraphicDeviceManager::getD2DFactory() {
+    ComPtr<ID2D1Factory> GraphicDeviceManager::getD2DFactory() const {
         return d2d_factory_;
     }
 
-    ComPtr<IDWriteFactory> GraphicDeviceManager::getDWriteFactory() {
+    ComPtr<IDWriteFactory> GraphicDeviceManager::getDWriteFactory() const {
         return dwrite_factory_;
     }
 
-    ComPtr<IDXGIFactory> GraphicDeviceManager::getDXGIFactory() {
+    ComPtr<IDXGIFactory> GraphicDeviceManager::getDXGIFactory() const {
         return dxgi_factory_;
     }
 
-    ComPtr<IDXGIDevice> GraphicDeviceManager::getDXGIDevice() {
+    ComPtr<IDXGIDevice> GraphicDeviceManager::getDXGIDevice() const {
         return dxgi_device_;
     }
 
-    ComPtr<ID3D11Device> GraphicDeviceManager::getD3DDevice() {
+    ComPtr<ID3D11Device> GraphicDeviceManager::getD3DDevice() const {
         return d3d_device_;
     }
 
-    ComPtr<ID3D11DeviceContext> GraphicDeviceManager::getD3DDeviceContext() {
+    ComPtr<ID3D11DeviceContext> GraphicDeviceManager::getD3DDeviceContext() const {
         return d3d_devicecontext_;
     }
 

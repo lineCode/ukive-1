@@ -14,7 +14,10 @@ namespace ukive {
 
     class Editable {
     public:
-        struct EditWatcher {
+        class EditWatcher {
+        public:
+            virtual ~EditWatcher() = default;
+
             enum SpanChange {
                 ADD,
                 REMOVE,
@@ -36,7 +39,7 @@ namespace ukive {
         Editable(const string16& text);
         ~Editable();
 
-        uint32_t length();
+        uint32_t length() const;
 
         void append(const string16& text);
         void insert(const string16& text, uint32_t position);
@@ -57,19 +60,19 @@ namespace ukive {
         void setSelectionForceNotify(uint32_t selection);
         void setSelectionForceNotify(uint32_t start, uint32_t end);
 
-        uint32_t getSelectionStart();
-        uint32_t getSelectionEnd();
-        bool hasSelection();
-        string16 getSelection();
+        uint32_t getSelectionStart() const;
+        uint32_t getSelectionEnd() const;
+        bool hasSelection() const;
+        string16 getSelection() const;
 
-        wchar_t at(size_t pos);
-        string16 toString();
+        wchar_t at(size_t pos) const;
+        string16 toString() const;
 
         void addSpan(Span* span);
         void removeSpan(std::size_t index);
         void removeAllSpan();
         Span* getSpan(std::size_t index);
-        std::size_t getSpanCount();
+        std::size_t getSpanCount() const;
 
         void addEditWatcher(EditWatcher* watcher);
         void removeEditWatcher(EditWatcher* watcher);

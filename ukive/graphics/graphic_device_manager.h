@@ -1,7 +1,6 @@
 #ifndef UKIVE_GRAPHICS_GRAPHIC_DEVICE_MANAGER_H_
 #define UKIVE_GRAPHICS_GRAPHIC_DEVICE_MANAGER_H_
 
-#include <Windows.h>
 #include <d2d1.h>
 #include <dwrite.h>
 #include <d3d11.h>
@@ -20,15 +19,15 @@ namespace ukive {
 
         void EnumSystemFonts();
 
-        ComPtr<IDXGIOutput> getCurOutput();
-        ComPtr<IDXGIAdapter> getCurAdapter();
-        ComPtr<ID2D1Factory> getD2DFactory();
-        ComPtr<IDWriteFactory> getDWriteFactory();
-        ComPtr<IDXGIFactory> getDXGIFactory();
+        ComPtr<IDXGIOutput> getCurOutput() const;
+        ComPtr<IDXGIAdapter> getCurAdapter() const;
+        ComPtr<ID2D1Factory> getD2DFactory() const;
+        ComPtr<IDWriteFactory> getDWriteFactory() const;
+        ComPtr<IDXGIFactory> getDXGIFactory() const;
 
-        ComPtr<IDXGIDevice> getDXGIDevice();
-        ComPtr<ID3D11Device> getD3DDevice();
-        ComPtr<ID3D11DeviceContext> getD3DDeviceContext();
+        ComPtr<IDXGIDevice> getDXGIDevice() const;
+        ComPtr<ID3D11Device> getD3DDevice() const;
+        ComPtr<ID3D11DeviceContext> getD3DDeviceContext() const;
 
     private:
         void initDXPersistance();

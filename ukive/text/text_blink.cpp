@@ -10,18 +10,17 @@
 namespace ukive {
 
     TextBlink::TextBlink(View* v)
-        :color_(Color::Black),
-        target_view_(v),
+        :target_view_(v),
         is_located_(false),
         is_cancelled_(true),
-        blink_mask_(false) {
+        blink_mask_(false),
+        color_(Color::Black) {
 
         blink_cycler_ = new Cycler();
         thickness_ = v->getWindow()->dpToPx(2);
     }
 
-    TextBlink::~TextBlink()
-    {
+    TextBlink::~TextBlink() {
         is_cancelled_ = true;
         blink_cycler_->removeCallbacks(this);
         delete blink_cycler_;
@@ -103,19 +102,17 @@ namespace ukive {
         thickness_ = thickness;
     }
 
-
-    bool TextBlink::isShowing() {
+    bool TextBlink::isShowing() const {
         return !is_cancelled_;
     }
 
-    Color TextBlink::getColor() {
+    Color TextBlink::getColor() const {
         return color_;
     }
 
-    float TextBlink::getThickness() {
+    float TextBlink::getThickness() const {
         return thickness_;
     }
-
 
     void TextBlink::run() {
         if (!is_cancelled_) {

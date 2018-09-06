@@ -35,7 +35,7 @@ namespace ukive {
         void onBeginProcess();
         void onEndProcess();
 
-        bool isReadOnly();
+        bool isReadOnly() const;
         void determineInsert(
             long start, long end, unsigned long repLength,
             long* resStart, long* resEnd);
@@ -58,7 +58,7 @@ namespace ukive {
             DWORD dwFlags, std::wstring text,
             LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange);
 
-        HWND getWindowHandle();
+        HWND getWindowHandle() const;
 
     private:
         TextView* text_view_;

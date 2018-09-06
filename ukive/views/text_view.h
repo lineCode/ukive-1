@@ -36,9 +36,9 @@ namespace ukive {
         void setIsEditable(bool editable);
         void setIsSelectable(bool selectable);
 
-        bool isAutoWrap();
-        bool isEditable();
-        bool isSelectable();
+        bool isAutoWrap() const;
+        bool isEditable() const;
+        bool isSelectable() const;
 
         void setText(const string16& text);
         void setTextSize(int size);
@@ -50,22 +50,22 @@ namespace ukive {
         void setFontFamilyName(const string16& font);
         void setLineSpacing(bool uniform, float spacingMultiple);
 
-        string16 getText();
-        Editable* getEditable();
-        float getTextSize();
+        string16 getText() const;
+        Editable* getEditable() const;
+        float getTextSize() const;
 
         void setSelection(unsigned int position);
         void setSelection(unsigned int start, unsigned int end);
         void drawSelection(unsigned int start, unsigned int end);
-        string16 getSelection();
-        int getSelectionStart();
-        int getSelectionEnd();
-        bool hasSelection();
+        string16 getSelection() const;
+        int getSelectionStart() const;
+        int getSelectionEnd() const;
+        bool hasSelection() const;
 
-        uint32_t getHitTextPosition(float textX, float textY);
-        bool isHitText(float textX, float textY, uint32_t* hitPos = nullptr);
-        bool isHitText(float textX, float textY, uint32_t position, uint32_t length, uint32_t* hitPos = nullptr);
-        RectF getSelectionBound(unsigned int start, unsigned int end);
+        uint32_t getHitTextPosition(float textX, float textY) const;
+        bool isHitText(float textX, float textY, uint32_t* hitPos = nullptr) const;
+        bool isHitText(float textX, float textY, uint32_t position, uint32_t length, uint32_t* hitPos = nullptr) const;
+        RectF getSelectionBound(unsigned int start, unsigned int end) const;
 
         void computeVisibleRegion(RectF* region);
 
@@ -115,8 +115,8 @@ namespace ukive {
 
         void scrollToFit(bool considerSelection);
 
-        float getTextWidth();
-        float getTextHeight();
+        float getTextWidth() const;
+        float getTextHeight() const;
 
         bool getLineInfo(
             uint32_t position,
@@ -131,10 +131,10 @@ namespace ukive {
         void makeNewTextFormat();
         void makeNewTextLayout(float maxWidth, float maxHeight, bool autoWrap);
 
-        bool canCut();
-        bool canCopy();
-        bool canPaste();
-        bool canSelectAll();
+        bool canCut() const;
+        bool canCopy() const;
+        bool canPaste() const;
+        bool canSelectAll() const;
 
         void performCut();
         void performCopy();

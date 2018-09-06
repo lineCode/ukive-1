@@ -29,14 +29,14 @@ namespace ukive {
     STDMETHODIMP TextDrawingEffect::QueryInterface(
         REFIID riid, void** ppvObject) {
 
-        if (ppvObject == nullptr) {
+        if (!ppvObject) {
             return E_POINTER;
         }
 
         if (__uuidof(TextDrawingEffect) == riid) {
-            *ppvObject = this;
+            *ppvObject = static_cast<TextDrawingEffect*>(this);
         } else if (__uuidof(IUnknown) == riid) {
-            *ppvObject = this;
+            *ppvObject = reinterpret_cast<IUnknown*>(this);
         } else {
             *ppvObject = nullptr;
             return E_NOINTERFACE;

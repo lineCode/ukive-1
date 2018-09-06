@@ -27,11 +27,11 @@ namespace ukive {
         void setColor(const Color& color);
         void setThickness(float thickness);
 
-        bool isShowing();
-        Color getColor();
-        float getThickness();
+        bool isShowing() const;
+        Color getColor() const;
+        float getThickness() const;
 
-        void run();
+        void run() override;
 
     private:
         View* target_view_;

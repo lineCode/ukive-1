@@ -12,12 +12,12 @@
 namespace ukive {
 
     TextRenderer::TextRenderer(const ComPtr<ID2D1RenderTarget>& rt)
-        :rt_(rt),
-        ref_count_(1),
+        :ref_count_(1),
         opacity_(1.f),
         def_text_color_(Color::Black),
         def_underline_color_(Color::Black),
-        def_strikethrough_color_(Color::Black)  {
+        def_strikethrough_color_(Color::Black),
+        rt_(rt)  {
 
         D2D1_COLOR_F color = {
             def_text_color_.r,
@@ -298,11 +298,11 @@ namespace ukive {
         }
 
         if (__uuidof(IDWriteTextRenderer) == riid) {
-            *ppvObject = this;
+            *ppvObject = static_cast<IDWriteTextRenderer*>(this);
         } else if (__uuidof(IDWritePixelSnapping) == riid) {
-            *ppvObject = this;
+            *ppvObject = static_cast<IDWritePixelSnapping*>(this);
         } else if (__uuidof(IUnknown) == riid) {
-            *ppvObject = this;
+            *ppvObject = reinterpret_cast<IUnknown*>(this);
         } else {
             *ppvObject = nullptr;
             return E_NOINTERFACE;

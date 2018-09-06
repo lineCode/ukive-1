@@ -11,7 +11,6 @@ namespace ukive {
         sel_end_(0) {
     }
 
-
     Editable::~Editable() {
     }
 
@@ -65,7 +64,7 @@ namespace ukive {
     }
 
 
-    uint32_t Editable::length() {
+    uint32_t Editable::length() const {
         return text_.length();
     }
 
@@ -207,19 +206,19 @@ namespace ukive {
     }
 
 
-    uint32_t Editable::getSelectionStart() {
+    uint32_t Editable::getSelectionStart() const {
         return sel_beg_;
     }
 
-    uint32_t Editable::getSelectionEnd() {
+    uint32_t Editable::getSelectionEnd() const {
         return sel_end_;
     }
 
-    bool Editable::hasSelection() {
+    bool Editable::hasSelection() const {
         return sel_beg_ != sel_end_;
     }
 
-    string16 Editable::getSelection() {
+    string16 Editable::getSelection() const {
         if (sel_beg_ == sel_end_) {
             return L"";
         }
@@ -228,11 +227,11 @@ namespace ukive {
     }
 
 
-    wchar_t Editable::at(size_t pos) {
+    wchar_t Editable::at(size_t pos) const {
         return text_.at(pos);
     }
 
-    string16 Editable::toString() {
+    string16 Editable::toString() const {
         return text_;
     }
 
@@ -264,7 +263,7 @@ namespace ukive {
         return spans_.at(index).get();
     }
 
-    std::size_t Editable::getSpanCount() {
+    std::size_t Editable::getSpanCount() const {
         return spans_.size();
     }
 

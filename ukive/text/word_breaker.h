@@ -78,8 +78,7 @@ namespace ukive {
     class WordStoreSink : public IWordSink
     {
     public:
-        struct WordBlock
-        {
+        struct WordBlock {
             std::uint32_t start;
             std::wstring word;
         };
@@ -90,6 +89,7 @@ namespace ukive {
 
     public:
         WordStoreSink();
+        virtual ~WordStoreSink() = default;
 
         void clearWords();
         std::size_t getWordCount();

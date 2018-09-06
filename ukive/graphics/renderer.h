@@ -44,8 +44,8 @@ namespace ukive {
             const string16& text, IDWriteTextFormat* format,
             float max_width, float max_height);
 
-        ComPtr<IDXGISwapChain> getSwapChain();
-        ComPtr<ID2D1RenderTarget> getRenderTarget();
+        ComPtr<IDXGISwapChain> getSwapChain() const;
+        ComPtr<ID2D1RenderTarget> getRenderTarget() const;
 
     private:
         HRESULT createRenderResource();
@@ -58,6 +58,8 @@ namespace ukive {
         HRESULT resizeHardwareBRT();
         HRESULT resizeSoftwareBRT();
         HRESULT resizeSwapchainBRT();
+
+        void applyTextRenderingParams();
 
         HRESULT drawLayered();
         HRESULT drawSwapchain();

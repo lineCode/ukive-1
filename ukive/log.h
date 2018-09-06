@@ -53,6 +53,7 @@ namespace ukive {
         enum Severity {
             INFO,
             WARNING,
+            ERR,
             FATAL
         };
 

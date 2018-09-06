@@ -1,11 +1,8 @@
 ﻿#include "renderer.h"
 
-#include <fstream>
-
 #include "ukive/application.h"
 #include "ukive/graphics/swapchain_resize_notifier.h"
 #include "ukive/log.h"
-#include "ukive/utils/hresult_utils.h"
 #include "ukive/window/window.h"
 
 
@@ -153,6 +150,8 @@ namespace ukive {
 
         d2d_rt_ = createDXGIRenderTarget(back_buffer.get(), false);
 
+        //applyTextRenderingParams();
+
         return S_OK;
     }
 
@@ -201,6 +200,8 @@ namespace ukive {
 
         d2d_rt_ = createDXGIRenderTarget(back_buffer.get(), false);
 
+        //applyTextRenderingParams();
+
         for (auto notifier : sc_resize_notifiers_) {
             notifier->onPostSwapChainResize();
         }
@@ -208,11 +209,21 @@ namespace ukive {
         return S_OK;
     }
 
+    void Renderer::applyTextRenderingParams() {
+        auto gdm = Application::getGraphicDeviceManager();
+        ComPtr<IDWriteRenderingParams> params;
+        HRESULT hr = gdm->getDWriteFactory()->CreateCustomRenderingParams(
+            2.2f, 0.7f, 1.f, DWRITE_PIXEL_GEOMETRY_RGB, DWRITE_RENDERING_MODE_ALIASED, &params);
+        if (SUCCEEDED(hr) && params) {
+            d2d_rt_->SetTextRenderingParams(params.get());
+        }
+    }
+
     HRESULT Renderer::drawLayered() {
         auto gdi_rt = d2d_rt_.cast<ID2D1GdiInteropRenderTarget>();
         DCHECK(gdi_rt != nullptr);
 
-        HDC hdc = NULL;
+        HDC hdc = nullptr;
         HRESULT hr = gdi_rt->GetDC(D2D1_DC_INITIALIZE_MODE_COPY, &hdc);
         DCHECK(SUCCEEDED(hr));
 
@@ -222,7 +233,7 @@ namespace ukive {
         SIZE size = { wr.right - wr.left, wr.bottom - wr.top };
         POINT position = { wr.left, wr.top };
         BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-        BOOL ret = ::UpdateLayeredWindow(owner_window_->getHandle(), NULL, &position, &size, hdc, &zero,
+        BOOL ret = ::UpdateLayeredWindow(owner_window_->getHandle(), nullptr, &position, &size, hdc, &zero,
             RGB(0xFF, 0xFF, 0xFF), &blend, ULW_ALPHA);
         if (ret == 0) {
             int errorno = ::GetLastError();
@@ -407,11 +418,11 @@ namespace ukive {
         return layout;
     }
 
-    ComPtr<IDXGISwapChain> Renderer::getSwapChain() {
+    ComPtr<IDXGISwapChain> Renderer::getSwapChain() const {
         return swapchain_;
     }
 
-    ComPtr<ID2D1RenderTarget> Renderer::getRenderTarget() {
+    ComPtr<ID2D1RenderTarget> Renderer::getRenderTarget() const {
         return d2d_rt_;
     }
 

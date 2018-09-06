@@ -32,8 +32,8 @@ namespace ukive {
 
     Log::Log(const wchar_t* file_name, int line_number, Severity level)
         :level_(level),
-        file_name_(file_name),
-        line_number_(line_number) {
+        line_number_(line_number),
+        file_name_(file_name) {
     }
 
     Log::~Log() {
@@ -50,6 +50,9 @@ namespace ukive {
         case Severity::INFO:
             break;
         case Severity::WARNING:
+            debugBreak();
+            break;
+        case Severity::ERR:
             debugBreak();
             break;
         case Severity::FATAL:
