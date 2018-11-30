@@ -56,6 +56,9 @@
     <Filter Include="test\utils">
       <UniqueIdentifier>{24d0f31e-a6a8-4890-a9a0-d797d84f0145}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cyroneno">
+      <UniqueIdentifier>{77384204-9752-4b6b-a92b-12b15077fd82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -154,6 +157,39 @@
     <ClCompile Include="test\utils\json_unit_test.cpp">
       <Filter>test\utils</Filter>
     </ClCompile>
+    <ClCompile Include="cyroneno\cyroneno_window.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\color.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\image.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\matrix.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\vector.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\point.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\equations.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\surface.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\box.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\ray_tracer.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\scene.cpp">
+      <Filter>cyroneno</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resources\resource.h">
@@ -251,6 +287,42 @@
     </ClInclude>
     <ClInclude Include="test\utils\json_unit_test.h">
       <Filter>test\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\cyroneno_window.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\color.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\image.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\matrix.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\vector.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\point.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\equations.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\surface.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\box.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\ray_tracer.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\scene.h">
+      <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\ray_tracer_structs.h">
+      <Filter>cyroneno</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

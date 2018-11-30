@@ -229,6 +229,17 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="disassembler\pe_file.cpp" />
+    <ClCompile Include="cyroneno\box.cpp" />
+    <ClCompile Include="cyroneno\color.cpp" />
+    <ClCompile Include="cyroneno\cyroneno_window.cpp" />
+    <ClCompile Include="cyroneno\equations.cpp" />
+    <ClCompile Include="cyroneno\image.cpp" />
+    <ClCompile Include="cyroneno\matrix.cpp" />
+    <ClCompile Include="cyroneno\point.cpp" />
+    <ClCompile Include="cyroneno\ray_tracer.cpp" />
+    <ClCompile Include="cyroneno\scene.cpp" />
+    <ClCompile Include="cyroneno\surface.cpp" />
+    <ClCompile Include="cyroneno\vector.cpp" />
     <ClCompile Include="lod\lod_window.cpp" />
     <ClCompile Include="lod\qtree_node.cpp" />
     <ClCompile Include="lod\terrain_configure.cpp" />
@@ -255,6 +266,18 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </Manifest>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cyroneno\box.h" />
+    <ClInclude Include="cyroneno\color.h" />
+    <ClInclude Include="cyroneno\cyroneno_window.h" />
+    <ClInclude Include="cyroneno\equations.h" />
+    <ClInclude Include="cyroneno\image.h" />
+    <ClInclude Include="cyroneno\matrix.h" />
+    <ClInclude Include="cyroneno\point.h" />
+    <ClInclude Include="cyroneno\ray_tracer.h" />
+    <ClInclude Include="cyroneno\ray_tracer_structs.h" />
+    <ClInclude Include="cyroneno\scene.h" />
+    <ClInclude Include="cyroneno\surface.h" />
+    <ClInclude Include="cyroneno\vector.h" />
     <ClInclude Include="direct3d\assist_configure.h" />
     <ClInclude Include="direct3d\camera.h" />
     <ClInclude Include="direct3d\graph_creator.h" />

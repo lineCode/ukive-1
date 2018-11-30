@@ -12,6 +12,7 @@
 #include "shell/test/bitmap_research/bitmap_research_window.h"
 #include "shell/test/shadow/shadow_window.h"
 #include "shell/disassembler/disassembler_window.h"
+#include "shell/cyroneno/cyroneno_window.h"
 
 
 int APIENTRY wWinMain(
@@ -57,7 +58,7 @@ int APIENTRY wWinMain(
     shadow_window->center();
     shadow_window->show();*/
 
-    auto test_window = std::make_shared<shell::TestWindow>();
+    /*auto test_window = std::make_shared<shell::TestWindow>();
     test_window->setTitle(L"Test");
     test_window->setWidth(ukive::Application::dpToPx(600));
     test_window->setHeight(ukive::Application::dpToPx(600));
@@ -65,7 +66,7 @@ int APIENTRY wWinMain(
     test_window->setTranslucent(false);
     test_window->setBlurBehindEnabled(true);
     test_window->center();
-    test_window->show();
+    test_window->show();*/
 
     //auto thr_dimen_window = std::make_shared<shell::MotionWindow>();
     //thr_dimen_window->setTitle(L"3D Motion");
@@ -83,6 +84,14 @@ int APIENTRY wWinMain(
     ////dar_window->setTranslucent(true);
     //dar_window->center();
     //dar_window->show();
+	
+	auto cyro_window = std::make_shared<shell::CyronenoWindow>();
+    cyro_window->setTitle(L"3D Motion");
+    cyro_window->setWidth(ukive::Application::dpToPx(600));
+    cyro_window->setHeight(ukive::Application::dpToPx(600));
+    //cyro_window->setTranslucent(true);
+    cyro_window->center();
+    cyro_window->show();
 
     app->run();
 
