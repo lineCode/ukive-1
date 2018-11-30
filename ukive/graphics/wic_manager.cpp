@@ -8,7 +8,7 @@ namespace ukive {
     WICManager::WICManager() {
         HRESULT hr = CoCreateInstance(
             CLSID_WICImagingFactory1,
-            0,
+            nullptr,
             CLSCTX_INPROC_SERVER,
             IID_PPV_ARGS(&wic_factory_));
         if (FAILED(hr)) {
@@ -33,7 +33,7 @@ namespace ukive {
         return {};
     }
 
-    ComPtr<IWICBitmap> WICManager::createBitmap(unsigned int width, unsigned int height) {
+    ComPtr<IWICBitmap> WICManager::createBitmap(UINT width, UINT height) {
         ComPtr<IWICBitmap> bmp;
         HRESULT hr = wic_factory_->CreateBitmap(
             width, height, GUID_WICPixelFormat32bppPBGRA,
@@ -41,6 +41,10 @@ namespace ukive {
         DCHECK(SUCCEEDED(hr));
 
         return bmp;
+    }
+
+    ComPtr<IWICBitmap> WICManager::createBitmap(UINT width, UINT height, BYTE* bgra_buf) {
+        return {};
     }
 
     WICBitmaps WICManager::decodeFile(const string16& file_name) {
@@ -90,6 +94,74 @@ namespace ukive {
         }
 
         return ProcessDecoder(decoder);
+    }
+
+    bool WICManager::saveToPngFile(UINT width, UINT height, BYTE* bgra_buf, const string16& name) {
+        ComPtr<IWICStream> stream;
+        HRESULT hr = wic_factory_->CreateStream(&stream);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = stream->InitializeFromFilename(name.c_str(), GENERIC_WRITE);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        ComPtr<IWICBitmapEncoder> encoder;
+        hr = wic_factory_->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = encoder->Initialize(stream.get(), WICBitmapEncoderNoCache);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        ComPtr<IWICBitmapFrameEncode> frame;
+        hr = encoder->CreateNewFrame(&frame, nullptr);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = frame->Initialize(nullptr);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = frame->SetSize(width, height);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        WICPixelFormatGUID format = GUID_WICPixelFormat32bppBGRA;
+        hr = frame->SetPixelFormat(&format);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = IsEqualGUID(format, GUID_WICPixelFormat32bppBGRA) ? S_OK : E_FAIL;
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = frame->WritePixels(height, width*4, width*height*4, bgra_buf);
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = frame->Commit();
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        hr = encoder->Commit();
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -263,7 +335,7 @@ namespace ukive {
 
         for (UINT i = 0; i < frame_count; ++i) {
             ComPtr<IWICBitmapFrameDecode> frame_decoder;
-            HRESULT hr = decoder->GetFrame(i, &frame_decoder);
+            hr = decoder->GetFrame(i, &frame_decoder);
             if (FAILED(hr)) {
                 DCHECK(false);
                 continue;
@@ -313,7 +385,7 @@ namespace ukive {
             if (!bmps.frames.empty()) {
                 UINT width = 0;
                 UINT height = 0;
-                HRESULT hr = bmps.frames.front().bitmap->GetSize(&width, &height);
+                hr = bmps.frames.front().bitmap->GetSize(&width, &height);
                 if (SUCCEEDED(hr)) {
                     bmps.width = width;
                     bmps.height = height;

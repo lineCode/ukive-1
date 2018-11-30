@@ -22,7 +22,7 @@ namespace ukive {
         for (auto it = class_list_.begin(); it != class_list_.end(); ++it) {
             wchar_t *class_name = reinterpret_cast<wchar_t*>(it->atom);
             if (::UnregisterClass(class_name, Application::getModuleHandle()) == 0) {
-                Log::e(L"WindowClassManager", string16(L"failed to unregister class: ") + class_name);
+                LOG(Log::ERR) << "Failed to unregister class: " << class_name;
             }
         }
     }
@@ -46,7 +46,7 @@ namespace ukive {
             ++class_counter_;
         }
         else {
-            Log::e(L"WindowClassManager", L"Cannot create new window class: " + class_name);
+            LOG(Log::ERR) << "Cannot create new window class: " << class_name;
         }
 
         return atom;

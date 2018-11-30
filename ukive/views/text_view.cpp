@@ -37,56 +37,57 @@ namespace ukive {
 
     TextView::TextView(Window* wnd)
         :View(wnd),
-        mTextColor(Color::Black),
-        mSelectionBackgroundColor(Color::Blue200) {
+        text_color_(Color::Black),
+        sel_bg_color_(Color::Blue200)
+    {
         initTextView();
     }
 
     TextView::~TextView() {
-        delete mBaseText;
-        delete mTextBlink;
-        delete mTextKeyListener;
+        delete base_text_;
+        delete text_blink_;
+        delete text_key_listener_;
     }
 
 
     void TextView::initTextView() {
-        mTextSize = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
-        mIsAutoWrap = true;
-        mIsEditable = false;
-        mIsSelectable = false;
-        mIsMouseLeftKeyDown = false;
-        mIsMouseRightKeyDown = false;
-        mIsMouseLeftKeyDownOnText = false;
+        text_size_ = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
+        is_auto_wrap_ = true;
+        is_editable_ = false;
+        is_selectable_ = false;
+        is_mouse_left_key_down_ = false;
+        is_mouse_right_key_down_ = false;
+        is_mouse_left_key_down_on_text_ = false;
 
-        mLineSpacingMultiple = 1.f;
-        mLineSpacingMethod = DWRITE_LINE_SPACING_METHOD_DEFAULT;
+        line_spacing_multiple_ = 1.f;
+        line_spacing_method_ = DWRITE_LINE_SPACING_METHOD_DEFAULT;
 
-        mTextOffsetAtViewTop = 0;
+        text_offset_at_view_top_ = 0;
 
-        mProcessRef = 0;
-        mFontFamilyName = L"微软雅黑";
-        mTextActionMode = nullptr;
-        mTextAlignment = DWRITE_TEXT_ALIGNMENT_LEADING;
-        mParagraphAlignment = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
-        mTextWeight = DWRITE_FONT_WEIGHT_NORMAL;
-        mTextStyle = DWRITE_FONT_STYLE_NORMAL;
+        process_ref_ = 0;
+        font_family_name_ = L"微软雅黑";
+        text_action_mode_ = nullptr;
+        text_alignment_ = DWRITE_TEXT_ALIGNMENT_LEADING;
+        paragraph_alignment_ = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;
+        text_weight_ = DWRITE_FONT_WEIGHT_NORMAL;
+        text_style_ = DWRITE_FONT_STYLE_NORMAL;
 
-        mTextBlink = new TextBlink(this);
-        mTextBlink->setColor(Color::Blue500);
+        text_blink_ = new TextBlink(this);
+        text_blink_->setColor(Color::Blue500);
 
-        mInputConnection = new InputConnection(this);
-        mTextKeyListener = new TextKeyListener();
+        input_connection_ = new InputConnection(this);
+        text_key_listener_ = new TextKeyListener();
 
-        mBaseText = new Editable(L"");
-        mBaseText->addEditWatcher(this);
+        base_text_ = new Editable(L"");
+        base_text_->addEditWatcher(this);
 
         makeNewTextFormat();
         makeNewTextLayout(0.f, 0.f, false);
 
-        mBaseText->setSelection(0);
+        base_text_->setSelection(0);
         locateTextBlink(0);
 
-        setFocusable(mIsEditable | mIsSelectable);
+        setFocusable(is_editable_ | is_selectable_);
     }
 
 
@@ -110,18 +111,18 @@ namespace ukive {
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
 
-        mTextLayout->HitTestPoint(
+        text_layout_->HitTestPoint(
             0.f, getScrollY(), &isTrailingHit, &isInside, &metrics);
 
-        mTextOffsetAtViewTop = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
-        mVerticalOffset = getScrollY() - metrics.top;
+        text_offset_at_view_top_ = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
+        vertical_offset_ = getScrollY() - metrics.top;
     }
 
     int TextView::computeVerticalScrollOffsetFromTextOffset(uint32_t tOff) {
         uint32_t actual;
         DWRITE_HIT_TEST_METRICS hitMetrics;
 
-        mTextLayout->HitTestTextRange(
+        text_layout_->HitTestTextRange(
             tOff, 0, 0.f, 0.f, &hitMetrics, 1, &actual);
 
         return hitMetrics.top - getScrollY();
@@ -168,14 +169,14 @@ namespace ukive {
             if (considerSelection) {
                 uint32_t selection;
                 if (hasSelection()) {
-                    selection = mLastSelection;
+                    selection = last_sel_;
                 } else {
                     selection = getSelectionStart();
                 }
 
                 uint32_t actual;
                 DWRITE_HIT_TEST_METRICS metrics;
-                mTextLayout->HitTestTextRange(
+                text_layout_->HitTestTextRange(
                     selection, 0, 0.f, 0.f, &metrics, 1, &actual);
 
                 int lineTop = (int)metrics.top;
@@ -188,14 +189,14 @@ namespace ukive {
                     scrollOffset = lineBottom - (getScrollY() + contentHeight);
             } else {
                 //置于大小变化前的位置。
-                uint32_t prevTextOffset = mTextOffsetAtViewTop;
-                float prevVerticalOffset = mVerticalOffset;
+                uint32_t prevTextOffset = text_offset_at_view_top_;
+                float prevVerticalOffset = vertical_offset_;
 
                 BOOL isInside;
                 BOOL isTrailingHit;
                 DWRITE_HIT_TEST_METRICS metrics;
 
-                mTextLayout->HitTestPoint(
+                text_layout_->HitTestPoint(
                     0.f, (float)getScrollY(), &isTrailingHit, &isInside, &metrics);
                 uint32_t curTextOffset = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
 
@@ -217,13 +218,13 @@ namespace ukive {
 
     float TextView::getTextWidth() const {
         DWRITE_TEXT_METRICS metrics;
-        mTextLayout->GetMetrics(&metrics);
+        text_layout_->GetMetrics(&metrics);
         return metrics.width;
     }
 
     float TextView::getTextHeight() const {
         DWRITE_TEXT_METRICS metrics;
-        mTextLayout->GetMetrics(&metrics);
+        text_layout_->GetMetrics(&metrics);
         return metrics.height;
     }
 
@@ -231,10 +232,10 @@ namespace ukive {
         uint32_t position, uint32_t* line, float* height, uint32_t* count) {
 
         uint32_t lineCount;
-        HRESULT hr = mTextLayout->GetLineMetrics(nullptr, 0, &lineCount);
+        HRESULT hr = text_layout_->GetLineMetrics(nullptr, 0, &lineCount);
         if (hr == E_NOT_SUFFICIENT_BUFFER && lineCount > 0) {
             DWRITE_LINE_METRICS* lineMetrics = new DWRITE_LINE_METRICS[lineCount];
-            hr = mTextLayout->GetLineMetrics(lineMetrics, lineCount, &lineCount);
+            hr = text_layout_->GetLineMetrics(lineMetrics, lineCount, &lineCount);
             if (SUCCEEDED(hr)) {
                 uint32_t lineTextPosStart = 0;
                 for (uint32_t i = 0; i < lineCount; ++i) {
@@ -261,10 +262,10 @@ namespace ukive {
 
     bool TextView::getLineHeight(uint32_t line, float* height) {
         uint32_t lineCount;
-        HRESULT hr = mTextLayout->GetLineMetrics(nullptr, 0, &lineCount);
+        HRESULT hr = text_layout_->GetLineMetrics(nullptr, 0, &lineCount);
         if (hr == E_NOT_SUFFICIENT_BUFFER && lineCount > 0) {
             DWRITE_LINE_METRICS* lineMetrics = new DWRITE_LINE_METRICS[lineCount];
-            hr = mTextLayout->GetLineMetrics(lineMetrics, lineCount, &lineCount);
+            hr = text_layout_->GetLineMetrics(lineMetrics, lineCount, &lineCount);
             if (SUCCEEDED(hr)) {
                 if (line >= 0 && line < lineCount) {
                     *height = lineMetrics[line].height;
@@ -280,141 +281,141 @@ namespace ukive {
 
     void TextView::blinkNavigator(int keyCode) {
         if (keyCode == VK_LEFT) {
-            uint32_t start = mBaseText->getSelectionStart();
+            uint32_t start = base_text_->getSelectionStart();
 
-            if (mBaseText->hasSelection()) {
-                mBaseText->setSelection(start);
+            if (base_text_->hasSelection()) {
+                base_text_->setSelection(start);
             } else {
                 if (start > 0) {
                     size_t len = 1;
                     size_t index = start - 1;
-                    wchar_t prev = mBaseText->at(index);
+                    wchar_t prev = base_text_->at(index);
                     if (prev == L'\n' && index > 0) {
-                        prev = mBaseText->at(index - 1);
+                        prev = base_text_->at(index - 1);
                         if (prev == L'\r') {
                             len = 2;
                         }
                     }
 
-                    mBaseText->setSelection(start - len);
+                    base_text_->setSelection(start - len);
                 }
             }
         } else if (keyCode == VK_RIGHT) {
-            uint32_t end = mBaseText->getSelectionEnd();
+            uint32_t end = base_text_->getSelectionEnd();
 
-            if (mBaseText->hasSelection()) {
-                mBaseText->setSelection(end);
+            if (base_text_->hasSelection()) {
+                base_text_->setSelection(end);
             } else {
-                if (end < mBaseText->length()) {
+                if (end < base_text_->length()) {
                     size_t len = 1;
                     size_t index = end;
-                    wchar_t next = mBaseText->at(index);
-                    if (next == L'\r' && (++index) < mBaseText->length()) {
-                        next = mBaseText->at(index);
+                    wchar_t next = base_text_->at(index);
+                    if (next == L'\r' && (++index) < base_text_->length()) {
+                        next = base_text_->at(index);
                         if (next == L'\n') {
                             len = 2;
                         }
                     }
 
-                    mBaseText->setSelection(end + len);
+                    base_text_->setSelection(end + len);
                 }
             }
         } else if (keyCode == VK_UP) {
             uint32_t start;
-            if (hasSelection() && (mLastSelection == mBaseText->getSelectionStart()
-                || mLastSelection == mBaseText->getSelectionEnd())) {
-                start = mLastSelection;
+            if (hasSelection() && (last_sel_ == base_text_->getSelectionStart()
+                || last_sel_ == base_text_->getSelectionEnd())) {
+                start = last_sel_;
             } else {
-                start = mBaseText->getSelectionStart();
+                start = base_text_->getSelectionStart();
             }
 
             uint32_t actual;
             DWRITE_HIT_TEST_METRICS rangeMetrics;
-            mTextLayout->HitTestTextRange(
+            text_layout_->HitTestTextRange(
                 start, 0, 0.f, 0.f, &rangeMetrics, 1, &actual);
 
             BOOL isTrailing, isInside;
             DWRITE_HIT_TEST_METRICS pointMetrics;
-            mTextLayout->HitTestPoint(
+            text_layout_->HitTestPoint(
                 rangeMetrics.left, rangeMetrics.top - 1.f,
                 &isTrailing, &isInside, &pointMetrics);
 
-            mBaseText->setSelection(
+            base_text_->setSelection(
                 pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0));
         } else if (keyCode == VK_DOWN) {
             uint32_t start;
-            if (hasSelection() && (mLastSelection == mBaseText->getSelectionStart()
-                || mLastSelection == mBaseText->getSelectionEnd())) {
-                start = mLastSelection;
+            if (hasSelection() && (last_sel_ == base_text_->getSelectionStart()
+                || last_sel_ == base_text_->getSelectionEnd())) {
+                start = last_sel_;
             } else {
-                start = mBaseText->getSelectionStart();
+                start = base_text_->getSelectionStart();
             }
 
             uint32_t actual;
             DWRITE_HIT_TEST_METRICS rangeMetrics;
-            mTextLayout->HitTestTextRange(
+            text_layout_->HitTestTextRange(
                 start, 0, 0.f, 0.f, &rangeMetrics, 1, &actual);
 
             BOOL isTrailing, isInside;
             DWRITE_HIT_TEST_METRICS pointMetrics;
-            mTextLayout->HitTestPoint(
+            text_layout_->HitTestPoint(
                 rangeMetrics.left, rangeMetrics.top + rangeMetrics.height,
                 &isTrailing, &isInside, &pointMetrics);
 
-            mBaseText->setSelection(
+            base_text_->setSelection(
                 pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0));
         }
     }
 
 
     void TextView::makeNewTextFormat() {
-        mTextFormat.reset();
-        mTextFormat = ukive::Renderer::createTextFormat(
-            mFontFamilyName,
-            mTextSize,
+        text_format_.reset();
+        text_format_ = ukive::Renderer::createTextFormat(
+            font_family_name_,
+            text_size_,
             L"en-US");
     }
 
     void TextView::makeNewTextLayout(float maxWidth, float maxHeight, bool autoWrap) {
-        mTextLayout.reset();
+        text_layout_.reset();
 
         DWRITE_TEXT_RANGE range;
         range.startPosition = 0;
-        range.length = mBaseText->length();
+        range.length = base_text_->length();
 
-        mTextLayout = ukive::Renderer::createTextLayout(
-            mBaseText->toString(),
-            mTextFormat.get(),
+        text_layout_ = ukive::Renderer::createTextLayout(
+            base_text_->toString(),
+            text_format_.get(),
             maxWidth,
             maxHeight);
 
-        mTextLayout->SetLineSpacing(
-            mLineSpacingMethod,
-            mTextSize*mLineSpacingMultiple,
-            mTextSize*mLineSpacingMultiple*0.8f);
+        text_layout_->SetLineSpacing(
+            line_spacing_method_,
+            text_size_*line_spacing_multiple_,
+            text_size_*line_spacing_multiple_*0.8f);
 
-        mTextLayout->SetWordWrapping(
+        text_layout_->SetWordWrapping(
             autoWrap ? DWRITE_WORD_WRAPPING_EMERGENCY_BREAK : DWRITE_WORD_WRAPPING_NO_WRAP);
-        mTextLayout->SetTextAlignment(mTextAlignment);
-        mTextLayout->SetParagraphAlignment(mParagraphAlignment);
+        text_layout_->SetTextAlignment(text_alignment_);
+        text_layout_->SetParagraphAlignment(paragraph_alignment_);
 
-        mTextLayout->SetFontStyle(mTextStyle, range);
-        mTextLayout->SetFontWeight(mTextWeight, range);
+        text_layout_->SetFontStyle(text_style_, range);
+        text_layout_->SetFontWeight(text_weight_, range);
     }
 
 
     void TextView::locateTextBlink(int position) {
         DWRITE_HIT_TEST_METRICS hitMetrics;
 
-        if (mLineSpacingMethod == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
+        if (line_spacing_method_ == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
             UINT32 actual;
-            mTextLayout->HitTestTextRange(position, 0, 0.f, 0.f, &hitMetrics, 1, &actual);
+            text_layout_->HitTestTextRange(position, 0, 0.f, 0.f, &hitMetrics, 1, &actual);
         } else {
             float pointX, pointY;
-            mTextLayout->HitTestTextPosition(position, FALSE, &pointX, &pointY, &hitMetrics);
+            text_layout_->HitTestTextPosition(position, FALSE, &pointX, &pointY, &hitMetrics);
         }
 
-        mTextBlink->locate(hitMetrics.left, hitMetrics.top, hitMetrics.top + hitMetrics.height);
+        text_blink_->locate(hitMetrics.left, hitMetrics.top, hitMetrics.top + hitMetrics.height);
     }
 
     void TextView::locateTextBlink(float textX, float textY) {
@@ -424,11 +425,11 @@ namespace ukive {
 
 
     void TextView::onBeginProcess() {
-        ++mProcessRef;
+        ++process_ref_;
     }
 
     void TextView::onEndProcess() {
-        --mProcessRef;
+        --process_ref_;
     }
 
 
@@ -444,16 +445,16 @@ namespace ukive {
         View::onFocusChanged(getFocus);
 
         if (getFocus) {
-            if (mIsEditable) {
-                mTextBlink->show();
+            if (is_editable_) {
+                text_blink_->show();
             }
         } else {
-            if (mTextActionMode != nullptr) {
-                mTextActionMode->close();
+            if (text_action_mode_ != nullptr) {
+                text_action_mode_->close();
             }
 
-            mTextBlink->hide();
-            mBaseText->setSelection(mBaseText->getSelectionStart());
+            text_blink_->hide();
+            base_text_->setSelection(base_text_->getSelectionStart());
             invalidate();
         }
     }
@@ -463,13 +464,13 @@ namespace ukive {
 
         if (hasFocus()) {
             if (windowFocus) {
-                if (mIsEditable && !hasSelection()) {
-                    mTextBlink->show();
+                if (is_editable_ && !hasSelection()) {
+                    text_blink_->show();
                 }
             } else {
-                mTextBlink->hide();
-                if (mTextActionMode != nullptr) {
-                    mTextActionMode->close();
+                text_blink_->hide();
+                if (text_action_mode_ != nullptr) {
+                    text_action_mode_->close();
                 }
             }
         }
@@ -483,124 +484,129 @@ namespace ukive {
 
 
     void TextView::onDraw(Canvas* canvas) {
-        if (mIsSelectable) {
-            for (auto sel : mSelectionList) {
-                canvas->fillRect(sel->rect, mSelectionBackgroundColor);
+        if (is_selectable_) {
+            for (auto sel : sel_list_) {
+                canvas->fillRect(sel->rect, sel_bg_color_);
             }
         }
 
-        mTextBlink->draw(canvas);
+        text_blink_->draw(canvas);
+
+        Color text_color = text_color_;
+        if (!isEnabled()) {
+            text_color.a *= 0.5f;
+        }
 
         canvas->drawTextLayoutWithEffect(
-            this, 0.f, 0.f, mTextLayout.get(), mTextColor);
+            this, 0.f, 0.f, text_layout_.get(), text_color);
     }
 
-    void TextView::onMeasure(int width, int height, int widthSpec, int heightSpec) {
-        int finalWidth = 0;
-        int finalHeight = 0;
+    void TextView::onMeasure(int width, int height, int width_mode, int height_mode) {
+        int final_width = 0;
+        int final_height = 0;
 
-        int horizontalPadding = getPaddingLeft() + getPaddingRight();
-        int verticalPadding = getPaddingTop() + getPaddingBottom();
+        int hori_padding = getPaddingLeft() + getPaddingRight();
+        int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        switch (widthSpec) {
+        switch (width_mode) {
         case FIT: {
-            mTextLayout->SetMaxWidth(
-                static_cast<float>(width - horizontalPadding));
+            text_layout_->SetMaxWidth(
+                static_cast<float>(width - hori_padding));
 
-            finalWidth = std::min(
+            final_width = std::min(
                 static_cast<int>(
-                    std::ceil(getTextWidth() + mTextBlink->getThickness()))
-                + horizontalPadding, width);
+                    std::ceil(getTextWidth() + text_blink_->getThickness()))
+                + hori_padding, width);
 
-            finalWidth = std::max(finalWidth, getMinimumWidth());
+            final_width = std::max(final_width, getMinimumWidth());
 
-            if (width != finalWidth) {
-                mTextLayout->SetMaxWidth(
-                    static_cast<float>(finalWidth - horizontalPadding));
+            if (width != final_width) {
+                text_layout_->SetMaxWidth(
+                    static_cast<float>(final_width - hori_padding));
             }
             break;
         }
 
         case EXACTLY:
-            mTextLayout->SetMaxWidth(
-                static_cast<float>(width - horizontalPadding));
-            finalWidth = width;
+            text_layout_->SetMaxWidth(
+                static_cast<float>(width - hori_padding));
+            final_width = width;
             break;
 
         case UNKNOWN:
-            mTextLayout->SetMaxWidth(0.f);
-            mTextLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+            text_layout_->SetMaxWidth(0.f);
+            text_layout_->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 
-            finalWidth = static_cast<int>(
+            final_width = static_cast<int>(
                 std::ceil(getTextWidth()
-                    + mTextBlink->getThickness()))
-                + horizontalPadding;
-            finalWidth = std::max(finalWidth, getMinimumWidth());
+                    + text_blink_->getThickness()))
+                + hori_padding;
+            final_width = std::max(final_width, getMinimumWidth());
 
-            mTextLayout->SetMaxWidth(
-                static_cast<float>(finalWidth - horizontalPadding));
+            text_layout_->SetMaxWidth(
+                static_cast<float>(final_width - hori_padding));
             break;
         }
 
-        switch (heightSpec) {
+        switch (height_mode) {
         case FIT:
         {
-            mTextLayout->SetMaxHeight(
-                static_cast<float>(height - verticalPadding));
+            text_layout_->SetMaxHeight(
+                static_cast<float>(height - vert_padding));
 
-            finalHeight = std::min(
+            final_height = std::min(
                 static_cast<int>(std::ceil(getTextHeight()))
-                + verticalPadding, height);
+                + vert_padding, height);
 
-            finalHeight = std::max(finalHeight, getMinimumHeight());
+            final_height = std::max(final_height, getMinimumHeight());
 
-            if (finalHeight != height) {
-                mTextLayout->SetMaxHeight(
-                    static_cast<float>(finalHeight - verticalPadding));
+            if (final_height != height) {
+                text_layout_->SetMaxHeight(
+                    static_cast<float>(final_height - vert_padding));
             }
             break;
         }
 
         case EXACTLY:
-            mTextLayout->SetMaxHeight(
-                static_cast<float>(height - verticalPadding));
-            finalHeight = height;
+            text_layout_->SetMaxHeight(
+                static_cast<float>(height - vert_padding));
+            final_height = height;
             break;
 
         case UNKNOWN:
-            mTextLayout->SetMaxHeight(0.f);
+            text_layout_->SetMaxHeight(0.f);
 
-            finalHeight = static_cast<int>(std::ceil(getTextHeight())) + verticalPadding;
-            finalHeight = std::max(finalHeight, getMinimumHeight());
+            final_height = static_cast<int>(std::ceil(getTextHeight())) + vert_padding;
+            final_height = std::max(final_height, getMinimumHeight());
 
-            mTextLayout->SetMaxHeight(
-                static_cast<float>(finalHeight - verticalPadding));
+            text_layout_->SetMaxHeight(
+                static_cast<float>(final_height - vert_padding));
             break;
         }
 
-        setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredDimension(final_width, final_height);
     }
 
     void TextView::onLayout(
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom) {
-        if (mTextActionMode && changed) {
-            mTextActionMode->invalidatePosition();
+        if (text_action_mode_ && changed) {
+            text_action_mode_->invalidatePosition();
         }
     }
 
     void TextView::onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
-        int selStart = mBaseText->getSelectionStart();
-        int selEnd = mBaseText->getSelectionEnd();
+        int selStart = base_text_->getSelectionStart();
+        int selEnd = base_text_->getSelectionEnd();
 
-        if (selStart == selEnd && mIsEditable && mIsAutoWrap) {
+        if (selStart == selEnd && is_editable_ && is_auto_wrap_) {
             locateTextBlink(selStart);
-        } else if (selStart != selEnd && mIsSelectable && mIsAutoWrap) {
+        } else if (selStart != selEnd && is_selectable_ && is_auto_wrap_) {
             drawSelection(selStart, selEnd);
         }
 
-        if (hasFocus() && mIsEditable) {
-            mInputConnection->notifyTextLayoutChanged(TS_LC_CHANGE);
+        if (hasFocus() && is_editable_) {
+            input_connection_->notifyTextLayoutChanged(TS_LC_CHANGE);
         }
 
         scrollToFit(false);
@@ -618,7 +624,7 @@ namespace ukive {
 
         case InputEvent::EVM_SCROLL_ENTER:
         {
-            if (mIsSelectable)
+            if (is_selectable_)
                 setCurrentCursor(Cursor::IBEAM);
             return true;
         }
@@ -630,8 +636,8 @@ namespace ukive {
 
             if (e->getMouseKey() == InputEvent::MK_LEFT
                 || e->getMouseKey() == InputEvent::MK_RIGHT) {
-                if (mTextActionMode != nullptr) {
-                    mTextActionMode->close();
+                if (text_action_mode_ != nullptr) {
+                    text_action_mode_->close();
                 }
 
                 isMouseKeyDown = true;
@@ -639,24 +645,24 @@ namespace ukive {
                     e->getMouseX() - getPaddingLeft() + getScrollX(),
                     e->getMouseY() - getPaddingTop() + getScrollY());
 
-                if (mIsSelectable && isMouseKeyDownOnText) {
+                if (is_selectable_ && isMouseKeyDownOnText) {
                     setCurrentCursor(Cursor::IBEAM);
                 }
 
                 if (e->getMouseKey() == InputEvent::MK_LEFT) {
-                    mIsMouseLeftKeyDown = isMouseKeyDown;
-                    mIsMouseLeftKeyDownOnText = isMouseKeyDownOnText;
+                    is_mouse_left_key_down_ = isMouseKeyDown;
+                    is_mouse_left_key_down_on_text_ = isMouseKeyDownOnText;
                 } else if (e->getMouseKey() == InputEvent::MK_RIGHT) {
-                    mIsMouseRightKeyDown = isMouseKeyDown;
+                    is_mouse_right_key_down_ = isMouseKeyDown;
                     //mIsMouseRightKeyDownOnText = isMouseKeyDownOnText;
                 }
 
                 if (e->getMouseKey() != InputEvent::MK_RIGHT || !hasSelection()) {
-                    mFirstSelection = getHitTextPosition(
+                    first_sel_ = getHitTextPosition(
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
                         e->getMouseY() - getPaddingTop() + getScrollY());
 
-                    mBaseText->setSelection(mFirstSelection);
+                    base_text_->setSelection(first_sel_);
                 }
             }
             return true;
@@ -665,24 +671,24 @@ namespace ukive {
         case InputEvent::EVM_UP:
         {
             if (e->getMouseKey() == InputEvent::MK_LEFT) {
-                mIsMouseLeftKeyDown = false;
-                mIsMouseLeftKeyDownOnText = false;
+                is_mouse_left_key_down_ = false;
+                is_mouse_left_key_down_on_text_ = false;
 
-                if (mIsSelectable
+                if (is_selectable_
                     && (isHitText(
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
-                        e->getMouseY() - getPaddingTop() + getScrollY()) || mIsEditable))
+                        e->getMouseY() - getPaddingTop() + getScrollY()) || is_editable_))
                     setCurrentCursor(Cursor::IBEAM);
                 else {
                     setCurrentCursor(Cursor::ARROW);
                 }
             } else if (e->getMouseKey() == InputEvent::MK_RIGHT) {
-                mPrevX = e->getMouseX();
-                mPrevY = e->getMouseY();
-                mIsMouseRightKeyDown = false;
+                prev_x_ = e->getMouseX();
+                prev_y_ = e->getMouseY();
+                is_mouse_right_key_down_ = false;
 
-                if (mIsEditable || mIsSelectable) {
-                    mTextActionMode = getWindow()->startTextActionMode(this);
+                if (is_editable_ || is_selectable_) {
+                    text_action_mode_ = getWindow()->startTextActionMode(this);
                 }
             }
             return true;
@@ -690,13 +696,13 @@ namespace ukive {
 
         case InputEvent::EVM_MOVE:
         {
-            if (mIsMouseLeftKeyDown) {
-                unsigned int start = mFirstSelection;
+            if (is_mouse_left_key_down_) {
+                unsigned int start = first_sel_;
                 unsigned int end = getHitTextPosition(
                     e->getMouseX() - getPaddingLeft() + getScrollX(),
                     e->getMouseY() - getPaddingTop() + getScrollY());
 
-                mLastSelection = end;
+                last_sel_ = end;
 
                 if (start > end) {
                     unsigned int tmp = start;
@@ -704,12 +710,12 @@ namespace ukive {
                     end = tmp;
                 }
 
-                mBaseText->setSelection(start, end);
+                base_text_->setSelection(start, end);
             } else {
-                if (mIsSelectable
+                if (is_selectable_
                     && (isHitText(
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
-                        e->getMouseY() - getPaddingTop() + getScrollY()) || mIsEditable)) {
+                        e->getMouseY() - getPaddingTop() + getScrollY()) || is_editable_)) {
                     setCurrentCursor(Cursor::IBEAM);
                 } else {
                     setCurrentCursor(Cursor::ARROW);
@@ -720,12 +726,12 @@ namespace ukive {
 
         case InputEvent::EVM_WHEEL:
         {
-            int originDy = -mTextSize * e->getMouseWheel();
+            int originDy = -text_size_ * e->getMouseWheel();
 
-            if (mLineSpacingMethod == DWRITE_LINE_SPACING_METHOD_DEFAULT) {
-                originDy = -(int)mTextSize * e->getMouseWheel();
-            } else if (mLineSpacingMethod == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
-                originDy = -(int)(mTextSize * mLineSpacingMultiple) * e->getMouseWheel();
+            if (line_spacing_method_ == DWRITE_LINE_SPACING_METHOD_DEFAULT) {
+                originDy = -(int)text_size_ * e->getMouseWheel();
+            } else if (line_spacing_method_ == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
+                originDy = -(int)(text_size_ * line_spacing_multiple_) * e->getMouseWheel();
             }
 
             scrollBy(0, determineVerticalScroll(originDy * 3));
@@ -734,18 +740,18 @@ namespace ukive {
 
         case InputEvent::EVK_DOWN:
         {
-            mTextKeyListener->onKeyDown(
-                mBaseText, mIsEditable, mIsSelectable, e->getKeyboardKey());
-            if (mIsEditable && mIsSelectable) {
-                blinkNavigator(e->getKeyboardKey());
+            text_key_listener_->onKeyDown(
+                base_text_, is_editable_, is_selectable_, e->getKeyboardVirtualKey());
+            if (is_editable_ && is_selectable_) {
+                blinkNavigator(e->getKeyboardVirtualKey());
             }
             break;
         }
 
         case InputEvent::EVK_UP:
         {
-            mTextKeyListener->onKeyUp(
-                mBaseText, mIsEditable, mIsSelectable, e->getKeyboardKey());
+            text_key_listener_->onKeyUp(
+                base_text_, is_editable_, is_selectable_, e->getKeyboardVirtualKey());
             break;
         }
 
@@ -756,21 +762,21 @@ namespace ukive {
     }
 
     bool TextView::onCheckIsTextEditor() {
-        return mIsEditable;
+        return is_editable_;
     }
 
     InputConnection* TextView::onCreateInputConnection() {
-        return mInputConnection;
+        return input_connection_;
     }
 
 
     void TextView::autoWrap(bool enable) {
-        if (mIsAutoWrap == enable) {
+        if (is_auto_wrap_ == enable) {
             return;
         }
 
-        mIsAutoWrap = enable;
-        mTextLayout->SetWordWrapping(
+        is_auto_wrap_ = enable;
+        text_layout_->SetWordWrapping(
             enable ? DWRITE_WORD_WRAPPING_EMERGENCY_BREAK : DWRITE_WORD_WRAPPING_NO_WRAP);
 
         requestLayout();
@@ -778,37 +784,37 @@ namespace ukive {
     }
 
     void TextView::setIsEditable(bool editable) {
-        if (editable == mIsEditable) {
+        if (editable == is_editable_) {
             return;
         }
 
-        mIsEditable = editable;
+        is_editable_ = editable;
 
         if (editable) {
             setFocusable(true);
             if (hasFocus()) {
-                mTextBlink->show();
+                text_blink_->show();
             }
         } else {
-            setFocusable(mIsSelectable);
-            mTextBlink->hide();
+            setFocusable(is_selectable_);
+            text_blink_->hide();
         }
     }
 
     void TextView::setIsSelectable(bool selectable) {
-        if (selectable == mIsSelectable) {
+        if (selectable == is_selectable_) {
             return;
         }
 
-        mIsSelectable = selectable;
+        is_selectable_ = selectable;
 
         if (selectable) {
             setFocusable(true);
         } else {
-            setFocusable(mIsEditable);
+            setFocusable(is_editable_);
 
-            if (!mSelectionList.empty()) {
-                mSelectionList.clear();
+            if (!sel_list_.empty()) {
+                sel_list_.clear();
                 invalidate();
             }
         }
@@ -816,108 +822,108 @@ namespace ukive {
 
 
     bool TextView::isAutoWrap() const {
-        return mIsAutoWrap;
+        return is_auto_wrap_;
     }
 
     bool TextView::isEditable() const {
-        return mIsEditable;
+        return is_editable_;
     }
 
     bool TextView::isSelectable() const {
-        return mIsSelectable;
+        return is_selectable_;
     }
 
 
     void TextView::setText(const string16& text) {
-        mBaseText->replace(text, 0, mBaseText->length());
-        mBaseText->setSelection(0);
+        base_text_->replace(text, 0, base_text_->length());
+        base_text_->setSelection(0);
     }
 
     void TextView::setTextSize(int size) {
         size = int(std::round(getWindow()->dpToPx(size)));
-        if (size == mTextSize) {
+        if (size == text_size_) {
             return;
         }
 
-        mTextSize = size;
+        text_size_ = size;
 
         makeNewTextFormat();
         makeNewTextLayout(
-            mTextLayout->GetMaxWidth(),
-            mTextLayout->GetMaxHeight(), mIsAutoWrap);
+            text_layout_->GetMaxWidth(),
+            text_layout_->GetMaxHeight(), is_auto_wrap_);
 
         requestLayout();
         invalidate();
     }
 
     void TextView::setTextColor(Color color) {
-        mTextColor = color;
+        text_color_ = color;
         invalidate();
     }
 
     void TextView::setTextAlignment(DWRITE_TEXT_ALIGNMENT alignment) {
-        if (mTextAlignment == alignment) {
+        if (text_alignment_ == alignment) {
             return;
         }
 
-        mTextAlignment = alignment;
-        mTextLayout->SetTextAlignment(alignment);
+        text_alignment_ = alignment;
+        text_layout_->SetTextAlignment(alignment);
     }
 
     void TextView::setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment) {
-        if (mParagraphAlignment == alignment) {
+        if (paragraph_alignment_ == alignment) {
             return;
         }
 
-        mParagraphAlignment = alignment;
-        mTextLayout->SetParagraphAlignment(alignment);
+        paragraph_alignment_ = alignment;
+        text_layout_->SetParagraphAlignment(alignment);
     }
 
     void TextView::setTextStyle(DWRITE_FONT_STYLE style) {
-        if (mTextStyle == style) {
+        if (text_style_ == style) {
             return;
         }
 
-        mTextStyle = style;
+        text_style_ = style;
 
         DWRITE_TEXT_RANGE range;
         range.startPosition = 0;
-        range.length = mBaseText->length();
+        range.length = base_text_->length();
 
-        mTextLayout->SetFontStyle(mTextStyle, range);
+        text_layout_->SetFontStyle(text_style_, range);
 
         requestLayout();
         invalidate();
     }
 
     void TextView::setTextWeight(DWRITE_FONT_WEIGHT weight) {
-        if (mTextWeight == weight) {
+        if (text_weight_ == weight) {
             return;
         }
 
-        mTextWeight = weight;
+        text_weight_ = weight;
 
         DWRITE_TEXT_RANGE range;
         range.startPosition = 0;
-        range.length = mBaseText->length();
+        range.length = base_text_->length();
 
-        mTextLayout->SetFontWeight(mTextWeight, range);
+        text_layout_->SetFontWeight(text_weight_, range);
 
         requestLayout();
         invalidate();
     }
 
     void TextView::setFontFamilyName(const string16& font) {
-        if (mFontFamilyName == font) {
+        if (font_family_name_ == font) {
             return;
         }
 
-        mFontFamilyName = font;
+        font_family_name_ = font;
 
         makeNewTextFormat();
         makeNewTextLayout(
-            mTextLayout->GetMaxWidth(),
-            mTextLayout->GetMaxHeight(), mIsAutoWrap);
+            text_layout_->GetMaxWidth(),
+            text_layout_->GetMaxHeight(), is_auto_wrap_);
 
         requestLayout();
         invalidate();
@@ -925,17 +931,17 @@ namespace ukive {
 
     void TextView::setLineSpacing(bool uniform, float spacingMultiple) {
         if (uniform) {
-            mLineSpacingMethod = DWRITE_LINE_SPACING_METHOD_UNIFORM;
+            line_spacing_method_ = DWRITE_LINE_SPACING_METHOD_UNIFORM;
         } else {
-            mLineSpacingMethod = DWRITE_LINE_SPACING_METHOD_DEFAULT;
+            line_spacing_method_ = DWRITE_LINE_SPACING_METHOD_DEFAULT;
         }
 
-        mLineSpacingMultiple = spacingMultiple;
+        line_spacing_multiple_ = spacingMultiple;
 
-        mTextLayout->SetLineSpacing(
-            mLineSpacingMethod,
-            mTextSize*mLineSpacingMultiple,
-            mTextSize*mLineSpacingMultiple*0.8f);
+        text_layout_->SetLineSpacing(
+            line_spacing_method_,
+            text_size_*line_spacing_multiple_,
+            text_size_*line_spacing_multiple_*0.8f);
 
         requestLayout();
         invalidate();
@@ -943,24 +949,24 @@ namespace ukive {
 
 
     string16 TextView::getText() const {
-        return mBaseText->toString();
+        return base_text_->toString();
     }
 
     Editable* TextView::getEditable() const {
-        return mBaseText;
+        return base_text_;
     }
 
     float TextView::getTextSize() const {
-        return mTextSize;
+        return text_size_;
     }
 
 
     void TextView::setSelection(unsigned int position) {
-        mBaseText->setSelection(position);
+        base_text_->setSelection(position);
     }
 
     void TextView::setSelection(unsigned int start, unsigned int end) {
-        mBaseText->setSelection(start, end);
+        base_text_->setSelection(start, end);
     }
 
     void TextView::drawSelection(unsigned int start, unsigned int end) {
@@ -969,7 +975,7 @@ namespace ukive {
             return;
         }
 
-        mTextLayout->HitTestTextRange(
+        text_layout_->HitTestTextRange(
             start, end - start,
             0.f, 0.f, nullptr, 0,
             &hitTextMetricsCount);
@@ -979,13 +985,13 @@ namespace ukive {
         }
 
         auto hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
-        mTextLayout->HitTestTextRange(
+        text_layout_->HitTestTextRange(
             start, end - start,
             0.f, 0.f,
             hitTextMetrics, hitTextMetricsCount,
             &hitTextMetricsCount);
 
-        mSelectionList.clear();
+        sel_list_.clear();
 
         for (UINT i = 0; i < hitTextMetricsCount; i++) {
             SelectionBlock* block = new SelectionBlock();
@@ -995,16 +1001,16 @@ namespace ukive {
             uint32_t tLength = hitTextMetrics[i].length;
 
             //一行中只有\n或\r\n时，添加一个一定宽度的Selection。
-            if ((tLength == 1 && mBaseText->at(tPos) == L'\n')
-                || (tLength == 2 && mBaseText->at(tPos) == L'\r'
-                    && mBaseText->at(tPos + 1) == L'\n')) {
-                extraWidth = mTextSize;
+            if ((tLength == 1 && base_text_->at(tPos) == L'\n')
+                || (tLength == 2 && base_text_->at(tPos) == L'\r'
+                    && base_text_->at(tPos + 1) == L'\n')) {
+                extraWidth = text_size_;
             }
             //一行中句尾有\n或\r\n时，句尾添加一个一定宽度的Selection。
-            else if ((tLength > 0 && mBaseText->at(tPos + tLength - 1) == L'\n')
-                || (tLength > 1 && mBaseText->at(tPos + tLength - 2) == L'\r'
-                    && mBaseText->at(tPos + tLength - 1) == L'\n')) {
-                extraWidth = mTextSize;
+            else if ((tLength > 0 && base_text_->at(tPos + tLength - 1) == L'\n')
+                || (tLength > 1 && base_text_->at(tPos + tLength - 2) == L'\r'
+                    && base_text_->at(tPos + tLength - 1) == L'\n')) {
+                extraWidth = text_size_;
             }
 
             block->rect.left = std::floor(hitTextMetrics[i].left);
@@ -1013,7 +1019,7 @@ namespace ukive {
             block->rect.bottom = std::ceil(hitTextMetrics[i].top + hitTextMetrics[i].height);
             block->start = hitTextMetrics[i].textPosition;
             block->length = hitTextMetrics[i].length;
-            mSelectionList.push_back(std::shared_ptr<SelectionBlock>(block));
+            sel_list_.push_back(std::shared_ptr<SelectionBlock>(block));
         }
 
         delete[] hitTextMetrics;
@@ -1022,19 +1028,19 @@ namespace ukive {
     }
 
     std::wstring TextView::getSelection() const {
-        return mBaseText->getSelection();
+        return base_text_->getSelection();
     }
 
     int TextView::getSelectionStart() const {
-        return mBaseText->getSelectionStart();
+        return base_text_->getSelectionStart();
     }
 
     int TextView::getSelectionEnd() const {
-        return mBaseText->getSelectionEnd();
+        return base_text_->getSelectionEnd();
     }
 
     bool TextView::hasSelection() const {
-        return mBaseText->hasSelection();
+        return base_text_->hasSelection();
     }
 
 
@@ -1043,7 +1049,7 @@ namespace ukive {
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
 
-        mTextLayout->HitTestPoint(
+        text_layout_->HitTestPoint(
             textX, textY, &isTrailingHit, &isInside, &metrics);
 
         return metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
@@ -1054,7 +1060,7 @@ namespace ukive {
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
 
-        mTextLayout->HitTestPoint(
+        text_layout_->HitTestPoint(
             textX, textY, &isTrailingHit, &isInside, &metrics);
 
         if (hitPos) {
@@ -1071,7 +1077,7 @@ namespace ukive {
         BOOL isTrailingHit;
         DWRITE_HIT_TEST_METRICS metrics;
 
-        mTextLayout->HitTestPoint(
+        text_layout_->HitTestPoint(
             textX, textY, &isTrailingHit, &isInside, &metrics);
 
         if (hitPos) {
@@ -1100,7 +1106,7 @@ namespace ukive {
             float pointY;
             DWRITE_HIT_TEST_METRICS metrics;
 
-            mTextLayout->HitTestTextPosition(start, FALSE, &pointX, &pointY, &metrics);
+            text_layout_->HitTestTextPosition(start, FALSE, &pointX, &pointY, &metrics);
 
             bound.left = pointX;
             bound.top = pointY;
@@ -1109,7 +1115,7 @@ namespace ukive {
         } else {
             UINT hitTextMetricsCount = 0;
 
-            mTextLayout->HitTestTextRange(
+            text_layout_->HitTestTextRange(
                 start, end - start,
                 0.f, 0.f,
                 0, 0,
@@ -1120,7 +1126,7 @@ namespace ukive {
             }
 
             auto hitTextMetrics = new DWRITE_HIT_TEST_METRICS[hitTextMetricsCount];
-            mTextLayout->HitTestTextRange(
+            text_layout_->HitTestTextRange(
                 start, end - start,
                 0.f, 0.f,
                 hitTextMetrics, hitTextMetricsCount,
@@ -1162,8 +1168,8 @@ namespace ukive {
     void TextView::computeVisibleRegion(RectF* visibleRegon) {
         visibleRegon->left = 0.f + getScrollX();
         visibleRegon->top = 0.f + getScrollY();
-        visibleRegon->right = visibleRegon->left + mTextLayout->GetMaxWidth();
-        visibleRegon->bottom = visibleRegon->top + mTextLayout->GetMaxHeight();
+        visibleRegon->right = visibleRegon->left + text_layout_->GetMaxWidth();
+        visibleRegon->bottom = visibleRegon->top + text_layout_->GetMaxHeight();
     }
 
 
@@ -1171,15 +1177,15 @@ namespace ukive {
         Editable* editable,
         int start, int oldEnd, int newEnd) {
 
-        float maxWidth = mTextLayout->GetMaxWidth();
-        float maxHeight = mTextLayout->GetMaxHeight();
+        float maxWidth = text_layout_->GetMaxWidth();
+        float maxHeight = text_layout_->GetMaxHeight();
 
         makeNewTextLayout(maxWidth, maxHeight, isAutoWrap());
         requestLayout();
         invalidate();
 
-        if (mProcessRef == 0 && hasFocus() && mIsEditable) {
-            mInputConnection->notifyTextChanged(false, start, oldEnd, newEnd);
+        if (process_ref_ == 0 && hasFocus() && is_editable_) {
+            input_connection_->notifyTextChanged(false, start, oldEnd, newEnd);
         }
 
         scrollToFit(false);
@@ -1191,26 +1197,26 @@ namespace ukive {
 
         if (ns == ne) {
             if (os != oe) {
-                if (mTextActionMode) {
-                    mTextActionMode->close();
+                if (text_action_mode_) {
+                    text_action_mode_->close();
                 }
 
-                mSelectionList.clear();
+                sel_list_.clear();
                 invalidate();
             }
 
-            if (mIsEditable && hasFocus()) {
+            if (is_editable_ && hasFocus()) {
                 locateTextBlink(ns);
-                mTextBlink->show();
+                text_blink_->show();
             }
         } else {
             setSelection(ns, ne);
-            mTextBlink->hide();
+            text_blink_->hide();
             drawSelection(ns, ne);
         }
 
-        if (mProcessRef == 0 && hasFocus() && mIsEditable) {
-            mInputConnection->notifyTextSelectionChanged();
+        if (process_ref_ == 0 && hasFocus() && is_editable_) {
+            input_connection_->notifyTextSelectionChanged();
         }
 
         scrollToFit(true);
@@ -1228,9 +1234,9 @@ namespace ukive {
             switch (span->getType()) {
             case Span::TEXT_UNDERLINE:
                 if (action == SpanChange::ADD) {
-                    mTextLayout->SetUnderline(TRUE, range);
+                    text_layout_->SetUnderline(TRUE, range);
                 } else if (action == SpanChange::REMOVE) {
-                    mTextLayout->SetUnderline(FALSE, range);
+                    text_layout_->SetUnderline(FALSE, range);
                 }
                 break;
             }
@@ -1242,9 +1248,9 @@ namespace ukive {
                 TextDrawingEffect* tdEffect = new TextDrawingEffect();
                 tdEffect->effect_span_ = reinterpret_cast<EffectSpan*>(span);
 
-                mTextLayout->SetDrawingEffect(tdEffect, range);
+                text_layout_->SetDrawingEffect(tdEffect, range);
             } else if (action == SpanChange::REMOVE) {
-                mTextLayout->SetDrawingEffect(0, range);
+                text_layout_->SetDrawingEffect(0, range);
             }
             break;
 
@@ -1258,15 +1264,15 @@ namespace ukive {
 
 
     bool TextView::canCut() const {
-        return mIsEditable && mBaseText->hasSelection();
+        return is_editable_ && base_text_->hasSelection();
     }
 
     bool TextView::canCopy() const {
-        return mBaseText->hasSelection();
+        return base_text_->hasSelection();
     }
 
     bool TextView::canPaste() const {
-        if (mIsEditable) {
+        if (is_editable_) {
             std::wstring content = ClipboardManager::getFromClipboard();
             return !content.empty();
         }
@@ -1274,12 +1280,12 @@ namespace ukive {
     }
 
     bool TextView::canSelectAll() const {
-        if (mBaseText->length() == 0) {
+        if (base_text_->length() == 0) {
             return false;
         }
 
-        if (mBaseText->getSelectionStart() == 0
-            && mBaseText->getSelectionEnd() == mBaseText->length()) {
+        if (base_text_->getSelectionStart() == 0
+            && base_text_->getSelectionEnd() == base_text_->length()) {
             return false;
         }
 
@@ -1288,37 +1294,37 @@ namespace ukive {
 
     void TextView::performCut() {
         ClipboardManager::saveToClipboard(getSelection());
-        mBaseText->replace(L"");
+        base_text_->replace(L"");
 
-        if (mTextActionMode) {
-            mTextActionMode->close();
+        if (text_action_mode_) {
+            text_action_mode_->close();
         }
     }
 
     void TextView::performCopy() {
         ClipboardManager::saveToClipboard(getSelection());
 
-        if (mTextActionMode) {
-            mTextActionMode->close();
+        if (text_action_mode_) {
+            text_action_mode_->close();
         }
     }
 
     void TextView::performPaste() {
         std::wstring content = ClipboardManager::getFromClipboard();
         if (hasSelection()) {
-            mBaseText->replace(content);
+            base_text_->replace(content);
         } else {
-            mBaseText->insert(content);
+            base_text_->insert(content);
         }
 
-        if (mTextActionMode) {
-            mTextActionMode->close();
+        if (text_action_mode_) {
+            text_action_mode_->close();
         }
     }
 
     void TextView::performSelectAll() {
-        setSelection(0, mBaseText->length());
-        mTextActionMode->invalidateMenu();
+        setSelection(0, base_text_->length());
+        text_action_mode_->invalidateMenu();
     }
 
 
@@ -1394,7 +1400,7 @@ namespace ukive {
     }
 
     void TextView::onDestroyActionMode(TextActionMode* mode) {
-        mTextActionMode = nullptr;
+        text_action_mode_ = nullptr;
     }
 
     void TextView::onGetContentPosition(int* x, int* y) {
@@ -1407,8 +1413,8 @@ namespace ukive {
             parent = parent->getParent();
         }
 
-        *x = left + mPrevX + 1;
-        *y = top + mPrevY + 1;
+        *x = left + prev_x_ + 1;
+        *y = top + prev_y_ + 1;
     }
 
 }

@@ -17,11 +17,9 @@ namespace ukive {
     class TextDrawingEffect;
 
 
-    ///<summary>
-    /// 文本编辑器，使用 TSF。
-    ///</summary>
     class TextView : public View,
-        public Editable::EditWatcher, public TextActionModeCallback {
+        public Editable::EditWatcher,
+        public TextActionModeCallback {
     public:
         TextView(Window* w);
         ~TextView();
@@ -157,47 +155,47 @@ namespace ukive {
         };
 
     private:
-        Editable* mBaseText;
-        ComPtr<IDWriteTextFormat> mTextFormat;
-        ComPtr<IDWriteTextLayout> mTextLayout;
+        Editable* base_text_;
+        ComPtr<IDWriteTextFormat> text_format_;
+        ComPtr<IDWriteTextLayout> text_layout_;
 
-        TextBlink* mTextBlink;
-        TextActionMode* mTextActionMode;
-        InputConnection* mInputConnection;
-        TextKeyListener* mTextKeyListener;
+        TextBlink* text_blink_;
+        TextActionMode* text_action_mode_;
+        InputConnection* input_connection_;
+        TextKeyListener* text_key_listener_;
 
-        ULONG64 mProcessRef;
+        ULONG64 process_ref_;
 
-        int mTextSize;
-        string16 mFontFamilyName;
-        Color mTextColor;
-        Color mSelectionBackgroundColor;
-        DWRITE_TEXT_ALIGNMENT mTextAlignment;
-        DWRITE_PARAGRAPH_ALIGNMENT mParagraphAlignment;
-        DWRITE_FONT_WEIGHT mTextWeight;
-        DWRITE_FONT_STYLE mTextStyle;
+        int text_size_;
+        string16 font_family_name_;
+        Color text_color_;
+        Color sel_bg_color_;
+        DWRITE_TEXT_ALIGNMENT text_alignment_;
+        DWRITE_PARAGRAPH_ALIGNMENT paragraph_alignment_;
+        DWRITE_FONT_WEIGHT text_weight_;
+        DWRITE_FONT_STYLE text_style_;
 
-        float mLineSpacingMultiple;
-        DWRITE_LINE_SPACING_METHOD mLineSpacingMethod;
+        float line_spacing_multiple_;
+        DWRITE_LINE_SPACING_METHOD line_spacing_method_;
 
-        bool mIsAutoWrap;
-        bool mIsEditable;
-        bool mIsSelectable;
+        bool is_auto_wrap_;
+        bool is_editable_;
+        bool is_selectable_;
 
-        int mPrevX, mPrevY;
-        bool mIsMouseLeftKeyDown;
-        bool mIsMouseRightKeyDown;
-        bool mIsMouseLeftKeyDownOnText;
+        int prev_x_, prev_y_;
+        bool is_mouse_left_key_down_;
+        bool is_mouse_right_key_down_;
+        bool is_mouse_left_key_down_on_text_;
 
-        int mLastSelection;
-        int mFirstSelection;
-        float mLastSelectionLeft;
+        int last_sel_;
+        int first_sel_;
+        float last_sel_left_;
 
-        float mVerticalOffset;
-        uint32_t mTextOffsetAtViewTop;
+        float vertical_offset_;
+        uint32_t text_offset_at_view_top_;
 
-        std::vector<ComPtr<TextDrawingEffect>> mTDEffectList;
-        std::vector<std::shared_ptr<SelectionBlock>> mSelectionList;
+        std::vector<ComPtr<TextDrawingEffect>> tde_list_;
+        std::vector<std::shared_ptr<SelectionBlock>> sel_list_;
     };
 
 }

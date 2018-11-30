@@ -26,9 +26,8 @@ namespace shell {
         TerrainConfigure();
         ~TerrainConfigure();
 
-        HRESULT init();
+        void init();
         void active();
-        void reset();
         void close();
 
         void setMatrix(dx::XMFLOAT4X4 matrix);

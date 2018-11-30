@@ -15,7 +15,7 @@ namespace ukive {
         opacity_ = opt;
     }
 
-    void BitmapDrawable::draw(Canvas *canvas) {
+    void BitmapDrawable::draw(Canvas* canvas) {
         canvas->drawBitmap(getBounds().toRectF(), opacity_, bitmap_.get());
     }
 

@@ -35,15 +35,15 @@ namespace shell {
         void reevaluate(float c1, float c2);
 
         void onSceneCreate(ukive::Direct3DView* d3d_view) override;
-        void onSceneResize(unsigned int width, unsigned int height) override;
+        void onSceneResize(int width, int height) override;
         void onSceneInput(ukive::InputEvent* e) override;
         void onSceneRender() override;
         void onSceneDestroy() override;
 
-        Camera* getCamera();
-        GraphCreator* getGraphCreator();
-        ukive::DrawingObjectManager* getDrawingObjectManager();
-        LodGenerator* getLodGenerator();
+        Camera* getCamera() const;
+        GraphCreator* getGraphCreator() const;
+        ukive::DrawingObjectManager* getDrawingObjectManager() const;
+        LodGenerator* getLodGenerator() const;
 
     private:
         enum {
@@ -60,9 +60,8 @@ namespace shell {
     private:
         int mPrevX;
         int mPrevY;
-
-        unsigned int mWidth;
-        unsigned int mHeight;
+        int mWidth;
+        int mHeight;
 
         int mMouseActionMode;
         bool mIsCtrlKeyPressed;

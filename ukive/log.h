@@ -48,6 +48,9 @@
 
 namespace ukive {
 
+    void InitLogging();
+    void UninitLogging();
+
     class Log {
     public:
         enum Severity {
@@ -56,12 +59,6 @@ namespace ukive {
             ERR,
             FATAL
         };
-
-        static void i(const string16& tag, const string16& msg);
-        static void d(const string16& tag, const string16& msg);
-        static void w(const string16& tag, const string16& msg);
-        static void e(const string16& tag, const string16& msg);
-        static void v(const string16& tag, const string16& msg);
 
         static void debugBreak();
 
@@ -84,5 +81,8 @@ namespace ukive {
     };
 
 }
+
+using Log = ukive::Log;
+
 
 #endif  // UKIVE_LOG_H_

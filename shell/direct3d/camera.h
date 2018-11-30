@@ -13,12 +13,10 @@ namespace shell {
 
     class Camera {
     public:
-        Camera();
+        Camera(int width, int height);
         ~Camera();
 
-        void init(unsigned int width, unsigned int height);
-        void close();
-        void resize(unsigned int width, unsigned int height);
+        void resize(int width, int height);
 
         void moveCamera(float dx, float dy);
         void scaleCamera(float factor);
@@ -34,17 +32,17 @@ namespace shell {
         // 该方法有缺陷，请看方法内注释。
         void setCameraLookAt(float x, float y, float z);
 
-        const dx::XMFLOAT3* getCameraPos();
-        const dx::XMFLOAT3* getCameraLookAt();
-        const dx::XMFLOAT3* getCameraUp();
+        const dx::XMFLOAT3* getCameraPos() const;
+        const dx::XMFLOAT3* getCameraLookAt() const;
+        const dx::XMFLOAT3* getCameraUp() const;
 
-        const dx::XMFLOAT4X4* getWorldMatrix();
-        const dx::XMFLOAT4X4* getViewMatrix();
-        const dx::XMFLOAT4X4* getProjectionMatrix();
-        const dx::XMFLOAT4X4* getOrthoMatrix();
+        const dx::XMFLOAT4X4* getWorldMatrix() const;
+        const dx::XMFLOAT4X4* getViewMatrix() const;
+        const dx::XMFLOAT4X4* getProjectionMatrix() const;
+        const dx::XMFLOAT4X4* getOrthoMatrix() const;
 
-        void getWVPMatrix(dx::XMFLOAT4X4* wvp);
-        void getWVOMatrix(dx::XMFLOAT4X4* wvo);
+        void getWVPMatrix(dx::XMFLOAT4X4* wvp) const;
+        void getWVOMatrix(dx::XMFLOAT4X4* wvo) const;
 
     private:
         dx::XMFLOAT3 pos_;
@@ -60,9 +58,9 @@ namespace shell {
         dx::XMFLOAT4X4 projection_matrix_;
         dx::XMFLOAT4X4 ortho_matrix_;
 
+        int width_;
+        int height_;
         float radius_;
-        unsigned int width_;
-        unsigned int height_;
     };
 
 }

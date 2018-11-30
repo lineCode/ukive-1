@@ -24,8 +24,8 @@ namespace ukive {
 
         void run();
 
-        size_t getCommandCount();
-        string16 getCommand(size_t index);
+        static size_t getCommandCount();
+        static string16 getCommand(size_t index);
 
         static int getScreenWidth();
         static int getScreenHeight();
@@ -34,6 +34,7 @@ namespace ukive {
         static bool isVSyncEnabled();
 
         static HMODULE getModuleHandle();
+        static string16 getExecFileName(bool dir);
         static GraphicDeviceManager* getGraphicDeviceManager();
 
         static WICManager* getWICManager();

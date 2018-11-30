@@ -11,8 +11,12 @@ namespace ukive {
         SwitchView(Window* w);
         ~SwitchView();
 
+        // View
+        void onMeasure(int width, int height, int width_mode, int height_mode) override;
+        void onDraw(Canvas* canvas) override;
+        bool onInputEvent(InputEvent* e) override;
+
     private:
-        void initSwitchView();
     };
 
 }

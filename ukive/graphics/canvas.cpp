@@ -18,7 +18,7 @@ namespace ukive {
     Canvas::Canvas(int width, int height)
         :is_texture_target_(true) {
 
-        d3d_tex2d_ = ukive::Renderer::createTexture2D(width, height);
+        d3d_tex2d_ = Renderer::createTexture2D(width, height);
         auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
         if (!dxgi_surface) {
             DCHECK(false);
@@ -26,25 +26,25 @@ namespace ukive {
             return;
         }
 
-        auto off_d2d_rt = ukive::Renderer::createDXGIRenderTarget(dxgi_surface.get(), true);
+        auto off_d2d_rt = Renderer::createDXGIRenderTarget(dxgi_surface.get(), true);
         initCanvas(off_d2d_rt);
     }
 
-    Canvas::Canvas(ComPtr<ID2D1RenderTarget> renderTarget)
+    Canvas::Canvas(ComPtr<ID2D1RenderTarget> rt)
         :is_texture_target_(false) {
 
-        initCanvas(renderTarget);
+        initCanvas(rt);
     }
 
     Canvas::~Canvas() {
     }
 
 
-    void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> renderTarget) {
+    void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> rt) {
         opacity_ = 1.f;
         layer_counter_ = 0;
 
-        render_target_ = renderTarget;
+        render_target_ = rt;
         render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
         render_target_->CreateBitmapBrush(nullptr, &bitmap_brush_);
     }
@@ -74,7 +74,7 @@ namespace ukive {
     }
 
     void Canvas::clear(const Color& color) {
-        D2D1_COLOR_F d2d_color = { color.r, color.g, color.b, color.a };
+        D2D1_COLOR_F d2d_color { color.r, color.g, color.b, color.a };
         render_target_->Clear(d2d_color);
     }
 
@@ -86,7 +86,7 @@ namespace ukive {
     void Canvas::endDraw() {
         HRESULT hr = render_target_->EndDraw();
         if (FAILED(hr)) {
-            Log::e(L"Canvas", L"failed to end draw.");
+            LOG(Log::ERR) << "Failed to end draw.";
         }
     }
 
@@ -96,7 +96,7 @@ namespace ukive {
     }
 
     void Canvas::pushClip(const RectF& rect) {
-        D2D1_RECT_F d2d_rect = { rect.left, rect.top, rect.right, rect.bottom };
+        D2D1_RECT_F d2d_rect { rect.left, rect.top, rect.right, rect.bottom };
         render_target_->PushAxisAlignedClip(
             d2d_rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     }
@@ -129,7 +129,7 @@ namespace ukive {
             return;
         }
 
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             content_bound.left, content_bound.top,
             content_bound.right, content_bound.bottom };
 
@@ -179,8 +179,7 @@ namespace ukive {
 
         opacity_ = opacity_stack_.top();
 
-        ID2D1DrawingStateBlock* drawingStateBlock
-            = drawing_state_stack_.top().get();
+        auto drawingStateBlock = drawing_state_stack_.top().get();
 
         D2D1_DRAWING_STATE_DESCRIPTION desc;
         drawingStateBlock->GetDescription(&desc);
@@ -286,7 +285,7 @@ namespace ukive {
     void Canvas::drawLine(
         const PointF& start, const PointF& end, float stroke_width, const Color& color) {
 
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
 
         solid_brush_->SetColor(d2d_color);
@@ -297,9 +296,9 @@ namespace ukive {
     }
 
     void Canvas::drawRect(const RectF& rect, const Color& color) {
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             rect.left, rect.top, rect.right, rect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -307,9 +306,9 @@ namespace ukive {
     }
 
     void Canvas::drawRect(const RectF& rect, float stroke_width, const Color& color) {
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             rect.left, rect.top, rect.right, rect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -318,9 +317,9 @@ namespace ukive {
 
 
     void Canvas::fillRect(const RectF& rect, const Color& color) {
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             rect.left, rect.top, rect.right, rect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -331,9 +330,9 @@ namespace ukive {
     void Canvas::drawRoundRect(
         const RectF& rect, float radius, const Color& color) {
 
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             rect.left, rect.top, rect.right, rect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -345,9 +344,9 @@ namespace ukive {
         const RectF& rect, float stroke_width,
         float radius, const Color& color) {
 
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             rect.left, rect.top, rect.right, rect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -358,9 +357,9 @@ namespace ukive {
     void Canvas::fillRoundRect(
         const RectF& rect, float radius, const Color& color) {
 
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_rect = {
+        D2D1_RECT_F d2d_rect {
             rect.left, rect.top, rect.right, rect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -416,7 +415,7 @@ namespace ukive {
     }
 
     void Canvas::drawOval(float cx, float cy, float rx, float ry, float stroke_width, const Color& color) {
-        D2D1_COLOR_F _color = {
+        D2D1_COLOR_F _color {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
         render_target_->DrawEllipse(
@@ -427,7 +426,7 @@ namespace ukive {
     }
 
     void Canvas::fillOval(float cx, float cy, float rx, float ry, const Color& color) {
-        D2D1_COLOR_F _color = {
+        D2D1_COLOR_F _color {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(_color);
         render_target_->FillEllipse(
@@ -488,9 +487,9 @@ namespace ukive {
             return;
         }
 
-        D2D1_RECT_F d2d_src_rect = {
+        D2D1_RECT_F d2d_src_rect {
             src.left, src.top, src.right, src.bottom };
-        D2D1_RECT_F d2d_dst_rect = {
+        D2D1_RECT_F d2d_dst_rect {
             dst.left, dst.top, dst.right, dst.bottom };
 
         render_target_->DrawBitmap(
@@ -508,9 +507,9 @@ namespace ukive {
             return;
         }
 
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
-        D2D1_RECT_F d2d_layout_rect = {
+        D2D1_RECT_F d2d_layout_rect {
             layoutRect.left, layoutRect.top, layoutRect.right, layoutRect.bottom };
 
         solid_brush_->SetColor(d2d_color);
@@ -526,7 +525,7 @@ namespace ukive {
             return;
         }
 
-        D2D1_COLOR_F d2d_color = {
+        D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
         solid_brush_->SetColor(d2d_color);
         render_target_->DrawTextLayout(D2D1::Point2F(x, y), textLayout, solid_brush_.get());

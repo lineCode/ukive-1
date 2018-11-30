@@ -4,10 +4,9 @@
 
 namespace ukive {
 
-    class InputEvent
-    {
+    class InputEvent {
     public:
-        // 鼠标事件。
+        // 鼠标事件
         enum {
             EVM_DOWN = 1,
             EVM_UP,
@@ -19,25 +18,35 @@ namespace ukive {
             EVM_SCROLL_ENTER,
         };
 
-        // 键盘事件。
+        // 触摸事件
         enum {
-            EVK_DOWN = (EVM_SCROLL_ENTER + 1),
+            EVT_DOWN = (EVM_SCROLL_ENTER + 1),
+            EVT_MULTI_DOWN,
+            EVT_MULTI_UP,
+            EVT_UP,
+            EVT_MOVE
+        };
+
+        // 键盘事件
+        enum {
+            EVK_DOWN = (EVT_MOVE + 1),
             EVK_UP,
+            EVK_CHAR,
         };
 
-        // 其他事件。
+        // 其他事件
         enum {
-            EV_CANCEL = (EVK_UP + 1),
+            EV_CANCEL = (EVK_CHAR + 1),
         };
 
-        // 鼠标按键定义。
+        // 鼠标按键定义
         enum {
             MK_LEFT = 0,
             MK_MIDDLE,
             MK_RIGHT,
         };
 
-        // 键盘按键定义使用windows本身的定义。
+        // 键盘按键定义使用 Windows 本身的定义。
 
     public:
         InputEvent();
@@ -51,7 +60,8 @@ namespace ukive {
         void setMouseRawY(int raw_y);
         void setMouseWheel(int wheel);
         void setMouseKey(int key);
-        void setKeyboardKey(int virtual_key, int ex_msg);
+        void setKeyboardCharKey(int char_key, int ex_msg);
+        void setKeyboardVirtualKey(int virtual_key, int ex_msg);
 
         void setOutside(bool outside);
         void setIsMouseCaptured(bool captured);
@@ -63,7 +73,8 @@ namespace ukive {
         int getMouseRawY();
         int getMouseWheel();
         int getMouseKey();
-        int getKeyboardKey();
+        int getKeyboardCharKey();
+        int getKeyboardVirtualKey();
 
         bool isMouseEvent();
         bool isKeyboardEvent();
@@ -84,6 +95,7 @@ namespace ukive {
         int mouse_wheel_;
         int mouse_key_;
 
+        int char_key_;
         int virtual_key_;
 
         int event_type_;

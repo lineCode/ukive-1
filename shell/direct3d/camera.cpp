@@ -1,20 +1,13 @@
 ﻿#include "camera.h"
 
+#include <algorithm>
+
 
 namespace shell {
 
-    Camera::Camera()
-        :width_(1),
-        height_(1) {
-    }
-
-    Camera::~Camera() {
-    }
-
-    void Camera::init(unsigned int width, unsigned int height)
-    {
-        width_ = width;
-        height_ = height;
+    Camera::Camera(int width, int height)
+        :width_(width >= 1 ? width : 1),
+        height_(height >= 1 ? height : 1) {
 
         //摄像机位置。
         pos_ = dx::XMFLOAT3(0.0f, 0.0f, -10.0f);
@@ -38,30 +31,26 @@ namespace shell {
         dx::XMStoreFloat4x4(&view_matrix_, dx::XMMatrixLookAtLH(posVec, lookAtVec, upVec));
 
         dx::XMStoreFloat4x4(&projection_matrix_,
-            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, (float)width_ / height_, NEAR_PLANE, FAR_PLANE));
+            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, width_ * 1.f / height_, NEAR_PLANE, FAR_PLANE));
         dx::XMStoreFloat4x4(&ortho_matrix_,
-            dx::XMMatrixOrthographicLH((float)width_, (float)height_, NEAR_PLANE, FAR_PLANE));
+            dx::XMMatrixOrthographicLH(width_, height_, NEAR_PLANE, FAR_PLANE));
     }
 
-    void Camera::close()
-    {
-    }
+    Camera::~Camera() {}
 
-    void Camera::resize(unsigned int width, unsigned int height)
-    {
-        width_ = width;
-        height_ = height;
+
+    void Camera::resize(int width, int height) {
+        width_ = std::max(width, 1);
+        height_ = std::max(height, 1);
 
         dx::XMStoreFloat4x4(&projection_matrix_,
-            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, (float)width_ / height_, NEAR_PLANE, FAR_PLANE));
+            dx::XMMatrixPerspectiveFovLH(dx::XM_PIDIV4, width_ * 1.f / height_, NEAR_PLANE, FAR_PLANE));
 
         dx::XMStoreFloat4x4(&ortho_matrix_,
-            dx::XMMatrixOrthographicLH((float)width_, (float)height_, NEAR_PLANE, FAR_PLANE));
+            dx::XMMatrixOrthographicLH(width_, height_, NEAR_PLANE, FAR_PLANE));
     }
 
-
-    void Camera::moveCamera(float dx, float dy)
-    {
+    void Camera::moveCamera(float dx, float dy) {
         dx::XMVECTOR frontVec = dx::XMVectorSet(look_.x, 0, look_.z, 0);
         frontVec = dx::XMVector3Normalize(frontVec);
 
@@ -84,8 +73,7 @@ namespace shell {
         dx::XMStoreFloat3(&look_at_, lookAtVec);
     }
 
-    void Camera::scaleCamera(float factor)
-    {
+    void Camera::scaleCamera(float factor) {
         dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
         dx::XMVECTOR lookVec = dx::XMLoadFloat3(&look_);
         dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
@@ -101,8 +89,7 @@ namespace shell {
         dx::XMStoreFloat3(&pos_, posVec);
     }
 
-    void Camera::circuleCamera(float dxAngle, float dyAngle)
-    {
+    void Camera::circuleCamera(float dxAngle, float dyAngle) {
         dx::XMVECTOR yVec = dx::XMLoadFloat3(&y_vector_);
         dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
         dx::XMVECTOR rightVec = dx::XMLoadFloat3(&right_);
@@ -133,8 +120,7 @@ namespace shell {
         dx::XMStoreFloat3(&look_, lookVec);
     }
 
-    void Camera::circuleCamera2(float dxAngle, float dyAngle)
-    {
+    void Camera::circuleCamera2(float dxAngle, float dyAngle) {
         dx::XMVECTOR yVec = dx::XMLoadFloat3(&y_vector_);
         dx::XMVECTOR rightVec = dx::XMLoadFloat3(&right_);
         dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
@@ -170,8 +156,7 @@ namespace shell {
     }
 
 
-    void Camera::moveWorld(float dx, float dy)
-    {
+    void Camera::moveWorld(float dx, float dy) {
         dx::XMVECTOR frontVec
             = dx::XMVectorSet(look_.x, 0, look_.z, 0);
         frontVec = dx::XMVector3Normalize(frontVec);
@@ -192,8 +177,7 @@ namespace shell {
         dx::XMStoreFloat4x4(&world_matrix_, worldMatrix);
     }
 
-    void Camera::scaleWorld(int direction)
-    {
+    void Camera::scaleWorld(int direction) {
         float scaleFactor;
 
         if (direction > 0)
@@ -210,8 +194,7 @@ namespace shell {
         dx::XMStoreFloat4x4(&world_matrix_, worldMatrix);
     }
 
-    void Camera::rotateWorld(float dxAngle, float dyAngle)
-    {
+    void Camera::rotateWorld(float dxAngle, float dyAngle) {
         dx::XMMATRIX rotateMatrix
             = dx::XMMatrixRotationY(dxAngle);
 
@@ -221,8 +204,7 @@ namespace shell {
         dx::XMStoreFloat4x4(&world_matrix_, worldMatrix);
     }
 
-    void Camera::setCameraPosition(float x, float y, float z)
-    {
+    void Camera::setCameraPosition(float x, float y, float z) {
         dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
         dx::XMVECTOR lookAtVec = dx::XMLoadFloat3(&look_at_);
         dx::XMVECTOR posVec = dx::XMVectorSet(x, y, z, 0);
@@ -247,8 +229,7 @@ namespace shell {
         dx::XMStoreFloat3(&look_, lookVec);
     }
 
-    void Camera::setCameraLookAt(float x, float y, float z)
-    {
+    void Camera::setCameraLookAt(float x, float y, float z) {
         dx::XMVECTOR upVec = dx::XMLoadFloat3(&up_);
         dx::XMVECTOR posVec = dx::XMLoadFloat3(&pos_);
         dx::XMVECTOR lookAtVec = dx::XMVectorSet(x, y, z, 0);
@@ -273,43 +254,35 @@ namespace shell {
         dx::XMStoreFloat3(&look_at_, lookVec);
     }
 
-    const dx::XMFLOAT3 *Camera::getCameraPos()
-    {
+    const dx::XMFLOAT3* Camera::getCameraPos() const {
         return &pos_;
     }
 
-    const dx::XMFLOAT3 *Camera::getCameraLookAt()
-    {
+    const dx::XMFLOAT3* Camera::getCameraLookAt() const {
         return &look_at_;
     }
 
-    const dx::XMFLOAT3 *Camera::getCameraUp()
-    {
+    const dx::XMFLOAT3* Camera::getCameraUp() const {
         return &up_;
     }
 
-    const dx::XMFLOAT4X4 *Camera::getWorldMatrix()
-    {
+    const dx::XMFLOAT4X4* Camera::getWorldMatrix() const {
         return &world_matrix_;
     }
 
-    const dx::XMFLOAT4X4 *Camera::getViewMatrix()
-    {
+    const dx::XMFLOAT4X4* Camera::getViewMatrix() const {
         return &view_matrix_;
     }
 
-    const dx::XMFLOAT4X4 *Camera::getProjectionMatrix()
-    {
+    const dx::XMFLOAT4X4* Camera::getProjectionMatrix() const {
         return &projection_matrix_;
     }
 
-    const dx::XMFLOAT4X4 *Camera::getOrthoMatrix()
-    {
+    const dx::XMFLOAT4X4* Camera::getOrthoMatrix() const {
         return &ortho_matrix_;
     }
 
-    void Camera::getWVPMatrix(dx::XMFLOAT4X4 *wvp)
-    {
+    void Camera::getWVPMatrix(dx::XMFLOAT4X4 *wvp) const {
         dx::XMMATRIX world = dx::XMLoadFloat4x4(&world_matrix_);
         dx::XMMATRIX view = dx::XMLoadFloat4x4(&view_matrix_);
         dx::XMMATRIX projection = dx::XMLoadFloat4x4(&projection_matrix_);
@@ -319,8 +292,7 @@ namespace shell {
                 dx::XMMatrixMultiply(world, view), projection));
     }
 
-    void Camera::getWVOMatrix(dx::XMFLOAT4X4 *wvo)
-    {
+    void Camera::getWVOMatrix(dx::XMFLOAT4X4 *wvo) const {
         dx::XMMATRIX world = dx::XMLoadFloat4x4(&world_matrix_);
         dx::XMMATRIX view = dx::XMLoadFloat4x4(&view_matrix_);
         dx::XMMATRIX ortho = dx::XMLoadFloat4x4(&ortho_matrix_);

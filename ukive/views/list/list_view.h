@@ -24,6 +24,7 @@ namespace ukive {
         bool onInputEvent(InputEvent* e) override;
 
         void onDraw(Canvas* canvas) override;
+        void onDrawOverChild(Canvas* canvas) override;
 
         void setAdapter(ListAdapter* adapter);
         void scrollToPosition(int position, int offset, bool smooth);
@@ -31,9 +32,10 @@ namespace ukive {
     private:
         int determineVerticalScroll(int dy);
         void offsetChildViewTopAndBottom(int dy);
+        ListAdapter::ViewHolder* getBindViewHolderAt(int index, int i);
 
-        ListAdapter::ViewHolder* getFirstVisibleViewHolder();
-        ListAdapter::ViewHolder* getLastVisibleViewHolder();
+        ListAdapter::ViewHolder* getFirstVisibleVH();
+        ListAdapter::ViewHolder* getLastVisibleVH();
 
         void recycleTopViews(int offset);
         void recycleBottomViews(int offset);
@@ -63,9 +65,9 @@ namespace ukive {
         int cur_offset_in_position_;
         bool initial_layouted_;
 
-        std::unique_ptr<ListAdapter> list_adapter_;
+        std::unique_ptr<ListAdapter> adapter_;
         std::unique_ptr<OverlayScrollBar> scroll_bar_;
-        std::unique_ptr<ViewHolderRecycler> view_recycler_;
+        std::unique_ptr<ViewHolderRecycler> recycler_;
     };
 
 }

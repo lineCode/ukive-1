@@ -15,7 +15,7 @@ namespace ukive {
             OVAL
         };
 
-        ShapeDrawable(Shape shape);
+        explicit ShapeDrawable(Shape shape);
         ~ShapeDrawable();
 
         void setSize(int width, int height);
@@ -32,6 +32,9 @@ namespace ukive {
         float getOpacity() const override;
         int getIncWidth() const override;
         int getIncHeight() const override;
+
+    protected:
+        bool onStateChanged(int new_state, int prev_state) override;
 
     private:
         int width_;

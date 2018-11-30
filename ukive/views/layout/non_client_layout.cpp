@@ -68,10 +68,14 @@ namespace ukive {
         int final_width = 0;
         int final_height = 0;
 
-        int hori_padding = getPaddingLeft() + getPaddingRight() + nc_padding_.left + nc_padding_.right;
-        int vert_padding = getPaddingTop() + getPaddingBottom() + nc_padding_.top + nc_padding_.bottom;
+        int nc_hori_padding = nc_padding_.left + nc_padding_.right;
+        int nc_vert_padding = nc_padding_.top + nc_padding_.bottom;
 
-        measureChildrenWithMargins(width, height, widthSpec, heightSpec);
+        int hori_padding = getPaddingLeft() + getPaddingRight() + nc_hori_padding;
+        int vert_padding = getPaddingTop() + getPaddingBottom() + nc_vert_padding;
+
+        measureChildrenWithMargins(
+            width - nc_hori_padding, height - nc_vert_padding, widthSpec, heightSpec);
 
         switch (widthSpec) {
         case FIT:
@@ -114,7 +118,8 @@ namespace ukive {
 
     void NonClientLayout::onLayout(
         bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom) {
+        int left, int top, int right, int bottom)
+    {
         View* child = nullptr;
         LayoutParams* lp = nullptr;
 
@@ -138,24 +143,24 @@ namespace ukive {
     }
 
     void NonClientLayout::onDraw(Canvas* canvas) {
-        Rect left_rect = {
+        Rect left_rect(
             0, 0,
-            nc_padding_.left, getHeight() - nc_padding_.bottom };
+            nc_padding_.left, getHeight() - nc_padding_.bottom);
         canvas->fillRect(left_rect.toRectF(), border_color);
 
-        Rect top_rect = {
+        Rect top_rect(
             nc_padding_.left, 0,
-            getWidth(), nc_padding_.top };
+            getWidth() - nc_padding_.left, nc_padding_.top);
         canvas->fillRect(top_rect.toRectF(), border_color);
 
-        Rect right_rect = {
+        Rect right_rect(
             getWidth() - nc_padding_.right, nc_padding_.top,
-            getWidth(), getHeight() };
+            nc_padding_.right, getHeight() - nc_padding_.top);
         canvas->fillRect(right_rect.toRectF(), border_color);
 
-        Rect bottom_rect = {
+        Rect bottom_rect(
             0, getHeight() - nc_padding_.bottom,
-            getWidth() - nc_padding_.right, getHeight() };
+            getWidth() - nc_padding_.right, nc_padding_.bottom);
         canvas->fillRect(bottom_rect.toRectF(), border_color);
 
         ViewGroup::onDraw(canvas);

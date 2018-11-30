@@ -415,7 +415,7 @@ namespace shell {
 
         HRESULT hr = dc_target_->BindDC(hdc, &rcWin);
         if (FAILED(hr)) {
-            ukive::Log::e(L"CustomNonClientFrame", L"Failed to bind dc RT!");
+            LOG(Log::ERR) << "Failed to bind dc RT!";
             return;
         }
 
@@ -453,7 +453,7 @@ namespace shell {
 
         hr = dc_target_->EndDraw();
         if (FAILED(hr)) {
-            ukive::Log::e(L"CustomNonClientFrame", L"Failed to end draw!");
+            LOG(Log::ERR) << "Failed to end draw!";
             return;
         }
 

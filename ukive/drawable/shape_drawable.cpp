@@ -8,15 +8,14 @@ namespace ukive {
 
     ShapeDrawable::ShapeDrawable(Shape shape)
         :Drawable(),
-        shape_(shape),
         width_(-1),
         height_(-1),
+        shape_(shape),
         has_solid_(false),
         has_stroke_(false),
         round_radius_(1.f),
         stroke_width_(1.f) {
     }
-
 
     ShapeDrawable::~ShapeDrawable() {
     }
@@ -50,7 +49,6 @@ namespace ukive {
     void ShapeDrawable::setStrokeColor(Color color) {
         stroke_color_ = color;
     }
-
 
     void ShapeDrawable::draw(Canvas* canvas) {
         if (!has_solid_ && !has_stroke_) {
@@ -113,6 +111,39 @@ namespace ukive {
 
     int ShapeDrawable::getIncHeight() const {
         return height_;
+    }
+
+    bool ShapeDrawable::onStateChanged(int new_state, int prev_state) {
+        bool need_redraw = false;
+        if (new_state == STATE_DISABLED) {
+            if (has_solid_) {
+                solid_color_.r *= 0.9f;
+                solid_color_.g *= 0.9f;
+                solid_color_.b *= 0.9f;
+                need_redraw = true;
+            }
+            if (has_stroke_) {
+                stroke_color_.r *= 0.9f;
+                stroke_color_.g *= 0.9f;
+                stroke_color_.b *= 0.9f;
+                need_redraw = true;
+            }
+        } else if (prev_state == STATE_DISABLED) {
+            if (has_solid_) {
+                solid_color_.r /= 0.9f;
+                solid_color_.g /= 0.9f;
+                solid_color_.b /= 0.9f;
+                need_redraw = true;
+            }
+            if (has_stroke_) {
+                stroke_color_.r /= 0.9f;
+                stroke_color_.g /= 0.9f;
+                stroke_color_.b /= 0.9f;
+                need_redraw = true;
+            }
+        }
+
+        return need_redraw;
     }
 
 }

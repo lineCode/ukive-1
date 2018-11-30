@@ -20,33 +20,29 @@
 namespace ukive {
 
     View::View(Window* w)
-        :window_(w),
-        id_(Application::getViewID()),
+        :id_(Application::getViewID()),
         flags_(0),
-        min_width_(0),
-        min_height_(0),
+        scroll_x_(0),
+        scroll_y_(0),
         measured_width_(0),
         measured_height_(0),
         old_pm_width_(0),
         old_pm_height_(0),
         old_pm_width_mode_(UNKNOWN),
         old_pm_height_mode_(UNKNOWN),
-        scroll_x_(0),
-        scroll_y_(0),
-        elevation_(0.f),
+        min_width_(0),
+        min_height_(0),
         visibility_(VISIBLE),
+        elevation_(0.f),
         has_focus_(false),
         is_enabled_(true),
-        is_pressed_(false),
-        is_focusable_(false),
         is_attached_to_window_(false),
         is_input_event_at_last_(false),
+        is_pressed_(false),
+        is_focusable_(false),
         is_receive_outside_input_event_(false),
         can_consume_mouse_event_(true),
-        parent_(nullptr),
-        input_connection_(nullptr),
-        click_listener_(nullptr),
-        click_performer_(new ClickPerformer(this)),
+        window_(w),
         mAlpha(1.0),
         mScaleX(1.0),
         mScaleY(1.0),
@@ -60,7 +56,11 @@ namespace ukive {
         mRevealCenterX(0.0),
         mRevealCenterY(0.0),
         mRevealWidthRadius(0.0),
-        mRevealHeightRadius(0.0) {}
+        mRevealHeightRadius(0.0),
+        parent_(nullptr),
+        click_listener_(nullptr),
+        click_performer_(new ClickPerformer(this)),
+        input_connection_(nullptr) {}
 
 
     View::~View() {
@@ -192,16 +192,19 @@ namespace ukive {
             discardPendingOperations();
         }
 
+        updateDrawableState();
         invalidate();
     }
 
     void View::setBackground(Drawable* drawable) {
         bg_drawable_.reset(drawable);
+        updateBackgroundState();
         invalidate();
     }
 
     void View::setForeground(Drawable* drawable) {
         fg_drawable_.reset(drawable);
+        updateForegroundState();
         invalidate();
     }
 
@@ -552,8 +555,8 @@ namespace ukive {
     }
 
     bool View::isLocalMouseInThis(InputEvent* e) const {
-        return (e->getMouseX() >= 0 && e->getMouseX() <= getWidth()
-            && e->getMouseY() >= 0 && e->getMouseY() <= getHeight());
+        return (e->getMouseX() >= 0 && e->getMouseX() < getWidth()
+            && e->getMouseY() >= 0 && e->getMouseY() < getHeight());
     }
 
     bool View::isParentMouseInThis(InputEvent* e) const {
@@ -714,6 +717,8 @@ namespace ukive {
         // 绘制孩子
         dispatchDraw(canvas);
 
+        onDrawOverChild(canvas);
+
         canvas->popClip();
         canvas->restore();
 
@@ -748,6 +753,45 @@ namespace ukive {
         if (needDrawForeground()) {
             fg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             fg_drawable_->draw(canvas);
+        }
+    }
+
+    void View::updateDrawableState() {
+        updateBackgroundState();
+        updateForegroundState();
+    }
+
+    void View::updateBackgroundState() {
+        bool need_redraw = false;
+        if (isEnabled()) {
+            if (bg_drawable_) {
+                need_redraw = bg_drawable_->setState(Drawable::STATE_NONE);
+            }
+        } else {
+            if (bg_drawable_) {
+                need_redraw = bg_drawable_->setState(Drawable::STATE_DISABLED);
+            }
+        }
+
+        if (need_redraw) {
+            invalidate();
+        }
+    }
+
+    void View::updateForegroundState() {
+        bool need_redraw = false;
+        if (isEnabled()) {
+            if (fg_drawable_) {
+                need_redraw = fg_drawable_->setState(Drawable::STATE_NONE);
+            }
+        } else {
+            if (fg_drawable_) {
+                need_redraw = fg_drawable_->setState(Drawable::STATE_DISABLED);
+            }
+        }
+
+        if (need_redraw) {
+            invalidate();
         }
     }
 
@@ -911,6 +955,7 @@ namespace ukive {
     }
 
     void View::onDraw(Canvas* canvas) {}
+    void View::onDrawOverChild(Canvas* canvas) {}
 
     bool View::onInputEvent(InputEvent* e) {
         bool should_refresh = false;
@@ -1034,6 +1079,9 @@ namespace ukive {
                 invalidate();
             }
             return can_consume_mouse_event_;
+
+        default:
+            break;
         }
 
         return false;
@@ -1083,15 +1131,15 @@ namespace ukive {
             }
         }
 
-        bool shouldRefresh = false;
+        bool should_refresh = false;
         if (bg_drawable_) {
-            shouldRefresh = bg_drawable_->setParentFocus(get_focus);
+            should_refresh = bg_drawable_->setParentFocus(get_focus);
         }
         if (fg_drawable_) {
-            shouldRefresh = fg_drawable_->setParentFocus(get_focus);
+            should_refresh = fg_drawable_->setParentFocus(get_focus);
         }
 
-        if (shouldRefresh) {
+        if (should_refresh) {
             invalidate();
         }
     }

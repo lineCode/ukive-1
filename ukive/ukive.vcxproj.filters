@@ -306,6 +306,27 @@
     <ClCompile Include="utils\event_handler.h">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="system\reg_manager.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="files\file.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\unicode.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\check_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="views\check_box.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\vector2.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\list_layouter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -652,6 +673,27 @@
     <ClInclude Include="views\layout\non_client_layout.h">
       <Filter>views\layout</Filter>
     </ClInclude>
+    <ClInclude Include="system\reg_manager.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="files\file.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\unicode.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\check_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="views\check_box.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\vector2.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\list_layouter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -710,6 +752,9 @@
     </Filter>
     <Filter Include="graphics\render_node">
       <UniqueIdentifier>{bbfb6918-d6e4-4428-8a70-2e63ad352cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="files">
+      <UniqueIdentifier>{b51fd15d-9a20-4be5-9d96-026070975a3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -62,10 +62,13 @@ namespace ukive {
         ~WICManager();
 
         ComPtr<IWICBitmap> createBitmap(IWICBitmapSource* src);
-        ComPtr<IWICBitmap> createBitmap(unsigned int width, unsigned int height);
+        ComPtr<IWICBitmap> createBitmap(UINT width, UINT height);
+        ComPtr<IWICBitmap> createBitmap(UINT width, UINT height, BYTE* bgra_buf);
 
         WICBitmaps decodeFile(const string16& file_name);
         WICBitmaps decodeMemory(const BYTE* buffer, size_t size);
+
+        bool saveToPngFile(UINT width, UINT height, BYTE* bgra_buf, const string16& name);
 
     private:
         void GetGlobalMetadata(

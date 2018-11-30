@@ -8,20 +8,20 @@ namespace ukive {
 
     class Canvas;
 
-    class Drawable
-    {
+    class Drawable {
     public:
         enum DrawableState {
             STATE_NONE,
             STATE_PRESSED,
             STATE_FOCUSED,
-            STATE_HOVERED
+            STATE_HOVERED,
+            STATE_DISABLED,
         };
 
         Drawable();
         virtual ~Drawable() = default;
 
-        void setBounds(const Rect &rect);
+        void setBounds(const Rect& rect);
         void setBounds(int left, int top, int right, int bottom);
 
         bool setState(int state);
@@ -32,7 +32,7 @@ namespace ukive {
         int getPrevState() const;
         Rect getBounds() const;
 
-        virtual void draw(Canvas *canvas) = 0;
+        virtual void draw(Canvas* canvas) = 0;
 
         virtual float getOpacity() const;
 

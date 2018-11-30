@@ -25,8 +25,9 @@ namespace ukive {
 
     protected:
         void onBoundChanged(const Rect& new_bound) override;
+        bool onStateChanged(int new_state, int prev_state) override;
 
-        std::vector<std::shared_ptr<Drawable>> mDrawableList;
+        std::vector<std::shared_ptr<Drawable>> drawable_list_;
     };
 
 }

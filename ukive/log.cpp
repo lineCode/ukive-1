@@ -3,32 +3,26 @@
 #include <intrin.h>
 #include <Windows.h>
 
+#include <fstream>
+
+#include "ukive/application.h"
+#include "ukive/files/file.h"
+
 
 namespace ukive {
 
-    void Log::i(const string16 &tag, const string16 &msg) {
-        ::OutputDebugString(msg.c_str());
+    std::wofstream log_file_stream_;
+
+    void InitLogging() {
+        auto exec_dir = ukive::Application::getExecFileName(true);
+        File log_file(exec_dir, L"Debug.log");
+        log_file_stream_.open(log_file.getPath().c_str(), std::ios::out | std::ios::app);
     }
 
-    void Log::d(const string16 &tag, const string16 &msg) {
-        if (tag == L"TsfEditor") {
-            return;
-        }
-        ::OutputDebugString(msg.c_str());
+    void UninitLogging() {
+        log_file_stream_.close();
     }
 
-    void Log::w(const string16 &tag, const string16 &msg) {
-        ::OutputDebugString(msg.c_str());
-    }
-
-    void Log::e(const string16 &tag, const string16 &msg) {
-        ::OutputDebugString(msg.c_str());
-        debugBreak();
-    }
-
-    void Log::v(const string16 &tag, const string16 &msg) {
-        ::OutputDebugString(msg.c_str());
-    }
 
     Log::Log(const wchar_t* file_name, int line_number, Severity level)
         :level_(level),
@@ -45,6 +39,10 @@ namespace ukive {
             .append(stream_.str())
             .append(L"\n");
         ::OutputDebugStringW(msg.c_str());
+
+        if (log_file_stream_.is_open()) {
+            log_file_stream_ << msg << std::flush;
+        }
 
         switch (level_) {
         case Severity::INFO:

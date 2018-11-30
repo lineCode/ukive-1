@@ -22,13 +22,13 @@ namespace ukive {
 
         if (!vertices || !indices
             || vertexCount == 0 || indexCount == 0) {
-            Log::e(L"DrawingObjectManager", L"invalid params.");
+            LOG(Log::ERR) << "Invalid params.";
             return;
         }
 
         for (auto obj : drawing_objs_) {
             if (obj->tag == tag) {
-                Log::e(L"DrawingObjectManager", L"invalid params.");
+                LOG(Log::ERR) << "Invalid params.";
                 return;
             }
         }

@@ -20,7 +20,7 @@ namespace ukive {
 
     class WindowImpl {
     public:
-        WindowImpl(Window* win);
+        explicit WindowImpl(Window* win);
         ~WindowImpl();
 
         void init();
@@ -43,7 +43,7 @@ namespace ukive {
         int getHeight() const;
         int getClientWidth() const;
         int getClientHeight() const;
-        unsigned int getDpi() const;
+        int getDpi() const;
         HWND getHandle() const;
         Cursor getCurrentCursor() const;
 
@@ -59,7 +59,7 @@ namespace ukive {
         bool isMouseTrackEnabled();
 
         float dpToPx(float dp);
-        float pxToDp(int px);
+        float pxToDp(float px);
 
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -83,6 +83,7 @@ namespace ukive {
         bool onResizing(WPARAM edge, Rect* rect);
         bool onClose();
         void onDestroy();
+        bool onTouch(const TOUCHINPUT* inputs, int size);
         bool onInputEvent(InputEvent* e);
         void onDpiChanged(int dpi_x, int dpi_y);
         void onStyleChanged(bool normal, bool ext, const STYLESTRUCT* ss);

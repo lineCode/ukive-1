@@ -8,9 +8,10 @@ namespace ukive {
     class MenuItem;
     class ContextMenu;
 
-    class ContextMenuCallback
-    {
+    class ContextMenuCallback {
     public:
+        virtual ~ContextMenuCallback() = default;
+
         virtual bool onCreateContextMenu(ContextMenu *contextMenu, Menu *menu) = 0;
         virtual bool onPrepareContextMenu(ContextMenu *contextMenu, Menu *menu) = 0;
         virtual bool onContextMenuItemClicked(ContextMenu *contextMenu, MenuItem *item) = 0;

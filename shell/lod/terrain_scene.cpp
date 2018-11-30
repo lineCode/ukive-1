@@ -6,6 +6,7 @@
 #include "ukive/views/text_view.h"
 #include "ukive/views/direct3d_view.h"
 #include "ukive/window/window.h"
+#include "ukive/log.h"
 
 #include "shell/lod/lod_generator.h"
 #include "shell/lod/terrain_configure.h"
@@ -22,19 +23,25 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    TerrainScene::TerrainScene() {
+    TerrainScene::TerrainScene()
+        : mPrevX(0),
+          mPrevY(0),
+          mWidth(0),
+          mHeight(0),
+          mAssistConfigure(nullptr),
+          mModelConfigure(nullptr),
+          mTerrainConfigure(nullptr),
+          d3d_view_(nullptr) {
+
         mMouseActionMode = MOUSE_ACTION_NONE;
         mIsCtrlKeyPressed = false;
         mIsShiftKeyPressed = false;
         mIsMouseLeftKeyPressed = false;
 
         drawing_obj_mgr_ = new ukive::DrawingObjectManager();
-
         graph_creator_ = new GraphCreator(drawing_obj_mgr_);
 
-        camera_ = new Camera();
-        camera_->init(1, 1);
-
+        camera_ = new Camera(1, 1);
         mLodGenerator = new LodGenerator(8192, 5);
 
         mVertexBuffer = ukive::Space::createVertexBuffer(
@@ -132,18 +139,13 @@ namespace shell {
         }
     }
 
-    void TerrainScene::getPickLine(int sx, int sy, dx::XMVECTOR *lineOrig, dx::XMVECTOR *lineDir) {
-        float vx, vy;
-        const dx::XMFLOAT4X4 *worldMatrix;
-        const dx::XMFLOAT4X4 *viewMatrix;
-        const dx::XMFLOAT4X4 *projectionMatrix;
+    void TerrainScene::getPickLine(int sx, int sy, dx::XMVECTOR* lineOrig, dx::XMVECTOR* lineDir) {
+        auto worldMatrix = camera_->getWorldMatrix();
+        auto viewMatrix = camera_->getViewMatrix();
+        auto projectionMatrix = camera_->getProjectionMatrix();
 
-        worldMatrix = camera_->getWorldMatrix();
-        viewMatrix = camera_->getViewMatrix();
-        projectionMatrix = camera_->getProjectionMatrix();
-
-        vx = (2.0f * sx / mWidth - 1.0f) / projectionMatrix->_11;
-        vy = (-2.0f * sy / mHeight + 1.0f) / projectionMatrix->_22;
+        auto vx = (2.0f * sx / mWidth - 1.0f) / projectionMatrix->_11;
+        auto vy = (-2.0f * sy / mHeight + 1.0f) / projectionMatrix->_22;
 
         dx::XMVECTOR rayDir = dx::XMVectorSet(vx, vy, 1.0f, 0);
         dx::XMVECTOR rayOrigin = dx::XMVectorSet(0.0f, 0.0f, 0.0f, 0);
@@ -151,11 +153,11 @@ namespace shell {
         dx::XMMATRIX world = dx::XMLoadFloat4x4(worldMatrix);
         dx::XMMATRIX view = dx::XMLoadFloat4x4(viewMatrix);
 
-        dx::XMMATRIX inverseView = dx::XMMatrixInverse(0, view);
+        dx::XMMATRIX inverseView = dx::XMMatrixInverse(nullptr, view);
         rayDir = dx::XMVector3TransformNormal(rayDir, inverseView);
         rayOrigin = dx::XMVector3TransformCoord(rayOrigin, inverseView);
 
-        dx::XMMATRIX inverseWorld = dx::XMMatrixInverse(0, world);
+        dx::XMMATRIX inverseWorld = dx::XMMatrixInverse(nullptr, world);
         rayDir = dx::XMVector3TransformNormal(rayDir, inverseWorld);
         rayOrigin = dx::XMVector3TransformCoord(rayOrigin, inverseWorld);
 
@@ -193,19 +195,13 @@ namespace shell {
         getCamera()->circuleCamera2(1.f, -0.2f);
 
         mAssistConfigure = new AssistConfigure();
-        HRESULT hr = mAssistConfigure->init();
-        if (FAILED(hr))
-            throw std::runtime_error("");
+        mAssistConfigure->init();
 
         mModelConfigure = new ModelConfigure();
-        hr = mModelConfigure->init();
-        if (FAILED(hr))
-            throw std::runtime_error("");
+        mModelConfigure->init();
 
         mTerrainConfigure = new TerrainConfigure();
-        hr = mTerrainConfigure->init();
-        if (FAILED(hr))
-            throw std::runtime_error("");
+        mTerrainConfigure->init();
 
         getGraphCreator()->putWorldAxis(kWorldAxis, 1024);
 
@@ -213,7 +209,7 @@ namespace shell {
     }
 
 
-    void TerrainScene::onSceneResize(unsigned int width, unsigned int height) {
+    void TerrainScene::onSceneResize(int width, int height) {
         Scene::onSceneResize(width, height);
 
         mWidth = width;
@@ -278,19 +274,19 @@ namespace shell {
             break;
 
         case ukive::InputEvent::EVK_DOWN:
-            if (e->getKeyboardKey() == VK_SHIFT) {
+            if (e->getKeyboardVirtualKey() == VK_SHIFT) {
                 mIsShiftKeyPressed = true;
             }
-            if (e->getKeyboardKey() == VK_CONTROL) {
+            if (e->getKeyboardVirtualKey() == VK_CONTROL) {
                 mIsCtrlKeyPressed = true;
             }
             break;
 
         case ukive::InputEvent::EVK_UP:
-            if (e->getKeyboardKey() == VK_SHIFT) {
+            if (e->getKeyboardVirtualKey() == VK_SHIFT) {
                 mIsShiftKeyPressed = false;
             }
-            if (e->getKeyboardKey() == VK_CONTROL) {
+            if (e->getKeyboardVirtualKey() == VK_CONTROL) {
                 mIsCtrlKeyPressed = false;
             }
             break;
@@ -299,6 +295,8 @@ namespace shell {
             getCamera()->scaleCamera(e->getMouseWheel() > 0 ? 0.9f : 1.1f);
             updateLodTerrain();
             d3d_view_->invalidate();
+            break;
+        default:
             break;
         }
     }
@@ -359,19 +357,19 @@ namespace shell {
         }
     }
 
-    Camera* TerrainScene::getCamera() {
+    Camera* TerrainScene::getCamera() const {
         return camera_;
     }
 
-    GraphCreator* TerrainScene::getGraphCreator() {
+    GraphCreator* TerrainScene::getGraphCreator() const {
         return graph_creator_;
     }
 
-    ukive::DrawingObjectManager* TerrainScene::getDrawingObjectManager() {
+    ukive::DrawingObjectManager* TerrainScene::getDrawingObjectManager() const {
         return drawing_obj_mgr_;
     }
 
-    LodGenerator* TerrainScene::getLodGenerator() {
+    LodGenerator* TerrainScene::getLodGenerator() const {
         return mLodGenerator;
     }
 

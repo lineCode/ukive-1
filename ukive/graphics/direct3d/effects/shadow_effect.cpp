@@ -38,7 +38,7 @@ namespace ukive {
         layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[0].InstanceDataStepRate = 0;
 
-        ukive::string16 shader_path(::_wgetcwd(nullptr, 0));
+        ukive::string16 shader_path = ukive::Application::getExecFileName(true);
 
         ukive::Space::createVertexShader(
             shader_path + L"\\shadow_effect_vs.cso",

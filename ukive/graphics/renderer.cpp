@@ -72,7 +72,7 @@ namespace ukive {
         hr = d2d_rt_->EndDraw();
         if (FAILED(hr)) {
             DCHECK(false);
-            Log::e(L"Render", L"failed to draw d2d content.");
+            LOG(Log::ERR) << "Failed to draw d2d content.";
         }
 
         if (!is_layered_) {
@@ -250,7 +250,7 @@ namespace ukive {
     HRESULT Renderer::drawSwapchain() {
         HRESULT hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
         if (FAILED(hr)) {
-            Log::e(L"Render", L"failed to present.");
+            LOG(Log::ERR) << "Failed to present.";
         }
 
         return hr;

@@ -1,4 +1,4 @@
-#include "point.h"
+#include "ukive/graphics/point.h"
 
 
 namespace ukive {
@@ -18,17 +18,29 @@ namespace ukive {
         return *this;
     }
 
-    bool Point::operator==(const Point& rhs) {
+    bool Point::operator==(const Point& rhs) const {
         return (x == rhs.x && y == rhs.y);
     }
 
-    bool Point::operator!=(const Point& rhs) {
+    bool Point::operator!=(const Point& rhs) const {
         return (x != rhs.x || y != rhs.y);
+    }
+
+    PointF Point::operator+(const Vector2& vec) const {
+        return PointF(x + vec.x, y + vec.y);
+    }
+
+    Vector2 Point::operator-(const Point& rhs) const {
+        return Vector2(x - rhs.x, y - rhs.y);
     }
 
     void Point::set(int x, int y) {
         this->x = x;
         this->y = y;
+    }
+
+    PointF Point::toPointF() const {
+        return PointF(x, y);
     }
 
 
@@ -47,12 +59,20 @@ namespace ukive {
         return *this;
     }
 
-    bool PointF::operator==(const PointF& rhs) {
+    bool PointF::operator==(const PointF& rhs) const {
         return (x == rhs.x && y == rhs.y);
     }
 
-    bool PointF::operator!=(const PointF& rhs) {
+    bool PointF::operator!=(const PointF& rhs) const {
         return (x != rhs.x || y != rhs.y);
+    }
+
+    PointF PointF::operator+(const Vector2& vec) const {
+        return PointF(x + vec.x, y + vec.y);
+    }
+
+    Vector2 PointF::operator-(const PointF& rhs) const {
+        return Vector2(x - rhs.x, y - rhs.y);
     }
 
     void PointF::set(float x, float y) {

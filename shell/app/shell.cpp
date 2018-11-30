@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "ukive/application.h"
+#include "ukive/log.h"
 
 #include "shell/test/test_window.h"
 #include "shell/lod/lod_window.h"
@@ -15,6 +16,10 @@
 int APIENTRY wWinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance,
     LPWSTR lpCmdLine, int nCmdShow) {
+
+    ukive::InitLogging();
+
+    LOG(Log::INFO) << "Application start.";
 
     auto app = std::make_shared<ukive::Application>(lpCmdLine);
 
@@ -63,6 +68,10 @@ int APIENTRY wWinMain(
     thr_dimen_window->show();
 
     app->run();
+
+    LOG(Log::INFO) << "Application exit.\n";
+
+    ukive::UninitLogging();
 
     return 0;
 }

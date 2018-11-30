@@ -12,28 +12,31 @@ namespace ukive {
     class AnimationManager;
     class AnimatorStateHandler;
 
-    class Animator
-    {
+    class Animator {
     public:
         class OnValueChangedListener {
         public:
+            virtual ~OnValueChangedListener() = default;
+
             virtual void onValueChanged(
                 unsigned int varIndex,
                 IUIAnimationStoryboard* storyboard,
                 IUIAnimationVariable* variable,
-                double newValue, double previousValue) = 0;
+                double newValue, double previousValue) {}
             virtual void onIntegerValueChanged(
                 unsigned int varIndex,
                 IUIAnimationStoryboard* storyboard,
                 IUIAnimationVariable* variable,
-                int newValue, int previousValue) = 0;
+                int newValue, int previousValue) {}
         };
 
         class OnAnimatorListener {
         public:
-            virtual void onAnimationStart(Animator* animator) = 0;
-            virtual void onAnimationEnd(Animator* animator) = 0;
-            virtual void onAnimationCancel(Animator* animator) = 0;
+            virtual ~OnAnimatorListener() = default;
+
+            virtual void onAnimationStart(Animator* animator) {}
+            virtual void onAnimationEnd(Animator* animator) {}
+            virtual void onAnimationCancel(Animator* animator) {}
         };
 
     public:
@@ -112,10 +115,10 @@ namespace ukive {
 
     private:
         AnimationManager* anim_mgr_;
-        ComPtr<IUIAnimationStoryboard> mStoryboard;
-        AnimatorStateHandler* mAnimatorStateListener;
+        ComPtr<IUIAnimationStoryboard> story_board_;
+        AnimatorStateHandler* animator_state_listener_;
 
-        std::map<unsigned int, ComPtr<IUIAnimationVariable>> mVariableList;
+        std::map<unsigned int, ComPtr<IUIAnimationVariable>> vars_;
     };
 
 }

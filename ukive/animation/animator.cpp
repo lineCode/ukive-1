@@ -9,60 +9,60 @@ namespace ukive {
 
     Animator::Animator(AnimationManager* mgr) {
         anim_mgr_ = mgr;
-        mAnimatorStateListener = new AnimatorStateHandler(this);
+        animator_state_listener_ = new AnimatorStateHandler(this);
 
         HRESULT hr = anim_mgr_->getAnimationManager()
-            ->CreateStoryboard(&mStoryboard);
+            ->CreateStoryboard(&story_board_);
         if (FAILED(hr)) {
             DLOG(Log::FATAL) << "create storyboard failed.";
         }
-        mStoryboard->SetStoryboardEventHandler(mAnimatorStateListener);
+        story_board_->SetStoryboardEventHandler(animator_state_listener_);
     }
-
 
     Animator::~Animator() {
         stop();
-        mAnimatorStateListener->Release();
+        animator_state_listener_->Release();
     }
 
 
     void Animator::start() {
         UI_ANIMATION_SECONDS time;
         anim_mgr_->getAnimationTimer()->GetTime(&time);
-        mStoryboard->Schedule(time);
+        story_board_->Schedule(time);
     }
 
     void Animator::stop() {
-        mStoryboard->Abandon();
+        story_board_->Abandon();
     }
 
     void Animator::finish(double second) {
-        mStoryboard->Finish(second);
+        story_board_->Finish(second);
     }
 
     void Animator::reset() {
         UI_ANIMATION_STORYBOARD_STATUS status;
-        mStoryboard->GetStatus(&status);
+        story_board_->GetStatus(&status);
         if (status == UI_ANIMATION_STORYBOARD_BUILDING) {
             return;
         }
 
-        mVariableList.clear();
+        vars_.clear();
 
-        mStoryboard->Abandon();
-        mStoryboard.reset();
+        story_board_->Abandon();
+        story_board_.reset();
+
         HRESULT hr = anim_mgr_->getAnimationManager()
-            ->CreateStoryboard(&mStoryboard);
+            ->CreateStoryboard(&story_board_);
         if (FAILED(hr)) {
             DLOG(Log::FATAL) << "create storyboard failed.";
             return;
         }
-        mStoryboard->SetStoryboardEventHandler(mAnimatorStateListener);
+        story_board_->SetStoryboardEventHandler(animator_state_listener_);
     }
 
     void Animator::startTransition(unsigned int varIndex, std::shared_ptr<Transition> transition) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return;
         }
 
@@ -73,35 +73,32 @@ namespace ukive {
             ScheduleTransition(it->second.get(), transition->getTransition().get(), time);
     }
 
-
     void Animator::setOnStateChangedListener(OnAnimatorListener* l) {
-        mAnimatorStateListener->setOnAnimatorListener(l);
+        animator_state_listener_->setOnAnimatorListener(l);
     }
 
     void Animator::setOnValueChangedListener(
         unsigned int varIndex, OnValueChangedListener* l) {
 
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return;
         }
 
-        if (l == nullptr) {
+        if (!l) {
             it->second->SetVariableChangeHandler(nullptr);
             it->second->SetVariableIntegerChangeHandler(nullptr);
         } else {
-            AnimationVariableChangeHandler* handler
-                = new AnimationVariableChangeHandler(l, varIndex);
+            auto handler = new AnimationVariableChangeHandler(l, varIndex);
             it->second->SetVariableChangeHandler(handler);
             it->second->SetVariableIntegerChangeHandler(handler);
             handler->Release();
         }
     }
 
-
     double Animator::getValue(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return 0;
         }
 
@@ -112,8 +109,8 @@ namespace ukive {
     }
 
     int Animator::getIntValue(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return 0;
         }
 
@@ -124,8 +121,8 @@ namespace ukive {
     }
 
     double Animator::getPrevValue(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return 0;
         }
 
@@ -136,8 +133,8 @@ namespace ukive {
     }
 
     int Animator::getPrevIntValue(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return 0;
         }
 
@@ -148,8 +145,8 @@ namespace ukive {
     }
 
     double Animator::getFinalValue(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return 0;
         }
 
@@ -160,8 +157,8 @@ namespace ukive {
     }
 
     int Animator::getFinalIntValue(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return 0;
         }
 
@@ -173,44 +170,42 @@ namespace ukive {
 
     double Animator::getElapsedTime() {
         double time = 0;
-        mStoryboard->GetElapsedTime(&time);
+        story_board_->GetElapsedTime(&time);
         return time;
     }
-
 
     bool Animator::addVariable(
         unsigned int varIndex, double initValue,
         double lower, double upper) {
 
-        auto it = mVariableList.find(varIndex);
-        if (it != mVariableList.end()) {
-            mVariableList.erase(varIndex);
+        auto it = vars_.find(varIndex);
+        if (it != vars_.end()) {
+            vars_.erase(varIndex);
         }
 
-        ComPtr<IUIAnimationVariable> aVariable;
+        ComPtr<IUIAnimationVariable> var;
 
         HRESULT hr = anim_mgr_->getAnimationManager()->
-            CreateAnimationVariable(initValue, &aVariable);
+            CreateAnimationVariable(initValue, &var);
         if (FAILED(hr)) {
             return false;
         }
 
-        aVariable->SetLowerBound(lower);
-        aVariable->SetUpperBound(upper);
+        var->SetLowerBound(lower);
+        var->SetUpperBound(upper);
 
-        mVariableList.insert(
-            std::pair<unsigned int, ComPtr<IUIAnimationVariable>>(varIndex, aVariable));
+        vars_.insert({ varIndex, var });
 
         return true;
     }
 
     bool Animator::addTransition(unsigned int varIndex, std::shared_ptr<Transition> transition) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return false;
         }
 
-        HRESULT hr = mStoryboard->AddTransition(
+        HRESULT hr = story_board_->AddTransition(
             it->second.get(), transition->getTransition().get());
         if (FAILED(hr)) {
             return false;
@@ -223,12 +218,12 @@ namespace ukive {
         unsigned int varIndex, std::shared_ptr<Transition> transition,
         UI_ANIMATION_KEYFRAME key) {
 
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return false;
         }
 
-        HRESULT hr = mStoryboard->AddTransitionAtKeyframe(
+        HRESULT hr = story_board_->AddTransitionAtKeyframe(
             it->second.get(), transition->getTransition().get(), key);
         if (FAILED(hr)) {
             return false;
@@ -241,12 +236,12 @@ namespace ukive {
         unsigned int varIndex, std::shared_ptr<Transition> transition,
         UI_ANIMATION_KEYFRAME startKey, UI_ANIMATION_KEYFRAME endKey) {
 
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        auto it = vars_.find(varIndex);
+        if (it == vars_.end()) {
             return false;
         }
 
-        HRESULT hr = mStoryboard->AddTransitionBetweenKeyframes(
+        HRESULT hr = story_board_->AddTransitionBetweenKeyframes(
             it->second.get(), transition->getTransition().get(), startKey, endKey);
         if (FAILED(hr)) {
             return false;
@@ -258,7 +253,7 @@ namespace ukive {
     bool Animator::addKey(
         UI_ANIMATION_KEYFRAME existed, double offset, UI_ANIMATION_KEYFRAME* newKey) {
 
-        HRESULT hr = mStoryboard->AddKeyframeAtOffset(existed, offset, newKey);
+        HRESULT hr = story_board_->AddKeyframeAtOffset(existed, offset, newKey);
         if (FAILED(hr)) {
             return false;
         }
@@ -269,7 +264,7 @@ namespace ukive {
     bool Animator::addKey(
         std::shared_ptr<Transition> transition, UI_ANIMATION_KEYFRAME* newKey) {
 
-        HRESULT hr = mStoryboard->AddKeyframeAfterTransition(transition->getTransition().get(), newKey);
+        HRESULT hr = story_board_->AddKeyframeAfterTransition(transition->getTransition().get(), newKey);
         if (FAILED(hr)) {
             return false;
         }
@@ -278,17 +273,16 @@ namespace ukive {
     }
 
     bool Animator::hasVariable(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        return (it != mVariableList.end());
+        auto it = vars_.find(varIndex);
+        return (it != vars_.end());
     }
 
     bool Animator::removeVariable(unsigned int varIndex) {
-        auto it = mVariableList.find(varIndex);
-        if (it == mVariableList.end()) {
+        if (!hasVariable(varIndex)) {
             return false;
         }
 
-        mVariableList.erase(varIndex);
+        vars_.erase(varIndex);
         return true;
     }
 

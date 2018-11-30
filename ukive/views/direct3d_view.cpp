@@ -234,7 +234,7 @@ namespace ukive {
             return;
         }
 
-        // std::wstring ddsFileName(::_wgetcwd(nullptr, 0));
+        // std::wstring ddsFileName = ukive::Application::getExecFileName(true);
         // RH(DirectX::CreateDDSTextureFromFile(
         // d3d_device.get(), ddsFileName + L"\\top.dds", 0, &shader_resource_view_));
     }

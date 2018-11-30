@@ -9,16 +9,13 @@ namespace ukive {
 
     class Window;
 
-    class EditTextDrawable : public Drawable
-    {
+    class EditTextDrawable : public Drawable {
     public:
         EditTextDrawable(Window* win);
         ~EditTextDrawable();
 
         bool onFocusChanged(bool focus) override;
-
         void draw(Canvas *canvas) override;
-
         float getOpacity() const override;
 
     private:

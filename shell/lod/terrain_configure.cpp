@@ -2,7 +2,7 @@
 
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/utils/string_utils.h"
-#include "ukive/utils/hresult_utils.h"
+#include "ukive/application.h"
 
 
 namespace shell {
@@ -12,7 +12,7 @@ namespace shell {
     TerrainConfigure::~TerrainConfigure() {}
 
 
-    HRESULT TerrainConfigure::init() {
+    void TerrainConfigure::init() {
         D3D11_INPUT_ELEMENT_DESC layout[2];
 
         layout[0].SemanticName = "POSITION";
@@ -31,7 +31,7 @@ namespace shell {
         layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[1].InstanceDataStepRate = 0;
 
-        ukive::string16 shader_path(::_wgetcwd(nullptr, 0));
+        ukive::string16 shader_path = ukive::Application::getExecFileName(true);
 
         ukive::Space::createVertexShader(
             shader_path + L"\\terrain_vertex_shader.cso",
@@ -42,17 +42,9 @@ namespace shell {
             &pixel_shader_);
 
         const_buffer_ = ukive::Space::createConstantBuffer(sizeof(MatrixConstBuffer));
-
-        return S_OK;
     }
 
     void TerrainConfigure::active() {
-        ukive::Space::setVertexShader(vertex_shader_.get());
-        ukive::Space::setPixelShader(pixel_shader_.get());
-        ukive::Space::setInputLayout(input_layout_.get());
-    }
-
-    void TerrainConfigure::reset() {
         ukive::Space::setVertexShader(vertex_shader_.get());
         ukive::Space::setPixelShader(pixel_shader_.get());
         ukive::Space::setInputLayout(input_layout_.get());

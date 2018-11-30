@@ -17,7 +17,6 @@
 #include "ukive/graphics/renderer.h"
 #include "ukive/system/qpc_service.h"
 #include "ukive/views/debug_view.h"
-#include "ukive/system/time_utils.h"
 
 
 namespace ukive {
@@ -213,7 +212,7 @@ namespace ukive {
         //与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
         if (mouse_holder_ref_ != 0
             && v != mouse_holder_) {
-            DCHECK(false) << "abnormal capture mouse!!";
+            LOG(Log::ERR) << "abnormal capture mouse!!";
             return;
         }
 
@@ -252,7 +251,7 @@ namespace ukive {
         return mouse_holder_;
     }
 
-    unsigned int Window::getMouseHolderRef() const {
+    int Window::getMouseHolderRef() const {
         return mouse_holder_ref_;
     }
 
@@ -278,7 +277,7 @@ namespace ukive {
             return;
         }
 
-        LayoutParams* params = root_layout_->getLayoutParams();
+        auto params = root_layout_->getLayoutParams();
 
         int width = getClientWidth();
         int height = getClientHeight();
@@ -291,6 +290,7 @@ namespace ukive {
                 widthSpec = View::FIT;
                 break;
 
+            default:
             case LayoutParams::MATCH_PARENT:
                 widthSpec = View::EXACTLY;
                 break;
@@ -306,6 +306,7 @@ namespace ukive {
                 heightSpec = View::FIT;
                 break;
 
+            default:
             case LayoutParams::MATCH_PARENT:
                 heightSpec = View::EXACTLY;
                 break;
@@ -392,13 +393,12 @@ namespace ukive {
 
         context_menu_.reset(contextMenu);
 
-        int x, y;
         Rect rect = anchor->getBoundsInWindow();
 
-        y = rect.bottom;
+        int x;
+        int y = rect.bottom;
 
-        switch (gravity)
-        {
+        switch (gravity) {
         case View::LEFT:
             x = rect.left;
             break;
@@ -444,7 +444,7 @@ namespace ukive {
         return impl_->dpToPx(dp);
     }
 
-    float Window::pxToDp(int px) {
+    float Window::pxToDp(float px) {
         return impl_->pxToDp(px);
     }
 
@@ -569,7 +569,7 @@ namespace ukive {
 
         HRESULT hr = renderer_->resize();
         if (FAILED(hr)) {
-            Log::e(L"Window", L"Resize DirectX Renderer failed.");
+            LOG(Log::ERR) << "Resize DirectX Renderer failed.";
             return;
         }
 
@@ -709,7 +709,7 @@ namespace ukive {
                 return root_layout_->dispatchInputEvent(e);
             }
         } else if (e->isKeyboardEvent()) {
-            if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardKey() == 0x51) {
+            if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
                 bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
                 bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);
                 if (isCtrlKeyPressed && isShiftKeyPressed) {

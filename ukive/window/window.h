@@ -10,7 +10,6 @@
 #include "ukive/graphics/color.h"
 #include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
-#include "ukive/utils/weak_bind.h"
 #include "ukive/graphics/swapchain_resize_notifier.h"
 
 
@@ -92,7 +91,7 @@ namespace ukive {
         void releaseKeyboard();
 
         View* getMouseHolder() const;
-        unsigned int getMouseHolderRef() const;
+        int getMouseHolderRef() const;
         View* getKeyboardHolder() const;
 
         void invalidate();
@@ -110,7 +109,7 @@ namespace ukive {
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);
 
         float dpToPx(float dp);
-        float pxToDp(int px);
+        float pxToDp(float px);
 
         virtual void onPreCreate(
             ClassInfo* info,
@@ -194,7 +193,7 @@ namespace ukive {
         View* mouse_holder_;
         View* focus_holder_;
         View* focus_holder_backup_;
-        unsigned int mouse_holder_ref_;
+        int mouse_holder_ref_;
 
         std::shared_ptr<ContextMenu> context_menu_;
         std::shared_ptr<TextActionMode> text_action_mode_;

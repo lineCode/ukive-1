@@ -176,6 +176,7 @@
     <ClInclude Include="animation\view_animator.h" />
     <ClInclude Include="application.h" />
     <ClInclude Include="drawable\bitmap_drawable.h" />
+    <ClInclude Include="drawable\check_drawable.h" />
     <ClInclude Include="drawable\color_drawable.h" />
     <ClInclude Include="drawable\drawable.h" />
     <ClInclude Include="drawable\edittext_drawable.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="drawable\ripple_drawable.h" />
     <ClInclude Include="drawable\shape_drawable.h" />
     <ClInclude Include="event\input_event.h" />
+    <ClInclude Include="files\file.h" />
     <ClInclude Include="graphics\bitmap.h" />
     <ClInclude Include="graphics\bitmap_factory.h" />
     <ClInclude Include="graphics\canvas.h" />
@@ -204,6 +206,7 @@
     <ClInclude Include="graphics\render_node\render_node.h" />
     <ClInclude Include="graphics\render_node\render_tree.h" />
     <ClInclude Include="graphics\swapchain_resize_notifier.h" />
+    <ClInclude Include="graphics\vector2.h" />
     <ClInclude Include="graphics\wic_manager.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="menu\context_menu.h" />
@@ -220,6 +223,7 @@
     <ClInclude Include="message\message_queue.h" />
     <ClInclude Include="system\clipboard_manager.h" />
     <ClInclude Include="system\qpc_service.h" />
+    <ClInclude Include="system\reg_manager.h" />
     <ClInclude Include="system\time_utils.h" />
     <ClInclude Include="text\editable.h" />
     <ClInclude Include="text\input_connection.h" />
@@ -246,8 +250,10 @@
     <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />
+    <ClInclude Include="utils\unicode.h" />
     <ClInclude Include="utils\weak_bind.h" />
     <ClInclude Include="views\button.h" />
+    <ClInclude Include="views\check_box.h" />
     <ClInclude Include="views\click_listener.h" />
     <ClInclude Include="views\debug_view.h" />
     <ClInclude Include="views\direct3d_view.h" />
@@ -263,6 +269,7 @@
     <ClInclude Include="views\layout\restraint_layout_params.h" />
     <ClInclude Include="views\layout\view_group.h" />
     <ClInclude Include="views\list\list_adapter.h" />
+    <ClInclude Include="views\list\list_layouter.h" />
     <ClInclude Include="views\list\list_view.h" />
     <ClInclude Include="views\list\overlay_scroll_bar.h" />
     <ClInclude Include="views\list\view_holder_recycler.h" />
@@ -294,6 +301,7 @@
     <ClCompile Include="animation\view_animator.cpp" />
     <ClCompile Include="application.cpp" />
     <ClCompile Include="drawable\bitmap_drawable.cpp" />
+    <ClCompile Include="drawable\check_drawable.cpp" />
     <ClCompile Include="drawable\color_drawable.cpp" />
     <ClCompile Include="drawable\drawable.cpp" />
     <ClCompile Include="drawable\edittext_drawable.cpp" />
@@ -301,6 +309,7 @@
     <ClCompile Include="drawable\ripple_drawable.cpp" />
     <ClCompile Include="drawable\shape_drawable.cpp" />
     <ClCompile Include="event\input_event.cpp" />
+    <ClCompile Include="files\file.cpp" />
     <ClCompile Include="graphics\bitmap.cpp" />
     <ClCompile Include="graphics\bitmap_factory.cpp" />
     <ClCompile Include="graphics\canvas.cpp" />
@@ -320,6 +329,7 @@
     <ClCompile Include="graphics\rendering_command_list.cpp" />
     <ClCompile Include="graphics\render_node\render_node.cpp" />
     <ClCompile Include="graphics\render_node\render_tree.cpp" />
+    <ClCompile Include="graphics\vector2.cpp" />
     <ClCompile Include="graphics\wic_manager.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="menu\context_menu.cpp" />
@@ -332,6 +342,7 @@
     <ClCompile Include="message\message_queue.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
     <ClCompile Include="system\qpc_service.cpp" />
+    <ClCompile Include="system\reg_manager.cpp" />
     <ClCompile Include="system\time_utils.cpp" />
     <ClCompile Include="text\editable.cpp" />
     <ClCompile Include="text\input_connection.cpp" />
@@ -355,7 +366,9 @@
     <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
     <ClCompile Include="utils\event_handler.h" />
+    <ClCompile Include="utils\unicode.cpp" />
     <ClCompile Include="views\button.cpp" />
+    <ClCompile Include="views\check_box.cpp" />
     <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
@@ -370,6 +383,7 @@
     <ClCompile Include="views\layout\restraint_layout_params.cpp" />
     <ClCompile Include="views\layout\view_group.cpp" />
     <ClCompile Include="views\list\list_adapter.cpp" />
+    <ClCompile Include="views\list\list_layouter.cpp" />
     <ClCompile Include="views\list\list_view.cpp" />
     <ClCompile Include="views\list\overlay_scroll_bar.cpp" />
     <ClCompile Include="views\list\view_holder_recycler.cpp" />

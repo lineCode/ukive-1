@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 
+#include "ukive/application.h"
 #include "ukive/log.h"
 #include "ukive/utils/string_utils.h"
 
@@ -25,7 +26,7 @@ namespace shell {
         flags_ = new char[vertex_count_];
         std::memset(flags_, 0, vertex_count_);
 
-        ukive::string16 altitudeFileName(::_wgetcwd(nullptr, 0));
+        ukive::string16 altitudeFileName = ukive::Application::getExecFileName(true);
         altitudeFileName.append(L"\\altitude.raw");
 
         std::ifstream reader(altitudeFileName, std::ios::binary);

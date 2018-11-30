@@ -41,8 +41,9 @@ namespace ukive {
     }
 
     Application::Application(int argc, wchar_t* argv[]) {
-        for (int i = 0; i < argc; ++i)
+        for (int i = 0; i < argc; ++i) {
             command_list_.push_back(argv[i]);
+        }
         initApplication();
 
         instance_ = this;
@@ -56,9 +57,9 @@ namespace ukive {
     }
 
     void Application::initApplication() {
-        HRESULT hr = ::CoInitialize(NULL);
+        HRESULT hr = ::CoInitialize(nullptr);
         if (FAILED(hr)) {
-            Log::e(L"Application", L"failed to init COM.");
+            LOG(Log::ERR) << "failed to init COM.";
         }
 
         Message::init(50);
@@ -67,7 +68,7 @@ namespace ukive {
 
         hr = AnimationManager::initGlobal();
         if (FAILED(hr)) {
-            Log::e(L"Application", L"Init anim library failed.");
+            LOG(Log::ERR) << "Init anim library failed.";
         }
 
         graphic_device_manager_.reset(new GraphicDeviceManager());
@@ -78,7 +79,7 @@ namespace ukive {
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
         if (FAILED(hr)) {
-            Log::e(L"Application", L"Init Tsf failed.");
+            LOG(Log::ERR) << "Init Tsf failed.";
         }
     }
 
@@ -117,13 +118,17 @@ namespace ukive {
 
         while (i != std::wstring::npos) {
             std::wstring tmp = cmd_string.substr(new_start, i - new_start);
-            command_list_.push_back(tmp);
+            if (!tmp.empty()) {
+                command_list_.push_back(tmp);
+            }
 
             new_start = i + 1;
             i = cmd_string.find(L" ", new_start);
             if (i == std::wstring::npos) {
                 tmp = cmd_string.substr(new_start, cmd_string.length() - new_start);
-                command_list_.push_back(tmp);
+                if (!tmp.empty()) {
+                    command_list_.push_back(tmp);
+                }
             }
         }
     }
@@ -146,7 +151,7 @@ namespace ukive {
             bool has_message = MessageLooper::loop();
             if (!has_message) {
                 DWORD result = ::MsgWaitForMultipleObjectsEx(
-                    0, NULL, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
+                    0, nullptr, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
                 if (result == WAIT_OBJECT_0) {
                     int i = 0;
                 }
@@ -157,7 +162,7 @@ namespace ukive {
                 int i = 0;
             }
 
-            while (::PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+            while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
                 if (msg.message == WM_QUIT) {
                     done = true;
                     MessageLooper::myLooper()->quit();
@@ -172,12 +177,12 @@ namespace ukive {
 
 
     string16 Application::getCommand(size_t index) {
-        return command_list_.at(index);
+        return instance_->command_list_.at(index);
     }
 
 
     size_t Application::getCommandCount() {
-        return command_list_.size();
+        return instance_->command_list_.size();
     }
 
     void Application::setVSync(bool enable){
@@ -189,7 +194,42 @@ namespace ukive {
     }
 
     HMODULE Application::getModuleHandle() {
-        return ::GetModuleHandle(NULL);
+        return ::GetModuleHandle(nullptr);
+    }
+
+    string16 Application::getExecFileName(bool dir) {
+        WCHAR buffer[MAX_PATH];
+        DWORD result = ::GetModuleFileNameW(nullptr, buffer, MAX_PATH);
+        if (result == 0) {
+            return {};
+        }
+
+        DWORD size = MAX_PATH;
+        std::unique_ptr<WCHAR[]> heap_buff;
+        while (::GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            size *= 2;
+            heap_buff.reset(new WCHAR[size]);
+            result = ::GetModuleFileNameW(nullptr, heap_buff.get(), size);
+            if (result == 0) {
+                return {};
+            }
+        }
+
+        string16 file_name;
+        if (heap_buff) {
+            file_name = heap_buff.get();
+        } else {
+            file_name = buffer;
+        }
+
+        if (dir) {
+            auto i = file_name.find_last_of(L"\\");
+            if (i != string16::npos) {
+                file_name = file_name.substr(0, i);
+            }
+        }
+
+        return file_name;
     }
 
     WICManager* Application::getWICManager() {

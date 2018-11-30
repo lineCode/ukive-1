@@ -18,7 +18,7 @@ namespace ukive {
         initial_layouted_(false) {
 
         scroll_bar_ = std::make_unique<OverlayScrollBar>();
-        view_recycler_ = std::make_unique<ViewHolderRecycler>(this);
+        recycler_ = std::make_unique<ViewHolderRecycler>(this);
     }
 
 
@@ -30,9 +30,7 @@ namespace ukive {
             recordCurPositionAndOffset();
             locateToPosition(cur_position_, cur_offset_in_position_);
 
-            scroll_bar_->setBounds(
-                std::move(Rect(0, 0, getMeasuredWidth(), getMeasuredHeight())));
-
+            scroll_bar_->setBounds(Rect(0, 0, getMeasuredWidth(), getMeasuredHeight()));
             updateOverlayScrollBar();
         }
     }
@@ -40,6 +38,7 @@ namespace ukive {
     bool ListView::onInputEvent(InputEvent* e) {
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
+        {
             int resDy = determineVerticalScroll(e->getMouseWheel() * 40);
             if (resDy == 0) {
                 break;
@@ -50,31 +49,40 @@ namespace ukive {
             break;
         }
 
+        default:
+            break;
+        }
+
         return ViewGroup::onInputEvent(e);
     }
 
     void ListView::onDraw(Canvas* canvas) {
         ViewGroup::onDraw(canvas);
+    }
+
+    void ListView::onDrawOverChild(Canvas* canvas) {
+        ViewGroup::onDrawOverChild(canvas);
         scroll_bar_->onDraw(canvas);
     }
 
-
     void ListView::setAdapter(ListAdapter* adapter) {
-        if (list_adapter_.get() == adapter) {
+        if (adapter_.get() == adapter) {
             return;
         }
 
-        if (list_adapter_) {
-            view_recycler_->clearAll();
+        if (adapter_) {
+            recycler_->clearAll();
             removeAllViews();
 
-            list_adapter_->setListener(nullptr);
+            adapter_->setListener(nullptr);
         }
 
-        list_adapter_.reset(adapter);
-        list_adapter_->setListener(this);
+        if (adapter) {
+            adapter_.reset(adapter);
+            adapter_->setListener(this);
+            locateToPosition(0);
+        }
 
-        locateToPosition(0);
         invalidate();
     }
 
@@ -108,10 +116,28 @@ namespace ukive {
         }
     }
 
-    ListAdapter::ViewHolder* ListView::getFirstVisibleViewHolder() {
-        int size = view_recycler_->getVisibleCount();
+    ListAdapter::ViewHolder* ListView::getBindViewHolderAt(int index, int i) {
+        auto holder = recycler_->getVisible(index);
+        int item_id = adapter_->getItemId(i);
+        if (!holder) {
+            holder = recycler_->reuse(item_id);
+            if (!holder) {
+                holder = adapter_->onCreateViewHolder(this, i);
+                recycler_->addToParent(holder);
+            }
+        }
+
+        holder->item_id = item_id;
+        holder->adapter_position = i;
+        adapter_->onBindViewHolder(holder, i);
+
+        return holder;
+    }
+
+    ListAdapter::ViewHolder* ListView::getFirstVisibleVH() {
+        int size = recycler_->getVisibleCount();
         for (int i = 0; i < size; ++i) {
-            auto holder = view_recycler_->getVisible(i);
+            auto holder = recycler_->getVisible(i);
             View* item = holder->item_view;
             if (item->getBottom() > getContentBoundsInThis().top) {
                 return holder;
@@ -121,10 +147,10 @@ namespace ukive {
         return nullptr;
     }
 
-    ListAdapter::ViewHolder* ListView::getLastVisibleViewHolder() {
-        int size = view_recycler_->getVisibleCount();
+    ListAdapter::ViewHolder* ListView::getLastVisibleVH() {
+        int size = recycler_->getVisibleCount();
         for (int i = size; i > 0; --i) {
-            auto holder = view_recycler_->getVisible(i - 1);
+            auto holder = recycler_->getVisible(i - 1);
             View* item = holder->item_view;
             if (item->getTop() < getContentBoundsInThis().bottom) {
                 return holder;
@@ -137,10 +163,10 @@ namespace ukive {
     void ListView::recycleTopViews(int offset) {
         int length = 0;
         int start_pos = 0;
-        int size = view_recycler_->getVisibleCount();
+        int size = recycler_->getVisibleCount();
 
         for (int i = 0; i < size; ++i) {
-            auto holder = view_recycler_->getVisible(i);
+            auto holder = recycler_->getVisible(i);
             View* item = holder->item_view;
             if (item->getBottom() + offset > getContentBoundsInThis().top) {
                 length = i;
@@ -149,16 +175,16 @@ namespace ukive {
         }
 
         if (length > 0) {
-            view_recycler_->recycleFromParent(start_pos, length);
+            recycler_->recycleFromParent(start_pos, length);
         }
     }
 
     void ListView::recycleBottomViews(int offset) {
         int start_pos = 0;
-        int size = view_recycler_->getVisibleCount();
+        int size = recycler_->getVisibleCount();
 
         for (int i = size; i > 0; --i) {
-            auto holder = view_recycler_->getVisible(i - 1);
+            auto holder = recycler_->getVisible(i - 1);
             View* item = holder->item_view;
             if (item->getTop() + offset < getContentBoundsInThis().bottom) {
                 start_pos = i;
@@ -167,12 +193,12 @@ namespace ukive {
         }
 
         if (start_pos + 1 <= size) {
-            view_recycler_->recycleFromParent(start_pos);
+            recycler_->recycleFromParent(start_pos);
         }
     }
 
     void ListView::updateOverlayScrollBar() {
-        auto count = list_adapter_->getItemCount();
+        auto count = adapter_->getItemCount();
         int prev_total_height = cur_offset_in_position_;
         bool cannot_determine_height = false;
 
@@ -197,7 +223,7 @@ namespace ukive {
     }
 
     void ListView::recordCurPositionAndOffset() {
-        auto holder = getFirstVisibleViewHolder();
+        auto holder = getFirstVisibleVH();
         if (holder) {
             cur_position_ = holder->adapter_position;
             cur_offset_in_position_ = getContentBoundsInThis().top - holder->item_view->getTop();
@@ -209,7 +235,7 @@ namespace ukive {
 
     int ListView::fillTopChildViews(int dy) {
         int resDeltaY = 0;
-        auto top_holder = view_recycler_->getVisible(0);
+        auto top_holder = recycler_->getVisible(0);
         if (top_holder) {
             Rect content_bound = getContentBoundsInThis();
             int top_diff = content_bound.top - top_holder->item_view->getTop();
@@ -226,16 +252,16 @@ namespace ukive {
                     && cur_adapter_position > 0)
                 {
                     --cur_adapter_position;
-                    int item_id = list_adapter_->getItemId(cur_adapter_position);
-                    auto new_holder = view_recycler_->reuse(item_id, 0);
+                    int item_id = adapter_->getItemId(cur_adapter_position);
+                    auto new_holder = recycler_->reuse(item_id, 0);
                     if (new_holder == nullptr) {
-                        new_holder = list_adapter_->onCreateViewHolder(this, cur_adapter_position);
-                        view_recycler_->addToParent(new_holder, 0);
+                        new_holder = adapter_->onCreateViewHolder(this, cur_adapter_position);
+                        recycler_->addToParent(new_holder, 0);
                     }
 
                     new_holder->item_id = item_id;
                     new_holder->adapter_position = cur_adapter_position;
-                    list_adapter_->onBindViewHolder(new_holder, cur_adapter_position);
+                    adapter_->onBindViewHolder(new_holder, cur_adapter_position);
 
                     new_holder->item_view->measure(content_bound.width(), 0, EXACTLY, UNKNOWN);
                     int height = new_holder->item_view->getMeasuredHeight();
@@ -261,19 +287,19 @@ namespace ukive {
 
     int ListView::fillBottomChildViews(int dy) {
         int resDeltaY = 0;
-        int vis_view_count = view_recycler_->getVisibleCount();
+        int vis_view_count = recycler_->getVisibleCount();
         if (vis_view_count == 0) {
             return 0;
         }
 
-        auto bottom_holder = view_recycler_->getVisible(vis_view_count - 1);
+        auto bottom_holder = recycler_->getVisible(vis_view_count - 1);
         if (bottom_holder) {
             Rect content_bound = getContentBoundsInThis();
             int bottom_diff = bottom_holder->item_view->getBottom() - content_bound.bottom;
             if (bottom_diff > 0 && -bottom_diff <= dy) {
                 resDeltaY = dy;
             } else if (bottom_diff > 0
-                && bottom_holder->adapter_position + 1 == list_adapter_->getItemCount()) {
+                && bottom_holder->adapter_position + 1 == adapter_->getItemCount()) {
                 resDeltaY = -bottom_diff;
             } else {
                 int cur_bottom = bottom_holder->item_view->getBottom();
@@ -281,19 +307,19 @@ namespace ukive {
                 int cur_adapter_position = bottom_holder->adapter_position;
 
                 while (-(bottom_diff + total_height) > dy
-                    && cur_adapter_position + 1 < list_adapter_->getItemCount())
+                    && cur_adapter_position + 1 < adapter_->getItemCount())
                 {
                     ++cur_adapter_position;
-                    int item_id = list_adapter_->getItemId(cur_adapter_position);
-                    auto new_holder = view_recycler_->reuse(item_id);
+                    int item_id = adapter_->getItemId(cur_adapter_position);
+                    auto new_holder = recycler_->reuse(item_id);
                     if (!new_holder) {
-                        new_holder = list_adapter_->onCreateViewHolder(this, cur_adapter_position);
-                        view_recycler_->addToParent(new_holder);
+                        new_holder = adapter_->onCreateViewHolder(this, cur_adapter_position);
+                        recycler_->addToParent(new_holder);
                     }
 
                     new_holder->item_id = item_id;
                     new_holder->adapter_position = cur_adapter_position;
-                    list_adapter_->onBindViewHolder(new_holder, cur_adapter_position);
+                    adapter_->onBindViewHolder(new_holder, cur_adapter_position);
 
                     new_holder->item_view->measure(content_bound.width(), 0, EXACTLY, UNKNOWN);
                     int height = new_holder->item_view->getMeasuredHeight();
@@ -318,7 +344,7 @@ namespace ukive {
     }
 
     void ListView::locateToPosition(int position, int offset) {
-        if (!list_adapter_) {
+        if (!adapter_) {
             return;
         }
 
@@ -333,7 +359,7 @@ namespace ukive {
 
         int i = position;
         int index = 0;
-        int child_count = list_adapter_->getItemCount();
+        int child_count = adapter_->getItemCount();
 
         int total_height = 0;
         int overflow_index = 0;
@@ -341,19 +367,7 @@ namespace ukive {
         bool full_child_reached = false;
 
         for (; i < child_count; ++i, ++index) {
-            auto holder = view_recycler_->getVisible(index);
-            int item_id = list_adapter_->getItemId(i);
-            if (!holder) {
-                holder = view_recycler_->reuse(item_id);
-                if (!holder) {
-                    holder = list_adapter_->onCreateViewHolder(this, i);
-                    view_recycler_->addToParent(holder);
-                }
-            }
-
-            holder->item_id = item_id;
-            holder->adapter_position = i;
-            list_adapter_->onBindViewHolder(holder, i);
+            auto holder = getBindViewHolderAt(index, i);
 
             holder->item_view->measure(content_bound.width(), 0, EXACTLY, UNKNOWN);
             int height = holder->item_view->getMeasuredHeight();
@@ -376,14 +390,14 @@ namespace ukive {
             }
         }
 
-        auto holder = view_recycler_->getVisible(index - overflow_index);
+        auto holder = recycler_->getVisible(index - overflow_index);
         if (holder) {
-            view_recycler_->recycleFromParent(index - overflow_index);
+            recycler_->recycleFromParent(index - overflow_index);
         }
 
         // 防止在列表大小变化时项目超出滑动范围。
-        auto last_holder = getLastVisibleViewHolder();
-        auto first_holder = getFirstVisibleViewHolder();
+        auto last_holder = getLastVisibleVH();
+        auto first_holder = getFirstVisibleVH();
         if (last_holder && first_holder
             && last_holder->adapter_position + 1 == child_count) {
             int topDy = content_bound.top - first_holder->item_view->getBounds().top;
@@ -400,7 +414,7 @@ namespace ukive {
     }
 
     void ListView::scrollToPosition(int position, int offset) {
-        if (!list_adapter_) {
+        if (!adapter_) {
             return;
         }
 
@@ -409,7 +423,7 @@ namespace ukive {
             return;
         }
 
-        auto child_count = list_adapter_->getItemCount();
+        auto child_count = adapter_->getItemCount();
         if (position + 1 > child_count) {
             if (child_count > 0) {
                 position = child_count - 1;
@@ -429,19 +443,7 @@ namespace ukive {
         bool full_child_reached = false;
 
         for (; i < child_count; ++i, ++index) {
-            auto holder = view_recycler_->getVisible(index);
-            int item_id = list_adapter_->getItemId(i);
-            if (!holder) {
-                holder = view_recycler_->reuse(item_id);
-                if (!holder) {
-                    holder = list_adapter_->onCreateViewHolder(this, i);
-                    view_recycler_->addToParent(holder);
-                }
-            }
-
-            holder->item_id = item_id;
-            holder->adapter_position = i;
-            list_adapter_->onBindViewHolder(holder, i);
+            auto holder = getBindViewHolderAt(index, i);
 
             holder->item_view->measure(content_bound.width(), 0, EXACTLY, UNKNOWN);
             int left = content_bound.left;
@@ -458,9 +460,9 @@ namespace ukive {
             }
         }
 
-        auto start_holder = view_recycler_->getVisible(index);
+        auto start_holder = recycler_->getVisible(index);
         if (start_holder) {
-            view_recycler_->recycleFromParent(index);
+            recycler_->recycleFromParent(index);
         }
 
         if (!full_child_reached && child_count > 0 && diff > 0) {
@@ -470,7 +472,7 @@ namespace ukive {
     }
 
     void ListView::smoothScrollToPosition(int position, int offset) {
-        if (!list_adapter_) {
+        if (!adapter_) {
             return;
         }
 
@@ -479,7 +481,7 @@ namespace ukive {
             return;
         }
 
-        auto child_count = list_adapter_->getItemCount();
+        auto child_count = adapter_->getItemCount();
         if (child_count == 0) {
             return;
         }
@@ -507,19 +509,7 @@ namespace ukive {
         bool full_child_reached = false;
 
         for (; (front ? (i <= terminate_pos) : (i >= terminate_pos)); (front ? ++i : --i), ++index) {
-            auto holder = view_recycler_->getVisible(index);
-            int item_id = list_adapter_->getItemId(i);
-            if (!holder) {
-                holder = view_recycler_->reuse(item_id);
-                if (!holder) {
-                    holder = list_adapter_->onCreateViewHolder(this, i);
-                    view_recycler_->addToParent(holder);
-                }
-            }
-
-            holder->item_id = item_id;
-            holder->adapter_position = i;
-            list_adapter_->onBindViewHolder(holder, i);
+            auto holder = getBindViewHolderAt(index, i);
 
             holder->item_view->measure(content_bound.width(), 0, EXACTLY, UNKNOWN);
             int left = content_bound.left;

@@ -2,7 +2,7 @@
 
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/utils/string_utils.h"
-#include "ukive/utils/hresult_utils.h"
+#include "ukive/application.h"
 
 
 namespace shell {
@@ -13,7 +13,8 @@ namespace shell {
     AssistConfigure::~AssistConfigure() {
     }
 
-    HRESULT AssistConfigure::init() {
+
+    void AssistConfigure::init() {
         D3D11_INPUT_ELEMENT_DESC layout[3];
 
         layout[0].SemanticName = "POSITION";
@@ -40,7 +41,7 @@ namespace shell {
         layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[2].InstanceDataStepRate = 0;
 
-        ukive::string16 shader_path(::_wgetcwd(nullptr, 0));
+        ukive::string16 shader_path = ukive::Application::getExecFileName(true);
 
         ukive::Space::createVertexShader(
             shader_path + L"\\assist_vertex_shader.cso",
@@ -51,8 +52,6 @@ namespace shell {
             &pixel_shader_);
 
         const_buffer_ = ukive::Space::createConstantBuffer(sizeof(AssistConstBuffer));
-
-        return S_OK;
     }
 
     void AssistConfigure::active() {
@@ -61,19 +60,11 @@ namespace shell {
         ukive::Space::setInputLayout(input_layout_.get());
     }
 
-    void AssistConfigure::reset() {
-        ukive::Space::setVertexShader(vertex_shader_.get());
-        ukive::Space::setPixelShader(pixel_shader_.get());
-        ukive::Space::setInputLayout(input_layout_.get());
-    }
-
     void AssistConfigure::close() {
     }
 
-    void AssistConfigure::setMatrix(dx::XMFLOAT4X4 matrix) {
-        D3D11_MAPPED_SUBRESOURCE resource;
-
-        resource = ukive::Space::lockResource(const_buffer_.get());
+    void AssistConfigure::setMatrix(const dx::XMFLOAT4X4& matrix) {
+        auto resource = ukive::Space::lockResource(const_buffer_.get());
         (reinterpret_cast<AssistConstBuffer*>(resource.pData))->wvp = matrix;
         ukive::Space::unlockResource(const_buffer_.get());
 

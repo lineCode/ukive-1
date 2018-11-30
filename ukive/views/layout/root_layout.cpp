@@ -19,18 +19,10 @@ namespace ukive {
 
         content_layout_ = new LinearLayout(getWindow());
         content_layout_->setOrientation(LinearLayout::VERTICAL);
-        content_layout_->setLayoutParams(
-            new LinearLayoutParams(
-                LinearLayoutParams::MATCH_PARENT,
-                LinearLayoutParams::MATCH_PARENT));
         addView(content_layout_);
 
         shade_layout_ = new FrameLayout(getWindow());
         shade_layout_->setCanConsumeMouseEvent(false);
-        shade_layout_->setLayoutParams(
-            new LayoutParams(
-                LayoutParams::MATCH_PARENT,
-                LayoutParams::MATCH_PARENT));
     }
 
     RootLayout::~RootLayout() {
@@ -106,7 +98,9 @@ namespace ukive {
     }
 
     void RootLayout::addContent(View* content) {
-        content_layout_->addView(content);
+        auto lp = new LayoutParams(
+            LayoutParams::MATCH_PARENT, LayoutParams::MATCH_PARENT);
+        content_layout_->addView(content, lp);
     }
 
 

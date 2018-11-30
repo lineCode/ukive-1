@@ -27,7 +27,7 @@ namespace ukive {
 
     Color Color::parse(const string16& color) {
         if (color.empty() || color.at(0) != L'#') {
-            Log::e(L"Color", L"unknown color");
+            LOG(Log::ERR) << "Unknown color: " << color;
             return Color::Red500;
         }
 
@@ -45,7 +45,7 @@ namespace ukive {
 
             return Color::ofInt(r, g, b, a);
         } else {
-            Log::e(L"Color", L"unknown color");
+            LOG(Log::ERR) << "Unknown color: " << color;
             return Color::Red500;
         }
     }

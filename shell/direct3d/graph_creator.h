@@ -1,8 +1,6 @@
 ﻿#ifndef SHELL_DIRECT3D_GRAPH_CREATOR_H_
 #define SHELL_DIRECT3D_GRAPH_CREATOR_H_
 
-#include <Windows.h>
-
 #include "shell/direct3d/assist_configure.h"
 #include "shell/direct3d/model_configure.h"
 #include "shell/third_party/directx_math/Inc/DirectXMath.h"
@@ -16,12 +14,10 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    struct ModelVertexData;
-
     class GraphCreator {
     public:
-        GraphCreator(ukive::DrawingObjectManager* mgr);
-        ~GraphCreator();
+       explicit GraphCreator(ukive::DrawingObjectManager* mgr);
+       ~GraphCreator();
 
         void calculateNormalVector(ModelVertexData* vertices, int vertexCount, int* indices, int indexCount);
 

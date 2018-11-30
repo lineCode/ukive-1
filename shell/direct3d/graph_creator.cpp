@@ -10,6 +10,7 @@ namespace shell {
 
     GraphCreator::~GraphCreator() {}
 
+
     void GraphCreator::calculateNormalVector(
         ModelVertexData* vertices, int vertexCount, int* indices, int indexCount) {
 
@@ -173,7 +174,18 @@ namespace shell {
         vertexData[7].color = dx::XMFLOAT4(1, 1, 0, 1);
 
         auto indices = new int[indexCount] {
-            0, 5, 1, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7, 3, 3, 7, 4, 3, 4, 0, 0, 4, 5, 3, 0, 2, 2, 0, 1, 5, 4, 6, 6, 4, 7
+            0, 5, 1,
+            1, 5, 6,
+            1, 6, 2,
+            2, 6, 7,
+            2, 7, 3,
+            3, 7, 4,
+            3, 4, 0,
+            0, 4, 5,
+            3, 0, 2,
+            2, 0, 1,
+            5, 4, 6,
+            6, 4, 7
         };
 
         drawing_obj_mgr_->add(

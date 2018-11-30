@@ -16,14 +16,14 @@ namespace shell {
     ukive::ListAdapter::ViewHolder* TestAdapter::onCreateViewHolder(
         ukive::ViewGroup* parent, int position) {
 
-        ukive::RestraintLayout* layout = new ukive::RestraintLayout(parent->getWindow());
+        auto layout = new ukive::RestraintLayout(parent->getWindow());
         layout->setBackground(new ukive::ColorDrawable(ukive::Color::Blue100));
         layout->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT));
 
         typedef ukive::RestraintLayoutParams Rlp;
 
-        ukive::ImageView* avatar_view = new ukive::ImageView(parent->getWindow());
+        auto avatar_view = new ukive::ImageView(parent->getWindow());
         avatar_view->setId(ID_AVATAR);
         Rlp* av_lp = new Rlp(36, 36);
         av_lp->startHandle(layout->getId(), Rlp::START, 16);

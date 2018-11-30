@@ -23,7 +23,7 @@ namespace ukive {
     class Canvas {
     public:
         Canvas(int width, int height);
-        Canvas(ComPtr<ID2D1RenderTarget> renderTarget);
+        Canvas(ComPtr<ID2D1RenderTarget> rt);
         ~Canvas();
 
         void setOpacity(float opacity);
@@ -113,7 +113,7 @@ namespace ukive {
             IDWriteTextLayout* textLayout, const Color& color);
 
     private:
-        void initCanvas(ComPtr<ID2D1RenderTarget> renderTarget);
+        void initCanvas(ComPtr<ID2D1RenderTarget> rt);
 
         int layer_counter_;
         bool is_texture_target_;

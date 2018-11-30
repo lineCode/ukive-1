@@ -17,7 +17,7 @@ namespace ukive {
 
         void setOpacity(float opt);
 
-        void draw(Canvas *canvas) override;
+        void draw(Canvas* canvas) override;
 
         float getOpacity() const override;
 

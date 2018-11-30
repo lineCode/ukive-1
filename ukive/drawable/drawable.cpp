@@ -6,9 +6,9 @@ namespace ukive {
     Drawable::Drawable()
         :start_x_(0.f),
         start_y_(0.f),
-        is_parent_has_focus_(false),
         state_(STATE_NONE),
-        prev_state_(STATE_NONE) {}
+        prev_state_(STATE_NONE),
+        is_parent_has_focus_(false) {}
 
 
     void Drawable::setBounds(const Rect &rect) {
@@ -28,10 +28,7 @@ namespace ukive {
             return;
         }
 
-        bounds_.left = left;
-        bounds_.top = top;
-        bounds_.right = left + width;
-        bounds_.bottom = top + height;
+        bounds_.set(left, top, width, height);
 
         onBoundChanged(bounds_);
     }

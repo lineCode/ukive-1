@@ -55,7 +55,7 @@ namespace ukive {
             D2D1_FACTORY_TYPE_SINGLE_THREADED,
             &d2d_factory_);
         if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create d2d factory.");
+            LOG(Log::ERR) << "Failed to create d2d factory.";
             return;
         }
 
@@ -64,7 +64,7 @@ namespace ukive {
             __uuidof(IDWriteFactory),
             reinterpret_cast<IUnknown**>(&dwrite_factory_));
         if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create dwrite factory.");
+            LOG(Log::ERR) << "Failed to create dwrite factory.";
             return;
         }
 
@@ -72,7 +72,7 @@ namespace ukive {
             __uuidof(IDXGIFactory),
             reinterpret_cast<void**>(&dxgi_factory_));
         if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create dxgi factory.");
+            LOG(Log::ERR) << "Failed to create dxgi factory.";
             return;
         }
 
@@ -128,13 +128,13 @@ namespace ukive {
             featureLevel, ARRAYSIZE(featureLevel), D3D11_SDK_VERSION,
             &d3d_device_, nullptr, &d3d_devicecontext_);
         if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create d3d device.");
+            LOG(Log::ERR) << "Failed to create d3d device.";
             return;
         }
 
         hr = d3d_device_->QueryInterface(&dxgi_device_);
         if (FAILED(hr)) {
-            Log::e(L"GraphicsDeviceManager", L"failed to create dxgi device.");
+            LOG(Log::ERR) << "Failed to create dxgi device.";
             return;
         }
     }

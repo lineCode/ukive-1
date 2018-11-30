@@ -52,13 +52,13 @@ namespace shell {
     }
 
     void TestWindow::inflateGroup() {
-        ukive::ScrollView* scrollView = new ukive::ScrollView(this);
+        auto scrollView = new ukive::ScrollView(this);
         scrollView->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
         setContentView(scrollView);
 
-        ukive::LinearLayout* linearLayout = new ukive::LinearLayout(this);
+        auto linearLayout = new ukive::LinearLayout(this);
         scrollView->addView(linearLayout,
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
@@ -112,7 +112,7 @@ namespace shell {
 
         linearLayout->addView(textView, textParams);
 
-        std::wstring imgFileName(::_wgetcwd(nullptr, 0));
+        std::wstring imgFileName = ukive::Application::getExecFileName(true);
         auto bitmap = ukive::BitmapFactory::decodeFile(this, imgFileName + L"\\freshpaint.png");
         ukive::ImageView* imageView = new ukive::ImageView(this);
         imageView->setId(kImageViewId);
@@ -150,7 +150,7 @@ namespace shell {
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::MATCH_PARENT);
         lp->leftMargin = lp->rightMargin
-            = lp->topMargin = lp->bottomMargin = dpToPx(8);
+            = lp->topMargin = lp->bottomMargin = dpToPx(2);
 
         linearLayout->addView(list_view, lp);
     }

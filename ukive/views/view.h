@@ -201,6 +201,7 @@ namespace ukive {
         virtual void dispatchDiscardPendingOperations();
 
         virtual void onDraw(Canvas* canvas);
+        virtual void onDrawOverChild(Canvas* canvas);
         virtual void onMeasure(
             int width, int height,
             int width_mode, int height_mode);
@@ -238,6 +239,10 @@ namespace ukive {
         private:
             View* view_;
         };
+
+        void updateDrawableState();
+        void updateBackgroundState();
+        void updateForegroundState();
 
 
         int id_;
