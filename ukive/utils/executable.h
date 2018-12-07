@@ -4,9 +4,10 @@
 
 namespace ukive {
 
-    class Executable
-    {
+    class Executable {
     public:
+        virtual ~Executable() = default;
+
         virtual void run() = 0;
     };
 

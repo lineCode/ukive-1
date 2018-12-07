@@ -6,13 +6,12 @@
 
 namespace ukive {
 
-    class InteractableSpan : public Span
-    {
+    class InteractableSpan : public Span {
     public:
         InteractableSpan(unsigned int start, unsigned int end);
-        virtual ~InteractableSpan();
+        ~InteractableSpan();
 
-        int getBaseType();
+        int getBaseType() const override;
     };
 
 }

@@ -80,6 +80,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,8 +100,13 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ukive.lib;gdiplus.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent />
+    <FxCompile>
+      <ObjectFileOutput>$(SolutionDir)build\$(Configuration)\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>4.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -123,13 +130,22 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ObjectFileOutput>$(SolutionDir)build\$(Configuration)\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>4.0</ShaderModel>
+    </FxCompile>
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -154,46 +170,46 @@
     <ClCompile Include="direct3d\camera.cpp" />
     <ClCompile Include="direct3d\graph_creator.cpp" />
     <ClCompile Include="direct3d\model_configure.cpp" />
-    <ClCompile Include="direct3d\scene.cpp" />
-    <ClCompile Include="lod\lod_view.cpp" />
     <ClCompile Include="lod\lod_window.cpp" />
     <ClCompile Include="lod\qtree_node.cpp" />
     <ClCompile Include="lod\terrain_configure.cpp" />
     <ClCompile Include="lod\terrain_scene.cpp" />
     <ClCompile Include="lod\lod_generator.cpp" />
-    <ClCompile Include="test\animation\wallpaper_effect.cpp" />
-    <ClCompile Include="test\animation\wallpaper_transform.cpp" />
-    <ClCompile Include="test\animation\wallpaper_window.cpp" />
+    <ClCompile Include="test\3d\motion_window.cpp" />
     <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp" />
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
+    <ClCompile Include="test\emulator\emulator_view.cpp" />
+    <ClCompile Include="test\emulator\emulator_window.cpp" />
     <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
+    <ClCompile Include="test\shadow\shadow_window.cpp" />
     <ClCompile Include="test\test_window.cpp" />
     <ClCompile Include="test\text\text_window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="DeclareDPIAware.manifest" />
+    <Manifest Include="application.manifest">
+      <SubType>Designer</SubType>
+    </Manifest>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="direct3d\assist_configure.h" />
     <ClInclude Include="direct3d\camera.h" />
     <ClInclude Include="direct3d\graph_creator.h" />
     <ClInclude Include="direct3d\model_configure.h" />
-    <ClInclude Include="direct3d\scene.h" />
-    <ClInclude Include="lod\lod_view.h" />
     <ClInclude Include="lod\lod_window.h" />
     <ClInclude Include="lod\qtree_node.h" />
     <ClInclude Include="lod\terrain_configure.h" />
     <ClInclude Include="lod\terrain_scene.h" />
     <ClInclude Include="lod\lod_generator.h" />
     <ClInclude Include="resources\resource.h" />
-    <ClInclude Include="test\animation\wallpaper_effect.h" />
-    <ClInclude Include="test\animation\wallpaper_transform.h" />
-    <ClInclude Include="test\animation\wallpaper_window.h" />
+    <ClInclude Include="test\3d\motion_window.h" />
     <ClInclude Include="test\bitmap_research\bitmap_dump_view.h" />
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
+    <ClInclude Include="test\emulator\emulator_view.h" />
+    <ClInclude Include="test\emulator\emulator_window.h" />
     <ClInclude Include="test\frame\custom_non_client_frame.h" />
     <ClInclude Include="test\list\test_adapter.h" />
+    <ClInclude Include="test\shadow\shadow_window.h" />
     <ClInclude Include="test\test_window.h" />
     <ClInclude Include="test\text\text_window.h" />
   </ItemGroup>
@@ -205,36 +221,29 @@
     <ResourceCompile Include="resources\shell.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="test\animation\wallpaper_props.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="hlsl\assist_pixel_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="hlsl\assist_vertex_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="hlsl\model_pixel_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="hlsl\model_vertex_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="hlsl\terrain_pixel_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="hlsl\terrain_vertex_shader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="hlsl\wallpaper_pixel_shader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

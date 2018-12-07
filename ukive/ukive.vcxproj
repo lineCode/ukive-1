@@ -33,7 +33,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -80,8 +80,9 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>UKIVE</TargetName>
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Configuration)\obj\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>UKIVE</TargetName>
@@ -105,6 +106,10 @@
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Lib>
+    <FxCompile>
+      <ObjectFileOutput>$(SolutionDir)build\$(Configuration)\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>4.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -127,7 +132,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,6 +142,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <FxCompile>
+      <ObjectFileOutput>$(SolutionDir)build\$(Configuration)\%(Filename).cso</ObjectFileOutput>
+      <ShaderModel>4.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -165,6 +176,7 @@
     <ClInclude Include="animation\view_animator.h" />
     <ClInclude Include="application.h" />
     <ClInclude Include="drawable\bitmap_drawable.h" />
+    <ClInclude Include="drawable\check_drawable.h" />
     <ClInclude Include="drawable\color_drawable.h" />
     <ClInclude Include="drawable\drawable.h" />
     <ClInclude Include="drawable\edittext_drawable.h" />
@@ -172,19 +184,29 @@
     <ClInclude Include="drawable\ripple_drawable.h" />
     <ClInclude Include="drawable\shape_drawable.h" />
     <ClInclude Include="event\input_event.h" />
+    <ClInclude Include="files\file.h" />
     <ClInclude Include="graphics\bitmap.h" />
     <ClInclude Include="graphics\bitmap_factory.h" />
     <ClInclude Include="graphics\canvas.h" />
     <ClInclude Include="graphics\color.h" />
     <ClInclude Include="graphics\cursor.h" />
     <ClInclude Include="graphics\device_lost_notifier.h" />
-    <ClInclude Include="graphics\direct3d_render_listener.h" />
-    <ClInclude Include="graphics\drawing_object_manager.h" />
+    <ClInclude Include="graphics\direct3d\drawing_object_manager.h" />
+    <ClInclude Include="graphics\direct3d\effects\shadow_effect.h" />
+    <ClInclude Include="graphics\direct3d\scene.h" />
+    <ClInclude Include="graphics\direct3d\space.h" />
+    <ClInclude Include="graphics\geometry.h" />
     <ClInclude Include="graphics\graphic_device_manager.h" />
     <ClInclude Include="graphics\matrix.h" />
+    <ClInclude Include="graphics\paint.h" />
+    <ClInclude Include="graphics\point.h" />
     <ClInclude Include="graphics\rect.h" />
     <ClInclude Include="graphics\renderer.h" />
+    <ClInclude Include="graphics\rendering_command_list.h" />
+    <ClInclude Include="graphics\render_node\render_node.h" />
+    <ClInclude Include="graphics\render_node\render_tree.h" />
     <ClInclude Include="graphics\swapchain_resize_notifier.h" />
+    <ClInclude Include="graphics\vector2.h" />
     <ClInclude Include="graphics\wic_manager.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="menu\context_menu.h" />
@@ -200,10 +222,11 @@
     <ClInclude Include="message\message_looper.h" />
     <ClInclude Include="message\message_queue.h" />
     <ClInclude Include="system\clipboard_manager.h" />
-    <ClInclude Include="system\system_clock.h" />
+    <ClInclude Include="system\qpc_service.h" />
+    <ClInclude Include="system\reg_manager.h" />
+    <ClInclude Include="system\time_utils.h" />
     <ClInclude Include="text\editable.h" />
     <ClInclude Include="text\input_connection.h" />
-    <ClInclude Include="text\language_detector.h" />
     <ClInclude Include="text\span\effect_span.h" />
     <ClInclude Include="text\span\inline_object_span.h" />
     <ClInclude Include="text\span\interactable_span.h" />
@@ -227,14 +250,17 @@
     <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />
-    <ClInclude Include="utils\thread_local.h" />
+    <ClInclude Include="utils\unicode.h" />
     <ClInclude Include="utils\weak_bind.h" />
     <ClInclude Include="views\button.h" />
+    <ClInclude Include="views\check_box.h" />
     <ClInclude Include="views\click_listener.h" />
+    <ClInclude Include="views\debug_view.h" />
     <ClInclude Include="views\direct3d_view.h" />
     <ClInclude Include="views\image_view.h" />
-    <ClInclude Include="views\layout\base_layout.h" />
-    <ClInclude Include="views\layout\base_layout_params.h" />
+    <ClInclude Include="views\layout\non_client_layout.h" />
+    <ClInclude Include="views\layout\root_layout.h" />
+    <ClInclude Include="views\layout\root_layout_params.h" />
     <ClInclude Include="views\layout\frame_layout.h" />
     <ClInclude Include="views\layout\layout_params.h" />
     <ClInclude Include="views\layout\linear_layout.h" />
@@ -243,16 +269,19 @@
     <ClInclude Include="views\layout\restraint_layout_params.h" />
     <ClInclude Include="views\layout\view_group.h" />
     <ClInclude Include="views\list\list_adapter.h" />
+    <ClInclude Include="views\list\list_layouter.h" />
     <ClInclude Include="views\list\list_view.h" />
+    <ClInclude Include="views\list\overlay_scroll_bar.h" />
+    <ClInclude Include="views\list\view_holder_recycler.h" />
     <ClInclude Include="views\scroll_view.h" />
     <ClInclude Include="views\seek_bar.h" />
     <ClInclude Include="views\seek_value_changed_listener.h" />
     <ClInclude Include="views\spinner_view.h" />
     <ClInclude Include="views\switch_view.h" />
     <ClInclude Include="views\text_view.h" />
-    <ClInclude Include="views\text_view2.h" />
     <ClInclude Include="views\view.h" />
     <ClInclude Include="window\frame\default_non_client_frame.h" />
+    <ClInclude Include="window\frame\drawable_non_client_frame.h" />
     <ClInclude Include="window\frame\non_client_frame.h" />
     <ClInclude Include="window\window.h" />
     <ClInclude Include="window\window_class_manager.h" />
@@ -272,6 +301,7 @@
     <ClCompile Include="animation\view_animator.cpp" />
     <ClCompile Include="application.cpp" />
     <ClCompile Include="drawable\bitmap_drawable.cpp" />
+    <ClCompile Include="drawable\check_drawable.cpp" />
     <ClCompile Include="drawable\color_drawable.cpp" />
     <ClCompile Include="drawable\drawable.cpp" />
     <ClCompile Include="drawable\edittext_drawable.cpp" />
@@ -279,16 +309,27 @@
     <ClCompile Include="drawable\ripple_drawable.cpp" />
     <ClCompile Include="drawable\shape_drawable.cpp" />
     <ClCompile Include="event\input_event.cpp" />
+    <ClCompile Include="files\file.cpp" />
     <ClCompile Include="graphics\bitmap.cpp" />
     <ClCompile Include="graphics\bitmap_factory.cpp" />
     <ClCompile Include="graphics\canvas.cpp" />
     <ClCompile Include="graphics\color.cpp" />
     <ClCompile Include="graphics\cursor.cpp" />
-    <ClCompile Include="graphics\drawing_object_manager.cpp" />
+    <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp" />
+    <ClCompile Include="graphics\direct3d\effects\shadow_effect.cpp" />
+    <ClCompile Include="graphics\direct3d\scene.cpp" />
+    <ClCompile Include="graphics\direct3d\space.cpp" />
+    <ClCompile Include="graphics\geometry.cpp" />
     <ClCompile Include="graphics\graphic_device_manager.cpp" />
     <ClCompile Include="graphics\matrix.cpp" />
+    <ClCompile Include="graphics\paint.cpp" />
+    <ClCompile Include="graphics\point.cpp" />
     <ClCompile Include="graphics\rect.cpp" />
     <ClCompile Include="graphics\renderer.cpp" />
+    <ClCompile Include="graphics\rendering_command_list.cpp" />
+    <ClCompile Include="graphics\render_node\render_node.cpp" />
+    <ClCompile Include="graphics\render_node\render_tree.cpp" />
+    <ClCompile Include="graphics\vector2.cpp" />
     <ClCompile Include="graphics\wic_manager.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="menu\context_menu.cpp" />
@@ -300,10 +341,11 @@
     <ClCompile Include="message\message_looper.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
-    <ClCompile Include="system\system_clock.cpp" />
+    <ClCompile Include="system\qpc_service.cpp" />
+    <ClCompile Include="system\reg_manager.cpp" />
+    <ClCompile Include="system\time_utils.cpp" />
     <ClCompile Include="text\editable.cpp" />
     <ClCompile Include="text\input_connection.cpp" />
-    <ClCompile Include="text\language_detector.cpp" />
     <ClCompile Include="text\span\effect_span.cpp" />
     <ClCompile Include="text\span\inline_object_span.cpp" />
     <ClCompile Include="text\span\interactable_span.cpp" />
@@ -323,12 +365,16 @@
     <ClCompile Include="utils\number.cpp" />
     <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
-    <ClCompile Include="utils\weak_bind.cpp" />
+    <ClCompile Include="utils\event_handler.h" />
+    <ClCompile Include="utils\unicode.cpp" />
     <ClCompile Include="views\button.cpp" />
+    <ClCompile Include="views\check_box.cpp" />
+    <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
-    <ClCompile Include="views\layout\base_layout.cpp" />
-    <ClCompile Include="views\layout\base_layout_params.cpp" />
+    <ClCompile Include="views\layout\non_client_layout.cpp" />
+    <ClCompile Include="views\layout\root_layout.cpp" />
+    <ClCompile Include="views\layout\root_layout_params.cpp" />
     <ClCompile Include="views\layout\frame_layout.cpp" />
     <ClCompile Include="views\layout\layout_params.cpp" />
     <ClCompile Include="views\layout\linear_layout.cpp" />
@@ -337,20 +383,33 @@
     <ClCompile Include="views\layout\restraint_layout_params.cpp" />
     <ClCompile Include="views\layout\view_group.cpp" />
     <ClCompile Include="views\list\list_adapter.cpp" />
+    <ClCompile Include="views\list\list_layouter.cpp" />
     <ClCompile Include="views\list\list_view.cpp" />
+    <ClCompile Include="views\list\overlay_scroll_bar.cpp" />
+    <ClCompile Include="views\list\view_holder_recycler.cpp" />
     <ClCompile Include="views\scroll_view.cpp" />
     <ClCompile Include="views\seek_bar.cpp" />
     <ClCompile Include="views\spinner_view.cpp" />
     <ClCompile Include="views\switch_view.cpp" />
     <ClCompile Include="views\text_view.cpp" />
-    <ClCompile Include="views\text_view2.cpp" />
     <ClCompile Include="views\view.cpp" />
     <ClCompile Include="window\frame\default_non_client_frame.cpp" />
+    <ClCompile Include="window\frame\drawable_non_client_frame.cpp" />
     <ClCompile Include="window\window.cpp" />
     <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />
     <ClCompile Include="window\window_manager.cpp" />
     <ClCompile Include="window\window_slave.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

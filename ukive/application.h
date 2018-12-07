@@ -15,18 +15,17 @@ namespace ukive {
 
     class GraphicDeviceManager;
 
-    class Application
-    {
+    class Application {
     public:
         Application();
-        Application(wchar_t *cl);
-        Application(int argc, wchar_t *argv[]);
+        Application(wchar_t* cl);
+        Application(int argc, wchar_t* argv[]);
         ~Application();
 
         void run();
 
-        size_t getCommandCount();
-        string16 getCommand(size_t index);
+        static size_t getCommandCount();
+        static string16 getCommand(size_t index);
 
         static int getScreenWidth();
         static int getScreenHeight();
@@ -35,12 +34,13 @@ namespace ukive {
         static bool isVSyncEnabled();
 
         static HMODULE getModuleHandle();
+        static string16 getExecFileName(bool dir);
         static GraphicDeviceManager* getGraphicDeviceManager();
 
-        static WICManager *getWICManager();
-        static TsfManager *getTsfManager();
+        static WICManager* getWICManager();
+        static TsfManager* getTsfManager();
 
-        static int getViewUID();
+        static int getViewID();
 
         static int getPrimaryDpi();
 
@@ -52,11 +52,11 @@ namespace ukive {
     private:
         void initApplication();
         void cleanApplication();
-        void parseCommandLine(wchar_t *cmdLine);
+        void parseCommandLine(wchar_t* cmd_line);
 
         static int view_uid_;
         static bool vsync_enabled_;
-        static Application *instance_;
+        static Application* instance_;
 
         std::vector<std::wstring> command_list_;
 

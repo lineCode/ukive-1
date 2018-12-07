@@ -6,8 +6,7 @@ namespace ukive {
 
     class SeekBar;
 
-    class OnSeekValueChangedListener
-    {
+    class OnSeekValueChangedListener {
     public:
         virtual ~OnSeekValueChangedListener() = default;
 

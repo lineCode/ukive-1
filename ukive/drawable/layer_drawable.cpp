@@ -4,59 +4,54 @@
 namespace ukive {
 
     LayerDrawable::LayerDrawable()
-        :Drawable()
-    {
+        :Drawable() {}
+
+    LayerDrawable::~LayerDrawable() {}
+
+
+    void LayerDrawable::addDrawable(Drawable* drawable) {
+        drawable_list_.push_back(std::shared_ptr<Drawable>(drawable));
     }
 
-    LayerDrawable::~LayerDrawable()
-    {
-    }
-
-
-    void LayerDrawable::addDrawable(Drawable *drawable)
-    {
-        mDrawableList.push_back(std::shared_ptr<Drawable>(drawable));
-    }
-
-    void LayerDrawable::removeDrawable(Drawable *drawable)
-    {
-        for (auto it = mDrawableList.begin();
-            it != mDrawableList.end(); ++it)
+    void LayerDrawable::removeDrawable(Drawable* drawable) {
+        for (auto it = drawable_list_.begin();
+            it != drawable_list_.end();)
         {
-            if ((*it).get() == drawable)
-            {
-                mDrawableList.erase(it);
-                return;
+            if ((*it).get() == drawable) {
+                it = drawable_list_.erase(it);
+            } else {
+                ++it;
             }
         }
     }
 
-
-    void LayerDrawable::onBoundChanged(RectF &newBound)
-    {
-        for (auto it = mDrawableList.begin();
-            it != mDrawableList.end(); ++it)
-        {
-            (*it)->setBounds(newBound);
+    void LayerDrawable::onBoundChanged(const Rect& new_bound) {
+        for (auto& drawable : drawable_list_) {
+            drawable->setBounds(new_bound);
         }
     }
 
+    bool LayerDrawable::onStateChanged(int new_state, int prev_state) {
+        bool need_redraw = false;
+        for (auto& drawable : drawable_list_) {
+            need_redraw |= drawable->setState(new_state);
+        }
 
-    void LayerDrawable::draw(Canvas *canvas)
-    {
-        for (auto it = mDrawableList.begin();
-            it != mDrawableList.end(); ++it)
-        {
-            (*it)->draw(canvas);
+        return need_redraw;
+    }
+
+    void LayerDrawable::draw(Canvas* canvas) {
+        for (auto& drawable : drawable_list_) {
+            drawable->draw(canvas);
         }
     }
 
-    float LayerDrawable::getOpacity()
-    {
-        if (mDrawableList.empty())
+    float LayerDrawable::getOpacity() {
+        if (drawable_list_.empty()) {
             return 0.f;
-        else
+        } else {
             return 1.f;
+        }
     }
 
 }

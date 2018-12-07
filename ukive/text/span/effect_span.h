@@ -11,18 +11,17 @@ namespace ukive {
     class View;
 
     // TODO: ¶ÀÁ¢ÓÚ Direct2D
-    class EffectSpan : public Span
-    {
+    class EffectSpan : public Span {
     public:
         EffectSpan(unsigned int start, unsigned int end);
-        virtual ~EffectSpan();
+        ~EffectSpan();
 
         D2D1_COLOR_F mTextColor;
         D2D1_COLOR_F mUnderlineColor;
         D2D1_COLOR_F mStrikethroughColor;
 
-        int getBaseType();
-        virtual int getType();
+        int getBaseType() const override;
+        int getType() const override;
 
         virtual bool onDrawText(
             View *widget,

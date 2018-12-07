@@ -8,22 +8,20 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    class QTreeNode
-    {
+    class QTreeNode {
     public:
+        QTreeNode();
+        ~QTreeNode();
+
         int level;
         int indexX;
         int indexY;
         float rough;
         dx::XMFLOAT3 mincoord;
         dx::XMFLOAT3 maxcoord;
-        QTreeNode *child[4];
+        QTreeNode* child[4];
 
-        QTreeNode *next;
-
-    public:
-        QTreeNode();
-        ~QTreeNode();
+        QTreeNode* next;
     };
 
 }

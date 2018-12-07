@@ -35,6 +35,15 @@
     <Filter Include="test\bitmap_research">
       <UniqueIdentifier>{e7a193cc-b2d1-4016-8d7a-3523627dd8ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\emulator">
+      <UniqueIdentifier>{a8ecb2be-23d0-45b0-bca9-34a710e22936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\shadow">
+      <UniqueIdentifier>{76bae05f-bc9e-473a-8b84-cae5f471b311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\3d">
+      <UniqueIdentifier>{8cfa8f7b-f4e2-4aff-bd98-2cf54675f6ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -43,16 +52,7 @@
     <ClCompile Include="direct3d\assist_configure.cpp">
       <Filter>direct3d</Filter>
     </ClCompile>
-    <ClCompile Include="direct3d\camera.cpp">
-      <Filter>direct3d</Filter>
-    </ClCompile>
-    <ClCompile Include="direct3d\graph_creator.cpp">
-      <Filter>direct3d</Filter>
-    </ClCompile>
     <ClCompile Include="direct3d\model_configure.cpp">
-      <Filter>direct3d</Filter>
-    </ClCompile>
-    <ClCompile Include="direct3d\scene.cpp">
       <Filter>direct3d</Filter>
     </ClCompile>
     <ClCompile Include="test\frame\custom_non_client_frame.cpp">
@@ -76,18 +76,6 @@
     <ClCompile Include="test\text\text_window.cpp">
       <Filter>test\text</Filter>
     </ClCompile>
-    <ClCompile Include="test\animation\wallpaper_effect.cpp">
-      <Filter>test\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="test\animation\wallpaper_transform.cpp">
-      <Filter>test\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="test\animation\wallpaper_window.cpp">
-      <Filter>test\animation</Filter>
-    </ClCompile>
-    <ClCompile Include="lod\lod_view.cpp">
-      <Filter>lod</Filter>
-    </ClCompile>
     <ClCompile Include="lod\terrain_configure.cpp">
       <Filter>lod</Filter>
     </ClCompile>
@@ -100,9 +88,24 @@
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp">
       <Filter>test\bitmap_research</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="DeclareDPIAware.manifest" />
+    <ClCompile Include="test\emulator\emulator_view.cpp">
+      <Filter>test\emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="test\emulator\emulator_window.cpp">
+      <Filter>test\emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="direct3d\camera.cpp">
+      <Filter>direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="direct3d\graph_creator.cpp">
+      <Filter>direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="test\shadow\shadow_window.cpp">
+      <Filter>test\shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="test\3d\motion_window.cpp">
+      <Filter>test\3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resources\resource.h">
@@ -111,16 +114,7 @@
     <ClInclude Include="direct3d\assist_configure.h">
       <Filter>direct3d</Filter>
     </ClInclude>
-    <ClInclude Include="direct3d\camera.h">
-      <Filter>direct3d</Filter>
-    </ClInclude>
-    <ClInclude Include="direct3d\graph_creator.h">
-      <Filter>direct3d</Filter>
-    </ClInclude>
     <ClInclude Include="direct3d\model_configure.h">
-      <Filter>direct3d</Filter>
-    </ClInclude>
-    <ClInclude Include="direct3d\scene.h">
       <Filter>direct3d</Filter>
     </ClInclude>
     <ClInclude Include="test\frame\custom_non_client_frame.h">
@@ -144,18 +138,6 @@
     <ClInclude Include="test\text\text_window.h">
       <Filter>test\text</Filter>
     </ClInclude>
-    <ClInclude Include="test\animation\wallpaper_effect.h">
-      <Filter>test\animation</Filter>
-    </ClInclude>
-    <ClInclude Include="test\animation\wallpaper_transform.h">
-      <Filter>test\animation</Filter>
-    </ClInclude>
-    <ClInclude Include="test\animation\wallpaper_window.h">
-      <Filter>test\animation</Filter>
-    </ClInclude>
-    <ClInclude Include="lod\lod_view.h">
-      <Filter>lod</Filter>
-    </ClInclude>
     <ClInclude Include="lod\terrain_configure.h">
       <Filter>lod</Filter>
     </ClInclude>
@@ -167,6 +149,24 @@
     </ClInclude>
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h">
       <Filter>test\bitmap_research</Filter>
+    </ClInclude>
+    <ClInclude Include="test\emulator\emulator_view.h">
+      <Filter>test\emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="test\emulator\emulator_window.h">
+      <Filter>test\emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="direct3d\camera.h">
+      <Filter>direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="direct3d\graph_creator.h">
+      <Filter>direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="test\shadow\shadow_window.h">
+      <Filter>test\shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="test\3d\motion_window.h">
+      <Filter>test\3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,11 +181,6 @@
     <ResourceCompile Include="resources\shell.rc">
       <Filter>resources</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="test\animation\wallpaper_props.xml">
-      <Filter>test\animation</Filter>
-    </Xml>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="hlsl\assist_pixel_shader.hlsl">
@@ -206,8 +201,8 @@
     <FxCompile Include="hlsl\terrain_vertex_shader.hlsl">
       <Filter>hlsl</Filter>
     </FxCompile>
-    <FxCompile Include="hlsl\wallpaper_pixel_shader.hlsl">
-      <Filter>hlsl</Filter>
-    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="application.manifest" />
   </ItemGroup>
 </Project>

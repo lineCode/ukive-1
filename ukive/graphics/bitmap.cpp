@@ -8,16 +8,16 @@ namespace ukive {
     }
 
 
-    unsigned int Bitmap::getWidth() {
+    unsigned int Bitmap::getWidth() const {
         return native_bitmap_->GetPixelSize().width;
     }
 
-    unsigned int Bitmap::getHeight() {
+    unsigned int Bitmap::getHeight() const {
         return native_bitmap_->GetPixelSize().height;
     }
 
 
-    ComPtr<ID2D1Bitmap> Bitmap::getNative() {
+    ComPtr<ID2D1Bitmap> Bitmap::getNative() const {
         return native_bitmap_;
     }
 }

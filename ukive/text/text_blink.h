@@ -13,39 +13,38 @@ namespace ukive {
     class Canvas;
     class Cycler;
 
-    class TextBlink : public Executable
-    {
-    private:
-        View *mTargetView;
-        Cycler *mBlinkCycler;
-
-        bool mLocated;
-        bool mCancelled;
-        bool mBlinkMask;
-
-        Rect mBlinkRect;
-
-        float mThickness;
-        Color mColor;
-
+    class TextBlink : public Executable {
     public:
-        TextBlink(View *widget);
+        TextBlink(View* v);
         ~TextBlink();
 
-        void draw(Canvas *canvas);
+        void draw(Canvas* canvas);
 
         void show();
         void hide();
         void locate(float xCenter, float top, float bottom);
 
-        void setColor(Color color);
+        void setColor(const Color& color);
         void setThickness(float thickness);
 
-        bool isShowing();
-        Color getColor();
-        float getThickness();
+        bool isShowing() const;
+        Color getColor() const;
+        float getThickness() const;
 
-        void run();
+        void run() override;
+
+    private:
+        View* target_view_;
+        Cycler* blink_cycler_;
+
+        bool is_located_;
+        bool is_cancelled_;
+        bool blink_mask_;
+
+        Rect blink_rect_;
+
+        float thickness_;
+        Color color_;
     };
 
 }

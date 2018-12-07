@@ -3,33 +3,28 @@
 
 namespace ukive {
 
-    AnimatorStateHandler::AnimatorStateHandler(Animator *animator)
-    {
-        mRefCount = 1;
-        mListener = nullptr;
-        mAnimator = animator;
+    AnimatorStateHandler::AnimatorStateHandler(Animator* animator)
+        :ref_count_(1),
+        listener_(nullptr),
+        animator_(animator) {
     }
 
-    AnimatorStateHandler::~AnimatorStateHandler()
-    {
+    AnimatorStateHandler::~AnimatorStateHandler() {
     }
 
 
-    void AnimatorStateHandler::setOnAnimatorListener(Animator::OnAnimatorListener *l)
-    {
-        mListener = l;
+    void AnimatorStateHandler::setOnAnimatorListener(Animator::OnAnimatorListener* l) {
+        listener_ = l;
     }
 
 
     HRESULT STDMETHODCALLTYPE AnimatorStateHandler::OnStoryboardStatusChanged(
-        IUIAnimationStoryboard *storyboard,
+        IUIAnimationStoryboard* storyboard,
         UI_ANIMATION_STORYBOARD_STATUS newStatus,
         UI_ANIMATION_STORYBOARD_STATUS previousStatus)
     {
-        if (mListener)
-        {
-            switch (newStatus)
-            {
+        if (listener_) {
+            switch (newStatus) {
                 //正在创建。
             case UI_ANIMATION_STORYBOARD_BUILDING:
                 break;
@@ -38,18 +33,18 @@ namespace ukive {
                 break;
                 //被取消。
             case UI_ANIMATION_STORYBOARD_CANCELLED:
-                mListener->onAnimationCancel(mAnimator);
+                listener_->onAnimationCancel(animator_);
                 break;
                 //正在播放。
             case UI_ANIMATION_STORYBOARD_PLAYING:
-                mListener->onAnimationStart(mAnimator);
+                listener_->onAnimationStart(animator_);
                 break;
                 //动画被截短。
             case UI_ANIMATION_STORYBOARD_TRUNCATED:
                 break;
                 //播放完毕。
             case UI_ANIMATION_STORYBOARD_FINISHED:
-                mListener->onAnimationEnd(mAnimator);
+                listener_->onAnimationEnd(animator_);
                 break;
                 //创建完毕，可以播放。
             case UI_ANIMATION_STORYBOARD_READY:
@@ -64,49 +59,41 @@ namespace ukive {
     }
 
     HRESULT STDMETHODCALLTYPE AnimatorStateHandler::OnStoryboardUpdated(
-        IUIAnimationStoryboard *storyboard)
-    {
+        IUIAnimationStoryboard* storyboard) {
         return S_OK;
     }
 
 
-    IFACEMETHODIMP_(ULONG) AnimatorStateHandler::AddRef()
-    {
-        return InterlockedIncrement(&mRefCount);
+    IFACEMETHODIMP_(ULONG) AnimatorStateHandler::AddRef() {
+        return InterlockedIncrement(&ref_count_);
     }
 
-    IFACEMETHODIMP_(ULONG) AnimatorStateHandler::Release()
-    {
-        unsigned long newCount = InterlockedDecrement(&mRefCount);
-
-        if (newCount == 0)
-        {
+    IFACEMETHODIMP_(ULONG) AnimatorStateHandler::Release() {
+        auto nc = InterlockedDecrement(&ref_count_);
+        if (nc == 0) {
             delete this;
-            return 0;
         }
 
-        return newCount;
+        return nc;
     }
 
     IFACEMETHODIMP AnimatorStateHandler::QueryInterface(
-        _In_ REFIID riid, _Outptr_ void** ppOutput)
-    {
-        if (__uuidof(IUIAnimationStoryboardEventHandler) == riid)
-        {
-            *ppOutput = this;
+        REFIID riid, void** ppOutput) {
+
+        if (ppOutput == nullptr) {
+            return E_POINTER;
         }
-        else if (__uuidof(IUnknown) == riid)
-        {
+
+        if (__uuidof(IUIAnimationStoryboardEventHandler) == riid) {
             *ppOutput = this;
-        }
-        else
-        {
-            *ppOutput = 0;
-            return E_FAIL;
+        } else if (__uuidof(IUnknown) == riid) {
+            *ppOutput = this;
+        } else {
+            *ppOutput = nullptr;
+            return E_NOINTERFACE;
         }
 
         AddRef();
-
         return S_OK;
     }
 

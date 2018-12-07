@@ -13,10 +13,10 @@ namespace ukive {
         ColorDrawable(Color color);
         ~ColorDrawable();
 
-        virtual void draw(Canvas *canvas) override;
-        virtual float getOpacity() override;
+        void draw(Canvas *canvas) override;
+        float getOpacity() const override;
 
-        Color getColor();
+        Color getColor() const;
 
     private:
         Color color_;

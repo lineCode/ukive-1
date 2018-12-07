@@ -4,8 +4,6 @@
 #include <memory>
 #include <mutex>
 
-#include "ukive/utils/thread_local.h"
-
 
 namespace ukive {
 
@@ -17,29 +15,26 @@ namespace ukive {
     public:
         ~MessageLooper();
 
-        static void init();
-        static void close();
-
         void quit();
-        MessageQueue *getQueue();
+        MessageQueue* getQueue();
 
         static void prepare();
         static void prepareMainLooper();
-        static void loop();
-        static MessageQueue *myQueue();
-        static MessageLooper *myLooper();
-        static MessageLooper *getMainLooper();
+        static bool loop();
+        static MessageQueue* myQueue();
+        static MessageLooper* myLooper();
+        static MessageLooper* getMainLooper();
 
         void receiveMessage();
 
     private:
         MessageLooper();
 
-        MessageQueue *mMsgQueue;
+        MessageQueue* msg_queue_;
 
-        static std::mutex mLooperSync;
-        static MessageLooper *mMainLooper;
-        static ThreadLocal<std::shared_ptr<MessageLooper>> *mThreadLocal;
+        static std::mutex looper_sync_;
+        static MessageLooper* main_looper_;
+        static thread_local std::shared_ptr<MessageLooper> looper_;
     };
 
 }

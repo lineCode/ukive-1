@@ -19,21 +19,10 @@ namespace ukive {
     class LayoutParams;
     class OnClickListener;
     class ViewAnimator;
+    class ShadowEffect;
 
     class View {
     public:
-        enum MeasureOption {
-            FIT,
-            EXACTLY,
-            UNKNOWN
-        };
-
-        enum Visibility {
-            VISIBLE,
-            INVISIBLE,
-            VANISHED
-        };
-
         enum Gravity {
             LEFT,
             TOP,
@@ -44,10 +33,22 @@ namespace ukive {
             CENTER_VERTICAL,
         };
 
-        View(Window *w);
+        enum Visibility {
+            VISIBLE,
+            INVISIBLE,
+            VANISHED
+        };
+
+        enum MeasureMode {
+            FIT,
+            EXACTLY,
+            UNKNOWN
+        };
+
+        View(Window* w);
         virtual ~View();
 
-        ViewAnimator *animate();
+        ViewAnimator* animate();
 
         void setId(int id);
         void setX(double x);
@@ -72,10 +73,10 @@ namespace ukive {
         void setScrollY(int y);
         void setVisibility(int visibility);
         void setEnabled(bool enable);
-        void setBackground(Drawable *drawable);
-        void setForeground(Drawable *drawable);
+        void setBackground(Drawable* drawable);
+        void setForeground(Drawable* drawable);
         void setPadding(int left, int top, int right, int bottom);
-        void setLayoutParams(LayoutParams *params);
+        void setLayoutParams(LayoutParams* params);
         void setIsInputEventAtLast(bool isInput);
         void setPressed(bool pressed);
         void setCurrentCursor(Cursor cursor);
@@ -83,155 +84,183 @@ namespace ukive {
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
         void setCanConsumeMouseEvent(bool enable);
-
         void setMinimumWidth(int width);
         void setMinimumHeight(int height);
+        void setOnClickListener(OnClickListener* l);
 
-        void setOnClickListener(OnClickListener *l);
-
-        //设置该 view 的父 view，该方法由框架调用。
-        void setParent(View *parent);
+        // Invoked by framework.
+        void setParent(View* parent);
 
         void offsetTopAndBottom(int dy);
         void offsetLeftAndRight(int dx);
 
-        double getX();
-        double getY();
-        double getAlpha();
-        double getScaleX();
-        double getScaleY();
-        double getTranslateX();
-        double getTranslateY();
-        double getPivotX();
-        double getPivotY();
+        double getX() const;
+        double getY() const;
+        double getAlpha() const;
+        double getScaleX() const;
+        double getScaleY() const;
+        double getTranslateX() const;
+        double getTranslateY() const;
+        double getPivotX() const;
+        double getPivotY() const;
 
-        int getId();
-        int getScrollX();
-        int getScrollY();
-        int getLeft();
-        int getTop();
-        int getRight();
-        int getBottom();
-        int getWidth();
-        int getHeight();
-        int getMeasuredWidth();
-        int getMeasuredHeight();
-        float getElevation();
-        int getVisibility();
+        int getId() const;
+        int getScrollX() const;
+        int getScrollY() const;
+        int getLeft() const;
+        int getTop() const;
+        int getRight() const;
+        int getBottom() const;
+        int getWidth() const;
+        int getHeight() const;
+        int getMeasuredWidth() const;
+        int getMeasuredHeight() const;
+        float getElevation() const;
+        int getVisibility() const;
 
-        int getMinimumWidth();
-        int getMinimumHeight();
+        int getMinimumWidth() const;
+        int getMinimumHeight() const;
 
-        int getPaddingLeft();
-        int getPaddingTop();
-        int getPaddingRight();
-        int getPaddingBottom();
+        int getPaddingLeft() const;
+        int getPaddingTop() const;
+        int getPaddingRight() const;
+        int getPaddingBottom() const;
 
-        LayoutParams *getLayoutParams();
-        View *getParent();
+        LayoutParams* getLayoutParams() const;
+        View* getParent() const;
 
-        Window *getWindow();
-        Drawable *getBackground();
-        Drawable *getForeground();
+        Window* getWindow() const;
+        Drawable* getBackground() const;
+        Drawable* getForeground() const;
 
-        Rect getBounds();
-        Rect getBoundsInWindow();
-        Rect getBoundsInScreen();
+        // bounds relative to parent.
+        Rect getBounds() const;
 
-        Rect getContentBounds();
-        Rect getContentBoundsInThis();
+        // bounds relative to window.
+        Rect getBoundsInWindow() const;
 
-        virtual View *findViewById(int id);
+        // bounds relative to screen.
+        Rect getBoundsInScreen() const;
 
-        bool isEnabled();
-        bool isAttachedToWindow();
-        bool isInputEventAtLast();
-        bool isPressed();
-        bool hasFocus();
-        bool isFocusable();
-        bool isLayouted();
-        bool isLocalMouseInThis(InputEvent *e);
-        bool isParentMouseInThis(InputEvent *e);
-        bool isReceiveOutsideInputEvent();
-        bool canConsumeMouseEvent();
+        // getBounds() with paddings.
+        Rect getContentBounds() const;
+
+        // getContentBounds() relative to (0, 0)
+        Rect getContentBoundsInThis() const;
+
+        virtual View* findViewById(int id);
+
+        bool isEnabled() const;
+        bool isAttachedToWindow() const;
+        bool isInputEventAtLast() const;
+        bool isPressed() const;
+        bool hasFocus() const;
+        bool isFocusable() const;
+        bool isLayouted() const;
+        bool isLocalMouseInThis(InputEvent* e) const;
+        bool isParentMouseInThis(InputEvent* e) const;
+        bool isReceiveOutsideInputEvent() const;
+        bool canConsumeMouseEvent() const;
 
         void scrollTo(int x, int y);
         void scrollBy(int dx, int dy);
 
-        void draw(Canvas *canvas);
-        void measure(int width, int height, int widthMode, int heightMode);
+        void draw(Canvas* canvas);
+        void measure(int width, int height, int width_mode, int height_mode);
         void layout(int left, int top, int right, int bottom);
 
-        void invalidate();
-        void invalidate(const Rect &rect);
-        void invalidate(int left, int top, int right, int bottom);
-        void requestLayout();
+        virtual void invalidate();
+        virtual void invalidate(const Rect &rect);
+        virtual void invalidate(int left, int top, int right, int bottom);
+        virtual void requestLayout();
 
         void requestFocus();
         void discardFocus();
         void discardPendingOperations();
 
-        virtual bool dispatchInputEvent(InputEvent *e);
-        virtual void dispatchWindowFocusChanged(bool windowFocus);
+        virtual bool dispatchInputEvent(InputEvent* e);
+        virtual void dispatchWindowFocusChanged(bool window_focus);
         virtual void dispatchWindowDpiChanged(int dpi_x, int dpi_y);
 
         virtual void onAttachedToWindow();
         virtual void onDetachedFromWindow();
 
     protected:
-        void performClick();
-
-        void drawBackground(Canvas *canvas);
-        void drawForeground(Canvas *canvas);
-
         void setMeasuredDimension(int width, int height);
 
-        virtual void dispatchDraw(Canvas *canvas);
+        void performClick();
+
+        bool needDrawBackground();
+        bool needDrawForeground();
+
+        void drawBackground(Canvas* canvas);
+        void drawForeground(Canvas* canvas);
+
+        virtual void dispatchDraw(Canvas* canvas);
         virtual void dispatchDiscardFocus();
         virtual void dispatchDiscardPendingOperations();
 
-        virtual void onDraw(Canvas *canvas);
+        virtual void onDraw(Canvas* canvas);
+        virtual void onDrawOverChild(Canvas* canvas);
         virtual void onMeasure(
             int width, int height,
-            int widthMode, int heightMode);
+            int width_mode, int height_mode);
         virtual void onLayout(
-            bool changed, bool sizeChanged,
+            bool changed, bool size_changed,
             int left, int top, int right, int bottom);
-        virtual bool onInputEvent(InputEvent *e);
+        virtual bool onInputEvent(InputEvent* e);
 
         virtual bool onCheckIsTextEditor();
-        virtual InputConnection *onCreateInputConnection();
+        virtual InputConnection* onCreateInputConnection();
 
-        virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight);
+        virtual void onSizeChanged(int width, int height, int old_width, int old_height);
         virtual void onVisibilityChanged(int visibility);
-        virtual void onFocusChanged(bool getFocus);
-        virtual void onWindowFocusChanged(bool windowFocus);
+        virtual void onFocusChanged(bool get_focus);
+        virtual void onWindowFocusChanged(bool window_focus);
         virtual void onWindowDpiChanged(int dpi_x, int dpi_y);
-        virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY);
+        virtual void onScrollChanged(int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y);
 
     private:
-        class ClickPerformer
-            : public Executable {
+        enum Flags : uint32_t {
+            MEASURED_DIMENSION_SET = 1,
+            FORCE_LAYOUT = 1 << 1,
+            BOUNDS_SET = 1 << 2,
+            NEED_LAYOUT = 1 << 3,
+            INVALIDATED = 1 << 4,
+        };
+
+        class ClickPerformer : public Executable {
         public:
-            ClickPerformer(View *v)
+            ClickPerformer(View* v)
                 :view_(v) {}
             void run() override {
                 view_->performClick();
             }
         private:
-            View *view_;
+            View* view_;
         };
+
+        void updateDrawableState();
+        void updateBackgroundState();
+        void updateForegroundState();
 
 
         int id_;
         Rect bounds_;
         Rect padding_;
 
+        uint32_t flags_;
+
         int scroll_x_;
         int scroll_y_;
 
         int measured_width_;
         int measured_height_;
+
+        int old_pm_width_;
+        int old_pm_height_;
+        int old_pm_width_mode_;
+        int old_pm_height_mode_;
 
         int min_width_;
         int min_height_;
@@ -245,11 +274,10 @@ namespace ukive {
         bool is_input_event_at_last_;
         bool is_pressed_;
         bool is_focusable_;
-        bool is_layouted_;
         bool is_receive_outside_input_event_;
         bool can_consume_mouse_event_;
 
-        Window *window_;
+        Window* window_;
         std::unique_ptr<Drawable> bg_drawable_;
         std::unique_ptr<Drawable> fg_drawable_;
 
@@ -270,12 +298,14 @@ namespace ukive {
         double mRevealWidthRadius;
         double mRevealHeightRadius;
 
-        View *parent_;
-        ViewAnimator *animator_;
-        LayoutParams *layout_params_;
-        OnClickListener *click_listener_;
-        ClickPerformer *click_performer_;
-        InputConnection *input_connection_;
+        std::unique_ptr<ViewAnimator> animator_;
+        std::unique_ptr<ShadowEffect> shadow_effect_;
+        std::unique_ptr<LayoutParams> layout_params_;
+
+        View* parent_;
+        OnClickListener* click_listener_;
+        ClickPerformer* click_performer_;
+        InputConnection* input_connection_;
     };
 
 }

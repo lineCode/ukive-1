@@ -1,36 +1,36 @@
 cbuffer mData
 {
-	float4x4 gWVP;
+    float4x4 gWVP;
 };
 
 cbuffer mData2
 {
-	float4x4 gWVP2;
+    float4x4 gWVP2;
 };
 
 struct VertexInputType
 {
-	float3 position : POSITION;
-	float4 color : COLOR;
-	float3 normal : NORMAL;
-	float2 tex : TEXCOORD0;
+    float3 position : POSITION;
+    float4 color : COLOR;
+    float3 normal : NORMAL;
+    float2 tex : TEXCOORD0;
 };
 
 struct PixelInputType
 {
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
-	float2 tex : TEXCOORD0;
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+    float2 tex : TEXCOORD0;
 };
 
 
 PixelInputType main(VertexInputType input)
 {
-	PixelInputType output;
+    PixelInputType output;
 
-	output.position = mul(float4(input.position, 1.0f), gWVP);
-	output.color = input.color;
-	output.tex = input.tex;
+    output.position = mul(float4(input.position, 1.0f), gWVP);
+    output.color = input.color;
+    output.tex = input.tex;
 
-	return output;
+    return output;
 }

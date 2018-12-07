@@ -9,18 +9,11 @@
 
 namespace ukive {
 
-    class Transition
-    {
-    private:
-        Transition();
-
-        ComPtr<IUIAnimationTransition> mTransition;
-
+    class Transition {
     public:
         ~Transition();
 
-        enum UTSlope
-        {
+        enum UTSlope {
             INCREASING = 0,
             DECREASING = 1
         };
@@ -60,6 +53,11 @@ namespace ukive {
         static std::shared_ptr<Transition> smoothStopTransition(double maxDuration, double finalValue);
 
         static std::shared_ptr<Transition> fromInterpolator(IUIAnimationInterpolator *interpolator);
+
+    private:
+        Transition();
+
+        ComPtr<IUIAnimationTransition> transition_;
     };
 
 }

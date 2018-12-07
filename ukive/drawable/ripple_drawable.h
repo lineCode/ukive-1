@@ -20,42 +20,39 @@ namespace ukive {
         : public LayerDrawable, public Animator::OnValueChangedListener
     {
     public:
-        RippleDrawable(Window *win);
+        RippleDrawable(Window* win);
         ~RippleDrawable();
 
         void setTintColor(Color tint);
 
-        void draw(Canvas *canvas) override;
+        void draw(Canvas* canvas) override;
 
         float getOpacity() override;
 
         void onValueChanged(
             unsigned int varIndex,
-            IUIAnimationStoryboard *storyboard,
-            IUIAnimationVariable *variable,
+            IUIAnimationStoryboard* storyboard,
+            IUIAnimationVariable* variable,
             double newValue, double previousValue) override;
-        void onIntegerValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard *storyboard,
-            IUIAnimationVariable *variable,
-            int newValue, int previousValue) override;
 
     protected:
+        void onBoundChanged(const Rect& new_bound) override;
         bool onStateChanged(int newState, int prevState) override;
 
     private:
-        double mAlpha;
-        Color mTintColor;
+        double alpha_;
+        Color tint_color_;
 
-        Window *owner_win_;
+        Window* owner_win_;
 
-        Animator *mUpAnimator;
-        Animator *mDownAnimator;
+        Animator* up_animator_;
+        Animator* down_animator_;
+        Animator* hover_animator_;
+        Animator* leave_animator_;
+        Animator* ripple_animator_;
 
-        Animator *mHoverAnimator;
-        Animator *mLeaveAnimator;
-
-        Animator *mRippleAnimator;
+        std::unique_ptr<Canvas> mask_off_;
+        std::unique_ptr<Canvas> content_off_;
     };
 
 }

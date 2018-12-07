@@ -8,7 +8,7 @@
 
 namespace ukive {
 
-    WindowSlave::WindowSlave(Window *master)
+    WindowSlave::WindowSlave(Window* master)
     {
         sUWSVtr = this;
         mMaster = master;
@@ -63,7 +63,7 @@ namespace ukive {
 
     LRESULT CALLBACK WindowSlave::messageHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
-        Window *window = nullptr;
+        Window* window = nullptr;
 
         switch (uMsg)
         {

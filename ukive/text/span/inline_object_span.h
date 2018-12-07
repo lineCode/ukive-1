@@ -6,13 +6,12 @@
 
 namespace ukive {
 
-    class InlineObjectSpan : public Span
-    {
+    class InlineObjectSpan : public Span {
     public:
         InlineObjectSpan(unsigned int start, unsigned int end);
-        virtual ~InlineObjectSpan();
+        ~InlineObjectSpan();
 
-        int getBaseType();
+        int getBaseType() const override;
     };
 
 }

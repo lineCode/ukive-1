@@ -13,25 +13,27 @@
 
 namespace shell {
 
-    ukive::ListAdapter::ViewHolder* TestAdapter::onCreateViewHolder(ukive::ViewGroup *parent, int position) {
-        ukive::RestraintLayout *layout = new ukive::RestraintLayout(parent->getWindow());
-        layout->setBackground(new ukive::ColorDrawable(ukive::Color::White));
+    ukive::ListAdapter::ViewHolder* TestAdapter::onCreateViewHolder(
+        ukive::ViewGroup* parent, int position) {
+
+        auto layout = new ukive::RestraintLayout(parent->getWindow());
+        layout->setBackground(new ukive::ColorDrawable(ukive::Color::Blue100));
         layout->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT));
 
         typedef ukive::RestraintLayoutParams Rlp;
 
-        ukive::ImageView *avatar_view = new ukive::ImageView(parent->getWindow());
+        auto avatar_view = new ukive::ImageView(parent->getWindow());
         avatar_view->setId(ID_AVATAR);
-        Rlp *av_lp = new Rlp(36, 36);
+        Rlp* av_lp = new Rlp(36, 36);
         av_lp->startHandle(layout->getId(), Rlp::START, 16);
         av_lp->topHandle(layout->getId(), Rlp::BOTTOM, 8);
         av_lp->bottomHandle(layout->getId(), Rlp::BOTTOM, 8);
         layout->addView(avatar_view, av_lp);
 
-        ukive::TextView *title_label = new ukive::TextView(parent->getWindow());
+        ukive::TextView* title_label = new ukive::TextView(parent->getWindow());
         title_label->setId(ID_TITLE);
-        Rlp *tl_lp = new Rlp(
+        Rlp* tl_lp = new Rlp(
             Rlp::MATCH_PARENT,
             Rlp::FIT_CONTENT);
         tl_lp->startHandle(avatar_view->getId(), Rlp::END, 8);
@@ -39,9 +41,9 @@ namespace shell {
         tl_lp->endHandle(layout->getId(), Rlp::END, 8);
         layout->addView(title_label, tl_lp);
 
-        ukive::TextView *summary_label = new ukive::TextView(parent->getWindow());
+        ukive::TextView* summary_label = new ukive::TextView(parent->getWindow());
         summary_label->setId(ID_SUMMARY);
-        Rlp *sl_lp = new Rlp(
+        Rlp* sl_lp = new Rlp(
             Rlp::MATCH_PARENT,
             Rlp::FIT_CONTENT);
         sl_lp->startHandle(avatar_view->getId(), Rlp::END, 8);
@@ -53,9 +55,9 @@ namespace shell {
         return new TestViewHolder(layout);
     }
 
-    void TestAdapter::onBindViewHolder(ViewHolder *holder, int position) {
-        BindData *data = data_list_.at(position);
-        TestViewHolder *test_holder = reinterpret_cast<TestViewHolder*>(holder);
+    void TestAdapter::onBindViewHolder(ViewHolder* holder, int position) {
+        BindData* data = data_list_.at(position);
+        TestViewHolder* test_holder = reinterpret_cast<TestViewHolder*>(holder);
 
         std::wstringstream ss;
         ss << data->title << " " << position;
@@ -66,12 +68,12 @@ namespace shell {
         //LOG(INFO) << "ListAdapter::OnBindViewHolder():" << position << " data has been bound.";
     }
 
-    size_t TestAdapter::getItemCount() {
+    int TestAdapter::getItemCount() {
         return data_list_.size();
     }
 
     void TestAdapter::AddItem(int image_res_id, ukive::string16 title, ukive::string16 summary) {
-        BindData *data = new BindData();
+        BindData* data = new BindData();
         data->image_resource_id = image_res_id;
         data->title = title;
         data->summary = summary;
@@ -80,8 +82,8 @@ namespace shell {
         notifyDataChanged();
     }
 
-    void TestAdapter::AddItem(size_t pos, int image_res_id, ukive::string16 title, ukive::string16 summary) {
-        BindData *data = new BindData();
+    void TestAdapter::AddItem(int pos, int image_res_id, ukive::string16 title, ukive::string16 summary) {
+        BindData* data = new BindData();
         data->image_resource_id = image_res_id;
         data->title = title;
         data->summary = summary;
@@ -89,7 +91,7 @@ namespace shell {
         if (data_list_.size() == 0)
             data_list_.push_back(data);
         else {
-            size_t index = 0;
+            int index = 0;
             for (auto it = data_list_.begin();
                 it != data_list_.end(); ++it, ++index) {
                 if (pos == index) {
@@ -117,17 +119,18 @@ namespace shell {
     void TestAdapter::RemoveItem(ukive::string16 title) {
         for (auto it = data_list_.begin();
             it != data_list_.end();) {
-            if ((*it)->title == title)
+            if ((*it)->title == title) {
                 it = data_list_.erase(it);
-            else
+            } else {
                 ++it;
+            }
         }
 
         notifyDataChanged();
     }
 
-    void TestAdapter::RemoveItem(size_t pos) {
-        size_t index = 0;
+    void TestAdapter::RemoveItem(int pos) {
+        int index = 0;
         for (auto it = data_list_.begin();
             it != data_list_.end(); ++index, ++it) {
             if (index == pos) {

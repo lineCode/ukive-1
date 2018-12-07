@@ -8,8 +8,7 @@ namespace ukive {
 
     class Window;
 
-    class WindowSlave
-    {
+    class WindowSlave {
     public:
         WindowSlave(Window *master);
         ~WindowSlave();

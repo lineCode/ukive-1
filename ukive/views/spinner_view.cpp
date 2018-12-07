@@ -3,12 +3,11 @@
 
 namespace ukive {
 
-    SpinnerView::SpinnerView(Window *wnd)
+    SpinnerView::SpinnerView(Window* wnd)
         :TextView(wnd) {
     }
 
-    SpinnerView::~SpinnerView()
-    {
+    SpinnerView::~SpinnerView() {
     }
 
 }

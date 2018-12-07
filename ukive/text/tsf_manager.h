@@ -12,22 +12,7 @@ namespace ukive {
     class TsfEditor;
     class InputConnection;
 
-    class TsfManager
-    {
-    private:
-        TsfSink *mSink;
-        TfClientId mClientId;
-        ComPtr<ITfThreadMgr> mThreadMgr;
-
-        DWORD mAlpnSinkCookie;
-        DWORD mOpenModeSinkCookie;
-        DWORD mConvModeSinkCookie;
-
-        HRESULT setupCompartmentSinks(ITfCompartment *openMode, ITfCompartment *convMode);
-        HRESULT releaseCompartmentSinks();
-
-        HRESULT getCompartments(ITfCompartmentMgr **cm, ITfCompartment **openMode, ITfCompartment **convMode);
-
+    class TsfManager {
     public:
         TsfManager();
         ~TsfManager();
@@ -35,38 +20,52 @@ namespace ukive {
         HRESULT init();
         void close();
 
-        TfClientId getClientId();
-        ComPtr<ITfThreadMgr> getThreadManager();
+        TfClientId getClientId() const;
+        ComPtr<ITfThreadMgr> getThreadManager() const;
 
         HRESULT setupSinks();
         HRESULT releaseSinks();
 
         HRESULT updateImeState();
+
+    private:
+        TsfSink* sink_;
+        TfClientId client_id_;
+        ComPtr<ITfThreadMgr> thread_mgr_;
+
+        DWORD mAlpnSinkCookie;
+        DWORD mOpenModeSinkCookie;
+        DWORD mConvModeSinkCookie;
+
+        HRESULT setupCompartmentSinks(ITfCompartment* openMode, ITfCompartment* convMode);
+        HRESULT releaseCompartmentSinks();
+        HRESULT getCompartments(
+            ITfCompartmentMgr** cm, ITfCompartment** openMode, ITfCompartment** convMode);
     };
 
-    class TsfSink : public ITfInputProcessorProfileActivationSink, public ITfCompartmentEventSink
-    {
-    private:
-        LONG mRefCount;
-        TsfManager *mTsfMgr;
-        ITfCompositionView *pComposition;
-
+    class TsfSink : public ITfInputProcessorProfileActivationSink, public ITfCompartmentEventSink {
     public:
-        TsfSink(TsfManager *tsfMgr);
-        ~TsfSink();
-
-        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObj) override;
-        STDMETHODIMP_(ULONG) AddRef(void) override;
-        STDMETHODIMP_(ULONG) Release(void) override;
+        TsfSink(TsfManager* tsfMgr);
+        virtual ~TsfSink();
 
         // ITfInputProcessorProfileActivationSink
         // Notification for keyboard input locale change
         STDMETHODIMP OnActivated(
-            DWORD dwProfileType, LANGID langid, REFCLSID clsid, REFGUID catid, REFGUID guidProfile, HKL hkl, DWORD dwFlags) override;
+            DWORD dwProfileType, LANGID langid, REFCLSID clsid, REFGUID catid, REFGUID guidProfile,
+            HKL hkl, DWORD dwFlags) override;
 
         // ITfCompartmentEventSink
         // Notification for open mode (toggle state) change
         STDMETHODIMP OnChange(REFGUID rguid) override;
+
+        STDMETHODIMP_(ULONG) AddRef() override;
+        STDMETHODIMP_(ULONG) Release() override;
+        STDMETHODIMP QueryInterface(REFIID riid, void** ppvObj) override;
+
+    private:
+        ULONG ref_count_;
+        TsfManager* tsf_mgr_;
+        ITfCompositionView* composition_view_;
     };
 
 }

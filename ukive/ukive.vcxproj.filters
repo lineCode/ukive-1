@@ -48,9 +48,6 @@
     <ClCompile Include="system\clipboard_manager.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="system\system_clock.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\bitmap_factory.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -68,9 +65,6 @@
     </ClCompile>
     <ClCompile Include="message\message_queue.cpp">
       <Filter>message</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics\drawing_object_manager.cpp">
-      <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="animation\animation_manager.cpp">
       <Filter>animation</Filter>
@@ -103,9 +97,6 @@
       <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="text\input_connection.cpp">
-      <Filter>text</Filter>
-    </ClCompile>
-    <ClCompile Include="text\language_detector.cpp">
       <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="text\text_action_mode.cpp">
@@ -207,17 +198,8 @@
     <ClCompile Include="views\text_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
-    <ClCompile Include="views\text_view2.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="views\view.cpp">
       <Filter>views</Filter>
-    </ClCompile>
-    <ClCompile Include="views\layout\base_layout.cpp">
-      <Filter>views\layout</Filter>
-    </ClCompile>
-    <ClCompile Include="views\layout\base_layout_params.cpp">
-      <Filter>views\layout</Filter>
     </ClCompile>
     <ClCompile Include="views\layout\frame_layout.cpp">
       <Filter>views\layout</Filter>
@@ -264,8 +246,86 @@
     <ClCompile Include="graphics\cursor.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="utils\weak_bind.cpp">
+    <ClCompile Include="graphics\direct3d\scene.cpp">
+      <Filter>graphics\direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\direct3d\space.cpp">
+      <Filter>graphics\direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\view_holder_recycler.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\overlay_scroll_bar.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\point.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp">
+      <Filter>graphics\direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\direct3d\effects\shadow_effect.cpp">
+      <Filter>graphics\direct3d\effects</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\root_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\root_layout_params.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="system\time_utils.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\qpc_service.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="views\debug_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\rendering_command_list.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\paint.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\geometry.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\render_node\render_node.cpp">
+      <Filter>graphics\render_node</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\render_node\render_tree.cpp">
+      <Filter>graphics\render_node</Filter>
+    </ClCompile>
+    <ClCompile Include="window\frame\drawable_non_client_frame.cpp">
+      <Filter>window\frame</Filter>
+    </ClCompile>
+    <ClCompile Include="views\layout\non_client_layout.cpp">
+      <Filter>views\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\event_handler.h">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="system\reg_manager.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="files\file.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\unicode.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="drawable\check_drawable.cpp">
+      <Filter>drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="views\check_box.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\vector2.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\list_layouter.cpp">
+      <Filter>views\list</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -319,13 +379,7 @@
     <ClInclude Include="graphics\wic_manager.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="utils\thread_local.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="system\clipboard_manager.h">
-      <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="system\system_clock.h">
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="graphics\bitmap_factory.h">
@@ -352,17 +406,11 @@
     <ClInclude Include="graphics\device_lost_notifier.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\direct3d_render_listener.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\swapchain_resize_notifier.h">
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="utils\hresult_utils.h">
       <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\drawing_object_manager.h">
-      <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="animation\animation_manager.h">
       <Filter>animation</Filter>
@@ -395,9 +443,6 @@
       <Filter>text</Filter>
     </ClInclude>
     <ClInclude Include="text\input_connection.h">
-      <Filter>text</Filter>
-    </ClInclude>
-    <ClInclude Include="text\language_detector.h">
       <Filter>text</Filter>
     </ClInclude>
     <ClInclude Include="text\text_action_mode.h">
@@ -520,17 +565,8 @@
     <ClInclude Include="views\text_view.h">
       <Filter>views</Filter>
     </ClInclude>
-    <ClInclude Include="views\text_view2.h">
-      <Filter>views</Filter>
-    </ClInclude>
     <ClInclude Include="views\view.h">
       <Filter>views</Filter>
-    </ClInclude>
-    <ClInclude Include="views\layout\base_layout.h">
-      <Filter>views\layout</Filter>
-    </ClInclude>
-    <ClInclude Include="views\layout\base_layout_params.h">
-      <Filter>views\layout</Filter>
     </ClInclude>
     <ClInclude Include="views\layout\frame_layout.h">
       <Filter>views\layout</Filter>
@@ -580,6 +616,84 @@
     <ClInclude Include="utils\weak_bind.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\direct3d\scene.h">
+      <Filter>graphics\direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\direct3d\space.h">
+      <Filter>graphics\direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\view_holder_recycler.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\overlay_scroll_bar.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\point.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\direct3d\drawing_object_manager.h">
+      <Filter>graphics\direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\direct3d\effects\shadow_effect.h">
+      <Filter>graphics\direct3d\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\root_layout.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\root_layout_params.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="system\time_utils.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="system\qpc_service.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="views\debug_view.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\rendering_command_list.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\paint.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\geometry.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\render_node\render_node.h">
+      <Filter>graphics\render_node</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\render_node\render_tree.h">
+      <Filter>graphics\render_node</Filter>
+    </ClInclude>
+    <ClInclude Include="window\frame\drawable_non_client_frame.h">
+      <Filter>window\frame</Filter>
+    </ClInclude>
+    <ClInclude Include="views\layout\non_client_layout.h">
+      <Filter>views\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="system\reg_manager.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="files\file.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\unicode.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="drawable\check_drawable.h">
+      <Filter>drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="views\check_box.h">
+      <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\vector2.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\list_layouter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -627,5 +741,28 @@
     <Filter Include="views\list">
       <UniqueIdentifier>{fe9efc35-eb80-43ea-8d5e-2974a5d8dd4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="graphics\direct3d">
+      <UniqueIdentifier>{9f042d8b-7913-4a2a-ab66-69969e03967e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\direct3d\effects">
+      <UniqueIdentifier>{6db64e0d-5acc-429c-b3bc-55195c4c0f18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\direct3d\hlsl">
+      <UniqueIdentifier>{b6700bbc-a76b-4523-845c-fef6a4494830}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\render_node">
+      <UniqueIdentifier>{bbfb6918-d6e4-4428-8a70-2e63ad352cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="files">
+      <UniqueIdentifier>{b51fd15d-9a20-4be5-9d96-026070975a3d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_ps.hlsl">
+      <Filter>graphics\direct3d\hlsl</Filter>
+    </FxCompile>
+    <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_vs.hlsl">
+      <Filter>graphics\direct3d\hlsl</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

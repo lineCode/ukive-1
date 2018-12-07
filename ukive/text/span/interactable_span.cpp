@@ -5,18 +5,15 @@ namespace ukive {
 
     InteractableSpan::InteractableSpan(
         unsigned int start, unsigned int end)
-        :Span(start, end)
-    {
+        :Span(start, end) {
     }
 
-    InteractableSpan::~InteractableSpan()
-    {
+    InteractableSpan::~InteractableSpan() {
     }
 
 
-    int InteractableSpan::getBaseType()
-    {
-        return Span::USPAN_BASE_TYPE_INTERACTABLE;
+    int InteractableSpan::getBaseType() const {
+        return Span::INTERACTABLE;
     }
 
 }

@@ -17,81 +17,87 @@ namespace ukive {
     class TextDrawingEffect;
 
 
-    ///<summary>
-    ///文本编辑器，使用TSF。
-    ///</summary>
     class TextView : public View,
-        public Editable::EditWatcher, public TextActionModeCallback
-    {
-    private:
-        //为支持撤销而创建的结构体（未完成）。
-        struct UndoBlock
-        {
-            std::wstring text;
-            uint32_t start;
-            uint32_t oldEnd;
-            uint32_t newEnd;
-        };
+        public Editable::EditWatcher,
+        public TextActionModeCallback {
+    public:
+        TextView(Window* w);
+        ~TextView();
 
-        struct SelectionBlock
-        {
-            unsigned int start;
-            unsigned int length;
-            RectF rect;
-        };
+        void onBeginProcess();
+        void onEndProcess();
 
-        static const int MENU_ID_COPY = 1;
-        static const int MENU_ID_CUT = 2;
-        static const int MENU_ID_PASTE = 3;
-        static const int MENU_ID_SELECTALL = 4;
+        void onAttachedToWindow() override;
+        void onDetachedFromWindow() override;
 
-        static const int MENU_ORDER_COPY = 1;
-        static const int MENU_ORDER_CUT = 2;
-        static const int MENU_ORDER_PASTE = 3;
-        static const int MENU_ORDER_SELECTALL = 4;
+        void autoWrap(bool enable);
+        void setIsEditable(bool editable);
+        void setIsSelectable(bool selectable);
 
-    private:
-        Editable *mBaseText;
-        ComPtr<IDWriteTextFormat> mTextFormat;
-        ComPtr<IDWriteTextLayout> mTextLayout;
+        bool isAutoWrap() const;
+        bool isEditable() const;
+        bool isSelectable() const;
 
-        TextBlink *mTextBlink;
-        TextActionMode *mTextActionMode;
-        InputConnection *mInputConnection;
-        TextKeyListener *mTextKeyListener;
+        void setText(const string16& text);
+        void setTextSize(int size);
+        void setTextColor(Color color);
+        void setTextAlignment(DWRITE_TEXT_ALIGNMENT alignment);
+        void setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment);
+        void setTextStyle(DWRITE_FONT_STYLE style);
+        void setTextWeight(DWRITE_FONT_WEIGHT weight);
+        void setFontFamilyName(const string16& font);
+        void setLineSpacing(bool uniform, float spacingMultiple);
 
-        ULONG64 mProcessRef;
+        string16 getText() const;
+        Editable* getEditable() const;
+        float getTextSize() const;
 
-        int mTextSize;
-        std::wstring mFontFamilyName;
-        Color mTextColor;
-        Color mSelectionBackgroundColor;
-        DWRITE_TEXT_ALIGNMENT mTextAlignment;
-        DWRITE_PARAGRAPH_ALIGNMENT mParagraphAlignment;
-        DWRITE_FONT_WEIGHT mTextWeight;
-        DWRITE_FONT_STYLE mTextStyle;
+        void setSelection(unsigned int position);
+        void setSelection(unsigned int start, unsigned int end);
+        void drawSelection(unsigned int start, unsigned int end);
+        string16 getSelection() const;
+        int getSelectionStart() const;
+        int getSelectionEnd() const;
+        bool hasSelection() const;
 
-        float mLineSpacingMultiple;
-        DWRITE_LINE_SPACING_METHOD mLineSpacingMethod;
+        uint32_t getHitTextPosition(float textX, float textY) const;
+        bool isHitText(float textX, float textY, uint32_t* hitPos = nullptr) const;
+        bool isHitText(float textX, float textY, uint32_t position, uint32_t length, uint32_t* hitPos = nullptr) const;
+        RectF getSelectionBound(unsigned int start, unsigned int end) const;
 
-        bool mIsAutoWrap;
-        bool mIsEditable;
-        bool mIsSelectable;
+        void computeVisibleRegion(RectF* region);
 
-        int mPrevX, mPrevY;
-        bool mIsMouseLeftKeyDown;
-        bool mIsMouseRightKeyDown;
-        bool mIsMouseLeftKeyDownOnText;
+        void onTextChanged(
+            Editable* editable,
+            int start, int oldEnd, int newEnd) override;
+        void onSelectionChanged(
+            unsigned int ns, unsigned int ne,
+            unsigned int os, unsigned int oe) override;
+        void onSpanChanged(
+            Span* span, SpanChange action) override;
 
-        int mLastSelection;
-        int mFirstSelection;
-        float mLastSelectionLeft;
+        bool onCreateActionMode(TextActionMode* mode, Menu* menu) override;
+        bool onPrepareActionMode(TextActionMode* mode, Menu* menu) override;
+        bool onActionItemClicked(TextActionMode* mode, MenuItem* item) override;
+        void onDestroyActionMode(TextActionMode* mode) override;
+        void onGetContentPosition(int* x, int* y) override;
 
-        float mVerticalOffset;
-        uint32_t mTextOffsetAtViewTop;
+    protected:
+        void onDraw(Canvas* canvas) override;
+        void onMeasure(int width, int height, int widthSpec, int heightSpec) override;
+        bool onInputEvent(InputEvent* e) override;
 
-        std::vector<ComPtr<TextDrawingEffect>> mTDEffectList;
-        std::vector<std::shared_ptr<SelectionBlock>> mSelectionList;
+        void onLayout(
+            bool changed, bool sizeChanged,
+            int left, int top, int right, int bottom) override;
+        void onSizeChanged(int width, int height, int oldWidth, int oldHeight) override;
+        void onFocusChanged(bool getFocus) override;
+        void onWindowFocusChanged(bool windowFocus) override;
+
+        void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
+
+        bool onCheckIsTextEditor() override;
+        InputConnection* onCreateInputConnection() override;
 
     private:
         void initTextView();
@@ -107,14 +113,14 @@ namespace ukive {
 
         void scrollToFit(bool considerSelection);
 
-        float getTextWidth();
-        float getTextHeight();
+        float getTextWidth() const;
+        float getTextHeight() const;
 
         bool getLineInfo(
             uint32_t position,
-            uint32_t *line, float *height, uint32_t *count = nullptr);
+            uint32_t* line, float* height, uint32_t* count = nullptr);
         bool getLineHeight(
-            uint32_t line, float *height);
+            uint32_t line, float* height);
 
         void blinkNavigator(int keyCode);
 
@@ -123,95 +129,73 @@ namespace ukive {
         void makeNewTextFormat();
         void makeNewTextLayout(float maxWidth, float maxHeight, bool autoWrap);
 
-        bool canCut();
-        bool canCopy();
-        bool canPaste();
-        bool canSelectAll();
+        bool canCut() const;
+        bool canCopy() const;
+        bool canPaste() const;
+        bool canSelectAll() const;
 
         void performCut();
         void performCopy();
         void performPaste();
         void performSelectAll();
 
-    public:
-        TextView(Window *w);
-        ~TextView();
+    private:
+        // 为支持撤销而创建的结构体（未完成）。
+        struct UndoBlock {
+            std::wstring text;
+            uint32_t start;
+            uint32_t oldEnd;
+            uint32_t newEnd;
+        };
 
-        void onBeginProcess();
-        void onEndProcess();
+        struct SelectionBlock {
+            unsigned int start;
+            unsigned int length;
+            RectF rect;
+        };
 
-        virtual void onAttachedToWindow() override;
-        virtual void onDetachedFromWindow() override;
+    private:
+        Editable* base_text_;
+        ComPtr<IDWriteTextFormat> text_format_;
+        ComPtr<IDWriteTextLayout> text_layout_;
 
-        void autoWrap(bool enable);
-        void setIsEditable(bool editable);
-        void setIsSelectable(bool selectable);
+        TextBlink* text_blink_;
+        TextActionMode* text_action_mode_;
+        InputConnection* input_connection_;
+        TextKeyListener* text_key_listener_;
 
-        bool isAutoWrap();
-        bool isEditable();
-        bool isSelectable();
+        ULONG64 process_ref_;
 
-        void setText(std::wstring text);
-        void setTextSize(int size);
-        void setTextColor(Color color);
-        void setTextAlignment(DWRITE_TEXT_ALIGNMENT alignment);
-        void setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT alignment);
-        void setTextStyle(DWRITE_FONT_STYLE style);
-        void setTextWeight(DWRITE_FONT_WEIGHT weight);
-        void setFontFamilyName(std::wstring font);
-        void setLineSpacing(bool uniform, float spacingMultiple);
+        int text_size_;
+        string16 font_family_name_;
+        Color text_color_;
+        Color sel_bg_color_;
+        DWRITE_TEXT_ALIGNMENT text_alignment_;
+        DWRITE_PARAGRAPH_ALIGNMENT paragraph_alignment_;
+        DWRITE_FONT_WEIGHT text_weight_;
+        DWRITE_FONT_STYLE text_style_;
 
-        std::wstring getText();
-        Editable *getEditable();
-        float getTextSize();
+        float line_spacing_multiple_;
+        DWRITE_LINE_SPACING_METHOD line_spacing_method_;
 
-        void setSelection(unsigned int position);
-        void setSelection(unsigned int start, unsigned int end);
-        void drawSelection(unsigned int start, unsigned int end);
-        std::wstring getSelection();
-        int getSelectionStart();
-        int getSelectionEnd();
-        bool hasSelection();
+        bool is_auto_wrap_;
+        bool is_editable_;
+        bool is_selectable_;
 
-        uint32_t getHitTextPosition(float textX, float textY);
-        bool isHitText(float textX, float textY, uint32_t *hitPos = nullptr);
-        bool isHitText(float textX, float textY, uint32_t position, uint32_t length, uint32_t *hitPos = nullptr);
-        RectF getSelectionBound(unsigned int start, unsigned int end);
+        int prev_x_, prev_y_;
+        bool is_mouse_left_key_down_;
+        bool is_mouse_right_key_down_;
+        bool is_mouse_left_key_down_on_text_;
 
-        void computeVisibleRegion(RectF *visibleRegon);
+        int last_sel_;
+        int first_sel_;
+        float last_sel_left_;
 
-    protected:
-        virtual void onDraw(Canvas *canvas) override;
-        virtual void onMeasure(int width, int height, int widthSpec, int heightSpec) override;
-        virtual bool onInputEvent(InputEvent *e) override;
+        float vertical_offset_;
+        uint32_t text_offset_at_view_top_;
 
-        virtual void onLayout(
-            bool changed, bool sizeChanged,
-            int left, int top, int right, int bottom) override;
-        virtual void onSizeChanged(int width, int height, int oldWidth, int oldHeight) override;
-        virtual void onFocusChanged(bool getFocus) override;
-        virtual void onWindowFocusChanged(bool windowFocus) override;
-
-        virtual void onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
-
-        virtual bool onCheckIsTextEditor() override;
-        virtual InputConnection *onCreateInputConnection() override;
-
-    public:
-        void onTextChanged(
-            Editable *editable,
-            int start, int oldEnd, int newEnd) override;
-        void onSelectionChanged(
-            unsigned int ns, unsigned int ne,
-            unsigned int os, unsigned int oe) override;
-        void onSpanChanged(
-            Span *span, SpanChange action) override;
-
-        bool onCreateActionMode(TextActionMode *mode, Menu *menu) override;
-        bool onPrepareActionMode(TextActionMode *mode, Menu *menu) override;
-        bool onActionItemClicked(TextActionMode *mode, MenuItem *item) override;
-        void onDestroyActionMode(TextActionMode *mode) override;
-        void onGetContentPosition(int *x, int *y) override;
+        std::vector<ComPtr<TextDrawingEffect>> tde_list_;
+        std::vector<std::shared_ptr<SelectionBlock>> sel_list_;
     };
 
 }

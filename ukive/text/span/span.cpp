@@ -4,30 +4,25 @@
 namespace ukive {
 
     Span::Span(unsigned int start, unsigned int end)
-    {
-        mStart = start;
-        mEnd = end;
+        :start_(start),
+        end_(end) {
     }
 
-    Span::~Span()
-    {
+    Span::~Span() {
     }
 
 
-    void Span::resize(unsigned int start, unsigned int end)
-    {
-        mStart = start;
-        mEnd = end;
+    void Span::resize(unsigned int start, unsigned int end) {
+        start_ = start;
+        end_ = end;
     }
 
-    unsigned int Span::getStart()
-    {
-        return mStart;
+    unsigned int Span::getStart() const {
+        return start_;
     }
 
-    unsigned int Span::getEnd()
-    {
-        return mEnd;
+    unsigned int Span::getEnd() const {
+        return end_;
     }
 
 }

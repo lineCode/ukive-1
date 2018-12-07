@@ -14,6 +14,8 @@ namespace ukive {
     class BitmapFactory {
     public:
         static std::shared_ptr<Bitmap> create(Window *win, unsigned int width, unsigned int height);
+        static std::shared_ptr<Bitmap> create(
+            Window *win, unsigned int width, unsigned int height, const void* data);
         static std::shared_ptr<Bitmap> decodeFile(Window *win, const string16 &file_name);
     };
 

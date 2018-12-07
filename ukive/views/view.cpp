@@ -1,5 +1,6 @@
 ﻿#include "view.h"
 
+#include "ukive/log.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
@@ -7,41 +8,41 @@
 #include "ukive/animation/view_animator.h"
 #include "ukive/text/input_connection.h"
 #include "ukive/views/click_listener.h"
+#include "ukive/views/layout/layout_params.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
 #include "ukive/application.h"
 #include "ukive/message/cycler.h"
 #include "ukive/graphics/bitmap_factory.h"
+#include "ukive/graphics/direct3d/effects/shadow_effect.h"
 
 
 namespace ukive {
 
-    View::View(Window *w)
-        :window_(w),
-        id_(Application::getViewUID()),
-        min_width_(0),
-        min_height_(0),
-        measured_width_(0),
-        measured_height_(0),
+    View::View(Window* w)
+        :id_(Application::getViewID()),
+        flags_(0),
         scroll_x_(0),
         scroll_y_(0),
-        elevation_(0.f),
+        measured_width_(0),
+        measured_height_(0),
+        old_pm_width_(0),
+        old_pm_height_(0),
+        old_pm_width_mode_(UNKNOWN),
+        old_pm_height_mode_(UNKNOWN),
+        min_width_(0),
+        min_height_(0),
         visibility_(VISIBLE),
+        elevation_(0.f),
         has_focus_(false),
         is_enabled_(true),
-        is_pressed_(false),
-        is_focusable_(false),
-        is_layouted_(false),
         is_attached_to_window_(false),
         is_input_event_at_last_(false),
+        is_pressed_(false),
+        is_focusable_(false),
         is_receive_outside_input_event_(false),
         can_consume_mouse_event_(true),
-        parent_(nullptr),
-        layout_params_(nullptr),
-        input_connection_(nullptr),
-        click_listener_(nullptr),
-        animator_(nullptr),
-        click_performer_(new ClickPerformer(this)),
+        window_(w),
         mAlpha(1.0),
         mScaleX(1.0),
         mScaleY(1.0),
@@ -55,24 +56,29 @@ namespace ukive {
         mRevealCenterX(0.0),
         mRevealCenterY(0.0),
         mRevealWidthRadius(0.0),
-        mRevealHeightRadius(0.0) {}
+        mRevealHeightRadius(0.0),
+        parent_(nullptr),
+        click_listener_(nullptr),
+        click_performer_(new ClickPerformer(this)),
+        input_connection_(nullptr) {}
 
 
     View::~View() {
         delete click_performer_;
 
-        if (input_connection_ != nullptr) {
+        if (input_connection_) {
+            input_connection_->popEditor();
             delete input_connection_;
         }
     }
 
 
-    ViewAnimator *View::animate() {
-        if (animator_ == nullptr) {
-            animator_ = new ViewAnimator(this);
+    ViewAnimator* View::animate() {
+        if (!animator_) {
+            animator_ = std::make_unique<ViewAnimator>(this);
         }
 
-        return animator_;
+        return animator_.get();
     }
 
     void View::setId(int id) {
@@ -157,14 +163,10 @@ namespace ukive {
         }
     }
 
-    void View::setMeasuredDimension(int width, int height) {
-        measured_width_ = width;
-        measured_height_ = height;
-    }
-
     void View::setVisibility(int visibility) {
-        if (visibility == visibility_)
+        if (visibility == visibility_) {
             return;
+        }
 
         visibility_ = visibility;
 
@@ -179,8 +181,9 @@ namespace ukive {
     }
 
     void View::setEnabled(bool enable) {
-        if (enable == is_enabled_)
+        if (enable == is_enabled_) {
             return;
+        }
 
         is_enabled_ = enable;
 
@@ -189,16 +192,19 @@ namespace ukive {
             discardPendingOperations();
         }
 
+        updateDrawableState();
         invalidate();
     }
 
-    void View::setBackground(Drawable *drawable) {
+    void View::setBackground(Drawable* drawable) {
         bg_drawable_.reset(drawable);
+        updateBackgroundState();
         invalidate();
     }
 
-    void View::setForeground(Drawable *drawable) {
+    void View::setForeground(Drawable* drawable) {
         fg_drawable_.reset(drawable);
+        updateForegroundState();
         invalidate();
     }
 
@@ -214,11 +220,13 @@ namespace ukive {
         invalidate();
     }
 
-    void View::setLayoutParams(LayoutParams *params) {
-        if (params == nullptr)
-            throw std::invalid_argument("setLayoutParams: null param");
+    void View::setLayoutParams(LayoutParams* params) {
+        if (!params) {
+            DLOG(Log::WARNING) << "null param";
+            return;
+        }
 
-        layout_params_ = params;
+        layout_params_.reset(params);
 
         requestLayout();
         invalidate();
@@ -229,8 +237,9 @@ namespace ukive {
     }
 
     void View::setPressed(bool pressed) {
-        if (is_pressed_ == pressed)
+        if (is_pressed_ == pressed) {
             return;
+        }
 
         is_pressed_ = pressed;
 
@@ -242,8 +251,9 @@ namespace ukive {
     }
 
     void View::setFocusable(bool focusable) {
-        if (is_focusable_ == focusable)
+        if (is_focusable_ == focusable) {
             return;
+        }
 
         is_focusable_ = focusable;
 
@@ -257,7 +267,12 @@ namespace ukive {
             return;
         }
 
+        if (!shadow_effect_) {
+            shadow_effect_ = std::make_unique<ShadowEffect>();
+        }
+
         elevation_ = elevation;
+        shadow_effect_->setRadius(elevation_ * 2);
 
         requestLayout();
         invalidate();
@@ -270,12 +285,20 @@ namespace ukive {
     void View::setCanConsumeMouseEvent(bool enable) {
         can_consume_mouse_event_ = enable;
 
-        if (!enable)
+        if (!enable) {
             window_->releaseMouse();
+        }
     }
 
-    void View::setParent(View *parent) {
+    void View::setParent(View* parent) {
         parent_ = parent;
+    }
+
+    void View::setMeasuredDimension(int width, int height) {
+        measured_width_ = width;
+        measured_height_ = height;
+
+        flags_ |= Flags::MEASURED_DIMENSION_SET;
     }
 
     void View::offsetTopAndBottom(int dy) {
@@ -300,156 +323,156 @@ namespace ukive {
         min_height_ = height;
     }
 
-    void View::setOnClickListener(OnClickListener *l) {
+    void View::setOnClickListener(OnClickListener* l) {
         click_listener_ = l;
     }
 
 
-    int View::getId() {
+    int View::getId() const {
         return id_;
     }
 
-    double View::getX() {
+    double View::getX() const {
         return bounds_.left + getTranslateX();
     }
 
-    double View::getY() {
+    double View::getY() const {
         return bounds_.top + getTranslateY();
     }
 
-    double View::getAlpha() {
+    double View::getAlpha() const {
         return mAlpha;
     }
 
-    double View::getScaleX() {
+    double View::getScaleX() const {
         return mScaleX;
     }
 
-    double View::getScaleY() {
+    double View::getScaleY() const {
         return mScaleY;
     }
 
-    double View::getTranslateX() {
+    double View::getTranslateX() const {
         return mTranslateX;
     }
 
-    double View::getTranslateY() {
+    double View::getTranslateY() const {
         return mTranslateY;
     }
 
-    double View::getPivotX() {
+    double View::getPivotX() const {
         return mPivotX;
     }
 
-    double View::getPivotY() {
+    double View::getPivotY() const {
         return mPivotY;
     }
 
-    int View::getScrollX() {
+    int View::getScrollX() const {
         return scroll_x_;
     }
 
-    int View::getScrollY() {
+    int View::getScrollY() const {
         return scroll_y_;
     }
 
-    int View::getLeft() {
+    int View::getLeft() const {
         return bounds_.left;
     }
 
-    int View::getTop() {
+    int View::getTop() const {
         return bounds_.top;
     }
 
-    int View::getRight() {
+    int View::getRight() const {
         return bounds_.right;
     }
 
-    int View::getBottom() {
+    int View::getBottom() const {
         return bounds_.bottom;
     }
 
-    int View::getWidth() {
+    int View::getWidth() const {
         return bounds_.width();
     }
 
-    int View::getHeight() {
+    int View::getHeight() const {
         return bounds_.height();
     }
 
-    int View::getMeasuredWidth() {
+    int View::getMeasuredWidth() const {
         return measured_width_;
     }
 
-    int View::getMeasuredHeight() {
+    int View::getMeasuredHeight() const {
         return measured_height_;
     }
 
-    int View::getMinimumWidth() {
+    int View::getMinimumWidth() const {
         return min_width_;
     }
 
-    int View::getMinimumHeight() {
+    int View::getMinimumHeight() const {
         return min_height_;
     }
 
-    float View::getElevation() {
+    float View::getElevation() const {
         return elevation_;
     }
 
-    int View::getVisibility() {
+    int View::getVisibility() const {
         return visibility_;
     }
 
 
-    int View::getPaddingLeft() {
+    int View::getPaddingLeft() const {
         return padding_.left;
     }
 
-    int View::getPaddingTop() {
+    int View::getPaddingTop() const {
         return padding_.top;
     }
 
-    int View::getPaddingRight() {
+    int View::getPaddingRight() const {
         return padding_.right;
     }
 
-    int View::getPaddingBottom() {
+    int View::getPaddingBottom() const {
         return padding_.bottom;
     }
 
 
-    LayoutParams *View::getLayoutParams() {
-        return layout_params_;
+    LayoutParams* View::getLayoutParams() const {
+        return layout_params_.get();
     }
 
-    View *View::getParent() {
+    View* View::getParent() const {
         return parent_;
     }
 
 
-    Window *View::getWindow() {
+    Window* View::getWindow() const {
         return window_;
     }
 
 
-    Drawable *View::getBackground() {
+    Drawable* View::getBackground() const {
         return bg_drawable_.get();
     }
 
-    Drawable *View::getForeground() {
+    Drawable* View::getForeground() const {
         return fg_drawable_.get();
     }
 
 
-    Rect View::getBounds() {
+    Rect View::getBounds() const {
         return bounds_;
     }
 
-    Rect View::getBoundsInWindow() {
+    Rect View::getBoundsInWindow() const {
         Rect bound = getBounds();
 
-        View *parent = parent_;
+        View* parent = parent_;
         while (parent) {
             Rect parentBound = parent->getBounds();
             bound.left += parentBound.left;
@@ -463,7 +486,7 @@ namespace ukive {
         return bound;
     }
 
-    Rect View::getBoundsInScreen() {
+    Rect View::getBoundsInScreen() const {
         Rect bound = getBoundsInWindow();
 
         POINT pt;
@@ -483,13 +506,13 @@ namespace ukive {
         return bound;
     }
 
-    Rect View::getContentBounds() {
+    Rect View::getContentBounds() const {
         Rect content_bounds = bounds_;
         content_bounds.insets(padding_);
         return content_bounds;
     }
 
-    Rect View::getContentBoundsInThis() {
+    Rect View::getContentBoundsInThis() const {
         int content_width = bounds_.width() - padding_.width();
         int content_height = bounds_.height() - padding_.height();
         return Rect(
@@ -498,53 +521,53 @@ namespace ukive {
     }
 
 
-    View *View::findViewById(int id) {
+    View* View::findViewById(int id) {
         return nullptr;
     }
 
 
-    bool View::isEnabled() {
+    bool View::isEnabled() const {
         return is_enabled_;
     }
 
-    bool View::isAttachedToWindow() {
+    bool View::isAttachedToWindow() const {
         return is_attached_to_window_;
     }
 
-    bool View::isInputEventAtLast() {
+    bool View::isInputEventAtLast() const {
         return is_input_event_at_last_;
     }
 
-    bool View::isPressed() {
+    bool View::isPressed() const {
         return is_pressed_;
     }
 
-    bool View::hasFocus() {
+    bool View::hasFocus() const {
         return has_focus_;
     }
 
-    bool View::isFocusable() {
+    bool View::isFocusable() const {
         return is_focusable_;
     }
 
-    bool View::isLayouted() {
-        return is_layouted_;
+    bool View::isLayouted() const {
+        return flags_ & Flags::BOUNDS_SET;
     }
 
-    bool View::isLocalMouseInThis(InputEvent *e) {
-        return (e->getMouseX() >= 0 && e->getMouseX() <= getWidth()
-            && e->getMouseY() >= 0 && e->getMouseY() <= getHeight());
+    bool View::isLocalMouseInThis(InputEvent* e) const {
+        return (e->getMouseX() >= 0 && e->getMouseX() < getWidth()
+            && e->getMouseY() >= 0 && e->getMouseY() < getHeight());
     }
 
-    bool View::isParentMouseInThis(InputEvent *e) {
+    bool View::isParentMouseInThis(InputEvent* e) const {
         return bounds_.hit(e->getMouseX(), e->getMouseY());
     }
 
-    bool View::isReceiveOutsideInputEvent() {
+    bool View::isReceiveOutsideInputEvent() const {
         return is_receive_outside_input_event_;
     }
 
-    bool View::canConsumeMouseEvent() {
+    bool View::canConsumeMouseEvent() const {
         return can_consume_mouse_event_;
     }
 
@@ -571,26 +594,34 @@ namespace ukive {
     }
 
 
-    void View::draw(Canvas *canvas) {
+    void View::draw(Canvas* canvas) {
         // 应用动画变量
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
         canvas->scale(mScaleX, mScaleY, bounds_.left + mPivotX, bounds_.top + mPivotY);
         canvas->translate(mTranslateX, mTranslateY);
 
-        // 将背景绘制到 bgBitmap 上
-        Canvas offscreen(getWindow(), getWidth(), getHeight());
-        offscreen.setOpacity(canvas->getOpacity());
-        drawBackground(&offscreen);
-        auto bgBitmap = offscreen.extractBitmap();
+        bool hasBg = needDrawBackground();
+        bool hasShadow = (hasBg && (elevation_ > 0.f) && shadow_effect_);
 
-        bool hasBg = (bgBitmap != nullptr);
-        bool hasShadow = (hasBg && (elevation_ > 0.f));
+        std::shared_ptr<Bitmap> bg_bmp;
+        ComPtr<ID3D11Texture2D> bg_texture;
+        if (hasShadow) {
+            // 将背景绘制到 bg_bmp 上
+            Canvas offscreen(getWidth(), getHeight());
+            offscreen.beginDraw();
+            offscreen.clear();
+            offscreen.setOpacity(canvas->getOpacity());
+            drawBackground(&offscreen);
+            offscreen.endDraw();
+            bg_bmp = offscreen.extractBitmap();
+            bg_texture = offscreen.getTexture();
+        }
 
         // 若有，使用 layer 应用 reveal 动画
         // 若某一 view 正在进行 reveal 动画，则其 child 无法应用 reveal 动画
         if (mHasReveal) {
-            //圆形 reveal 动画。
+            // 圆形 reveal 动画。
             if (mRevealType == ViewAnimator::REVEAL_CIRCULE) {
                 ComPtr<ID2D1EllipseGeometry> circleGeo;
                 Application::getGraphicDeviceManager()->getD2DFactory()->CreateEllipseGeometry(
@@ -601,24 +632,29 @@ namespace ukive {
                 // 在 pushLayer 之前绘制阴影
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
-                    canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
+                    canvas->getRT()->CreateBitmapBrush(bg_bmp->getNative().get(), &bmp_brush);
 
-                    Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    Canvas offscreen(getWidth(), getHeight());
+                    offscreen.beginDraw();
+                    offscreen.clear();
                     offscreen.fillGeometry(circleGeo.get(), bmp_brush.get());
-                    auto bgRevealedBitmap = offscreen.extractBitmap();
+                    offscreen.endDraw();
+                    auto revealed_bg_bmp = offscreen.extractBitmap();
+                    auto revealed_bg_texture = offscreen.getTexture();
 
-                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
-                    canvas->drawBitmap(bgRevealedBitmap.get());
+                    shadow_effect_->setContent(revealed_bg_texture.get());
+                    shadow_effect_->draw(canvas);
+
+                    canvas->drawBitmap(revealed_bg_bmp.get());
                 }
 
                 canvas->pushLayer(circleGeo.get());
 
                 if (hasBg && !hasShadow) {
-                    canvas->drawBitmap(bgBitmap.get());
+                    drawBackground(canvas);
                 }
-            }
-            // 矩形 reveal 动画
-            else if (mRevealType == ViewAnimator::REVEAL_RECT) {
+            } else if (mRevealType == ViewAnimator::REVEAL_RECT) {
+                // 矩形 reveal 动画
                 ComPtr<ID2D1RectangleGeometry> rectGeo;
                 Application::getGraphicDeviceManager()->getD2DFactory()->CreateRectangleGeometry(
                     D2D1::RectF(
@@ -630,31 +666,39 @@ namespace ukive {
                 // 在 pushLayer 之前绘制阴影
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
-                    canvas->getRT()->CreateBitmapBrush(bgBitmap->getNative().get(), &bmp_brush);
+                    canvas->getRT()->CreateBitmapBrush(bg_bmp->getNative().get(), &bmp_brush);
 
-                    Canvas offscreen(getWindow(), getWidth(), getHeight());
+                    Canvas offscreen(getWidth(), getHeight());
+                    offscreen.beginDraw();
+                    offscreen.clear();
                     offscreen.fillGeometry(rectGeo.get(), bmp_brush.get());
-                    auto bgRevealedBitmap = offscreen.extractBitmap();
+                    offscreen.endDraw();
+                    auto revealed_bg_bmp = offscreen.extractBitmap();
+                    auto revealed_bg_texture = offscreen.getTexture();
 
-                    window_->getRenderer()->drawShadow(elevation_, canvas->getOpacity(), bgRevealedBitmap->getNative().get());
-                    canvas->drawBitmap(bgRevealedBitmap.get());
+                    shadow_effect_->setContent(revealed_bg_texture.get());
+                    shadow_effect_->draw(canvas);
+
+                    canvas->drawBitmap(revealed_bg_bmp.get());
                 }
 
                 canvas->pushLayer(rectGeo.get());
 
                 if (hasBg && !hasShadow) {
-                    canvas->drawBitmap(bgBitmap.get());
+                    drawBackground(canvas);
                 }
             }
-        }
-        // 没有 reveal 动画，直接绘制背景和阴影
-        else {
+        } else {
+            // 没有 reveal 动画，直接绘制背景和阴影
             if (hasBg) {
                 if (hasShadow) {
-                    window_->getRenderer()->drawShadow(
-                        elevation_, canvas->getOpacity(), bgBitmap->getNative().get());
+                    shadow_effect_->setContent(bg_texture.get());
+                    shadow_effect_->draw(canvas);
+
+                    canvas->drawBitmap(bg_bmp.get());
+                } else {
+                    drawBackground(canvas);
                 }
-                canvas->drawBitmap(bgBitmap.get());
             }
         }
 
@@ -673,91 +717,166 @@ namespace ukive {
         // 绘制孩子
         dispatchDraw(canvas);
 
+        onDrawOverChild(canvas);
+
         canvas->popClip();
         canvas->restore();
 
         // 绘制前景
         drawForeground(canvas);
 
-        if (mHasReveal)
+        if (mHasReveal) {
             canvas->popLayer();
+        }
 
         canvas->restore();
     }
 
-    void View::drawBackground(Canvas *canvas) {
-        if (bg_drawable_ != nullptr
-            && bg_drawable_->getOpacity() != 0.f) {
-            bg_drawable_->setBounds(0.f, 0.f, bounds_.width(), bounds_.height());
+    bool View::needDrawBackground() {
+        return (bg_drawable_ != nullptr
+            && bg_drawable_->getOpacity() > 0.f);
+    }
+
+    bool View::needDrawForeground() {
+        return (fg_drawable_ != nullptr
+            && fg_drawable_->getOpacity() > 0.f);
+    }
+
+    void View::drawBackground(Canvas* canvas) {
+        if (needDrawBackground()) {
+            bg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             bg_drawable_->draw(canvas);
         }
     }
 
-    void View::drawForeground(Canvas *canvas) {
-        if (fg_drawable_ != nullptr
-            && fg_drawable_->getOpacity() != 0.f) {
-            fg_drawable_->setBounds(0.f, 0.f, bounds_.width(), bounds_.height());
+    void View::drawForeground(Canvas* canvas) {
+        if (needDrawForeground()) {
+            fg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             fg_drawable_->draw(canvas);
         }
     }
 
-
-    void View::measure(int width, int height, int widthMode, int heightMode) {
-        onMeasure(width, height, widthMode, heightMode);
+    void View::updateDrawableState() {
+        updateBackgroundState();
+        updateForegroundState();
     }
 
-
-    void View::layout(int left, int top, int right, int bottom) {
-        bool sizeChanged = false;
-
-        Rect new_bounds(left, top, right - left, bottom - top);
-
-        int width = new_bounds.width();
-        int height = new_bounds.height();
-        int old_width = bounds_.width();
-        int old_height = bounds_.height();
-
-        bool changed = bounds_ != new_bounds;
-        if (changed) {
-            sizeChanged = old_width != width || old_height != height;
-            bounds_ = new_bounds;
-            if (sizeChanged) {
-                onSizeChanged(width, height, old_width, old_height);
+    void View::updateBackgroundState() {
+        bool need_redraw = false;
+        if (isEnabled()) {
+            if (bg_drawable_) {
+                need_redraw = bg_drawable_->setState(Drawable::STATE_NONE);
+            }
+        } else {
+            if (bg_drawable_) {
+                need_redraw = bg_drawable_->setState(Drawable::STATE_DISABLED);
             }
         }
 
-        onLayout(changed, sizeChanged,
-            left, top, right, bottom);
-
-        is_layouted_ = true;
+        if (need_redraw) {
+            invalidate();
+        }
     }
 
+    void View::updateForegroundState() {
+        bool need_redraw = false;
+        if (isEnabled()) {
+            if (fg_drawable_) {
+                need_redraw = fg_drawable_->setState(Drawable::STATE_NONE);
+            }
+        } else {
+            if (fg_drawable_) {
+                need_redraw = fg_drawable_->setState(Drawable::STATE_DISABLED);
+            }
+        }
+
+        if (need_redraw) {
+            invalidate();
+        }
+    }
+
+    void View::measure(int width, int height, int width_mode, int height_mode) {
+        if (flags_ & Flags::MEASURED_DIMENSION_SET) {
+            bool is_force_layout = (flags_ & Flags::FORCE_LAYOUT);
+            bool is_exactly_mode = (width_mode == EXACTLY && height_mode == EXACTLY);
+            bool is_spec_not_change =
+                (width == old_pm_width_ && height == old_pm_height_
+                    && width_mode == old_pm_width_mode_ && height_mode == old_pm_height_mode_);
+
+            if (!is_force_layout && is_exactly_mode && is_spec_not_change) {
+                return;
+            }
+        }
+
+        flags_ &= ~Flags::MEASURED_DIMENSION_SET;
+
+        onMeasure(width, height, width_mode, height_mode);
+
+        if (!(flags_ & Flags::MEASURED_DIMENSION_SET)) {
+            LOG(Log::FATAL) << "You must invoke setMeasuredDimension() in onMeasure()!";
+        }
+
+        flags_ |= Flags::NEED_LAYOUT;
+
+        old_pm_width_ = width;
+        old_pm_height_ = height;
+        old_pm_width_mode_ = width_mode;
+        old_pm_height_mode_ = height_mode;
+    }
+
+    void View::layout(int left, int top, int right, int bottom) {
+        bool size_changed = false;
+
+        Rect new_bounds(left, top, right - left, bottom - top);
+
+        bool changed = bounds_ != new_bounds;
+        if (changed) {
+            int width = new_bounds.width();
+            int height = new_bounds.height();
+            int old_width = bounds_.width();
+            int old_height = bounds_.height();
+
+            size_changed = old_width != width || old_height != height;
+            bounds_ = new_bounds;
+            if (size_changed) {
+                onSizeChanged(width, height, old_width, old_height);
+            }
+
+            invalidate();
+        }
+
+        if (changed || (flags_ & Flags::NEED_LAYOUT)) {
+            onLayout(changed, size_changed,
+                left, top, right, bottom);
+        }
+
+        flags_ |= Flags::BOUNDS_SET;
+        flags_ &= ~Flags::FORCE_LAYOUT;
+        flags_ &= ~Flags::NEED_LAYOUT;
+    }
 
     void View::invalidate() {
         invalidate(bounds_);
     }
 
-    void View::invalidate(const Rect &rect) {
+    void View::invalidate(const Rect& rect) {
         invalidate(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     void View::invalidate(int left, int top, int right, int bottom) {
-        //TODO:应只刷新脏区域。
-        //this->getWindow()->performRefresh(left, top, right, bottom);
+        flags_ |= Flags::INVALIDATED;
 
-        //直接绘制。(实时)
-        //this->getWindow()->performRefresh();
-
-        //加入消息队列，等待下一帧。(非实时)
+        // TODO: we only need to refresh dirty region.
+        // add to queue
         getWindow()->invalidate();
     }
 
     void View::requestLayout() {
-        //直接布局。(实时)
-        //this->getWindow()->performLayout();
+        flags_ |= Flags::FORCE_LAYOUT;
 
-        //加入消息队列，等待下一帧。(非实时)
-        getWindow()->requestLayout();
+        if (parent_) {
+            parent_->requestLayout();
+        }
     }
 
     void View::requestFocus() {
@@ -765,13 +884,13 @@ namespace ukive {
             return;
         }
 
-        //先取消其他widget的焦点。
-        View *prevHolder = window_->getKeyboardHolder();
-        if (prevHolder != nullptr) {
-            prevHolder->discardFocus();
+        // 先取消其他 view 的焦点。
+        View* prev_holder = window_->getKeyboardHolder();
+        if (prev_holder) {
+            prev_holder->discardFocus();
         }
 
-        //获取焦点。
+        // 获取焦点。
         window_->captureKeyboard(this);
 
         has_focus_ = true;
@@ -779,7 +898,6 @@ namespace ukive {
     }
 
     void View::discardFocus() {
-        //舍弃焦点(如果有的话)。
         if (has_focus_) {
             has_focus_ = false;
             window_->releaseKeyboard();
@@ -794,18 +912,13 @@ namespace ukive {
         dispatchDiscardPendingOperations();
     }
 
+    void View::dispatchDraw(Canvas* canvas) {}
 
-    void View::dispatchDraw(Canvas *canvas) {
-    }
+    void View::dispatchDiscardFocus() {}
 
-    void View::dispatchDiscardFocus() {
-    }
+    void View::dispatchDiscardPendingOperations() {}
 
-    void View::dispatchDiscardPendingOperations() {
-    }
-
-
-    bool View::dispatchInputEvent(InputEvent *e) {
+    bool View::dispatchInputEvent(InputEvent* e) {
         e->setMouseX(e->getMouseX() - bounds_.left);
         e->setMouseY(e->getMouseY() - bounds_.top);
 
@@ -824,7 +937,7 @@ namespace ukive {
     void View::onAttachedToWindow() {
         is_attached_to_window_ = true;
 
-        if (input_connection_ != nullptr) {
+        if (input_connection_) {
             input_connection_->pushEditor();
         }
     }
@@ -832,21 +945,20 @@ namespace ukive {
     void View::onDetachedFromWindow() {
         is_attached_to_window_ = false;
 
-        if (input_connection_ != nullptr) {
+        if (input_connection_) {
             input_connection_->popEditor();
         }
 
-        if (animator_ != nullptr) {
+        if (animator_) {
             animator_->cancel();
         }
     }
 
+    void View::onDraw(Canvas* canvas) {}
+    void View::onDrawOverChild(Canvas* canvas) {}
 
-    void View::onDraw(Canvas *canvas) {
-    }
-
-    bool View::onInputEvent(InputEvent *e) {
-        bool shouldRefresh = false;
+    bool View::onInputEvent(InputEvent* e) {
+        bool should_refresh = false;
 
         switch (e->getEvent()) {
         case InputEvent::EVM_DOWN:
@@ -860,14 +972,14 @@ namespace ukive {
                 setPressed(true);
                 if (fg_drawable_) {
                     fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
+                    should_refresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
                 }
                 if (bg_drawable_) {
                     bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
+                    should_refresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
                 }
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
@@ -876,38 +988,38 @@ namespace ukive {
             if (!isPressed()) {
                 if (fg_drawable_) {
                     //fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                    should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
                 }
                 if (bg_drawable_) {
                     //bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    shouldRefresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                    should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
                 }
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
 
         case InputEvent::EVM_SCROLL_ENTER:
             if (fg_drawable_) {
-                shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
             }
             if (bg_drawable_) {
-                shouldRefresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
 
-        case InputEvent::EVM_LEAVE_OBJ:
+        case InputEvent::EVM_LEAVE_VIEW:
             if (fg_drawable_) {
-                shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
             }
             if (bg_drawable_) {
-                shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
             }
-            if (shouldRefresh) {
+            if (should_refresh) {
                 invalidate();
             }
             return can_consume_mouse_event_;
@@ -926,11 +1038,11 @@ namespace ukive {
                 if (isLocalMouseInThis(e)) {
                     if (fg_drawable_) {
                         fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                        shouldRefresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
                     }
                     if (bg_drawable_) {
                         bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                        shouldRefresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
                     }
 
                     if (pressed && click_listener_) {
@@ -940,28 +1052,36 @@ namespace ukive {
                 }
                 else {
                     if (fg_drawable_) {
-                        shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
                     }
                     if (bg_drawable_) {
-                        shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
                     }
                 }
             }
-            if (shouldRefresh)
+            if (should_refresh) {
                 invalidate();
+            }
             return can_consume_mouse_event_;
 
         case InputEvent::EV_CANCEL:
-            if (can_consume_mouse_event_)
+            if (can_consume_mouse_event_) {
                 window_->releaseMouse();
+            }
             setPressed(false);
-            if (fg_drawable_)
-                shouldRefresh = fg_drawable_->setState(Drawable::STATE_NONE);
-            if (bg_drawable_)
-                shouldRefresh = bg_drawable_->setState(Drawable::STATE_NONE);
-            if (shouldRefresh)
+            if (fg_drawable_) {
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (bg_drawable_) {
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (should_refresh) {
                 invalidate();
+            }
             return can_consume_mouse_event_;
+
+        default:
+            break;
         }
 
         return false;
@@ -977,80 +1097,78 @@ namespace ukive {
         int left, int top, int right, int bottom) {
     }
 
-
     bool View::onCheckIsTextEditor() {
         return false;
     }
 
-    InputConnection *View::onCreateInputConnection() {
+    InputConnection* View::onCreateInputConnection() {
         return nullptr;
     }
 
-
-    void View::onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+    void View::onSizeChanged(int width, int height, int old_width, int old_height) {
     }
 
     void View::onVisibilityChanged(int visibility) {
     }
 
-    void View::onFocusChanged(bool getFocus) {
-        if (getFocus) {
-            if (this->onCheckIsTextEditor()) {
-                if (input_connection_ == nullptr)
-                    input_connection_ = this->onCreateInputConnection();
+    void View::onFocusChanged(bool get_focus) {
+        if (get_focus) {
+            if (onCheckIsTextEditor()) {
+                if (!input_connection_) {
+                    input_connection_ = onCreateInputConnection();
+                }
 
-                if (input_connection_ != nullptr) {
-                    TsfManager *tsfMgr = Application::getTsfManager();
-                    input_connection_->initialization(tsfMgr);
+                if (input_connection_) {
+                    input_connection_->initialization();
                     input_connection_->pushEditor();
-                    input_connection_->mount(tsfMgr);
+                    input_connection_->mount();
                 }
             }
-        }
-        else {
-            if (input_connection_ != nullptr) {
-                TsfManager *tsfMgr = Application::getTsfManager();
-                input_connection_->unmount(tsfMgr);
+        } else {
+            if (input_connection_) {
+                input_connection_->unmount();
                 input_connection_->terminateComposition();
             }
         }
 
-        bool shouldRefresh = false;
+        bool should_refresh = false;
         if (bg_drawable_) {
-            shouldRefresh = bg_drawable_->setParentFocus(getFocus);
+            should_refresh = bg_drawable_->setParentFocus(get_focus);
         }
         if (fg_drawable_) {
-            shouldRefresh = fg_drawable_->setParentFocus(getFocus);
+            should_refresh = fg_drawable_->setParentFocus(get_focus);
         }
 
-        if (shouldRefresh) {
+        if (should_refresh) {
             invalidate();
         }
     }
 
-    void View::onWindowFocusChanged(bool windowFocus) {
+    void View::onWindowFocusChanged(bool window_focus) {
         if (!hasFocus()) {
+            DCHECK(getWindow()->getKeyboardHolder() != this);
             return;
         }
 
-        if (windowFocus) {
+        if (window_focus) {
             if (onCheckIsTextEditor()) {
-                if (input_connection_ == nullptr) {
-                    input_connection_ = this->onCreateInputConnection();
+                if (!input_connection_) {
+                    input_connection_ = onCreateInputConnection();
                 }
 
-                if (input_connection_ != nullptr) {
-                    TsfManager *tsfMgr = Application::getTsfManager();
-                    input_connection_->initialization(tsfMgr);
-                    input_connection_->mount(tsfMgr);
+                if (input_connection_) {
+                    HRESULT hr = input_connection_->initialization();
+                    DCHECK(SUCCEEDED(hr));
+                    input_connection_->pushEditor();
+                    input_connection_->mount();
                 }
             }
-        }
-        else {
-            if (input_connection_ != nullptr) {
-                TsfManager *tsfMgr = Application::getTsfManager();
-                input_connection_->unmount(tsfMgr);
-                input_connection_->terminateComposition();
+        } else {
+            if (input_connection_) {
+                bool ret = input_connection_->unmount();
+                DCHECK(ret);
+                ret = input_connection_->terminateComposition();
+                DCHECK(ret);
             }
         }
     }
@@ -1058,7 +1176,8 @@ namespace ukive {
     void View::onWindowDpiChanged(int dpi_x, int dpi_y) {
     }
 
-    void View::onScrollChanged(int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+    void View::onScrollChanged(
+        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {
     }
 
 }

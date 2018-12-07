@@ -9,33 +9,32 @@ namespace ukive {
 
     class AnimationVariableChangeHandler
         : public IUIAnimationVariableChangeHandler,
-        public IUIAnimationVariableIntegerChangeHandler
-    {
-    private:
-        ULONG mRefCount;
-        unsigned int mVarIndex;
-        Animator::OnValueChangedListener *mListener;
-
+        public IUIAnimationVariableIntegerChangeHandler {
     public:
         AnimationVariableChangeHandler(
-            Animator::OnValueChangedListener *listener, unsigned int varIndex);
+            Animator::OnValueChangedListener* listener, unsigned int varIndex);
         ~AnimationVariableChangeHandler();
 
         HRESULT STDMETHODCALLTYPE OnValueChanged(
-            _In_  IUIAnimationStoryboard *storyboard,
-            _In_  IUIAnimationVariable *variable,
-            _In_  DOUBLE newValue,
-            _In_  DOUBLE previousValue);
+            IUIAnimationStoryboard* storyboard,
+            IUIAnimationVariable* variable,
+            DOUBLE newValue,
+            DOUBLE previousValue);
 
         HRESULT STDMETHODCALLTYPE OnIntegerValueChanged(
-            _In_  IUIAnimationStoryboard *storyboard,
-            _In_  IUIAnimationVariable *variable,
-            _In_  INT32 newValue,
-            _In_  INT32 previousValue);
+            IUIAnimationStoryboard* storyboard,
+            IUIAnimationVariable* variable,
+            INT32 newValue,
+            INT32 previousValue);
 
         IFACEMETHODIMP_(ULONG) AddRef();
         IFACEMETHODIMP_(ULONG) Release();
-        IFACEMETHODIMP QueryInterface(_In_ REFIID riid, _Outptr_ void** ppOutput);
+        IFACEMETHODIMP QueryInterface(REFIID riid, void** ppOutput);
+
+    private:
+        ULONG ref_count_;
+        unsigned int var_index_;
+        Animator::OnValueChangedListener* listener_;
     };
 
 }

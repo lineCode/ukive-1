@@ -6,12 +6,12 @@ namespace ukive {
     Drawable::Drawable()
         :start_x_(0.f),
         start_y_(0.f),
-        is_parent_has_focus_(false),
         state_(STATE_NONE),
-        prev_state_(STATE_NONE) {}
+        prev_state_(STATE_NONE),
+        is_parent_has_focus_(false) {}
 
 
-    void Drawable::setBounds(RectF &rect) {
+    void Drawable::setBounds(const Rect &rect) {
         if (bounds_ == rect) {
             return;
         }
@@ -28,10 +28,7 @@ namespace ukive {
             return;
         }
 
-        bounds_.left = left;
-        bounds_.top = top;
-        bounds_.right = left + width;
-        bounds_.bottom = top + height;
+        bounds_.set(left, top, width, height);
 
         onBoundChanged(bounds_);
     }
@@ -62,19 +59,19 @@ namespace ukive {
     }
 
 
-    int Drawable::getState() {
+    int Drawable::getState() const {
         return state_;
     }
 
-    int Drawable::getPrevState() {
+    int Drawable::getPrevState() const {
         return prev_state_;
     }
 
-    RectF &Drawable::getBounds() {
+    Rect Drawable::getBounds() const {
         return bounds_;
     }
 
-    float Drawable::getOpacity() {
+    float Drawable::getOpacity() const {
         return 1.f;
     }
 
@@ -82,17 +79,17 @@ namespace ukive {
         return false;
     }
 
-    void Drawable::onBoundChanged(RectF &newBound) {}
+    void Drawable::onBoundChanged(const Rect& new_bound) {}
 
-    bool Drawable::onStateChanged(int newState, int prevState) {
+    bool Drawable::onStateChanged(int new_state, int prev_state) {
         return false;
     }
 
-    int Drawable::getIncWidth() {
+    int Drawable::getIncWidth() const {
         return -1;
     }
 
-    int Drawable::getIncHeight() {
+    int Drawable::getIncHeight() const {
         return -1;
     }
 

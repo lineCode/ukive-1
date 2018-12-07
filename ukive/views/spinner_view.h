@@ -6,10 +6,9 @@
 
 namespace ukive {
 
-    class SpinnerView : public TextView
-    {
+    class SpinnerView : public TextView {
     public:
-        SpinnerView(Window *w);
+        SpinnerView(Window* w);
         ~SpinnerView();
     };
 

@@ -7,7 +7,7 @@
 
 namespace ukive {
 
-    typedef std::function<void()> Solid;
+    using Solid = std::function<void()>;
 
     template <typename T>
     class SharedHelper : public std::enable_shared_from_this<T> {
@@ -22,8 +22,7 @@ namespace ukive {
     template <typename Ret>
     struct Wrapper {
         template <typename Obj>
-        Ret operator()(const std::weak_ptr<Obj> &obj, const Solid &bound_func, Ret &def_ret)
-        {
+        Ret operator()(const std::weak_ptr<Obj>& obj, const Solid& bound_func, Ret& def_ret) {
             if (auto ptr = obj.lock()) {
                 return bound_func();
             }
@@ -36,8 +35,7 @@ namespace ukive {
     template <>
     struct Wrapper<void> {
         template <typename Obj>
-        void operator()(const std::weak_ptr<Obj> &obj, Solid &bound_func)
-        {
+        void operator()(const std::weak_ptr<Obj>& obj, Solid& bound_func) {
             if (auto ptr = obj.lock()) {
                 bound_func();
             }
@@ -45,7 +43,7 @@ namespace ukive {
     };
 
     template <typename Func, typename Obj, typename... Types>
-    std::function<void()> weak_bind(Func &&func, const std::shared_ptr<Obj> &obj, Types&&... args) {
+    std::function<void()> weak_bind(Func&& func, const std::shared_ptr<Obj>& obj, Types&&... args) {
         return std::bind(
             Wrapper<void>(),
             std::weak_ptr<Obj>(obj),
@@ -53,7 +51,8 @@ namespace ukive {
     }
 
     template <typename Ret, typename Func, typename Obj, typename... Types>
-    std::function<Ret()> weak_ret_bind(Ret &&def_ret, Func &&func, const std::shared_ptr<Obj> &obj, Types&&... args) {
+    std::function<Ret()> weak_ret_bind(
+        Ret&& def_ret, Func&& func, const std::shared_ptr<Obj>& obj, Types&&... args) {
         return std::bind(
             Wrapper<Ret>(),
             std::weak_ptr<Obj>(obj),

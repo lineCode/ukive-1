@@ -8,8 +8,14 @@ namespace ukive {
 
     class Editable;
 
-    class TextKeyListener
-    {
+    class TextKeyListener {
+    public:
+        TextKeyListener();
+        ~TextKeyListener();
+
+        void onKeyDown(Editable* editable, bool canEdit, bool canSelect, int keyCode);
+        void onKeyUp(Editable* editable, bool canEdit, bool canSelect, int keyCode);
+
     private:
         string16 numpad(int keyCode);
         string16 number(int keyCode);
@@ -18,19 +24,12 @@ namespace ukive {
 
         bool metaKey(int keyCode, bool down);
 
-        void backspace(Editable *editable);
-        void newline(Editable *editable);
+        void backspace(Editable* editable);
+        void newline(Editable* editable);
 
         bool isNumpad(int keyCode);
         bool isNumber(int keyCode);
         bool isAlphabet(int keyCode);
-
-    public:
-        TextKeyListener();
-        ~TextKeyListener();
-
-        void onKeyDown(Editable *editable, bool canEdit, bool canSelect, int keyCode);
-        void onKeyUp(Editable *editable, bool canEdit, bool canSelect, int keyCode);
     };
 
 }

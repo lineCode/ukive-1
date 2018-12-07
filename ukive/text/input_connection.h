@@ -13,31 +13,18 @@ namespace ukive {
     class TsfEditor;
     class TsfManager;
 
-    class InputConnection
-    {
-    private:
-        TextView *mTextView;
-
-        TsfEditor *mTsfEditor;
-        TfEditCookie mEditorCookie;
-        ComPtr<ITfContext> mEditorContext;
-        ComPtr<ITfDocumentMgr> mDocumentMgr;
-        ComPtr<ITfContextOwnerCompositionServices> mCompServices;
-
-        bool mIsInitialized;
-        bool mIsEditorPushed;
-
+    class InputConnection {
     public:
-        InputConnection(TextView *textView);
+        InputConnection(TextView* textView);
         ~InputConnection();
 
-        HRESULT initialization(TsfManager *tsfMgr);
+        HRESULT initialization();
 
         void pushEditor();
         void popEditor();
 
-        bool mount(TsfManager *tsfMgr);
-        bool unmount(TsfManager *tsfMgr);
+        bool mount();
+        bool unmount();
         bool terminateComposition();
 
         void notifyStatusChanged(DWORD flags);
@@ -45,34 +32,45 @@ namespace ukive {
         void notifyTextLayoutChanged(TsLayoutCode reason);
         void notifyTextSelectionChanged();
 
-
         void onBeginProcess();
         void onEndProcess();
 
-        bool isReadOnly();
+        bool isReadOnly() const;
         void determineInsert(
             long start, long end, unsigned long repLength,
-            long *resStart, long *resEnd);
+            long* resStart, long* resEnd);
 
         bool getSelection(
             unsigned long startIndex, unsigned long maxCount,
-            TS_SELECTION_ACP *selections, unsigned long *fetchedCount);
-        bool setSelection(unsigned long count, const TS_SELECTION_ACP *selections);
+            TS_SELECTION_ACP* selections, unsigned long* fetchedCount);
+        bool setSelection(unsigned long count, const TS_SELECTION_ACP* selections);
 
         std::wstring getText(long start, long end, long maxLength);
         void setText(long start, long end, std::wstring newText);
 
         long getTextLength();
-        bool getTextPositionAtPoint(const POINT *pt, DWORD dwFlags, long *pacp);
-        bool getTextBound(long start, long end, RECT *prc, BOOL *pfClipped);
+        bool getTextPositionAtPoint(const POINT* pt, DWORD dwFlags, long* pacp);
+        bool getTextBound(long start, long end, RECT* prc, BOOL* pfClipped);
 
-        void getTextViewBound(RECT *prc);
+        void getTextViewBound(RECT* prc);
 
         void insertTextAtSelection(
             DWORD dwFlags, std::wstring text,
-            LONG *pacpStart, LONG *pacpEnd, TS_TEXTCHANGE *pChange);
+            LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange);
 
-        HWND getWindowHandle();
+        HWND getWindowHandle() const;
+
+    private:
+        TextView* text_view_;
+
+        TsfEditor* tsf_editor_;
+        TfEditCookie editor_cookie_;
+        ComPtr<ITfContext> editor_context_;
+        ComPtr<ITfDocumentMgr> doc_mgr_;
+        ComPtr<ITfContextOwnerCompositionServices> comp_service_;
+
+        bool is_initialized_;
+        bool is_editor_pushed_;
     };
 
 }

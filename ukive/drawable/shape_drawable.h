@@ -7,27 +7,15 @@
 
 namespace ukive {
 
-    class ShapeDrawable : public Drawable
-    {
-    private:
-        int mWidth;
-        int mHeight;
-        int mShape;
-
-        bool mHasSolid;
-        bool mHasStroke;
-        float mRoundRadius;
-        float mStrokeWidth;
-        Color mSolidColor;
-        Color mStrokeColor;
-
+    class ShapeDrawable : public Drawable {
     public:
-        static const int SHAPE_RECT = 0;
-        static const int SHAPE_ROUND_RECT = 1;
-        static const int SHAPE_OVAL = 2;
+        enum Shape {
+            RECT,
+            ROUND_RECT,
+            OVAL
+        };
 
-    public:
-        ShapeDrawable(int shape);
+        explicit ShapeDrawable(Shape shape);
         ~ShapeDrawable();
 
         void setSize(int width, int height);
@@ -39,12 +27,26 @@ namespace ukive {
         void setStrokeWidth(float width);
         void setStrokeColor(Color color);
 
-        virtual void draw(Canvas *canvas);
+        void draw(Canvas* canvas) override;
 
-        virtual float getOpacity();
+        float getOpacity() const override;
+        int getIncWidth() const override;
+        int getIncHeight() const override;
 
-        virtual int getIncWidth();
-        virtual int getIncHeight();
+    protected:
+        bool onStateChanged(int new_state, int prev_state) override;
+
+    private:
+        int width_;
+        int height_;
+        Shape shape_;
+
+        bool has_solid_;
+        bool has_stroke_;
+        float round_radius_;
+        float stroke_width_;
+        Color solid_color_;
+        Color stroke_color_;
     };
 
 }

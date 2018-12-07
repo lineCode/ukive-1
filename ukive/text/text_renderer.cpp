@@ -1,5 +1,6 @@
 ﻿#include "text_renderer.h"
 
+#include "ukive/log.h"
 #include "ukive/graphics/color.h"
 #include "ukive/text/span/effect_span.h"
 #include "ukive/text/span/underline_span.h"
@@ -10,48 +11,41 @@
 
 namespace ukive {
 
-    TextRenderer::TextRenderer(ComPtr<ID2D1RenderTarget> renderTarget)
-        :mRefCount(1),
-        mOpacity(1.f)
-    {
-        mDefaultTextColor = Color::Black;
-        mDefaultUnderlineColor = Color::Black;
-        mDefaultStrikethroughColor = Color::Black;
+    TextRenderer::TextRenderer(const ComPtr<ID2D1RenderTarget>& rt)
+        :ref_count_(1),
+        opacity_(1.f),
+        def_text_color_(Color::Black),
+        def_underline_color_(Color::Black),
+        def_strikethrough_color_(Color::Black),
+        rt_(rt)  {
 
-        mRenderTarget = renderTarget;
         D2D1_COLOR_F color = {
-            mDefaultTextColor.r,
-            mDefaultTextColor.g,
-            mDefaultTextColor.b,
-            mDefaultTextColor.a, };
-        mRenderTarget->CreateSolidColorBrush(color, &mSolidBrush);
+            def_text_color_.r,
+            def_text_color_.g,
+            def_text_color_.b,
+            def_text_color_.a, };
+        rt_->CreateSolidColorBrush(color, &brush_);
+    }
+
+    TextRenderer::~TextRenderer() {
     }
 
 
-    TextRenderer::~TextRenderer()
-    {
+    void TextRenderer::setOpacity(float opacity) {
+        opacity_ = opacity;
+        brush_->SetOpacity(opacity);
     }
 
-
-    void TextRenderer::setOpacity(float opacity)
-    {
-        mOpacity = opacity;
-        mSolidBrush->SetOpacity(opacity);
+    void TextRenderer::setTextColor(const Color& color) {
+        def_text_color_ = color;
     }
 
-    void TextRenderer::setTextColor(Color color)
-    {
-        mDefaultTextColor = color;
+    void TextRenderer::setUnderlineColor(const Color& color) {
+        def_underline_color_ = color;
     }
 
-    void TextRenderer::setUnderlineColor(Color color)
-    {
-        mDefaultUnderlineColor = color;
-    }
-
-    void TextRenderer::setStrikethroughColor(Color color)
-    {
-        mDefaultStrikethroughColor = color;
+    void TextRenderer::setStrikethroughColor(const Color& color) {
+        def_strikethrough_color_ = color;
     }
 
 
@@ -65,62 +59,43 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawGlyphRun(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT baselineOriginX,
         FLOAT baselineOriginY,
         DWRITE_MEASURING_MODE measuringMode,
-        __in DWRITE_GLYPH_RUN const* glyphRun,
-        __in DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
-        IUnknown* clientDrawingEffect
-    )
-    {
-        if (clientDrawingContext != nullptr)
-        {
-            RectF region;
-            TextView *textView = (TextView*)clientDrawingContext;
-            textView->computeVisibleRegion(&region);
+        DWRITE_GLYPH_RUN const* glyphRun,
+        DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
+        IUnknown* clientDrawingEffect) {
 
-            if ((int)std::floor(baselineOriginX) > (int)std::ceil(region.right))
-                return S_OK;
-            if ((int)std::ceil(baselineOriginX) < (int)std::floor(region.left))
-                return S_OK;
-            if ((int)std::ceil(baselineOriginY) < (int)std::floor(region.top))
-                return S_OK;
-            if ((int)std::floor(baselineOriginY - glyphRun->fontEmSize) > (int)std::ceil(region.bottom))
-                return S_OK;
-        }
-
-        if (clientDrawingEffect != nullptr)
-        {
+        if (clientDrawingEffect) {
             ComPtr<TextDrawingEffect> drawingEffect;
-            clientDrawingEffect->QueryInterface(__uuidof(TextDrawingEffect), reinterpret_cast<void**>(&drawingEffect));
+            HRESULT hr = clientDrawingEffect->QueryInterface(&drawingEffect);
+            DCHECK(SUCCEEDED(hr));
 
-            EffectSpan *span = drawingEffect->mEffectSpan;
-            mSolidBrush->SetColor(span->mTextColor);
+            EffectSpan* span = drawingEffect->effect_span_;
+            brush_->SetColor(span->mTextColor);
 
             if (!span->onDrawText(
-                (View*)clientDrawingContext,
+                reinterpret_cast<View*>(clientDrawingContext),
                 baselineOriginX, baselineOriginY,
                 glyphRun, glyphRunDescription,
-                mRenderTarget.get(), mSolidBrush.get()))
+                rt_.get(), brush_.get()))
             {
-                mRenderTarget->DrawGlyphRun(
+                rt_->DrawGlyphRun(
                     D2D1::Point2F(baselineOriginX, baselineOriginY),
-                    glyphRun, mSolidBrush.get(), measuringMode);
+                    glyphRun, brush_.get(), measuringMode);
             }
-        }
-        else
-        {
+        } else {
             D2D1_COLOR_F color = {
-                mDefaultTextColor.r,
-                mDefaultTextColor.g,
-                mDefaultTextColor.b,
-                mDefaultTextColor.a, };
-            mSolidBrush->SetColor(color);
+                def_text_color_.r,
+                def_text_color_.g,
+                def_text_color_.b,
+                def_text_color_.a, };
+            brush_->SetColor(color);
 
-            mRenderTarget->DrawGlyphRun(
+            rt_->DrawGlyphRun(
                 D2D1::Point2F(baselineOriginX, baselineOriginY),
-                glyphRun, mSolidBrush.get(), measuringMode);
+                glyphRun, brush_.get(), measuringMode);
         }
 
         return S_OK;
@@ -136,43 +111,40 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawUnderline(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT baselineOriginX,
         FLOAT baselineOriginY,
-        __in DWRITE_UNDERLINE const* underline,
-        IUnknown* clientDrawingEffect
-    )
-    {
+        DWRITE_UNDERLINE const* underline,
+        IUnknown* clientDrawingEffect) {
+
         D2D1_RECT_F rect = D2D1::RectF(
             0 + baselineOriginX,
             underline->offset + baselineOriginY,
             underline->width + baselineOriginX,
             underline->offset + underline->thickness + baselineOriginY);
 
-        if (clientDrawingEffect != 0)
-        {
+        if (clientDrawingEffect) {
             ComPtr<TextDrawingEffect> drawingEffect;
-            clientDrawingEffect->QueryInterface(__uuidof(TextDrawingEffect), reinterpret_cast<void**>(&drawingEffect));
+            clientDrawingEffect->QueryInterface(&drawingEffect);
 
-            EffectSpan *span = drawingEffect->mEffectSpan;
-            mSolidBrush->SetColor(span->mUnderlineColor);
+            EffectSpan* span = drawingEffect->effect_span_;
+            brush_->SetColor(span->mUnderlineColor);
 
             if (!span->onDrawUnderline(
-                (View*)clientDrawingContext,
+                reinterpret_cast<View*>(clientDrawingContext),
                 baselineOriginX, baselineOriginY,
-                underline,
-                mRenderTarget.get(), mSolidBrush.get()))
-                mRenderTarget->FillRectangle(rect, mSolidBrush.get());
-        }
-        else
-        {
+                underline, rt_.get(), brush_.get())) {
+
+                rt_->FillRectangle(rect, brush_.get());
+            }
+        } else {
             D2D1_COLOR_F color = {
-                mDefaultUnderlineColor.r,
-                mDefaultUnderlineColor.g,
-                mDefaultUnderlineColor.b,
-                mDefaultUnderlineColor.a, };
-            mSolidBrush->SetColor(color);
-            mRenderTarget->FillRectangle(rect, mSolidBrush.get());
+                def_underline_color_.r,
+                def_underline_color_.g,
+                def_underline_color_.b,
+                def_underline_color_.a, };
+            brush_->SetColor(color);
+            rt_->FillRectangle(rect, brush_.get());
         }
 
         return S_OK;
@@ -188,43 +160,41 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawStrikethrough(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT baselineOriginX,
         FLOAT baselineOriginY,
-        __in DWRITE_STRIKETHROUGH const* strikethrough,
-        IUnknown* clientDrawingEffect
-    )
-    {
+        DWRITE_STRIKETHROUGH const* strikethrough,
+        IUnknown* clientDrawingEffect) {
+
         D2D1_RECT_F rect = D2D1::RectF(
             0 + baselineOriginX,
             strikethrough->offset + baselineOriginY,
             strikethrough->width + baselineOriginX,
             strikethrough->offset + strikethrough->thickness + baselineOriginY);
 
-        if (clientDrawingEffect != 0)
-        {
+        if (clientDrawingEffect) {
             ComPtr<TextDrawingEffect> drawingEffect;
-            clientDrawingEffect->QueryInterface(__uuidof(TextDrawingEffect), reinterpret_cast<void**>(&drawingEffect));
+            HRESULT hr = clientDrawingEffect->QueryInterface(&drawingEffect);
+            DCHECK(SUCCEEDED(hr));
 
-            EffectSpan *span = drawingEffect->mEffectSpan;
-            mSolidBrush->SetColor(span->mStrikethroughColor);
+            EffectSpan* span = drawingEffect->effect_span_;
+            brush_->SetColor(span->mStrikethroughColor);
 
             if (!span->onDrawStrikethrough(
-                (View*)clientDrawingContext,
+                reinterpret_cast<View*>(clientDrawingContext),
                 baselineOriginX, baselineOriginY,
                 strikethrough,
-                mRenderTarget.get(), mSolidBrush.get()))
-                mRenderTarget->FillRectangle(rect, mSolidBrush.get());
-        }
-        else
-        {
+                rt_.get(), brush_.get())) {
+                rt_->FillRectangle(rect, brush_.get());
+            }
+        } else {
             D2D1_COLOR_F color = {
-                mDefaultStrikethroughColor.r,
-                mDefaultStrikethroughColor.g,
-                mDefaultStrikethroughColor.b,
-                mDefaultStrikethroughColor.a, };
-            mSolidBrush->SetColor(color);
-            mRenderTarget->FillRectangle(rect, mSolidBrush.get());
+                def_strikethrough_color_.r,
+                def_strikethrough_color_.g,
+                def_strikethrough_color_.b,
+                def_strikethrough_color_.a, };
+            brush_->SetColor(color);
+            rt_->FillRectangle(rect, brush_.get());
         }
 
         return S_OK;
@@ -240,37 +210,16 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::DrawInlineObject(
-        __maybenull void* clientDrawingContext,
+        void* clientDrawingContext,
         FLOAT originX,
         FLOAT originY,
         IDWriteInlineObject* inlineObject,
         BOOL isSideways,
         BOOL isRightToLeft,
-        IUnknown* clientDrawingEffect
-    )
-    {
+        IUnknown* clientDrawingEffect) {
+
         // Not implemented
         return E_NOTIMPL;
-    }
-
-
-    STDMETHODIMP_(unsigned long) TextRenderer::AddRef()
-    {
-        return InterlockedIncrement(&mRefCount);
-    }
-
-
-    STDMETHODIMP_(unsigned long) TextRenderer::Release()
-    {
-        unsigned long newCount = InterlockedDecrement(&mRefCount);
-
-        if (newCount == 0)
-        {
-            delete this;
-            return 0;
-        }
-
-        return newCount;
     }
 
     /******************************************************************
@@ -284,10 +233,9 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::IsPixelSnappingDisabled(
-        __maybenull void* clientDrawingContext,
-        __out BOOL* isDisabled
-    )
-    {
+        void* clientDrawingContext,
+        BOOL* isDisabled) {
+
         *isDisabled = FALSE;
         return S_OK;
     }
@@ -301,12 +249,11 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::GetCurrentTransform(
-        __maybenull void* clientDrawingContext,
-        __out DWRITE_MATRIX* transform
-    )
-    {
+        void* clientDrawingContext,
+        DWRITE_MATRIX* transform) {
+
         //forward the render target's transform
-        mRenderTarget->GetTransform(reinterpret_cast<D2D1_MATRIX_3X2_F*>(transform));
+        rt_->GetTransform(reinterpret_cast<D2D1_MATRIX_3X2_F*>(transform));
         return S_OK;
     }
 
@@ -319,51 +266,49 @@ namespace ukive {
     ******************************************************************/
 
     STDMETHODIMP TextRenderer::GetPixelsPerDip(
-        __maybenull void* clientDrawingContext,
-        __out FLOAT* pixelsPerDip
-    )
-    {
+        void* clientDrawingContext,
+        FLOAT* pixelsPerDip) {
+
         float x, yUnused;
 
-        mRenderTarget->GetDpi(&x, &yUnused);
+        rt_->GetDpi(&x, &yUnused);
         *pixelsPerDip = x / 96;
 
         return S_OK;
     }
 
-    /******************************************************************
-    *                                                                 *
-    *  CustomTextRenderer::QueryInterface                             *
-    *                                                                 *
-    *  Query interface implementation                                 *
-    *                                                                 *
-    ******************************************************************/
+    STDMETHODIMP_(ULONG) TextRenderer::AddRef() {
+        return InterlockedIncrement(&ref_count_);
+    }
+
+    STDMETHODIMP_(ULONG) TextRenderer::Release() {
+        auto rc = InterlockedDecrement(&ref_count_);
+        if (rc == 0) {
+            delete this;
+        }
+
+        return rc;
+    }
 
     STDMETHODIMP TextRenderer::QueryInterface(
-        IID const& riid,
-        void** ppvObject
-    )
-    {
-        if (__uuidof(IDWriteTextRenderer) == riid)
-        {
-            *ppvObject = this;
+        REFIID riid, void** ppvObject) {
+
+        if (ppvObject == nullptr) {
+            return E_POINTER;
         }
-        else if (__uuidof(IDWritePixelSnapping) == riid)
-        {
-            *ppvObject = this;
-        }
-        else if (__uuidof(IUnknown) == riid)
-        {
-            *ppvObject = this;
-        }
-        else
-        {
-            *ppvObject = 0;
-            return E_FAIL;
+
+        if (__uuidof(IDWriteTextRenderer) == riid) {
+            *ppvObject = static_cast<IDWriteTextRenderer*>(this);
+        } else if (__uuidof(IDWritePixelSnapping) == riid) {
+            *ppvObject = static_cast<IDWritePixelSnapping*>(this);
+        } else if (__uuidof(IUnknown) == riid) {
+            *ppvObject = reinterpret_cast<IUnknown*>(this);
+        } else {
+            *ppvObject = nullptr;
+            return E_NOINTERFACE;
         }
 
         AddRef();
-
         return S_OK;
     }
 

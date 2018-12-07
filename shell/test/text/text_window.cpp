@@ -1,12 +1,13 @@
 ﻿#include "text_window.h"
 
+#include "ukive/log.h"
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/layout/linear_layout.h"
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
-#include "ukive/views/layout/base_layout_params.h"
+#include "ukive/views/layout/root_layout_params.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
 #include "ukive/drawable/ripple_drawable.h"
@@ -17,12 +18,12 @@
 namespace shell {
 
     TextWindow::TextWindow()
-        :Window()
-    {
+        :Window(),
+        mContextMenu(nullptr),
+        mTBMCallback(nullptr) {
     }
 
-    TextWindow::~TextWindow()
-    {
+    TextWindow::~TextWindow() {
     }
 
 
@@ -30,30 +31,29 @@ namespace shell {
     {
         Window::onCreate();
 
-        typedef ukive::RestraintLayoutParams Rlp;
+        using Rlp = ukive::RestraintLayoutParams;
 
         mTBMCallback = new ToolbarMenuCallback(this);
 
         //root view.
         ukive::RestraintLayout *rootLayout = new ukive::RestraintLayout(this);
         rootLayout->setId(ID_LAYOUT_ROOT);
-        ukive::BaseLayoutParams *rightViewLp = new ukive::BaseLayoutParams(
+        ukive::RootLayoutParams *rightViewLp = new ukive::RootLayoutParams(
             ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT);
         rootLayout->setLayoutParams(rightViewLp);
 
         setContentView(rootLayout);
 
         //Toolbar.
-        /*auto toolbar = inflateToolbar(rootLayout);
+        auto toolbar = inflateToolbar(rootLayout);
 
-        RestraintLayoutParams *toolbarLp = new RestraintLayoutParams(
-            ULayoutParams::MATCH_PARENT, ULayoutParams::FIT_CONTENT);
-        toolbarLp
-            ->startHandle(ID_LAYOUT_ROOT, RestraintLayoutParams::EDGE_START)
-            ->topHandle(ID_LAYOUT_ROOT, RestraintLayoutParams::EDGE_TOP)
-            ->endHandle(ID_LAYOUT_ROOT, RestraintLayoutParams::EDGE_END);
+        Rlp *toolbarLp = Rlp::Builder(
+            Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
+            .start(ID_LAYOUT_ROOT)
+            .top(ID_LAYOUT_ROOT)
+            .end(ID_LAYOUT_ROOT).build();
 
-        rootLayout->addWidget(toolbar, toolbarLp);*/
+        rootLayout->addView(toolbar, toolbarLp);
 
 
         //编辑器。
@@ -61,8 +61,8 @@ namespace shell {
         editorTV->setId(ID_TV_EDITOR);
         editorTV->setIsEditable(true);
         editorTV->setIsSelectable(true);
-        editorTV->setFontFamilyName(L"Consolas");
-        editorTV->setTextSize(15);
+        //editorTV->setFontFamilyName(L"Consolas");
+        editorTV->setTextSize(14);
         editorTV->setPadding(18, 18, 18, 18);
         editorTV->setLineSpacing(true, 1.2f);
         editorTV->autoWrap(false);
@@ -70,38 +70,29 @@ namespace shell {
 
         Rlp *editorTVLp = Rlp::Builder(
             ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT)
-            .start(ID_LAYOUT_ROOT, Rlp::START)
-            .top(ID_LAYOUT_ROOT, Rlp::TOP)
-            .end(ID_LAYOUT_ROOT, Rlp::END)
-            .bottom(ID_LAYOUT_ROOT, Rlp::BOTTOM).build();
+            .start(ID_LAYOUT_ROOT)
+            .top(ID_TOOLBAR, Rlp::BOTTOM)
+            .end(ID_LAYOUT_ROOT)
+            .bottom(ID_LAYOUT_ROOT).build();
 
         rootLayout->addView(editorTV, editorTVLp);
     }
 
 
-    bool TextWindow::onMoving(ukive::Rect *rect)
-    {
-        ::OutputDebugStringW(L"onMoving()\n");
+    bool TextWindow::onMoving(ukive::Rect *rect) {
         return Window::onMoving(rect);
     }
 
-    bool TextWindow::onResizing(int edge, ukive::Rect *rect)
-    {
-        ::OutputDebugStringW(L"onResizing()\n");
+    bool TextWindow::onResizing(int edge, ukive::Rect *rect) {
         return Window::onResizing(edge, rect);
     }
 
-    void TextWindow::onMove(int x, int y)
-    {
-        ::OutputDebugStringW(L"onMove()\n");
+    void TextWindow::onMove(int x, int y) {
         Window::onMove(x, y);
     }
 
     void TextWindow::onResize(
-        int param, int width, int height,
-        int clientWidth, int clientHeight)
-    {
-        ::OutputDebugStringW(L"onResize()\n");
+        int param, int width, int height, int clientWidth, int clientHeight) {
         Window::onResize(param, width, height, clientWidth, clientHeight);
     }
 
@@ -120,7 +111,7 @@ namespace shell {
         font->setTextSize(13);
         font->setPadding(16, 8, 16, 8);
         font->setBackground(new ukive::RippleDrawable(this));
-        font->setOnClickListener(new FontItemClickListener(this));
+        //font->setOnClickListener(new FontItemClickListener(this));
         font->setFocusable(true);
 
         ukive::LinearLayoutParams *fontParams
@@ -134,7 +125,7 @@ namespace shell {
         format->setTextSize(13);
         format->setPadding(16, 8, 16, 8);
         format->setBackground(new ukive::RippleDrawable(this));
-        format->setOnClickListener(new FormatItemClickListener(this));
+        //format->setOnClickListener(new FormatItemClickListener(this));
         format->setFocusable(true);
 
         ukive::LinearLayoutParams *formatParams
@@ -158,42 +149,37 @@ namespace shell {
     }
 
     bool TextWindow::ToolbarMenuCallback::onPrepareContextMenu(
-        ukive::ContextMenu *contextMenu, ukive::Menu *menu)
-    {
+        ukive::ContextMenu *contextMenu, ukive::Menu *menu) {
         return true;
     }
 
     bool TextWindow::ToolbarMenuCallback::onContextMenuItemClicked(
-        ukive::ContextMenu *contextMenu, ukive::MenuItem *item)
-    {
+        ukive::ContextMenu *contextMenu, ukive::MenuItem *item) {
         contextMenu->close();
         return false;
     }
 
     void TextWindow::ToolbarMenuCallback::onDestroyContextMenu(
-        ukive::ContextMenu *contextMenu)
-    {
+        ukive::ContextMenu *contextMenu) {
         mWindow->mContextMenu = nullptr;
     }
 
 
-    void TextWindow::FontItemClickListener::onClick(ukive::View *widget)
+    void TextWindow::FontItemClickListener::onClick(ukive::View *v)
     {
-        if (mWindow->mContextMenu == nullptr)
-        {
+        if (mWindow->mContextMenu == nullptr) {
             mWindow->mContextMenu = mWindow->startContextMenu(
-                mWindow->mTBMCallback, widget, ukive::View::Gravity::LEFT);
+                mWindow->mTBMCallback, v, ukive::View::Gravity::LEFT);
 
             mWindow->findViewById(TextWindow::ID_TOOLBAR_ITEM_FONT)->requestFocus();
         }
     }
 
-    void TextWindow::FormatItemClickListener::onClick(ukive::View *widget)
+    void TextWindow::FormatItemClickListener::onClick(ukive::View *v)
     {
-        if (mWindow->mContextMenu == nullptr)
-        {
+        if (mWindow->mContextMenu == nullptr) {
             mWindow->mContextMenu = mWindow->startContextMenu(
-                mWindow->mTBMCallback, widget, ukive::View::Gravity::LEFT);
+                mWindow->mTBMCallback, v, ukive::View::Gravity::LEFT);
 
             mWindow->findViewById(TextWindow::ID_TOOLBAR_ITEM_FORMAT)->requestFocus();
         }

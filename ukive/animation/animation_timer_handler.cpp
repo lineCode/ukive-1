@@ -5,74 +5,69 @@ namespace ukive {
 
     AnimationTimerHandler::AnimationTimerHandler(
         AnimationManager::OnTimerEventListener *listener)
-        :mRefCount(1),
-        mListener(listener) {}
+        :ref_count_(1),
+        listener_(listener) {}
 
     AnimationTimerHandler::~AnimationTimerHandler() {}
 
 
-    HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnPreUpdate()
-    {
-        if (mListener) {
-            mListener->onPreUpdate();
+    HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnPreUpdate() {
+        if (listener_) {
+            listener_->onPreUpdate();
         }
 
         return S_OK;
     }
 
-    HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnPostUpdate()
-    {
-        if (mListener) {
-            mListener->onPostUpdate();
+    HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnPostUpdate() {
+        if (listener_) {
+            listener_->onPostUpdate();
         }
 
         return S_OK;
     }
 
     HRESULT STDMETHODCALLTYPE AnimationTimerHandler::OnRenderingTooSlow(
-        UINT32 framesPerSecond)
-    {
-        if (mListener) {
-            mListener->onRenderingTooSlow(framesPerSecond);
+        UINT32 framesPerSecond) {
+
+        if (listener_) {
+            listener_->onRenderingTooSlow(framesPerSecond);
         }
 
         return S_OK;
     }
 
 
-    IFACEMETHODIMP_(ULONG) AnimationTimerHandler::AddRef()
-    {
-        return InterlockedIncrement(&mRefCount);
+    IFACEMETHODIMP_(ULONG) AnimationTimerHandler::AddRef() {
+        return InterlockedIncrement(&ref_count_);
     }
 
-    IFACEMETHODIMP_(ULONG) AnimationTimerHandler::Release()
-    {
-        ULONG newCount = InterlockedDecrement(&mRefCount);
-
-        if (newCount == 0) {
+    IFACEMETHODIMP_(ULONG) AnimationTimerHandler::Release() {
+        auto nc = InterlockedDecrement(&ref_count_);
+        if (nc == 0) {
             delete this;
-            return 0;
         }
 
-        return newCount;
+        return nc;
     }
 
     IFACEMETHODIMP AnimationTimerHandler::QueryInterface(
-        _In_ REFIID riid, _Outptr_ void** ppOutput)
-    {
+        REFIID riid, void** ppOutput) {
+
+        if (ppOutput == nullptr) {
+            return E_POINTER;
+        }
+
         if (__uuidof(IUIAnimationTimerEventHandler) == riid) {
             *ppOutput = this;
-        }
-        else if (__uuidof(IUnknown) == riid) {
+        } else if (__uuidof(IUnknown) == riid) {
             *ppOutput = this;
-        }
-        else {
+        } else {
             *ppOutput = nullptr;
-            return E_FAIL;
+            return E_NOINTERFACE;
         }
 
         AddRef();
-
         return S_OK;
     }
 

@@ -4,36 +4,53 @@
 
 namespace ukive {
 
-    class InputEvent
-    {
+    class InputEvent {
     public:
-        // 鼠标事件。
-        static const int EVM_DOWN = 1;
-        static const int EVM_UP = 2;
-        static const int EVM_MOVE = 3;
-        static const int EVM_WHEEL = 4;
-        static const int EVM_LEAVE_WIN = 5;
-        static const int EVM_LEAVE_OBJ = 6;
-        static const int EVM_HOVER = 7;
-        static const int EVM_SCROLL_ENTER = 8;
+        // 鼠标事件
+        enum {
+            EVM_DOWN = 1,
+            EVM_UP,
+            EVM_MOVE,
+            EVM_WHEEL,
+            EVM_LEAVE_WIN,
+            EVM_LEAVE_VIEW,
+            EVM_HOVER,
+            EVM_SCROLL_ENTER,
+        };
 
-        // 键盘事件。
-        static const int EVK_DOWN = 100;
-        static const int EVK_UP = 101;
+        // 触摸事件
+        enum {
+            EVT_DOWN = (EVM_SCROLL_ENTER + 1),
+            EVT_MULTI_DOWN,
+            EVT_MULTI_UP,
+            EVT_UP,
+            EVT_MOVE
+        };
 
-        // 其他事件。
-        static const int EV_CANCEL = 400;
+        // 键盘事件
+        enum {
+            EVK_DOWN = (EVT_MOVE + 1),
+            EVK_UP,
+            EVK_CHAR,
+        };
 
-        // 鼠标按键定义。
-        static const int MK_LEFT = 100;
-        static const int MK_MIDDLE = 101;
-        static const int MK_RIGHT = 102;
+        // 其他事件
+        enum {
+            EV_CANCEL = (EVK_CHAR + 1),
+        };
 
-        // 键盘按键定义使用windows本身的定义。
+        // 鼠标按键定义
+        enum {
+            MK_LEFT = 0,
+            MK_MIDDLE,
+            MK_RIGHT,
+        };
+
+        // 键盘按键定义使用 Windows 本身的定义。
 
     public:
         InputEvent();
-        InputEvent(const InputEvent &source);
+        InputEvent(const InputEvent& source) = default;
         ~InputEvent();
 
         void setEvent(int ev);
@@ -43,7 +60,8 @@ namespace ukive {
         void setMouseRawY(int raw_y);
         void setMouseWheel(int wheel);
         void setMouseKey(int key);
-        void setKeyboardKey(int virtual_key, int ex_msg);
+        void setKeyboardCharKey(int char_key, int ex_msg);
+        void setKeyboardVirtualKey(int virtual_key, int ex_msg);
 
         void setOutside(bool outside);
         void setIsMouseCaptured(bool captured);
@@ -55,7 +73,8 @@ namespace ukive {
         int getMouseRawY();
         int getMouseWheel();
         int getMouseKey();
-        int getKeyboardKey();
+        int getKeyboardCharKey();
+        int getKeyboardVirtualKey();
 
         bool isMouseEvent();
         bool isKeyboardEvent();
@@ -63,7 +82,7 @@ namespace ukive {
 
         /// <summary>
         /// 当鼠标事件发生于Widget外部时，该方法返回true。
-        /// 只有当Widget的setReceiveOutsideInputEvent()方法以true为参数
+        /// 只有当 View 的 setReceiveOutsideInputEvent() 方法以 true 为参数
         /// 调用之后，此方法才有效。
         /// </summary>
         bool isOutside();
@@ -76,6 +95,7 @@ namespace ukive {
         int mouse_wheel_;
         int mouse_key_;
 
+        int char_key_;
         int virtual_key_;
 
         int event_type_;

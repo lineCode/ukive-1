@@ -10,126 +10,64 @@
 
 namespace ukive {
 
-    class ListView;
+    class OverlayScrollBar;
+    class ViewHolderRecycler;
 
-    class ViewRecycler
-    {
+
+    class ListView : public ViewGroup, public ListDataSetChangedListener {
     public:
-        ViewRecycler(ViewGroup *parent)
-            :parent_(parent) {}
-
-        void AddViewHolder(ListAdapter::ViewHolder *holder);
-        void AddViewHolder(ListAdapter::ViewHolder *holder, size_t pos);
-        void AddRecycledViewHolder(ListAdapter::ViewHolder *holder);
-        void RecycleViewHolder(View *item_view);
-        void RecycleViewHolders(size_t start_pos);
-        void RecycleViewHolders(size_t start_pos, size_t length);
-        ListAdapter::ViewHolder* ReuseViewHolder();
-        ListAdapter::ViewHolder* ReuseViewHolder(size_t pos);
-        ListAdapter::ViewHolder* GetVisibleViewHolder(size_t pos);
-
-        size_t Size();
-        void ClearAll();
-
-    private:
-        ViewGroup *parent_;
-
-        std::list<ListAdapter::ViewHolder*> visible_view_holder_;
-        std::vector<ListAdapter::ViewHolder*> recycled_view_holder_;
-    };
-
-    class ListOperator
-    {
-    public:
-        enum OpType {
-            INSERT,
-            CHANGE,
-            REMOVE
-        };
-
-        struct Operation {
-            OpType op;
-            size_t start_position;
-            size_t length;
-        };
-
-        ListOperator(ListView *view) {}
-
-        void AddOp(OpType op, size_t start_position, size_t length) {}
-
-    private:
-        std::vector<Operation> op_list_;
-    };
-
-
-    class ListView : public ViewGroup, public ListDataSetChangedListener
-    {
-    public:
-        ListView(Window *w);
+        ListView(Window* w);
 
         void onLayout(
-            bool changed, bool sizeChanged,
+            bool changed, bool size_changed,
             int left, int top, int right, int bottom) override;
-        bool onInputEvent(InputEvent *e) override;
+        bool onInputEvent(InputEvent* e) override;
 
-        void setAdapter(ListAdapter *adapter);
-        void ScrollToPosition(size_t position, int offset, bool smooth);
+        void onDraw(Canvas* canvas) override;
+        void onDrawOverChild(Canvas* canvas) override;
+
+        void setAdapter(ListAdapter* adapter);
+        void scrollToPosition(int position, int offset, bool smooth);
 
     private:
-        enum OpType {
-            INSERT,
-            CHANGE,
-            REMOVE
-        };
+        int determineVerticalScroll(int dy);
+        void offsetChildViewTopAndBottom(int dy);
+        ListAdapter::ViewHolder* getBindViewHolderAt(int index, int i);
 
-        struct Operation {
-            OpType op;
-            size_t start_position;
-            size_t length;
-        };
+        ListAdapter::ViewHolder* getFirstVisibleVH();
+        ListAdapter::ViewHolder* getLastVisibleVH();
 
-        void initListView();
+        void recycleTopViews(int offset);
+        void recycleBottomViews(int offset);
 
-        int DetermineVerticalScroll(int dy);
+        void updateOverlayScrollBar();
+        void recordCurPositionAndOffset();
 
-        void OffsetChildViewTopAndBottom(int dy);
+        int fillTopChildViews(int dy);
+        int fillBottomChildViews(int dy);
 
-        ListAdapter::ViewHolder* GetFirstVisibleViewHolder();
-        ListAdapter::ViewHolder* GetLastVisibleViewHolder();
+        void locateToPosition(int position, int offset = 0);
+        void scrollToPosition(int position, int offset = 0);
+        void smoothScrollToPosition(int position, int offset = 0);
 
-        void RecycleTopViews(int offset);
-        void RecycleBottomViews(int offset);
+        void scrollByScrollBar(int dy);
 
-        void RecordCurPositionAndOffset();
-
-        int FillTopChildViews(int dy);
-        int FillBottomChildViews(int dy);
-
-        void LocateToPosition(size_t position, int offset = 0);
-        void ScrollToPosition(size_t position, int offset = 0);
-        void SmoothScrollToPosition(size_t position, int offset = 0);
-
-        // Overriden from ListScrollDelegate:
+        // ListScrollDelegate:
         //void OnScroll(float dx, float dy) OVERRIDE;
 
-        // Overriden from ListDataSetListener:
-        void OnDataSetChanged() override;
-        void OnItemRangeInserted(size_t start_position, size_t length) override;
-        void OnItemRangeChanged(size_t start_position, size_t length) override;
-        void OnItemRangeRemoved(size_t start_position, size_t length) override;
+        // ListDataSetListener:
+        void onDataSetChanged() override;
+        void onItemRangeInserted(int start_position, int length) override;
+        void onItemRangeChanged(int start_position, int length) override;
+        void onItemRangeRemoved(int start_position, int length) override;
 
-        void AddOp(OpType op, size_t start_position, size_t length);
-        void ProcessOp();
-
-        size_t cur_position_;
+        int cur_position_;
         int cur_offset_in_position_;
         bool initial_layouted_;
 
-        std::unique_ptr<ListAdapter> list_adapter_;
-
-        ViewRecycler *view_recycler_;
-
-        std::vector<Operation> op_list_;
+        std::unique_ptr<ListAdapter> adapter_;
+        std::unique_ptr<OverlayScrollBar> scroll_bar_;
+        std::unique_ptr<ViewHolderRecycler> recycler_;
     };
 
 }

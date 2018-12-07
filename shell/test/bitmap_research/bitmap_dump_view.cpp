@@ -4,7 +4,6 @@
 
 #include "ukive/graphics/canvas.h"
 #include "ukive/event/input_event.h"
-#include "ukive/drawable/color_drawable.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
 #include "ukive/graphics/rect.h"
@@ -45,8 +44,8 @@ namespace shell {
         scale_factor_ = 1.f;
         cell_width_ = kCellWidth;
 
-        getWindow()->getRenderer()->createTextFormat(
-            L"Consolas", 15, L"en-US", &text_format_);
+        text_format_ = ukive::Renderer::createTextFormat(
+            L"Consolas", 15, L"en-US");
         text_format_->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
         text_format_->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     }
@@ -94,7 +93,7 @@ namespace shell {
         for (int h = 0; h < bitmap_height_; ++h) {
             for (int w = 0; w < bitmap_width_; ++w) {
                 unsigned int color_int = pixels_[h][w];
-                ukive::Color color(color_int);
+                ukive::Color color = ukive::Color::ofARGB(color_int);
 
                 ukive::RectF cell_rect(
                     cur_x, cur_y, cell_width_, cell_width_);
@@ -163,6 +162,8 @@ namespace shell {
         case ukive::InputEvent::EVM_UP:
             is_mouse_down_ = false;
             break;
+        default:
+            break;
         }
         return View::onInputEvent(e);
     }
@@ -172,11 +173,11 @@ namespace shell {
     }
 
     bool BitmapDumpView::isCellVisible(const ukive::RectF &rect) {
-        ukive::Rect real_rect(rect.left, rect.top,
+        ukive::RectF real_rect(rect.left, rect.top,
             rect.right - rect.left, rect.bottom - rect.top);
         matrix_.transformRect(&real_rect);
 
-        return getContentBoundsInThis().intersect(real_rect);
+        return getContentBoundsInThis().intersect(real_rect.toRect());
     }
 
 }

@@ -8,86 +8,75 @@
 
 namespace ukive {
 
-    class TextRenderer : public IDWriteTextRenderer
-    {
-    private:
-        ULONG mRefCount;
-        float mOpacity;
-
-        Color mDefaultTextColor;
-        Color mDefaultUnderlineColor;
-        Color mDefaultStrikethroughColor;
-
-        ComPtr<ID2D1RenderTarget> mRenderTarget;
-        ComPtr<ID2D1SolidColorBrush> mSolidBrush;
-
+    class TextRenderer : public IDWriteTextRenderer {
     public:
-        TextRenderer(ComPtr<ID2D1RenderTarget> renderTarget);
-        ~TextRenderer();
+        explicit TextRenderer(const ComPtr<ID2D1RenderTarget>& rt);
+        virtual ~TextRenderer();
 
         void setOpacity(float opacity);
-        void setTextColor(Color color);
-        void setUnderlineColor(Color color);
-        void setStrikethroughColor(Color color);
+        void setTextColor(const Color& color);
+        void setUnderlineColor(const Color& color);
+        void setStrikethroughColor(const Color& color);
 
         STDMETHOD(IsPixelSnappingDisabled)(
-            __maybenull void* clientDrawingContext,
-            __out BOOL* isDisabled
-            );
+            void* clientDrawingContext,
+            BOOL* isDisabled) override;
 
         STDMETHOD(GetCurrentTransform)(
-            __maybenull void* clientDrawingContext,
-            __out DWRITE_MATRIX* transform
-            );
+            void* clientDrawingContext,
+            DWRITE_MATRIX* transform) override;
 
         STDMETHOD(GetPixelsPerDip)(
-            __maybenull void* clientDrawingContext,
-            __out FLOAT* pixelsPerDip
-            );
+            void* clientDrawingContext,
+            FLOAT* pixelsPerDip) override;
 
         STDMETHOD(DrawGlyphRun)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
             DWRITE_MEASURING_MODE measuringMode,
-            __in DWRITE_GLYPH_RUN const* glyphRun,
-            __in DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
-            IUnknown* clientDrawingEffect
-            );
+            DWRITE_GLYPH_RUN const* glyphRun,
+            DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
+            IUnknown* clientDrawingEffect) override;
 
         STDMETHOD(DrawUnderline)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
-            __in DWRITE_UNDERLINE const* underline,
-            IUnknown* clientDrawingEffect
-            );
+            DWRITE_UNDERLINE const* underline,
+            IUnknown* clientDrawingEffect) override;
 
         STDMETHOD(DrawStrikethrough)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT baselineOriginX,
             FLOAT baselineOriginY,
-            __in DWRITE_STRIKETHROUGH const* strikethrough,
-            IUnknown* clientDrawingEffect
-            );
+            DWRITE_STRIKETHROUGH const* strikethrough,
+            IUnknown* clientDrawingEffect) override;
 
         STDMETHOD(DrawInlineObject)(
-            __maybenull void* clientDrawingContext,
+            void* clientDrawingContext,
             FLOAT originX,
             FLOAT originY,
             IDWriteInlineObject* inlineObject,
             BOOL isSideways,
             BOOL isRightToLeft,
-            IUnknown* clientDrawingEffect
-            );
+            IUnknown* clientDrawingEffect) override;
 
-    public:
-        unsigned long STDMETHODCALLTYPE AddRef();
-        unsigned long STDMETHODCALLTYPE Release();
+        ULONG STDMETHODCALLTYPE AddRef() override;
+        ULONG STDMETHODCALLTYPE Release() override;
         HRESULT STDMETHODCALLTYPE QueryInterface(
-            IID const& riid,
-            void** ppvObject
-        );
+            REFIID riid, void** ppvObject) override;
+
+    private:
+        ULONG ref_count_;
+        float opacity_;
+
+        Color def_text_color_;
+        Color def_underline_color_;
+        Color def_strikethrough_color_;
+
+        ComPtr<ID2D1RenderTarget> rt_;
+        ComPtr<ID2D1SolidColorBrush> brush_;
     };
 
 }

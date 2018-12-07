@@ -1,105 +1,80 @@
 ﻿#include "model_configure.h"
 
-#include "ukive/graphics/renderer.h"
-#include "ukive/utils/hresult_utils.h"
+#include "ukive/application.h"
+#include "ukive/graphics/direct3d/space.h"
 #include "ukive/utils/string_utils.h"
 
 
 namespace shell {
 
-    ModelConfigure::ModelConfigure()
-    {
+    ModelConfigure::ModelConfigure() {}
+
+    ModelConfigure::~ModelConfigure() {}
+
+
+    void ModelConfigure::init() {
+        D3D11_INPUT_ELEMENT_DESC layout[4];
+
+        layout[0].SemanticName = "POSITION";
+        layout[0].SemanticIndex = 0;
+        layout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+        layout[0].InputSlot = 0;
+        layout[0].AlignedByteOffset = 0;
+        layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[0].InstanceDataStepRate = 0;
+
+        layout[1].SemanticName = "COLOR";
+        layout[1].SemanticIndex = 0;
+        layout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+        layout[1].InputSlot = 0;
+        layout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+        layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[1].InstanceDataStepRate = 0;
+
+        layout[2].SemanticName = "NORMAL";
+        layout[2].SemanticIndex = 0;
+        layout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+        layout[2].InputSlot = 0;
+        layout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+        layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[2].InstanceDataStepRate = 0;
+
+        layout[3].SemanticName = "TEXCOORD";
+        layout[3].SemanticIndex = 0;
+        layout[3].Format = DXGI_FORMAT_R32G32_FLOAT;
+        layout[3].InputSlot = 0;
+        layout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+        layout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        layout[3].InstanceDataStepRate = 0;
+
+        ukive::string16 shader_path = ukive::Application::getExecFileName(true);
+
+        ukive::Space::createVertexShader(
+            shader_path + L"\\model_vertex_shader.cso",
+            layout, ARRAYSIZE(layout), &vertex_shader_, &input_layout_);
+
+        ukive::Space::createPixelShader(
+            shader_path + L"\\model_pixel_shader.cso",
+            &pixel_shader_);
+
+        const_buffer_ = ukive::Space::createConstantBuffer(sizeof(MatrixConstBuffer));
+        light_const_buffer_ = ukive::Space::createConstantBuffer(sizeof(PhongLightConstBuffer));
     }
 
-    ModelConfigure::~ModelConfigure()
-    {
+    void ModelConfigure::active() {
+        ukive::Space::setVertexShader(vertex_shader_.get());
+        ukive::Space::setPixelShader(pixel_shader_.get());
+        ukive::Space::setInputLayout(input_layout_.get());
     }
 
-    HRESULT ModelConfigure::init()
-    {
-        UINT numElements;
-        D3D11_INPUT_ELEMENT_DESC polygonLayout[4];
+    void ModelConfigure::close() {}
 
-        polygonLayout[0].SemanticName = "POSITION";
-        polygonLayout[0].SemanticIndex = 0;
-        polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-        polygonLayout[0].InputSlot = 0;
-        polygonLayout[0].AlignedByteOffset = 0;
-        polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[0].InstanceDataStepRate = 0;
+    void ModelConfigure::setMatrix(const dx::XMFLOAT4X4& matrix) {
+        auto resource = ukive::Space::lockResource(const_buffer_.get());
+        (reinterpret_cast<MatrixConstBuffer*>(resource.pData))->wvp = matrix;
+        ukive::Space::unlockResource(const_buffer_.get());
 
-        polygonLayout[1].SemanticName = "COLOR";
-        polygonLayout[1].SemanticIndex = 0;
-        polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-        polygonLayout[1].InputSlot = 0;
-        polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[1].InstanceDataStepRate = 0;
-
-        polygonLayout[2].SemanticName = "NORMAL";
-        polygonLayout[2].SemanticIndex = 0;
-        polygonLayout[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-        polygonLayout[2].InputSlot = 0;
-        polygonLayout[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        polygonLayout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[2].InstanceDataStepRate = 0;
-
-        polygonLayout[3].SemanticName = "TEXCOORD";
-        polygonLayout[3].SemanticIndex = 0;
-        polygonLayout[3].Format = DXGI_FORMAT_R32G32_FLOAT;
-        polygonLayout[3].InputSlot = 0;
-        polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-        polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        polygonLayout[3].InstanceDataStepRate = 0;
-
-        numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-
-        ukive::string16 shaderFileName(::_wgetcwd(nullptr, 0));
-
-        RH(ukive::Renderer::createVertexShader(
-            shaderFileName + L"\\model_vertex_shader.cso",
-            polygonLayout, numElements, &mVertexShader, &mInputLayout));
-
-        RH(ukive::Renderer::createPixelShader(
-            shaderFileName + L"\\model_pixel_shader.cso",
-            &mPixelShader));
-
-        RH(ukive::Renderer::createConstantBuffer(
-            sizeof(MatrixConstBuffer), &mMatrixConstBuffer));
-
-        RH(ukive::Renderer::createConstantBuffer(
-            sizeof(PhongLightConstBuffer), &mModelLightConstBuffer));
-
-        return S_OK;
-    }
-
-    void ModelConfigure::active()
-    {
-        ukive::Renderer::setVertexShader(mVertexShader.get());
-        ukive::Renderer::setPixelShader(mPixelShader.get());
-        ukive::Renderer::setInputLayout(mInputLayout.get());
-    }
-
-    void ModelConfigure::reset()
-    {
-        ukive::Renderer::setVertexShader(mVertexShader.get());
-        ukive::Renderer::setPixelShader(mPixelShader.get());
-        ukive::Renderer::setInputLayout(mInputLayout.get());
-    }
-
-    void ModelConfigure::close()
-    {
-    }
-
-    void ModelConfigure::setMatrix(dx::XMFLOAT4X4 matrix)
-    {
-        D3D11_MAPPED_SUBRESOURCE resource;
-
-        resource = ukive::Renderer::lockResource(mMatrixConstBuffer.get());
-        ((MatrixConstBuffer*)resource.pData)->mWVP = matrix;
-        ukive::Renderer::unlockResource(mMatrixConstBuffer.get());
-
-        ukive::Renderer::setConstantBuffers(0, 1, &mMatrixConstBuffer);
+        ukive::Space::setConstantBuffers(0, 1, &const_buffer_);
     }
 
 }

@@ -11,33 +11,12 @@ namespace shell {
 
     namespace dx = DirectX;
 
-    class Camera
-    {
-    private:
-        dx::XMFLOAT3 mPos;
-        dx::XMFLOAT3 mLookAt;
-        dx::XMFLOAT3 mUp;
-        dx::XMFLOAT3 mRight;
-        dx::XMFLOAT3 mLook;
-        dx::XMFLOAT3 mZVector;
-        dx::XMFLOAT3 mYVector;
-
-        dx::XMFLOAT4X4 mWorldMatrix;
-        dx::XMFLOAT4X4 mViewMatrix;
-        dx::XMFLOAT4X4 mProjectionMatrix;
-        dx::XMFLOAT4X4 mOrthoMatrix;
-
-        float mRadius;
-        unsigned int mWidth;
-        unsigned int mHeight;
-
+    class Camera {
     public:
-        Camera();
+        Camera(int width, int height);
         ~Camera();
 
-        void init(unsigned int wWidth, unsigned int wHeight);
-        void close();
-        void resize(unsigned int wWidth, unsigned int wHeight);
+        void resize(int width, int height);
 
         void moveCamera(float dx, float dy);
         void scaleCamera(float factor);
@@ -48,22 +27,40 @@ namespace shell {
         void scaleWorld(int direction);
         void rotateWorld(float dxAngle, float dyAngle);
 
-        //该方法有缺陷，请看方法内注释。
+        // 该方法有缺陷，请看方法内注释。
         void setCameraPosition(float x, float y, float z);
-        //该方法有缺陷，请看方法内注释。
+        // 该方法有缺陷，请看方法内注释。
         void setCameraLookAt(float x, float y, float z);
 
-        const dx::XMFLOAT3 *getCameraPos();
-        const dx::XMFLOAT3 *getCameraLookAt();
-        const dx::XMFLOAT3 *getCameraUp();
+        const dx::XMFLOAT3* getCameraPos() const;
+        const dx::XMFLOAT3* getCameraLookAt() const;
+        const dx::XMFLOAT3* getCameraUp() const;
 
-        const dx::XMFLOAT4X4 *getWorldMatrix();
-        const dx::XMFLOAT4X4 *getViewMatrix();
-        const dx::XMFLOAT4X4 *getProjectionMatrix();
-        const dx::XMFLOAT4X4 *getOrthoMatrix();
+        const dx::XMFLOAT4X4* getWorldMatrix() const;
+        const dx::XMFLOAT4X4* getViewMatrix() const;
+        const dx::XMFLOAT4X4* getProjectionMatrix() const;
+        const dx::XMFLOAT4X4* getOrthoMatrix() const;
 
-        void getWVPMatrix(dx::XMFLOAT4X4 *wvp);
-        void getWVOMatrix(dx::XMFLOAT4X4 *wvo);
+        void getWVPMatrix(dx::XMFLOAT4X4* wvp) const;
+        void getWVOMatrix(dx::XMFLOAT4X4* wvo) const;
+
+    private:
+        dx::XMFLOAT3 pos_;
+        dx::XMFLOAT3 look_at_;
+        dx::XMFLOAT3 up_;
+        dx::XMFLOAT3 right_;
+        dx::XMFLOAT3 look_;
+        dx::XMFLOAT3 z_vector_;
+        dx::XMFLOAT3 y_vector_;
+
+        dx::XMFLOAT4X4 world_matrix_;
+        dx::XMFLOAT4X4 view_matrix_;
+        dx::XMFLOAT4X4 projection_matrix_;
+        dx::XMFLOAT4X4 ortho_matrix_;
+
+        int width_;
+        int height_;
+        float radius_;
     };
 
 }

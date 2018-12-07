@@ -14,114 +14,98 @@
 namespace ukive {
 
     ContextMenu::ContextMenu(
-        Window *window, ContextMenuCallback *callback)
-    {
-        mIsFinished = true;
-        mMenuWidth = window->dpToPx(92);
-        mMenuItemHeight = window->dpToPx(36);
+        Window* window, ContextMenuCallback* callback)
+        :window_(window),
+        callback_(callback),
+        is_finished_(true) {
 
-        mWindow = window;
-        mCallback = callback;
+        menu_width_ = window->dpToPx(92);
+        menu_item_height_ = window->dpToPx(36);
 
-        mMenu = new MenuImpl(window);
-        mMenu->setCallback(this);
-        mMenu->setMenuItemHeight(mMenuItemHeight);
+        menu_ = new MenuImpl(window);
+        menu_->setCallback(this);
+        menu_->setMenuItemHeight(menu_item_height_);
 
-        mInnerWindow = std::make_shared<InnerWindow>(window);
-        mInnerWindow->setElevation(1.5f);
-        mInnerWindow->setContentView(mMenu);
-        mInnerWindow->setOutsideTouchable(true);
-        mInnerWindow->setDismissByTouchOutside(true);
-        mInnerWindow->setBackground(new ColorDrawable(Color::White));
-        mInnerWindow->setWidth(mMenuWidth);
+        inner_window_ = std::make_shared<InnerWindow>(window);
+        inner_window_->setElevation(1.5f);
+        inner_window_->setContentView(menu_);
+        inner_window_->setOutsideTouchable(true);
+        inner_window_->setDismissByTouchOutside(true);
+        inner_window_->setBackground(new ColorDrawable(Color::White));
+        inner_window_->setWidth(menu_width_);
     }
 
-    ContextMenu::~ContextMenu()
-    {
-    }
+    ContextMenu::~ContextMenu() {}
 
 
-    void ContextMenu::onCreateMenu(Menu *menu)
-    {
-    }
+    void ContextMenu::onCreateMenu(Menu* menu) {}
 
-    void ContextMenu::onPrepareMenu(Menu *menu)
-    {
-    }
+    void ContextMenu::onPrepareMenu(Menu* menu) {}
 
-    bool ContextMenu::onMenuItemClicked(Menu *menu, MenuItem *item)
-    {
-        return mCallback->onContextMenuItemClicked(this, item);
+    bool ContextMenu::onMenuItemClicked(Menu* menu, MenuItem* item) {
+        return callback_->onContextMenuItemClicked(this, item);
     }
 
 
-    Menu *ContextMenu::getMenu()
-    {
-        return mMenu;
+    Menu* ContextMenu::getMenu() {
+        return menu_;
     }
 
 
-    void ContextMenu::invalidateMenu()
-    {
-        if (mIsFinished) return;
+    void ContextMenu::invalidateMenu() {
+        if (is_finished_) return;
 
-        mCallback->onPrepareContextMenu(this, mMenu);
+        callback_->onPrepareContextMenu(this, menu_);
     }
 
-    void ContextMenu::show(int x, int y)
-    {
-        if (!mIsFinished) return;
+    void ContextMenu::show(int x, int y) {
+        if (!is_finished_) return;
 
-        mIsFinished = false;
+        is_finished_ = false;
 
-        //异步打开 ContextMenu，以防止在输入事件处理流程中
-        //打开菜单时出现问题。
-        mWindow->getCycler()->post(weak_bind(&ContextMenu::showAsync, s_this(), x, y));
+        // 异步打开 ContextMenu，以防止在输入事件处理流程中
+        // 打开菜单时出现问题。
+        window_->getCycler()->post(weak_bind(&ContextMenu::showAsync, s_this(), x, y));
     }
 
-    void ContextMenu::close()
-    {
-        if (mIsFinished)
+    void ContextMenu::close() {
+        if (is_finished_)
             return;
 
-        mIsFinished = true;
-        mCallback->onDestroyContextMenu(this);
+        is_finished_ = true;
+        callback_->onDestroyContextMenu(this);
 
-        //异步关闭 ContextMenu，以防止在输入事件处理流程中
-        //关闭菜单时出现问题。
-        mWindow->getCycler()->post(weak_bind(&ContextMenu::closeAsync, s_this()));
+        // 异步关闭 ContextMenu，以防止在输入事件处理流程中
+        // 关闭菜单时出现问题。
+        window_->getCycler()->post(weak_bind(&ContextMenu::closeAsync, s_this()));
     }
 
     void ContextMenu::showAsync(int x, int y) {
-        mInnerWindow->show(x, y);
+        inner_window_->show(x, y);
 
-        //UWidgetAnimator::createCirculeReveal(
-        //mInnerWindow->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
+        //ViewAnimator::createCirculeReveal(
+        //inner_window_->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
     }
 
     void ContextMenu::closeAsync() {
         class DismissAnimListener
-            : public Animator::OnAnimatorListener
-        {
-        private:
-            std::shared_ptr<InnerWindow> window;
+            : public Animator::OnAnimatorListener {
         public:
-            DismissAnimListener(std::shared_ptr<InnerWindow> w)
-            {
-                window = w;
+            DismissAnimListener(std::shared_ptr<InnerWindow> w) {
+                window_ = w;
             }
-            void onAnimationStart(Animator *animator) {}
-            void onAnimationEnd(Animator *animator)
-            {
-                window->dismiss();
+            void onAnimationStart(Animator* animator) {}
+            void onAnimationEnd(Animator* animator) {
+                window_->dismiss();
             }
-            void onAnimationCancel(Animator *animator)
-            {
-                window->dismiss();
+            void onAnimationCancel(Animator* animator) {
+                window_->dismiss();
             }
-        }*animListener = new DismissAnimListener(mInnerWindow);
+        private:
+            std::shared_ptr<InnerWindow> window_;
+        }*animListener = new DismissAnimListener(inner_window_);
 
-        mInnerWindow->getDecorView()->animate()->
+        inner_window_->getDecorView()->animate()->
             setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
     }
 

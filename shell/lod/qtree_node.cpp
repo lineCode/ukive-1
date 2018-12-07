@@ -3,8 +3,7 @@
 
 namespace shell {
 
-    QTreeNode::QTreeNode()
-    {
+    QTreeNode::QTreeNode() {
         level = 0;
         indexX = -1;
         indexY = -1;
@@ -18,8 +17,7 @@ namespace shell {
         next = nullptr;
     }
 
-    QTreeNode::~QTreeNode()
-    {
+    QTreeNode::~QTreeNode() {
     }
 
 }

@@ -4,31 +4,34 @@
 
 namespace ukive {
 
-    class Span
-    {
-    private:
-        unsigned int mStart;
-        unsigned int mEnd;
-
+    class Span {
     public:
         Span(unsigned int start, unsigned int end);
         virtual ~Span();
 
-        static const int USPAN_BASE_TYPE_TEXT = 0x1;
-        static const int USPAN_BASE_TYPE_INTERACTABLE = 0x2;
-        static const int USPAN_BASE_TYPE_EFFECT = 0x4;
-        static const int USPAN_BASE_TYPE_INLINEOBJECT = 0x8;
+        enum BaseType {
+            TEXT = 0x1,
+            INTERACTABLE = 0x2,
+            EFFECT = 0x4,
+            INLINEOBJECT = 0x8,
+        };
 
-        static const int TEXT_UNDERLINE = 0x100;
-        static const int EFFECT_NORMAL = 0x101;
+        enum Type {
+            TEXT_UNDERLINE = 0x100,
+            EFFECT_NORMAL = 0x101,
+        };
 
-        virtual int getType() = 0;
-        virtual int getBaseType() = 0;
+        virtual int getType() const = 0;
+        virtual int getBaseType() const = 0;
 
         void resize(unsigned int start, unsigned int end);
 
-        unsigned int getStart();
-        unsigned int getEnd();
+        unsigned int getStart() const;
+        unsigned int getEnd() const;
+
+    private:
+        unsigned int start_;
+        unsigned int end_;
     };
 
 }

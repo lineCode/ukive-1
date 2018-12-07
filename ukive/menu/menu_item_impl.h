@@ -9,28 +9,27 @@ namespace ukive {
 
     class Window;
 
-    class MenuItemImpl : public TextView, public MenuItem
-    {
-    private:
-        int mMenuId;
-        bool mIsVisible;
-        std::wstring mTitle;
-        std::int32_t mOrder;
-
-        void initMenuItem();
-
+    class MenuItemImpl : public TextView, public MenuItem {
     public:
-        MenuItemImpl(Window *w, int menuId, int order);
+        MenuItemImpl(Window* w, int menu_id, int32_t order);
 
-        void setItemTitle(std::wstring title) override;
+        void setItemTitle(const string16& title) override;
         void setItemVisible(bool visible) override;
         void setItemEnabled(bool enable) override;
 
         int getItemId() override;
-        std::int32_t getItemOrder() override;
-        std::wstring getItemTitle() override;
+        int32_t getItemOrder() override;
+        string16 getItemTitle() override;
         bool isItemVisible() override;
         bool isItemEnabled() override;
+
+    private:
+        void initMenuItem();
+
+        int menu_id_;
+        bool is_visible_;
+        string16 title_;
+        int32_t order_;
     };
 
 }

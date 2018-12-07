@@ -8,25 +8,22 @@
 
 namespace ukive {
 
-    LinearLayout::LinearLayout(Window *w)
+    LinearLayout::LinearLayout(Window* w)
         :ViewGroup(w),
-        mOrientation(VERTICAL) {}
+        orientation_(VERTICAL) {}
 
 
-    LayoutParams *LinearLayout::generateLayoutParams(const LayoutParams &lp)
-    {
+    LayoutParams* LinearLayout::generateLayoutParams(const LayoutParams& lp) {
         return new LinearLayoutParams(lp);
     }
 
-    LayoutParams *LinearLayout::generateDefaultLayoutParams()
-    {
+    LayoutParams* LinearLayout::generateDefaultLayoutParams() {
         return new LinearLayoutParams(
             LayoutParams::FIT_CONTENT,
             LayoutParams::FIT_CONTENT);
     }
 
-    bool LinearLayout::checkLayoutParams(LayoutParams *lp)
-    {
+    bool LinearLayout::checkLayoutParams(LayoutParams* lp) {
         return typeid(*lp) == typeid(LinearLayoutParams);
     }
 
@@ -36,43 +33,40 @@ namespace ukive {
         int parentWidth, int parentHeight,
         int parentWidthMode, int parentHeightMode)
     {
-        for (unsigned int i = 0; i < this->getChildCount(); ++i)
+        for (size_t i = 0; i < getChildCount(); ++i)
         {
-            View *child = this->getChildAt(i);
+            View* child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED)
             {
-                LinearLayoutParams *childParams = (LinearLayoutParams*)child->getLayoutParams();
+                LinearLayoutParams* child_lp = (LinearLayoutParams*)child->getLayoutParams();
 
-                int horizontalPadding = getPaddingLeft() + getPaddingRight();
-                int verticalPadding = getPaddingTop() + getPaddingBottom();
+                int hori_padding = getPaddingLeft() + getPaddingRight();
+                int vert_padding = getPaddingTop() + getPaddingBottom();
 
-                int horizontalMargins = childParams->leftMargin + childParams->rightMargin;
-                int verticalMargins = childParams->topMargin + childParams->bottomMargin;
+                int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
+                int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
 
                 int childWidth;
                 int childWidthSpec;
                 int childHeight;
                 int childHeightSpec;
 
-                this->getChildMeasure(
+                getChildMeasure(
                     parentWidth, parentWidthMode,
-                    horizontalMargins + horizontalPadding,
-                    childParams->width, &childWidth, &childWidthSpec);
+                    hori_margin + hori_padding,
+                    child_lp->width, &childWidth, &childWidthSpec);
 
-                this->getChildMeasure(
+                getChildMeasure(
                     parentHeight, parentHeightMode,
-                    verticalMargins + verticalPadding,
-                    childParams->height, &childHeight, &childHeightSpec);
+                    vert_margin + vert_padding,
+                    child_lp->height, &childHeight, &childHeightSpec);
 
-                if (mOrientation == VERTICAL)
-                {
-                    childHeight = std::round((childParams->weight / (float)totalWeight)*parentHeight);
-                    childHeight = std::max(0, childHeight - verticalMargins);
-                }
-                else if (mOrientation == HORIZONTAL)
-                {
-                    childWidth = std::round((childParams->weight / (float)totalWeight)*parentWidth);
-                    childWidth = std::max(0, childWidth - horizontalMargins);
+                if (orientation_ == VERTICAL) {
+                    childHeight = std::round((child_lp->weight / (float)totalWeight)*parentHeight);
+                    childHeight = std::max(0, childHeight - vert_margin);
+                } else if (orientation_ == HORIZONTAL) {
+                    childWidth = std::round((child_lp->weight / (float)totalWeight)*parentWidth);
+                    childWidth = std::max(0, childWidth - hori_margin);
                 }
 
                 child->measure(
@@ -86,33 +80,32 @@ namespace ukive {
         int parentWidth, int parentHeight,
         int parentWidthMode, int parentHeightMode)
     {
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED)
             {
-                LayoutParams *childParams = child->getLayoutParams();
+                LayoutParams* child_lp = child->getLayoutParams();
 
-                int horizontalPadding = getPaddingLeft() + getPaddingRight();
-                int verticalPadding = getPaddingTop() + getPaddingBottom();
+                int hori_padding = getPaddingLeft() + getPaddingRight();
+                int vert_padding = getPaddingTop() + getPaddingBottom();
 
-                int horizontalMargins = childParams->leftMargin + childParams->rightMargin;
-                int verticalMargins = childParams->topMargin + childParams->bottomMargin;
+                int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
+                int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
 
                 int childWidth;
                 int childWidthSpec;
                 int childHeight;
                 int childHeightSpec;
 
-                this->getChildMeasure(
+                getChildMeasure(
                     parentWidth, parentWidthMode,
-                    horizontalMargins + horizontalPadding,
-                    childParams->width, &childWidth, &childWidthSpec);
+                    hori_margin + hori_padding,
+                    child_lp->width, &childWidth, &childWidthSpec);
 
-                this->getChildMeasure(
+                getChildMeasure(
                     parentHeight, parentHeightMode,
-                    verticalMargins + verticalPadding,
-                    childParams->height, &childHeight, &childHeightSpec);
+                    vert_margin + vert_padding,
+                    child_lp->height, &childHeight, &childHeightSpec);
 
                 child->measure(childWidth, childHeight, childWidthSpec, childHeightSpec);
             }
@@ -121,26 +114,23 @@ namespace ukive {
 
     void LinearLayout::measureLinearLayoutChildren(
         int parentWidth, int parentHeight,
-        int parentWidthMode, int parentHeightMode)
-    {
-        int totalWeight = 0;
-        for (std::size_t i = 0; i < this->getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            if (child->getVisibility() != View::VANISHED)
-            {
-                LinearLayoutParams *lp = (LinearLayoutParams*)child->getLayoutParams();
-                totalWeight += lp->weight;
+        int parentWidthMode, int parentHeightMode) {
+        int total_weight = 0;
+
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
+            if (child->getVisibility() != View::VANISHED) {
+                LinearLayoutParams* lp = (LinearLayoutParams*)child->getLayoutParams();
+                total_weight += lp->weight;
             }
         }
 
-        if (totalWeight > 0)
+        if (total_weight > 0) {
             measureWeightedChildren(
-                totalWeight,
+                total_weight,
                 parentWidth, parentHeight,
                 parentWidthMode, parentHeightMode);
-        else
-        {
+        } else {
             measureSequenceChildren(
                 parentWidth, parentHeight,
                 parentWidthMode, parentHeightMode);
@@ -148,224 +138,200 @@ namespace ukive {
     }
 
 
-    void LinearLayout::measureVertical(int width, int height, int widthSpec, int heightSpec)
-    {
-        int finalWidth = 0;
-        int finalHeight = 0;
+    void LinearLayout::measureVertical(int width, int height, int widthSpec, int heightSpec) {
+        int final_width = 0;
+        int final_height = 0;
 
-        int horizontalPadding = getPaddingLeft() + getPaddingRight();
-        int verticalPadding = getPaddingTop() + getPaddingBottom();
-
-        measureLinearLayoutChildren(width, height, widthSpec, heightSpec);
-
-        int totalHeight = 0;
-
-        switch (widthSpec)
-        {
-        case FIT:
-            finalWidth = getWrappedWidth();
-            finalWidth = std::min(finalWidth + horizontalPadding, width);
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
-            break;
-
-        case UNKNOWN:
-            finalWidth = getWrappedWidth();
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
-            break;
-
-        case EXACTLY:
-            finalWidth = width;
-            break;
-        }
-
-        switch (heightSpec)
-        {
-        case FIT:
-        {
-            View *widget;
-            LayoutParams *lp;
-            for (unsigned int i = 0; i < this->getChildCount(); ++i)
-            {
-                widget = this->getChildAt(i);
-                if (widget->getVisibility() != View::VANISHED)
-                {
-                    lp = widget->getLayoutParams();
-                    totalHeight += widget->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
-                }
-            }
-            finalHeight = std::min(height, totalHeight + verticalPadding);
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
-            break;
-        }
-
-        case UNKNOWN:
-        {
-            View *widget;
-            LayoutParams *lp;
-            for (unsigned int i = 0; i < this->getChildCount(); ++i)
-            {
-                widget = this->getChildAt(i);
-                if (widget->getVisibility() != View::VANISHED)
-                {
-                    lp = widget->getLayoutParams();
-                    totalHeight += widget->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
-                }
-            }
-            finalHeight = std::max(getMinimumHeight(), totalHeight + verticalPadding);
-            break;
-        }
-
-        case EXACTLY:
-            finalHeight = height;
-            break;
-        }
-
-        this->setMeasuredDimension(finalWidth, finalHeight);
-    }
-
-    void LinearLayout::measureHorizontal(int width, int height, int widthSpec, int heightSpec)
-    {
-        int finalWidth = 0;
-        int finalHeight = 0;
-
-        int horizontalPadding = getPaddingLeft() + getPaddingRight();
-        int verticalPadding = getPaddingTop() + getPaddingBottom();
+        int hori_padding = getPaddingLeft() + getPaddingRight();
+        int vert_padding = getPaddingTop() + getPaddingBottom();
 
         measureLinearLayoutChildren(width, height, widthSpec, heightSpec);
 
-        int totalWidth = 0;
+        int total_height = 0;
 
-        switch (widthSpec)
-        {
+        switch (widthSpec) {
         case FIT:
-        {
-            View *widget;
-            LayoutParams *lp;
-            for (unsigned int i = 0; i < this->getChildCount(); ++i)
-            {
-                widget = this->getChildAt(i);
-                if (widget->getVisibility() != View::VANISHED)
-                {
-                    lp = widget->getLayoutParams();
-                    totalWidth += widget->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
-                }
-            }
-            finalWidth = std::min(totalWidth + horizontalPadding, width);
-            finalWidth = std::max(getMinimumWidth(), finalWidth);
+            final_width = getWrappedWidth();
+            final_width = std::min(final_width + hori_padding, width);
+            final_width = std::max(getMinimumWidth(), final_width);
+            break;
+
+        case UNKNOWN:
+            final_width = getWrappedWidth();
+            final_width = std::max(getMinimumWidth(), final_width);
+            break;
+
+        case EXACTLY:
+            final_width = width;
             break;
         }
 
-        case UNKNOWN:
-        {
-            View *widget;
-            LayoutParams *lp;
-            for (unsigned int i = 0; i < this->getChildCount(); ++i)
-            {
-                widget = this->getChildAt(i);
-                if (widget->getVisibility() != View::VANISHED)
-                {
-                    lp = widget->getLayoutParams();
-                    totalWidth += widget->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
+        switch (heightSpec) {
+        case FIT: {
+            View* child = nullptr;
+            LayoutParams* lp = nullptr;
+            for (size_t i = 0; i < getChildCount(); ++i) {
+                child = getChildAt(i);
+                if (child->getVisibility() != View::VANISHED) {
+                    lp = child->getLayoutParams();
+                    total_height += child->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
                 }
             }
-            finalWidth = std::max(getMinimumWidth(), totalWidth + horizontalPadding);
+            final_height = std::min(height, total_height + vert_padding);
+            final_height = std::max(getMinimumHeight(), final_height);
+            break;
+        }
+
+        case UNKNOWN: {
+            View* child = nullptr;
+            LayoutParams* lp = nullptr;
+            for (size_t i = 0; i < getChildCount(); ++i) {
+                child = getChildAt(i);
+                if (child->getVisibility() != View::VANISHED) {
+                    lp = child->getLayoutParams();
+                    total_height += child->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
+                }
+            }
+            final_height = std::max(getMinimumHeight(), total_height + vert_padding);
             break;
         }
 
         case EXACTLY:
-            finalWidth = width;
+            final_height = height;
             break;
         }
 
-        switch (heightSpec)
-        {
+        setMeasuredDimension(final_width, final_height);
+    }
+
+    void LinearLayout::measureHorizontal(int width, int height, int widthSpec, int heightSpec) {
+        int final_width = 0;
+        int final_height = 0;
+
+        int hori_padding = getPaddingLeft() + getPaddingRight();
+        int vert_padding = getPaddingTop() + getPaddingBottom();
+
+        measureLinearLayoutChildren(width, height, widthSpec, heightSpec);
+
+        int total_width = 0;
+
+        switch (widthSpec) {
+        case FIT: {
+            View* child = nullptr;
+            LayoutParams* lp = nullptr;
+            for (size_t i = 0; i < getChildCount(); ++i) {
+                child = getChildAt(i);
+                if (child->getVisibility() != View::VANISHED) {
+                    lp = child->getLayoutParams();
+                    total_width += child->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
+                }
+            }
+            final_width = std::min(total_width + hori_padding, width);
+            final_width = std::max(getMinimumWidth(), final_width);
+            break;
+        }
+
+        case UNKNOWN: {
+            View* child = nullptr;
+            LayoutParams* lp = nullptr;
+            for (size_t i = 0; i < getChildCount(); ++i) {
+                child = getChildAt(i);
+                if (child->getVisibility() != View::VANISHED) {
+                    lp = child->getLayoutParams();
+                    total_width += child->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
+                }
+            }
+            final_width = std::max(getMinimumWidth(), total_width + hori_padding);
+            break;
+        }
+
+        case EXACTLY:
+            final_width = width;
+            break;
+        }
+
+        switch (heightSpec) {
         case FIT:
-            finalHeight = getWrappedHeight();
-            finalHeight = std::min(finalHeight + verticalPadding, height);
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
+            final_height = getWrappedHeight();
+            final_height = std::min(final_height + vert_padding, height);
+            final_height = std::max(getMinimumHeight(), final_height);
             break;
 
         case UNKNOWN:
-            finalHeight = getWrappedHeight();
-            finalHeight = std::max(getMinimumHeight(), finalHeight);
+            final_height = getWrappedHeight();
+            final_height = std::max(getMinimumHeight(), final_height);
             break;
 
         case EXACTLY:
-            finalHeight = height;
+            final_height = height;
             break;
         }
 
-        this->setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredDimension(final_width, final_height);
     }
 
 
-    void LinearLayout::layoutVertical(int left, int top, int right, int bottom)
-    {
-        View *widget = 0;
-        LayoutParams *lp = 0;
+    void LinearLayout::layoutVertical(int left, int top, int right, int bottom) {
+        View* child = nullptr;
+        LayoutParams* lp = nullptr;
 
-        int curTop = getPaddingTop();
+        int cur_top = getPaddingTop();
 
-        for (unsigned int i = 0; i < this->getChildCount(); ++i)
-        {
-            widget = this->getChildAt(i);
-            if (widget->getVisibility() != View::VANISHED)
-            {
-                lp = widget->getLayoutParams();
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            child = getChildAt(i);
+            if (child->getVisibility() != View::VANISHED) {
+                lp = child->getLayoutParams();
 
-                int width = widget->getMeasuredWidth();
-                int height = widget->getMeasuredHeight();
+                int width = child->getMeasuredWidth();
+                int height = child->getMeasuredHeight();
 
-                curTop += lp->topMargin;
+                cur_top += lp->topMargin;
 
-                widget->layout(
+                child->layout(
                     getPaddingLeft() + lp->leftMargin,
-                    curTop,
+                    cur_top,
                     getPaddingLeft() + lp->leftMargin + width,
-                    curTop + height);
+                    cur_top + height);
 
-                curTop += height + lp->bottomMargin;
+                cur_top += height + lp->bottomMargin;
             }
         }
     }
 
-    void LinearLayout::layoutHorizontal(int left, int top, int right, int bottom)
-    {
-        View *widget = 0;
-        LayoutParams *lp = 0;
+    void LinearLayout::layoutHorizontal(int left, int top, int right, int bottom) {
+        View* child = nullptr;
+        LayoutParams* lp = nullptr;
 
-        int curLeft = getPaddingLeft();
+        int cur_left = getPaddingLeft();
 
-        for (unsigned int i = 0; i < this->getChildCount(); ++i)
-        {
-            widget = this->getChildAt(i);
-            if (widget->getVisibility() != View::VANISHED)
-            {
-                lp = widget->getLayoutParams();
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            child = getChildAt(i);
+            if (child->getVisibility() != View::VANISHED) {
+                lp = child->getLayoutParams();
 
-                int width = widget->getMeasuredWidth();
-                int height = widget->getMeasuredHeight();
+                int width = child->getMeasuredWidth();
+                int height = child->getMeasuredHeight();
 
-                curLeft += lp->leftMargin;
+                cur_left += lp->leftMargin;
 
-                widget->layout(
-                    curLeft,
+                child->layout(
+                    cur_left,
                     getPaddingTop() + lp->topMargin,
-                    curLeft + width,
+                    cur_left + width,
                     getPaddingTop() + lp->topMargin + height);
 
-                curLeft += width + lp->rightMargin;
+                cur_left += width + lp->rightMargin;
             }
         }
     }
 
 
-    void LinearLayout::onMeasure(int width, int height, int widthSpec, int heightSpec)
-    {
-        if (mOrientation == VERTICAL)
-            this->measureVertical(width, height, widthSpec, heightSpec);
-        else
-            this->measureHorizontal(width, height, widthSpec, heightSpec);
+    void LinearLayout::onMeasure(int width, int height, int widthSpec, int heightSpec) {
+        if (orientation_ == VERTICAL) {
+            measureVertical(width, height, widthSpec, heightSpec);
+        } else {
+            measureHorizontal(width, height, widthSpec, heightSpec);
+        }
     }
 
 
@@ -373,22 +339,23 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        if (mOrientation == VERTICAL)
-            this->layoutVertical(left, top, right, bottom);
-        else
-            this->layoutHorizontal(left, top, right, bottom);
+        if (orientation_ == VERTICAL) {
+            layoutVertical(left, top, right, bottom);
+        } else {
+            layoutHorizontal(left, top, right, bottom);
+        }
     }
 
 
-    void LinearLayout::setOrientation(int orientation)
-    {
-        if (orientation == mOrientation)
+    void LinearLayout::setOrientation(int orientation) {
+        if (orientation == orientation_) {
             return;
+        }
 
-        mOrientation = orientation;
+        orientation_ = orientation;
 
-        this->requestLayout();
-        this->invalidate();
+        requestLayout();
+        invalidate();
     }
 
 }

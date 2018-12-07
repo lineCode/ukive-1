@@ -7,94 +7,95 @@
 namespace ukive {
 
     Color::Color()
-        :a(1.f), r(0.f), g(0.f), b(0.f) {}
+        :r(0.f), g(0.f), b(0.f), a(0.f) {}
 
-    Color::Color(unsigned int r, unsigned int g, unsigned int b)
-        : a(1.f), r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
+    Color::Color(const Color& color)
+        :r(color.r), g(color.g), b(color.b), a(color.a) {}
 
-    Color::Color(unsigned int a, unsigned int r, unsigned int g, unsigned int b)
-        : a(a / 255.f), r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
+    Color::Color(float r, float g, float b, float a)
+        :r(r), g(g), b(b), a(a) {}
 
-    Color::Color(float r, float g, float b)
-        : a(1.f), r(r), g(g), b(b) {}
+    Color& Color::operator=(const Color& rhs) {
+        r = rhs.r;
+        g = rhs.g;
+        b = rhs.b;
+        a = rhs.a;
 
-    Color::Color(float a, float r, float g, float b)
-        : a(a), r(r), g(g), b(b) {}
-
-    Color::Color(unsigned int rgb, unsigned int a)
-        : a(a / 255.f) {
-        r = ((rgb & red_mask) >> red_shift) / 255.f;
-        g = ((rgb & green_mask) >> green_shift) / 255.f;
-        b = ((rgb & blue_mask) >> blue_shift) / 255.f;
-    }
-
-    Color::Color(unsigned int rgb, float a)
-        : a(a) {
-        r = ((rgb & red_mask) >> red_shift) / 255.f;
-        g = ((rgb & green_mask) >> green_shift) / 255.f;
-        b = ((rgb & blue_mask) >> blue_shift) / 255.f;
-    }
-
-    Color::Color(unsigned int argb) {
-        a = ((argb & alpha_mask) >> alpha_shift) / 255.f;
-        r = ((argb & red_mask) >> red_shift) / 255.f;
-        g = ((argb & green_mask) >> green_shift) / 255.f;
-        b = ((argb & blue_mask) >> blue_shift) / 255.f;
+        return *this;
     }
 
 
-    Color Color::parse(string16 color) {
+    Color Color::parse(const string16& color) {
         if (color.empty() || color.at(0) != L'#') {
-            Log::e(L"unknown color");
+            LOG(Log::ERR) << "Unknown color: " << color;
             return Color::Red500;
         }
 
         if (color.length() == 7) {
-            unsigned int r = Number::parseInt(color.substr(1, 2), 16);
-            unsigned int g = Number::parseInt(color.substr(3, 2), 16);
-            unsigned int b = Number::parseInt(color.substr(5, 2), 16);
+            int r = Number::parseInt(color.substr(1, 2), 16);
+            int g = Number::parseInt(color.substr(3, 2), 16);
+            int b = Number::parseInt(color.substr(5, 2), 16);
 
-            return Color(r, g, b);
-        }
-        else if (color.length() == 9) {
-            unsigned int a = Number::parseInt(color.substr(1, 2), 16);
-            unsigned int r = Number::parseInt(color.substr(3, 2), 16);
-            unsigned int g = Number::parseInt(color.substr(5, 2), 16);
-            unsigned int b = Number::parseInt(color.substr(7, 2), 16);
+            return Color::ofInt(r, g, b);
+        } else if (color.length() == 9) {
+            int a = Number::parseInt(color.substr(1, 2), 16);
+            int r = Number::parseInt(color.substr(3, 2), 16);
+            int g = Number::parseInt(color.substr(5, 2), 16);
+            int b = Number::parseInt(color.substr(7, 2), 16);
 
-            return Color(a, r, g, b);
-        }
-        else {
-            Log::e(L"unknown color");
+            return Color::ofInt(r, g, b, a);
+        } else {
+            LOG(Log::ERR) << "Unknown color: " << color;
             return Color::Red500;
         }
     }
 
-    unsigned int Color::GetA(unsigned int argb) {
+    Color Color::ofInt(int r, int g, int b, int a) {
+        return Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
+    }
+
+    Color Color::ofRGB(unsigned int rgb, float a) {
+        return Color(
+            ((rgb & red_mask) >> red_shift) / 255.f,
+            ((rgb & green_mask) >> green_shift) / 255.f,
+            ((rgb & blue_mask) >> blue_shift) / 255.f,
+            a);
+    }
+
+    Color Color::ofARGB(unsigned int argb) {
+        return Color(
+            ((argb & red_mask) >> red_shift) / 255.f,
+            ((argb & green_mask) >> green_shift) / 255.f,
+            ((argb & blue_mask) >> blue_shift) / 255.f,
+            ((argb & alpha_mask) >> alpha_shift) / 255.f);
+    }
+
+
+    int Color::GetA(unsigned int argb) {
         return (argb & alpha_mask) >> alpha_shift;
     }
 
-    unsigned int Color::GetR(unsigned int argb) {
+    int Color::GetR(unsigned int argb) {
         return (argb & red_mask) >> red_shift;
     }
 
-    unsigned int Color::GetG(unsigned int argb) {
+    int Color::GetG(unsigned int argb) {
         return (argb & green_mask) >> green_shift;
     }
 
-    unsigned int Color::GetB(unsigned int argb) {
+    int Color::GetB(unsigned int argb) {
         return (argb & blue_mask) >> blue_shift;
     }
 
 
     // Color White.
-    Color Color::White = Color::parse(L"#FFFFFF");
+    const Color Color::White = Color::parse(L"#FFFFFF");
     // Color Black.
-    Color Color::Black = Color::parse(L"#000000");
+    const Color Color::Black = Color::parse(L"#000000");
     // Color Transparent.
-    Color Color::Transparent = Color::parse(L"#00000000");
+    const Color Color::Transparent = Color::parse(L"#00000000");
 
-    //Material Color Red.
+    // Material Color Red.
     Color Color::Red50 = Color::parse(L"#FFEBEE");
     Color Color::Red100 = Color::parse(L"#FFCDD2");
     Color Color::Red200 = Color::parse(L"#EF9A9A");
@@ -106,7 +107,19 @@ namespace ukive {
     Color Color::Red800 = Color::parse(L"#C62828");
     Color Color::Red900 = Color::parse(L"#B71C1C");
 
-    //Material Color Yellow.
+    // Material Color Orange.
+    Color Color::Orange50 = Color::parse(L"#FFF3E0");
+    Color Color::Orange100 = Color::parse(L"#FFE0B2");
+    Color Color::Orange200 = Color::parse(L"#FFCC80");
+    Color Color::Orange300 = Color::parse(L"#FFB74D");
+    Color Color::Orange400 = Color::parse(L"#FFA726");
+    Color Color::Orange500 = Color::parse(L"#FF9800");
+    Color Color::Orange600 = Color::parse(L"#FB8C00");
+    Color Color::Orange700 = Color::parse(L"#F57C00");
+    Color Color::Orange800 = Color::parse(L"#EF6C00");
+    Color Color::Orange900 = Color::parse(L"#E65100");
+
+    // Material Color Yellow.
     Color Color::Yellow50 = Color::parse(L"#FFFDE7");
     Color Color::Yellow100 = Color::parse(L"#FFF9C4");
     Color Color::Yellow200 = Color::parse(L"#FFF59D");
@@ -118,7 +131,7 @@ namespace ukive {
     Color Color::Yellow800 = Color::parse(L"#F9A825");
     Color Color::Yellow900 = Color::parse(L"#F57F17");
 
-    //Material Color Pink.
+    // Material Color Pink.
     Color Color::Pink50 = Color::parse(L"#FCE4EC");
     Color Color::Pink100 = Color::parse(L"#F8BBD0");
     Color Color::Pink200 = Color::parse(L"#F48FB1");
@@ -130,7 +143,7 @@ namespace ukive {
     Color Color::Pink800 = Color::parse(L"#AD1457");
     Color Color::Pink900 = Color::parse(L"#880E4F");
 
-    //Material Color Green.
+    // Material Color Green.
     Color Color::Green50 = Color::parse(L"#E8F5E9");
     Color Color::Green100 = Color::parse(L"#C8E6C9");
     Color Color::Green200 = Color::parse(L"#A5D6A7");
@@ -142,7 +155,7 @@ namespace ukive {
     Color Color::Green800 = Color::parse(L"#2E7D32");
     Color Color::Green900 = Color::parse(L"#1B5E20");
 
-    //Material Color Blue.
+    // Material Color Blue.
     Color Color::Blue50 = Color::parse(L"#E3F2FD");
     Color Color::Blue100 = Color::parse(L"#BBDEFB");
     Color Color::Blue200 = Color::parse(L"#90CAF9");
@@ -154,7 +167,7 @@ namespace ukive {
     Color Color::Blue800 = Color::parse(L"#1565C0");
     Color Color::Blue900 = Color::parse(L"#0D47A1");
 
-    //Material Color Grey.
+    // Material Color Grey.
     Color Color::Grey50 = Color::parse(L"#FAFAFA");
     Color Color::Grey100 = Color::parse(L"#F5F5F5");
     Color Color::Grey200 = Color::parse(L"#EEEEEE");

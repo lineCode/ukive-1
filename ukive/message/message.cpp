@@ -3,7 +3,7 @@
 
 namespace ukive {
 
-    Message *Message::pool = 0;
+    Message* Message::pool = 0;
     uint64_t Message::pool_size = 0;
     bool Message::is_initialized = false;
     std::mutex Message::pool_sync;
@@ -26,10 +26,10 @@ namespace ukive {
         if (is_initialized)
             throw std::logic_error("Message-init(): can only init once.");
 
-        Message *ptr = nullptr;
+        Message* ptr = nullptr;
 
         for (uint64_t i = 0; i < pool_capacity; ++i) {
-            Message *msg = new Message();
+            Message* msg = new Message();
             if (pool) {
                 ptr->next = msg;
                 ptr = msg;
@@ -46,7 +46,7 @@ namespace ukive {
 
     void Message::close() {
         while (pool) {
-            Message *msg = pool;
+            Message* msg = pool;
             pool = msg->next;
             delete msg;
         }
@@ -56,11 +56,11 @@ namespace ukive {
     }
 
 
-    Message *Message::obtain() {
+    Message* Message::obtain() {
         std::lock_guard<std::mutex> lk(pool_sync);
 
         if (pool) {
-            Message *msg = pool;
+            Message* msg = pool;
             pool = msg->next;
             msg->next = nullptr;
             --pool_size;

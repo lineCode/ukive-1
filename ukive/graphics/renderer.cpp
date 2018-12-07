@@ -1,501 +1,429 @@
 ﻿#include "renderer.h"
 
-#include <fstream>
-
 #include "ukive/application.h"
 #include "ukive/graphics/swapchain_resize_notifier.h"
-#include "ukive/graphics/direct3d_render_listener.h"
 #include "ukive/log.h"
-#include "ukive/utils/hresult_utils.h"
 #include "ukive/window/window.h"
 
 
 namespace ukive {
 
     Renderer::Renderer()
-        :d3d_render_listener_(nullptr) {
-    }
+        :is_layered_(false),
+        is_hardware_acc_(true) {}
 
     Renderer::~Renderer() {
     }
 
 
-    HRESULT Renderer::init(Window *window)
-    {
+    HRESULT Renderer::init(Window* window) {
         owner_window_ = window;
-        d2d_dc_ = Application::getGraphicDeviceManager()->createD2DDeviceContext();
-
+        is_layered_ = owner_window_->isTranslucent();
         return createRenderResource();
     }
 
-    HRESULT Renderer::createRenderResource()
-    {
-        RH(d2d_dc_->CreateEffect(CLSID_D2D1Shadow, &shadow_effect_));
-        RH(d2d_dc_->CreateEffect(CLSID_D2D12DAffineTransform, &affinetrans_effect_));
+    HRESULT Renderer::createRenderResource() {
+        HRESULT hr = S_OK;
+        if (is_layered_) {
+            if (is_hardware_acc_) {
+                createHardwareBRT();
+            } else {
+                createSoftwareBRT();
+            }
+        } else {
+            hr = createSwapchainBRT();
+        }
 
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-        ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-
-        swapChainDesc.BufferCount = 2;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-        swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-        swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-
-        auto gdm = Application::getGraphicDeviceManager();
-
-        RH(gdm->getDXGIFactory()->CreateSwapChainForHwnd(
-            gdm->getD3DDevice().get(),
-            owner_window_->getHandle(),
-            &swapChainDesc, 0, 0, &swapchain_));
-
-        ComPtr<IDXGISurface> backBufferPtr;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), (LPVOID*)&backBufferPtr));
-        RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
-
-        d2d_dc_->SetTarget(bitmap_render_target_.get());
-
-        DXGI_SWAP_CHAIN_DESC1 checkDesc;
-        swapchain_->GetDesc1(&checkDesc);
-
-        width_ = checkDesc.Width;
-        height_ = checkDesc.Height;
-
-        return S_OK;
+        return hr;
     }
 
-    void Renderer::releaseRenderResource()
-    {
-        bitmap_render_target_.reset();
+    void Renderer::releaseRenderResource() {
         swapchain_.reset();
-        shadow_effect_.reset();
-        affinetrans_effect_.reset();
     }
 
-    HRESULT Renderer::resize()
-    {
-        d2d_dc_->SetTarget(0);
-        bitmap_render_target_.reset();
-
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it)
-        {
-            (*it)->onSwapChainResize();
+    HRESULT Renderer::resize() {
+        HRESULT hr = S_OK;
+        if (is_layered_) {
+            if (is_hardware_acc_) {
+                hr = resizeHardwareBRT();
+            } else {
+                hr = resizeSoftwareBRT();
+            }
+        } else {
+            hr = resizeSwapchainBRT();
         }
-
-        RH(swapchain_->ResizeBuffers(
-            0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
-
-        ComPtr<IDXGISurface> backBufferPtr;
-        RH(swapchain_->GetBuffer(0, __uuidof(IDXGISurface), (LPVOID*)&backBufferPtr));
-        RH(createBitmapRenderTarget(backBufferPtr.get(), &bitmap_render_target_));
-
-        d2d_dc_->SetTarget(bitmap_render_target_.get());
-
-        DXGI_SWAP_CHAIN_DESC1 checkDesc;
-        swapchain_->GetDesc1(&checkDesc);
-
-        width_ = checkDesc.Width;
-        height_ = checkDesc.Height;
-
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end(); ++it)
-        {
-            (*it)->onSwapChainResized();
-        }
-
-        return S_OK;
+        return hr;
     }
 
-    bool Renderer::render(
-        Color bkColor,
-        std::function<void()> renderCallback)
-    {
-        HRESULT hr;
-
-        if (d3d_render_listener_)
-            d3d_render_listener_->onDirect3DClear();
-
-        d2d_dc_->BeginDraw();
+    bool Renderer::render(const Color& bg_color, std::function<void()> callback) {
+        d2d_rt_->BeginDraw();
         D2D1_COLOR_F color = {
-            bkColor.r,
-            bkColor.g,
-            bkColor.b,
-            bkColor.a, };
-        d2d_dc_->Clear(color);
+            bg_color.r, bg_color.g, bg_color.b, bg_color.a };
+        d2d_rt_->Clear(color);
 
-        renderCallback();
+        callback();
 
-        hr = d2d_dc_->EndDraw();
+        HRESULT hr = S_OK;
+        if (is_layered_) {
+            hr = drawLayered();
+            DCHECK(SUCCEEDED(hr));
+        }
 
-        if (d3d_render_listener_)
-            d3d_render_listener_->onDirect3DRender();
-
-        hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
+        hr = d2d_rt_->EndDraw();
         if (FAILED(hr)) {
-            Log::e(L"failed to present.");
+            DCHECK(false);
+            LOG(Log::ERR) << "Failed to draw d2d content.";
+        }
+
+        if (!is_layered_) {
+            hr = drawSwapchain();
         }
 
         return !FAILED(hr);
     }
 
-    void Renderer::close()
-    {
+    void Renderer::close() {
         releaseRenderResource();
     }
 
-    HRESULT Renderer::drawShadow(float elevation, float alpha, ID2D1Bitmap *bitmap)
-    {
-        //在 Alpha 动画时，令阴影更快消退。
-        float shadow_alpha;
-        if (alpha == 0.f) {
-            shadow_alpha = 0.f;
-        }
-        else if (alpha == 1.f) {
-            shadow_alpha = .38f;
-        }
-        else {
-            shadow_alpha = static_cast<float>(.38f*::pow(2, 8 * (alpha - 1)) / 1.f);
+
+    void Renderer::createHardwareBRT() {
+        D3D11_TEXTURE2D_DESC tex_desc = { 0 };
+        tex_desc.ArraySize = 1;
+        tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+        tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        tex_desc.Width = owner_window_->getWidth();
+        tex_desc.Height = owner_window_->getHeight();
+        tex_desc.MipLevels = 1;
+        tex_desc.SampleDesc.Count = 1;
+        tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+
+        ComPtr<ID3D11Texture2D> d3d_texture;
+        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()->
+            CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
+        DCHECK(SUCCEEDED(hr));
+
+        auto dxgi_surface  = d3d_texture.cast<IDXGISurface>();
+        DCHECK(dxgi_surface != nullptr);
+
+        d2d_rt_ = createDXGIRenderTarget(dxgi_surface.get(), true);
+    }
+
+    void Renderer::createSoftwareBRT() {
+        auto wic_bmp = Application::getWICManager()->createBitmap(
+            owner_window_->getClientWidth(),
+            owner_window_->getClientHeight());
+
+        d2d_rt_ = createWICRenderTarget(wic_bmp.get());
+    }
+
+    HRESULT Renderer::createSwapchainBRT() {
+        DXGI_SWAP_CHAIN_DESC swapChainDesc;
+        ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+
+        swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
+        swapChainDesc.SampleDesc.Count = 1;
+        swapChainDesc.SampleDesc.Quality = 0;
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferCount = 2;
+        swapChainDesc.OutputWindow = owner_window_->getHandle();
+        swapChainDesc.Windowed = TRUE;
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
+        auto gdm = Application::getGraphicDeviceManager();
+
+        HRESULT hr = gdm->getDXGIFactory()->CreateSwapChain(
+            gdm->getD3DDevice().get(),
+            &swapChainDesc, &swapchain_);
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to create swap chain: " << hr;
+            return hr;
         }
 
-        shadow_effect_->SetInput(0, bitmap);
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_OPTIMIZATION, D2D1_SHADOW_OPTIMIZATION_BALANCED));
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, elevation));
-        RH(shadow_effect_->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(0, 0, 0, shadow_alpha)));
+        ComPtr<IDXGISurface> back_buffer;
+        hr = swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer));
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to query DXGI surface: " << hr;
+            return hr;
+        }
 
-        D2D1_MATRIX_3X2_F matrix = D2D1::Matrix3x2F::Translation(0, elevation / 1.5f);
-        affinetrans_effect_->SetInputEffect(0, shadow_effect_.get());
-        RH(affinetrans_effect_->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, matrix));
+        d2d_rt_ = createDXGIRenderTarget(back_buffer.get(), false);
 
-        d2d_dc_->DrawImage(affinetrans_effect_.get());
+        //applyTextRenderingParams();
 
         return S_OK;
     }
 
-    void Renderer::drawObjects(DrawingObjectManager::DrawingObject *object) {
-        if (object == nullptr) {
-            return;
+    HRESULT Renderer::resizeHardwareBRT() {
+        d2d_rt_.reset();
+
+        for (auto notifier : sc_resize_notifiers_) {
+            notifier->onPreSwapChainResize();
         }
 
+        createHardwareBRT();
+
+        for (auto notifier : sc_resize_notifiers_) {
+            notifier->onPostSwapChainResize();
+        }
+
+        return S_OK;
+    }
+
+    HRESULT Renderer::resizeSoftwareBRT() {
+        d2d_rt_.reset();
+        createSoftwareBRT();
+
+        return S_OK;
+    }
+
+    HRESULT Renderer::resizeSwapchainBRT() {
+        d2d_rt_.reset();
+
+        for (auto notifier : sc_resize_notifiers_) {
+            notifier->onPreSwapChainResize();
+        }
+
+        HRESULT hr = swapchain_->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to resize swap chain: " << hr;
+            return hr;
+        }
+
+        ComPtr<IDXGISurface> back_buffer;
+        hr = swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer));
+        if (FAILED(hr)) {
+            LOG(Log::FATAL) << "Failed to query DXGI surface: " << hr;
+            return hr;
+        }
+
+        d2d_rt_ = createDXGIRenderTarget(back_buffer.get(), false);
+
+        //applyTextRenderingParams();
+
+        for (auto notifier : sc_resize_notifiers_) {
+            notifier->onPostSwapChainResize();
+        }
+
+        return S_OK;
+    }
+
+    void Renderer::applyTextRenderingParams() {
         auto gdm = Application::getGraphicDeviceManager();
-
-        gdm->getD3DDeviceContext()->IASetVertexBuffers(
-            0, 1, &object->vertexBuffer, &object->vertexStructSize, &object->vertexDataOffset);
-        gdm->getD3DDeviceContext()->IASetIndexBuffer(object->indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-        gdm->getD3DDeviceContext()->DrawIndexed(object->indexCount, 0, 0);
+        ComPtr<IDWriteRenderingParams> params;
+        HRESULT hr = gdm->getDWriteFactory()->CreateCustomRenderingParams(
+            2.2f, 0.7f, 1.f, DWRITE_PIXEL_GEOMETRY_RGB, DWRITE_RENDERING_MODE_ALIASED, &params);
+        if (SUCCEEDED(hr) && params) {
+            d2d_rt_->SetTextRenderingParams(params.get());
+        }
     }
 
-    void Renderer::draw(ID3D11Buffer* vertices, ID3D11Buffer* indices, int structSize, int indexCount) {
-        UINT vertexDataOffset = 0;
-        UINT vertexStructSize = structSize;
+    HRESULT Renderer::drawLayered() {
+        auto gdi_rt = d2d_rt_.cast<ID2D1GdiInteropRenderTarget>();
+        DCHECK(gdi_rt != nullptr);
 
-        auto gdm = Application::getGraphicDeviceManager();
+        HDC hdc = nullptr;
+        HRESULT hr = gdi_rt->GetDC(D2D1_DC_INITIALIZE_MODE_COPY, &hdc);
+        DCHECK(SUCCEEDED(hr));
 
-        gdm->getD3DDeviceContext()->IASetVertexBuffers(
-            0, 1, &vertices, &vertexStructSize, &vertexDataOffset);
-        gdm->getD3DDeviceContext()->IASetIndexBuffer(indices, DXGI_FORMAT_R32_UINT, 0);
-        gdm->getD3DDeviceContext()->DrawIndexed(indexCount, 0, 0);
+        RECT wr;
+        ::GetWindowRect(owner_window_->getHandle(), &wr);
+        POINT zero = { 0, 0 };
+        SIZE size = { wr.right - wr.left, wr.bottom - wr.top };
+        POINT position = { wr.left, wr.top };
+        BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
+        BOOL ret = ::UpdateLayeredWindow(owner_window_->getHandle(), nullptr, &position, &size, hdc, &zero,
+            RGB(0xFF, 0xFF, 0xFF), &blend, ULW_ALPHA);
+        if (ret == 0) {
+            int errorno = ::GetLastError();
+            DCHECK(false);
+        }
+
+        RECT rect = {};
+        hr = gdi_rt->ReleaseDC(&rect);
+        DCHECK(SUCCEEDED(hr));
+
+        return hr;
+    }
+
+    HRESULT Renderer::drawSwapchain() {
+        HRESULT hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
+        if (FAILED(hr)) {
+            LOG(Log::ERR) << "Failed to present.";
+        }
+
+        return hr;
     }
 
 
-    void Renderer::addSwapChainResizeNotifier(SwapChainResizeNotifier *notifier) {
-        sc_resize_notifier_list_.push_back(notifier);
+    void Renderer::addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier) {
+        sc_resize_notifiers_.push_back(notifier);
     }
 
-    void Renderer::removeSwapChainResizeNotifier(SwapChainResizeNotifier *notifier) {
-        for (auto it = sc_resize_notifier_list_.begin();
-            it != sc_resize_notifier_list_.end();) {
+    void Renderer::removeSwapChainResizeNotifier(SwapChainResizeNotifier* notifier) {
+        for (auto it = sc_resize_notifiers_.begin();
+            it != sc_resize_notifiers_.end();) {
 
             if ((*it) == notifier) {
-                it = sc_resize_notifier_list_.erase(it);
-            }
-            else {
+                it = sc_resize_notifiers_.erase(it);
+            } else {
                 ++it;
             }
         }
     }
 
     void Renderer::removeAllSwapChainResizeNotifier() {
-        sc_resize_notifier_list_.clear();
+        sc_resize_notifiers_.clear();
     }
 
-    void Renderer::setDirect3DRenderListener(Direct3DRenderListener *listener) {
-        d3d_render_listener_ = listener;
+    ComPtr<ID2D1RenderTarget> Renderer::createWICRenderTarget(IWICBitmap* wic_bitmap) {
+
+        ComPtr<ID2D1RenderTarget> render_target;
+        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
+        if (d2d_factory) {
+            const D2D1_PIXEL_FORMAT format =
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+            const D2D1_RENDER_TARGET_PROPERTIES properties
+                = D2D1::RenderTargetProperties(
+                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                    format, 96, 96,
+                    D2D1_RENDER_TARGET_USAGE_NONE);
+
+            HRESULT hr = d2d_factory->CreateWicBitmapRenderTarget(
+                wic_bitmap, properties, &render_target);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                LOG(Log::WARNING) << "Failed to create WICBitmap RenderTarget: " << hr;
+                return {};
+            }
+        }
+
+        return render_target;
     }
 
+    ComPtr<ID2D1DCRenderTarget> Renderer::createDCRenderTarget() {
+        ComPtr<ID2D1DCRenderTarget> render_target;
+        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
 
-    void Renderer::setVertexShader(ID3D11VertexShader *shader) {
-        auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->VSSetShader(shader, 0, 0);
+        if (d2d_factory) {
+            const D2D1_PIXEL_FORMAT format =
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                    D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+            // DPI 固定为 96
+            const D2D1_RENDER_TARGET_PROPERTIES properties =
+                D2D1::RenderTargetProperties(
+                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
+                    format);
+
+            HRESULT hr = d2d_factory->CreateDCRenderTarget(
+                &properties, &render_target);
+            if (FAILED(hr)) {
+                DCHECK(false);
+                LOG(Log::WARNING) << "Failed to create DC RenderTarget: " << hr;
+                return {};
+            }
+        }
+
+        return render_target;
     }
 
-    void Renderer::setPixelShader(ID3D11PixelShader *shader) {
-        auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->PSSetShader(shader, 0, 0);
+    ComPtr<ID3D11Texture2D> Renderer::createTexture2D(int width, int height) {
+        auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
+
+        D3D11_TEXTURE2D_DESC tex_desc = { 0 };
+        tex_desc.ArraySize = 1;
+        tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        tex_desc.Width = width;
+        tex_desc.Height = height;
+        tex_desc.MipLevels = 1;
+        tex_desc.SampleDesc.Count = 1;
+        tex_desc.SampleDesc.Quality = 0;
+        tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
+
+        ComPtr<ID3D11Texture2D> d3d_texture;
+        HRESULT hr = d3d_device->CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create 2d texture: " << hr;
+            return {};
+        }
+
+        return d3d_texture;
     }
 
-    void Renderer::setInputLayout(ID3D11InputLayout *inputLayout) {
-        auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->IASetInputLayout(inputLayout);
+    ComPtr<ID2D1RenderTarget> Renderer::createDXGIRenderTarget(
+        IDXGISurface* surface, bool gdi_compat) {
+
+        ComPtr<ID2D1RenderTarget> render_target;
+        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
+        if (d2d_factory) {
+            D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
+                D2D1_RENDER_TARGET_TYPE_DEFAULT,
+                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+                96, 96, gdi_compat ? D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE : D2D1_RENDER_TARGET_USAGE_NONE);
+
+            HRESULT hr = d2d_factory->CreateDxgiSurfaceRenderTarget(surface, props, &render_target);
+            if (FAILED(hr)) {
+                DCHECK(false);
+            }
+        }
+
+        return render_target;
     }
 
-    void Renderer::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY topology) {
-        auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->IASetPrimitiveTopology(topology);
-    }
+    ComPtr<IDWriteTextFormat> Renderer::createTextFormat(
+        const string16& font_family_name,
+        float font_size, const string16& locale_name) {
 
-    void Renderer::setConstantBuffers(
-        UINT startSlot, UINT NumBuffers, ID3D11Buffer *const *ppConstantBuffers) {
-        auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->VSSetConstantBuffers(
-            startSlot, NumBuffers, ppConstantBuffers);
-    }
+        auto dwrite_factory = Application::getGraphicDeviceManager()->getDWriteFactory();
 
-
-    UINT Renderer::getScWidth() {
-        return width_;
-    }
-
-    UINT Renderer::getScHeight() {
-        return height_;
-    }
-
-    ComPtr<ID2D1Effect> Renderer::getShadowEffect() {
-        return shadow_effect_;
-    }
-
-    ComPtr<ID2D1Effect> Renderer::getAffineTransEffect() {
-        return affinetrans_effect_;
-    }
-
-    ComPtr<IDXGISwapChain1> Renderer::getSwapChain() {
-        return swapchain_;
-    }
-
-    ComPtr<ID2D1DeviceContext> Renderer::getD2DDeviceContext() {
-        return d2d_dc_;
-    }
-
-
-    HRESULT Renderer::createBitmapRenderTarget(IDXGISurface *dxgiSurface, ID2D1Bitmap1 **bitmap) {
-        HRESULT hr = S_OK;
-
-        D2D1_BITMAP_PROPERTIES1 bitmapProperties =
-            D2D1::BitmapProperties1(
-                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE));
-
-        return d2d_dc_->
-            CreateBitmapFromDxgiSurface(dxgiSurface, 0, bitmap);
-    }
-
-    HRESULT Renderer::createCompatBitmapRenderTarget(
-        float width, float height, ID2D1BitmapRenderTarget **bRT)
-    {
-        ComPtr<ID2D1BitmapRenderTarget> bmpRenderTarget;
-        RH(d2d_dc_->CreateCompatibleRenderTarget(
-            D2D1::SizeF(width, height), bRT));
-
-        return S_OK;
-    }
-
-    HRESULT Renderer::createDXGISurfaceRenderTarget(
-        IDXGISurface *dxgiSurface, ID2D1RenderTarget **renderTarget)
-    {
-        HRESULT hr = S_OK;
-        auto gdm = Application::getGraphicDeviceManager();
-
-        D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-            D2D1_RENDER_TARGET_TYPE_DEFAULT,
-            D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), 96, 96);
-
-        return gdm->getD2DFactory()->CreateDxgiSurfaceRenderTarget(dxgiSurface, props, renderTarget);
-    }
-
-    HRESULT Renderer::createWindowRenderTarget(
-        HWND handle, unsigned int width, unsigned int height, ID2D1HwndRenderTarget **renderTarget)
-    {
-        HRESULT hr = S_OK;
-        auto gdm = Application::getGraphicDeviceManager();
-
-        D2D1_RENDER_TARGET_PROPERTIES renderTargetProperties = D2D1::RenderTargetProperties();
-        // Set the DPI to be the default system DPI to allow direct mapping
-        // between image pixels and desktop pixels in different system DPI settings
-        renderTargetProperties.dpiX = 96;
-        renderTargetProperties.dpiY = 96;
-
-        return gdm->getD2DFactory()->CreateHwndRenderTarget(D2D1::RenderTargetProperties(),
-            D2D1::HwndRenderTargetProperties(handle, D2D1::SizeU(width, height)),
-            renderTarget);
-    }
-
-    HRESULT Renderer::createTextFormat(
-        string16 fontFamilyName,
-        float fontSize, string16 localeName,
-        IDWriteTextFormat **textFormat)
-    {
-        return Application::getGraphicDeviceManager()->getDWriteFactory()->CreateTextFormat(
-            fontFamilyName.c_str(), nullptr,
+        ComPtr<IDWriteTextFormat> format;
+        HRESULT hr = dwrite_factory->CreateTextFormat(
+            font_family_name.c_str(), nullptr,
             DWRITE_FONT_WEIGHT_NORMAL,
             DWRITE_FONT_STYLE_NORMAL,
             DWRITE_FONT_STRETCH_NORMAL,
-            fontSize,
-            localeName.c_str(),
-            textFormat);
+            font_size,
+            locale_name.c_str(),
+            &format);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create text format: " << hr;
+            return {};
+        }
+
+        return format;
     }
 
-    HRESULT Renderer::createTextLayout(
-        string16 text,
-        IDWriteTextFormat *textFormat,
-        float maxWidth, float maxHeight,
-        IDWriteTextLayout **textLayout)
-    {
-        return Application::getGraphicDeviceManager()->getDWriteFactory()->CreateTextLayout(
-            text.c_str(), text.length(), textFormat, maxWidth, maxHeight, textLayout);
+    ComPtr<IDWriteTextLayout> Renderer::createTextLayout(
+        const string16& text,
+        IDWriteTextFormat* format,
+        float max_width, float max_height) {
+
+        auto dwrite_factory = Application::getGraphicDeviceManager()->getDWriteFactory();
+
+        ComPtr<IDWriteTextLayout> layout;
+        HRESULT hr = dwrite_factory->CreateTextLayout(
+            text.c_str(), text.length(), format, max_width, max_height, &layout);
+        if (FAILED(hr)) {
+            DCHECK(false);
+            LOG(Log::WARNING) << "Failed to create text layout: " << hr;
+            return {};
+        }
+
+        return layout;
     }
 
-
-    HRESULT Renderer::createVertexShader(
-        string16 fileName,
-        D3D11_INPUT_ELEMENT_DESC *polygonLayout,
-        UINT numElements,
-        ID3D11VertexShader **vertexShader,
-        ID3D11InputLayout **inputLayout)
-    {
-        std::ifstream reader(fileName.c_str(), std::ios::binary);
-        auto cpos = reader.tellg();
-        reader.seekg(0, std::ios_base::end);
-        size_t charSize = (size_t)reader.tellg();
-        reader.seekg(cpos);
-
-        char *shaderBuf = new char[charSize];
-        reader.read(shaderBuf, charSize);
-
-        auto gdm = Application::getGraphicDeviceManager();
-
-        RH(gdm->getD3DDevice()->CreateVertexShader(
-            shaderBuf, charSize, 0, vertexShader));
-
-        RH(gdm->getD3DDevice()->CreateInputLayout(
-            polygonLayout, numElements,
-            shaderBuf, charSize, inputLayout));
-
-        delete[] shaderBuf;
-
-        return S_OK;
+    ComPtr<IDXGISwapChain> Renderer::getSwapChain() const {
+        return swapchain_;
     }
 
-    HRESULT Renderer::createPixelShader(
-        string16 fileName,
-        ID3D11PixelShader **pixelShader)
-    {
-        std::ifstream reader(fileName.c_str(), std::ios::binary);
-        auto cpos = reader.tellg();
-        reader.seekg(0, std::ios_base::end);
-        size_t charSize = (size_t)reader.tellg();
-        reader.seekg(cpos);
-
-        char *shaderBuf = new char[charSize];
-        reader.read(shaderBuf, charSize);
-
-        RH(Application::getGraphicDeviceManager()->getD3DDevice()->CreatePixelShader(
-            shaderBuf, charSize, 0, pixelShader));
-
-        delete[] shaderBuf;
-
-        return S_OK;
-    }
-
-
-    HRESULT Renderer::createVertexBuffer(
-        void *vertices, UINT structSize, UINT vertexCount, ID3D11Buffer *&vertexBuffer)
-    {
-        D3D11_BUFFER_DESC vertexBufferDesc;
-        D3D11_SUBRESOURCE_DATA vertexData;
-
-        vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        vertexBufferDesc.ByteWidth = structSize * vertexCount;
-        vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        vertexBufferDesc.MiscFlags = 0;
-        vertexBufferDesc.StructureByteStride = 0;
-
-        vertexData.pSysMem = vertices;
-        vertexData.SysMemPitch = 0;
-        vertexData.SysMemSlicePitch = 0;
-
-        RH(Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexBuffer));
-
-        return S_OK;
-    }
-
-    HRESULT Renderer::createIndexBuffer(int *indices, UINT indexCount, ID3D11Buffer *&indexBuffer)
-    {
-        D3D11_BUFFER_DESC indexBufferDesc;
-        D3D11_SUBRESOURCE_DATA indexData;
-
-        // 设置索引缓冲描述.
-        indexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        indexBufferDesc.ByteWidth = sizeof(int)* indexCount;
-        indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        indexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        indexBufferDesc.MiscFlags = 0;
-        indexBufferDesc.StructureByteStride = 0;
-
-        // 指向存临时索引缓冲.
-        indexData.pSysMem = indices;
-        indexData.SysMemPitch = 0;
-        indexData.SysMemSlicePitch = 0;
-
-        // 创建索引缓冲.
-        RH(Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&indexBufferDesc, &indexData, &indexBuffer));
-
-        return S_OK;
-    }
-
-    HRESULT Renderer::createConstantBuffer(UINT size, ID3D11Buffer **buffer)
-    {
-        HRESULT hr = E_FAIL;
-        ID3D11Buffer *_buffer = 0;
-        D3D11_BUFFER_DESC constBufferDesc;
-
-        constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        constBufferDesc.ByteWidth = size;
-        constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-        constBufferDesc.MiscFlags = 0;
-        constBufferDesc.StructureByteStride = 0;
-
-        hr = Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&constBufferDesc, 0, &_buffer);
-
-        *buffer = _buffer;
-
-        return hr;
-    }
-
-    D3D11_MAPPED_SUBRESOURCE Renderer::lockResource(ID3D11Resource *resource)
-    {
-        HRESULT hr = E_FAIL;
-        D3D11_MAPPED_SUBRESOURCE mappedResource;
-
-        hr = Application::getGraphicDeviceManager()->getD3DDeviceContext()
-            ->Map(resource, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-        if (SUCCEEDED(hr))
-            return mappedResource;
-
-        mappedResource.pData = nullptr;
-        return mappedResource;
-    }
-
-    void Renderer::unlockResource(ID3D11Resource *resource)
-    {
-        Application::getGraphicDeviceManager()->getD3DDeviceContext()->Unmap(resource, 0);
+    ComPtr<ID2D1RenderTarget> Renderer::getRenderTarget() const {
+        return d2d_rt_;
     }
 
 }

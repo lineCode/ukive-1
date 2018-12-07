@@ -10,26 +10,25 @@ namespace ukive {
 
     class Bitmap;
 
-    class BitmapDrawable : public Drawable
-    {
-    private:
-        float mOpacity;
-        std::shared_ptr<Bitmap> mBitmap;
-
+    class BitmapDrawable : public Drawable {
     public:
         BitmapDrawable(std::shared_ptr<Bitmap> bitmap);
         ~BitmapDrawable() = default;
 
         void setOpacity(float opt);
 
-        void draw(Canvas *canvas) override;
+        void draw(Canvas* canvas) override;
 
-        float getOpacity() override;
+        float getOpacity() const override;
 
-        int getIncWidth() override;
-        int getIncHeight() override;
+        int getIncWidth() const override;
+        int getIncHeight() const override;
 
-        std::shared_ptr<Bitmap> getBitmap();
+        std::shared_ptr<Bitmap> getBitmap() const;
+
+    private:
+        float opacity_;
+        std::shared_ptr<Bitmap> bitmap_;
     };
 
 }

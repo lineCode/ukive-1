@@ -10,9 +10,9 @@ namespace ukive {
     {
     public:
         UnderlineSpan(unsigned int start, unsigned int end);
-        virtual ~UnderlineSpan();
+        ~UnderlineSpan();
 
-        virtual int getType();
+        int getType() const override;
     };
 
 }

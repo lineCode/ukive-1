@@ -10,10 +10,9 @@ namespace ukive {
     class Cycler;
     class Executable;
 
-    class Message
-    {
+    class Message {
     public:
-        static Message *obtain();
+        static Message* obtain();
         void recycle();
 
         static void init(uint64_t pool_capacity);
@@ -22,14 +21,14 @@ namespace ukive {
     public:
         int what;
         uint64_t when;
-        Cycler *target;
-        Executable *callback;
+        Cycler* target;
+        Executable* callback;
         std::function<void()> func;
-        void *data;
+        void* data;
 
-        Message *next;
+        Message* next;
 
-        static Message *pool;
+        static Message* pool;
         static uint64_t pool_size;
 
     private:

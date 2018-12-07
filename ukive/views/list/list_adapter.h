@@ -9,47 +9,35 @@ namespace ukive {
     class View;
     class ViewGroup;
 
-    class ListDataSetChangedListener
-    {
+    class ListDataSetChangedListener {
     public:
         virtual ~ListDataSetChangedListener() = default;
 
-        virtual void OnDataSetChanged() = 0;
-
-        virtual void OnItemRangeInserted(size_t start_position, size_t length) {}
-        virtual void OnItemRangeChanged(size_t start_position, size_t length) {}
-        virtual void OnItemRangeRemoved(size_t start_position, size_t length) {}
+        virtual void onDataSetChanged() = 0;
+        virtual void onItemRangeInserted(int start_position, int length) { onDataSetChanged(); }
+        virtual void onItemRangeChanged(int start_position, int length) { onDataSetChanged(); }
+        virtual void onItemRangeRemoved(int start_position, int length) { onDataSetChanged(); }
     };
 
-    class ListAdapter
-    {
+    class ListAdapter {
     public:
-        class ViewHolder
-        {
+        class ViewHolder {
         public:
-            View *item_view;
+            View* item_view;
+            int item_id;
             int adapter_position;
             bool recycled;
 
-            ViewHolder(View *v)
-                :item_view(v),
-                adapter_position(-1),
-                recycled(false) {}
-
-            virtual ~ViewHolder() {
-                if (recycled)
-                    delete item_view;
-            }
+            ViewHolder(View* v);
+            virtual ~ViewHolder();
         };
 
-        ListAdapter()
-            :listener_(0) {}
+        ListAdapter();
         virtual ~ListAdapter() = default;
 
-        void setListener(ListDataSetChangedListener *listener) { listener_ = listener; }
+        void setListener(ListDataSetChangedListener* listener) { listener_ = listener; }
 
         void notifyDataChanged();
-
         void notifyItemChanged(int position);
         void notifyItemInserted(int position);
         void notifyItemRemoved(int position);
@@ -57,13 +45,13 @@ namespace ukive {
         void notifyItemRangeInserted(int start_position, int count);
         void notifyItemRangeRemoved(int start_position, int count);
 
-        virtual ViewHolder *onCreateViewHolder(ViewGroup *parent, int position) = 0;
-        virtual void onBindViewHolder(ViewHolder *holder, int position) = 0;
-        virtual int getItemId(int position) { return position; }
-        virtual size_t getItemCount() = 0;
+        virtual ViewHolder* onCreateViewHolder(ViewGroup* parent, int position) = 0;
+        virtual void onBindViewHolder(ViewHolder* holder, int position) = 0;
+        virtual int getItemId(int position) { return 0; }
+        virtual int getItemCount() = 0;
 
     private:
-        ListDataSetChangedListener *listener_;
+        ListDataSetChangedListener* listener_;
     };
 
 }

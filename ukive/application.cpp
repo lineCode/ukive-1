@@ -9,22 +9,22 @@
 #include "ukive/animation/animation_manager.h"
 #include "ukive/text/word_breaker.h"
 
+
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxguid.lib")
-#pragma comment(lib, "Elscore.lib")
 #pragma comment(lib, "Shcore.lib")
+#pragma comment(lib, "winmm.lib")
 
 
 namespace ukive {
 
     int Application::view_uid_ = 10000;
     bool Application::vsync_enabled_ = true;
-    Application *Application::instance_ = nullptr;
+    Application* Application::instance_ = nullptr;
 
 
     Application::Application() {
@@ -33,16 +33,17 @@ namespace ukive {
         instance_ = this;
     }
 
-    Application::Application(wchar_t *cl) {
+    Application::Application(wchar_t* cl) {
         parseCommandLine(cl);
         initApplication();
 
         instance_ = this;
     }
 
-    Application::Application(int argc, wchar_t *argv[]) {
-        for (int i = 0; i < argc; ++i)
+    Application::Application(int argc, wchar_t* argv[]) {
+        for (int i = 0; i < argc; ++i) {
             command_list_.push_back(argv[i]);
+        }
         initApplication();
 
         instance_ = this;
@@ -56,39 +57,33 @@ namespace ukive {
     }
 
     void Application::initApplication() {
-        HRESULT hr = ::CoInitialize(NULL);
+        HRESULT hr = ::CoInitialize(nullptr);
         if (FAILED(hr)) {
-            Log::e(L"failed to init COM.");
+            LOG(Log::ERR) << "failed to init COM.";
         }
 
         Message::init(50);
-        MessageLooper::init();
         MessageLooper::prepareMainLooper();
         WordBreaker::initGlobal();
 
         hr = AnimationManager::initGlobal();
         if (FAILED(hr)) {
-            Log::e(L"UAnimationManager-initGlobal(): Init anim library failed.");
+            LOG(Log::ERR) << "Init anim library failed.";
         }
 
         graphic_device_manager_.reset(new GraphicDeviceManager());
         graphic_device_manager_->init();
 
         wic_manager_.reset(new WICManager());
-        hr = wic_manager_->init();
-        if (FAILED(hr)) {
-            Log::e(L"UApplication-initApplication(): Init WIC failed.");
-        }
 
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
         if (FAILED(hr)) {
-            Log::e(L"UApplication-initApplication(): Init Tsf failed.");
+            LOG(Log::ERR) << "Init Tsf failed.";
         }
     }
 
     void Application::cleanApplication() {
-        MessageLooper::close();
         Message::close();
         AnimationManager::closeGlobal();
         WordBreaker::closeGlobal();
@@ -96,7 +91,6 @@ namespace ukive {
         tsf_manager_->close();
         tsf_manager_.reset();
 
-        wic_manager_->close();
         wic_manager_.reset();
 
         graphic_device_manager_->shutdown();
@@ -104,33 +98,37 @@ namespace ukive {
         ::CoUninitialize();
     }
 
-    void Application::parseCommandLine(wchar_t *cmdLine) {
-        if (cmdLine == nullptr) {
+    void Application::parseCommandLine(wchar_t* cmd_line) {
+        if (!cmd_line) {
             return;
         }
 
-        std::wstring cmdString = cmdLine;
-        if (cmdString.empty()) {
+        std::wstring cmd_string = cmd_line;
+        if (cmd_string.empty()) {
             return;
         }
 
-        size_t i = cmdString.find(L" ");
+        size_t i = cmd_string.find(L" ");
         if (i == std::wstring::npos) {
-            command_list_.push_back(cmdString);
+            command_list_.push_back(cmd_string);
             return;
         }
 
-        size_t newStart = 0;
+        size_t new_start = 0;
 
         while (i != std::wstring::npos) {
-            std::wstring tmp = cmdString.substr(newStart, i - newStart);
-            command_list_.push_back(tmp);
-
-            newStart = i + 1;
-            i = cmdString.find(L" ", newStart);
-            if (i == std::wstring::npos) {
-                tmp = cmdString.substr(newStart, cmdString.length() - newStart);
+            std::wstring tmp = cmd_string.substr(new_start, i - new_start);
+            if (!tmp.empty()) {
                 command_list_.push_back(tmp);
+            }
+
+            new_start = i + 1;
+            i = cmd_string.find(L" ", new_start);
+            if (i == std::wstring::npos) {
+                tmp = cmd_string.substr(new_start, cmd_string.length() - new_start);
+                if (!tmp.empty()) {
+                    command_list_.push_back(tmp);
+                }
             }
         }
     }
@@ -145,20 +143,33 @@ namespace ukive {
             if (vsync_enabled_) {
                 HRESULT hr = graphic_device_manager_->getCurOutput()->WaitForVBlank();
                 if (FAILED(hr)) {
-                    Log::e(L"failed to wait vblank.");
+                    LOG(Log::WARNING) << "Failed to wait vblank: " << hr;
+                    ::Sleep(16);
                 }
             }
 
-            MessageLooper::loop();
-            while (::PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
+            bool has_message = MessageLooper::loop();
+            if (!has_message) {
+                DWORD result = ::MsgWaitForMultipleObjectsEx(
+                    0, nullptr, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
+                if (result == WAIT_OBJECT_0) {
+                    int i = 0;
+                }
+            }
+
+            DWORD status = ::GetQueueStatus(QS_INPUT);
+            if (HIWORD(status) & QS_INPUT) {
+                int i = 0;
+            }
+
+            while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
                 if (msg.message == WM_QUIT) {
                     done = true;
                     MessageLooper::myLooper()->quit();
                     break;
-                }
-                else {
+                } else {
                     ::TranslateMessage(&msg);
-                    ::DispatchMessageW(&msg);
+                    ::DispatchMessage(&msg);
                 }
             }
         }
@@ -166,12 +177,12 @@ namespace ukive {
 
 
     string16 Application::getCommand(size_t index) {
-        return command_list_.at(index);
+        return instance_->command_list_.at(index);
     }
 
 
     size_t Application::getCommandCount() {
-        return command_list_.size();
+        return instance_->command_list_.size();
     }
 
     void Application::setVSync(bool enable){
@@ -183,18 +194,53 @@ namespace ukive {
     }
 
     HMODULE Application::getModuleHandle() {
-        return ::GetModuleHandle(NULL);
+        return ::GetModuleHandle(nullptr);
     }
 
-    WICManager *Application::getWICManager() {
+    string16 Application::getExecFileName(bool dir) {
+        WCHAR buffer[MAX_PATH];
+        DWORD result = ::GetModuleFileNameW(nullptr, buffer, MAX_PATH);
+        if (result == 0) {
+            return {};
+        }
+
+        DWORD size = MAX_PATH;
+        std::unique_ptr<WCHAR[]> heap_buff;
+        while (::GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+            size *= 2;
+            heap_buff.reset(new WCHAR[size]);
+            result = ::GetModuleFileNameW(nullptr, heap_buff.get(), size);
+            if (result == 0) {
+                return {};
+            }
+        }
+
+        string16 file_name;
+        if (heap_buff) {
+            file_name = heap_buff.get();
+        } else {
+            file_name = buffer;
+        }
+
+        if (dir) {
+            auto i = file_name.find_last_of(L"\\");
+            if (i != string16::npos) {
+                file_name = file_name.substr(0, i);
+            }
+        }
+
+        return file_name;
+    }
+
+    WICManager* Application::getWICManager() {
         return instance_->wic_manager_.get();
     }
 
-    TsfManager *Application::getTsfManager() {
+    TsfManager* Application::getTsfManager() {
         return instance_->tsf_manager_.get();
     }
 
-    int Application::getViewUID() {
+    int Application::getViewID() {
         ++view_uid_;
         return view_uid_;
     }
@@ -203,11 +249,11 @@ namespace ukive {
         POINT pt = { 0, 0 };
         HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
 
-        unsigned int dpiX, dpiY;
+        UINT dpiX = 96, dpiY = 96;
         HRESULT hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
         if (FAILED(hr)) {
-            Log::e(L"failed to get primary monitor dpi.");
-            return 0;
+            LOG(Log::WARNING) << "Failed to get primary monitor dpi: " << hr;
+            return 96;
         }
 
         return dpiX;

@@ -1,227 +1,202 @@
 #include "inner_window.h"
 
 #include "ukive/event/input_event.h"
-#include "ukive/views/layout/base_layout.h"
-#include "ukive/views/layout/base_layout_params.h"
+#include "ukive/views/layout/root_layout.h"
+#include "ukive/views/layout/root_layout_params.h"
 #include "ukive/window/window.h"
 
 
 namespace ukive {
 
-    InnerWindow::InnerWindow(Window *wnd)
+    InnerWindow::InnerWindow(Window* wnd)
+        :parent_(wnd),
+        elevation_(0.f),
+        is_showing_(false),
+        outside_touchable_(false),
+        dismiss_by_touch_outside_(false)
     {
-        mParent = wnd;
-        mDecorView = nullptr;
-        mContentView = nullptr;
-        mIsShowing = false;
+        decor_view_ = nullptr;
+        content_view_ = nullptr;
 
-        mElevation = 0.f;
-        mOutsideTouchable = false;
-        mDismissByTouchOutside = false;
-        mBackgroundDrawable = nullptr;
-        mWidth = LayoutParams::FIT_CONTENT;
-        mHeight = LayoutParams::FIT_CONTENT;
+        background_drawable_ = nullptr;
+        width_ = LayoutParams::FIT_CONTENT;
+        height_ = LayoutParams::FIT_CONTENT;
     }
 
-    InnerWindow::~InnerWindow()
-    {
-        if (mDecorView && !mIsShowing) {
-            delete mDecorView;
+    InnerWindow::~InnerWindow() {
+        if (decor_view_ && !is_showing_) {
+            delete decor_view_;
         }
     }
 
 
-    void InnerWindow::createDecorView()
-    {
-        InnerDecorView *decorView
-            = new InnerDecorView(this);
-        decorView->addView(
-            mContentView, new LayoutParams(mWidth, mHeight));
+    void InnerWindow::createDecorView() {
+        decor_view_ = new InnerDecorView(this);
+        decor_view_->addView(
+            content_view_, new LayoutParams(width_, height_));
 
-        decorView->setElevation(mElevation);
-        decorView->setBackground(mBackgroundDrawable);
-        decorView->setReceiveOutsideInputEvent(!mOutsideTouchable);
-
-        mDecorView = decorView;
+        decor_view_->setElevation(elevation_);
+        decor_view_->setBackground(background_drawable_);
+        decor_view_->setReceiveOutsideInputEvent(!outside_touchable_);
     }
 
 
-    void InnerWindow::setWidth(int width)
-    {
-        mWidth = width;
+    void InnerWindow::setWidth(int width) {
+        width_ = width;
     }
 
-    void InnerWindow::setHeight(int height)
-    {
-        mHeight = height;
+    void InnerWindow::setHeight(int height) {
+        height_ = height;
     }
 
-    void InnerWindow::setSize(int width, int height)
-    {
-        mWidth = width;
-        mHeight = height;
+    void InnerWindow::setSize(int width, int height) {
+        width_ = width;
+        height_ = height;
     }
 
-    void InnerWindow::setElevation(float elevation)
-    {
-        mElevation = elevation;
+    void InnerWindow::setElevation(float elevation) {
+        elevation_ = elevation;
     }
 
-    void InnerWindow::setBackground(Drawable *drawable)
-    {
-        mBackgroundDrawable = drawable;
+    void InnerWindow::setBackground(Drawable* drawable) {
+        background_drawable_ = drawable;
     }
 
-    void InnerWindow::setOutsideTouchable(bool touchable)
-    {
-        mOutsideTouchable = touchable;
+    void InnerWindow::setOutsideTouchable(bool touchable) {
+        outside_touchable_ = touchable;
     }
 
-    void InnerWindow::setDismissByTouchOutside(bool enable)
-    {
-        mDismissByTouchOutside = enable;
+    void InnerWindow::setDismissByTouchOutside(bool enable) {
+        dismiss_by_touch_outside_ = enable;
     }
 
-    void InnerWindow::setContentView(View *contentView)
-    {
-        if (contentView == nullptr)
+    void InnerWindow::setContentView(View* contentView) {
+        if (contentView == nullptr) {
             throw std::invalid_argument("setContentView: null param");
+        }
 
-        mContentView = contentView;
+        content_view_ = contentView;
     }
 
 
-    int InnerWindow::getWidth()
-    {
-        return mWidth;
+    int InnerWindow::getWidth() {
+        return width_;
     }
 
-    int InnerWindow::getHeight()
-    {
-        return mHeight;
+    int InnerWindow::getHeight() {
+        return height_;
     }
 
-    float InnerWindow::getElevation()
-    {
-        return mElevation;
+    float InnerWindow::getElevation() {
+        return elevation_;
     }
 
-    Drawable *InnerWindow::getBackground()
-    {
-        return mBackgroundDrawable;
+    Drawable* InnerWindow::getBackground() {
+        return background_drawable_;
     }
 
-    bool InnerWindow::isOutsideTouchable()
-    {
-        return mOutsideTouchable;
+    bool InnerWindow::isOutsideTouchable() {
+        return outside_touchable_;
     }
 
-    bool InnerWindow::isDismissByTouchOutside()
-    {
-        return mDismissByTouchOutside;
+    bool InnerWindow::isDismissByTouchOutside() {
+        return dismiss_by_touch_outside_;
     }
 
-    Window *InnerWindow::getParent()
-    {
-        return mParent;
+    Window* InnerWindow::getParent() {
+        return parent_;
     }
 
-    View *InnerWindow::getContentView()
-    {
-        return mContentView;
+    View* InnerWindow::getContentView() {
+        return content_view_;
     }
 
-    View *InnerWindow::getDecorView()
-    {
-        return mDecorView;
+    View* InnerWindow::getDecorView() {
+        return decor_view_;
     }
 
-    bool InnerWindow::isShowing()
-    {
-        return mIsShowing;
+    bool InnerWindow::isShowing() {
+        return is_showing_;
     }
 
 
-    void InnerWindow::show(int x, int y)
-    {
-        if (mContentView == nullptr || mIsShowing)
+    void InnerWindow::show(int x, int y) {
+        if (!content_view_ || is_showing_) {
             return;
+        }
 
-        if (mDecorView)
-            delete mDecorView;
+        if (decor_view_) {
+            delete decor_view_;
+        }
 
         createDecorView();
 
-        BaseLayoutParams *baselp
-            = new BaseLayoutParams(mWidth, mHeight);
+        RootLayoutParams* baselp
+            = new RootLayoutParams(width_, height_);
         baselp->leftMargin = x;
         baselp->topMargin = y;
 
-        mDecorView->setLayoutParams(baselp);
+        decor_view_->setLayoutParams(baselp);
 
-        mParent->getBaseLayout()->addShade(mDecorView);
+        parent_->getRootLayout()->addShade(decor_view_);
 
-        mIsShowing = true;
+        is_showing_ = true;
     }
 
-    void InnerWindow::show(View *anchor, Gravity gravity)
-    {
-        if (mContentView == nullptr
-            || anchor == nullptr || mIsShowing)
+    void InnerWindow::show(View* anchor, View::Gravity gravity) {
+        if (!content_view_ || !anchor || is_showing_) {
             return;
+        }
 
         createDecorView();
 
         Rect rect = anchor->getBoundsInWindow();
     }
 
-    void InnerWindow::update(int x, int y)
-    {
-        if (mDecorView == nullptr || !mIsShowing)
+    void InnerWindow::update(int x, int y) {
+        if (!decor_view_ || !is_showing_) {
             return;
+        }
 
-        BaseLayoutParams *baselp
-            = (BaseLayoutParams*)mDecorView->getLayoutParams();
+        RootLayoutParams* baselp
+            = (RootLayoutParams*)decor_view_->getLayoutParams();
         baselp->leftMargin = x;
         baselp->topMargin = y;
 
-        mDecorView->setLayoutParams(baselp);
+        decor_view_->setLayoutParams(baselp);
     }
 
-    void InnerWindow::update(View *anchor, Gravity gravity)
-    {
-
+    void InnerWindow::update(View* anchor, View::Gravity gravity) {
     }
 
-    void InnerWindow::dismiss()
-    {
-        if (mDecorView && mIsShowing)
-            mParent->getBaseLayout()->removeShade(mDecorView);
-        mIsShowing = false;
+    void InnerWindow::dismiss() {
+        if (decor_view_ && is_showing_) {
+            parent_->getRootLayout()->removeShade(decor_view_);
+        }
+        is_showing_ = false;
     }
 
 
-    InnerWindow::InnerDecorView::InnerDecorView(InnerWindow *inner)
+    InnerWindow::InnerDecorView::InnerDecorView(InnerWindow* inner)
         :FrameLayout(inner->getParent()),
-        mInnerWindow(inner) {}
+        inner_window_(inner) {}
 
     InnerWindow::InnerDecorView::~InnerDecorView() {
     }
 
 
-    bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent *e) {
+    bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent* e) {
         return false;
     }
 
-    bool InnerWindow::InnerDecorView::onInputEvent(InputEvent *e)
-    {
-        if (e->isOutside())
-        {
+    bool InnerWindow::InnerDecorView::onInputEvent(InputEvent* e) {
+        if (e->isOutside()) {
             if (e->getEvent() == InputEvent::EVM_DOWN
                 || e->getEvent() == InputEvent::EVM_UP)
             {
-                if (mInnerWindow->mDismissByTouchOutside)
-                    mInnerWindow->dismiss();
+                if (inner_window_->dismiss_by_touch_outside_) {
+                    inner_window_->dismiss();
+                }
             }
             return true;
         }

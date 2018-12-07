@@ -4,58 +4,45 @@
 namespace ukive {
 
     TextDrawingEffect::TextDrawingEffect()
-        :mRefCount(1),
-        mEffectSpan(nullptr)
-    {
+        :effect_span_(nullptr),
+        ref_count_(1) {
     }
 
 
-    TextDrawingEffect::~TextDrawingEffect()
-    {
+    TextDrawingEffect::~TextDrawingEffect() {
     }
 
 
-    STDMETHODIMP_(unsigned long) TextDrawingEffect::AddRef()
-    {
-        return InterlockedIncrement(&mRefCount);
+    STDMETHODIMP_(unsigned long) TextDrawingEffect::AddRef() {
+        return InterlockedIncrement(&ref_count_);
     }
 
-
-    STDMETHODIMP_(unsigned long) TextDrawingEffect::Release()
-    {
-        unsigned long newCount = InterlockedDecrement(&mRefCount);
-
-        if (newCount == 0)
-        {
+    STDMETHODIMP_(unsigned long) TextDrawingEffect::Release() {
+        auto nc = InterlockedDecrement(&ref_count_);
+        if (nc == 0) {
             delete this;
-            return 0;
         }
 
-        return newCount;
+        return nc;
     }
-
 
     STDMETHODIMP TextDrawingEffect::QueryInterface(
-        IID const& riid,
-        void** ppvObject
-    )
-    {
-        if (__uuidof(TextDrawingEffect) == riid)
-        {
-            *ppvObject = this;
+        REFIID riid, void** ppvObject) {
+
+        if (!ppvObject) {
+            return E_POINTER;
         }
-        else if (__uuidof(IUnknown) == riid)
-        {
-            *ppvObject = this;
-        }
-        else
-        {
-            *ppvObject = NULL;
-            return E_FAIL;
+
+        if (__uuidof(TextDrawingEffect) == riid) {
+            *ppvObject = static_cast<TextDrawingEffect*>(this);
+        } else if (__uuidof(IUnknown) == riid) {
+            *ppvObject = reinterpret_cast<IUnknown*>(this);
+        } else {
+            *ppvObject = nullptr;
+            return E_NOINTERFACE;
         }
 
         AddRef();
-
         return S_OK;
     }
 

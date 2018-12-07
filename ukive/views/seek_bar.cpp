@@ -12,13 +12,12 @@
 
 namespace ukive {
 
-    SeekBar::SeekBar(Window *w)
+    SeekBar::SeekBar(Window* w)
         :View(w) {
         initSeekBar();
     }
 
-    SeekBar::~SeekBar()
-    {
+    SeekBar::~SeekBar() {
         delete mThumbInAnimator;
         delete mThumbOutAnimator;
     }
@@ -29,23 +28,34 @@ namespace ukive {
         mMaximum = 100.f;
         mSeekPercent = 0.f;
         mIsMouseLeftKeyAvailable = false;
-        mListener = nullptr;
+        listener_ = nullptr;
 
         mThumbInAnimator = new Animator(getWindow()->getAnimationManager());
         mThumbOutAnimator = new Animator(getWindow()->getAnimationManager());
 
-        mSeekTrackHeight = 2;
-        mSeekThumbMinDiameter = 10;
-        mSeekThumbMaxDiameter = 14;
+        mSeekTrackHeight = getWindow()->dpToPx(2);
+        if (mSeekTrackHeight % 2 != 0) {
+            ++mSeekTrackHeight;
+        }
+
+        mSeekThumbMinDiameter = getWindow()->dpToPx(10);
+        if (mSeekThumbMinDiameter % 2 != 0) {
+            ++mSeekThumbMinDiameter;
+        }
+
+        mSeekThumbMaxDiameter = getWindow()->dpToPx(14);
+        if (mSeekThumbMaxDiameter % 2 != 0) {
+            ++mSeekThumbMaxDiameter;
+        }
 
         mSeekThumbCurDiameter = mSeekThumbMinDiameter;
     }
 
 
-    void SeekBar::setMaximum(float max)
-    {
-        if (mMaximum > 0)
+    void SeekBar::setMaximum(float max) {
+        if (mMaximum > 0) {
             mMaximum = max;
+        }
     }
 
     void SeekBar::setProgress(float progress, bool notify)
@@ -56,24 +66,21 @@ namespace ukive {
         {
             mSeekPercent = percent;
 
-            if (notify && mListener)
-            {
-                mListener->onSeekValueChanged(this, mSeekPercent*mMaximum);
-                mListener->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
+            if (notify && listener_) {
+                listener_->onSeekValueChanged(this, mSeekPercent*mMaximum);
+                listener_->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
             }
 
             invalidate();
         }
     }
 
-    float SeekBar::getProgress()
-    {
-        return mMaximum*mSeekPercent;
+    float SeekBar::getProgress() {
+        return mMaximum * mSeekPercent;
     }
 
-    void SeekBar::setOnSeekValueChangedListener(OnSeekValueChangedListener *l)
-    {
-        mListener = l;
+    void SeekBar::setOnSeekValueChangedListener(OnSeekValueChangedListener* l) {
+        listener_ = l;
     }
 
 
@@ -118,10 +125,10 @@ namespace ukive {
         mSeekPercent = std::max(0.f, mouseInTrack / trackWidth);
         mSeekPercent = std::min(1.f, mSeekPercent);
 
-        if (mListener)
+        if (listener_)
         {
-            mListener->onSeekValueChanged(this, mSeekPercent*mMaximum);
-            mListener->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
+            listener_->onSeekValueChanged(this, mSeekPercent*mMaximum);
+            listener_->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
         }
     }
 
@@ -207,17 +214,16 @@ namespace ukive {
     void SeekBar::onDraw(Canvas *canvas)
     {
         float left = mSeekThumbMaxDiameter / 2.f;
-        float top = mSeekThumbMaxDiameter / 2.f - mSeekTrackHeight / 2.f;
+        float top = (mSeekThumbMaxDiameter - mSeekTrackHeight) / 2.f;
         float trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
 
         float cur_pos = trackWidth * mSeekPercent;
         float centerX = left + cur_pos;
         float centerY = mSeekThumbMaxDiameter / 2.f;
 
-        if (centerX < mSeekThumbMinDiameter)
+        if (centerX < mSeekThumbMinDiameter) {
             canvas->fillRect(RectF(left, top, trackWidth, mSeekTrackHeight), Color::Grey300);
-        else
-        {
+        } else {
             canvas->fillRect(RectF(left, top, cur_pos, mSeekTrackHeight), Color::Blue400);
             canvas->fillRect(RectF(centerX, top, trackWidth - cur_pos, mSeekTrackHeight), Color::Grey300);
         }
@@ -231,7 +237,7 @@ namespace ukive {
 
         switch (e->getEvent())
         {
-        case InputEvent::EVM_LEAVE_OBJ:
+        case InputEvent::EVM_LEAVE_VIEW:
         {
             startZoomOutAnimation();
             break;

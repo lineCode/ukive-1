@@ -4,11 +4,12 @@
 
 namespace ukive {
 
-    class SwapChainResizeNotifier
-    {
+    class SwapChainResizeNotifier {
     public:
-        virtual void onSwapChainResize() = 0;
-        virtual void onSwapChainResized() = 0;
+        virtual ~SwapChainResizeNotifier() = default;
+
+        virtual void onPreSwapChainResize() = 0;
+        virtual void onPostSwapChainResize() = 0;
     };
 
 }

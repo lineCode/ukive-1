@@ -22,7 +22,7 @@ namespace shell {
     class TestViewHolder : public ukive::ListAdapter::ViewHolder
     {
     public:
-        TestViewHolder(ukive::View *v)
+        TestViewHolder(ukive::View* v)
             :ViewHolder(v) {
 
             title_label = reinterpret_cast<ukive::TextView*>(v->findViewById(ID_TITLE));
@@ -30,9 +30,9 @@ namespace shell {
             avatar_image = reinterpret_cast<ukive::ImageView*>(v->findViewById(ID_AVATAR));
         }
 
-        ukive::TextView *title_label;
-        ukive::TextView *summary_label;
-        ukive::ImageView *avatar_image;
+        ukive::TextView* title_label;
+        ukive::TextView* summary_label;
+        ukive::ImageView* avatar_image;
     };
 
     class TestAdapter : public ukive::ListAdapter
@@ -48,15 +48,15 @@ namespace shell {
             ukive::string16 summary;
         };
 
-        ViewHolder* onCreateViewHolder(ukive::ViewGroup *parent, int position) override;
-        void onBindViewHolder(ViewHolder *holder, int position) override;
-        size_t getItemCount() override;
+        ViewHolder* onCreateViewHolder(ukive::ViewGroup* parent, int position) override;
+        void onBindViewHolder(ViewHolder* holder, int position) override;
+        int getItemCount() override;
 
         void AddItem(int image_res_id, ukive::string16 title, ukive::string16 summary);
-        void AddItem(size_t pos, int image_res_id, ukive::string16 title, ukive::string16 summary);
+        void AddItem(int pos, int image_res_id, ukive::string16 title, ukive::string16 summary);
         void ModifyItem(int image_res_id, ukive::string16 title, ukive::string16 summary);
         void RemoveItem(ukive::string16 title);
-        void RemoveItem(size_t pos);
+        void RemoveItem(int pos);
 
     private:
         std::vector<BindData*> data_list_;

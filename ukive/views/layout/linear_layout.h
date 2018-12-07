@@ -8,20 +8,30 @@ namespace ukive {
 
     class LayoutParams;
 
-    class LinearLayout : public ViewGroup
-    {
+    class LinearLayout : public ViewGroup {
     public:
-        static const int VERTICAL = 1;
-        static const int HORIZONTAL = 2;
+        enum Orientation {
+            VERTICAL = 1,
+            HORIZONTAL = 2
+        };
+
+        LinearLayout(Window* w);
+
+        void setOrientation(int orientation);
+
+        void onMeasure(
+            int width, int height,
+            int widthSpec, int heightSpec) override;
+        void onLayout(
+            bool changed, bool sizeChanged,
+            int left, int top, int right, int bottom) override;
 
     protected:
-        LayoutParams *generateLayoutParams(const LayoutParams &lp) override;
-        LayoutParams *generateDefaultLayoutParams() override;
-        bool checkLayoutParams(LayoutParams *lp) override;
+        bool checkLayoutParams(LayoutParams* lp) override;
+        LayoutParams* generateDefaultLayoutParams() override;
+        LayoutParams* generateLayoutParams(const LayoutParams& lp) override;
 
     private:
-        int mOrientation;
-
         void measureWeightedChildren(
             int totalWeight,
             int parentWidth, int parentHeight,
@@ -39,17 +49,7 @@ namespace ukive {
         void layoutVertical(int left, int top, int right, int bottom);
         void layoutHorizontal(int left, int top, int right, int bottom);
 
-    public:
-        LinearLayout(Window *w);
-
-        void setOrientation(int orientation);
-
-        virtual void onMeasure(
-            int width, int height,
-            int widthSpec, int heightSpec) override;
-        virtual void onLayout(
-            bool changed, bool sizeChanged,
-            int left, int top, int right, int bottom) override;
+        int orientation_;
     };
 
 }

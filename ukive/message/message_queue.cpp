@@ -1,7 +1,8 @@
 ﻿#include "message_queue.h"
 
+#include "ukive/log.h"
 #include "ukive/message/message.h"
-#include "ukive/system/system_clock.h"
+#include "ukive/system/time_utils.h"
 
 
 namespace ukive {
@@ -11,7 +12,6 @@ namespace ukive {
         is_quitting_(false),
         has_barrier_(false) {
     }
-
 
     MessageQueue::~MessageQueue() {
     }
@@ -24,11 +24,16 @@ namespace ukive {
         removeAllLocked();
     }
 
+    bool MessageQueue::hasMessage() {
+        std::lock_guard<std::mutex> lk(queue_sync_);
+        return message_ != nullptr;
+    }
 
-    bool MessageQueue::enqueue(Message *msg) {
+    bool MessageQueue::enqueue(Message* msg) {
         if (!msg->target) {
-            throw std::logic_error(
-                "MessageQueue-enqueue(): Message must have a target.");
+            LOG(Log::WARNING) << "Message must have a target!";
+            msg->recycle();
+            return false;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
@@ -38,17 +43,15 @@ namespace ukive {
             return false;
         }
 
-        Message *ptr = message_;
+        Message* ptr = message_;
 
         if (!ptr || !ptr->target
             || msg->when == 0 || msg->when < ptr->when) {
             msg->next = ptr;
             message_ = msg;
-        }
-        else {
-            Message *prev = nullptr;
-            while (true)
-            {
+        } else {
+            Message* prev = nullptr;
+            while (true) {
                 prev = ptr;
                 ptr = ptr->next;
                 if (!ptr || !ptr->target
@@ -64,31 +67,29 @@ namespace ukive {
         return true;
     }
 
-    Message *MessageQueue::dequeue() {
+    Message* MessageQueue::dequeue() {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        uint64_t now = SystemClock::upTimeMillis();
-        Message *prev = nullptr;
-        Message *ptr = message_;
+        Message* ptr = message_;
+        Message* prev = nullptr;
+        uint64_t now = TimeUtils::upTimeMillis();
 
-        //find barrier.
+        // find barrier
         while (ptr && ptr->target) {
             prev = ptr;
             ptr = ptr->next;
         }
 
-        if (!ptr) {
-            throw std::logic_error("MessageQueue-dequeue(): cannot find barrier.");
-        }
+        CHECK(ptr) << "Cannot find barrier!";
 
-        //over the barrier.
+        // over the barrier
         prev = ptr;
         ptr = ptr->next;
 
         while (ptr) {
             if (ptr->when <= now) {
                 prev->next = ptr->next;
-                Message *msg = ptr;
+                Message* msg = ptr;
                 return msg;
             }
 
@@ -100,26 +101,25 @@ namespace ukive {
     }
 
 
-    void MessageQueue::remove(Cycler *c, void *data) {
-        if (c == nullptr) {
+    void MessageQueue::remove(Cycler* c, void* data) {
+        if (!c) {
             return;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        Message *ptr = message_;
-        Message *prev = nullptr;
+        Message* ptr = message_;
+        Message* prev = nullptr;
         while (ptr) {
             if (ptr->target == c
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 
-                Message *msg = ptr;
+                Message* msg = ptr;
                 ptr = ptr->next;
 
                 msg->recycle();
@@ -131,19 +131,19 @@ namespace ukive {
         }
     }
 
-    void MessageQueue::remove(Cycler *c, int what, void *data) {
-        if (c == nullptr) {
+    void MessageQueue::remove(Cycler* c, int what, void* data) {
+        if (!c) {
             return;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        Message *ptr = message_;
-        Message *prev = nullptr;
+        Message* ptr = message_;
+        Message* prev = nullptr;
         while (ptr) {
             if (ptr->target == c
                 && ptr->what == what
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 if (prev) {
                     prev->next = ptr->next;
                 }
@@ -151,7 +151,7 @@ namespace ukive {
                     message_ = ptr->next;
                 }
 
-                Message *msg = ptr;
+                Message* msg = ptr;
                 ptr = ptr->next;
 
                 msg->recycle();
@@ -163,27 +163,26 @@ namespace ukive {
         }
     }
 
-    void MessageQueue::remove(Cycler *c, Executable *exec, void *data) {
-        if (c == nullptr) {
+    void MessageQueue::remove(Cycler* c, Executable* exec, void* data) {
+        if (!c) {
             return;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        Message *ptr = message_;
-        Message *prev = nullptr;
+        Message* ptr = message_;
+        Message* prev = nullptr;
         while (ptr) {
             if (ptr->target == c
                 && ptr->callback == exec
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 
-                Message *msg = ptr;
+                Message* msg = ptr;
                 ptr = ptr->next;
 
                 msg->recycle();
@@ -196,8 +195,8 @@ namespace ukive {
     }
 
     void MessageQueue::removeAllLocked() {
-        Message *ptr = message_;
-        Message *msg = nullptr;
+        Message* ptr = message_;
+        Message* msg = nullptr;
         while (ptr) {
             msg = ptr;
             ptr = ptr->next;
@@ -208,18 +207,18 @@ namespace ukive {
     }
 
 
-    bool MessageQueue::contains(Cycler *c, int what, void *data) {
-        if (c == nullptr) {
+    bool MessageQueue::contains(Cycler* c, int what, void* data) {
+        if (!c) {
             return false;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        Message *ptr = message_;
+        Message* ptr = message_;
         while (ptr) {
             if (ptr->target == c
                 && ptr->what == what
-                && (data == nullptr || ptr->data == data)) {
+                && (!data || ptr->data == data)) {
                 return true;
             }
             ptr = ptr->next;
@@ -228,14 +227,14 @@ namespace ukive {
         return false;
     }
 
-    bool MessageQueue::contains(Cycler *c, Executable *exec, void *data) {
-        if (c == nullptr) {
+    bool MessageQueue::contains(Cycler* c, Executable* exec, void* data) {
+        if (!c) {
             return false;
         }
 
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        Message *ptr = message_;
+        Message* ptr = message_;
         while (ptr) {
             if (ptr->target == c
                 && ptr->callback == exec
@@ -256,7 +255,7 @@ namespace ukive {
             return;
         }
 
-        Message *barrier = Message::obtain();
+        Message* barrier = Message::obtain();
         if (message_) {
             barrier->next = message_;
         }
@@ -268,18 +267,17 @@ namespace ukive {
     void MessageQueue::removeBarrier() {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
-        Message *ptr = message_;
-        Message *prev = nullptr;
+        Message* ptr = message_;
+        Message* prev = nullptr;
         while (ptr) {
-            if (ptr->target == nullptr) {
+            if (!ptr->target) {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 
-                Message *msg = ptr;
+                Message* msg = ptr;
                 ptr = ptr->next;
 
                 msg->recycle();

@@ -8,221 +8,200 @@
 
 namespace ukive {
 
-    ScrollView::ScrollView(Window *wnd)
-        :ViewGroup(wnd)
-    {
+    ScrollView::ScrollView(Window* wnd)
+        :ViewGroup(wnd) {
     }
 
 
-    bool ScrollView::canScroll()
-    {
-        View *widget = getChildAt(0);
-        if (widget && widget->getVisibility() != View::VANISHED)
-        {
-            if (getMeasuredHeight() < widget->getMeasuredHeight())
+    bool ScrollView::canScroll() {
+        View* child = getChildAt(0);
+        if (child && child->getVisibility() != View::VANISHED) {
+            if (getMeasuredHeight() < child->getMeasuredHeight()) {
                 return true;
+            }
         }
 
         return false;
     }
 
-    int ScrollView::computeScrollRange()
-    {
-        View *widget = getChildAt(0);
-        if (widget && widget->getVisibility() != View::VANISHED)
-            return widget->getMeasuredHeight();
+    int ScrollView::computeScrollRange() {
+        View* child = getChildAt(0);
+        if (child && child->getVisibility() != View::VANISHED) {
+            return child->getMeasuredHeight();
+        }
         return 0;
     }
 
-    int ScrollView::computeScrollExtend()
-    {
-        View *widget = getChildAt(0);
-        if (widget && widget->getVisibility() != View::VANISHED)
-            return (widget->getMeasuredHeight() - getMeasuredHeight());
+    int ScrollView::computeScrollExtend() {
+        View* child = getChildAt(0);
+        if (child && child->getVisibility() != View::VANISHED) {
+            return (child->getMeasuredHeight() - getMeasuredHeight());
+        }
         return 0;
     }
 
-    void ScrollView::processVerticalScroll(int dy)
-    {
-        int finalDy = 0;
-        if (dy > 0)
-        {
-            int scrollY = getScrollY();
-            finalDy = std::max(scrollY - dy, 0) - scrollY;
-        }
-        else if (dy < 0)
-        {
-            int scrollY = getScrollY();
-            int extend = this->computeScrollExtend();
-            if (extend > 0)
-                finalDy = std::min(scrollY - dy, extend) - scrollY;
+    void ScrollView::processVerticalScroll(int dy) {
+        int final_dy = 0;
+        if (dy > 0) {
+            int scroll_y = getScrollY();
+            final_dy = std::max(scroll_y - dy, 0) - scroll_y;
+        } else if (dy < 0) {
+            int scroll_y = getScrollY();
+            int extend = computeScrollExtend();
+            if (extend > 0) {
+                final_dy = std::min(scroll_y - dy, extend) - scroll_y;
+            }
         }
 
-        if (finalDy != 0)
-            scrollBy(0, finalDy);
+        if (final_dy != 0) {
+            scrollBy(0, final_dy);
+        }
     }
 
 
     void ScrollView::onMeasure(
-        int width, int height,
-        int widthSpec, int heightSpec)
-    {
-        int finalWidth = 0;
-        int finalHeight = 0;
+        int width, int height, int widthSpec, int heightSpec) {
 
-        int horizontalPadding = getPaddingLeft() + getPaddingRight();
-        int verticalPadding = getPaddingTop() + getPaddingBottom();
+        int final_width = 0;
+        int final_height = 0;
 
-        if (getChildCount() > 1)
+        int hori_padding = getPaddingLeft() + getPaddingRight();
+        int vert_padding = getPaddingTop() + getPaddingBottom();
+
+        if (getChildCount() > 1) {
             throw std::logic_error("UScrollView-onMeasure(): UScrollView can only have one child.");
+        }
 
-        this->measureChildrenWithMargins(width, 0, widthSpec, UNKNOWN);
+        measureChildrenWithMargins(width, 0, widthSpec, UNKNOWN);
 
-        switch (widthSpec)
-        {
-        case FIT:
-        {
-            View *widget = this->getChildAt(0);
-            if (widget && widget->getVisibility() != View::VANISHED)
-            {
-                int childWidth = widget->getMeasuredWidth();
-                finalWidth = std::min(childWidth + horizontalPadding, width);
-                finalWidth = std::max(getMinimumWidth(), finalWidth);
+        switch (widthSpec) {
+        case FIT: {
+            View* child = getChildAt(0);
+            if (child && child->getVisibility() != View::VANISHED) {
+                int childWidth = child->getMeasuredWidth();
+                final_width = std::min(childWidth + hori_padding, width);
+                final_width = std::max(getMinimumWidth(), final_width);
             }
             break;
         }
 
-        case UNKNOWN:
-        {
-            View *widget = this->getChildAt(0);
-            if (widget && widget->getVisibility() != View::VANISHED)
-            {
-                int childWidth = widget->getMeasuredWidth();
-                finalWidth = std::max(getMinimumWidth(), childWidth);
-            }
-            break;
-        }
-
-        case EXACTLY:
-            finalWidth = width;
-            break;
-        }
-
-        switch (heightSpec)
-        {
-        case FIT:
-        {
-            View *widget = this->getChildAt(0);
-            if (widget && widget->getVisibility() != View::VANISHED)
-            {
-                int childHeight = widget->getMeasuredHeight();
-                finalHeight = std::min(childHeight + verticalPadding, height);
-                finalHeight = std::max(getMinimumHeight(), finalHeight);
-            }
-            break;
-        }
-
-        case UNKNOWN:
-        {
-            View *widget = this->getChildAt(0);
-            if (widget && widget->getVisibility() != View::VANISHED)
-            {
-                int childHeight = widget->getMeasuredHeight();
-                finalHeight = std::max(getMinimumHeight(), childHeight);
+        case UNKNOWN: {
+            View* child = getChildAt(0);
+            if (child && child->getVisibility() != View::VANISHED) {
+                int childWidth = child->getMeasuredWidth();
+                final_width = std::max(getMinimumWidth(), childWidth);
             }
             break;
         }
 
         case EXACTLY:
-            finalHeight = height;
+            final_width = width;
             break;
         }
 
-        this->setMeasuredDimension(finalWidth, finalHeight);
+        switch (heightSpec) {
+        case FIT: {
+            View* child = getChildAt(0);
+            if (child && child->getVisibility() != View::VANISHED) {
+                int childHeight = child->getMeasuredHeight();
+                final_height = std::min(childHeight + vert_padding, height);
+                final_height = std::max(getMinimumHeight(), final_height);
+            }
+            break;
+        }
+
+        case UNKNOWN: {
+            View* child = getChildAt(0);
+            if (child && child->getVisibility() != View::VANISHED) {
+                int childHeight = child->getMeasuredHeight();
+                final_height = std::max(getMinimumHeight(), childHeight);
+            }
+            break;
+        }
+
+        case EXACTLY:
+            final_height = height;
+            break;
+        }
+
+        setMeasuredDimension(final_width, final_height);
     }
 
     void ScrollView::onLayout(
         bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom)
-    {
-        View *widget = this->getChildAt(0);
-        if (widget && widget->getVisibility() != View::VANISHED)
-        {
-            LayoutParams *lp = widget->getLayoutParams();
+        int left, int top, int right, int bottom) {
 
-            int width = widget->getMeasuredWidth();
-            int height = widget->getMeasuredHeight();
+        auto child = getChildAt(0);
+        if (child && child->getVisibility() != View::VANISHED) {
+            auto lp = child->getLayoutParams();
+
+            int width = child->getMeasuredWidth();
+            int height = child->getMeasuredHeight();
 
             int childleft = getPaddingLeft() + lp->leftMargin;
             int childTop = getPaddingTop() + lp->topMargin;
 
-            widget->layout(
-                childleft,
-                childTop,
-                width + childleft,
-                height + childTop);
+            child->layout(
+                childleft, childTop,
+                width + childleft, height + childTop);
         }
     }
 
     void ScrollView::onSizeChanged(
-        int width, int height, int oldWidth, int oldHeight)
-    {
+        int width, int height, int oldWidth, int oldHeight) {
+
         if (width > 0 && height > 0
-            && oldWidth > 0 && oldHeight > 0)
-        {
+            && oldWidth > 0 && oldHeight > 0) {
             int changed = 0;
 
-            if (canScroll())
-            {
-                if (getScrollY() < 0)
+            if (canScroll()) {
+                if (getScrollY() < 0) {
                     changed = -getScrollY();
+                }
 
-                int extend = this->computeScrollExtend();
-                if (getScrollY() > extend)
+                int extend = computeScrollExtend();
+                if (getScrollY() > extend) {
                     changed = extend - getScrollY();
-            }
-            else
-            {
-                if (getScrollY() != 0)
+                }
+            } else {
+                if (getScrollY() != 0) {
                     changed = -getScrollY();
+                }
             }
 
-            if (changed != 0)
+            if (changed != 0) {
                 scrollBy(0, changed);
+            }
         }
     }
 
     void ScrollView::onScrollChanged(
-        int scrollX, int scrollY, int oldScrollX, int oldScrollY)
-    {
+        int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
         ViewGroup::onScrollChanged(scrollX, scrollY, oldScrollX, oldScrollY);
 
         InputEvent e;
         e.setEvent(InputEvent::EVM_SCROLL_ENTER);
         e.setMouseX(mMouseXCache + getLeft() - getScrollX() - (oldScrollX - scrollX));
         e.setMouseY(mMouseYCache + getTop() - getScrollY() - (oldScrollY - scrollY));
-        this->dispatchInputEvent(&e);
+        dispatchInputEvent(&e);
     }
 
 
-    bool ScrollView::onInputEvent(InputEvent *e)
-    {
-        ViewGroup::onInputEvent(e);
+    bool ScrollView::onInputEvent(InputEvent* e) {
+        bool consumed = ViewGroup::onInputEvent(e);
 
-        switch (e->getEvent())
-        {
+        switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
             mMouseXCache = e->getMouseX();
             mMouseYCache = e->getMouseY();
             processVerticalScroll(30 * e->getMouseWheel());
-            return true;
+            consumed |= true;
         }
 
-        return false;
+        return consumed;
     }
 
-    bool ScrollView::onInterceptMouseEvent(InputEvent *e)
-    {
+    bool ScrollView::onInterceptMouseEvent(InputEvent* e) {
         return false;
     }
 

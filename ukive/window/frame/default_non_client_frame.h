@@ -8,19 +8,24 @@
 
 namespace ukive {
 
+    class Window;
+
     class DefaultNonClientFrame : public NonClientFrame {
     public:
-        LRESULT onSize(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onMouseMove(WPARAM wParam, LPARAM lParam) override;
-        LRESULT OnLButtonUp(WPARAM wParam, LPARAM lParam) override;
+        int onNcCreate(Window* w, bool* handled) override;
+        int onNcDestroy(bool* handled) override;
 
-        LRESULT onNcPaint(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onNcActivate(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onNcHitTest(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onNcCalSize(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onNcLButtonDown(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam) override;
-        LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam) override;
+        LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onMouseMove(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT OnLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;
+
+        LRESULT onNcPaint(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcActivate(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcHitTest(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcCalSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcLButtonDown(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) override;
     };
 
 }

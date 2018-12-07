@@ -8,7 +8,7 @@
 
 namespace ukive {
 
-    MenuImpl::MenuImpl(Window *w)
+    MenuImpl::MenuImpl(Window* w)
         :LinearLayout(w),
         callback_(nullptr),
         item_height_(LayoutParams::FIT_CONTENT) {
@@ -16,64 +16,51 @@ namespace ukive {
     }
 
 
-    void MenuImpl::initMenu() {
-    }
+    void MenuImpl::initMenu() {}
 
-
-    void MenuImpl::setMenuItemHeight(int height)
-    {
+    void MenuImpl::setMenuItemHeight(int height) {
         item_height_ = height;
     }
 
-
-    void MenuImpl::setCallback(MenuCallback *callback)
-    {
+    void MenuImpl::setCallback(MenuCallback* callback) {
         callback_ = callback;
     }
 
-    MenuCallback *MenuImpl::getCallback()
-    {
+    MenuCallback* MenuImpl::getCallback() {
         return callback_;
     }
 
-
-    MenuItem* MenuImpl::addItem(int id, int order, string16 title)
-    {
-        MenuItem *item = new MenuItemImpl(getWindow(), id, order);
+    MenuItem* MenuImpl::addItem(int id, int order, string16 title) {
+        MenuItem* item = new MenuItemImpl(getWindow(), id, order);
         item->setItemTitle(title);
 
-        View *widget = dynamic_cast<View*>(item);
-        widget->setBackground(new RippleDrawable(getWindow()));
-        widget->setOnClickListener(this);
+        View* view = dynamic_cast<View*>(item);
+        view->setBackground(new RippleDrawable(getWindow()));
+        view->setOnClickListener(this);
 
         int insertedIndex = getChildCount();
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            MenuItem *childItem = dynamic_cast<MenuItem*>(child);
-            if (childItem->getItemOrder() > order)
-            {
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
+            MenuItem* childItem = dynamic_cast<MenuItem*>(child);
+            if (childItem->getItemOrder() > order) {
                 insertedIndex = i;
                 break;
             }
         }
 
-        addView(insertedIndex, widget, new LinearLayoutParams(
+        addView(insertedIndex, view, new LinearLayoutParams(
             LayoutParams::MATCH_PARENT,
             item_height_));
         return item;
     }
 
-    bool MenuImpl::removeItem(int id)
-    {
+    bool MenuImpl::removeItem(int id) {
         bool removed = false;
 
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            MenuItem *item = dynamic_cast<MenuItem*>(child);
-            if (item && item->getItemId() == id)
-            {
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
+            MenuItem* item = dynamic_cast<MenuItem*>(child);
+            if (item && item->getItemId() == id) {
                 removeView(child);
 
                 --i;
@@ -84,39 +71,35 @@ namespace ukive {
         return removed;
     }
 
-    bool MenuImpl::hasItem(int id)
-    {
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            MenuItem *item = dynamic_cast<MenuItem*>(child);
-            if (item && item->getItemId() == id)
+    bool MenuImpl::hasItem(int id) {
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
+            MenuItem* item = dynamic_cast<MenuItem*>(child);
+            if (item && item->getItemId() == id) {
                 return true;
+            }
         }
 
         return false;
     }
 
-    MenuItem* MenuImpl::findItem(int id)
-    {
-        for (std::size_t i = 0; i < getChildCount(); ++i)
-        {
-            View *child = getChildAt(i);
-            MenuItem *item = dynamic_cast<MenuItem*>(child);
-            if (item && item->getItemId() == id)
+    MenuItem* MenuImpl::findItem(int id) {
+        for (size_t i = 0; i < getChildCount(); ++i) {
+            View* child = getChildAt(i);
+            MenuItem* item = dynamic_cast<MenuItem*>(child);
+            if (item && item->getItemId() == id) {
                 return item;
+            }
         }
 
         return nullptr;
     }
 
-    size_t MenuImpl::getItemCount()
-    {
+    size_t MenuImpl::getItemCount() {
         return getChildCount();
     }
 
-    void MenuImpl::onClick(View *v)
-    {
+    void MenuImpl::onClick(View* v) {
         callback_->onMenuItemClicked(this, dynamic_cast<MenuItem*>(v));
     }
 

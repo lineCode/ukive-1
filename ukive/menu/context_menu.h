@@ -18,17 +18,16 @@ namespace ukive {
 
     class ContextMenu :
         public MenuCallback,
-        public SharedHelper<ContextMenu>
-    {
+        public SharedHelper<ContextMenu> {
     public:
-        ContextMenu(Window *window, ContextMenuCallback *callback);
+        ContextMenu(Window* window, ContextMenuCallback* callback);
         ~ContextMenu();
 
-        void onCreateMenu(Menu *menu) override;
-        void onPrepareMenu(Menu *menu) override;
-        bool onMenuItemClicked(Menu *menu, MenuItem *item) override;
+        void onCreateMenu(Menu* menu) override;
+        void onPrepareMenu(Menu* menu) override;
+        bool onMenuItemClicked(Menu* menu, MenuItem* item) override;
 
-        Menu *getMenu();
+        Menu* getMenu();
 
         void invalidateMenu();
 
@@ -39,15 +38,15 @@ namespace ukive {
         void showAsync(int x, int y);
         void closeAsync();
 
-        int mMenuWidth;
-        int mMenuItemHeight;
-        bool mIsFinished;
+        int menu_width_;
+        int menu_item_height_;
+        bool is_finished_;
 
-        Window *mWindow;
-        ContextMenuCallback *mCallback;
+        Window* window_;
+        ContextMenuCallback* callback_;
 
-        MenuImpl *mMenu;
-        std::shared_ptr<InnerWindow> mInnerWindow;
+        MenuImpl* menu_;
+        std::shared_ptr<InnerWindow> inner_window_;
     };
 
 }

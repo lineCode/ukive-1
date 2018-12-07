@@ -6,14 +6,13 @@
 
 namespace ukive {
 
-    class FrameLayout : public ViewGroup
-    {
+    class FrameLayout : public ViewGroup {
     public:
-        FrameLayout(Window *w);
+        FrameLayout(Window* w);
 
-        virtual void onMeasure(
+        void onMeasure(
             int width, int height, int widthSpec, int heightSpec) override;
-        virtual void onLayout(
+        void onLayout(
             bool changed, bool sizeChanged,
             int left, int top, int right, int bottom) override;
     };
