@@ -13,8 +13,9 @@ namespace {
 namespace ukive {
 
     OverlayScrollBar::OverlayScrollBar()
-        :content_height_(0),
-        dragging_deviation_(0.f) {
+        : content_height_(0),
+          distance_y_prev_(0),
+          dragging_deviation_(0.f) {
     }
 
     OverlayScrollBar::~OverlayScrollBar() {}
@@ -74,10 +75,25 @@ namespace ukive {
 
     bool OverlayScrollBar::onMousePressed(const Point& p) {
         if (scrollbar_bounds_.hit(p)) {
-            dragging_start_ = p;
             thumb_bounds_start_ = thumb_bounds_;
             distance_y_prev_ = 0;
             dragging_deviation_ = 0.f;
+
+            if (thumb_bounds_.hit(p)) {
+                dragging_start_ = p;
+            } else {
+                int distance_y = 0;
+                if (p.y < thumb_bounds_.top) {
+                    distance_y = -thumb_bounds_.height();
+                } else if (p.y >= thumb_bounds_.bottom) {
+                    distance_y = thumb_bounds_.height();
+                }
+
+                if (distance_y != 0) {
+                    moveScroller(distance_y);
+                }
+            }
+
             return true;
         }
         return false;
@@ -87,6 +103,11 @@ namespace ukive {
 
     bool OverlayScrollBar::onMouseDragged(const Point& p) {
         int distance_y = p.y - dragging_start_.y;
+        moveScroller(distance_y);
+        return true;
+    }
+
+    void OverlayScrollBar::moveScroller(int distance_y) {
         int view_height = view_bounds_.height();
 
         distance_y = std::max(0 - thumb_bounds_start_.top, distance_y);
@@ -115,7 +136,6 @@ namespace ukive {
         }
 
         distance_y_prev_ = distance_y;
-        return true;
     }
 
 }

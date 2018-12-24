@@ -29,6 +29,8 @@ namespace ukive {
         bool onMouseDragged(const Point& p);
 
     private:
+        void moveScroller(int distance_y);
+
         int content_height_;
         int distance_y_prev_;
         float dragging_deviation_;

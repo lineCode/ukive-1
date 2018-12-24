@@ -142,13 +142,8 @@ namespace ukive {
         // bounds relative to screen.
         Rect getBoundsInScreen() const;
 
-        // getBounds() with paddings.
+        // getBounds() with paddings relative to (0, 0).
         Rect getContentBounds() const;
-
-        // getContentBounds() relative to (0, 0)
-        Rect getContentBoundsInThis() const;
-
-        virtual View* findViewById(int id);
 
         bool isEnabled() const;
         bool isAttachedToWindow() const;
@@ -168,6 +163,8 @@ namespace ukive {
         void draw(Canvas* canvas);
         void measure(int width, int height, int width_mode, int height_mode);
         void layout(int left, int top, int right, int bottom);
+
+        virtual View* findViewById(int id);
 
         virtual void invalidate();
         virtual void invalidate(const Rect &rect);
@@ -201,7 +198,7 @@ namespace ukive {
         virtual void dispatchDiscardPendingOperations();
 
         virtual void onDraw(Canvas* canvas);
-        virtual void onDrawOverChild(Canvas* canvas);
+        virtual void onDrawOverChildren(Canvas* canvas);
         virtual void onMeasure(
             int width, int height,
             int width_mode, int height_mode);

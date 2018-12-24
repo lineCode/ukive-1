@@ -470,24 +470,24 @@ namespace ukive {
     }
 
     Rect View::getBoundsInWindow() const {
-        Rect bound = getBounds();
+        auto bounds = getBounds();
 
-        View* parent = parent_;
+        auto parent = parent_;
         while (parent) {
-            Rect parentBound = parent->getBounds();
-            bound.left += parentBound.left;
-            bound.top += parentBound.top;
-            bound.right += parentBound.left;
-            bound.bottom += parentBound.top;
+            auto p_bounds = parent->getBounds();
+            bounds.left += p_bounds.left;
+            bounds.top += p_bounds.top;
+            bounds.right += p_bounds.left;
+            bounds.bottom += p_bounds.top;
 
             parent = parent->getParent();
         }
 
-        return bound;
+        return bounds;
     }
 
     Rect View::getBoundsInScreen() const {
-        Rect bound = getBoundsInWindow();
+        auto bound = getBoundsInWindow();
 
         POINT pt;
         pt.x = bound.left;
@@ -495,24 +495,18 @@ namespace ukive {
 
         ::ClientToScreen(window_->getHandle(), &pt);
 
-        int diffX = pt.x - bound.left;
-        int diffY = pt.y - bound.top;
+        int dx = pt.x - bound.left;
+        int dy = pt.y - bound.top;
 
-        bound.left += diffX;
-        bound.top += diffY;
-        bound.right += diffX;
-        bound.bottom += diffY;
+        bound.left += dx;
+        bound.top += dy;
+        bound.right += dx;
+        bound.bottom += dy;
 
         return bound;
     }
 
     Rect View::getContentBounds() const {
-        Rect content_bounds = bounds_;
-        content_bounds.insets(padding_);
-        return content_bounds;
-    }
-
-    Rect View::getContentBoundsInThis() const {
         int content_width = bounds_.width() - padding_.width();
         int content_height = bounds_.height() - padding_.height();
         return Rect(
@@ -520,11 +514,9 @@ namespace ukive {
             content_width, content_height);
     }
 
-
     View* View::findViewById(int id) {
         return nullptr;
     }
-
 
     bool View::isEnabled() const {
         return is_enabled_;
@@ -717,7 +709,7 @@ namespace ukive {
         // 绘制孩子
         dispatchDraw(canvas);
 
-        onDrawOverChild(canvas);
+        onDrawOverChildren(canvas);
 
         canvas->popClip();
         canvas->restore();
@@ -955,7 +947,7 @@ namespace ukive {
     }
 
     void View::onDraw(Canvas* canvas) {}
-    void View::onDrawOverChild(Canvas* canvas) {}
+    void View::onDrawOverChildren(Canvas* canvas) {}
 
     bool View::onInputEvent(InputEvent* e) {
         bool should_refresh = false;

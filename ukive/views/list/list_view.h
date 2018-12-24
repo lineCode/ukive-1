@@ -13,10 +13,9 @@ namespace ukive {
     class OverlayScrollBar;
     class ViewHolderRecycler;
 
-
     class ListView : public ViewGroup, public ListDataSetChangedListener {
     public:
-        ListView(Window* w);
+        explicit ListView(Window* w);
 
         void onLayout(
             bool changed, bool size_changed,
@@ -24,10 +23,10 @@ namespace ukive {
         bool onInputEvent(InputEvent* e) override;
 
         void onDraw(Canvas* canvas) override;
-        void onDrawOverChild(Canvas* canvas) override;
+        void onDrawOverChildren(Canvas* canvas) override;
 
         void setAdapter(ListAdapter* adapter);
-        void scrollToPosition(int position, int offset, bool smooth);
+        void scrollToPosition(int pos, int offset, bool smooth);
 
     private:
         int determineVerticalScroll(int dy);
@@ -46,9 +45,9 @@ namespace ukive {
         int fillTopChildViews(int dy);
         int fillBottomChildViews(int dy);
 
-        void locateToPosition(int position, int offset = 0);
-        void scrollToPosition(int position, int offset = 0);
-        void smoothScrollToPosition(int position, int offset = 0);
+        void locateToPosition(int pos, int offset = 0);
+        void scrollToPosition(int pos, int offset = 0);
+        void smoothScrollToPosition(int pos, int offset = 0);
 
         void scrollByScrollBar(int dy);
 
@@ -57,9 +56,9 @@ namespace ukive {
 
         // ListDataSetListener:
         void onDataSetChanged() override;
-        void onItemRangeInserted(int start_position, int length) override;
-        void onItemRangeChanged(int start_position, int length) override;
-        void onItemRangeRemoved(int start_position, int length) override;
+        void onItemRangeInserted(int start_pos, int length) override;
+        void onItemRangeChanged(int start_pos, int length) override;
+        void onItemRangeRemoved(int start_pos, int length) override;
 
         int cur_position_;
         int cur_offset_in_position_;
