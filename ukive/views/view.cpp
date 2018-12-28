@@ -1094,8 +1094,7 @@ namespace ukive {
 
     void View::onLayout(
         bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom) {
-    }
+        int left, int top, int right, int bottom) {}
 
     bool View::onCheckIsTextEditor() {
         return false;
@@ -1105,11 +1104,9 @@ namespace ukive {
         return nullptr;
     }
 
-    void View::onSizeChanged(int width, int height, int old_width, int old_height) {
-    }
+    void View::onSizeChanged(int width, int height, int old_width, int old_height) {}
 
-    void View::onVisibilityChanged(int visibility) {
-    }
+    void View::onVisibilityChanged(int visibility) {}
 
     void View::onFocusChanged(bool get_focus) {
         if (get_focus) {
@@ -1173,11 +1170,9 @@ namespace ukive {
         }
     }
 
-    void View::onWindowDpiChanged(int dpi_x, int dpi_y) {
-    }
+    void View::onWindowDpiChanged(int dpi_x, int dpi_y) {}
 
     void View::onScrollChanged(
-        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {
-    }
+        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {}
 
 }

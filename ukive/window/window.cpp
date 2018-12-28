@@ -279,41 +279,48 @@ namespace ukive {
 
         auto params = root_layout_->getLayoutParams();
 
-        int width = getClientWidth();
-        int height = getClientHeight();
-        int widthSpec = View::EXACTLY;
-        int heightSpec = View::EXACTLY;
+        int width;
+        int height;
+        int width_mode = View::EXACTLY;
+        int height_mode = View::EXACTLY;
+        if (impl_->isTranslucent()) {
+            width = getWidth();
+            height = getHeight();
+        } else {
+            width = getClientWidth();
+            height = getClientHeight();
+        }
 
         if (params->width < 0) {
             switch (params->width) {
             case LayoutParams::FIT_CONTENT:
-                widthSpec = View::FIT;
+                width_mode = View::FIT;
                 break;
 
             default:
             case LayoutParams::MATCH_PARENT:
-                widthSpec = View::EXACTLY;
+                width_mode = View::EXACTLY;
                 break;
             }
         } else {
             width = params->width;
-            widthSpec = View::EXACTLY;
+            width_mode = View::EXACTLY;
         }
 
         if (params->height < 0) {
             switch (params->height) {
             case LayoutParams::FIT_CONTENT:
-                heightSpec = View::FIT;
+                height_mode = View::FIT;
                 break;
 
             default:
             case LayoutParams::MATCH_PARENT:
-                heightSpec = View::EXACTLY;
+                height_mode = View::EXACTLY;
                 break;
             }
         } else {
             height = params->height;
-            heightSpec = View::EXACTLY;
+            height_mode = View::EXACTLY;
         }
 
         QPCService qpc_service;
@@ -323,7 +330,7 @@ namespace ukive {
             qpc_service.Start();
         }
 
-        root_layout_->measure(width, height, widthSpec, heightSpec);
+        root_layout_->measure(width, height, width_mode, height_mode);
 
         int measuredWidth = root_layout_->getMeasuredWidth();
         int measuredHeight = root_layout_->getMeasuredHeight();
@@ -348,7 +355,7 @@ namespace ukive {
             qpc_service.Start();
         }
 
-        Rect rect(0, 0, getWidth(), getHeight());
+        Rect rect(0, 0, getClientWidth(), getClientHeight());
         onDraw(rect);
 
         if (enable_qpc) {

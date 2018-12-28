@@ -33,7 +33,8 @@ namespace ukive {
     public:
         enum FrameType {
             FRAME_NATIVE,
-            FRAME_CUSTOM
+            FRAME_CUSTOM,
+            FRAME_ZERO,
         };
 
         Window();

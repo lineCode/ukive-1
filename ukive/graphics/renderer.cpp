@@ -9,8 +9,10 @@
 namespace ukive {
 
     Renderer::Renderer()
-        :is_layered_(false),
-        is_hardware_acc_(true) {}
+        : is_layered_(false),
+          is_hardware_acc_(true),
+          owner_window_(nullptr) {
+    }
 
     Renderer::~Renderer() {
     }
@@ -111,8 +113,8 @@ namespace ukive {
 
     void Renderer::createSoftwareBRT() {
         auto wic_bmp = Application::getWICManager()->createBitmap(
-            owner_window_->getClientWidth(),
-            owner_window_->getClientHeight());
+            owner_window_->getWidth(),
+            owner_window_->getHeight());
 
         d2d_rt_ = createWICRenderTarget(wic_bmp.get());
     }
@@ -156,6 +158,12 @@ namespace ukive {
     }
 
     HRESULT Renderer::resizeHardwareBRT() {
+        if (owner_window_->getWidth() <= 0 ||
+            owner_window_->getHeight() <= 0)
+        {
+            return S_OK;
+        }
+
         d2d_rt_.reset();
 
         for (auto notifier : sc_resize_notifiers_) {
@@ -172,6 +180,12 @@ namespace ukive {
     }
 
     HRESULT Renderer::resizeSoftwareBRT() {
+        if (owner_window_->getWidth() <= 0 ||
+            owner_window_->getHeight() <= 0)
+        {
+            return S_OK;
+        }
+
         d2d_rt_.reset();
         createSoftwareBRT();
 
@@ -179,6 +193,12 @@ namespace ukive {
     }
 
     HRESULT Renderer::resizeSwapchainBRT() {
+        if (owner_window_->getClientWidth() <= 0 ||
+            owner_window_->getClientHeight() <= 0)
+        {
+            return S_OK;
+        }
+
         d2d_rt_.reset();
 
         for (auto notifier : sc_resize_notifiers_) {

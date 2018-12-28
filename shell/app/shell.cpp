@@ -52,20 +52,22 @@ int APIENTRY wWinMain(
     shadow_window->center();
     shadow_window->show();*/
 
-    /*auto test_window = std::make_shared<shell::TestWindow>();
+    auto test_window = std::make_shared<shell::TestWindow>();
     test_window->setTitle(L"Test");
     test_window->setWidth(ukive::Application::dpToPx(600));
     test_window->setHeight(ukive::Application::dpToPx(600));
+    test_window->setFrameType(ukive::Window::FRAME_ZERO);
+    test_window->setTranslucent(false);
     test_window->center();
-    test_window->show();*/
+    test_window->show();
 
-    auto thr_dimen_window = std::make_shared<shell::MotionWindow>();
-    thr_dimen_window->setTitle(L"3D Motion");
-    thr_dimen_window->setWidth(ukive::Application::dpToPx(600));
-    thr_dimen_window->setHeight(ukive::Application::dpToPx(600));
-    //thr_dimen_window->setTranslucent(true);
-    thr_dimen_window->center();
-    thr_dimen_window->show();
+    //auto thr_dimen_window = std::make_shared<shell::MotionWindow>();
+    //thr_dimen_window->setTitle(L"3D Motion");
+    //thr_dimen_window->setWidth(ukive::Application::dpToPx(600));
+    //thr_dimen_window->setHeight(ukive::Application::dpToPx(600));
+    ////thr_dimen_window->setTranslucent(true);
+    //thr_dimen_window->center();
+    //thr_dimen_window->show();
 
     app->run();
 

@@ -15,7 +15,7 @@ namespace ukive {
     NonClientLayout::NonClientLayout(Window* w)
         :ViewGroup(w) {
 
-        if (w->getFrameType() == Window::FRAME_CUSTOM) {
+        if (w->getFrameType() == Window::FRAME_ZERO) {
             nc_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
             sh_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
         }

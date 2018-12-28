@@ -129,29 +129,31 @@ namespace ukive {
     }
 
     int TextView::determineVerticalScroll(int dy) {
-        int finalY = getScrollY();
+        int final_y = getScrollY();
         int range = computeVerticalScrollRange();
         if (range > 0) {
-            if (dy < 0)
-                finalY = std::max(0, getScrollY() + dy);
-            else if (dy > 0)
-                finalY = std::min(range, getScrollY() + dy);
+            if (dy < 0) {
+                final_y = std::max(0, getScrollY() + dy);
+            } else if (dy > 0) {
+                final_y = std::min(range, getScrollY() + dy);
+            }
         }
 
-        return finalY - getScrollY();
+        return final_y - getScrollY();
     }
 
     int TextView::determineHorizontalScroll(int dx) {
-        int finalX = getScrollX();
+        int final_x = getScrollX();
         int range = computeHorizontalScrollRange();
         if (range > 0) {
-            if (dx < 0)
-                finalX = std::max(0, getScrollX() + dx);
-            else if (dx > 0)
-                finalX = std::min(range, getScrollX() + dx);
+            if (dx < 0) {
+                final_x = std::max(0, getScrollX() + dx);
+            } else if (dx > 0) {
+                final_x = std::min(range, getScrollX() + dx);
+            }
         }
 
-        return finalX - getScrollX();
+        return final_x - getScrollX();
     }
 
 
@@ -179,8 +181,8 @@ namespace ukive {
                 text_layout_->HitTestTextRange(
                     selection, 0, 0.f, 0.f, &metrics, 1, &actual);
 
-                int lineTop = (int)metrics.top;
-                int lineBottom = (int)(metrics.top + metrics.height);
+                int lineTop = metrics.top;
+                int lineBottom = metrics.top + metrics.height;
                 int contentHeight = getHeight() - getPaddingTop() - getPaddingBottom();
 
                 if (lineTop < getScrollY())
@@ -197,7 +199,7 @@ namespace ukive {
                 DWRITE_HIT_TEST_METRICS metrics;
 
                 text_layout_->HitTestPoint(
-                    0.f, (float)getScrollY(), &isTrailingHit, &isInside, &metrics);
+                    0.f, getScrollY(), &isTrailingHit, &isInside, &metrics);
                 uint32_t curTextOffset = metrics.textPosition + (isTrailingHit == TRUE ? 1 : 0);
 
                 if (curTextOffset != prevTextOffset) {
@@ -234,8 +236,8 @@ namespace ukive {
         uint32_t lineCount;
         HRESULT hr = text_layout_->GetLineMetrics(nullptr, 0, &lineCount);
         if (hr == E_NOT_SUFFICIENT_BUFFER && lineCount > 0) {
-            DWRITE_LINE_METRICS* lineMetrics = new DWRITE_LINE_METRICS[lineCount];
-            hr = text_layout_->GetLineMetrics(lineMetrics, lineCount, &lineCount);
+            std::unique_ptr<DWRITE_LINE_METRICS[]> lineMetrics(new DWRITE_LINE_METRICS[lineCount]);
+            hr = text_layout_->GetLineMetrics(lineMetrics.get(), lineCount, &lineCount);
             if (SUCCEEDED(hr)) {
                 uint32_t lineTextPosStart = 0;
                 for (uint32_t i = 0; i < lineCount; ++i) {
@@ -244,7 +246,7 @@ namespace ukive {
                     if (position >= lineTextPosStart && position <= lineTextPosEnd) {
                         *line = i;
                         *height = lineMetrics[i].height;
-                        if (count != nullptr) {
+                        if (!count) {
                             *count = lineCount;
                         }
                         return true;
@@ -253,8 +255,6 @@ namespace ukive {
                     lineTextPosStart = lineTextPosEnd;
                 }
             }
-
-            delete[] lineMetrics;
         }
 
         return false;
@@ -264,16 +264,14 @@ namespace ukive {
         uint32_t lineCount;
         HRESULT hr = text_layout_->GetLineMetrics(nullptr, 0, &lineCount);
         if (hr == E_NOT_SUFFICIENT_BUFFER && lineCount > 0) {
-            DWRITE_LINE_METRICS* lineMetrics = new DWRITE_LINE_METRICS[lineCount];
-            hr = text_layout_->GetLineMetrics(lineMetrics, lineCount, &lineCount);
+            std::unique_ptr<DWRITE_LINE_METRICS[]> lineMetrics(new DWRITE_LINE_METRICS[lineCount]);
+            hr = text_layout_->GetLineMetrics(lineMetrics.get(), lineCount, &lineCount);
             if (SUCCEEDED(hr)) {
                 if (line >= 0 && line < lineCount) {
                     *height = lineMetrics[line].height;
                     return true;
                 }
             }
-
-            delete[] lineMetrics;
         }
 
         return false;
@@ -726,15 +724,14 @@ namespace ukive {
 
         case InputEvent::EVM_WHEEL:
         {
-            int originDy = -text_size_ * e->getMouseWheel();
-
+            int dy = -text_size_ * e->getMouseWheel();
             if (line_spacing_method_ == DWRITE_LINE_SPACING_METHOD_DEFAULT) {
-                originDy = -(int)text_size_ * e->getMouseWheel();
+                dy = -text_size_ * e->getMouseWheel();
             } else if (line_spacing_method_ == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
-                originDy = -(int)(text_size_ * line_spacing_multiple_) * e->getMouseWheel();
+                dy = -text_size_ * line_spacing_multiple_ * e->getMouseWheel();
             }
 
-            scrollBy(0, determineVerticalScroll(originDy * 3));
+            scrollBy(0, determineVerticalScroll(dy * 3));
             break;
         }
 
@@ -1118,7 +1115,7 @@ namespace ukive {
             text_layout_->HitTestTextRange(
                 start, end - start,
                 0.f, 0.f,
-                0, 0,
+                nullptr, 0,
                 &hitTextMetricsCount);
 
             if (hitTextMetricsCount < 1) {
@@ -1222,9 +1219,7 @@ namespace ukive {
         scrollToFit(true);
     }
 
-    void TextView::onSpanChanged(
-        Span* span, Editable::EditWatcher::SpanChange action) {
-
+    void TextView::onSpanChanged(Span* span, SpanChange action) {
         DWRITE_TEXT_RANGE range;
         range.startPosition = span->getStart();
         range.length = span->getEnd() - span->getStart();
@@ -1239,7 +1234,11 @@ namespace ukive {
                     text_layout_->SetUnderline(FALSE, range);
                 }
                 break;
+            default:
+                break;
             }
+            break;
+        default:
             break;
         }
 
@@ -1250,7 +1249,7 @@ namespace ukive {
 
                 text_layout_->SetDrawingEffect(tdEffect, range);
             } else if (action == SpanChange::REMOVE) {
-                text_layout_->SetDrawingEffect(0, range);
+                text_layout_->SetDrawingEffect(nullptr, range);
             }
             break;
 
@@ -1393,6 +1392,8 @@ namespace ukive {
             break;
         case MENU_ID_SELECTALL:
             performSelectAll();
+            break;
+        default:
             break;
         }
 

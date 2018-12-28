@@ -45,6 +45,7 @@ namespace shell {
 
         dc_target_ = ukive::Renderer::createDCRenderTarget();
         text_format_ = ukive::Renderer::createTextFormat(L"微软雅黑", 15, L"zh-CN");
+        text_format_->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 
         //resources used to drawing Non-client.
         min_button_color_ = kMinButtonColor;
@@ -79,16 +80,19 @@ namespace shell {
             RECT rcWin;
             ::GetWindowRect(window_->getHandle(), &rcWin);
 
-            int leftExtended = -rcWin.left;
-            int topExtended = -rcWin.top;
-            int rightExtended = rcWin.right - GetSystemMetrics(SM_CXFULLSCREEN);
-            int bottomExtended = rcWin.bottom - (GetSystemMetrics(SM_CYFULLSCREEN) + GetSystemMetrics(SM_CYCAPTION));
+            int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME)
+                + GetSystemMetrics(SM_CXPADDEDBORDER);
 
-            ::OffsetRect(&rcWin, -rcWin.left, -rcWin.top);
+            int left_ext = border_thickness;
+            int top_ext = border_thickness;
+            int right_ext = border_thickness;
+            int bottom_ext = border_thickness;
 
-            title_rect_.left = kTitleLeftMargin + leftExtended - kLeftBorderWidth;
-            title_rect_.top = topExtended - kTopBorderWidth;
-            createCaptionButtonRgn(rcWin.right, topExtended - kTopBorderWidth, rightExtended - kRightBorderWidth);
+            int win_width = rcWin.right - rcWin.left;
+
+            title_rect_.left = kTitleLeftMargin + left_ext - kLeftBorderWidth;
+            title_rect_.top = top_ext - kTopBorderWidth;
+            createCaptionButtonRgn(win_width, top_ext - kTopBorderWidth, right_ext - kRightBorderWidth);
             drawCaptionAndBorder();
             break;
         }
@@ -223,7 +227,7 @@ namespace shell {
     LRESULT CustomNonClientFrame::onNcPaint(WPARAM wParam, LPARAM lParam, bool* handled) {
         *handled = true;
         drawCaptionAndBorder();
-        return TRUE;
+        return FALSE;
     }
 
     LRESULT CustomNonClientFrame::onNcActivate(WPARAM wParam, LPARAM lParam, bool* handled) {
@@ -308,18 +312,18 @@ namespace shell {
             // 1: 旧窗口位置
             // 2: 旧客户区位置
             if (::IsZoomed(window_->getHandle())) {
-                RECT rcWin;
-                ::GetWindowRect(window_->getHandle(), &rcWin);
+                int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME)
+                    + GetSystemMetrics(SM_CXPADDEDBORDER);
 
-                int leftExtended = -rcWin.left;
-                int topExtended = -rcWin.top;
-                int rightExtended = rcWin.right - ::GetSystemMetrics(SM_CXFULLSCREEN);
-                int bottomExtended = rcWin.bottom - (::GetSystemMetrics(SM_CYFULLSCREEN) + ::GetSystemMetrics(SM_CYCAPTION));
+                int left_ext = border_thickness;
+                int top_ext = border_thickness;
+                int right_ext = border_thickness;
+                int bottom_ext = border_thickness;
 
-                ncp->rgrc[0].left += leftExtended;
+                ncp->rgrc[0].left += left_ext;
                 ncp->rgrc[0].top += kTopBorderWidth + kCaptionHeight;
-                ncp->rgrc[0].right -= rightExtended;
-                ncp->rgrc[0].bottom -= bottomExtended;
+                ncp->rgrc[0].right -= right_ext;
+                ncp->rgrc[0].bottom -= bottom_ext;
             } else {
                 ncp->rgrc[0].left += kLeftBorderWidth;
                 ncp->rgrc[0].top += kTopBorderWidth + kCaptionHeight;
@@ -333,7 +337,7 @@ namespace shell {
             return WVR_REDRAW;
         } else {
             // 新窗口位置
-            RECT *rgrc = (RECT*)lParam;
+            RECT *rgrc = reinterpret_cast<RECT*>(lParam);
             rgrc->left += kLeftBorderWidth;
             rgrc->top += kTopBorderWidth + kCaptionHeight;
             rgrc->right -= kRightBorderWidth;

@@ -26,27 +26,26 @@ namespace ukive {
     const int kDefaultWindowStyle = WS_OVERLAPPEDWINDOW;
     const int kDefaultWindowExStyle = WS_EX_APPWINDOW;
 
-    const int WM_NCDRAWCLASSIC1 = 0xAE;
-    const int WM_NCDRAWCLASSIC2 = 0xAF;
-
 
     WindowImpl::WindowImpl(Window* win)
-        :delegate_(win),
-        hWnd_(nullptr),
-        cursor_(Cursor::ARROW),
-        x_(kDefaultX),
-        y_(kDefaultY),
-        prev_x_(kDefaultX),
-        prev_y_(kDefaultY),
-        width_(kDefaultWidth),
-        height_(kDefaultHeight),
-        prev_width_(kDefaultWidth),
-        prev_height_(kDefaultHeight),
-        title_(kDefaultTitle),
-        is_created_(false),
-        is_showing_(false),
-        is_translucent_(false),
-        is_enable_mouse_track_(true) {}
+        : delegate_(win),
+          hWnd_(nullptr),
+          cursor_(Cursor::ARROW),
+          x_(kDefaultX),
+          y_(kDefaultY),
+          prev_x_(kDefaultX),
+          prev_y_(kDefaultY),
+          width_(kDefaultWidth),
+          height_(kDefaultHeight),
+          prev_width_(kDefaultWidth),
+          prev_height_(kDefaultHeight),
+          title_(kDefaultTitle),
+          is_created_(false),
+          is_showing_(false),
+          is_translucent_(false),
+          is_enable_mouse_track_(true),
+          is_first_nccalc_(true) {
+    }
 
     WindowImpl::~WindowImpl() {}
 
@@ -62,6 +61,7 @@ namespace ukive {
 
         if (is_translucent_) {
             win_ex_style |= WS_EX_LAYERED;
+            win_style &= ~WS_CAPTION;
         }
 
         onPreCreate(&info, &win_style, &win_ex_style);
@@ -121,14 +121,14 @@ namespace ukive {
         x_ = std::round((Application::getScreenWidth() - width_) / 2.f);
         y_ = std::round((Application::getScreenHeight() - height_) / 2.f);
 
-        if (is_created_) {
+        if (::IsWindow(hWnd_)) {
             ::MoveWindow(hWnd_, x_, y_, width_, height_, FALSE);
         }
     }
 
     void WindowImpl::setTitle(const string16& title) {
         title_ = title;
-        if (is_created_) {
+        if (::IsWindow(hWnd_)) {
             ::SetWindowText(hWnd_, title_.c_str());
         }
     }
@@ -139,14 +139,12 @@ namespace ukive {
         width_ = width;
         height_ = height;
 
-        if (is_created_) {
+        if (::IsWindow(hWnd_)) {
             ::MoveWindow(hWnd_, x_, y_, width_, height_, FALSE);
         }
     }
 
-    void WindowImpl::setCurrentCursor(Cursor cursor)
-    {
-        // TODO: separate it.
+    void WindowImpl::setCurrentCursor(Cursor cursor) {
         HCURSOR native_cursor = nullptr;
         switch (cursor) {
         case Cursor::ARROW: native_cursor = ::LoadCursor(nullptr, IDC_ARROW); break;
@@ -178,34 +176,11 @@ namespace ukive {
     }
 
     void WindowImpl::setTranslucent(bool translucent) {
-        if (is_created_) {
-            ::SetLastError(0);
-            auto ex_style = ::GetWindowLongPtr(hWnd_, GWL_EXSTYLE);
-            if (ex_style == 0) {
-                auto err_no = ::GetLastError();
-                if (err_no != 0) {
-                    LOG(Log::WARNING) << "Failed to get window style: " << err_no;
-                    return;
-                }
-            }
-
-            if (translucent) {
-                ex_style |= WS_EX_LAYERED;
-            } else {
-                ex_style &= ~WS_EX_LAYERED;
-            }
-
-            ::SetLastError(0);
-            auto result = ::SetWindowLongPtr(hWnd_, GWL_EXSTYLE, ex_style);
-            if (result == 0) {
-                auto err_no = ::GetLastError();
-                if (err_no != 0) {
-                    LOG(Log::WARNING) << "Failed to set window style: " << err_no;
-                    return;
-                }
-            }
+        if (::IsWindow(hWnd_)) {
+            setWindowStyle(WS_EX_LAYERED, true, translucent);
+            setWindowStyle(WS_CAPTION, false, !translucent);
+            sendFrameChanged();
         }
-
         is_translucent_ = translucent;
     }
 
@@ -254,7 +229,7 @@ namespace ukive {
             return 0;
         }
 
-        unsigned int dpi = ::GetDpiForWindow(hWnd_);
+        auto dpi = ::GetDpiForWindow(hWnd_);
         if (dpi == 0) {
             LOG(Log::ERR) << "Failed to get window dpi.";
         }
@@ -310,14 +285,24 @@ namespace ukive {
     }
 
     void WindowImpl::setMouseCaptureRaw() {
+        if (!is_created_) {
+            return;
+        }
         ::SetCapture(hWnd_);
     }
 
     void WindowImpl::releaseMouseCaptureRaw() {
+        if (!is_created_) {
+            return;
+        }
         ::ReleaseCapture();
     }
 
     void WindowImpl::setMouseTrack() {
+        if (!is_created_) {
+            return;
+        }
+
         if (is_enable_mouse_track_) {
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof(tme);
@@ -328,6 +313,23 @@ namespace ukive {
 
             is_enable_mouse_track_ = false;
         }
+    }
+
+    void WindowImpl::setWindowStyle(int style, bool ex, bool enabled) {
+        auto win_style = ::GetWindowLongPtr(hWnd_, ex ? GWL_EXSTYLE : GWL_STYLE);
+        if (enabled) {
+            win_style |= style;
+        } else {
+            win_style &= ~style;
+        }
+        ::SetWindowLongPtr(hWnd_, ex ? GWL_EXSTYLE : GWL_STYLE, win_style);
+    }
+
+    void WindowImpl::sendFrameChanged() {
+        ::SetWindowPos(hWnd_, nullptr, 0, 0, 0, 0,
+            SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS |
+            SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOREPOSITION |
+            SWP_NOSENDCHANGING | SWP_NOSIZE | SWP_NOZORDER);
     }
 
     bool WindowImpl::isMouseTrackEnabled() {
@@ -341,7 +343,6 @@ namespace ukive {
     float WindowImpl::pxToDp(float px) {
         return px / (getDpi() / 96.f);
     }
-
 
     void WindowImpl::onPreCreate(ClassInfo* info, int* win_style, int* win_ex_style) {
         delegate_->onPreCreate(info, win_style, win_ex_style);
@@ -382,8 +383,8 @@ namespace ukive {
 
     void WindowImpl::onResize(
         int param, int width, int height,
-        int client_width, int client_height) {
-
+        int client_width, int client_height)
+    {
         if (client_width <= 0 || client_height <= 0) {
             return;
         }
@@ -478,240 +479,115 @@ namespace ukive {
         return delegate_->onDataCopy(id, size, data);
     }
 
+    LRESULT WindowImpl::onNCCreate(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onCreate();
+        if (delegate_->getFrameType() == Window::FRAME_CUSTOM) {
+            non_client_frame_.reset(new shell::CustomNonClientFrame());
+        } else if (delegate_->getFrameType() == Window::FRAME_ZERO) {
+            non_client_frame_.reset(new DrawableNonClientFrame());
+        } else {
+            non_client_frame_.reset(new DefaultNonClientFrame());
+        }
 
-    LRESULT CALLBACK WindowImpl::messageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-        bool nc_handled = false;
+        auto nc_result = non_client_frame_->onNcCreate(delegate_, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onCreate(WPARAM wParam, LPARAM lParam, bool* handled) {
+        if (is_translucent_) {
+            setWindowStyle(WS_CAPTION, false, false);
+            sendFrameChanged();
+        }
+
+        *handled = true;
+        return TRUE;
+    }
+
+    LRESULT WindowImpl::onNCDrawClassic1(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto nc_result = non_client_frame_->onInterceptDrawClassic(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onNCDrawClassic2(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto nc_result = non_client_frame_->onInterceptDrawClassic(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onNCPaint(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto nc_result = non_client_frame_->onNcPaint(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onPaint(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onDraw({});
+        return 0;
+    }
+
+    LRESULT WindowImpl::onNCActivate(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto nc_result = non_client_frame_->onNcActivate(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onNCHitTest(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto nc_result = non_client_frame_->onNcHitTest(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onNCCalCSize(WPARAM wParam, LPARAM lParam, bool* handled) {
+        if (is_first_nccalc_) {
+            is_first_nccalc_ = false;
+            if (GetWindowLongPtr(hWnd_, GWL_STYLE) & WS_CAPTION) {
+                return 0;
+            }
+        }
+
+        auto nc_result = non_client_frame_->onNcCalSize(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMouseRange(UINT uMsg, WPARAM wParam, LPARAM lParam, bool* handled) {
         LRESULT nc_result = 0;
 
         switch (uMsg) {
-        case WM_NCCREATE: {
-            onCreate();
-            if (delegate_->getFrameType() == Window::FRAME_CUSTOM) {
-                non_client_frame_.reset(new DrawableNonClientFrame());
-            } else {
-                non_client_frame_.reset(new DefaultNonClientFrame());
-            }
-            nc_result = non_client_frame_->onNcCreate(delegate_, &nc_handled);
-            if (nc_handled) {
+        case WM_NCLBUTTONDOWN:
+            nc_result = non_client_frame_->onNcLButtonDown(wParam, lParam, handled);
+            if (*handled) {
                 return nc_result;
             }
             break;
-        }
 
-        case WM_CREATE: {
-            return TRUE;
-        }
-
-        case WM_NCDRAWCLASSIC1:
-        case WM_NCDRAWCLASSIC2: {
-            nc_result = non_client_frame_->onInterceptDrawClassic(wParam, lParam, &nc_handled);
-            if (nc_handled) {
+        case WM_NCLBUTTONUP:
+            nc_result = non_client_frame_->onNcLButtonUp(wParam, lParam, handled);
+            if (*handled) {
                 return nc_result;
             }
             break;
-        }
 
-        case WM_NCPAINT: {
-            nc_result = non_client_frame_->onNcPaint(wParam, lParam, &nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_PAINT: {
-            break;
-        }
-
-        case WM_NCACTIVATE: {
-            nc_result = non_client_frame_->onNcActivate(wParam, lParam, &nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_NCHITTEST: {
-            nc_result = non_client_frame_->onNcHitTest(wParam, lParam, &nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_NCCALCSIZE: {
-            nc_result = non_client_frame_->onNcCalSize(wParam, lParam, &nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_NCLBUTTONDOWN: {
-            nc_result = non_client_frame_->onNcLButtonDown(wParam, lParam, &nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_NCLBUTTONUP: {
-            nc_result = non_client_frame_->onNcLButtonUp(wParam, lParam, &nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_CLOSE: {
-            if (onClose()) {
-                break;
-            }
-            return 0;
-        }
-
-        case WM_DESTROY: {
-            onDestroy();
-            return 0;
-        }
-
-        case WM_NCDESTROY: {
-            nc_result = non_client_frame_->onNcDestroy(&nc_handled);
-            if (nc_handled) {
-                return nc_result;
-            }
-            break;
-        }
-
-        case WM_SHOWWINDOW: {
-            onShow(static_cast<BOOL>(wParam) == TRUE ? true : false);
-            break;
-        }
-
-        case WM_ACTIVATE: {
-            onActivate(LOWORD(wParam));
-            break;
-        }
-
-        case WM_DPICHANGED: {
-            int new_dpi_x = LOWORD(wParam);
-            int new_dpi_y = HIWORD(wParam);
-
-            auto nw_rect = reinterpret_cast<RECT*>(lParam);
-            SetWindowPos(hWnd_,
-                nullptr,
-                nw_rect->left,
-                nw_rect->top,
-                nw_rect->right - nw_rect->left,
-                nw_rect->bottom - nw_rect->top,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-            onDpiChanged(new_dpi_x, new_dpi_y);
-            break;
-        }
-
-        case WM_STYLECHANGED: {
-            onStyleChanged(
-                wParam & GWL_STYLE, wParam & GWL_EXSTYLE,
-                reinterpret_cast<const STYLESTRUCT*>(lParam));
-            break;
-        }
-
-        case WM_COPYDATA: {
-            PCOPYDATASTRUCT cds = reinterpret_cast<PCOPYDATASTRUCT>(lParam);
-            if (cds == nullptr) {
-                break;
-            }
-
-            if (onDataCopy(cds->dwData, cds->cbData, cds->lpData)) {
-                return TRUE;
-            }
-
-            return FALSE;
-        }
-
-        case WM_ERASEBKGND: {
-            return TRUE;
-        }
-
-        case WM_SETCURSOR: {
-            if (isCursorInClient()) {
-                setCurrentCursor(cursor_);
-                return TRUE;
-            }
-            break;
-        }
-
-        case WM_SETFOCUS: {
-            onSetFocus();
-            break;
-        }
-
-        case WM_KILLFOCUS: {
-            onKillFocus();
-            break;
-        }
-
-        case WM_MOVE: {
-            int x_px = LOWORD(lParam);
-            int y_px = HIWORD(lParam);
-            onMove(x_px, y_px);
-            break;
-        }
-
-        case WM_SIZE: {
-            RECT winRect;
-            ::GetWindowRect(hWnd_, &winRect);
-
-            int width_px = winRect.right - winRect.left;
-            int height_px = winRect.bottom - winRect.top;
-            int client_width_px = LOWORD(lParam);
-            int client_height_px = HIWORD(lParam);
-
-            onResize(wParam, width_px, height_px, client_width_px, client_height_px);
-            nc_result = non_client_frame_->onSize(wParam, lParam, &nc_handled);
-            break;
-        }
-
-        case WM_MOVING: {
-            auto raw_rect = reinterpret_cast<RECT*>(lParam);
-            Rect rect(
-                raw_rect->left, raw_rect->top,
-                raw_rect->right - raw_rect->left,
-                raw_rect->bottom - raw_rect->top);
-
-            bool handled = onMoving(&rect);
-            raw_rect->left = rect.left;
-            raw_rect->top = rect.top;
-            raw_rect->right = rect.right;
-            raw_rect->bottom = rect.bottom;
-
-            if (handled) {
-                return TRUE;
-            }
-            break;
-        }
-
-        case WM_SIZING: {
-            auto raw_rect = reinterpret_cast<RECT*>(lParam);
-            Rect rect(
-                raw_rect->left, raw_rect->top,
-                raw_rect->right - raw_rect->left,
-                raw_rect->bottom - raw_rect->top);
-
-            bool handled = onResizing(wParam, &rect);
-            raw_rect->left = rect.left;
-            raw_rect->top = rect.top;
-            raw_rect->right = rect.right;
-            raw_rect->bottom = rect.bottom;
-
-            if (handled) {
-                return TRUE;
-            }
-            break;
-        }
-
-        case WM_LBUTTONDOWN: {
+        case WM_LBUTTONDOWN:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
@@ -724,18 +600,21 @@ namespace ukive {
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_LBUTTONUP: {
+        case WM_LBUTTONUP:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
-            nc_result = non_client_frame_->OnLButtonUp(wParam, lParam, &nc_handled);
-            if (nc_handled) {
+            nc_result = non_client_frame_->OnLButtonUp(wParam, lParam, handled);
+            if (*handled) {
                 return nc_result;
             }
 
@@ -746,15 +625,17 @@ namespace ukive {
             ev.setMouseY(GET_Y_LPARAM(lParam));
             ev.setMouseRawX(GET_X_LPARAM(lParam));
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_RBUTTONDOWN: {
+        case WM_RBUTTONDOWN:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
@@ -765,15 +646,17 @@ namespace ukive {
             ev.setMouseY(GET_Y_LPARAM(lParam));
             ev.setMouseRawX(GET_X_LPARAM(lParam));
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_RBUTTONUP: {
+        case WM_RBUTTONUP:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
@@ -784,15 +667,17 @@ namespace ukive {
             ev.setMouseY(GET_Y_LPARAM(lParam));
             ev.setMouseRawX(GET_X_LPARAM(lParam));
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_MBUTTONDOWN: {
+        case WM_MBUTTONDOWN:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
@@ -803,15 +688,17 @@ namespace ukive {
             ev.setMouseY(GET_Y_LPARAM(lParam));
             ev.setMouseRawX(GET_X_LPARAM(lParam));
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_MBUTTONUP: {
+        case WM_MBUTTONUP:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
@@ -822,20 +709,22 @@ namespace ukive {
             ev.setMouseY(GET_Y_LPARAM(lParam));
             ev.setMouseRawX(GET_X_LPARAM(lParam));
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_MOUSEMOVE: {
+        case WM_MOUSEMOVE:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
-            nc_result = non_client_frame_->onMouseMove(wParam, lParam, &nc_handled);
-            if (nc_handled) {
+            nc_result = non_client_frame_->onMouseMove(wParam, lParam, handled);
+            if (*handled) {
                 return nc_result;
             }
 
@@ -845,43 +734,49 @@ namespace ukive {
             ev.setMouseY(GET_Y_LPARAM(lParam));
             ev.setMouseRawX(GET_X_LPARAM(lParam));
             ev.setMouseRawY(GET_Y_LPARAM(lParam));
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_MOUSELEAVE: {
+        case WM_MOUSELEAVE:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_LEAVE_WIN);
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_MOUSEHOVER: {
+        case WM_MOUSEHOVER:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_HOVER);
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
             break;
         }
 
-        case WM_MOUSEWHEEL: {
+        case WM_MOUSEWHEEL:
+        {
             if (::GetMessageExtraInfo() != 0) {
+                *handled = true;
                 return 0;
             }
 
@@ -898,87 +793,247 @@ namespace ukive {
             ev.setMouseY(pt.y);
             ev.setMouseRawX(pt.x);
             ev.setMouseRawY(pt.y);
-
             if (onInputEvent(&ev)) {
+                *handled = true;
                 return 0;
             }
-            break;
         }
-
-        case WM_KEYDOWN: {
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVK_DOWN);
-            ev.setKeyboardVirtualKey(wParam, lParam);
-
-            if (onInputEvent(&ev)) {
-                return TRUE;
-            }
-            break;
-        }
-
-        case WM_KEYUP: {
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVK_UP);
-            ev.setKeyboardVirtualKey(wParam, lParam);
-
-            if (onInputEvent(&ev)) {
-                return TRUE;
-            }
-            break;
-        }
-
-        case WM_CHAR: {
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVK_CHAR);
-            ev.setKeyboardCharKey(wParam, lParam);
-
-            if (onInputEvent(&ev)) {
-                return TRUE;
-            }
-            break;
-        }
-
-        case WM_UNICHAR: {
-            // Do nothing.
-            break;
-        }
-
-        case WM_GESTURE: {
-            // Do nothing.
-            break;
-        }
-
-        case WM_TOUCH: {
-            UINT input_count = LOWORD(wParam);
-            if (input_count == 0) {
-                break;
-            }
-
-            std::unique_ptr<TOUCHINPUT[]> inputs(new TOUCHINPUT[input_count]);
-            if (::GetTouchInputInfo(
-                reinterpret_cast<HTOUCHINPUT>(lParam), input_count, inputs.get(), sizeof(TOUCHINPUT)))
-            {
-                bool handled = onTouch(inputs.get(), input_count);
-                ::CloseTouchInputHandle(reinterpret_cast<HTOUCHINPUT>(lParam));
-
-                if (handled) {
-                    return 0;
-                }
-            }
-
-            break;
-        }
-
         default:
-            break;
+        break;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onClose(WPARAM wParam, LPARAM lParam, bool* handled) {
+        if (!onClose()) {
+            *handled = true;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onDestroy(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onDestroy();
+        *handled = true;
+        return 0;
+    }
+
+    LRESULT WindowImpl::onNCDestroy(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto nc_result = non_client_frame_->onNcDestroy(handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onShowWindow(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onShow(static_cast<BOOL>(wParam) == TRUE ? true : false);
+        return 0;
+    }
+
+    LRESULT WindowImpl::onActivate(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onActivate(LOWORD(wParam));
+        return 0;
+    }
+
+    LRESULT WindowImpl::onDPIChanged(WPARAM wParam, LPARAM lParam, bool* handled) {
+        int new_dpi_x = LOWORD(wParam);
+        int new_dpi_y = HIWORD(wParam);
+
+        auto nw_rect = reinterpret_cast<RECT*>(lParam);
+        SetWindowPos(hWnd_,
+            nullptr,
+            nw_rect->left,
+            nw_rect->top,
+            nw_rect->right - nw_rect->left,
+            nw_rect->bottom - nw_rect->top,
+            SWP_NOZORDER | SWP_NOACTIVATE);
+        onDpiChanged(new_dpi_x, new_dpi_y);
+        return 0;
+    }
+
+    LRESULT WindowImpl::onStyleChanged(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onStyleChanged(
+            wParam & GWL_STYLE, wParam & GWL_EXSTYLE,
+            reinterpret_cast<const STYLESTRUCT*>(lParam));
+        return 0;
+    }
+
+    LRESULT WindowImpl::onCopyData(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto cds = reinterpret_cast<PCOPYDATASTRUCT>(lParam);
+        if (!cds) {
+            return 0;
         }
 
-        return ::DefWindowProc(hWnd_, uMsg, wParam, lParam);
+        *handled = true;
+
+        if (onDataCopy(cds->dwData, cds->cbData, cds->lpData)) {
+            return TRUE;
+        }
+
+        return FALSE;
+    }
+
+    LRESULT WindowImpl::onEraseBkgnd(WPARAM wParam, LPARAM lParam, bool* handled) {
+        *handled = true;
+        return TRUE;
+    }
+
+    LRESULT WindowImpl::onSetCursor(WPARAM wParam, LPARAM lParam, bool* handled) {
+        if (isCursorInClient()) {
+            *handled = true;
+            setCurrentCursor(cursor_);
+            return TRUE;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onSetFocus(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onSetFocus();
+        return 0;
+    }
+
+    LRESULT WindowImpl::onKillFocus(WPARAM wParam, LPARAM lParam, bool* handled) {
+        onKillFocus();
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMove(WPARAM wParam, LPARAM lParam, bool* handled) {
+        int x_px = LOWORD(lParam);
+        int y_px = HIWORD(lParam);
+        onMove(x_px, y_px);
+        return 0;
+    }
+
+    LRESULT WindowImpl::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
+        RECT winRect;
+        ::GetWindowRect(hWnd_, &winRect);
+
+        int width_px = winRect.right - winRect.left;
+        int height_px = winRect.bottom - winRect.top;
+        int client_width_px = LOWORD(lParam);
+        int client_height_px = HIWORD(lParam);
+
+        onResize(wParam, width_px, height_px, client_width_px, client_height_px);
+        auto nc_result = non_client_frame_->onSize(wParam, lParam, handled);
+        if (*handled) {
+            return nc_result;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMoving(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto raw_rect = reinterpret_cast<RECT*>(lParam);
+        Rect rect(
+            raw_rect->left, raw_rect->top,
+            raw_rect->right - raw_rect->left,
+            raw_rect->bottom - raw_rect->top);
+
+        *handled = onMoving(&rect);
+        raw_rect->left = rect.left;
+        raw_rect->top = rect.top;
+        raw_rect->right = rect.right;
+        raw_rect->bottom = rect.bottom;
+
+        if (*handled) {
+            return TRUE;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onSizing(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto raw_rect = reinterpret_cast<RECT*>(lParam);
+        Rect rect(
+            raw_rect->left, raw_rect->top,
+            raw_rect->right - raw_rect->left,
+            raw_rect->bottom - raw_rect->top);
+
+        *handled = onResizing(wParam, &rect);
+        raw_rect->left = rect.left;
+        raw_rect->top = rect.top;
+        raw_rect->right = rect.right;
+        raw_rect->bottom = rect.bottom;
+
+        if (*handled) {
+            return TRUE;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onKeyDown(WPARAM wParam, LPARAM lParam, bool* handled) {
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVK_DOWN);
+        ev.setKeyboardVirtualKey(wParam, lParam);
+
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return TRUE;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onKeyUp(WPARAM wParam, LPARAM lParam, bool* handled) {
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVK_UP);
+        ev.setKeyboardVirtualKey(wParam, lParam);
+
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return TRUE;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onChar(WPARAM wParam, LPARAM lParam, bool* handled) {
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVK_CHAR);
+        ev.setKeyboardCharKey(wParam, lParam);
+
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return TRUE;
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onUniChar(WPARAM wParam, LPARAM lParam, bool* handled) {
+        return 0;
+    }
+
+    LRESULT WindowImpl::onGesture(WPARAM wParam, LPARAM lParam, bool* handled) {
+        return 0;
+    }
+
+    LRESULT WindowImpl::onTouch(WPARAM wParam, LPARAM lParam, bool* handled) {
+        UINT input_count = LOWORD(wParam);
+        if (input_count == 0) {
+            return 0;
+        }
+
+        std::unique_ptr<TOUCHINPUT[]> inputs(new TOUCHINPUT[input_count]);
+        if (::GetTouchInputInfo(
+            reinterpret_cast<HTOUCHINPUT>(lParam), input_count, inputs.get(), sizeof(TOUCHINPUT)))
+        {
+            *handled = onTouch(inputs.get(), input_count);
+            ::CloseTouchInputHandle(reinterpret_cast<HTOUCHINPUT>(lParam));
+
+            if (*handled) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onWindowPosChanged(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto win_pos = reinterpret_cast<WINDOWPOS*>(lParam);
+        if (win_pos->flags & (SWP_NOSIZE | SWP_FRAMECHANGED)) {
+            //onDraw({});
+        }
+        return 0;
     }
 
     LRESULT WindowImpl::processDWMProc(
-        HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP) {
-
+        HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP)
+    {
         LRESULT ret = 0;
         HRESULT hr = S_OK;
         bool call_dwp = true; // Pass on to DefWindowProc?
@@ -1008,7 +1063,7 @@ namespace ukive {
 
             margins.cxLeftWidth = 0;
             margins.cxRightWidth = 0;
-            margins.cyBottomHeight = 0;
+            margins.cyBottomHeight = 1;
             margins.cyTopHeight = 0;
 
             hr = ::DwmExtendFrameIntoClientArea(hWnd, &margins);
@@ -1030,7 +1085,9 @@ namespace ukive {
     }
 
     LRESULT CALLBACK WindowImpl::WndProc(
-        HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+        HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    {
+        WindowImpl* window = nullptr;
         if (uMsg == WM_NCCREATE) {
             //::EnableNonClientDpiScaling(hWnd);
             if (::RegisterTouchWindow(hWnd, TWF_WANTPALM) == 0) {
@@ -1038,16 +1095,14 @@ namespace ukive {
             }
 
             auto cs = reinterpret_cast<CREATESTRUCTW*>(lParam);
-            auto window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
+            window = reinterpret_cast<WindowImpl*>(cs->lpCreateParams);
             if (!window) {
                 DCHECK(Log::FATAL) << "null window creating param.";
                 return FALSE;
             }
 
             window->hWnd_ = hWnd;
-
             ::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
-            return window->messageHandler(uMsg, wParam, lParam);
         }
 
         if (uMsg == WM_NCDESTROY) {
@@ -1056,28 +1111,34 @@ namespace ukive {
             }
         }
 
-        auto window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
         if (!window) {
-            return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+            window = reinterpret_cast<WindowImpl*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
         }
 
-        bool callDWP = true;
-        BOOL dwmEnabled = FALSE;
-        LRESULT lRet = 0;
-        HRESULT hr = S_OK;
-        // Winproc worker for custom frame issues.
-        hr = ::DwmIsCompositionEnabled(&dwmEnabled);
-        if (SUCCEEDED(hr) && dwmEnabled == TRUE)
-        {
-            //lRet = window->processDWMProc(hWnd, uMsg, wParam, lParam, &callDWP);
+        if (window) {
+            bool call_dwp = true;
+            BOOL dwm_enabled = FALSE;
+            LRESULT lRet = 0;
+            // Winproc worker for custom frame issues.
+            HRESULT hr = ::DwmIsCompositionEnabled(&dwm_enabled);
+            if (SUCCEEDED(hr) && dwm_enabled == TRUE) {
+                lRet = window->processDWMProc(hWnd, uMsg, wParam, lParam, &call_dwp);
+                if (!call_dwp) {
+                    return lRet;
+                }
+            }
+
+            // Winproc worker for the rest of the application.
+            if (call_dwp) {
+                bool handled = false;
+                auto result = window->processWindowMessage(uMsg, wParam, lParam, &handled);
+                if (handled) {
+                    return result;
+                }
+            }
         }
 
-        // Winproc worker for the rest of the application.
-        if (callDWP) {
-            return window->messageHandler(uMsg, wParam, lParam);
-        }
-
-        return lRet;
+        return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
     }
 
 }
