@@ -235,6 +235,8 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="cyroneno\equations.cpp" />
     <ClCompile Include="cyroneno\image.cpp" />
     <ClCompile Include="cyroneno\matrix.cpp" />
+    <ClCompile Include="cyroneno\pipeline\pipeline.cpp" />
+    <ClCompile Include="cyroneno\pipeline\rasterizer.cpp" />
     <ClCompile Include="cyroneno\point.cpp" />
     <ClCompile Include="cyroneno\ray_tracer.cpp" />
     <ClCompile Include="cyroneno\scene.cpp" />
@@ -272,6 +274,8 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="cyroneno\equations.h" />
     <ClInclude Include="cyroneno\image.h" />
     <ClInclude Include="cyroneno\matrix.h" />
+    <ClInclude Include="cyroneno\pipeline\pipeline.h" />
+    <ClInclude Include="cyroneno\pipeline\rasterizer.h" />
     <ClInclude Include="cyroneno\point.h" />
     <ClInclude Include="cyroneno\ray_tracer.h" />
     <ClInclude Include="cyroneno\ray_tracer_structs.h" />

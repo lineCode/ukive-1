@@ -13,7 +13,7 @@ namespace cyro {
     }
 
     bool Sphere::hit(const Ray& ray, double t0, double t1, HitRecord& rec) const {
-        Quadratic quad(
+        QuadraticEqu quad(
             ray.direction*ray.direction,
             ray.direction*(ray.origin - center_) * 2,
             (ray.origin - center_)*(ray.origin - center_) - radius_ * radius_);
@@ -43,6 +43,7 @@ namespace cyro {
 
 
     //////////
+    // TODO: 不再假定平面接近平行于 xz 平面
     Plane::Plane(const std::vector<Point3>& p, const Vector3& n)
         : n_(n), points_(p) {
     }

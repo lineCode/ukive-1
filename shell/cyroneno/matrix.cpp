@@ -1,5 +1,10 @@
 #include "matrix.h"
 
+#include <cmath>
+
+#include "point.h"
+#include "vector.h"
+
 
 namespace cyro {
 
@@ -7,8 +12,15 @@ namespace cyro {
     Matrix3x3::Matrix3x3()
         : m11_(0), m12_(0), m13_(0),
           m21_(0), m22_(0), m23_(0),
-          m31_(0), m32_(0), m33_(0) {
-    }
+          m31_(0), m32_(0), m33_(0) {}
+
+    Matrix3x3::Matrix3x3(
+        double m11, double m12, double m13,
+        double m21, double m22, double m23,
+        double m31, double m32, double m33)
+        : m11_(m11), m12_(m12), m13_(m13),
+          m21_(m21), m22_(m22), m23_(m23),
+          m31_(m31), m32_(m32), m33_(m33) {}
 
     Matrix3x3::Matrix3x3(const Matrix3x3& rhs)
         : m11_(rhs.m11_), m12_(rhs.m12_), m13_(rhs.m13_),
@@ -39,6 +51,22 @@ namespace cyro {
         Matrix3x3 m(*this);
         m.mul(rhs);
         return m;
+    }
+
+    Point3 Matrix3x3::operator*(const Point3& p) {
+        return {
+            m11_ * p.x_ + m12_ * p.y_ + m13_ * p.z_,
+            m21_ * p.x_ + m22_ * p.y_ + m23_ * p.z_,
+            m31_ * p.x_ + m32_ * p.y_ + m33_ * p.z_
+        };
+    }
+
+    Vector3 Matrix3x3::operator*(const Vector3& v) {
+        return {
+            m11_ * v.x_ + m12_ * v.y_ + m13_ * v.z_,
+            m21_ * v.x_ + m22_ * v.y_ + m23_ * v.z_,
+            m31_ * v.x_ + m32_ * v.y_ + m33_ * v.z_
+        };
     }
 
     Matrix3x3 Matrix3x3::operator*(double factor) {
@@ -101,6 +129,54 @@ namespace cyro {
         m31_ /= factor; m32_ /= factor; m33_ /= factor;
     }
 
+    Matrix3x3 Matrix3x3::scale(double sx, double sy) {
+        return {
+            sx, 0,  0,
+            0,  sy, 0,
+            0,  0,  1
+        };
+    }
+
+    Matrix3x3 Matrix3x3::shearX(double s) {
+        return {
+            1, s, 0,
+            0, 1, 0,
+            0, 0, 1
+        };
+    }
+
+    Matrix3x3 Matrix3x3::shearY(double s) {
+        return {
+            1, 0, 0,
+            s, 1, 0,
+            0, 0, 1
+        };
+    }
+
+    Matrix3x3 Matrix3x3::rotate(double angle) {
+        return {
+            cos(angle), -sin(angle),  0,
+            sin(angle),  cos(angle),  0,
+            0,          0,            1
+        };
+    }
+
+    Matrix3x3 Matrix3x3::reflect(bool rx, bool ry) {
+        return {
+            (ry ? -1. : 1.), 0,               0,
+            0,               (rx ? -1. : 1.), 0,
+            0,               0,               1
+        };
+    }
+
+    Matrix3x3 Matrix3x3::translate(double tx, double ty) {
+        return {
+            1, 0, tx,
+            0, 1, ty,
+            0, 0, 1
+        };
+    }
+
 
     //////////
     Matrix4x4::Matrix4x4()
@@ -108,6 +184,16 @@ namespace cyro {
           m21_(0), m22_(0), m23_(0), m24_(0),
           m31_(0), m32_(0), m33_(0), m34_(0),
           m41_(0), m42_(0), m43_(0), m44_(0) {}
+
+    Matrix4x4::Matrix4x4(
+        double m11, double m12, double m13, double m14,
+        double m21, double m22, double m23, double m24,
+        double m31, double m32, double m33, double m34,
+        double m41, double m42, double m43, double m44)
+        : m11_(m11), m12_(m12), m13_(m13), m14_(m14),
+          m21_(m21), m22_(m22), m23_(m23), m24_(m24),
+          m31_(m31), m32_(m32), m33_(m33), m34_(m34),
+          m41_(m41), m42_(m42), m43_(m43), m44_(m44) {}
 
     Matrix4x4::Matrix4x4(const Matrix4x4& rhs)
         : m11_(rhs.m11_), m12_(rhs.m12_), m13_(rhs.m13_), m14_(rhs.m14_),
@@ -139,6 +225,24 @@ namespace cyro {
         Matrix4x4 m(*this);
         m.mul(rhs);
         return m;
+    }
+
+    Point4 Matrix4x4::operator*(const Point4& p) {
+        return {
+            m11_ * p.x_ + m12_ * p.y_ + m13_ * p.z_ + m14_ * p.w_,
+            m21_ * p.x_ + m22_ * p.y_ + m23_ * p.z_ + m24_ * p.w_,
+            m31_ * p.x_ + m32_ * p.y_ + m33_ * p.z_ + m34_ * p.w_,
+            m41_ * p.x_ + m42_ * p.y_ + m43_ * p.z_ + m44_ * p.w_
+        };
+    }
+
+    Vector4 Matrix4x4::operator*(const Vector4& v) {
+        return {
+            m11_ * v.x_ + m12_ * v.y_ + m13_ * v.z_ + m14_ * v.w_,
+            m21_ * v.x_ + m22_ * v.y_ + m23_ * v.z_ + m24_ * v.w_,
+            m31_ * v.x_ + m32_ * v.y_ + m33_ * v.z_ + m34_ * v.w_,
+            m41_ * v.x_ + m42_ * v.y_ + m43_ * v.z_ + m44_ * v.w_
+        };
     }
 
     Matrix4x4 Matrix4x4::operator*(double factor) {
@@ -214,4 +318,130 @@ namespace cyro {
         m31_ /= factor; m32_ /= factor; m33_ /= factor; m34_ /= factor;
         m41_ /= factor; m42_ /= factor; m43_ /= factor; m44_ /= factor;
     }
+
+    Matrix4x4 Matrix4x4::scale(double sx, double sy, double sz) {
+        return {
+            sx, 0,  0,  0,
+            0,  sy, 0,  0,
+            0,  0,  sz, 0,
+            0,  0,  0,  1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::shearX(double sy, double sz) {
+        return {
+            1,  sy, sz, 0,
+            0,  1,  0,  0,
+            0,  0,  1,  0,
+            0,  0,  0,  1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::shearY(double sx, double sz) {
+        // TODO:
+        return {
+            1,  sx, sz, 0,
+            0,  1,  0,  0,
+            0,  0,  1,  0,
+            0,  0,  0,  1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::shearZ(double sx, double sy) {
+        // TODO:
+        return {
+            1,  sy, sx, 0,
+            0,  1,  0,  0,
+            0,  0,  1,  0,
+            0,  0,  0,  1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::rotateX(double angle) {
+        return {
+            1, 0,          0,           0,
+            0, cos(angle), -sin(angle), 0,
+            0, sin(angle),  cos(angle), 0,
+            0, 0,          0,           1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::rotateY(double angle) {
+        return {
+            cos(angle),  0, sin(angle), 0,
+            0,           1, 0,          0,
+            -sin(angle), 0, cos(angle), 0,
+            0,           0, 0,          1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::rotateZ(double angle) {
+        return {
+            cos(angle), -sin(angle), 0, 0,
+            sin(angle),  cos(angle), 0, 0,
+            0,          0,           1, 0,
+            0,          0,           0, 1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::translate(double tx, double ty, double tz) {
+        return {
+            1, 0, 0, tx,
+            0, 1, 0, ty,
+            0, 0, 1, tz,
+            0, 0, 0, 1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::viewport(int pixel_width, int pixel_height) {
+        return {
+            pixel_width / 2.0, 0,                  0, (pixel_width - 1) / 2.0,
+            0,                 pixel_height / 2.0, 0, (pixel_height - 1) / 2.0,
+            0,                 0,                  1, 0,
+            0,                 0,                  0, 1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::orthoProj(double l, double r, double b, double t, double n, double f) {
+        return {
+            2 / (r - l), 0,           0,           -(r + l) / (r - l),
+            0,           2 / (t - b), 0,           -(t + b) / (t - b),
+            0,           0,           2 / (n - f), -(n + f) / (n - f),
+            0,           0,           0,           1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::persp(double n, double f) {
+        return {
+            n, 0, 0,     0,
+            0, n, 0,     0,
+            0, 0, n + f, -f * n,
+            0, 0, 1,     0
+        };
+    }
+
+    Matrix4x4 Matrix4x4::camera(const Vector3& eye, const Vector3& look, const Vector3& up) {
+        auto w = -look.normalize();
+        auto u = (up ^ w).normalize();
+        auto v = w ^ u;
+        return {
+            u.x_, u.y_, u.z_, -u.x_*eye.x_ - u.y_*eye.y_ - u.z_*eye.z_,
+            v.x_, v.y_, v.z_, -v.x_*eye.x_ - v.y_*eye.y_ - v.z_*eye.z_,
+            w.x_, w.y_, w.z_, -w.x_*eye.x_ - w.y_*eye.y_ - w.z_*eye.z_,
+            0,    0,    0,    1
+        };
+    }
+
+    Matrix4x4 Matrix4x4::cameraInverse(const Vector3& eye, const Vector3& look, const Vector3& up) {
+        auto w = -look.normalize();
+        auto u = (up ^ w).normalize();
+        auto v = w ^ u;
+        return {
+            u.x_, v.x_, w.x_, eye.x_,
+            u.y_, v.y_, w.y_, eye.y_,
+            u.z_, v.z_, w.z_, eye.z_,
+            0,    0,    0,    1
+        };
+    }
+
 }

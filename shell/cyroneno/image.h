@@ -10,24 +10,26 @@ namespace cyro {
 
     class Image {
     public:
-        Image(size_t width, size_t height);
+        Image(int width, int height);
 
         void setColor(int x, int y, const Color& c);
         Color getColor(int x, int y) const;
 
-        size_t width_, height_;
+        int width_, height_;
         std::vector<Color> data_;
     };
 
 
     class ImagePng {
     public:
-        ImagePng(size_t width, size_t height);
+        ImagePng(int width, int height);
+        ImagePng(int width, int height, const ColorBGRAInt& c);
 
         void setColor(int x, int y, const ColorBGRAInt& c);
+        void drawColor(int x, int y, const ColorBGRAInt& c);
         ColorBGRAInt getColor(int x, int y) const;
 
-        size_t width_, height_;
+        int width_, height_;
         std::vector<ColorBGRAInt> data_;
     };
 

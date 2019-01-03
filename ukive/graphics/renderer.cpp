@@ -299,7 +299,6 @@ namespace ukive {
     }
 
     ComPtr<ID2D1RenderTarget> Renderer::createWICRenderTarget(IWICBitmap* wic_bitmap) {
-
         ComPtr<ID2D1RenderTarget> render_target;
         auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
         if (d2d_factory) {

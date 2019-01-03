@@ -59,6 +59,9 @@
     <Filter Include="cyroneno">
       <UniqueIdentifier>{77384204-9752-4b6b-a92b-12b15077fd82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cyroneno\pipeline">
+      <UniqueIdentifier>{56095ada-0813-4191-afea-5417d242e336}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -189,6 +192,12 @@
     </ClCompile>
     <ClCompile Include="cyroneno\scene.cpp">
       <Filter>cyroneno</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\pipeline\rasterizer.cpp">
+      <Filter>cyroneno\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\pipeline\pipeline.cpp">
+      <Filter>cyroneno\pipeline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -323,6 +332,12 @@
     </ClInclude>
     <ClInclude Include="cyroneno\ray_tracer_structs.h">
       <Filter>cyroneno</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\pipeline\rasterizer.h">
+      <Filter>cyroneno\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\pipeline\pipeline.h">
+      <Filter>cyroneno\pipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

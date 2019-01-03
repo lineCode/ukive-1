@@ -59,6 +59,9 @@ namespace cyro {
     Point3::Point3(double x, double y, double z)
         : x_(x), y_(y), z_(z) {}
 
+    Point3::Point3(const Point2& p, double z)
+        : x_(p.x_), y_(p.y_), z_(z) {}
+
     Point3::Point3(const Point3& rhs)
         : x_(rhs.x_), y_(rhs.y_), z_(rhs.z_) {}
 
@@ -86,6 +89,10 @@ namespace cyro {
         return p;
     }
 
+    Vector3 Point3::toVector() const {
+        return Vector3(x_, y_, z_ );
+    }
+
     void Point3::add(const Vector3& rhs) {
         x_ += rhs.x_;
         y_ += rhs.y_;
@@ -97,4 +104,66 @@ namespace cyro {
         y_ -= rhs.y_;
         z_ -= rhs.z_;
     }
+
+
+    ///////////
+    Point4::Point4()
+        : x_(0), y_(0), z_(0), w_(0) {}
+
+    Point4::Point4(double x, double y, double z, double w)
+        : x_(x), y_(y), z_(z), w_(w) {}
+
+    Point4::Point4(const Point3& p, double w)
+        : x_(p.x_), y_(p.y_), z_(p.z_), w_(w) {}
+
+    Point4::Point4(const Point4& rhs)
+        : x_(rhs.x_), y_(rhs.y_), z_(rhs.z_), w_(rhs.w_) {}
+
+    Point4& Point4::operator=(const Point4& rhs) {
+        x_ = rhs.x_;
+        y_ = rhs.y_;
+        z_ = rhs.z_;
+        w_ = rhs.w_;
+        return *this;
+    }
+
+    Point4 Point4::operator+(const Vector4& rhs) const {
+        Point4 p(*this);
+        p.add(rhs);
+        return p;
+    }
+
+    Vector4 Point4::operator-(const Point4& rhs) const {
+        Vector4 v(x_ - rhs.x_, y_ - rhs.y_, z_ - rhs.z_, w_ - rhs.w_);
+        return v;
+    }
+
+    Point4 Point4::operator-(const Vector4& rhs) const {
+        Point4 p(*this);
+        p.sub(rhs);
+        return p;
+    }
+
+    Vector4 Point4::toVector() const {
+        return Vector4(x_, y_, z_, w_);
+    }
+
+    void Point4::add(const Vector4& rhs) {
+        x_ += rhs.x_;
+        y_ += rhs.y_;
+        z_ += rhs.z_;
+        w_ += rhs.w_;
+    }
+
+    void Point4::sub(const Vector4& rhs) {
+        x_ -= rhs.x_;
+        y_ -= rhs.y_;
+        z_ -= rhs.z_;
+        w_ -= rhs.w_;
+    }
+
+    Point3 Point4::toPoint3() const {
+        return { x_, y_, z_ };
+    }
+
 }

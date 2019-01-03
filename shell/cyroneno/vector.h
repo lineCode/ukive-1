@@ -18,13 +18,14 @@ namespace cyro {
         Vector2 operator*(double factor) const;
         Vector2 operator/(double factor) const;
         double operator*(const Vector2& rhs) const;
+        Vector2 normalize() const;
 
-        void normalize();
         void add(const Vector2& rhs);
         void sub(const Vector2& rhs);
         void mul(double factor);
         void div(double factor);
         void inv();
+        void nor();
 
         double length() const;
 
@@ -47,14 +48,15 @@ namespace cyro {
         Vector3 operator/(double factor) const;
         double operator*(const Vector3& rhs) const;
         Vector3 operator^(const Vector3& rhs) const;
+        Vector3 normalize() const;
 
-        void normalize();
         void add(const Vector3& rhs);
         void sub(const Vector3& rhs);
         void mul(double factor);
         void div(double factor);
         void cross(const Vector3& rhs);
         void inv();
+        void nor();
 
         double length() const;
 
@@ -76,13 +78,14 @@ namespace cyro {
         Vector4 operator*(double factor) const;
         Vector4 operator/(double factor) const;
         double operator*(const Vector4& rhs) const;
+        Vector4 normalize() const;
 
-        void normalize();
         void add(const Vector4& rhs);
         void sub(const Vector4& rhs);
         void mul(double factor);
         void div(double factor);
         void inv();
+        void nor();
 
         double length() const;
 

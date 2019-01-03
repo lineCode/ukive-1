@@ -24,10 +24,8 @@ namespace cyro {
         Vector3 view_dir(0, -0.3, -1);
         Vector3 up_vector(0, 1, 0);
 
-        Vector3 cb_w = -view_dir;
-        cb_w.normalize();
-        Vector3 cb_u = up_vector ^ cb_w;
-        cb_u.normalize();
+        Vector3 cb_w = -view_dir.normalize();
+        Vector3 cb_u = (up_vector ^ cb_w).normalize();
         Vector3 cb_v = cb_w ^ cb_u;
 
         ImagePng image(img_width, img_height);
@@ -48,7 +46,7 @@ namespace cyro {
                 }
 
                 auto color = rayColor(ray, 0, std::numeric_limits<double>::max());
-                image.setColor(i, img_height - j - 1, color.toBGRAInt(255));
+                image.setColor(i, j, color.toBGRAInt(255));
             }
         }
 
@@ -111,11 +109,8 @@ namespace cyro {
 
             {
                 // 镜面反射（可能反射多次）
-                auto vv = ray.origin - hit.p;
-                vv.normalize();
-
-                auto re = -vv + hit.n*(2 * (vv*hit.n));
-                re.normalize();
+                auto vv = (ray.origin - hit.p).normalize();
+                auto re = (-vv + hit.n*(2 * (vv*hit.n))).normalize();
 
                 Ray re_ray;
                 re_ray.origin = hit.p;
@@ -125,12 +120,9 @@ namespace cyro {
             }
 
             for (const auto& light : lights_) {
-                auto lv = light.pos - hit.p;
-                lv.normalize();
-                auto vv = ray.origin - hit.p;
-                vv.normalize();
-                auto hv = vv + lv;
-                hv.normalize();
+                auto lv = (light.pos - hit.p).normalize();
+                auto vv = (ray.origin - hit.p).normalize();
+                auto hv = (vv + lv).normalize();
 
                 Ray shadow_ray;
                 shadow_ray.direction = lv;

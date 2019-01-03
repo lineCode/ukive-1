@@ -84,12 +84,12 @@ int APIENTRY wWinMain(
     ////dar_window->setTranslucent(true);
     //dar_window->center();
     //dar_window->show();
-	
-	auto cyro_window = std::make_shared<shell::CyronenoWindow>();
-    cyro_window->setTitle(L"3D Motion");
+
+    auto cyro_window = std::make_shared<shell::CyronenoWindow>();
+    cyro_window->setTitle(L"Cyroneno");
     cyro_window->setWidth(ukive::Application::dpToPx(600));
     cyro_window->setHeight(ukive::Application::dpToPx(600));
-    //cyro_window->setTranslucent(true);
+    cyro_window->setFrameType(ukive::Window::FRAME_CUSTOM);
     cyro_window->center();
     cyro_window->show();
 

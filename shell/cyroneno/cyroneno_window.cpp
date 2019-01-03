@@ -5,8 +5,11 @@
 #include "ukive/application.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap_factory.h"
+#include "ukive/graphics/point.h"
 #include "shell/cyroneno/ray_tracer.h"
-
+#include "shell/cyroneno/pipeline/rasterizer.h"
+#include "shell/cyroneno/pipeline/pipeline.h"
+#include "ukive/log.h"
 
 namespace {
     constexpr auto IMAGE_WIDTH = 400;
@@ -21,8 +24,24 @@ namespace shell {
     void CyronenoWindow::onCreate() {
         Window::onCreate();
 
-        cyro::RayTracer ray_tracer;
-        auto image = ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT);
+        showTitleBar();
+        setBackgroundColor(ukive::Color(0.5f, 0.5f, 0.5f));
+
+        /*cyro::RayTracer ray_tracer;
+        auto image = ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT);*/
+
+        /*cyro::Rasterizer rasterizer(IMAGE_WIDTH, IMAGE_HEIGHT);
+        rasterizer.drawLine({100, 100}, {200, 99}, cyro::Color(0, 0, 0, 1));
+        rasterizer.drawTriangle(
+            {50, 50}, {70, 200}, {300, 50},
+            cyro::Color(1, 0, 0, 1),
+            cyro::Color(0, 1, 0, 1),
+            cyro::Color(0, 0, 1, 1));
+        auto image = rasterizer.getOutput();*/
+
+        cyro::Pipeline pipeline(IMAGE_WIDTH, IMAGE_HEIGHT);
+        pipeline.launch();
+        auto image = pipeline.getOutput();
 
         auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_.data());
 

@@ -195,7 +195,7 @@ namespace ukive {
         if (!window_->isTranslucent() && Application::isAeroEnabled()) {
             window_->setWindowStyle(WS_CAPTION, false, true);
             // 切回 Aero 时，窗口阴影不会立刻显示，这里让它显示出来。
-            MARGINS margins = { 0,0,0,1 };
+            MARGINS margins = { 0, 0, 0, 1 };
             ::DwmExtendFrameIntoClientArea(window_->getHandle(), &margins);
             window_->sendFrameChanged();
         }

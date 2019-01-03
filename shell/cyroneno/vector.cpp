@@ -58,10 +58,10 @@ namespace cyro {
         return x_ * rhs.x_ + y_ * rhs.y_;
     }
 
-    void Vector2::normalize() {
-        auto l = length();
-        x_ /= l;
-        y_ /= l;
+    Vector2 Vector2::normalize() const {
+        Vector2 v(*this);
+        v.nor();
+        return v;
     }
 
     void Vector2::add(const Vector2& rhs) {
@@ -87,6 +87,12 @@ namespace cyro {
     void Vector2::inv() {
         x_ = -x_;
         y_ = -y_;
+    }
+
+    void Vector2::nor() {
+        auto l = length();
+        x_ /= l;
+        y_ /= l;
     }
 
     double Vector2::length() const {
@@ -154,11 +160,10 @@ namespace cyro {
         return v;
     }
 
-    void Vector3::normalize() {
-        auto l = length();
-        x_ /= l;
-        y_ /= l;
-        z_ /= l;
+    Vector3 Vector3::normalize() const {
+        Vector3 v(*this);
+        v.nor();
+        return v;
     }
 
     void Vector3::add(const Vector3& rhs) {
@@ -198,6 +203,13 @@ namespace cyro {
         x_ = -x_;
         y_ = -y_;
         z_ = -z_;
+    }
+
+    void Vector3::nor() {
+        auto l = length();
+        x_ /= l;
+        y_ /= l;
+        z_ /= l;
     }
 
     double Vector3::length() const {
@@ -260,12 +272,10 @@ namespace cyro {
         return x_ * rhs.x_ + y_ * rhs.y_ + z_ * rhs.z_ + w_ * rhs.w_;
     }
 
-    void Vector4::normalize() {
-        auto l = length();
-        x_ /= l;
-        y_ /= l;
-        z_ /= l;
-        w_ /= l;
+    Vector4 Vector4::normalize() const {
+        Vector4 v(*this);
+        v.nor();
+        return v;
     }
 
     void Vector4::add(const Vector4& rhs) {
@@ -301,6 +311,14 @@ namespace cyro {
         y_ = -y_;
         z_ = -z_;
         w_ = -w_;
+    }
+
+    void Vector4::nor() {
+        auto l = length();
+        x_ /= l;
+        y_ /= l;
+        z_ /= l;
+        w_ /= l;
     }
 
     double Vector4::length() const {
