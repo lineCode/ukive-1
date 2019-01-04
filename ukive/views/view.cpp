@@ -514,10 +514,6 @@ namespace ukive {
             content_width, content_height);
     }
 
-    View* View::findViewById(int id) {
-        return nullptr;
-    }
-
     bool View::isEnabled() const {
         return is_enabled_;
     }
@@ -904,11 +900,9 @@ namespace ukive {
         dispatchDiscardPendingOperations();
     }
 
-    void View::dispatchDraw(Canvas* canvas) {}
-
-    void View::dispatchDiscardFocus() {}
-
-    void View::dispatchDiscardPendingOperations() {}
+    View* View::findViewById(int id) const {
+        return nullptr;
+    }
 
     bool View::dispatchInputEvent(InputEvent* e) {
         e->setMouseX(e->getMouseX() - bounds_.left);
@@ -917,8 +911,8 @@ namespace ukive {
         return onInputEvent(e);
     }
 
-    void View::dispatchWindowFocusChanged(bool windowFocus) {
-        onWindowFocusChanged(windowFocus);
+    void View::dispatchWindowFocusChanged(bool focus) {
+        onWindowFocusChanged(focus);
     }
 
     void View::dispatchWindowDpiChanged(int dpi_x, int dpi_y) {
@@ -945,9 +939,6 @@ namespace ukive {
             animator_->cancel();
         }
     }
-
-    void View::onDraw(Canvas* canvas) {}
-    void View::onDrawOverChildren(Canvas* canvas) {}
 
     bool View::onInputEvent(InputEvent* e) {
         bool should_refresh = false;
@@ -1084,10 +1075,6 @@ namespace ukive {
             height > min_height_ ? height : min_height_);
     }
 
-    void View::onLayout(
-        bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom) {}
-
     bool View::onCheckIsTextEditor() {
         return false;
     }
@@ -1095,10 +1082,6 @@ namespace ukive {
     InputConnection* View::onCreateInputConnection() {
         return nullptr;
     }
-
-    void View::onSizeChanged(int width, int height, int old_width, int old_height) {}
-
-    void View::onVisibilityChanged(int visibility) {}
 
     void View::onFocusChanged(bool get_focus) {
         if (get_focus) {
@@ -1161,10 +1144,5 @@ namespace ukive {
             }
         }
     }
-
-    void View::onWindowDpiChanged(int dpi_x, int dpi_y) {}
-
-    void View::onScrollChanged(
-        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {}
 
 }

@@ -164,8 +164,6 @@ namespace ukive {
         void measure(int width, int height, int width_mode, int height_mode);
         void layout(int left, int top, int right, int bottom);
 
-        virtual View* findViewById(int id);
-
         virtual void invalidate();
         virtual void invalidate(const Rect &rect);
         virtual void invalidate(int left, int top, int right, int bottom);
@@ -175,8 +173,9 @@ namespace ukive {
         void discardFocus();
         void discardPendingOperations();
 
+        virtual View* findViewById(int id) const;
         virtual bool dispatchInputEvent(InputEvent* e);
-        virtual void dispatchWindowFocusChanged(bool window_focus);
+        virtual void dispatchWindowFocusChanged(bool focus);
         virtual void dispatchWindowDpiChanged(int dpi_x, int dpi_y);
 
         virtual void onAttachedToWindow();
@@ -193,29 +192,30 @@ namespace ukive {
         void drawBackground(Canvas* canvas);
         void drawForeground(Canvas* canvas);
 
-        virtual void dispatchDraw(Canvas* canvas);
-        virtual void dispatchDiscardFocus();
-        virtual void dispatchDiscardPendingOperations();
+        virtual void dispatchDraw(Canvas* canvas) {}
+        virtual void dispatchDiscardFocus() {}
+        virtual void dispatchDiscardPendingOperations() {}
 
-        virtual void onDraw(Canvas* canvas);
-        virtual void onDrawOverChildren(Canvas* canvas);
+        virtual void onDraw(Canvas* canvas) {}
+        virtual void onDrawOverChildren(Canvas* canvas) {}
         virtual void onMeasure(
             int width, int height,
             int width_mode, int height_mode);
         virtual void onLayout(
             bool changed, bool size_changed,
-            int left, int top, int right, int bottom);
+            int left, int top, int right, int bottom) {}
         virtual bool onInputEvent(InputEvent* e);
 
         virtual bool onCheckIsTextEditor();
         virtual InputConnection* onCreateInputConnection();
 
-        virtual void onSizeChanged(int width, int height, int old_width, int old_height);
-        virtual void onVisibilityChanged(int visibility);
+        virtual void onSizeChanged(int width, int height, int old_width, int old_height) {}
+        virtual void onVisibilityChanged(int visibility) {}
         virtual void onFocusChanged(bool get_focus);
         virtual void onWindowFocusChanged(bool window_focus);
-        virtual void onWindowDpiChanged(int dpi_x, int dpi_y);
-        virtual void onScrollChanged(int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y);
+        virtual void onWindowDpiChanged(int dpi_x, int dpi_y) {}
+        virtual void onScrollChanged(
+            int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {}
 
     private:
         enum Flags : uint32_t {

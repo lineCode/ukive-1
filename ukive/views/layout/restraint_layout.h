@@ -18,7 +18,6 @@ namespace ukive {
         bool checkLayoutParams(LayoutParams* lp) override;
 
     private:
-        View* getChildById(int id);
         void clearMeasureFlag();
 
         void measureRestrainedChildren(

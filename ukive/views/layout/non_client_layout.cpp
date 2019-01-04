@@ -123,7 +123,7 @@ namespace ukive {
         View* child = nullptr;
         LayoutParams* lp = nullptr;
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
                 lp = child->getLayoutParams();

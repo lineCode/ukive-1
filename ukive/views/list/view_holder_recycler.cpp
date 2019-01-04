@@ -14,25 +14,14 @@ namespace ukive {
         DCHECK(holder);
 
         holder->recycled = false;
-        visible_holders_.push_back(holder);
         parent_->addView(holder->item_view);
     }
 
     void ViewHolderRecycler::addToParent(ListAdapter::ViewHolder* holder, int pos) {
         DCHECK(holder && pos >= 0);
 
-        int index = 0;
-        for (auto it = visible_holders_.begin();
-            it != visible_holders_.end(); ++it) {
-            if (index == pos) {
-                holder->recycled = false;
-                visible_holders_.insert(it, holder);
-                parent_->addView(pos, holder->item_view);
-                return;
-            }
-
-            ++index;
-        }
+        holder->recycled = false;
+        parent_->addView(pos, holder->item_view);
     }
 
     void ViewHolderRecycler::addToRecycler(ListAdapter::ViewHolder* holder) {
@@ -42,69 +31,12 @@ namespace ukive {
         recycled_holders_[holder->item_id].push_back(holder);
     }
 
-    void ViewHolderRecycler::recycleFromParent(View* item_view) {
-        DCHECK(item_view);
+    void ViewHolderRecycler::recycleFromParent(ListAdapter::ViewHolder* holder) {
+        DCHECK(holder);
 
-        for (auto it = visible_holders_.begin();
-            it != visible_holders_.end(); ++it) {
-            auto holder = *it;
-            if (holder->item_view == item_view) {
-                holder->recycled = true;
-                recycled_holders_[holder->item_id].push_back(holder);
-                visible_holders_.erase(it);
-                parent_->removeView(item_view, false);
-                return;
-            }
-        }
-    }
-
-    void ViewHolderRecycler::recycleFromParent(int start_pos) {
-        DCHECK(start_pos >= 0);
-
-        int index = 0;
-        for (auto it = visible_holders_.begin();
-            it != visible_holders_.end();) {
-            if (index >= start_pos) {
-                auto holder = *it;
-                holder->recycled = true;
-                recycled_holders_[holder->item_id].push_back(holder);
-                it = visible_holders_.erase(it);
-                parent_->removeView(holder->item_view, false);
-            } else {
-                ++it;
-            }
-
-            ++index;
-        }
-    }
-
-    void ViewHolderRecycler::recycleFromParent(int start_pos, int length) {
-        DCHECK(start_pos >= 0 && length > 0);
-        if (length == 0) {
-            return;
-        }
-
-        int index = 0;
-        int length_index = 0;
-        for (auto it = visible_holders_.begin();
-            it != visible_holders_.end();) {
-            if (index >= start_pos) {
-                auto holder = *it;
-                holder->recycled = true;
-                recycled_holders_[holder->item_id].push_back(holder);
-                it = visible_holders_.erase(it);
-                parent_->removeView(holder->item_view, false);
-
-                ++length_index;
-                if (length_index == length) {
-                    break;
-                }
-            } else {
-                ++it;
-            }
-
-            ++index;
-        }
+        holder->recycled = true;
+        recycled_holders_[holder->item_id].push_back(holder);
+        parent_->removeView(holder->item_view, false);
     }
 
     ListAdapter::ViewHolder* ViewHolderRecycler::reuse(int item_id) {
@@ -135,35 +67,13 @@ namespace ukive {
         return holder;
     }
 
-    ListAdapter::ViewHolder* ViewHolderRecycler::getVisible(int pos) {
-        DCHECK(pos >= 0);
-
-        int index = 0;
-        for (auto it = visible_holders_.begin();
-            it != visible_holders_.end(); ++it) {
-            if (index == pos) {
-                return *it;
-            }
-            ++index;
-        }
-
-        return nullptr;
-    }
-
-    int ViewHolderRecycler::getVisibleCount() {
-        return visible_holders_.size();
-    }
-
     int ViewHolderRecycler::getRecycledCount(int item_id) {
         return recycled_holders_[item_id].size();
     }
 
-    void ViewHolderRecycler::clearAll() {
-        STLDeleteElements(&visible_holders_);
-
-        for (auto it = recycled_holders_.begin();
-            it != recycled_holders_.end(); ++it) {
-            STLDeleteElements(&it->second);
+    void ViewHolderRecycler::clear() {
+        for (auto& pair : recycled_holders_) {
+            STLDeleteElements(&pair.second);
         }
 
         recycled_holders_.clear();

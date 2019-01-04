@@ -33,12 +33,11 @@ namespace ukive {
         int parentWidth, int parentHeight,
         int parentWidthMode, int parentHeightMode)
     {
-        for (size_t i = 0; i < getChildCount(); ++i)
-        {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED)
             {
-                LinearLayoutParams* child_lp = (LinearLayoutParams*)child->getLayoutParams();
+                auto child_lp = static_cast<LinearLayoutParams*>(child->getLayoutParams());
 
                 int hori_padding = getPaddingLeft() + getPaddingRight();
                 int vert_padding = getPaddingTop() + getPaddingBottom();
@@ -80,7 +79,7 @@ namespace ukive {
         int parentWidth, int parentHeight,
         int parentWidthMode, int parentHeightMode)
     {
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED)
             {
@@ -117,10 +116,10 @@ namespace ukive {
         int parentWidthMode, int parentHeightMode) {
         int total_weight = 0;
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
-                LinearLayoutParams* lp = (LinearLayoutParams*)child->getLayoutParams();
+                auto lp = static_cast<LinearLayoutParams*>(child->getLayoutParams());
                 total_weight += lp->weight;
             }
         }
@@ -170,7 +169,7 @@ namespace ukive {
         case FIT: {
             View* child = nullptr;
             LayoutParams* lp = nullptr;
-            for (size_t i = 0; i < getChildCount(); ++i) {
+            for (int i = 0; i < getChildCount(); ++i) {
                 child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     lp = child->getLayoutParams();
@@ -185,7 +184,7 @@ namespace ukive {
         case UNKNOWN: {
             View* child = nullptr;
             LayoutParams* lp = nullptr;
-            for (size_t i = 0; i < getChildCount(); ++i) {
+            for (int i = 0; i < getChildCount(); ++i) {
                 child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     lp = child->getLayoutParams();
@@ -219,7 +218,7 @@ namespace ukive {
         case FIT: {
             View* child = nullptr;
             LayoutParams* lp = nullptr;
-            for (size_t i = 0; i < getChildCount(); ++i) {
+            for (int i = 0; i < getChildCount(); ++i) {
                 child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     lp = child->getLayoutParams();
@@ -234,7 +233,7 @@ namespace ukive {
         case UNKNOWN: {
             View* child = nullptr;
             LayoutParams* lp = nullptr;
-            for (size_t i = 0; i < getChildCount(); ++i) {
+            for (int i = 0; i < getChildCount(); ++i) {
                 child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     lp = child->getLayoutParams();
@@ -277,7 +276,7 @@ namespace ukive {
 
         int cur_top = getPaddingTop();
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
                 lp = child->getLayoutParams();
@@ -304,7 +303,7 @@ namespace ukive {
 
         int cur_left = getPaddingLeft();
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
                 lp = child->getLayoutParams();

@@ -18,6 +18,8 @@
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
 #include "ukive/utils/weak_bind.h"
+#include "ukive/views/list/grid_list_layouter.h"
+#include "ukive/views/list/linear_list_layouter.h"
 
 #include "shell/test/list/test_adapter.h"
 
@@ -132,21 +134,22 @@ namespace shell {
     }
 
     void TestWindow::inflateListView() {
-        ukive::LinearLayout* linearLayout = new ukive::LinearLayout(this);
+        auto linearLayout = new ukive::LinearLayout(this);
         linearLayout->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
 
         setContentView(linearLayout);
 
-        TestAdapter* adapter = new TestAdapter();
-        for (int i = 0; i < 8; ++i) {
+        auto adapter = new TestAdapter();
+        for (int i = 0; i < 36; ++i) {
             adapter->AddItem(0, L"test", L"test test");
         }
 
-        ukive::ListView* list_view = new ukive::ListView(this);
+        auto list_view = new ukive::ListView(this);
+        list_view->setLayouter(new ukive::GridListLayouter());
         list_view->setAdapter(adapter);
 
-        ukive::LayoutParams* lp = new ukive::LayoutParams(
+        auto lp = new ukive::LayoutParams(
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::MATCH_PARENT);
         lp->leftMargin = lp->rightMargin

@@ -21,7 +21,13 @@ namespace shell {
         layout->setLayoutParams(
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT));
 
-        typedef ukive::RestraintLayoutParams Rlp;
+        auto layout_lp = layout->getLayoutParams();
+        layout_lp->leftMargin = 4;
+        layout_lp->topMargin = 4;
+        layout_lp->rightMargin = 4;
+        layout_lp->bottomMargin = 4;
+
+        using Rlp = ukive::RestraintLayoutParams;
 
         auto avatar_view = new ukive::ImageView(parent->getWindow());
         avatar_view->setId(ID_AVATAR);

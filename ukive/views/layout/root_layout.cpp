@@ -110,7 +110,7 @@ namespace ukive {
         getWindow()->requestLayout();
     }
 
-    View* RootLayout::findViewById(int id) {
+    View* RootLayout::findViewById(int id) const {
         return content_layout_->findViewById(id);
     }
 

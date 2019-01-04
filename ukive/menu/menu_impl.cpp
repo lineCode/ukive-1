@@ -39,7 +39,7 @@ namespace ukive {
         view->setOnClickListener(this);
 
         int insertedIndex = getChildCount();
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             MenuItem* childItem = dynamic_cast<MenuItem*>(child);
             if (childItem->getItemOrder() > order) {
@@ -57,9 +57,9 @@ namespace ukive {
     bool MenuImpl::removeItem(int id) {
         bool removed = false;
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
-            MenuItem* item = dynamic_cast<MenuItem*>(child);
+            auto item = dynamic_cast<MenuItem*>(child);
             if (item && item->getItemId() == id) {
                 removeView(child);
 
@@ -72,7 +72,7 @@ namespace ukive {
     }
 
     bool MenuImpl::hasItem(int id) {
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             MenuItem* item = dynamic_cast<MenuItem*>(child);
             if (item && item->getItemId() == id) {
@@ -84,7 +84,7 @@ namespace ukive {
     }
 
     MenuItem* MenuImpl::findItem(int id) {
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             MenuItem* item = dynamic_cast<MenuItem*>(child);
             if (item && item->getItemId() == id) {

@@ -10,6 +10,7 @@
 
 namespace ukive {
 
+    class ListLayouter;
     class OverlayScrollBar;
     class ViewHolderRecycler;
 
@@ -17,27 +18,31 @@ namespace ukive {
     public:
         explicit ListView(Window* w);
 
+        // ViewGroup
         void onLayout(
             bool changed, bool size_changed,
             int left, int top, int right, int bottom) override;
         bool onInputEvent(InputEvent* e) override;
-
         void onDraw(Canvas* canvas) override;
         void onDrawOverChildren(Canvas* canvas) override;
 
         void setAdapter(ListAdapter* adapter);
+        void setLayouter(ListLayouter* layouter);
         void scrollToPosition(int pos, int offset, bool smooth);
 
     private:
         int determineVerticalScroll(int dy);
         void offsetChildViewTopAndBottom(int dy);
-        ListAdapter::ViewHolder* getBindViewHolderAt(int index, int i);
+        ListAdapter::ViewHolder* makeNewBindViewHolder(int adapter_pos, int view_index);
+        void recycleViewHolder(ListAdapter::ViewHolder* holder);
 
-        ListAdapter::ViewHolder* getFirstVisibleVH();
-        ListAdapter::ViewHolder* getLastVisibleVH();
+        int findViewIndexFromStart(ListAdapter::ViewHolder* holder) const;
+        int findViewIndexFromEnd(ListAdapter::ViewHolder* holder) const;
 
-        void recycleTopViews(int offset);
-        void recycleBottomViews(int offset);
+        int measureViewHolder(
+            ListAdapter::ViewHolder* holder, int width);
+        void layoutViewHolder(
+            ListAdapter::ViewHolder* holder, int left, int top, int width, int height);
 
         void updateOverlayScrollBar();
         void recordCurPositionAndOffset();
@@ -45,11 +50,11 @@ namespace ukive {
         int fillTopChildViews(int dy);
         int fillBottomChildViews(int dy);
 
-        void locateToPosition(int pos, int offset = 0);
-        void scrollToPosition(int pos, int offset = 0);
-        void smoothScrollToPosition(int pos, int offset = 0);
+        void layoutAtPosition(bool cur);
+        void directScrollToPosition(int pos, int offset, bool cur);
+        void smoothScrollToPosition(int pos, int offset);
 
-        void scrollByScrollBar(int dy);
+        void onScrollBarChanged(int dy);
 
         // ListScrollDelegate:
         //void OnScroll(float dx, float dy) OVERRIDE;
@@ -60,13 +65,15 @@ namespace ukive {
         void onItemRangeChanged(int start_pos, int length) override;
         void onItemRangeRemoved(int start_pos, int length) override;
 
-        int cur_position_;
-        int cur_offset_in_position_;
         bool initial_layouted_;
 
         std::unique_ptr<ListAdapter> adapter_;
+        std::unique_ptr<ListLayouter> layouter_;
         std::unique_ptr<OverlayScrollBar> scroll_bar_;
         std::unique_ptr<ViewHolderRecycler> recycler_;
+
+        friend class GridListLayouter;
+        friend class LinearListLayouter;
     };
 
 }

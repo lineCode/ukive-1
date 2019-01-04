@@ -690,25 +690,25 @@ namespace ukive {
 
     bool Window::onInputEvent(InputEvent* e) {
         if (e->isMouseEvent()) {
-            // 若有之前捕获过鼠标的 View 存在，则直接将所有事件
+            // 若有之前捕获过鼠标的 View 存在，则直接将所有鼠标事件
             // 直接发送至该Widget。
-            if (mouse_holder_
-                && mouse_holder_->getVisibility() == View::VISIBLE
-                && mouse_holder_->isEnabled()) {
-
+            if (mouse_holder_ &&
+                mouse_holder_->getVisibility() == View::VISIBLE &&
+                mouse_holder_->isEnabled())
+            {
                 // 进行坐标变换，将目标 View 左上角映射为(0, 0)。
-                int totalLeft = 0;
-                int totalTop = 0;
-                View* parent = mouse_holder_->getParent();
+                int total_left = 0;
+                int total_top = 0;
+                auto parent = mouse_holder_->getParent();
                 while (parent) {
-                    totalLeft += (parent->getLeft() - parent->getScrollX());
-                    totalTop += (parent->getTop() - parent->getScrollY());
+                    total_left += (parent->getLeft() - parent->getScrollX());
+                    total_top += (parent->getTop() - parent->getScrollY());
 
                     parent = parent->getParent();
                 }
 
-                e->setMouseX(e->getMouseX() - totalLeft);
-                e->setMouseY(e->getMouseY() - totalTop);
+                e->setMouseX(e->getMouseX() - total_left);
+                e->setMouseY(e->getMouseY() - total_top);
                 e->setIsMouseCaptured(true);
 
                 return mouse_holder_->dispatchInputEvent(e);
@@ -772,10 +772,12 @@ namespace ukive {
 
     void Window::AnimStateChangedListener::onStateChanged(
         UI_ANIMATION_MANAGER_STATUS newStatus,
-        UI_ANIMATION_MANAGER_STATUS previousStatus) {
-        if (newStatus == UI_ANIMATION_MANAGER_BUSY
-            && previousStatus == UI_ANIMATION_MANAGER_IDLE)
+        UI_ANIMATION_MANAGER_STATUS previousStatus)
+    {
+        if (newStatus == UI_ANIMATION_MANAGER_BUSY &&
+            previousStatus == UI_ANIMATION_MANAGER_IDLE) {
             win_->invalidate();
+        }
     }
 
 
