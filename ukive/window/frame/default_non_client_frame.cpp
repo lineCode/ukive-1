@@ -3,7 +3,7 @@
 
 namespace ukive {
 
-    int DefaultNonClientFrame::onNcCreate(ukive::Window* w, bool* handled) {
+    int DefaultNonClientFrame::onNcCreate(WindowImpl* w, bool* handled) {
         *handled = false;
         return TRUE;
     }
@@ -38,8 +38,12 @@ namespace ukive {
         return FALSE;
     }
 
-    LRESULT DefaultNonClientFrame::onNcHitTest(WPARAM wParam, LPARAM lParam, bool* handled) {
+    LRESULT DefaultNonClientFrame::onNcHitTest(
+        WPARAM wParam, LPARAM lParam, bool* handled,
+        bool* pass_to_window, POINT* p)
+    {
         *handled = false;
+        *pass_to_window = false;
         return HTNOWHERE;
     }
 
@@ -54,6 +58,11 @@ namespace ukive {
     }
 
     LRESULT DefaultNonClientFrame::onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) {
+        *handled = false;
+        return FALSE;
+    }
+
+    LRESULT DefaultNonClientFrame::onDwmCompositionChanged(bool* handled) {
         *handled = false;
         return FALSE;
     }

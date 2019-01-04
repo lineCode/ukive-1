@@ -42,6 +42,9 @@ namespace ukive {
 
         void show();
         void hide();
+        void minimize();
+        void maximize();
+        void restore();
         void focus();
         void close();
         void center();
@@ -66,6 +69,8 @@ namespace ukive {
         bool isShowing() const;
         bool isCursorInClient() const;
         bool isTranslucent() const;
+        bool isMinimum() const;
+        bool isMaximum() const;
 
         void setMouseCaptureRaw();
         void releaseMouseCaptureRaw();
@@ -76,11 +81,13 @@ namespace ukive {
         float dpToPx(float dp);
         float pxToDp(float px);
 
+        void setWindowStyle(int style, bool ex, bool enabled);
+        void sendFrameChanged();
+
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     private:
-        void setWindowStyle(int style, bool ex, bool enabled);
-        void sendFrameChanged();
+        void setWindowRectShape();
 
         LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP);
 
@@ -119,6 +126,7 @@ namespace ukive {
             WINDOW_MSG_HANDLER(WM_UNICHAR, onUniChar);
             WINDOW_MSG_HANDLER(WM_GESTURE, onGesture);
             WINDOW_MSG_HANDLER(WM_TOUCH, onTouch);
+            WINDOW_MSG_HANDLER(WM_DWMCOMPOSITIONCHANGED, onDwmCompositionChanged);
             WINDOW_MSG_HANDLER(WM_WINDOWPOSCHANGED, onWindowPosChanged);
 
             return 0;
@@ -156,6 +164,7 @@ namespace ukive {
         LRESULT onUniChar(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onGesture(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onTouch(WPARAM wParam, LPARAM lParam, bool* handled);
+        LRESULT onDwmCompositionChanged(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onWindowPosChanged(WPARAM wParam, LPARAM lParam, bool* handled);
 
         void onPreCreate(

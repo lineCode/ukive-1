@@ -225,9 +225,6 @@
     <ClCompile Include="graphics\rect.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="window\window_slave.cpp">
-      <Filter>window</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\bitmap.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -597,9 +594,6 @@
     </ClInclude>
     <ClInclude Include="graphics\rect.h">
       <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="window\window_slave.h">
-      <Filter>window</Filter>
     </ClInclude>
     <ClInclude Include="graphics\bitmap.h">
       <Filter>graphics</Filter>

@@ -9,15 +9,15 @@ namespace ukive {
 
     class NonClientLayout : public ViewGroup {
     public:
-        NonClientLayout(Window* w);
+        explicit NonClientLayout(Window* w);
 
-        int nonClientHitTest(int x, int y);
+        HitPoint onNCHitTest(int x, int y);
 
         void setNonClientPadding(int left, int top, int right, int bottom);
         void setSizeHandlePadding(int left, int top, int right, int bottom);
 
         void onMeasure(
-            int width, int height, int widthSpec, int heightSpec) override;
+            int width, int height, int width_mode, int height_mode) override;
         void onLayout(
             bool changed, bool sizeChanged,
             int left, int top, int right, int bottom) override;

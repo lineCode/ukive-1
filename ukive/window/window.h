@@ -42,6 +42,9 @@ namespace ukive {
 
         void show();
         void hide();
+        void minimize();
+        void maximize();
+        void restore();
         void focus();
         void close();
         void center();
@@ -82,6 +85,8 @@ namespace ukive {
         bool isCursorInClient() const;
         bool isTranslucent() const;
         bool isStartupWindow() const;
+        bool isMinimum() const;
+        bool isMaximum() const;
 
         void captureMouse(View* v);
         void releaseMouse();
@@ -130,6 +135,7 @@ namespace ukive {
         virtual bool onClose();
         virtual void onDestroy();
         virtual bool onInputEvent(InputEvent* e);
+        virtual HitPoint onNCHitTest(int x, int y);
         virtual void onDpiChanged(int dpi_x, int dpi_y);
         virtual bool onDataCopy(unsigned int id, unsigned int size, void* data);
 

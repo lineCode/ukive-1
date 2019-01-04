@@ -12,26 +12,18 @@
 
 
 namespace ukive {
-    class Window;
+    class WindowImpl;
 }
 
 namespace shell {
 
     class CustomNonClientFrame : public ukive::NonClientFrame {
     public:
-        CustomNonClientFrame() {
-            kTitleColor = ukive::Color::White;
-            kBorderColor = ukive::Color::Red500;
-            kMinButtonColor = ukive::Color::Green300;
-            kMinButtonPressedColor = ukive::Color::Green600;
-            kMaxButtonColor = ukive::Color::Yellow600;
-            kMaxButtonPressedColor = ukive::Color::Yellow900;
-            kCloseButtonColor = ukive::Color::parse(L"#4db7ff");        //Orange 300
-            kCloseButtonPressedColor = ukive::Color::parse(L"#008cfb"); //Orange 600
-        }
+        CustomNonClientFrame();
 
-        int onNcCreate(ukive::Window* w, bool* handled) override;
+        int onNcCreate(ukive::WindowImpl* w, bool* handled) override;
         int onNcDestroy(bool* handled) override;
+        void onTranslucentChanged(bool translucent) override;
 
         LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onMouseMove(WPARAM wParam, LPARAM lParam, bool* handled) override;
@@ -39,10 +31,13 @@ namespace shell {
 
         LRESULT onNcPaint(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcActivate(WPARAM wParam, LPARAM lParam, bool* handled) override;
-        LRESULT onNcHitTest(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcHitTest(
+            WPARAM wParam, LPARAM lParam, bool* handled,
+            bool* pass_to_window, POINT* p) override;
         LRESULT onNcCalSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcLButtonDown(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onDwmCompositionChanged(bool* handled) override;
         LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) override;
 
     private:
@@ -58,7 +53,7 @@ namespace shell {
         void drawCaptionAndBorder();
         void createCaptionButtonRgn(int rightOfWin, int topPadding, int rightPadding);
 
-        ukive::Window* window_;
+        ukive::WindowImpl* window_;
 
         ukive::ComPtr<ID2D1DCRenderTarget> dc_target_;
         ukive::ComPtr<IDWriteTextFormat> text_format_;

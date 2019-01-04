@@ -475,11 +475,7 @@ namespace ukive {
         auto parent = parent_;
         while (parent) {
             auto p_bounds = parent->getBounds();
-            bounds.left += p_bounds.left;
-            bounds.top += p_bounds.top;
-            bounds.right += p_bounds.left;
-            bounds.bottom += p_bounds.top;
-
+            bounds.offset(p_bounds.left, p_bounds.top);
             parent = parent->getParent();
         }
 

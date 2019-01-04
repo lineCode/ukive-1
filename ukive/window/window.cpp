@@ -54,6 +54,18 @@ namespace ukive {
         impl_->hide();
     }
 
+    void Window::minimize() {
+        impl_->minimize();
+    }
+
+    void Window::maximize() {
+        impl_->maximize();
+    }
+
+    void Window::restore() {
+        impl_->restore();
+    }
+
     void Window::focus() {
         impl_->focus();
     }
@@ -201,6 +213,14 @@ namespace ukive {
 
     bool Window::isStartupWindow() const {
         return is_startup_window_;
+    }
+
+    bool Window::isMinimum() const {
+        return impl_->isMinimum();
+    }
+
+    bool Window::isMaximum() const {
+        return impl_->isMaximum();
     }
 
     void Window::captureMouse(View* v) {
@@ -468,12 +488,6 @@ namespace ukive {
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
 
-        /*FrameLayout* titleBar = new FrameLayout(this);
-        titleBar->setBackground(new ColorDrawable(this, Color::Blue100));
-        RootLayoutParams* titleBarLp = new RootLayoutParams(
-        RootLayoutParams::MATCH_PARENT, 50);
-        root_layout_->addContent(titleBar, titleBarLp);*/
-
         anim_mgr_ = new AnimationManager();
         HRESULT hr = anim_mgr_->init();
         if (FAILED(hr)) {
@@ -735,6 +749,10 @@ namespace ukive {
         }
 
         return false;
+    }
+
+    HitPoint Window::onNCHitTest(int x, int y) {
+        return root_layout_->onNCHitTest(x, y);
     }
 
     void Window::onDpiChanged(int dpi_x, int dpi_y) {

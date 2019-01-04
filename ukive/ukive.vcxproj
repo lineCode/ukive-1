@@ -23,7 +23,7 @@
     <ProjectGuid>{6C135376-870C-4C39-B198-2FFC8E947FFD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ukive</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -292,7 +292,6 @@
     <ClInclude Include="window\window_class_manager.h" />
     <ClInclude Include="window\window_impl.h" />
     <ClInclude Include="window\window_manager.h" />
-    <ClInclude Include="window\window_slave.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="animation\animation_manager.cpp" />
@@ -406,7 +405,6 @@
     <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />
     <ClCompile Include="window\window_manager.cpp" />
-    <ClCompile Include="window\window_slave.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_ps.hlsl">

@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include "ukive/application.h"
-#include "ukive/window/window.h"
+#include "ukive/window/window_impl.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/graphics/renderer.h"
 #include "ukive/graphics/canvas.h"
@@ -39,7 +39,23 @@ namespace shell {
     const wchar_t kTitleText[] = L"Custom Non-client Frame";
 
 
-    int CustomNonClientFrame::onNcCreate(ukive::Window* w, bool* handled) {
+    CustomNonClientFrame::CustomNonClientFrame()
+        : window_(nullptr),
+        mIsMousePressedInMinButton(false),
+        mIsMousePressedInMaxButton(false),
+        mIsMousePressedInCloseButton(false)
+    {
+        kTitleColor = ukive::Color::White;
+        kBorderColor = ukive::Color::Red500;
+        kMinButtonColor = ukive::Color::Green300;
+        kMinButtonPressedColor = ukive::Color::Green600;
+        kMaxButtonColor = ukive::Color::Yellow600;
+        kMaxButtonPressedColor = ukive::Color::Yellow900;
+        kCloseButtonColor = ukive::Color::parse(L"#4db7ff"); //Orange 300
+        kCloseButtonPressedColor = ukive::Color::parse(L"#008cfb"); //Orange 600
+    }
+
+    int CustomNonClientFrame::onNcCreate(ukive::WindowImpl* w, bool* handled) {
         window_ = w;
         *handled = true;
 
@@ -72,6 +88,9 @@ namespace shell {
 
     int CustomNonClientFrame::onNcDestroy(bool* handled) {
         return TRUE;
+    }
+
+    void CustomNonClientFrame::onTranslucentChanged(bool translucent) {
     }
 
     LRESULT CustomNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
@@ -238,8 +257,11 @@ namespace shell {
         return TRUE;
     }
 
-    LRESULT CustomNonClientFrame::onNcHitTest(WPARAM wParam, LPARAM lParam, bool* handled) {
+    LRESULT CustomNonClientFrame::onNcHitTest(
+        WPARAM wParam, LPARAM lParam, bool* handled, bool* pass_to_window, POINT* p)
+    {
         *handled = true;
+        *pass_to_window = false;
 
         RECT rcWin;
         ::GetWindowRect(window_->getHandle(), &rcWin);
@@ -402,6 +424,11 @@ namespace shell {
         mIsMousePressedInCloseButton = false;
 
         return TRUE;
+    }
+
+    LRESULT CustomNonClientFrame::onDwmCompositionChanged(bool* handled) {
+        *handled = false;
+        return FALSE;
     }
 
     LRESULT CustomNonClientFrame::onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) {
