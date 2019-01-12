@@ -23,13 +23,22 @@ namespace ukive {
     public:
         class ViewHolder {
         public:
+            Rect ex_margins;
             View* item_view;
             int item_id;
             int adapter_position;
             bool recycled;
 
-            ViewHolder(View* v);
+            explicit ViewHolder(View* v);
             virtual ~ViewHolder();
+
+            int getMgdLeft() const;
+            int getMgdTop() const;
+            int getMgdRight() const;
+            int getMgdBottom() const;
+
+            int getMgdWidth() const;
+            int getMgdHeight() const;
         };
 
         ListAdapter();

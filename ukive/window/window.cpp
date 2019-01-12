@@ -54,6 +54,18 @@ namespace ukive {
         impl_->hide();
     }
 
+    void Window::minimize() {
+        impl_->minimize();
+    }
+
+    void Window::maximize() {
+        impl_->maximize();
+    }
+
+    void Window::restore() {
+        impl_->restore();
+    }
+
     void Window::focus() {
         impl_->focus();
     }
@@ -203,6 +215,14 @@ namespace ukive {
         return is_startup_window_;
     }
 
+    bool Window::isMinimum() const {
+        return impl_->isMinimum();
+    }
+
+    bool Window::isMaximum() const {
+        return impl_->isMaximum();
+    }
+
     void Window::captureMouse(View* v) {
         if (v == nullptr) {
             return;
@@ -279,41 +299,48 @@ namespace ukive {
 
         auto params = root_layout_->getLayoutParams();
 
-        int width = getClientWidth();
-        int height = getClientHeight();
-        int widthSpec = View::EXACTLY;
-        int heightSpec = View::EXACTLY;
+        int width;
+        int height;
+        int width_mode = View::EXACTLY;
+        int height_mode = View::EXACTLY;
+        if (impl_->isTranslucent()) {
+            width = getWidth();
+            height = getHeight();
+        } else {
+            width = getClientWidth();
+            height = getClientHeight();
+        }
 
         if (params->width < 0) {
             switch (params->width) {
             case LayoutParams::FIT_CONTENT:
-                widthSpec = View::FIT;
+                width_mode = View::FIT;
                 break;
 
             default:
             case LayoutParams::MATCH_PARENT:
-                widthSpec = View::EXACTLY;
+                width_mode = View::EXACTLY;
                 break;
             }
         } else {
             width = params->width;
-            widthSpec = View::EXACTLY;
+            width_mode = View::EXACTLY;
         }
 
         if (params->height < 0) {
             switch (params->height) {
             case LayoutParams::FIT_CONTENT:
-                heightSpec = View::FIT;
+                height_mode = View::FIT;
                 break;
 
             default:
             case LayoutParams::MATCH_PARENT:
-                heightSpec = View::EXACTLY;
+                height_mode = View::EXACTLY;
                 break;
             }
         } else {
             height = params->height;
-            heightSpec = View::EXACTLY;
+            height_mode = View::EXACTLY;
         }
 
         QPCService qpc_service;
@@ -323,7 +350,7 @@ namespace ukive {
             qpc_service.Start();
         }
 
-        root_layout_->measure(width, height, widthSpec, heightSpec);
+        root_layout_->measure(width, height, width_mode, height_mode);
 
         int measuredWidth = root_layout_->getMeasuredWidth();
         int measuredHeight = root_layout_->getMeasuredHeight();
@@ -348,7 +375,7 @@ namespace ukive {
             qpc_service.Start();
         }
 
-        Rect rect(0, 0, getWidth(), getHeight());
+        Rect rect(0, 0, getClientWidth(), getClientHeight());
         onDraw(rect);
 
         if (enable_qpc) {
@@ -460,12 +487,6 @@ namespace ukive {
             new LayoutParams(
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
-
-        /*FrameLayout* titleBar = new FrameLayout(this);
-        titleBar->setBackground(new ColorDrawable(this, Color::Blue100));
-        RootLayoutParams* titleBarLp = new RootLayoutParams(
-        RootLayoutParams::MATCH_PARENT, 50);
-        root_layout_->addContent(titleBar, titleBarLp);*/
 
         anim_mgr_ = new AnimationManager();
         HRESULT hr = anim_mgr_->init();
@@ -683,25 +704,25 @@ namespace ukive {
 
     bool Window::onInputEvent(InputEvent* e) {
         if (e->isMouseEvent()) {
-            // 若有之前捕获过鼠标的 View 存在，则直接将所有事件
+            // 若有之前捕获过鼠标的 View 存在，则直接将所有鼠标事件
             // 直接发送至该Widget。
-            if (mouse_holder_
-                && mouse_holder_->getVisibility() == View::VISIBLE
-                && mouse_holder_->isEnabled()) {
-
+            if (mouse_holder_ &&
+                mouse_holder_->getVisibility() == View::VISIBLE &&
+                mouse_holder_->isEnabled())
+            {
                 // 进行坐标变换，将目标 View 左上角映射为(0, 0)。
-                int totalLeft = 0;
-                int totalTop = 0;
-                View* parent = mouse_holder_->getParent();
+                int total_left = 0;
+                int total_top = 0;
+                auto parent = mouse_holder_->getParent();
                 while (parent) {
-                    totalLeft += (parent->getLeft() - parent->getScrollX());
-                    totalTop += (parent->getTop() - parent->getScrollY());
+                    total_left += (parent->getLeft() - parent->getScrollX());
+                    total_top += (parent->getTop() - parent->getScrollY());
 
                     parent = parent->getParent();
                 }
 
-                e->setMouseX(e->getMouseX() - totalLeft);
-                e->setMouseY(e->getMouseY() - totalTop);
+                e->setMouseX(e->getMouseX() - total_left);
+                e->setMouseY(e->getMouseY() - total_top);
                 e->setIsMouseCaptured(true);
 
                 return mouse_holder_->dispatchInputEvent(e);
@@ -728,6 +749,10 @@ namespace ukive {
         }
 
         return false;
+    }
+
+    HitPoint Window::onNCHitTest(int x, int y) {
+        return root_layout_->onNCHitTest(x, y);
     }
 
     void Window::onDpiChanged(int dpi_x, int dpi_y) {
@@ -765,10 +790,12 @@ namespace ukive {
 
     void Window::AnimStateChangedListener::onStateChanged(
         UI_ANIMATION_MANAGER_STATUS newStatus,
-        UI_ANIMATION_MANAGER_STATUS previousStatus) {
-        if (newStatus == UI_ANIMATION_MANAGER_BUSY
-            && previousStatus == UI_ANIMATION_MANAGER_IDLE)
+        UI_ANIMATION_MANAGER_STATUS previousStatus)
+    {
+        if (newStatus == UI_ANIMATION_MANAGER_BUSY &&
+            previousStatus == UI_ANIMATION_MANAGER_IDLE) {
             win_->invalidate();
+        }
     }
 
 

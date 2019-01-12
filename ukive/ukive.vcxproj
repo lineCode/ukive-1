@@ -23,7 +23,7 @@
     <ProjectGuid>{6C135376-870C-4C39-B198-2FFC8E947FFD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ukive</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -97,6 +97,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,6 +136,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -268,8 +270,11 @@
     <ClInclude Include="views\layout\restraint_layout.h" />
     <ClInclude Include="views\layout\restraint_layout_params.h" />
     <ClInclude Include="views\layout\view_group.h" />
+    <ClInclude Include="views\list\grid_list_layouter.h" />
+    <ClInclude Include="views\list\linear_list_layouter.h" />
     <ClInclude Include="views\list\list_adapter.h" />
     <ClInclude Include="views\list\list_layouter.h" />
+    <ClInclude Include="views\list\list_structs.h" />
     <ClInclude Include="views\list\list_view.h" />
     <ClInclude Include="views\list\overlay_scroll_bar.h" />
     <ClInclude Include="views\list\view_holder_recycler.h" />
@@ -287,7 +292,6 @@
     <ClInclude Include="window\window_class_manager.h" />
     <ClInclude Include="window\window_impl.h" />
     <ClInclude Include="window\window_manager.h" />
-    <ClInclude Include="window\window_slave.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="animation\animation_manager.cpp" />
@@ -382,8 +386,10 @@
     <ClCompile Include="views\layout\restraint_layout.cpp" />
     <ClCompile Include="views\layout\restraint_layout_params.cpp" />
     <ClCompile Include="views\layout\view_group.cpp" />
+    <ClCompile Include="views\list\grid_list_layouter.cpp" />
+    <ClCompile Include="views\list\linear_list_layouter.cpp" />
     <ClCompile Include="views\list\list_adapter.cpp" />
-    <ClCompile Include="views\list\list_layouter.cpp" />
+    <ClCompile Include="views\list\list_structs.cpp" />
     <ClCompile Include="views\list\list_view.cpp" />
     <ClCompile Include="views\list\overlay_scroll_bar.cpp" />
     <ClCompile Include="views\list\view_holder_recycler.cpp" />
@@ -399,7 +405,6 @@
     <ClCompile Include="window\window_class_manager.cpp" />
     <ClCompile Include="window\window_impl.cpp" />
     <ClCompile Include="window\window_manager.cpp" />
-    <ClCompile Include="window\window_slave.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_ps.hlsl">

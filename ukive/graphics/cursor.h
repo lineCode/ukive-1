@@ -4,7 +4,7 @@
 
 namespace ukive {
 
-    enum Cursor {
+    enum class Cursor {
         ARROW,
         IBEAM,
         WAIT,
@@ -24,6 +24,18 @@ namespace ukive {
         // (WINVER >= 0x0606)
         PIN,
         PERSON
+    };
+
+    enum class HitPoint {
+        TOP_LEFT,
+        TOP,
+        TOP_RIGHT,
+        LEFT,
+        CLIENT,
+        RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM,
+        BOTTOM_RIGHT,
     };
 
 }

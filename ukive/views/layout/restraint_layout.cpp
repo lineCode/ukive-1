@@ -9,9 +9,8 @@
 
 namespace ukive {
 
-    RestraintLayout::RestraintLayout(Window* wnd)
-        : ViewGroup(wnd) {}
-
+    RestraintLayout::RestraintLayout(Window* w)
+        : ViewGroup(w) {}
 
     LayoutParams* RestraintLayout::generateLayoutParams(const LayoutParams &lp) {
         return new RestraintLayoutParams(lp);
@@ -26,22 +25,9 @@ namespace ukive {
         return typeid(*lp) == typeid(RestraintLayoutParams);
     }
 
-
-    View* RestraintLayout::getChildById(int id) {
-        size_t count = getChildCount();
-        for (size_t i = 0; i < count; ++i) {
-            View* child = getChildAt(i);
-            if (child->getId() == id) {
-                return child;
-            }
-        }
-
-        throw std::runtime_error("child view id not existed.");
-    }
-
     void RestraintLayout::clearMeasureFlag() {
-        size_t count = getChildCount();
-        for (size_t i = 0; i < count; ++i) {
+        auto count = getChildCount();
+        for (int i = 0; i < count; ++i) {
             View* child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
             lp->isWidthMeasured = lp->isHeightMeasured = false;
@@ -49,13 +35,12 @@ namespace ukive {
         }
     }
 
-
     void RestraintLayout::measureRestrainedChildren(
         int parentWidth, int parentHeight,
         int parentWidthMode, int parentHeightMode)
     {
-        size_t count = getChildCount();
-        for (size_t i = 0; i < count; ++i) {
+        auto count = getChildCount();
+        for (int i = 0; i < count; ++i) {
             View* child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
             if (lp->isWidthMeasured) {
@@ -75,8 +60,7 @@ namespace ukive {
             lp->specWidthMode = childWidthMode;
         }
 
-        for (size_t i = 0; i < count; ++i)
-        {
+        for (int i = 0; i < count; ++i) {
             View* child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
             if (lp->isWidthMeasured && lp->isHeightMeasured) {
@@ -106,8 +90,8 @@ namespace ukive {
     }
 
     void RestraintLayout::checkRestrainedChildrenWeight() {
-        size_t count = getChildCount();
-        for (size_t i = 0; i < count; ++i) {
+        auto count = getChildCount();
+        for (int i = 0; i < count; ++i) {
             View* child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
         }
@@ -187,7 +171,7 @@ namespace ukive {
                     {
                         int measuredTargetWidth = 0;
                         View* target = getChildById(lp->startHandledId);
-                        auto targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                        auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
                         // 测量此 target view 的宽度。
                         int targetWidth;
@@ -250,7 +234,7 @@ namespace ukive {
                                 && childLp->startHandledId != this->getId())
                             {
                                 View* target = getChildById(childLp->startHandledId);
-                                auto targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
                                 // 测量此 target view 的宽度。
                                 int targetWidth;
@@ -309,7 +293,7 @@ namespace ukive {
                                 && childLp->endHandledId != this->getId())
                             {
                                 View* target = getChildById(childLp->endHandledId);
-                                auto targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
                                 // 测量此 target view 的宽度。
                                 int targetWidth;
@@ -479,7 +463,7 @@ namespace ukive {
                     {
                         int measuredTargetHeight = 0;
                         View* target = getChildById(lp->topHandledId);
-                        RestraintLayoutParams* targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                        auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
                         // 测量此 target view 的高度。
                         int targetHeight;
@@ -595,7 +579,7 @@ namespace ukive {
                             while (childLp->hasBottom() && childLp->bottomHandledId != getId())
                             {
                                 View* target = getChildById(childLp->bottomHandledId);
-                                RestraintLayoutParams* targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+                                auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
                                 // 测量此 target view 的高度。
                                 int targetHeight;
@@ -766,7 +750,7 @@ namespace ukive {
     int RestraintLayout::measureWrappedWidth() {
         int wrapped_width = 0;
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
 
@@ -788,7 +772,7 @@ namespace ukive {
     int RestraintLayout::measureWrappedHeight() {
         int wrapped_height = 0;
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             auto child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
 
@@ -894,8 +878,7 @@ namespace ukive {
         int childLeft = left + getPaddingLeft();
         if (lp->hasStart() && lp->startHandledId != getId()) {
             View* target = getChildById(lp->startHandledId);
-            RestraintLayoutParams* targetLp
-                = (RestraintLayoutParams*)target->getLayoutParams();
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
             if (!targetLp->isHoriLayouted) {
                 layoutChildHorizontal(target, targetLp, left, right);
@@ -911,7 +894,7 @@ namespace ukive {
         int childRight = right - getPaddingRight();
         if (lp->hasEnd() && lp->endHandledId != getId()) {
             View* target = getChildById(lp->endHandledId);
-            RestraintLayoutParams* targetLp = (RestraintLayoutParams*)target->getLayoutParams();
+            auto targetLp = static_cast<RestraintLayoutParams*>(target->getLayoutParams());
 
             if (!targetLp->isHoriLayouted) {
                 layoutChildHorizontal(target, targetLp, left, right);
@@ -1013,7 +996,7 @@ namespace ukive {
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             auto child = getChildAt(i);
             auto lp = static_cast<RestraintLayoutParams*>(child->getLayoutParams());
 

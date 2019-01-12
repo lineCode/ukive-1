@@ -1,6 +1,10 @@
 ﻿#include "application.h"
 
+#include <algorithm>
+
+#include <dwmapi.h>
 #include <ShellScalingAPI.h>
+#include <VersionHelpers.h>
 
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/log.h"
@@ -16,7 +20,7 @@
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "Shcore.lib")
+//#pragma comment(lib, "Shcore.lib")
 #pragma comment(lib, "winmm.lib")
 
 
@@ -246,15 +250,26 @@ namespace ukive {
     }
 
     int Application::getPrimaryDpi() {
-        POINT pt = { 0, 0 };
-        HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
+        if (::IsWindows8Point1OrGreater()) {
+            POINT pt = { 0, 0 };
+            HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
 
-        UINT dpiX = 96, dpiY = 96;
-        HRESULT hr = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
-        if (FAILED(hr)) {
-            LOG(Log::WARNING) << "Failed to get primary monitor dpi: " << hr;
-            return 96;
+            UINT dpi_x = 96, dpi_y = 96;
+            using GetDpiForMonitorPtr = HRESULT(STDAPICALLTYPE*)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
+            auto func = reinterpret_cast<GetDpiForMonitorPtr>(
+                ::GetProcAddress(::LoadLibraryW(L"Shcore.dll"), "GetDpiForMonitor"));
+            if (func) {
+                HRESULT hr = func(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
+                if (SUCCEEDED(hr)) {
+                    return dpi_x;
+                }
+            }
         }
+
+        HDC screen = ::GetDC(nullptr);
+        int dpiX = ::GetDeviceCaps(screen, LOGPIXELSX);
+        //int dpiY = ::GetDeviceCaps(screen, LOGPIXELSY);
+        ::ReleaseDC(nullptr, screen);
 
         return dpiX;
     }
@@ -265,6 +280,12 @@ namespace ukive {
 
     float Application::pxToDp(int px) {
         return px / (getPrimaryDpi() / 96.f);
+    }
+
+    bool Application::isAeroEnabled() {
+        BOOL dwm_enabled = FALSE;
+        HRESULT hr = ::DwmIsCompositionEnabled(&dwm_enabled);
+        return (SUCCEEDED(hr) && dwm_enabled == TRUE);
     }
 
     void Application::quitSystemQueue() {

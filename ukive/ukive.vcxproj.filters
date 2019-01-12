@@ -225,9 +225,6 @@
     <ClCompile Include="graphics\rect.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="window\window_slave.cpp">
-      <Filter>window</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\bitmap.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -324,7 +321,13 @@
     <ClCompile Include="graphics\vector2.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="views\list\list_layouter.cpp">
+    <ClCompile Include="views\list\grid_list_layouter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\linear_list_layouter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\list_structs.cpp">
       <Filter>views\list</Filter>
     </ClCompile>
   </ItemGroup>
@@ -592,9 +595,6 @@
     <ClInclude Include="graphics\rect.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="window\window_slave.h">
-      <Filter>window</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\bitmap.h">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -692,6 +692,15 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="views\list\list_layouter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\grid_list_layouter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\linear_list_layouter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\list_structs.h">
       <Filter>views\list</Filter>
     </ClInclude>
   </ItemGroup>

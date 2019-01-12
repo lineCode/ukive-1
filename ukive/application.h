@@ -47,6 +47,8 @@ namespace ukive {
         static float dpToPx(float dp);
         static float pxToDp(int px);
 
+        static bool isAeroEnabled();
+
         static void quitSystemQueue();
 
     private:

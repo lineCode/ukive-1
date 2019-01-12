@@ -470,24 +470,20 @@ namespace ukive {
     }
 
     Rect View::getBoundsInWindow() const {
-        Rect bound = getBounds();
+        auto bounds = getBounds();
 
-        View* parent = parent_;
+        auto parent = parent_;
         while (parent) {
-            Rect parentBound = parent->getBounds();
-            bound.left += parentBound.left;
-            bound.top += parentBound.top;
-            bound.right += parentBound.left;
-            bound.bottom += parentBound.top;
-
+            auto p_bounds = parent->getBounds();
+            bounds.offset(p_bounds.left, p_bounds.top);
             parent = parent->getParent();
         }
 
-        return bound;
+        return bounds;
     }
 
     Rect View::getBoundsInScreen() const {
-        Rect bound = getBoundsInWindow();
+        auto bound = getBoundsInWindow();
 
         POINT pt;
         pt.x = bound.left;
@@ -495,36 +491,24 @@ namespace ukive {
 
         ::ClientToScreen(window_->getHandle(), &pt);
 
-        int diffX = pt.x - bound.left;
-        int diffY = pt.y - bound.top;
+        int dx = pt.x - bound.left;
+        int dy = pt.y - bound.top;
 
-        bound.left += diffX;
-        bound.top += diffY;
-        bound.right += diffX;
-        bound.bottom += diffY;
+        bound.left += dx;
+        bound.top += dy;
+        bound.right += dx;
+        bound.bottom += dy;
 
         return bound;
     }
 
     Rect View::getContentBounds() const {
-        Rect content_bounds = bounds_;
-        content_bounds.insets(padding_);
-        return content_bounds;
-    }
-
-    Rect View::getContentBoundsInThis() const {
         int content_width = bounds_.width() - padding_.width();
         int content_height = bounds_.height() - padding_.height();
         return Rect(
             padding_.left, padding_.top,
             content_width, content_height);
     }
-
-
-    View* View::findViewById(int id) {
-        return nullptr;
-    }
-
 
     bool View::isEnabled() const {
         return is_enabled_;
@@ -717,7 +701,7 @@ namespace ukive {
         // 绘制孩子
         dispatchDraw(canvas);
 
-        onDrawOverChild(canvas);
+        onDrawOverChildren(canvas);
 
         canvas->popClip();
         canvas->restore();
@@ -912,11 +896,9 @@ namespace ukive {
         dispatchDiscardPendingOperations();
     }
 
-    void View::dispatchDraw(Canvas* canvas) {}
-
-    void View::dispatchDiscardFocus() {}
-
-    void View::dispatchDiscardPendingOperations() {}
+    View* View::findViewById(int id) const {
+        return nullptr;
+    }
 
     bool View::dispatchInputEvent(InputEvent* e) {
         e->setMouseX(e->getMouseX() - bounds_.left);
@@ -925,8 +907,8 @@ namespace ukive {
         return onInputEvent(e);
     }
 
-    void View::dispatchWindowFocusChanged(bool windowFocus) {
-        onWindowFocusChanged(windowFocus);
+    void View::dispatchWindowFocusChanged(bool focus) {
+        onWindowFocusChanged(focus);
     }
 
     void View::dispatchWindowDpiChanged(int dpi_x, int dpi_y) {
@@ -953,9 +935,6 @@ namespace ukive {
             animator_->cancel();
         }
     }
-
-    void View::onDraw(Canvas* canvas) {}
-    void View::onDrawOverChild(Canvas* canvas) {}
 
     bool View::onInputEvent(InputEvent* e) {
         bool should_refresh = false;
@@ -1092,23 +1071,12 @@ namespace ukive {
             height > min_height_ ? height : min_height_);
     }
 
-    void View::onLayout(
-        bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom) {
-    }
-
     bool View::onCheckIsTextEditor() {
         return false;
     }
 
     InputConnection* View::onCreateInputConnection() {
         return nullptr;
-    }
-
-    void View::onSizeChanged(int width, int height, int old_width, int old_height) {
-    }
-
-    void View::onVisibilityChanged(int visibility) {
     }
 
     void View::onFocusChanged(bool get_focus) {
@@ -1171,13 +1139,6 @@ namespace ukive {
                 DCHECK(ret);
             }
         }
-    }
-
-    void View::onWindowDpiChanged(int dpi_x, int dpi_y) {
-    }
-
-    void View::onScrollChanged(
-        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {
     }
 
 }

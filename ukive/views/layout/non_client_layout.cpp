@@ -1,7 +1,6 @@
 #include "ukive/views/layout/non_client_layout.h"
 
 #include <algorithm>
-#include <Windows.h>
 
 #include "ukive/graphics/canvas.h"
 #include "ukive/views/layout/layout_params.h"
@@ -15,14 +14,13 @@ namespace ukive {
     NonClientLayout::NonClientLayout(Window* w)
         :ViewGroup(w) {
 
-        if (w->getFrameType() == Window::FRAME_CUSTOM) {
+        if (w->getFrameType() == Window::FRAME_ZERO) {
             nc_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
             sh_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
         }
     }
 
-
-    int NonClientLayout::nonClientHitTest(int x, int y) {
+    HitPoint NonClientLayout::onNCHitTest(int x, int y) {
         int row = 1, col = 1;
 
         if (x >= 0 && x < sh_padding_.left) {
@@ -37,10 +35,10 @@ namespace ukive {
             row = 2;
         }
 
-        LRESULT hitTests[3][3] = {
-            { HTTOPLEFT,      HTTOP,      HTTOPRIGHT    },
-            { HTLEFT,         HTCLIENT,   HTRIGHT       },
-            { HTBOTTOMLEFT,   HTBOTTOM,   HTBOTTOMRIGHT },
+        HitPoint hitTests[3][3] = {
+            { HitPoint::TOP_LEFT,    HitPoint::TOP,    HitPoint::TOP_RIGHT    },
+            { HitPoint::LEFT,        HitPoint::CLIENT, HitPoint::RIGHT        },
+            { HitPoint::BOTTOM_LEFT, HitPoint::BOTTOM, HitPoint::BOTTOM_RIGHT },
         };
 
         Cursor cursor[3][3] = {
@@ -50,7 +48,6 @@ namespace ukive {
         };
 
         setCurrentCursor(cursor[row][col]);
-
         return hitTests[row][col];
     }
 
@@ -64,7 +61,7 @@ namespace ukive {
         requestLayout();
     }
 
-    void NonClientLayout::onMeasure(int width, int height, int widthSpec, int heightSpec) {
+    void NonClientLayout::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_width = 0;
         int final_height = 0;
 
@@ -75,9 +72,9 @@ namespace ukive {
         int vert_padding = getPaddingTop() + getPaddingBottom() + nc_vert_padding;
 
         measureChildrenWithMargins(
-            width - nc_hori_padding, height - nc_vert_padding, widthSpec, heightSpec);
+            width - nc_hori_padding, height - nc_vert_padding, width_mode, height_mode);
 
-        switch (widthSpec) {
+        switch (width_mode) {
         case FIT:
             final_width = getWrappedWidth();
             final_width = std::min(final_width + hori_padding, width);
@@ -95,7 +92,7 @@ namespace ukive {
             break;
         }
 
-        switch (heightSpec) {
+        switch (height_mode) {
         case FIT:
             final_height = getWrappedHeight();
             final_height = std::min(final_height + vert_padding, height);
@@ -120,13 +117,10 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        View* child = nullptr;
-        LayoutParams* lp = nullptr;
-
-        for (size_t i = 0; i < getChildCount(); ++i) {
-            child = getChildAt(i);
+        for (int i = 0; i < getChildCount(); ++i) {
+            auto child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
-                lp = child->getLayoutParams();
+                auto lp = child->getLayoutParams();
 
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();

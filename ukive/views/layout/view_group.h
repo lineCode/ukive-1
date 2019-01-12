@@ -14,12 +14,12 @@ namespace ukive {
         ~ViewGroup();
 
         bool dispatchInputEvent(InputEvent* e) override;
-        void dispatchWindowFocusChanged(bool windowFocus) override;
+        void dispatchWindowFocusChanged(bool focus) override;
         void dispatchWindowDpiChanged(int dpi_x, int dpi_y) override;
 
-        virtual void onLayout(
+        void onLayout(
             bool changed, bool size_changed,
-            int left, int top, int right, int bottom) = 0;
+            int left, int top, int right, int bottom) override {}
 
         virtual bool onInterceptInputEvent(InputEvent* e);
         virtual bool onInterceptMouseEvent(InputEvent* e);
@@ -29,14 +29,14 @@ namespace ukive {
         void onDetachedFromWindow() override;
 
         void addView(View* v, LayoutParams* params = nullptr);
-        void addView(size_t index, View* v, LayoutParams* params = nullptr);
+        void addView(int index, View* v, LayoutParams* params = nullptr);
         void removeView(View* v, bool del = true);
         void removeAllViews(bool del = true);
 
-        size_t getChildCount();
-        View* getChildById(int id);
-        View* getChildAt(size_t index);
-        View* findViewById(int id) override;
+        int getChildCount() const;
+        View* getChildById(int id) const;
+        View* getChildAt(int index) const;
+        View* findViewById(int id) const override;
 
         void drawChild(Canvas* canvas, View* child);
         void drawChildren(Canvas* canvas);

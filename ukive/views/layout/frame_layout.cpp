@@ -67,7 +67,7 @@ namespace ukive {
         View* child = nullptr;
         LayoutParams* lp = nullptr;
 
-        for (size_t i = 0; i < getChildCount(); ++i) {
+        for (int i = 0; i < getChildCount(); ++i) {
             child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
                 lp = child->getLayoutParams();
@@ -75,13 +75,13 @@ namespace ukive {
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();
 
-                int left = getPaddingLeft() + lp->leftMargin;
-                int top = getPaddingTop() + lp->topMargin;
+                int child_left = getPaddingLeft() + lp->leftMargin;
+                int child_top = getPaddingTop() + lp->topMargin;
 
                 child->layout(
-                    left, top,
-                    width + left,
-                    height + top);
+                    child_left, child_top,
+                    width + child_left,
+                    height + child_top);
             }
         }
     }

@@ -29,7 +29,7 @@ namespace ukive {
         void addContent(View* content);
 
         void requestLayout() override;
-        View* findViewById(int id) override;
+        View* findViewById(int id) const override;
 
     protected:
         LayoutParams* generateLayoutParams(const LayoutParams &lp) override;

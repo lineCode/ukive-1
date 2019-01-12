@@ -6,14 +6,15 @@
 
 namespace ukive {
 
-    class Window;
+    class WindowImpl;
 
     class DrawableNonClientFrame : public NonClientFrame {
     public:
         DrawableNonClientFrame();
 
-        int onNcCreate(Window* w, bool* handled) override;
+        int onNcCreate(WindowImpl* w, bool* handled) override;
         int onNcDestroy(bool* handled) override;
+        void onTranslucentChanged(bool translucent) override;
 
         LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onMouseMove(WPARAM wParam, LPARAM lParam, bool* handled) override;
@@ -21,14 +22,18 @@ namespace ukive {
 
         LRESULT onNcPaint(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcActivate(WPARAM wParam, LPARAM lParam, bool* handled) override;
-        LRESULT onNcHitTest(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onNcHitTest(
+            WPARAM wParam, LPARAM lParam, bool* handled,
+            bool* pass_to_window, POINT* p) override;
         LRESULT onNcCalSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcLButtonDown(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;
+        LRESULT onDwmCompositionChanged(bool* handled) override;
         LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) override;
 
     private:
-        Window* window_;
+        WindowImpl* window_;
+        bool vanish_captain_;
     };
 
 }

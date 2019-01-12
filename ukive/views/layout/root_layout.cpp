@@ -13,9 +13,9 @@
 namespace ukive {
 
     RootLayout::RootLayout(Window* w)
-        :NonClientLayout(w),
-        debug_view_(nullptr),
-        shade_added_(false) {
+        : NonClientLayout(w),
+          debug_view_(nullptr),
+          shade_added_(false) {
 
         content_layout_ = new LinearLayout(getWindow());
         content_layout_->setOrientation(LinearLayout::VERTICAL);
@@ -110,7 +110,7 @@ namespace ukive {
         getWindow()->requestLayout();
     }
 
-    View* RootLayout::findViewById(int id) {
+    View* RootLayout::findViewById(int id) const {
         return content_layout_->findViewById(id);
     }
 
