@@ -275,7 +275,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
     void Direct3DView::onDraw(Canvas* canvas) {

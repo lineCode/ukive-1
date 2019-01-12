@@ -124,7 +124,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
     void ScrollView::onLayout(

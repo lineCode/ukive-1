@@ -582,7 +582,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
     void TextView::onLayout(
@@ -643,7 +643,7 @@ namespace ukive {
                     e->getMouseX() - getPaddingLeft() + getScrollX(),
                     e->getMouseY() - getPaddingTop() + getScrollY());
 
-                if (is_selectable_ && isMouseKeyDownOnText) {
+                if (is_selectable_ && (isMouseKeyDownOnText || is_editable_)) {
                     setCurrentCursor(Cursor::IBEAM);
                 }
 
@@ -713,7 +713,8 @@ namespace ukive {
                 if (is_selectable_
                     && (isHitText(
                         e->getMouseX() - getPaddingLeft() + getScrollX(),
-                        e->getMouseY() - getPaddingTop() + getScrollY()) || is_editable_)) {
+                        e->getMouseY() - getPaddingTop() + getScrollY()) || is_editable_))
+                {
                     setCurrentCursor(Cursor::IBEAM);
                 } else {
                     setCurrentCursor(Cursor::ARROW);

@@ -10,7 +10,7 @@ namespace ukive {
 
     class ViewGroup : public View {
     public:
-        ViewGroup(Window* w);
+        explicit ViewGroup(Window* w);
         ~ViewGroup();
 
         bool dispatchInputEvent(InputEvent* e) override;

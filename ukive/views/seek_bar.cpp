@@ -208,7 +208,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredSize(finalWidth, finalHeight);
     }
 
     void SeekBar::onDraw(Canvas *canvas)

@@ -11,7 +11,7 @@ namespace ukive {
     public:
         explicit NonClientLayout(Window* w);
 
-        HitPoint onNCHitTest(int x, int y);
+        virtual HitPoint onNCHitTest(int x, int y);
 
         void setNonClientPadding(int left, int top, int right, int bottom);
         void setSizeHandlePadding(int left, int top, int right, int bottom);

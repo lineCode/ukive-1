@@ -182,7 +182,7 @@ namespace ukive {
         virtual void onDetachedFromWindow();
 
     protected:
-        void setMeasuredDimension(int width, int height);
+        void setMeasuredSize(int width, int height);
 
         void performClick();
 
@@ -219,7 +219,7 @@ namespace ukive {
 
     private:
         enum Flags : uint32_t {
-            MEASURED_DIMENSION_SET = 1,
+            MEASURED_SIZE_SET = 1,
             FORCE_LAYOUT = 1 << 1,
             BOUNDS_SET = 1 << 2,
             NEED_LAYOUT = 1 << 3,

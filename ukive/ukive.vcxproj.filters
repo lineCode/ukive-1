@@ -330,6 +330,9 @@
     <ClCompile Include="views\list\list_structs.cpp">
       <Filter>views\list</Filter>
     </ClCompile>
+    <ClCompile Include="views\title_bar\title_bar.cpp">
+      <Filter>views\title_bar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -703,6 +706,12 @@
     <ClInclude Include="views\list\list_structs.h">
       <Filter>views\list</Filter>
     </ClInclude>
+    <ClInclude Include="views\title_bar\title_bar.h">
+      <Filter>views\title_bar</Filter>
+    </ClInclude>
+    <ClInclude Include="window\window_listener.h">
+      <Filter>window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -764,6 +773,9 @@
     </Filter>
     <Filter Include="files">
       <UniqueIdentifier>{b51fd15d-9a20-4be5-9d96-026070975a3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views\title_bar">
+      <UniqueIdentifier>{58d30b33-09a0-48c8-9859-84fef49669e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

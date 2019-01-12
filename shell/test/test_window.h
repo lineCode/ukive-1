@@ -27,8 +27,6 @@ namespace shell {
         void inflateGroup();
         void inflateListView();
 
-        ukive::Button* min_button_;
-        ukive::Button* max_button_;
         ukive::Button* dwm_button_;
     };
 

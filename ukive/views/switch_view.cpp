@@ -43,7 +43,7 @@ namespace ukive {
         final_w += getPaddingLeft() + getPaddingRight();
         final_h += getPaddingTop() + getPaddingBottom();
 
-        setMeasuredDimension(final_w, final_h);
+        setMeasuredSize(final_w, final_h);
     }
 
     void SwitchView::onDraw(Canvas* canvas) {

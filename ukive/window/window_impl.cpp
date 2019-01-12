@@ -300,33 +300,6 @@ namespace ukive {
         return is_showing_;
     }
 
-    bool WindowImpl::isCursorInClient() const {
-        RECT clientRect;
-        RECT clientInScreenRect;
-        POINT cursorPos;
-        POINT convertPos;
-
-        ::GetCursorPos(&cursorPos);
-        ::GetClientRect(hWnd_, &clientRect);
-
-        int clientWidth = clientRect.right - clientRect.left;
-        int clientHeight = clientRect.bottom - clientRect.top;
-
-        convertPos.x = clientRect.left;
-        convertPos.y = clientRect.top;
-        ::ClientToScreen(hWnd_, &convertPos);
-
-        clientInScreenRect.left = convertPos.x;
-        clientInScreenRect.top = convertPos.y;
-        clientInScreenRect.right = clientInScreenRect.left + clientWidth;
-        clientInScreenRect.bottom = clientInScreenRect.top + clientHeight;
-
-        return (cursorPos.x >= clientInScreenRect.left
-            && cursorPos.x < clientInScreenRect.right
-            && cursorPos.y >= clientInScreenRect.top
-            && cursorPos.y < clientInScreenRect.bottom);
-    }
-
     bool WindowImpl::isTranslucent() const {
         return is_translucent_;
     }
@@ -348,21 +321,21 @@ namespace ukive {
     }
 
     void WindowImpl::setMouseCaptureRaw() {
-        if (!is_created_) {
+        if (!::IsWindow(hWnd_)) {
             return;
         }
         ::SetCapture(hWnd_);
     }
 
     void WindowImpl::releaseMouseCaptureRaw() {
-        if (!is_created_) {
+        if (!::IsWindow(hWnd_)) {
             return;
         }
         ::ReleaseCapture();
     }
 
     void WindowImpl::setMouseTrack() {
-        if (!is_created_) {
+        if (!::IsWindow(hWnd_)) {
             return;
         }
 
@@ -393,6 +366,20 @@ namespace ukive {
             SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS |
             SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOREPOSITION |
             SWP_NOSENDCHANGING | SWP_NOSIZE | SWP_NOZORDER);
+    }
+
+    void WindowImpl::convScreenToClient(Point* p) {
+        POINT raw_p = { p->x, p->y };
+        ::ScreenToClient(hWnd_, &raw_p);
+        p->x = raw_p.x;
+        p->y = raw_p.y;
+    }
+
+    void WindowImpl::convClientToScreen(Point* p) {
+        POINT raw_p = { p->x, p->y };
+        ::ClientToScreen(hWnd_, &raw_p);
+        p->x = raw_p.x;
+        p->y = raw_p.y;
     }
 
     void WindowImpl::setWindowRectShape() {
@@ -635,6 +622,11 @@ namespace ukive {
             case HitPoint::BOTTOM_LEFT:win_hp = HTBOTTOMLEFT; break;
             case HitPoint::BOTTOM:win_hp = HTBOTTOM; break;
             case HitPoint::BOTTOM_RIGHT:win_hp = HTBOTTOMRIGHT; break;
+            case HitPoint::CAPTION:win_hp = HTCAPTION; break;
+            case HitPoint::SYS_MENU:win_hp = HTSYSMENU; break;
+            case HitPoint::MIN_BUTTON:win_hp = HTMINBUTTON; break;
+            case HitPoint::MAX_BUTTON:win_hp = HTMAXBUTTON; break;
+            case HitPoint::CLOSE_BUTTON:win_hp = HTCLOSE; break;
             default: win_hp = HTCLIENT; break;
             }
 
@@ -836,38 +828,6 @@ namespace ukive {
             break;
         }
 
-        case WM_MOUSELEAVE:
-        {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
-                return 0;
-            }
-
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVM_LEAVE_WIN);
-            if (onInputEvent(&ev)) {
-                *handled = true;
-                return 0;
-            }
-            break;
-        }
-
-        case WM_MOUSEHOVER:
-        {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
-                return 0;
-            }
-
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVM_HOVER);
-            if (onInputEvent(&ev)) {
-                *handled = true;
-                return 0;
-            }
-            break;
-        }
-
         case WM_MOUSEWHEEL:
         {
             if (::GetMessageExtraInfo() != 0) {
@@ -896,6 +856,38 @@ namespace ukive {
         default:
         break;
         }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMouseHover(WPARAM wParam, LPARAM lParam, bool* handled) {
+        if (::GetMessageExtraInfo() != 0) {
+            *handled = true;
+            return 0;
+        }
+
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVM_HOVER);
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return 0;
+        }
+
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMouseLeave(WPARAM wParam, LPARAM lParam, bool* handled) {
+        if (::GetMessageExtraInfo() != 0) {
+            *handled = true;
+            return 0;
+        }
+
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVM_LEAVE_WIN);
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return 0;
+        }
+
         return 0;
     }
 
@@ -974,7 +966,9 @@ namespace ukive {
     }
 
     LRESULT WindowImpl::onSetCursor(WPARAM wParam, LPARAM lParam, bool* handled) {
-        if (isCursorInClient()) {
+        int hit_code = LOWORD(lParam);
+
+        if (hit_code == HTCLIENT) {
             *handled = true;
             setCurrentCursor(cursor_);
             return TRUE;
@@ -992,6 +986,17 @@ namespace ukive {
         return 0;
     }
 
+    LRESULT WindowImpl::onSetText(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto text = reinterpret_cast<wchar_t*>(lParam);
+        delegate_->onSetText(text);
+        return 0;
+    }
+
+    LRESULT WindowImpl::onSetIcon(WPARAM wParam, LPARAM lParam, bool* handled) {
+        delegate_->onSetIcon();
+        return 0;
+    }
+
     LRESULT WindowImpl::onMove(WPARAM wParam, LPARAM lParam, bool* handled) {
         int x_px = LOWORD(lParam);
         int y_px = HIWORD(lParam);
@@ -1004,13 +1009,15 @@ namespace ukive {
             setWindowRectShape();
         }
 
-        RECT winRect;
-        ::GetWindowRect(hWnd_, &winRect);
+        RECT w_rect;
+        ::GetWindowRect(hWnd_, &w_rect);
+        RECT c_rect;
+        ::GetClientRect(hWnd_, &c_rect);
 
-        int width_px = winRect.right - winRect.left;
-        int height_px = winRect.bottom - winRect.top;
-        int client_width_px = LOWORD(lParam);
-        int client_height_px = HIWORD(lParam);
+        int width_px = w_rect.right - w_rect.left;
+        int height_px = w_rect.bottom - w_rect.top;
+        int client_width_px = c_rect.right - c_rect.left;
+        int client_height_px = c_rect.bottom - c_rect.top;
 
         onResize(wParam, width_px, height_px, client_width_px, client_height_px);
         auto nc_result = non_client_frame_->onSize(wParam, lParam, handled);

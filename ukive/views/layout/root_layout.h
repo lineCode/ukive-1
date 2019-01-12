@@ -11,35 +11,45 @@ namespace ukive {
     class LayoutParams;
     class FrameLayout;
     class LinearLayout;
+    class TitleBar;
 
     class RootLayout : public NonClientLayout {
     public:
-        RootLayout(Window* w);
+        explicit RootLayout(Window* w);
         ~RootLayout();
+
+        void showTitleBar();
+        void hideTitleBar();
+        void removeTitleBar();
 
         void addShade(View* shade);
         void removeShade(View* shade);
 
-        void addDebugView();
+        void showDebugView();
         void removeDebugView();
         void toggleDebugView();
 
+        bool isTitleBarShowing() const;
+        TitleBar* getTitleBar() const;
         DebugView* getDebugView() const;
 
-        void addContent(View* content);
+        void setContent(View* content);
 
         void requestLayout() override;
         View* findViewById(int id) const override;
+        HitPoint onNCHitTest(int x, int y) override;
 
     protected:
-        LayoutParams* generateLayoutParams(const LayoutParams &lp) override;
+        LayoutParams* generateLayoutParams(const LayoutParams& lp) override;
         LayoutParams* generateDefaultLayoutParams() override;
         bool checkLayoutParams(LayoutParams* lp) override;
 
     private:
+        TitleBar* title_bar_;
         DebugView* debug_view_;
         FrameLayout* shade_layout_;
-        LinearLayout* content_layout_;
+        FrameLayout* content_layout_;
+        View* content_view_;
 
         bool shade_added_;
     };

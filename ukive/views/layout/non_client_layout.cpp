@@ -15,7 +15,7 @@ namespace ukive {
         :ViewGroup(w) {
 
         if (w->getFrameType() == Window::FRAME_ZERO) {
-            nc_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
+            nc_padding_.set(w->dpToPx(0), w->dpToPx(0), 0, 0);
             sh_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
         }
     }
@@ -41,24 +41,19 @@ namespace ukive {
             { HitPoint::BOTTOM_LEFT, HitPoint::BOTTOM, HitPoint::BOTTOM_RIGHT },
         };
 
-        Cursor cursor[3][3] = {
-            { Cursor::SIZENWSE,   Cursor::SIZENS,   Cursor::SIZENESW },
-            { Cursor::SIZEWE,     Cursor::ARROW,    Cursor::SIZEWE },
-            { Cursor::SIZENESW,   Cursor::SIZENS,   Cursor::SIZENWSE },
-        };
-
-        setCurrentCursor(cursor[row][col]);
         return hitTests[row][col];
     }
 
     void NonClientLayout::setNonClientPadding(int left, int top, int right, int bottom) {
         nc_padding_.set(left, top, right - left, bottom - top);
         requestLayout();
+        invalidate();
     }
 
     void NonClientLayout::setSizeHandlePadding(int left, int top, int right, int bottom) {
         sh_padding_.set(left, top, right - left, bottom - top);
         requestLayout();
+        invalidate();
     }
 
     void NonClientLayout::onMeasure(int width, int height, int width_mode, int height_mode) {
@@ -110,7 +105,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
     void NonClientLayout::onLayout(
@@ -137,25 +132,27 @@ namespace ukive {
     }
 
     void NonClientLayout::onDraw(Canvas* canvas) {
-        Rect left_rect(
-            0, 0,
-            nc_padding_.left, getHeight() - nc_padding_.bottom);
-        canvas->fillRect(left_rect.toRectF(), border_color);
+        if (!nc_padding_.empty()) {
+            Rect left_rect(
+                0, 0,
+                nc_padding_.left, getHeight() - nc_padding_.bottom);
+            canvas->fillRect(left_rect.toRectF(), border_color);
 
-        Rect top_rect(
-            nc_padding_.left, 0,
-            getWidth() - nc_padding_.left, nc_padding_.top);
-        canvas->fillRect(top_rect.toRectF(), border_color);
+            Rect top_rect(
+                nc_padding_.left, 0,
+                getWidth() - nc_padding_.left, nc_padding_.top);
+            canvas->fillRect(top_rect.toRectF(), border_color);
 
-        Rect right_rect(
-            getWidth() - nc_padding_.right, nc_padding_.top,
-            nc_padding_.right, getHeight() - nc_padding_.top);
-        canvas->fillRect(right_rect.toRectF(), border_color);
+            Rect right_rect(
+                getWidth() - nc_padding_.right, nc_padding_.top,
+                nc_padding_.right, getHeight() - nc_padding_.top);
+            canvas->fillRect(right_rect.toRectF(), border_color);
 
-        Rect bottom_rect(
-            0, getHeight() - nc_padding_.bottom,
-            getWidth() - nc_padding_.right, nc_padding_.bottom);
-        canvas->fillRect(bottom_rect.toRectF(), border_color);
+            Rect bottom_rect(
+                0, getHeight() - nc_padding_.bottom,
+                getWidth() - nc_padding_.right, nc_padding_.bottom);
+            canvas->fillRect(bottom_rect.toRectF(), border_color);
+        }
 
         ViewGroup::onDraw(canvas);
     }

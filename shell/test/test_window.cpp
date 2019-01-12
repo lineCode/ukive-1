@@ -39,8 +39,6 @@ namespace shell {
 
     TestWindow::TestWindow()
         : Window(),
-          min_button_(nullptr),
-          max_button_(nullptr),
           dwm_button_(nullptr) {
     }
 
@@ -56,21 +54,21 @@ namespace shell {
     void TestWindow::onCreate() {
         Window::onCreate();
 
+        showTitleBar();
+
         //inflateGroup();
         inflateListView();
     }
 
     void TestWindow::onClick(ukive::View* v) {
-        if (v == min_button_) {
-            minimize();
-        } else if (v == max_button_) {
-            if (isMaximum()) {
-                restore();
+        if (v == dwm_button_) {
+            if (isTitleBarShowing()) {
+                hideTitleBar();
             } else {
-                maximize();
+                showTitleBar();
             }
-        } else if (v == dwm_button_) {
-            BOOL enable_aero = true;
+
+            /*BOOL enable_aero = true;
             BOOL new_aero = true;
             ::DwmIsCompositionEnabled(&enable_aero);
             if (enable_aero) {
@@ -79,7 +77,7 @@ namespace shell {
                 ::DwmEnableComposition(DWM_EC_ENABLECOMPOSITION);
             }
 
-            ::DwmIsCompositionEnabled(&new_aero);
+            ::DwmIsCompositionEnabled(&new_aero);*/
         }
     }
 
@@ -173,28 +171,12 @@ namespace shell {
         setContentView(layout);
 
         // Buttons
-        min_button_ = new ukive::Button(this);
-        min_button_->setOnClickListener(this);
-        min_button_->setText(L"Minimum");
-        auto min_btn_lp = Rlp::Builder()
-            .start(layout->getId(), Rlp::START, dpToPx(4))
-            .top(layout->getId(), Rlp::TOP, dpToPx(4)).build();
-        layout->addView(min_button_, min_btn_lp);
-
-        max_button_ = new ukive::Button(this);
-        max_button_->setOnClickListener(this);
-        max_button_->setText(L"Maximum");
-        auto max_btn_lp = Rlp::Builder()
-            .start(min_button_->getId(), Rlp::END, dpToPx(4))
-            .top(layout->getId(), Rlp::TOP, dpToPx(4)).build();
-        layout->addView(max_button_, max_btn_lp);
-
         dwm_button_ = new ukive::Button(this);
         dwm_button_->setOnClickListener(this);
         dwm_button_->setText(L"Switch DWM");
         auto dwm_btn_lp = Rlp::Builder()
-            .start(max_button_->getId(), Rlp::END, dpToPx(4))
-            .top(layout->getId(), Rlp::TOP, dpToPx(4)).build();
+            .start(layout->getId(), Rlp::START, dpToPx(12))
+            .top(layout->getId(), Rlp::TOP, dpToPx(12)).build();
         layout->addView(dwm_button_, dwm_btn_lp);
 
         // ListView
@@ -210,10 +192,10 @@ namespace shell {
         auto list_lp = Rlp::Builder(
             ukive::LayoutParams::MATCH_PARENT,
             ukive::LayoutParams::MATCH_PARENT)
-            .start(layout->getId(), Rlp::START, dpToPx(2))
-            .top(min_button_->getId(), Rlp::BOTTOM, dpToPx(4))
-            .end(layout->getId(), Rlp::END, dpToPx(2))
-            .bottom(layout->getId(), Rlp::BOTTOM, dpToPx(2)).build();
+            .start(layout->getId(), Rlp::START, dpToPx(8))
+            .top(dwm_button_->getId(), Rlp::BOTTOM, dpToPx(8))
+            .end(layout->getId(), Rlp::END, dpToPx(8))
+            .bottom(layout->getId(), Rlp::BOTTOM, dpToPx(8)).build();
         layout->addView(list_view, list_lp);
     }
 

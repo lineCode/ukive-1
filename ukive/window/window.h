@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #include <memory>
+#include <vector>
 
 #include "ukive/message/cycler.h"
 #include "ukive/utils/string_utils.h"
@@ -21,13 +22,16 @@ namespace ukive {
     class Renderer;
     class InputEvent;
     class WindowImpl;
+    class TitleBar;
     class RootLayout;
     class AnimationManager;
     class ContextMenu;
     class ContextMenuCallback;
     class TextActionMode;
     class TextActionModeCallback;
+    class OnWindowStatusChangedListener;
     struct ClassInfo;
+
 
     class Window : public SwapChainResizeNotifier {
     public:
@@ -73,6 +77,7 @@ namespace ukive {
         int getMinHeight() const;
         int getClientWidth() const;
         int getClientHeight() const;
+        string16 getTitle() const;
         RootLayout* getRootLayout() const;
         Color getBackgroundColor() const;
         Cycler* getCycler() const;
@@ -80,13 +85,24 @@ namespace ukive {
         HWND getHandle() const;
         AnimationManager* getAnimationManager() const;
         FrameType getFrameType() const;
+        TitleBar* getTitleBar() const;
 
         bool isShowing() const;
-        bool isCursorInClient() const;
         bool isTranslucent() const;
         bool isStartupWindow() const;
         bool isMinimum() const;
         bool isMaximum() const;
+        bool isTitleBarShowing() const;
+
+        void showTitleBar();
+        void hideTitleBar();
+        void removeTitleBar();
+
+        void addStatusChangedListener(OnWindowStatusChangedListener* l);
+        void removeStatusChangedListener(OnWindowStatusChangedListener* l);
+
+        void convScreenToClient(Point* p);
+        void convClientToScreen(Point* p);
 
         void captureMouse(View* v);
         void releaseMouse();
@@ -108,7 +124,7 @@ namespace ukive {
         void performRefresh();
         void performRefresh(int left, int top, int right, int bottom);
 
-        View* findViewById(int id);
+        View* findViewById(int id) const;
 
         ContextMenu* startContextMenu(
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
@@ -125,6 +141,8 @@ namespace ukive {
         virtual void onActivate(int param);
         virtual void onSetFocus();
         virtual void onKillFocus();
+        virtual void onSetText(const string16& text);
+        virtual void onSetIcon();
         virtual void onDraw(const Rect& rect);
         virtual void onMove(int x, int y);
         virtual void onResize(
@@ -210,6 +228,7 @@ namespace ukive {
 
         AnimStateChangedListener* mAnimStateChangedListener;
         AnimTimerEventListener* mAnimTimerEventListener;
+        std::vector<OnWindowStatusChangedListener*> status_changed_listeners_;
 
         Color background_color_;
         bool is_startup_window_;

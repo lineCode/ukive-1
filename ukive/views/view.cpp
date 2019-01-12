@@ -13,7 +13,7 @@
 #include "ukive/graphics/renderer.h"
 #include "ukive/application.h"
 #include "ukive/message/cycler.h"
-#include "ukive/graphics/bitmap_factory.h"
+#include "ukive/graphics/point.h"
 #include "ukive/graphics/direct3d/effects/shadow_effect.h"
 
 
@@ -294,11 +294,11 @@ namespace ukive {
         parent_ = parent;
     }
 
-    void View::setMeasuredDimension(int width, int height) {
+    void View::setMeasuredSize(int width, int height) {
         measured_width_ = width;
         measured_height_ = height;
 
-        flags_ |= Flags::MEASURED_DIMENSION_SET;
+        flags_ |= Flags::MEASURED_SIZE_SET;
     }
 
     void View::offsetTopAndBottom(int dy) {
@@ -485,19 +485,16 @@ namespace ukive {
     Rect View::getBoundsInScreen() const {
         auto bound = getBoundsInWindow();
 
-        POINT pt;
+        Point pt;
         pt.x = bound.left;
         pt.y = bound.top;
 
-        ::ClientToScreen(window_->getHandle(), &pt);
+        getWindow()->convClientToScreen(&pt);
 
         int dx = pt.x - bound.left;
         int dy = pt.y - bound.top;
 
-        bound.left += dx;
-        bound.top += dy;
-        bound.right += dx;
-        bound.bottom += dy;
+        bound.offset(dx, dy);
 
         return bound;
     }
@@ -780,7 +777,7 @@ namespace ukive {
     }
 
     void View::measure(int width, int height, int width_mode, int height_mode) {
-        if (flags_ & Flags::MEASURED_DIMENSION_SET) {
+        if (flags_ & Flags::MEASURED_SIZE_SET) {
             bool is_force_layout = (flags_ & Flags::FORCE_LAYOUT);
             bool is_exactly_mode = (width_mode == EXACTLY && height_mode == EXACTLY);
             bool is_spec_not_change =
@@ -792,12 +789,12 @@ namespace ukive {
             }
         }
 
-        flags_ &= ~Flags::MEASURED_DIMENSION_SET;
+        flags_ &= ~Flags::MEASURED_SIZE_SET;
 
         onMeasure(width, height, width_mode, height_mode);
 
-        if (!(flags_ & Flags::MEASURED_DIMENSION_SET)) {
-            LOG(Log::FATAL) << "You must invoke setMeasuredDimension() in onMeasure()!";
+        if (!(flags_ & Flags::MEASURED_SIZE_SET)) {
+            LOG(Log::FATAL) << "You must invoke setMeasuredSize() in onMeasure()!";
         }
 
         flags_ |= Flags::NEED_LAYOUT;
@@ -1067,7 +1064,7 @@ namespace ukive {
     }
 
     void View::onMeasure(int width, int height, int widthMode, int heightMode) {
-        setMeasuredDimension(width > min_width_ ? width : min_width_,
+        setMeasuredSize(width > min_width_ ? width : min_width_,
             height > min_height_ ? height : min_height_);
     }
 

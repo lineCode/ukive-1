@@ -284,6 +284,7 @@
     <ClInclude Include="views\spinner_view.h" />
     <ClInclude Include="views\switch_view.h" />
     <ClInclude Include="views\text_view.h" />
+    <ClInclude Include="views\title_bar\title_bar.h" />
     <ClInclude Include="views\view.h" />
     <ClInclude Include="window\frame\default_non_client_frame.h" />
     <ClInclude Include="window\frame\drawable_non_client_frame.h" />
@@ -291,6 +292,7 @@
     <ClInclude Include="window\window.h" />
     <ClInclude Include="window\window_class_manager.h" />
     <ClInclude Include="window\window_impl.h" />
+    <ClInclude Include="window\window_listener.h" />
     <ClInclude Include="window\window_manager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -398,6 +400,7 @@
     <ClCompile Include="views\spinner_view.cpp" />
     <ClCompile Include="views\switch_view.cpp" />
     <ClCompile Include="views\text_view.cpp" />
+    <ClCompile Include="views\title_bar\title_bar.cpp" />
     <ClCompile Include="views\view.cpp" />
     <ClCompile Include="window\frame\default_non_client_frame.cpp" />
     <ClCompile Include="window\frame\drawable_non_client_frame.cpp" />

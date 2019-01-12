@@ -89,7 +89,7 @@ namespace ukive {
 
 
     void ViewGroup::addView(View* v, LayoutParams* params) {
-        addView(view_list_.size(), v, params);
+        addView(STLCInt(view_list_.size()), v, params);
     }
 
     void ViewGroup::addView(int index, View* v, LayoutParams* params) {
@@ -104,7 +104,7 @@ namespace ukive {
         }
 
         for (auto view : view_list_) {
-            if (view->getId() == v->getId()) {
+            if (view == v) {
                 return;
             }
         }
@@ -149,10 +149,8 @@ namespace ukive {
             return;
         }
 
-        for (auto it = view_list_.begin();
-            it != view_list_.end(); ++it) {
-
-            if ((*it)->getId() == v->getId()) {
+        for (auto it = view_list_.begin(); it != view_list_.end(); ++it) {
+            if ((*it) == v) {
                 v->discardFocus();
                 v->discardPendingOperations();
 

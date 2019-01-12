@@ -9,8 +9,8 @@
 namespace ukive {
 
     Button::Button(Window *w)
-        :TextView(w) {
-        initButton();
+        : TextView(w) {
+          initButton();
     }
 
 
@@ -39,6 +39,7 @@ namespace ukive {
 
     void Button::setButtonColor(Color color) {
         shape_drawable_->setSolidColor(color);
+        invalidate();
     }
 
 }

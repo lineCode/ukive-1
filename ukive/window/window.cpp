@@ -17,29 +17,30 @@
 #include "ukive/graphics/renderer.h"
 #include "ukive/system/qpc_service.h"
 #include "ukive/views/debug_view.h"
+#include "ukive/window/window_listener.h"
 
 
 namespace ukive {
 
     Window::Window()
-        :impl_(std::make_unique<WindowImpl>(this)),
-        canvas_(nullptr),
-        renderer_(nullptr),
-        labour_cycler_(nullptr),
-        root_layout_(nullptr),
-        mouse_holder_(nullptr),
-        focus_holder_(nullptr),
-        focus_holder_backup_(nullptr),
-        mouse_holder_ref_(0),
-        anim_mgr_(nullptr),
-        mAnimStateChangedListener(nullptr),
-        mAnimTimerEventListener(nullptr),
-        background_color_(Color::White),
-        is_startup_window_(false),
-        min_width_(0),
-        min_height_(0),
-        frame_type_(FRAME_NATIVE) {
-
+        : impl_(std::make_unique<WindowImpl>(this)),
+          canvas_(nullptr),
+          renderer_(nullptr),
+          labour_cycler_(nullptr),
+          root_layout_(nullptr),
+          mouse_holder_(nullptr),
+          focus_holder_(nullptr),
+          focus_holder_backup_(nullptr),
+          mouse_holder_ref_(0),
+          anim_mgr_(nullptr),
+          mAnimStateChangedListener(nullptr),
+          mAnimTimerEventListener(nullptr),
+          background_color_(Color::White),
+          is_startup_window_(false),
+          min_width_(0),
+          min_height_(0),
+          frame_type_(FRAME_NATIVE)
+    {
         WindowManager::getInstance()->addWindow(this);
     }
 
@@ -119,7 +120,7 @@ namespace ukive {
     }
 
     void Window::setContentView(View* content) {
-        root_layout_->addContent(content);
+        root_layout_->setContent(content);
     }
 
     void Window::setBackgroundColor(Color color) {
@@ -171,6 +172,10 @@ namespace ukive {
         return impl_->getClientHeight();
     }
 
+    string16 Window::getTitle() const {
+        return impl_->getTitle();
+    }
+
     RootLayout* Window::getRootLayout() const {
         return root_layout_;
     }
@@ -199,12 +204,12 @@ namespace ukive {
         return frame_type_;
     }
 
-    bool Window::isShowing() const {
-        return impl_->isShowing();
+    TitleBar* Window::getTitleBar() const {
+        return root_layout_->getTitleBar();
     }
 
-    bool Window::isCursorInClient() const {
-        return impl_->isCursorInClient();
+    bool Window::isShowing() const {
+        return impl_->isShowing();
     }
 
     bool Window::isTranslucent() const {
@@ -221,6 +226,45 @@ namespace ukive {
 
     bool Window::isMaximum() const {
         return impl_->isMaximum();
+    }
+
+    bool Window::isTitleBarShowing() const {
+        return root_layout_->isTitleBarShowing();
+    }
+
+    void Window::showTitleBar() {
+        root_layout_->showTitleBar();
+    }
+
+    void Window::hideTitleBar() {
+        root_layout_->hideTitleBar();
+    }
+
+    void Window::removeTitleBar() {
+        root_layout_->removeTitleBar();
+    }
+
+    void Window::addStatusChangedListener(OnWindowStatusChangedListener* l) {
+        status_changed_listeners_.push_back(l);
+    }
+
+    void Window::removeStatusChangedListener(OnWindowStatusChangedListener* l) {
+        for (auto it = status_changed_listeners_.begin();
+            it != status_changed_listeners_.end(); ++it)
+        {
+            if (*it == l) {
+                status_changed_listeners_.erase(it);
+                break;
+            }
+        }
+    }
+
+    void Window::convScreenToClient(Point* p) {
+        impl_->convScreenToClient(p);
+    }
+
+    void Window::convClientToScreen(Point* p) {
+        impl_->convClientToScreen(p);
     }
 
     void Window::captureMouse(View* v) {
@@ -284,8 +328,7 @@ namespace ukive {
         labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
     }
 
-    void Window::invalidate(int left, int top, int right, int bottom) {
-    }
+    void Window::invalidate(int left, int top, int right, int bottom) {}
 
     void Window::requestLayout() {
         labour_cycler_->removeMessages(SCHEDULE_LAYOUT);
@@ -394,31 +437,30 @@ namespace ukive {
     }
 
 
-    View* Window::findViewById(int id) {
+    View* Window::findViewById(int id) const {
         return root_layout_->findViewById(id);
     }
 
     ContextMenu* Window::startContextMenu(
-        ContextMenuCallback* callback, View* anchor, View::Gravity gravity) {
-
-        ContextMenu* contextMenu
-            = new ContextMenu(this, callback);
+        ContextMenuCallback* callback, View* anchor, View::Gravity gravity)
+    {
+        auto context_menu = new ContextMenu(this, callback);
 
         if (!callback->onCreateContextMenu(
-            contextMenu, contextMenu->getMenu())) {
-            delete contextMenu;
+            context_menu, context_menu->getMenu())) {
+            delete context_menu;
             return nullptr;
         }
 
         callback->onPrepareContextMenu(
-            contextMenu, contextMenu->getMenu());
+            context_menu, context_menu->getMenu());
 
-        if (contextMenu->getMenu()->getItemCount() == 0) {
-            delete contextMenu;
+        if (context_menu->getMenu()->getItemCount() == 0) {
+            delete context_menu;
             return nullptr;
         }
 
-        context_menu_.reset(contextMenu);
+        context_menu_.reset(context_menu);
 
         Rect rect = anchor->getBoundsInWindow();
 
@@ -440,31 +482,29 @@ namespace ukive {
         }
 
         context_menu_->show(x, y);
-        return contextMenu;
+        return context_menu;
     }
 
     TextActionMode* Window::startTextActionMode(TextActionModeCallback* callback) {
-        TextActionMode* actionMode
-            = new TextActionMode(this, callback);
-
+        auto action_mode = new TextActionMode(this, callback);
         if (!callback->onCreateActionMode(
-            actionMode, actionMode->getMenu())) {
-            delete actionMode;
+            action_mode, action_mode->getMenu())) {
+            delete action_mode;
             return nullptr;
         }
 
         callback->onPrepareActionMode(
-            actionMode, actionMode->getMenu());
+            action_mode, action_mode->getMenu());
 
-        if (actionMode->getMenu()->getItemCount() == 0) {
-            delete actionMode;
+        if (action_mode->getMenu()->getItemCount() == 0) {
+            delete action_mode;
             return nullptr;
         }
 
-        text_action_mode_.reset(actionMode);
+        text_action_mode_.reset(action_mode);
         text_action_mode_->show();
 
-        return actionMode;
+        return action_mode;
     }
 
     float Window::dpToPx(float dp) {
@@ -553,6 +593,18 @@ namespace ukive {
         root_layout_->dispatchWindowFocusChanged(false);
     }
 
+    void Window::onSetText(const string16& text) {
+        for (auto listener : status_changed_listeners_) {
+            listener->onWindowTextChanged(text);
+        }
+    }
+
+    void Window::onSetIcon() {
+        for (auto listener : status_changed_listeners_) {
+            listener->onWindowIconChanged();
+        }
+    }
+
     void Window::onDraw(const Rect& rect) {
         if (impl_->isCreated())
         {
@@ -586,7 +638,7 @@ namespace ukive {
 
     void Window::onResize(
         int param, int width, int height,
-        int clientWidth, int clientHeight) {
+        int client_width, int client_height) {
 
         HRESULT hr = renderer_->resize();
         if (FAILED(hr)) {
@@ -596,10 +648,11 @@ namespace ukive {
 
         switch (param) {
         case SIZE_RESTORED:
-            break;
         case SIZE_MINIMIZED:
-            break;
         case SIZE_MAXIMIZED:
+            for (auto listener : status_changed_listeners_) {
+                listener->onWindowStatusChanged();
+            }
             break;
         case SIZE_MAXSHOW:
             break;
