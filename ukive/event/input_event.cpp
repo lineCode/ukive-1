@@ -4,12 +4,9 @@
 namespace ukive {
 
     InputEvent::InputEvent()
-        : mouse_x_(0),
-          mouse_y_(0),
-          mouse_raw_x_(0),
-          mouse_raw_y_(0),
-          mouse_wheel_(0),
+        : mouse_wheel_(0),
           mouse_key_(0),
+          cur_touch_id_(-1),
           char_key_(0),
           virtual_key_(0),
           event_type_(0),
@@ -20,25 +17,24 @@ namespace ukive {
     InputEvent::~InputEvent() {
     }
 
-
     void InputEvent::setEvent(int ev) {
         event_type_ = ev;
     }
 
     void InputEvent::setMouseX(int x) {
-        mouse_x_ = x;
+        mouse_pos_.x = x;
     }
 
     void InputEvent::setMouseY(int y) {
-        mouse_y_ = y;
+        mouse_pos_.y = y;
     }
 
     void InputEvent::setMouseRawX(int raw_x) {
-        mouse_raw_x_ = raw_x;
+        mouse_pos_.raw_x = raw_x;
     }
 
     void InputEvent::setMouseRawY(int raw_y) {
-        mouse_raw_y_ = raw_y;
+        mouse_pos_.raw_y = raw_y;
     }
 
     void InputEvent::setMouseWheel(int wheel) {
@@ -141,6 +137,26 @@ namespace ukive {
         virtual_key_ = virtual_key;
     }
 
+    void InputEvent::setTouchX(int x, int id) {
+        touch_pos_[id].x = x;
+    }
+
+    void InputEvent::setTouchY(int y, int id) {
+        touch_pos_[id].y = y;
+    }
+
+    void InputEvent::setTouchRawX(int raw_x, int id) {
+        touch_pos_[id].raw_x = raw_x;
+    }
+
+    void InputEvent::setTouchRawY(int raw_y, int id) {
+        touch_pos_[id].raw_y = raw_y;
+    }
+
+    void InputEvent::setCurTouchId(int id) {
+        cur_touch_id_ = id;
+    }
+
     void InputEvent::setOutside(bool outside) {
         is_outside_ = outside;
     }
@@ -149,59 +165,93 @@ namespace ukive {
         is_mouse_captured_ = captured;
     }
 
-
-    int InputEvent::getEvent() {
+    int InputEvent::getEvent() const {
         return event_type_;
     }
 
-    int InputEvent::getMouseX() {
-        return mouse_x_;
+    int InputEvent::getMouseX() const {
+        return mouse_pos_.x;
     }
 
-    int InputEvent::getMouseY() {
-        return mouse_y_;
+    int InputEvent::getMouseY() const {
+        return mouse_pos_.y;
     }
 
-    int InputEvent::getMouseRawX() {
-        return mouse_raw_x_;
+    int InputEvent::getMouseRawX() const {
+        return mouse_pos_.raw_x;
     }
 
-    int InputEvent::getMouseRawY() {
-        return mouse_raw_y_;
+    int InputEvent::getMouseRawY() const {
+        return mouse_pos_.raw_y;
     }
 
-    int InputEvent::getMouseWheel() {
+    int InputEvent::getMouseWheel() const {
         return mouse_wheel_;
     }
 
-    int InputEvent::getMouseKey() {
+    int InputEvent::getMouseKey() const {
         return mouse_key_;
     }
 
-    int InputEvent::getKeyboardCharKey() {
+    int InputEvent::getKeyboardCharKey() const {
         return char_key_;
     }
 
-    int InputEvent::getKeyboardVirtualKey() {
+    int InputEvent::getKeyboardVirtualKey() const {
         return virtual_key_;
     }
 
+    int InputEvent::getTouchX(int id) const {
+        auto it = touch_pos_.find(id);
+        if (it != touch_pos_.end()) {
+            return it->second.x;
+        }
+        return 0;
+    }
 
-    bool InputEvent::isMouseEvent() {
+    int InputEvent::getTouchY(int id) const {
+        auto it = touch_pos_.find(id);
+        if (it != touch_pos_.end()) {
+            return it->second.y;
+        }
+        return 0;
+    }
+
+    int InputEvent::getTouchRawX(int id) const {
+        auto it = touch_pos_.find(id);
+        if (it != touch_pos_.end()) {
+            return it->second.raw_x;
+        }
+        return 0;
+    }
+
+    int InputEvent::getTouchRawY(int id) const {
+        auto it = touch_pos_.find(id);
+        if (it != touch_pos_.end()) {
+            return it->second.raw_y;
+        }
+        return 0;
+    }
+
+    int InputEvent::getCurTouchId() const {
+        return cur_touch_id_;
+    }
+
+    bool InputEvent::isMouseEvent() const {
         return (event_type_ >= EVM_DOWN
             && event_type_ <= EVM_SCROLL_ENTER);
     }
 
-    bool InputEvent::isKeyboardEvent() {
+    bool InputEvent::isKeyboardEvent() const {
         return (event_type_ >= EVK_DOWN
             && event_type_ <= EVK_CHAR);
     }
 
-    bool InputEvent::isMouseCaptured() {
+    bool InputEvent::isMouseCaptured() const {
         return is_mouse_captured_;
     }
 
-    bool InputEvent::isOutside() {
+    bool InputEvent::isOutside() const {
         return is_outside_;
     }
 

@@ -44,6 +44,13 @@ namespace ukive {
         }
     }
 
+    void DrawableNonClientFrame::getClientInsets(RECT* rect) {
+        rect->left = 0;
+        rect->right = 0;
+        rect->top = 0;
+        rect->bottom = (window_->isTranslucent() ? 0 : 1);
+    }
+
     LRESULT DrawableNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
         *handled = false;
         return FALSE;
@@ -114,11 +121,14 @@ namespace ukive {
         *handled = true;
         if (wParam == TRUE) {
             // 直接移除整个非客户区。
+            RECT rect;
+            getClientInsets(&rect);
+
             auto ncp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
             ncp->rgrc[0].left += 0;
             ncp->rgrc[0].top += 0;
             ncp->rgrc[0].right -= 0;
-            ncp->rgrc[0].bottom -= 0;
+            ncp->rgrc[0].bottom -= -1;
         }
 
         return 0;

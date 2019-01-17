@@ -1,6 +1,8 @@
 ﻿#ifndef UKIVE_EVENT_INPUT_EVENT_H_
 #define UKIVE_EVENT_INPUT_EVENT_H_
 
+#include <map>
+
 
 namespace ukive {
 
@@ -62,38 +64,54 @@ namespace ukive {
         void setMouseKey(int key);
         void setKeyboardCharKey(int char_key, int ex_msg);
         void setKeyboardVirtualKey(int virtual_key, int ex_msg);
+        void setTouchX(int x, int id);
+        void setTouchY(int y, int id);
+        void setTouchRawX(int raw_x, int id);
+        void setTouchRawY(int raw_y, int id);
+        void setCurTouchId(int id);
 
         void setOutside(bool outside);
         void setIsMouseCaptured(bool captured);
 
-        int getEvent();
-        int getMouseX();
-        int getMouseY();
-        int getMouseRawX();
-        int getMouseRawY();
-        int getMouseWheel();
-        int getMouseKey();
-        int getKeyboardCharKey();
-        int getKeyboardVirtualKey();
+        int getEvent() const;
+        int getMouseX() const;
+        int getMouseY() const;
+        int getMouseRawX() const;
+        int getMouseRawY() const;
+        int getMouseWheel() const;
+        int getMouseKey() const;
+        int getKeyboardCharKey() const;
+        int getKeyboardVirtualKey() const;
+        int getTouchX(int id) const;
+        int getTouchY(int id) const;
+        int getTouchRawX(int id) const;
+        int getTouchRawY(int id) const;
+        int getCurTouchId() const;
 
-        bool isMouseEvent();
-        bool isKeyboardEvent();
-        bool isMouseCaptured();
+        bool isMouseEvent() const;
+        bool isKeyboardEvent() const;
+        bool isMouseCaptured() const;
 
-        /// <summary>
-        /// 当鼠标事件发生于Widget外部时，该方法返回true。
-        /// 只有当 View 的 setReceiveOutsideInputEvent() 方法以 true 为参数
-        /// 调用之后，此方法才有效。
-        /// </summary>
-        bool isOutside();
+        /**
+         * 当鼠标事件发生于Widget外部时，该方法返回true。
+         * 只有当 View 的 setReceiveOutsideInputEvent() 方法以 true 为参数
+         * 调用之后，此方法才有效。
+         */
+        bool isOutside() const;
 
     private:
-        int mouse_x_;
-        int mouse_y_;
-        int mouse_raw_x_;
-        int mouse_raw_y_;
+        struct InputPos {
+            int x = 0;
+            int y = 0;
+            int raw_x = 0;
+            int raw_y = 0;
+        };
+
         int mouse_wheel_;
         int mouse_key_;
+        InputPos mouse_pos_;
+        std::map<int, InputPos> touch_pos_;
+        int cur_touch_id_;
 
         int char_key_;
         int virtual_key_;

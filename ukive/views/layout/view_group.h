@@ -80,7 +80,7 @@ namespace ukive {
         int getWrappedHeight();
 
     private:
-        std::vector<View*> view_list_;
+        std::vector<View*> views_;
     };
 
 }

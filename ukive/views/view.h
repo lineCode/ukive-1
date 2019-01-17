@@ -192,6 +192,7 @@ namespace ukive {
         void drawBackground(Canvas* canvas);
         void drawForeground(Canvas* canvas);
 
+        bool dispatchInputEventToThis(InputEvent* e);
         virtual void dispatchDraw(Canvas* canvas) {}
         virtual void dispatchDiscardFocus() {}
         virtual void dispatchDiscardPendingOperations() {}

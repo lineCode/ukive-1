@@ -333,6 +333,9 @@
     <ClCompile Include="views\title_bar\title_bar.cpp">
       <Filter>views\title_bar</Filter>
     </ClCompile>
+    <ClCompile Include="views\chart_view.cpp">
+      <Filter>views</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -711,6 +714,9 @@
     </ClInclude>
     <ClInclude Include="window\window_listener.h">
       <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="views\chart_view.h">
+      <Filter>views</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

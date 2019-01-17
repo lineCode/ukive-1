@@ -13,6 +13,13 @@ namespace ukive {
         return FALSE;
     }
 
+    void DefaultNonClientFrame::getClientInsets(RECT* rect) {
+        rect->left = 0;
+        rect->right = 0;
+        rect->top = 0;
+        rect->bottom = 0;
+    }
+
     LRESULT DefaultNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
         *handled = false;
         return FALSE;

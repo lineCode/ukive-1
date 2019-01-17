@@ -13,6 +13,7 @@
 #include "ukive/window/frame/default_non_client_frame.h"
 #include "ukive/window/frame/drawable_non_client_frame.h"
 #include "ukive/event/input_event.h"
+#include "ukive/utils/stl_utils.h"
 
 #include "shell/test/frame/custom_non_client_frame.h"
 
@@ -245,7 +246,12 @@ namespace ukive {
 
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
-        return rect.right - rect.left;
+        int width = rect.right - rect.left;
+
+        non_client_frame_->getClientInsets(&rect);
+        width -= (rect.left + rect.right);
+
+        return std::max(width, 0);
     }
 
     int WindowImpl::getClientHeight() const {
@@ -255,7 +261,12 @@ namespace ukive {
 
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
-        return rect.bottom - rect.top;
+        int height = rect.bottom - rect.top;
+
+        non_client_frame_->getClientInsets(&rect);
+        height -= (rect.top + rect.bottom);
+
+        return std::max(height, 0);
     }
 
     int WindowImpl::getDpi() const {
@@ -485,39 +496,59 @@ namespace ukive {
     }
 
     bool WindowImpl::onTouch(const TOUCHINPUT* inputs, int size) {
-        DCHECK(size > 0);
-
         InputEvent ev;
 
+        bool has_move = false;
+        bool has_down_up = false;
         for (int i = 0; i < size; ++i) {
-            auto& ti = inputs[i];
-            bool need_process = false;
-
-            if (ti.dwFlags & TOUCHEVENTF_DOWN) {
-                need_process = true;
+            bool need_proc = false;
+            auto& input = inputs[i];
+            if (input.dwFlags & TOUCHEVENTF_DOWN) {
+                DCHECK(!has_down_up);
+                DCHECK(prev_ti_.find(input.dwID) == prev_ti_.end());
+                need_proc = has_down_up = true;
                 ev.setEvent(size > 1 ? InputEvent::EVT_MULTI_DOWN : InputEvent::EVT_DOWN);
-            } else if (ti.dwFlags & TOUCHEVENTF_UP) {
-                need_process = true;
+                ev.setCurTouchId(STLCInt(input.dwID));
+                prev_ti_[input.dwID] = input;
+            } else if (input.dwFlags & TOUCHEVENTF_UP) {
+                DCHECK(!has_down_up);
+                auto it = prev_ti_.find(input.dwID);
+                DCHECK(it != prev_ti_.end());
+                need_proc = has_down_up = true;
                 ev.setEvent(size > 1 ? InputEvent::EVT_MULTI_UP : InputEvent::EVT_UP);
-            } else if (ti.dwFlags & TOUCHEVENTF_MOVE) {
-                need_process = true;
-                ev.setEvent(InputEvent::EVT_MOVE);
+                ev.setCurTouchId(STLCInt(input.dwID));
+                prev_ti_.erase(it);
+            } else if (input.dwFlags & TOUCHEVENTF_MOVE) {
+                need_proc = true;
+                if (!has_down_up && !has_move) {
+                    auto it = prev_ti_.find(input.dwID);
+                    DCHECK(it != prev_ti_.end());
+                    if (input.x != it->second.x || input.y != it->second.y) {
+                        has_move = true;
+                        ev.setEvent(InputEvent::EVT_MOVE);
+                        ev.setCurTouchId(STLCInt(input.dwID));
+                    }
+                }
+                prev_ti_[input.dwID] = input;
             }
 
-            if (need_process) {
-                ev.setMouseRawX(TOUCH_COORD_TO_PIXEL(ti.x));
-                ev.setMouseRawY(TOUCH_COORD_TO_PIXEL(ti.y));
+            if (need_proc) {
+                int id = STLCInt(input.dwID);
+                int tx = TOUCH_COORD_TO_PIXEL(input.x);
+                int ty = TOUCH_COORD_TO_PIXEL(input.y);
 
-                ::POINT pt;
-                pt.x = TOUCH_COORD_TO_PIXEL(ti.x);
-                pt.y = TOUCH_COORD_TO_PIXEL(ti.y);
+                POINT pt = { tx, ty };
                 ::ScreenToClient(hWnd_, &pt);
 
-                ev.setMouseX(pt.x);
-                ev.setMouseY(pt.y);
-
-                return onInputEvent(&ev);
+                ev.setTouchRawX(tx, id);
+                ev.setTouchRawY(ty, id);
+                ev.setTouchX(pt.x, id);
+                ev.setTouchY(pt.y, id);
             }
+        }
+
+        if (has_down_up || has_move) {
+            return onInputEvent(&ev);
         }
 
         return true;
@@ -876,6 +907,7 @@ namespace ukive {
     }
 
     LRESULT WindowImpl::onMouseLeave(WPARAM wParam, LPARAM lParam, bool* handled) {
+
         if (::GetMessageExtraInfo() != 0) {
             *handled = true;
             return 0;
@@ -1115,11 +1147,18 @@ namespace ukive {
             return 0;
         }
 
-        std::unique_ptr<TOUCHINPUT[]> inputs(new TOUCHINPUT[input_count]);
+        if (input_count > ti_cache_.size) {
+            ti_cache_.cache.reset(new TOUCHINPUT[input_count]);
+            ti_cache_.size = input_count;
+        }
+
         if (::GetTouchInputInfo(
-            reinterpret_cast<HTOUCHINPUT>(lParam), input_count, inputs.get(), sizeof(TOUCHINPUT)))
+            reinterpret_cast<HTOUCHINPUT>(lParam),
+            input_count,
+            ti_cache_.cache.get(),
+            sizeof(TOUCHINPUT)))
         {
-            *handled = onTouch(inputs.get(), input_count);
+            *handled = onTouch(ti_cache_.cache.get(), STLCInt(input_count));
             ::CloseTouchInputHandle(reinterpret_cast<HTOUCHINPUT>(lParam));
 
             if (*handled) {

@@ -255,6 +255,7 @@
     <ClInclude Include="utils\unicode.h" />
     <ClInclude Include="utils\weak_bind.h" />
     <ClInclude Include="views\button.h" />
+    <ClInclude Include="views\chart_view.h" />
     <ClInclude Include="views\check_box.h" />
     <ClInclude Include="views\click_listener.h" />
     <ClInclude Include="views\debug_view.h" />
@@ -374,6 +375,7 @@
     <ClCompile Include="utils\event_handler.h" />
     <ClCompile Include="utils\unicode.cpp" />
     <ClCompile Include="views\button.cpp" />
+    <ClCompile Include="views\chart_view.cpp" />
     <ClCompile Include="views\check_box.cpp" />
     <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />

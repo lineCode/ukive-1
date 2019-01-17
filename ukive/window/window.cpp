@@ -779,10 +779,11 @@ namespace ukive {
                 e->setIsMouseCaptured(true);
 
                 return mouse_holder_->dispatchInputEvent(e);
-            } else {
-                return root_layout_->dispatchInputEvent(e);
             }
-        } else if (e->isKeyboardEvent()) {
+            return root_layout_->dispatchInputEvent(e);
+        }
+
+        if (e->isKeyboardEvent()) {
             if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
                 bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
                 bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);

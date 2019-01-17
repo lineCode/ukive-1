@@ -93,6 +93,13 @@ namespace shell {
     void CustomNonClientFrame::onTranslucentChanged(bool translucent) {
     }
 
+    void CustomNonClientFrame::getClientInsets(RECT* rect) {
+        rect->left = 0;
+        rect->right = 0;
+        rect->top = 0;
+        rect->bottom = 0;
+    }
+
     LRESULT CustomNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {
         switch (wParam) {
         case SIZE_MAXIMIZED: {

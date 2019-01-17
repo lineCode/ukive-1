@@ -737,6 +737,29 @@ namespace ukive {
         }
     }
 
+    bool View::dispatchInputEventToThis(InputEvent* e) {
+        bool consumed = false;
+        if (e->getEvent() == InputEvent::EVM_LEAVE_WIN ||
+            e->getEvent() == InputEvent::EVM_LEAVE_VIEW ||
+            e->getEvent() == InputEvent::EV_CANCEL)
+        {
+            if (isInputEventAtLast()) {
+                int saved_event = e->getEvent();
+                if (saved_event != InputEvent::EV_CANCEL) {
+                    e->setEvent(InputEvent::EVM_LEAVE_VIEW);
+                }
+
+                onInputEvent(e);
+                setIsInputEventAtLast(false);
+                e->setEvent(saved_event);
+            }
+        } else {
+            consumed = onInputEvent(e);
+            setIsInputEventAtLast(consumed);
+        }
+        return consumed;
+    }
+
     void View::updateDrawableState() {
         updateBackgroundState();
         updateForegroundState();
@@ -900,8 +923,7 @@ namespace ukive {
     bool View::dispatchInputEvent(InputEvent* e) {
         e->setMouseX(e->getMouseX() - bounds_.left);
         e->setMouseY(e->getMouseY() - bounds_.top);
-
-        return onInputEvent(e);
+        return dispatchInputEventToThis(e);
     }
 
     void View::dispatchWindowFocusChanged(bool focus) {
@@ -974,7 +996,7 @@ namespace ukive {
             if (should_refresh) {
                 invalidate();
             }
-            return can_consume_mouse_event_;
+            return can_consume_mouse_event_ && should_refresh;
 
         case InputEvent::EVM_SCROLL_ENTER:
             if (fg_drawable_) {
@@ -989,6 +1011,7 @@ namespace ukive {
             return can_consume_mouse_event_;
 
         case InputEvent::EVM_LEAVE_VIEW:
+            setPressed(false);
             if (fg_drawable_) {
                 should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
             }

@@ -4,7 +4,9 @@
 #include <Windows.h>
 #include <windowsx.h>
 
+#include <map>
 #include <memory>
+#include <vector>
 
 #include "ukive/graphics/cursor.h"
 #include "ukive/graphics/point.h"
@@ -90,6 +92,11 @@ namespace ukive {
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     private:
+        struct TouchInputCache {
+            std::unique_ptr<TOUCHINPUT[]> cache;
+            UINT size = 0;
+        };
+
         void setWindowRectShape();
 
         LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP);
@@ -218,6 +225,9 @@ namespace ukive {
         bool is_translucent_;
         bool is_enable_mouse_track_;
         bool is_first_nccalc_;
+
+        TouchInputCache ti_cache_;
+        std::map<DWORD, TOUCHINPUT> prev_ti_;
     };
 
 }
