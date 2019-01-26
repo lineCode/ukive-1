@@ -5,22 +5,23 @@
 #include "ukive/menu/menu_impl.h"
 #include "ukive/drawable/shape_drawable.h"
 #include "ukive/animation/animator.h"
-#include "ukive/utils/executable.h"
 #include "ukive/graphics/color.h"
 #include "ukive/text/text_action_mode_callback.h"
 #include "ukive/animation/view_animator.h"
 #include "ukive/window/window.h"
 #include "ukive/message/cycler.h"
+#include "ukive/utils/weak_bind.h"
 
 
 namespace ukive {
 
     TextActionMode::TextActionMode(
         Window* window, TextActionModeCallback* callback)
-        :window_(window),
-        callback_(callback),
-        is_finished_(true) {
-
+        : is_finished_(true),
+          window_(window),
+          callback_(callback),
+          weak_ref_nest_(this)
+    {
         menu_width_ = window->dpToPx(92);
         menu_item_height_ = window->dpToPx(36);
 
@@ -45,7 +46,6 @@ namespace ukive {
     TextActionMode::~TextActionMode() {
     }
 
-
     void TextActionMode::onCreateMenu(Menu* menu) {
     }
 
@@ -56,11 +56,9 @@ namespace ukive {
         return callback_->onActionItemClicked(this, item);
     }
 
-
     Menu* TextActionMode::getMenu() {
         return menu_impl_;
     }
-
 
     void TextActionMode::invalidateMenu() {
         callback_->onPrepareActionMode(this, menu_impl_);
@@ -70,9 +68,9 @@ namespace ukive {
         int x = 0, y = 0;
         callback_->onGetContentPosition(&x, &y);
 
-        int windowWidth = window_->getClientWidth();
-        int windowHeight = window_->getClientHeight();
-        if (x + menu_width_ > windowWidth) {
+        int window_width = window_->getClientWidth();
+        int window_height = window_->getClientHeight();
+        if (x + menu_width_ > window_width) {
             x -= menu_width_;
         }
 
@@ -88,7 +86,8 @@ namespace ukive {
 
         // 异步打开TextActionMode菜单，以防止在输入事件处理流程中
         // 打开菜单时出现问题。
-        window_->getCycler()->post(weak_bind(&TextActionMode::showAsync, s_this()));
+        window_->getCycler()->post(
+            weakref_bind(&TextActionMode::showAsync, weak_ref_nest_.getRef()));
     }
 
     void TextActionMode::close() {
@@ -100,10 +99,12 @@ namespace ukive {
 
         menu_impl_->setEnabled(false);
         callback_->onDestroyActionMode(this);
+        window_->notifyTextActionModeClose();
 
         // 异步关闭TextActionMode菜单，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
-        window_->getCycler()->post(weak_bind(&TextActionMode::closeAsync, s_this()));
+        window_->getCycler()->post(
+            weakref_bind(&TextActionMode::closeAsync, weak_ref_nest_.getRef()));
     }
 
 
@@ -111,19 +112,19 @@ namespace ukive {
         int x = 0, y = 0;
         callback_->onGetContentPosition(&x, &y);
 
-        int cCenterX = 0, cCenterY = 0;
-        int windowWidth = window_->getClientWidth();
-        int windowHeight = window_->getClientHeight();
-        if (x + menu_width_ > windowWidth) {
-            cCenterX = menu_width_;
-            cCenterY = 0;
+        int center_x = 0, center_y = 0;
+        int window_width = window_->getClientWidth();
+        int window_height = window_->getClientHeight();
+        if (x + menu_width_ > window_width) {
+            center_x = menu_width_;
+            center_y = 0;
             x -= menu_width_;
         }
 
         inner_window_->show(x, y);
 
         ViewAnimator::createCirculeReveal(
-            inner_window_->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
+            inner_window_->getDecorView(), center_x, center_y, 0, 150)->start();
     }
 
     void TextActionMode::closeAsync() {
@@ -146,6 +147,8 @@ namespace ukive {
 
         inner_window_->getDecorView()->animate()->
             setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
+
+        delete this;
     }
 
 }

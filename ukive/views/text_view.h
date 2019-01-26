@@ -183,9 +183,9 @@ namespace ukive {
         bool is_selectable_;
 
         int prev_x_, prev_y_;
-        bool is_mouse_left_key_down_;
-        bool is_mouse_right_key_down_;
-        bool is_mouse_left_key_down_on_text_;
+        bool is_plkey_down_;
+        bool is_prkey_down_;
+        bool is_plkey_down_on_text_;
 
         int last_sel_;
         int first_sel_;

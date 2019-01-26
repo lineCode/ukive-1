@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <windowsx.h>
+#include <tpcshrd.h>
 
 #include <map>
 #include <memory>
@@ -98,6 +99,8 @@ namespace ukive {
         };
 
         void setWindowRectShape();
+        static void disableTouchFeedback(HWND hWnd);
+        int getPointerTypeFromMouseMsg();
 
         LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP);
 

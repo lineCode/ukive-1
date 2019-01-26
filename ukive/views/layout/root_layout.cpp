@@ -3,8 +3,6 @@
 #include <typeinfo>
 
 #include "ukive/views/layout/frame_layout.h"
-#include "ukive/views/layout/linear_layout.h"
-#include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/root_layout_params.h"
 #include "ukive/window/window.h"
 #include "ukive/views/debug_view.h"
@@ -26,7 +24,6 @@ namespace ukive {
         addView(content_layout_);
 
         shade_layout_ = new FrameLayout(getWindow());
-        shade_layout_->setCanConsumeMouseEvent(false);
     }
 
     RootLayout::~RootLayout() {
@@ -115,7 +112,6 @@ namespace ukive {
                 new LayoutParams(
                     LayoutParams::MATCH_PARENT,
                     LayoutParams::MATCH_PARENT));
-            debug_view_->setCanConsumeMouseEvent(false);
             addView(debug_view_);
         }
     }

@@ -245,16 +245,18 @@ namespace ukive {
     }
 
 
-    bool ViewGroup::dispatchMouseEvent(InputEvent* e) {
+    bool ViewGroup::dispatchPointerEvent(InputEvent* e) {
         bool consumed = false;
         bool intercepted = false;
 
-        e->setMouseX(e->getMouseX() - getLeft() + getScrollX());
-        e->setMouseY(e->getMouseY() - getTop() + getScrollY());
+        e->offsetInputPos(-getLeft() + getScrollX(), -getTop() + getScrollY());
 
-        if (onInterceptInputEvent(e) || onInterceptMouseEvent(e)) {
+        if (onInterceptInputEvent(e)) {
             intercepted = true;
             consumed = dispatchInputEventToThis(e);
+            if (e->getEvent() == InputEvent::EVT_DOWN) {
+                return consumed;
+            }
             e->setEvent(InputEvent::EV_CANCEL);
         }
 
@@ -263,7 +265,7 @@ namespace ukive {
         //  View 是从列表头开始的），这样一来与坐标相关的事件就可能发生在
         // 多个 View 交叠的区域，此时应该将该事件先发送至最上层的 View ，
         // 为此从 View 列表的尾部开始遍历。
-        // 随后根据子 View 的dispatchInputEvent()方法的返回值来决定是否将
+        // 随后根据子 View 的 dispatchInputEvent() 方法的返回值来决定是否将
         // 该事件传递给下层的 View。
         for (auto it = views_.rbegin(); it != views_.rend(); ++it) {
             auto child = (*it);
@@ -271,18 +273,16 @@ namespace ukive {
                 continue;
             }
 
-            int mx = e->getMouseX();
-            int my = e->getMouseY();
+            int mx = e->getX();
+            int my = e->getY();
 
-            if (child->isParentMouseInThis(e) &&
-                e->getEvent() != InputEvent::EVM_LEAVE_WIN &&
+            if (child->isParentPointerInThis(e) &&
                 e->getEvent() != InputEvent::EV_CANCEL)
             {
                 if (!consumed) {
                     consumed = child->dispatchInputEvent(e);
                 }
             } else if (child->isReceiveOutsideInputEvent() &&
-                e->getEvent() != InputEvent::EVM_LEAVE_WIN &&
                 e->getEvent() != InputEvent::EV_CANCEL)
             {
                 if (!consumed) {
@@ -296,14 +296,14 @@ namespace ukive {
             } else {
                 int saved_event = e->getEvent();
                 if (saved_event != InputEvent::EV_CANCEL) {
-                    e->setEvent(InputEvent::EVM_LEAVE_VIEW);
+                    e->setEvent(InputEvent::EV_LEAVE_VIEW);
                 }
                 child->dispatchInputEvent(e);
                 e->setEvent(saved_event);
             }
 
-            e->setMouseX(mx);
-            e->setMouseY(my);
+            e->setX(mx);
+            e->setY(my);
         }
 
         if (!intercepted && !consumed) {
@@ -317,20 +317,14 @@ namespace ukive {
         if (onInterceptInputEvent(e)) {
             return onInputEvent(e);
         }
-
-        if (onInterceptKeyboardEvent(e)) {
-            return onInputEvent(e);
-        }
-
         // 键盘事件不参与分发。
         return false;
     }
 
     bool ViewGroup::dispatchInputEvent(InputEvent* e) {
-        bool consumed = false;
-
-        if (e->isMouseEvent() && !e->isMouseCaptured()) {
-            consumed = dispatchMouseEvent(e);
+        bool consumed;
+        if ((e->isMouseEvent() || e->isTouchEvent()) && !e->isNoDispatch()) {
+            consumed = dispatchPointerEvent(e);
         } else if (e->isKeyboardEvent()) {
             consumed = dispatchKeyboardEvent(e);
         } else {
@@ -360,15 +354,6 @@ namespace ukive {
         return false;
     }
 
-    bool ViewGroup::onInterceptMouseEvent(InputEvent* e) {
-        return false;
-    }
-
-    bool ViewGroup::onInterceptKeyboardEvent(InputEvent* e) {
-        return false;
-    }
-
-
     void ViewGroup::drawChild(Canvas* canvas, View* child) {
         if (child->isLayouted() &&
             child->getVisibility() == View::VISIBLE &&
@@ -397,22 +382,22 @@ namespace ukive {
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        int childWidth;
-        int childWidthSpec;
-        int childHeight;
-        int childHeightSpec;
+        int child_w;
+        int child_w_mode;
+        int child_h;
+        int child_h_mode;
 
         getChildMeasure(
             parent_width, parent_width_mode,
             hori_padding,
-            child_lp->width, &childWidth, &childWidthSpec);
+            child_lp->width, &child_w, &child_w_mode);
 
         getChildMeasure(
             parent_height, parent_height_mode,
             vert_padding,
-            child_lp->height, &childHeight, &childHeightSpec);
+            child_lp->height, &child_h, &child_h_mode);
 
-        child->measure(childWidth, childHeight, childWidthSpec, childHeightSpec);
+        child->measure(child_w, child_h, child_w_mode, child_h_mode);
     }
 
     void ViewGroup::measureChildWithMargins(
@@ -428,22 +413,22 @@ namespace ukive {
         int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
         int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
 
-        int childWidth;
-        int childWidthSpec;
-        int childHeight;
-        int childHeightSpec;
+        int child_w;
+        int child_w_mode;
+        int child_h;
+        int child_h_mode;
 
         getChildMeasure(
             parent_width, parent_width_mode,
             hori_margin + hori_padding,
-            child_lp->width, &childWidth, &childWidthSpec);
+            child_lp->width, &child_w, &child_w_mode);
 
         getChildMeasure(
             parent_height, parent_height_mode,
             vert_margin + vert_padding,
-            child_lp->height, &childHeight, &childHeightSpec);
+            child_lp->height, &child_h, &child_h_mode);
 
-        child->measure(childWidth, childHeight, childWidthSpec, childHeightSpec);
+        child->measure(child_w, child_h, child_w_mode, child_h_mode);
     }
 
     void ViewGroup::measureChildren(

@@ -336,6 +336,12 @@
     <ClCompile Include="views\chart_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
+    <ClCompile Include="utils\dynamic_windows_api.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\win10_version.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -717,6 +723,15 @@
     </ClInclude>
     <ClInclude Include="views\chart_view.h">
       <Filter>views</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\dynamic_windows_api.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\win10_version.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\weak_ref_nest.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

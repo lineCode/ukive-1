@@ -3,14 +3,18 @@
 #include <algorithm>
 
 #include "ukive/event/input_event.h"
+#include "ukive/log.h"
 #include "ukive/views/layout/layout_params.h"
 
 
 namespace ukive {
 
-    ScrollView::ScrollView(Window* wnd)
-        :ViewGroup(wnd) {
-    }
+    ScrollView::ScrollView(Window* w)
+        : ViewGroup(w),
+          mouse_x_cache_(0),
+          mouse_y_cache_(0),
+          saved_pointer_type_(InputEvent::PT_NONE),
+          scroller_(nullptr) { }
 
 
     bool ScrollView::canScroll() {
@@ -59,27 +63,23 @@ namespace ukive {
     }
 
 
-    void ScrollView::onMeasure(
-        int width, int height, int widthSpec, int heightSpec) {
-
+    void ScrollView::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_width = 0;
         int final_height = 0;
 
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        if (getChildCount() > 1) {
-            throw std::logic_error("UScrollView-onMeasure(): UScrollView can only have one child.");
-        }
+        DCHECK(getChildCount() <= 1) << "ScrollView can only have one child.";
 
-        measureChildrenWithMargins(width, 0, widthSpec, UNKNOWN);
+        measureChildrenWithMargins(width, 0, width_mode, UNKNOWN);
 
-        switch (widthSpec) {
+        switch (width_mode) {
         case FIT: {
             View* child = getChildAt(0);
             if (child && child->getVisibility() != View::VANISHED) {
-                int childWidth = child->getMeasuredWidth();
-                final_width = std::min(childWidth + hori_padding, width);
+                int child_width = child->getMeasuredWidth();
+                final_width = std::min(child_width + hori_padding, width);
                 final_width = std::max(getMinimumWidth(), final_width);
             }
             break;
@@ -88,23 +88,24 @@ namespace ukive {
         case UNKNOWN: {
             View* child = getChildAt(0);
             if (child && child->getVisibility() != View::VANISHED) {
-                int childWidth = child->getMeasuredWidth();
-                final_width = std::max(getMinimumWidth(), childWidth);
+                int child_width = child->getMeasuredWidth();
+                final_width = std::max(getMinimumWidth(), child_width);
             }
             break;
         }
 
         case EXACTLY:
+        default:
             final_width = width;
             break;
         }
 
-        switch (heightSpec) {
+        switch (height_mode) {
         case FIT: {
             View* child = getChildAt(0);
             if (child && child->getVisibility() != View::VANISHED) {
-                int childHeight = child->getMeasuredHeight();
-                final_height = std::min(childHeight + vert_padding, height);
+                int child_height = child->getMeasuredHeight();
+                final_height = std::min(child_height + vert_padding, height);
                 final_height = std::max(getMinimumHeight(), final_height);
             }
             break;
@@ -113,13 +114,14 @@ namespace ukive {
         case UNKNOWN: {
             View* child = getChildAt(0);
             if (child && child->getVisibility() != View::VANISHED) {
-                int childHeight = child->getMeasuredHeight();
-                final_height = std::max(getMinimumHeight(), childHeight);
+                int child_height = child->getMeasuredHeight();
+                final_height = std::max(getMinimumHeight(), child_height);
             }
             break;
         }
 
         case EXACTLY:
+        default:
             final_height = height;
             break;
         }
@@ -129,8 +131,8 @@ namespace ukive {
 
     void ScrollView::onLayout(
         bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom) {
-
+        int left, int top, int right, int bottom)
+    {
         auto child = getChildAt(0);
         if (child && child->getVisibility() != View::VANISHED) {
             auto lp = child->getLayoutParams();
@@ -138,22 +140,22 @@ namespace ukive {
             int width = child->getMeasuredWidth();
             int height = child->getMeasuredHeight();
 
-            int childleft = getPaddingLeft() + lp->leftMargin;
-            int childTop = getPaddingTop() + lp->topMargin;
+            int child_left = getPaddingLeft() + lp->leftMargin;
+            int child_top = getPaddingTop() + lp->topMargin;
 
             child->layout(
-                childleft, childTop,
-                width + childleft, height + childTop);
+                child_left, child_top,
+                width + child_left, height + child_top);
         }
     }
 
     void ScrollView::onSizeChanged(
-        int width, int height, int oldWidth, int oldHeight) {
-
-        if (width > 0 && height > 0
-            && oldWidth > 0 && oldHeight > 0) {
+        int width, int height, int old_w, int old_h)
+    {
+        if (width > 0 && height > 0 &&
+            old_w > 0 && old_h > 0)
+        {
             int changed = 0;
-
             if (canScroll()) {
                 if (getScrollY() < 0) {
                     changed = -getScrollY();
@@ -176,13 +178,15 @@ namespace ukive {
     }
 
     void ScrollView::onScrollChanged(
-        int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+        int scrollX, int scrollY, int oldScrollX, int oldScrollY)
+    {
         ViewGroup::onScrollChanged(scrollX, scrollY, oldScrollX, oldScrollY);
 
         InputEvent e;
         e.setEvent(InputEvent::EVM_SCROLL_ENTER);
-        e.setMouseX(mMouseXCache + getLeft() - getScrollX() - (oldScrollX - scrollX));
-        e.setMouseY(mMouseYCache + getTop() - getScrollY() - (oldScrollY - scrollY));
+        e.setPointerType(saved_pointer_type_);
+        e.setX(mouse_x_cache_ + getLeft() - getScrollX() - (oldScrollX - scrollX));
+        e.setY(mouse_y_cache_ + getTop() - getScrollY() - (oldScrollY - scrollY));
         dispatchInputEvent(&e);
     }
 
@@ -192,16 +196,20 @@ namespace ukive {
 
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
-            mMouseXCache = e->getMouseX();
-            mMouseYCache = e->getMouseY();
+            mouse_x_cache_ = e->getX();
+            mouse_y_cache_ = e->getY();
+            saved_pointer_type_ = e->getPointerType();
             processVerticalScroll(30 * e->getMouseWheel());
             consumed |= true;
+
+        default:
+            break;
         }
 
         return consumed;
     }
 
-    bool ScrollView::onInterceptMouseEvent(InputEvent* e) {
+    bool ScrollView::onInterceptInputEvent(InputEvent* e) {
         return false;
     }
 

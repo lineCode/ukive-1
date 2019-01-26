@@ -31,7 +31,10 @@ namespace ukive {
           mouse_holder_(nullptr),
           focus_holder_(nullptr),
           focus_holder_backup_(nullptr),
+          last_input_view_(nullptr),
           mouse_holder_ref_(0),
+          context_menu_(nullptr),
+          text_action_mode_(nullptr),
           anim_mgr_(nullptr),
           mAnimStateChangedListener(nullptr),
           mAnimTimerEventListener(nullptr),
@@ -140,6 +143,10 @@ namespace ukive {
         frame_type_ = type;
     }
 
+    void Window::setLastInputView(View* v) {
+        last_input_view_ = v;
+    }
+
     int Window::getX() const {
         return impl_->getX();
     }
@@ -202,6 +209,10 @@ namespace ukive {
 
     Window::FrameType Window::getFrameType() const {
         return frame_type_;
+    }
+
+    View* Window::getLastInputView() const {
+        return last_input_view_;
     }
 
     TitleBar* Window::getTitleBar() const {
@@ -268,35 +279,40 @@ namespace ukive {
     }
 
     void Window::captureMouse(View* v) {
-        if (v == nullptr) {
+        if (!v) {
             return;
         }
 
-        //当已存在有捕获鼠标的 view 时，若此次调用该方法的 view
-        //与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
-        if (mouse_holder_ref_ != 0
-            && v != mouse_holder_) {
+        // 当已存在有捕获鼠标的 View 时，若此次调用该方法的 View
+        // 与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
+        if (mouse_holder_ref_ != 0 &&
+            v != mouse_holder_)
+        {
             LOG(Log::ERR) << "abnormal capture mouse!!";
             return;
         }
 
         ++mouse_holder_ref_;
 
-        //该Widget第一次捕获鼠标。
+        // 该 View 第一次捕获鼠标。
         if (mouse_holder_ref_ == 1) {
             impl_->setMouseCaptureRaw();
             mouse_holder_ = v;
         }
     }
 
-    void Window::releaseMouse() {
+    void Window::releaseMouse(bool all) {
         if (mouse_holder_ref_ == 0) {
             return;
         }
 
-        --mouse_holder_ref_;
+        if (all) {
+            mouse_holder_ref_ = 0;
+        } else {
+            --mouse_holder_ref_;
+        }
 
-        //鼠标将被释放。
+        // 鼠标将被释放。
         if (mouse_holder_ref_ == 0) {
             impl_->releaseMouseCaptureRaw();
             mouse_holder_ = nullptr;
@@ -344,8 +360,8 @@ namespace ukive {
 
         int width;
         int height;
-        int width_mode = View::EXACTLY;
-        int height_mode = View::EXACTLY;
+        int width_mode;
+        int height_mode;
         if (impl_->isTranslucent()) {
             width = getWidth();
             height = getHeight();
@@ -360,8 +376,8 @@ namespace ukive {
                 width_mode = View::FIT;
                 break;
 
-            default:
             case LayoutParams::MATCH_PARENT:
+            default:
                 width_mode = View::EXACTLY;
                 break;
             }
@@ -376,8 +392,8 @@ namespace ukive {
                 height_mode = View::FIT;
                 break;
 
-            default:
             case LayoutParams::MATCH_PARENT:
+            default:
                 height_mode = View::EXACTLY;
                 break;
             }
@@ -460,7 +476,7 @@ namespace ukive {
             return nullptr;
         }
 
-        context_menu_.reset(context_menu);
+        context_menu_ = context_menu;
 
         Rect rect = anchor->getBoundsInWindow();
 
@@ -485,6 +501,10 @@ namespace ukive {
         return context_menu;
     }
 
+    void Window::notifyContextMenuClose() {
+        context_menu_ = nullptr;
+    }
+
     TextActionMode* Window::startTextActionMode(TextActionModeCallback* callback) {
         auto action_mode = new TextActionMode(this, callback);
         if (!callback->onCreateActionMode(
@@ -501,10 +521,14 @@ namespace ukive {
             return nullptr;
         }
 
-        text_action_mode_.reset(action_mode);
+        text_action_mode_ = action_mode;
         text_action_mode_->show();
 
         return action_mode;
+    }
+
+    void Window::notifyTextActionModeClose() {
+        text_action_mode_ = nullptr;
     }
 
     float Window::dpToPx(float dp) {
@@ -718,8 +742,8 @@ namespace ukive {
 
     bool Window::onClose() {
         if (isStartupWindow()) {
-            size_t count = WindowManager::getInstance()->getWindowCount();
-            for (size_t i = 0; i < count; ++i) {
+            int count = WindowManager::getInstance()->getWindowCount();
+            for (int i = 0; i < count; ++i) {
                 auto window = WindowManager::getInstance()->getWindow(i);
                 if (!window->isStartupWindow()) {
                     window->close();
@@ -730,6 +754,13 @@ namespace ukive {
     }
 
     void Window::onDestroy() {
+        if (context_menu_) {
+            context_menu_->close();
+        }
+        if (text_action_mode_) {
+            text_action_mode_->close();
+        }
+
         delete root_layout_;
 
         delete canvas_;
@@ -758,7 +789,7 @@ namespace ukive {
     bool Window::onInputEvent(InputEvent* e) {
         if (e->isMouseEvent()) {
             // 若有之前捕获过鼠标的 View 存在，则直接将所有鼠标事件
-            // 直接发送至该Widget。
+            // 直接发送至该 View。
             if (mouse_holder_ &&
                 mouse_holder_->getVisibility() == View::VISIBLE &&
                 mouse_holder_->isEnabled())
@@ -774,12 +805,26 @@ namespace ukive {
                     parent = parent->getParent();
                 }
 
-                e->setMouseX(e->getMouseX() - total_left);
-                e->setMouseY(e->getMouseY() - total_top);
-                e->setIsMouseCaptured(true);
+                e->setX(e->getX() - total_left);
+                e->setY(e->getY() - total_top);
+                e->setIsNoDispatch(true);
 
                 return mouse_holder_->dispatchInputEvent(e);
             }
+
+            if (e->getEvent() == InputEvent::EVM_LEAVE_WIN) {
+                e->setEvent(InputEvent::EV_LEAVE_VIEW);
+                if (last_input_view_) {
+                    e->setIsNoDispatch(true);
+                    last_input_view_->dispatchInputEvent(e);
+                    return false;
+                }
+            }
+
+            return root_layout_->dispatchInputEvent(e);
+        }
+
+        if (e->isTouchEvent()) {
             return root_layout_->dispatchInputEvent(e);
         }
 
@@ -847,7 +892,8 @@ namespace ukive {
         UI_ANIMATION_MANAGER_STATUS previousStatus)
     {
         if (newStatus == UI_ANIMATION_MANAGER_BUSY &&
-            previousStatus == UI_ANIMATION_MANAGER_IDLE) {
+            previousStatus == UI_ANIMATION_MANAGER_IDLE)
+        {
             win_->invalidate();
         }
     }

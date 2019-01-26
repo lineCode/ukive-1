@@ -246,6 +246,7 @@
     <ClInclude Include="text\word_breaker.h" />
     <ClInclude Include="utils\com_ptr.h" />
     <ClInclude Include="utils\double.h" />
+    <ClInclude Include="utils\dynamic_windows_api.h" />
     <ClInclude Include="utils\executable.h" />
     <ClInclude Include="utils\float.h" />
     <ClInclude Include="utils\hresult_utils.h" />
@@ -254,6 +255,8 @@
     <ClInclude Include="utils\string_utils.h" />
     <ClInclude Include="utils\unicode.h" />
     <ClInclude Include="utils\weak_bind.h" />
+    <ClInclude Include="utils\weak_ref_nest.h" />
+    <ClInclude Include="utils\win10_version.h" />
     <ClInclude Include="views\button.h" />
     <ClInclude Include="views\chart_view.h" />
     <ClInclude Include="views\check_box.h" />
@@ -368,12 +371,14 @@
     <ClCompile Include="text\tsf_manager.cpp" />
     <ClCompile Include="text\word_breaker.cpp" />
     <ClCompile Include="utils\double.cpp" />
+    <ClCompile Include="utils\dynamic_windows_api.cpp" />
     <ClCompile Include="utils\float.cpp" />
     <ClCompile Include="utils\number.cpp" />
     <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
     <ClCompile Include="utils\event_handler.h" />
     <ClCompile Include="utils\unicode.cpp" />
+    <ClCompile Include="utils\win10_version.cpp" />
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\chart_view.cpp" />
     <ClCompile Include="views\check_box.cpp" />

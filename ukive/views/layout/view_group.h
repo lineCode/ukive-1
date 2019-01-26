@@ -22,8 +22,6 @@ namespace ukive {
             int left, int top, int right, int bottom) override {}
 
         virtual bool onInterceptInputEvent(InputEvent* e);
-        virtual bool onInterceptMouseEvent(InputEvent* e);
-        virtual bool onInterceptKeyboardEvent(InputEvent* e);
 
         void onAttachedToWindow() override;
         void onDetachedFromWindow() override;
@@ -69,7 +67,7 @@ namespace ukive {
         void dispatchDiscardFocus() override;
         void dispatchDiscardPendingOperations() override;
 
-        virtual bool dispatchMouseEvent(InputEvent* e);
+        virtual bool dispatchPointerEvent(InputEvent* e);
         virtual bool dispatchKeyboardEvent(InputEvent* e);
 
         virtual bool checkLayoutParams(LayoutParams* lp);

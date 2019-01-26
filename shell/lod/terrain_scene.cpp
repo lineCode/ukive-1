@@ -228,8 +228,8 @@ namespace shell {
         case ukive::InputEvent::EVM_DOWN:
             if (e->getMouseKey() == ukive::InputEvent::MK_LEFT) {
                 mIsMouseLeftKeyPressed = true;
-                mPrevX = e->getMouseX();
-                mPrevY = e->getMouseY();
+                mPrevX = e->getX();
+                mPrevY = e->getY();
             }
             break;
 
@@ -237,8 +237,8 @@ namespace shell {
             if (mIsMouseLeftKeyPressed == true) {
                 mMouseActionMode = MOUSE_ACTION_MOVED;
 
-                int dx = e->getMouseX() - mPrevX;
-                int dy = e->getMouseY() - mPrevY;
+                int dx = e->getX() - mPrevX;
+                int dy = e->getY() - mPrevY;
 
                 if (::GetKeyState(VK_SHIFT) < 0) {
                     getCamera()->circuleCamera2(
@@ -254,10 +254,10 @@ namespace shell {
                     d3d_view_->invalidate();
                 }
 
-                mPrevX = e->getMouseX();
-                mPrevY = e->getMouseY();
+                mPrevX = e->getX();
+                mPrevY = e->getY();
             } else {
-                elementAwareness(e->getMouseX(), e->getMouseY());
+                elementAwareness(e->getX(), e->getY());
             }
             break;
 

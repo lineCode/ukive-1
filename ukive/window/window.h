@@ -68,6 +68,7 @@ namespace ukive {
         void setTranslucent(bool translucent);
         void setStartupWindow(bool enable);
         void setFrameType(FrameType type);
+        void setLastInputView(View* v);
 
         int getX() const;
         int getY() const;
@@ -85,6 +86,7 @@ namespace ukive {
         HWND getHandle() const;
         AnimationManager* getAnimationManager() const;
         FrameType getFrameType() const;
+        View* getLastInputView() const;
         TitleBar* getTitleBar() const;
 
         bool isShowing() const;
@@ -105,11 +107,11 @@ namespace ukive {
         void convClientToScreen(Point* p);
 
         void captureMouse(View* v);
-        void releaseMouse();
+        void releaseMouse(bool all = false);
 
-        //当一个widget获取到焦点时，应调用此方法。
+        // 当一个 View 获取到焦点时，应调用此方法。
         void captureKeyboard(View* v);
-        //当一个widget放弃焦点时，应调用此方法。
+        // 当一个 View 放弃焦点时，应调用此方法。
         void releaseKeyboard();
 
         View* getMouseHolder() const;
@@ -128,7 +130,9 @@ namespace ukive {
 
         ContextMenu* startContextMenu(
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
+        void notifyContextMenuClose();
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);
+        void notifyTextActionModeClose();
 
         float dpToPx(float dp);
         float pxToDp(float px);
@@ -218,16 +222,17 @@ namespace ukive {
         View* mouse_holder_;
         View* focus_holder_;
         View* focus_holder_backup_;
+        View* last_input_view_;
         int mouse_holder_ref_;
 
-        std::shared_ptr<ContextMenu> context_menu_;
-        std::shared_ptr<TextActionMode> text_action_mode_;
+        ContextMenu* context_menu_;
+        TextActionMode* text_action_mode_;
 
         AnimationManager* anim_mgr_;
         AnimationManager::OnStateChangedListener* mStateChangedListener;
-
         AnimStateChangedListener* mAnimStateChangedListener;
         AnimTimerEventListener* mAnimTimerEventListener;
+
         std::vector<OnWindowStatusChangedListener*> status_changed_listeners_;
 
         Color background_color_;

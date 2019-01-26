@@ -10,6 +10,8 @@ namespace ukive {
 
     class TextActionModeCallback {
     public:
+        virtual ~TextActionModeCallback() = default;
+
         virtual bool onCreateActionMode(TextActionMode* mode, Menu* menu) = 0;
         virtual bool onPrepareActionMode(TextActionMode* mode, Menu* menu) = 0;
         virtual bool onActionItemClicked(TextActionMode* mode, MenuItem* item) = 0;

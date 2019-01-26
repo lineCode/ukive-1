@@ -56,8 +56,8 @@ namespace shell {
 
         showTitleBar();
 
-        //inflateGroup();
-        inflateListView();
+        inflateGroup();
+        //inflateListView();
     }
 
     void TestWindow::onClick(ukive::View* v) {

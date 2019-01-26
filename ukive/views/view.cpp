@@ -1,4 +1,4 @@
-ï»¿#include "view.h"
+#include "view.h"
 
 #include "ukive/log.h"
 #include "ukive/event/input_event.h"
@@ -41,7 +41,8 @@ namespace ukive {
         is_pressed_(false),
         is_focusable_(false),
         is_receive_outside_input_event_(false),
-        can_consume_mouse_event_(true),
+        is_mouse_down_(false),
+        is_touch_down_(false),
         window_(w),
         mAlpha(1.0),
         mScaleX(1.0),
@@ -57,6 +58,7 @@ namespace ukive {
         mRevealCenterY(0.0),
         mRevealWidthRadius(0.0),
         mRevealHeightRadius(0.0),
+        cur_ev_(std::make_unique<InputEvent>()),
         parent_(nullptr),
         click_listener_(nullptr),
         click_performer_(new ClickPerformer(this)),
@@ -172,6 +174,7 @@ namespace ukive {
 
         if (visibility_ != VISIBLE) {
             discardFocus();
+            discardMouseCapture();
             discardPendingOperations();
         }
 
@@ -189,6 +192,7 @@ namespace ukive {
 
         if (!is_enabled_) {
             discardFocus();
+            discardMouseCapture();
             discardPendingOperations();
         }
 
@@ -226,14 +230,17 @@ namespace ukive {
             return;
         }
 
-        layout_params_.reset(params);
+        if (layout_params_.get() != params) {
+            layout_params_.reset(params);
+        }
 
         requestLayout();
         invalidate();
     }
 
-    void View::setIsInputEventAtLast(bool isInput) {
-        is_input_event_at_last_ = isInput;
+    void View::setIsInputEventAtLast(bool is_last) {
+        is_input_event_at_last_ = is_last;
+        window_->setLastInputView(is_last ? this : nullptr);
     }
 
     void View::setPressed(bool pressed) {
@@ -280,14 +287,6 @@ namespace ukive {
 
     void View::setReceiveOutsideInputEvent(bool receive) {
         is_receive_outside_input_event_ = receive;
-    }
-
-    void View::setCanConsumeMouseEvent(bool enable) {
-        can_consume_mouse_event_ = enable;
-
-        if (!enable) {
-            window_->releaseMouse();
-        }
     }
 
     void View::setParent(View* parent) {
@@ -535,23 +534,18 @@ namespace ukive {
         return flags_ & Flags::BOUNDS_SET;
     }
 
-    bool View::isLocalMouseInThis(InputEvent* e) const {
-        return (e->getMouseX() >= 0 && e->getMouseX() < getWidth()
-            && e->getMouseY() >= 0 && e->getMouseY() < getHeight());
+    bool View::isLocalPointerInThis(InputEvent* e) const {
+        return (e->getX() >= 0 && e->getX() < getWidth()
+            && e->getY() >= 0 && e->getY() < getHeight());
     }
 
-    bool View::isParentMouseInThis(InputEvent* e) const {
-        return bounds_.hit(e->getMouseX(), e->getMouseY());
+    bool View::isParentPointerInThis(InputEvent* e) const {
+        return bounds_.hit(e->getX(), e->getY());
     }
 
     bool View::isReceiveOutsideInputEvent() const {
         return is_receive_outside_input_event_;
     }
-
-    bool View::canConsumeMouseEvent() const {
-        return can_consume_mouse_event_;
-    }
-
 
     void View::scrollTo(int x, int y) {
         if (scroll_x_ != x || scroll_y_ != y) {
@@ -574,9 +568,8 @@ namespace ukive {
         click_listener_->onClick(this);
     }
 
-
     void View::draw(Canvas* canvas) {
-        // åº”ç”¨åŠ¨ç”»å˜é‡
+        // Ó¦ÓÃ¶¯»­±äÁ¿
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
         canvas->scale(mScaleX, mScaleY, bounds_.left + mPivotX, bounds_.top + mPivotY);
@@ -588,7 +581,7 @@ namespace ukive {
         std::shared_ptr<Bitmap> bg_bmp;
         ComPtr<ID3D11Texture2D> bg_texture;
         if (hasShadow) {
-            // å°†èƒŒæ™¯ç»˜åˆ¶åˆ° bg_bmp ä¸Š
+            // ½«±³¾°»æÖÆµ½ bg_bmp ÉÏ
             Canvas offscreen(getWidth(), getHeight());
             offscreen.beginDraw();
             offscreen.clear();
@@ -599,10 +592,10 @@ namespace ukive {
             bg_texture = offscreen.getTexture();
         }
 
-        // è‹¥æœ‰ï¼Œä½¿ç”¨ layer åº”ç”¨ reveal åŠ¨ç”»
-        // è‹¥æŸä¸€ view æ­£åœ¨è¿›è¡Œ reveal åŠ¨ç”»ï¼Œåˆ™å…¶ child æ— æ³•åº”ç”¨ reveal åŠ¨ç”»
+        // ÈôÓĞ£¬Ê¹ÓÃ layer Ó¦ÓÃ reveal ¶¯»­
+        // ÈôÄ³Ò» view ÕıÔÚ½øĞĞ reveal ¶¯»­£¬ÔòÆä child ÎŞ·¨Ó¦ÓÃ reveal ¶¯»­
         if (mHasReveal) {
-            // åœ†å½¢ reveal åŠ¨ç”»ã€‚
+            // Ô²ĞÎ reveal ¶¯»­¡£
             if (mRevealType == ViewAnimator::REVEAL_CIRCULE) {
                 ComPtr<ID2D1EllipseGeometry> circleGeo;
                 Application::getGraphicDeviceManager()->getD2DFactory()->CreateEllipseGeometry(
@@ -610,7 +603,7 @@ namespace ukive {
                         D2D1::Point2F(mRevealCenterX, mRevealCenterY),
                         mRevealRadius, mRevealRadius), &circleGeo);
 
-                // åœ¨ pushLayer ä¹‹å‰ç»˜åˆ¶é˜´å½±
+                // ÔÚ pushLayer Ö®Ç°»æÖÆÒõÓ°
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
                     canvas->getRT()->CreateBitmapBrush(bg_bmp->getNative().get(), &bmp_brush);
@@ -635,7 +628,7 @@ namespace ukive {
                     drawBackground(canvas);
                 }
             } else if (mRevealType == ViewAnimator::REVEAL_RECT) {
-                // çŸ©å½¢ reveal åŠ¨ç”»
+                // ¾ØĞÎ reveal ¶¯»­
                 ComPtr<ID2D1RectangleGeometry> rectGeo;
                 Application::getGraphicDeviceManager()->getD2DFactory()->CreateRectangleGeometry(
                     D2D1::RectF(
@@ -644,7 +637,7 @@ namespace ukive {
                         mRevealCenterX + mRevealWidthRadius,
                         mRevealCenterY + mRevealHeightRadius), &rectGeo);
 
-                // åœ¨ pushLayer ä¹‹å‰ç»˜åˆ¶é˜´å½±
+                // ÔÚ pushLayer Ö®Ç°»æÖÆÒõÓ°
                 if (hasShadow) {
                     ComPtr<ID2D1BitmapBrush> bmp_brush;
                     canvas->getRT()->CreateBitmapBrush(bg_bmp->getNative().get(), &bmp_brush);
@@ -670,7 +663,7 @@ namespace ukive {
                 }
             }
         } else {
-            // æ²¡æœ‰ reveal åŠ¨ç”»ï¼Œç›´æ¥ç»˜åˆ¶èƒŒæ™¯å’Œé˜´å½±
+            // Ã»ÓĞ reveal ¶¯»­£¬Ö±½Ó»æÖÆ±³¾°ºÍÒõÓ°
             if (hasBg) {
                 if (hasShadow) {
                     shadow_effect_->setContent(bg_texture.get());
@@ -683,19 +676,19 @@ namespace ukive {
             }
         }
 
-        // åº”ç”¨ padding
+        // Ó¦ÓÃ padding
         canvas->save();
         canvas->translate(padding_.left, padding_.top);
 
-        // è£å‰ª
+        // ²Ã¼ô
         canvas->pushClip(RectF(0, 0,
             measured_width_ - padding_.width(),
             measured_height_ - padding_.height()));
         canvas->translate(-scroll_x_, -scroll_y_);
 
-        // ç»˜åˆ¶è‡ªèº«
+        // »æÖÆ×ÔÉí
         onDraw(canvas);
-        // ç»˜åˆ¶å­©å­
+        // »æÖÆº¢×Ó
         dispatchDraw(canvas);
 
         onDrawOverChildren(canvas);
@@ -703,7 +696,7 @@ namespace ukive {
         canvas->popClip();
         canvas->restore();
 
-        // ç»˜åˆ¶å‰æ™¯
+        // »æÖÆÇ°¾°
         drawForeground(canvas);
 
         if (mHasReveal) {
@@ -739,23 +732,20 @@ namespace ukive {
 
     bool View::dispatchInputEventToThis(InputEvent* e) {
         bool consumed = false;
-        if (e->getEvent() == InputEvent::EVM_LEAVE_WIN ||
-            e->getEvent() == InputEvent::EVM_LEAVE_VIEW ||
-            e->getEvent() == InputEvent::EV_CANCEL)
+        if (e->getEvent() == InputEvent::EV_CANCEL ||
+            e->getEvent() == InputEvent::EV_LEAVE_VIEW)
         {
             if (isInputEventAtLast()) {
-                int saved_event = e->getEvent();
-                if (saved_event != InputEvent::EV_CANCEL) {
-                    e->setEvent(InputEvent::EVM_LEAVE_VIEW);
-                }
-
-                onInputEvent(e);
+                processInputEvent(e);
                 setIsInputEventAtLast(false);
-                e->setEvent(saved_event);
             }
         } else {
-            consumed = onInputEvent(e);
-            setIsInputEventAtLast(consumed);
+            consumed = processInputEvent(e);
+            // ·ÀÖ¹¶Ô EVM_SCROLL_ENTER ÏûÏ¢µÄ·Ö·¢²úÉúÓ°Ïì¡£
+            // Ö÷ÒªÓ°ÏìÓÉ¸ÃÏûÏ¢×ª±äµÄ EVM_LEAVE_VIEW ÏûÏ¢µÄ·Ö·¢
+            if (!isInputEventAtLast() || e->getEvent() != InputEvent::EVM_WHEEL) {
+                setIsInputEventAtLast(consumed);
+            }
         }
         return consumed;
     }
@@ -797,6 +787,241 @@ namespace ukive {
         if (need_redraw) {
             invalidate();
         }
+    }
+
+    bool View::processInputEvent(InputEvent* e) {
+        if (is_mouse_down_ && e->isTouchEvent()) {
+            return true;
+        }
+        if (is_touch_down_ && e->isMouseEvent()) {
+            return true;
+        }
+
+        // ¶ÔÓÚÊó±êÊÂ¼ş£¬½ö UP ÊÂ¼şĞèÒª¹ıÂË
+        if (e->getEvent() == InputEvent::EVM_UP && !is_mouse_down_) {
+            return true;
+        }
+
+        // ¶ÔÓÚ´¥ÃşÊÂ¼ş£¬ËùÓĞÊÂ¼ş¶¼ĞèÒª¹ıÂË
+        if (e->getEvent() != InputEvent::EVT_DOWN) {
+            if (e->isTouchEvent() && !is_touch_down_) {
+                return false;
+            }
+        }
+
+        InputEvent* ev;
+        if (e->isTouchEvent()) {
+            cur_ev_->combineTouchEvent(e);
+            ev = cur_ev_.get();
+        } else {
+            ev = e;
+        }
+
+        bool consumed = onInputEvent(ev);
+        if (e->isTouchEvent()) {
+            cur_ev_->clearTouchUp();
+        }
+
+        bool should_refresh = false;
+        switch (ev->getEvent()) {
+        case InputEvent::EVM_DOWN:
+            if (consumed) {
+                is_mouse_down_ = true;
+                window_->captureMouse(this);
+                if (is_focusable_) {
+                    requestFocus();
+                }
+
+                if (e->getMouseKey() == InputEvent::MK_LEFT) {
+                    setPressed(true);
+                    if (fg_drawable_) {
+                        fg_drawable_->setHotspot(e->getX(), e->getY());
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
+                    }
+                    if (bg_drawable_) {
+                        bg_drawable_->setHotspot(e->getX(), e->getY());
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
+                    }
+                    if (should_refresh) {
+                        invalidate();
+                    }
+                }
+            }
+            return consumed;
+
+        case InputEvent::EVT_DOWN:
+            if (consumed) {
+                is_touch_down_ = true;
+                if (is_focusable_) {
+                    requestFocus();
+                }
+
+                setPressed(true);
+                if (fg_drawable_) {
+                    fg_drawable_->setHotspot(e->getX(), e->getY());
+                    should_refresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
+                }
+                if (bg_drawable_) {
+                    bg_drawable_->setHotspot(e->getX(), e->getY());
+                    should_refresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
+                }
+
+                if (should_refresh) {
+                    invalidate();
+                }
+            } else {
+                cur_ev_->clearTouch();
+            }
+            return consumed;
+
+        case InputEvent::EVT_MULTI_DOWN:
+            return true;
+
+        case InputEvent::EVM_MOVE:
+            if (consumed) {
+                if (!isPressed()) {
+                    if (fg_drawable_) {
+                        //fg_drawable_->setHotspot(e->getX(), e->getY());
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                    }
+                    if (bg_drawable_) {
+                        //bg_drawable_->setHotspot(e->getX(), e->getY());
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                    }
+                }
+                if (should_refresh) {
+                    invalidate();
+                }
+            }
+            return consumed;
+
+        case InputEvent::EVT_MOVE:
+            return true;
+
+        case InputEvent::EVM_SCROLL_ENTER:
+            if (fg_drawable_) {
+                should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+            }
+            if (bg_drawable_) {
+                should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+            }
+            if (should_refresh) {
+                invalidate();
+            }
+            return consumed;
+
+        case InputEvent::EV_LEAVE_VIEW:
+            if (e->isMouseEvent()) {
+                is_mouse_down_ = false;
+            }
+            if (e->isTouchEvent()) {
+                is_touch_down_ = false;
+            }
+            setPressed(false);
+            if (fg_drawable_) {
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (bg_drawable_) {
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (should_refresh) {
+                invalidate();
+            }
+            return consumed;
+
+        case InputEvent::EVM_UP:
+            window_->releaseMouse();
+            if (window_->getMouseHolderRef() == 0) {
+                is_mouse_down_ = false;
+            }
+            if (e->getMouseKey() == InputEvent::MK_LEFT) {
+                bool pressed = isPressed();
+                setPressed(false);
+
+                if (isLocalPointerInThis(e)) {
+                    if (fg_drawable_) {
+                        fg_drawable_->setHotspot(e->getX(), e->getY());
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                    }
+                    if (bg_drawable_) {
+                        bg_drawable_->setHotspot(e->getX(), e->getY());
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                    }
+
+                    if (pressed && click_listener_) {
+                        window_->getCycler()->removeCallbacks(click_performer_);
+                        window_->getCycler()->post(click_performer_);
+                    }
+                } else {
+                    if (fg_drawable_) {
+                        should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                    }
+                    if (bg_drawable_) {
+                        should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                    }
+                }
+            }
+            if (should_refresh) {
+                invalidate();
+            }
+            return consumed;
+
+        case InputEvent::EVT_MULTI_UP:
+            return true;
+
+        case InputEvent::EVT_UP:
+        {
+            is_touch_down_ = false;
+            bool pressed = isPressed();
+            setPressed(false);
+
+            if (fg_drawable_) {
+                fg_drawable_->setHotspot(e->getX(), e->getY());
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (bg_drawable_) {
+                bg_drawable_->setHotspot(e->getX(), e->getY());
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+            }
+
+            if (isLocalPointerInThis(e)) {
+                if (pressed && click_listener_) {
+                    window_->getCycler()->removeCallbacks(click_performer_);
+                    window_->getCycler()->post(click_performer_);
+                }
+            }
+
+            if (should_refresh) {
+                invalidate();
+            }
+            return true;
+        }
+
+        case InputEvent::EV_CANCEL:
+            if (e->isMouseEvent()) {
+                window_->releaseMouse();
+                is_mouse_down_ = false;
+            }
+            if (e->isTouchEvent()) {
+                is_touch_down_ = false;
+            }
+            setPressed(false);
+            if (fg_drawable_) {
+                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (bg_drawable_) {
+                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+            }
+            if (should_refresh) {
+                invalidate();
+            }
+            return consumed;
+
+        default:
+            break;
+        }
+
+        return consumed;
     }
 
     void View::measure(int width, int height, int width_mode, int height_mode) {
@@ -888,13 +1113,13 @@ namespace ukive {
             return;
         }
 
-        // å…ˆå–æ¶ˆå…¶ä»– view çš„ç„¦ç‚¹ã€‚
+        // ÏÈÈ¡ÏûÆäËû View µÄ½¹µã¡£
         View* prev_holder = window_->getKeyboardHolder();
         if (prev_holder) {
             prev_holder->discardFocus();
         }
 
-        // è·å–ç„¦ç‚¹ã€‚
+        // »ñÈ¡½¹µã¡£
         window_->captureKeyboard(this);
 
         has_focus_ = true;
@@ -911,6 +1136,12 @@ namespace ukive {
         dispatchDiscardFocus();
     }
 
+    void View::discardMouseCapture() {
+        if (window_->getMouseHolder() == this) {
+            window_->releaseMouse(true);
+        }
+    }
+
     void View::discardPendingOperations() {
         window_->getCycler()->removeCallbacks(click_performer_);
         dispatchDiscardPendingOperations();
@@ -921,8 +1152,7 @@ namespace ukive {
     }
 
     bool View::dispatchInputEvent(InputEvent* e) {
-        e->setMouseX(e->getMouseX() - bounds_.left);
-        e->setMouseY(e->getMouseY() - bounds_.top);
+        e->offsetInputPos(-bounds_.left, -bounds_.top);
         return dispatchInputEventToThis(e);
     }
 
@@ -956,137 +1186,10 @@ namespace ukive {
     }
 
     bool View::onInputEvent(InputEvent* e) {
-        bool should_refresh = false;
-
-        switch (e->getEvent()) {
-        case InputEvent::EVM_DOWN:
-            if (can_consume_mouse_event_) {
-                window_->captureMouse(this);
-            }
-            if (is_focusable_) {
-                requestFocus();
-            }
-            if (e->getMouseKey() == InputEvent::MK_LEFT) {
-                setPressed(true);
-                if (fg_drawable_) {
-                    fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    should_refresh = fg_drawable_->setState(Drawable::STATE_PRESSED);
-                }
-                if (bg_drawable_) {
-                    bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    should_refresh = bg_drawable_->setState(Drawable::STATE_PRESSED);
-                }
-            }
-            if (should_refresh) {
-                invalidate();
-            }
-            return can_consume_mouse_event_;
-
-        case InputEvent::EVM_MOVE:
-            if (!isPressed()) {
-                if (fg_drawable_) {
-                    //fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
-                }
-                if (bg_drawable_) {
-                    //bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                    should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
-                }
-            }
-            if (should_refresh) {
-                invalidate();
-            }
-            return can_consume_mouse_event_ && should_refresh;
-
-        case InputEvent::EVM_SCROLL_ENTER:
-            if (fg_drawable_) {
-                should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
-            }
-            if (bg_drawable_) {
-                should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
-            }
-            if (should_refresh) {
-                invalidate();
-            }
-            return can_consume_mouse_event_;
-
-        case InputEvent::EVM_LEAVE_VIEW:
-            setPressed(false);
-            if (fg_drawable_) {
-                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
-            }
-            if (bg_drawable_) {
-                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
-            }
-            if (should_refresh) {
-                invalidate();
-            }
-            return can_consume_mouse_event_;
-
-        case InputEvent::EVM_UP:
-            if (can_consume_mouse_event_) {
-                window_->releaseMouse();
-            }
-            if (e->getMouseKey() == InputEvent::MK_LEFT) {
-                bool pressed = false;
-                if (isPressed()) {
-                    pressed = true;
-                    setPressed(false);
-                }
-
-                if (isLocalMouseInThis(e)) {
-                    if (fg_drawable_) {
-                        fg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                        should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
-                    }
-                    if (bg_drawable_) {
-                        bg_drawable_->setHotspot(e->getMouseX(), e->getMouseY());
-                        should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
-                    }
-
-                    if (pressed && click_listener_) {
-                        window_->getCycler()->removeCallbacks(click_performer_);
-                        window_->getCycler()->post(click_performer_);
-                    }
-                }
-                else {
-                    if (fg_drawable_) {
-                        should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
-                    }
-                    if (bg_drawable_) {
-                        should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
-                    }
-                }
-            }
-            if (should_refresh) {
-                invalidate();
-            }
-            return can_consume_mouse_event_;
-
-        case InputEvent::EV_CANCEL:
-            if (can_consume_mouse_event_) {
-                window_->releaseMouse();
-            }
-            setPressed(false);
-            if (fg_drawable_) {
-                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
-            }
-            if (bg_drawable_) {
-                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
-            }
-            if (should_refresh) {
-                invalidate();
-            }
-            return can_consume_mouse_event_;
-
-        default:
-            break;
-        }
-
         return false;
     }
 
-    void View::onMeasure(int width, int height, int widthMode, int heightMode) {
+    void View::onMeasure(int width, int height, int width_mode, int height_mode) {
         setMeasuredSize(width > min_width_ ? width : min_width_,
             height > min_height_ ? height : min_height_);
     }
