@@ -370,8 +370,8 @@ namespace ukive {
     }
 
     bool InputEvent::isKeyboardEvent() const {
-        return (event_type_ >= EVK_DOWN
-            && event_type_ <= EVK_CHAR);
+        DCHECK(pointer_type_ != PT_NONE);
+        return pointer_type_ == PT_KEYBOARD;
     }
 
     bool InputEvent::isNoDispatch() const {

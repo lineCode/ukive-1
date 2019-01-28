@@ -60,8 +60,8 @@ namespace ukive {
 
     void TsfEditor::notifyAttrsChanged(
         long start, long end,
-        unsigned long attrsCount, const TS_ATTRID* attrs) {
-
+        unsigned long attrsCount, const TS_ATTRID* attrs)
+    {
         if (input_conn_ && sink_record_.sink) {
             sink_record_.sink->OnAttrsChange(start, end, attrsCount, attrs);
         }
@@ -203,8 +203,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::QueryInsert(
         LONG acpTestStart, LONG acpTestEnd, ULONG cch,
-        LONG* pacpResultStart, LONG* pacpResultEnd) {
-
+        LONG* pacpResultStart, LONG* pacpResultEnd)
+    {
         long length = input_conn_->getTextLength();
         if (acpTestStart < 0 || acpTestStart > length || acpTestEnd < 0 || acpTestEnd > length) {
             DCHECK(false);
@@ -222,8 +222,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::GetSelection(
         ULONG ulIndex, ULONG ulCount,
-        TS_SELECTION_ACP* pSelection, ULONG* pcFetched) {
-
+        TS_SELECTION_ACP* pSelection, ULONG* pcFetched)
+    {
         if (!hasReadOnlyLock()) {
             DCHECK(false);
             return TS_E_NOLOCK;
@@ -242,7 +242,8 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::SetSelection(ULONG ulCount, const TS_SELECTION_ACP* pSelection) {
-        DLOG(Log::INFO) << "SetSelection(" << pSelection->acpStart << ", " << pSelection->acpEnd << ")";
+        DLOG(Log::INFO) << "SetSelection("
+            << ulCount << ", " << pSelection->acpStart << ", " << pSelection->acpEnd << ")";
 
         if (!hasReadWriteLock()) {
             DCHECK(false);
@@ -260,8 +261,8 @@ namespace ukive {
     STDMETHODIMP TsfEditor::GetText(
         LONG acpStart, LONG acpEnd,
         WCHAR* pchPlain, ULONG cchPlainReq, ULONG* pcchPlainRet,
-        TS_RUNINFO* prgRunInfo, ULONG cRunInfoReq, ULONG* pcRunInfoRet, LONG* pacpNext) {
-
+        TS_RUNINFO* prgRunInfo, ULONG cRunInfoReq, ULONG* pcRunInfoRet, LONG* pacpNext)
+    {
         if (!hasReadOnlyLock()) {
             DCHECK(false);
             return TS_E_NOLOCK;
@@ -291,12 +292,9 @@ namespace ukive {
         if (cRunInfoReq == 0) {
             *pcRunInfoRet = 0;
         } else {
-            for (ULONG i = 0; i < cRunInfoReq; ++i) {
-                ULONG count = prgRunInfo[i].uCount;
-                TsRunType type = prgRunInfo[i].type;
-            }
-
-            *pcRunInfoRet = cRunInfoReq;
+            prgRunInfo[0].uCount = *pcchPlainRet;
+            prgRunInfo[0].type = TS_RT_PLAIN;
+            *pcRunInfoRet = 1;
         }
 
         DLOG(Log::INFO) << "GetText("
@@ -309,8 +307,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::SetText(
         DWORD dwFlags, LONG acpStart, LONG acpEnd,
-        const WCHAR* pchText, ULONG cch, TS_TEXTCHANGE* pChange) {
-
+        const WCHAR* pchText, ULONG cch, TS_TEXTCHANGE* pChange)
+    {
         if (dwFlags == TS_ST_CORRECTION) {
             return S_OK;
         }
@@ -352,8 +350,8 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetFormattedText(
-        LONG acpStart, LONG acpEnd, IDataObject** ppDataObject) {
-
+        LONG acpStart, LONG acpEnd, IDataObject** ppDataObject)
+    {
         DLOG(Log::INFO) << "GetFormattedText()";
 
         if (!hasReadWriteLock()) {
@@ -364,30 +362,29 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetEmbedded(
-        LONG acpPos, REFGUID rguidService, REFIID riid, IUnknown** ppunk) {
-
+        LONG acpPos, REFGUID rguidService, REFIID riid, IUnknown** ppunk)
+    {
         DLOG(Log::INFO) << "GetEmbedded()";
-
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::QueryInsertEmbedded(
-        const GUID* pguidService, const FORMATETC* pFormatEtc, BOOL* pfInsertable) {
-
+        const GUID* pguidService, const FORMATETC* pFormatEtc, BOOL* pfInsertable)
+    {
         DLOG(Log::INFO) << "QueryInsertEmbedded()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::InsertEmbedded(
-        DWORD dwFlags, LONG acpStart, LONG acpEnd, IDataObject* pDataObject, TS_TEXTCHANGE* pChange) {
-
+        DWORD dwFlags, LONG acpStart, LONG acpEnd, IDataObject* pDataObject, TS_TEXTCHANGE* pChange)
+    {
         DLOG(Log::INFO) << "InsertEmbedded()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RequestSupportedAttrs(
-        DWORD dwFlags, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs) {
-
+        DWORD dwFlags, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs)
+    {
         /*DLOG(Log::INFO) << "RequestSupportedAttrs("
             << dwFlags << ", "
             << cFilterAttrs << ", "
@@ -400,30 +397,30 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::RequestAttrsAtPosition(
-        LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs, DWORD dwFlags) {
-
+        LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs, DWORD dwFlags)
+    {
         DLOG(Log::INFO) << "RequestAttrsAtPosition()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RequestAttrsTransitioningAtPosition(
-        LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs, DWORD dwFlags) {
-
+        LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs, DWORD dwFlags)
+    {
         DLOG(Log::INFO) << "RequestAttrsTransitioningAtPosition()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::FindNextAttrTransition(
         LONG acpStart, LONG acpHalt, ULONG cFilterAttrs,
-        const TS_ATTRID* paFilterAttrs, DWORD dwFlags, LONG* pacpNext, BOOL* pfFound, LONG* plFoundOffset) {
-
+        const TS_ATTRID* paFilterAttrs, DWORD dwFlags, LONG* pacpNext, BOOL* pfFound, LONG* plFoundOffset)
+    {
         DLOG(Log::INFO) << "FindNextAttrTransition()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RetrieveRequestedAttrs(
-        ULONG ulCount, TS_ATTRVAL* paAttrVals, ULONG* pcFetched) {
-
+        ULONG ulCount, TS_ATTRVAL* paAttrVals, ULONG* pcFetched)
+    {
         //DLOG(Log::INFO) << "RetrieveRequestedAttrs()";
 
         *pcFetched = 0;
@@ -448,8 +445,8 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetACPFromPoint(
-        TsViewCookie vcView, const POINT* pt, DWORD dwFlags, LONG* pacp) {
-
+        TsViewCookie vcView, const POINT* pt, DWORD dwFlags, LONG* pacp)
+    {
         DLOG(Log::INFO) << "GetACPFromPoint()";
 
         if (!input_conn_->getTextPositionAtPoint(pt, dwFlags, pacp)) {
@@ -460,8 +457,8 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetTextExt(
-        TsViewCookie vcView, LONG acpStart, LONG acpEnd, RECT* prc, BOOL* pfClipped) {
-
+        TsViewCookie vcView, LONG acpStart, LONG acpEnd, RECT* prc, BOOL* pfClipped)
+    {
         if ((cur_lock_type_ & TS_LF_READ) != TS_LF_READ) {
             DCHECK(false);
             return TS_E_NOLOCK;
@@ -510,8 +507,8 @@ namespace ukive {
 
     STDMETHODIMP TsfEditor::InsertTextAtSelection(
         DWORD dwFlags, const WCHAR* pchText, ULONG cch,
-        LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange) {
-
+        LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange)
+    {
         if (cch != 0 && !pchText) {
             DCHECK(false);
             return E_INVALIDARG;
@@ -539,25 +536,28 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::InsertEmbeddedAtSelection(
-        DWORD dwFlags, IDataObject* pDataObject, LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange) {
+        DWORD dwFlags, IDataObject* pDataObject, LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange)
+    {
         return S_OK;
     }
 
 
     STDMETHODIMP TsfEditor::OnStartComposition(
-        ITfCompositionView* pComposition, BOOL* pfOk) {
-
+        ITfCompositionView* pComposition, BOOL* pfOk)
+    {
         *pfOk = TRUE;
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::OnUpdateComposition(
-        ITfCompositionView* pComposition, ITfRange* pRangeNew) {
+        ITfCompositionView* pComposition, ITfRange* pRangeNew)
+    {
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::OnEndComposition(
-        ITfCompositionView* pComposition) {
+        ITfCompositionView* pComposition)
+    {
         return S_OK;
     }
 

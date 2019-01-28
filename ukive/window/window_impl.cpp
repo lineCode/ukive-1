@@ -739,8 +739,6 @@ namespace ukive {
                 return 0;
             }
 
-            DLOG(Log::INFO) << "LBTN DOWN";
-
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
             ev.setPointerType(InputEvent::PT_MOUSE);
@@ -765,8 +763,6 @@ namespace ukive {
             {
                 return 0;
             }
-
-            DLOG(Log::INFO) << "LBTN UP";
 
             nc_result = non_client_frame_->OnLButtonUp(wParam, lParam, handled);
             if (*handled) {
@@ -1161,6 +1157,7 @@ namespace ukive {
     LRESULT WindowImpl::onKeyDown(WPARAM wParam, LPARAM lParam, bool* handled) {
         InputEvent ev;
         ev.setEvent(InputEvent::EVK_DOWN);
+        ev.setPointerType(InputEvent::PT_KEYBOARD);
         ev.setKeyboardVirtualKey(wParam, lParam);
 
         if (onInputEvent(&ev)) {
@@ -1173,6 +1170,7 @@ namespace ukive {
     LRESULT WindowImpl::onKeyUp(WPARAM wParam, LPARAM lParam, bool* handled) {
         InputEvent ev;
         ev.setEvent(InputEvent::EVK_UP);
+        ev.setPointerType(InputEvent::PT_KEYBOARD);
         ev.setKeyboardVirtualKey(wParam, lParam);
 
         if (onInputEvent(&ev)) {
@@ -1185,6 +1183,7 @@ namespace ukive {
     LRESULT WindowImpl::onChar(WPARAM wParam, LPARAM lParam, bool* handled) {
         InputEvent ev;
         ev.setEvent(InputEvent::EVK_CHAR);
+        ev.setPointerType(InputEvent::PT_KEYBOARD);
         ev.setKeyboardCharKey(wParam, lParam);
 
         if (onInputEvent(&ev)) {

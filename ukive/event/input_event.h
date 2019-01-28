@@ -55,6 +55,7 @@ namespace ukive {
             PT_MOUSE,
             PT_TOUCH,
             PT_PEN,
+            PT_KEYBOARD,
         };
 
     public:
