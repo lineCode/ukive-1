@@ -39,6 +39,8 @@ namespace ukive {
         if (i != string16::npos) {
             parent_path_ = path_.substr(0, i);
             name_ = path_.substr(i + 1, path_.length() - i - 1);
+        } else {
+            name_ = path_;
         }
 
         if (!name_.empty()) {
@@ -76,10 +78,10 @@ namespace ukive {
                 auto last_error = ::GetLastError();
                 if (last_error == ERROR_NO_MORE_FILES) {
                     break;
-                } else {
-                    // TODO:
-                    break;
                 }
+
+                DLOG(Log::WARNING) << "Failed to find next file: " << last_error;
+                return {};
             }
         }
 

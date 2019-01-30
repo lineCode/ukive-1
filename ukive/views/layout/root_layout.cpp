@@ -9,6 +9,12 @@
 #include "ukive/views/title_bar/title_bar.h"
 
 
+namespace {
+
+    const int kTitleBarHeight = 42;
+
+}
+
 namespace ukive {
 
     RootLayout::RootLayout(Window* w)
@@ -32,7 +38,6 @@ namespace ukive {
         }
     }
 
-
     LayoutParams* RootLayout::generateLayoutParams(const LayoutParams& lp) {
         return new RootLayoutParams(lp);
     }
@@ -48,7 +53,7 @@ namespace ukive {
     }
 
     void RootLayout::showTitleBar() {
-        int title_bar_height = getWindow()->dpToPx(48);
+        int title_bar_height = getWindow()->dpToPx(kTitleBarHeight);
         if (!title_bar_) {
             if (content_view_) {
                 content_view_->getLayoutParams()->topMargin = title_bar_height;
@@ -156,7 +161,7 @@ namespace ukive {
         auto lp = new LayoutParams(
             LayoutParams::MATCH_PARENT, LayoutParams::MATCH_PARENT);
         if (title_bar_ && title_bar_->getVisibility() != View::VANISHED) {
-            lp->topMargin = getWindow()->dpToPx(48);
+            lp->topMargin = getWindow()->dpToPx(kTitleBarHeight);
         }
 
         content_layout_->addView(0, content, lp);
@@ -178,7 +183,9 @@ namespace ukive {
             title_bar_ &&
             title_bar_->getVisibility() == View::VISIBLE)
         {
-            auto bounds = title_bar_->getBoundsInWindow();
+            x -= content_layout_->getLeft();
+            y -= content_layout_->getTop();
+            auto bounds = title_bar_->getBounds();
             if (bounds.hit(x, y)) {
                 hit_point = title_bar_->onNCHitTest(x - bounds.left, y - bounds.top);
             }

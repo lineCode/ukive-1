@@ -12,15 +12,21 @@ namespace ukive {
     Color border_color = Color::Blue500;
 
     NonClientLayout::NonClientLayout(Window* w)
-        :ViewGroup(w) {
-
-        if (w->getFrameType() == Window::FRAME_ZERO) {
+        : ViewGroup(w)
+    {
+        if (w->isTranslucent() ||
+            w->getFrameType() == Window::FRAME_ZERO)
+        {
             nc_padding_.set(w->dpToPx(0), w->dpToPx(0), 0, 0);
             sh_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
         }
     }
 
     HitPoint NonClientLayout::onNCHitTest(int x, int y) {
+        if (getWindow()->isMaximum()) {
+            return HitPoint::CLIENT;
+        }
+
         int row = 1, col = 1;
 
         if (x >= 0 && x < sh_padding_.left) {

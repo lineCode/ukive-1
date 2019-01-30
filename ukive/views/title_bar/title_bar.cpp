@@ -43,10 +43,13 @@ namespace ukive {
             .bottom(root_layout->getId(), Rlp::BOTTOM).build();
         root_layout->addView(title_tv_, title_tv_lp);
 
+        int btn_padding = getWindow()->dpToPx(8);
+
         close_btn_ = new Button(getWindow());
-        close_btn_->setText(L"Clo");
+        close_btn_->setText(L"");
+        close_btn_->setPadding(btn_padding, 0, btn_padding, 0);
         close_btn_->setOnClickListener(this);
-        //close_btn_->setBackground();
+        close_btn_->setButtonColor(Color::Red500);
         auto close_btn_lp = Rlp::Builder()
             .end(root_layout->getId(), Rlp::END, getWindow()->dpToPx(8))
             .top(root_layout->getId(), Rlp::TOP)
@@ -54,8 +57,10 @@ namespace ukive {
         root_layout->addView(close_btn_, close_btn_lp);
 
         max_btn_ = new Button(getWindow());
-        max_btn_->setText(L"Max");
+        max_btn_->setText(L"");
         max_btn_->setOnClickListener(this);
+        max_btn_->setPadding(btn_padding, 0, btn_padding, 0);
+        max_btn_->setButtonColor(Color::Yellow500);
         auto max_btn_lp = Rlp::Builder()
             .end(close_btn_->getId(), Rlp::START, getWindow()->dpToPx(8))
             .top(root_layout->getId(), Rlp::TOP)
@@ -63,8 +68,10 @@ namespace ukive {
         root_layout->addView(max_btn_, max_btn_lp);
 
         min_btn_ = new Button(getWindow());
-        min_btn_->setText(L"Min");
+        min_btn_->setText(L"");
         min_btn_->setOnClickListener(this);
+        min_btn_->setPadding(btn_padding, 0, btn_padding, 0);
+        min_btn_->setButtonColor(Color::Green500);
         auto min_btn_lp = Rlp::Builder()
             .end(max_btn_->getId(), Rlp::START, getWindow()->dpToPx(8))
             .top(root_layout->getId(), Rlp::TOP)
@@ -101,9 +108,9 @@ namespace ukive {
 
     void TitleBar::onWindowStatusChanged() {
         if (getWindow()->isMaximum()) {
-            max_btn_->setText(L"Res");
+            //max_btn_->setText(L"Res");
         } else {
-            max_btn_->setText(L"Max");
+            //max_btn_->setText(L"Max");
         }
     }
 

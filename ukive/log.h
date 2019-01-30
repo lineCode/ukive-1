@@ -61,6 +61,7 @@ namespace ukive {
         };
 
         static void debugBreak();
+        static void debugBreakIfInDebugger();
 
         Log(const wchar_t* file_name, int line_number, Severity level);
         ~Log();

@@ -17,6 +17,7 @@ namespace ukive {
         virtual void onTranslucentChanged(bool translucent) = 0;
 
         virtual void getClientInsets(RECT* rect) = 0;
+        virtual void getClientOffset(POINT* offset) = 0;
 
         virtual LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled) = 0;
         virtual LRESULT onMouseMove(WPARAM wParam, LPARAM lParam, bool* handled) = 0;

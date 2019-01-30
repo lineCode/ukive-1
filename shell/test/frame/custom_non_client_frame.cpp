@@ -94,10 +94,19 @@ namespace shell {
     }
 
     void CustomNonClientFrame::getClientInsets(RECT* rect) {
+        DCHECK(rect);
+
         rect->left = 0;
         rect->right = 0;
         rect->top = 0;
         rect->bottom = 0;
+    }
+
+    void CustomNonClientFrame::getClientOffset(POINT* offset) {
+        DCHECK(offset);
+
+        offset->x = 0;
+        offset->y = 0;
     }
 
     LRESULT CustomNonClientFrame::onSize(WPARAM wParam, LPARAM lParam, bool* handled) {

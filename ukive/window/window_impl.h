@@ -63,6 +63,8 @@ namespace ukive {
         int getY() const;
         int getWidth() const;
         int getHeight() const;
+        int getClientOffX() const;
+        int getClientOffY() const;
         int getClientWidth() const;
         int getClientHeight() const;
         int getDpi() const;

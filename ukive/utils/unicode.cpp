@@ -60,8 +60,8 @@ namespace ukive {
             return true;
         }
 
-        size_t index = 0;
-        size_t src_length = src.length();
+        string16::size_type index = 0;
+        auto src_length = src.length();
         uint32_t scalar_value;
         string16 utf16_string;
 
@@ -135,8 +135,8 @@ namespace ukive {
             return true;
         }
 
-        size_t index = 0;
-        size_t src_length = src.length();
+        string8::size_type index = 0;
+        auto src_length = src.length();
         uint32_t scalar_value;
         string8 utf8_string;
 

@@ -64,13 +64,10 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        View* child = nullptr;
-        LayoutParams* lp = nullptr;
-
         for (int i = 0; i < getChildCount(); ++i) {
-            child = getChildAt(i);
+            auto child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
-                lp = child->getLayoutParams();
+                auto lp = child->getLayoutParams();
 
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();

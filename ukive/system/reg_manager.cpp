@@ -16,10 +16,23 @@ namespace ukive {
         return false;
     }
 
-    bool RegManager::associateExtName(
-        const string16& ext_name, const string16& progid, const string16& cmd)
-    {
+    bool RegManager::registerProgId(const string16& progid, const string16& cmd) {
         if (!createProgId(progid, cmd)) {
+            return false;
+        }
+        return true;
+    }
+
+    bool RegManager::unregisterProgId(const string16& progid) {
+        if (!deleteProgId(progid)) {
+            return false;
+        }
+        return true;
+    }
+
+    bool RegManager::associateExtName(const string16& ext_name, const string16& progid)
+    {
+        if (!hasProgId(progid)) {
             return false;
         }
 
@@ -33,7 +46,7 @@ namespace ukive {
     }
 
     bool RegManager::unassociateExtName(const string16& ext_name, const string16& progid) {
-        if (!deleteProgId(progid)) {
+        if (!hasProgId(progid)) {
             return false;
         }
 

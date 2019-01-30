@@ -245,6 +245,18 @@ namespace ukive {
         return height_;
     }
 
+    int WindowImpl::getClientOffX() const {
+        POINT p;
+        non_client_frame_->getClientOffset(&p);
+        return p.x;
+    }
+
+    int WindowImpl::getClientOffY() const {
+        POINT p;
+        non_client_frame_->getClientOffset(&p);
+        return p.y;
+    }
+
     int WindowImpl::getClientWidth() const {
         if (!::IsWindow(hWnd_)) {
             return 0;

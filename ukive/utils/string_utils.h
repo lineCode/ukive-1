@@ -11,6 +11,9 @@ namespace ukive {
     string8 UTF16ToUTF8(const string16& str);
     string16 UTF8ToUTF16(const string8& str);
 
+    string16 toASCIILowerCase(const string16& str);
+    string16 toASCIIUpperCase(const string16& str);
+
 }
 
 using string8 = ukive::string8;

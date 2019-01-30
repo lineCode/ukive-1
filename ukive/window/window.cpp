@@ -358,13 +358,20 @@ namespace ukive {
 
         auto params = root_layout_->getLayoutParams();
 
+        int left = impl_->getClientOffX();
+        int top = impl_->getClientOffY();
         int width;
         int height;
         int width_mode;
         int height_mode;
         if (impl_->isTranslucent()) {
-            width = getWidth();
-            height = getHeight();
+            if (isMaximum()) {
+                width = getClientWidth();
+                height = getClientHeight();
+            } else {
+                width = getWidth();
+                height = getHeight();
+            }
         } else {
             width = getClientWidth();
             height = getClientHeight();
@@ -411,10 +418,10 @@ namespace ukive {
 
         root_layout_->measure(width, height, width_mode, height_mode);
 
-        int measuredWidth = root_layout_->getMeasuredWidth();
-        int measuredHeight = root_layout_->getMeasuredHeight();
+        int measured_width = root_layout_->getMeasuredWidth();
+        int measured_height = root_layout_->getMeasuredHeight();
 
-        root_layout_->layout(0, 0, measuredWidth, measuredHeight);
+        root_layout_->layout(left, top, left + measured_width, top + measured_height);
 
         if (enable_qpc) {
             auto duration = qpc_service.Stop();
@@ -640,8 +647,14 @@ namespace ukive {
                 if (canvas_) {
                     onDrawCanvas(canvas_);
 
-                    if (root_layout_->isLayouted()) {
+                    if (root_layout_->isLayouted() &&
+                        root_layout_->getVisibility() == View::VISIBLE &&
+                        root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
+                    {
+                        canvas_->save();
+                        canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
                         root_layout_->draw(canvas_);
+                        canvas_->restore();
                     }
                 }
             });
@@ -851,6 +864,8 @@ namespace ukive {
     }
 
     HitPoint Window::onNCHitTest(int x, int y) {
+        x -= root_layout_->getLeft();
+        y -= root_layout_->getTop();
         return root_layout_->onNCHitTest(x, y);
     }
 

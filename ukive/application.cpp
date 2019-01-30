@@ -22,7 +22,6 @@
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-//#pragma comment(lib, "Shcore.lib")
 #pragma comment(lib, "winmm.lib")
 
 
@@ -109,32 +108,39 @@ namespace ukive {
             return;
         }
 
+        command_list_.clear();
+
+        string16 cur_cmd;
         string16 cmd_string = cmd_line;
-        if (cmd_string.empty()) {
-            return;
-        }
+        bool in_quote = false;
 
-        auto i = cmd_string.find(L" ");
-        if (i == string16::npos) {
-            command_list_.push_back(cmd_string);
-            return;
-        }
-
-        string16::size_type new_start = 0;
-        while (i != string16::npos) {
-            string16 tmp = cmd_string.substr(new_start, i - new_start);
-            if (!tmp.empty()) {
-                command_list_.push_back(tmp);
-            }
-
-            new_start = i + 1;
-            i = cmd_string.find(L" ", new_start);
-            if (i == string16::npos) {
-                tmp = cmd_string.substr(new_start, cmd_string.length() - new_start);
-                if (!tmp.empty()) {
-                    command_list_.push_back(tmp);
+        for (auto ch : cmd_string) {
+            if (ch == L' ') {
+                if (in_quote) {
+                    cur_cmd.push_back(ch);
+                } else {
+                    if (!cur_cmd.empty()) {
+                        command_list_.push_back(cur_cmd);
+                        cur_cmd.clear();
+                    }
                 }
+            } else if (ch == L'"') {
+                if (in_quote) {
+                    in_quote = false;
+                    if (!cur_cmd.empty()) {
+                        command_list_.push_back(cur_cmd);
+                        cur_cmd.clear();
+                    }
+                } else {
+                    in_quote = true;
+                }
+            } else {
+                cur_cmd.push_back(ch);
             }
+        }
+
+        if (!cur_cmd.empty()) {
+            command_list_.push_back(cur_cmd);
         }
     }
 

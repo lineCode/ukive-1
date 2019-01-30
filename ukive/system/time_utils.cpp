@@ -19,7 +19,6 @@ namespace ukive {
     TimeUtils::~TimeUtils() {
     }
 
-
     uint64_t TimeUtils::upTimeMillis() {
         return ::GetTickCount64();
     }
@@ -27,7 +26,6 @@ namespace ukive {
     void TimeUtils::enableHighResTimer() {
         TIMECAPS tc;
         if (::timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to get timer res!";
             return;
         }
@@ -36,7 +34,6 @@ namespace ukive {
 
         auto result = ::timeBeginPeriod(timer_res_);
         if (result != TIMERR_NOERROR) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to enable high res timer! Res: " << timer_res_;
             return;
         }
@@ -52,7 +49,6 @@ namespace ukive {
 
         auto result = ::timeEndPeriod(timer_res_);
         if (result != TIMERR_NOERROR) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to disable high res timer! Res: " << timer_res_;
             return;
         }
