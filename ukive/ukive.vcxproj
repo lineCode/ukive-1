@@ -182,8 +182,11 @@
     <ClInclude Include="animation\animation_timer_handler.h" />
     <ClInclude Include="animation\animation_variable_change_handler.h" />
     <ClInclude Include="animation\animator.h" />
+    <ClInclude Include="animation\animator2.h" />
     <ClInclude Include="animation\animator_state_handler.h" />
+    <ClInclude Include="animation\interpolator.h" />
     <ClInclude Include="animation\scroller.h" />
+    <ClInclude Include="animation\timer.h" />
     <ClInclude Include="animation\transition.h" />
     <ClInclude Include="animation\view_animator.h" />
     <ClInclude Include="application.h" />
@@ -321,8 +324,11 @@
     <ClCompile Include="animation\animation_timer_handler.cpp" />
     <ClCompile Include="animation\animation_variable_change_handler.cpp" />
     <ClCompile Include="animation\animator.cpp" />
+    <ClCompile Include="animation\animator2.cpp" />
     <ClCompile Include="animation\animator_state_handler.cpp" />
+    <ClCompile Include="animation\interpolator.cpp" />
     <ClCompile Include="animation\scroller.cpp" />
+    <ClCompile Include="animation\timer.cpp" />
     <ClCompile Include="animation\transition.cpp" />
     <ClCompile Include="animation\view_animator.cpp" />
     <ClCompile Include="application.cpp" />

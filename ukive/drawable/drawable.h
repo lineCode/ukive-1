@@ -7,6 +7,14 @@
 namespace ukive {
 
     class Canvas;
+    class Drawable;
+
+    class DrawableCallback {
+    public:
+        virtual ~DrawableCallback() = default;
+
+        virtual void onDrawableInvalidate(Drawable* d) = 0;
+    };
 
     class Drawable {
     public:
@@ -23,6 +31,7 @@ namespace ukive {
 
         void setBounds(const Rect& rect);
         void setBounds(int left, int top, int width, int height);
+        void setCallback(DrawableCallback* callback);
 
         bool setState(int state);
         void setHotspot(int x, int y);
@@ -40,6 +49,8 @@ namespace ukive {
         virtual int getIncHeight() const;
 
     protected:
+        void invalidate();
+
         virtual bool onFocusChanged(bool focus);
         virtual void onBoundChanged(const Rect& new_bound);
         virtual bool onStateChanged(int new_state, int prev_state);
@@ -51,6 +62,7 @@ namespace ukive {
         int prev_state_;
         bool is_parent_has_focus_;
         Rect bounds_;
+        DrawableCallback* callback_;
     };
 
 }

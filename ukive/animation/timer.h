@@ -14,22 +14,24 @@ namespace ukive {
         using Runner = std::function<void()>;
 
         Timer();
+        ~Timer();
 
         void start();
         void stop();
 
         void setRepeat(bool repeat);
         void setRunner(const Runner& runner);
-        void setDuration(int duration);
+        void setDuration(uint64_t duration);
 
         bool isRepeat() const;
         bool isRunning() const;
-        int getDuration() const;
+        uint64_t getDuration() const;
 
     private:
         void onTimer();
+        void postToMessageLoop();
 
-        int duration_;
+        uint64_t duration_;
         bool is_repeat_;
         bool is_running_;
         Runner runner_;

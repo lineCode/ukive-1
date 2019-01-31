@@ -4,7 +4,6 @@
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
-#include "ukive/drawable/drawable.h"
 #include "ukive/animation/view_animator.h"
 #include "ukive/text/input_connection.h"
 #include "ukive/views/click_listener.h"
@@ -231,12 +230,14 @@ namespace ukive {
 
     void View::setBackground(Drawable* drawable) {
         bg_drawable_.reset(drawable);
+        bg_drawable_->setCallback(this);
         updateBackgroundState();
         invalidate();
     }
 
     void View::setForeground(Drawable* drawable) {
         fg_drawable_.reset(drawable);
+        fg_drawable_->setCallback(this);
         updateForegroundState();
         invalidate();
     }
@@ -752,6 +753,10 @@ namespace ukive {
             fg_drawable_->setBounds(0, 0, bounds_.width(), bounds_.height());
             fg_drawable_->draw(canvas);
         }
+    }
+
+    void View::onDrawableInvalidate(Drawable* d) {
+        invalidate();
     }
 
     bool View::dispatchInputEventToThis(InputEvent* e) {

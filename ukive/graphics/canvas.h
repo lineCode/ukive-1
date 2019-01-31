@@ -23,7 +23,7 @@ namespace ukive {
     class Canvas {
     public:
         Canvas(int width, int height);
-        Canvas(ComPtr<ID2D1RenderTarget> rt);
+        explicit Canvas(ComPtr<ID2D1RenderTarget> rt);
         ~Canvas();
 
         void setOpacity(float opacity);

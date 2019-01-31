@@ -417,7 +417,7 @@ namespace ukive {
         auto debug_view = root_layout_->getDebugView();
         bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::LAYOUT);
         if (enable_qpc) {
-            qpc_service.Start();
+            qpc_service.start();
         }
 
         root_layout_->measure(width, height, width_mode, height_mode);
@@ -428,7 +428,7 @@ namespace ukive {
         root_layout_->layout(left, top, left + measured_width, top + measured_height);
 
         if (enable_qpc) {
-            auto duration = qpc_service.Stop();
+            auto duration = qpc_service.stop();
             debug_view->addDuration(duration);
         }
     }
@@ -442,14 +442,14 @@ namespace ukive {
         auto debug_view = root_layout_->getDebugView();
         bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::RENDER);
         if (enable_qpc) {
-            qpc_service.Start();
+            qpc_service.start();
         }
 
         Rect rect(0, 0, getClientWidth(), getClientHeight());
         onDraw(rect);
 
         if (enable_qpc) {
-            auto duration = qpc_service.Stop();
+            auto duration = qpc_service.stop();
             debug_view->addDuration(duration);
         }
     }
@@ -575,7 +575,7 @@ namespace ukive {
         anim_mgr_->setOnStateChangedListener(mAnimStateChangedListener);
 
         //anim_mgr_->connectTimer(true);
-        mAnimTimerEventListener = new AnimTimerEventListener(this);
+        //mAnimTimerEventListener = new AnimTimerEventListener(this);
         //anim_mgr_->setTimerEventListener(mAnimTimerEventListener);
 
         renderer_ = new Renderer();

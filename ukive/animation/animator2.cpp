@@ -1,0 +1,210 @@
+#include "ukive/animation/animator2.h"
+
+#include "ukive/animation/interpolator.h"
+#include "ukive/system/time_utils.h"
+
+
+namespace ukive {
+
+    Animator2::Animator2(bool timer_driven)
+        : fps_(60),
+          cur_val_(0),
+          init_val_(0),
+          duration_(250),
+          elapsed_duration_(0),
+          start_time_(0),
+          is_repeat_(false),
+          is_started_(false),
+          is_running_(false),
+          is_finished_(false),
+          is_timer_driven_(timer_driven),
+          listener_(nullptr),
+          interpolator_(std::make_unique<LinearInterpolator>(1))
+    {
+        if (is_timer_driven_) {
+            timer_.setRepeat(true);
+            timer_.setRunner(std::bind(&Animator2::AnimationProgress, this));
+            timer_.setDuration(1000 / fps_);
+        }
+    }
+
+    Animator2::~Animator2() {}
+
+    void Animator2::start() {
+        if (is_running_ || is_finished_) {
+            return;
+        }
+
+        if (!is_started_) {
+            is_started_ = true;
+            cur_val_ = init_val_;
+            interpolator_->setInitVal(init_val_);
+        }
+
+        is_finished_ = false;
+        start_time_ = upTimeMillis() - elapsed_duration_;
+
+        if (is_timer_driven_) {
+            timer_.start();
+        }
+        is_running_ = true;
+
+        if (listener_) {
+            listener_->onAnimationStarted(this);
+        }
+    }
+
+    void Animator2::stop() {
+        if (is_running_) {
+            if (is_timer_driven_) {
+                timer_.stop();
+            }
+            is_running_ = false;
+
+            elapsed_duration_ = upTimeMillis() - start_time_;
+
+            if (listener_) {
+                listener_->onAnimationStopped(this);
+            }
+        }
+    }
+
+    void Animator2::finish() {
+        if (is_started_) {
+            if (is_timer_driven_) {
+                timer_.stop();
+            }
+            is_running_ = false;
+            is_finished_ = true;
+
+            cur_val_ = interpolator_->interpolate(1);
+
+            if (listener_) {
+                listener_->onAnimationFinished(this);
+            }
+        }
+    }
+
+    void Animator2::reset() {
+        if (is_started_) {
+            if (is_timer_driven_) {
+                timer_.stop();
+            }
+            is_started_ = false;
+            is_running_ = false;
+            is_finished_ = false;
+
+            cur_val_ = init_val_;
+            elapsed_duration_ = 0;
+
+            if (listener_) {
+                listener_->onAnimationReset(this);
+            }
+        }
+    }
+
+    void Animator2::update() {
+        if (!is_running_) {
+            return;
+        }
+
+        auto cur_time = upTimeMillis();
+        bool finished = (cur_time >= start_time_ + duration_);
+        double progress = finished ? 1 : static_cast<double>(cur_time - start_time_) / duration_;
+        cur_val_ = interpolator_->interpolate(progress);
+
+        if (listener_) {
+            listener_->onAnimationProgress(this);
+        }
+
+        if (finished) {
+            if (is_repeat_) {
+                restart();
+            } else {
+                finish();
+            }
+        }
+    }
+
+    void Animator2::restart() {
+        cur_val_ = init_val_;
+        elapsed_duration_ = 0;
+        start_time_ = upTimeMillis();
+    }
+
+    void Animator2::setFps(int fps) {
+        if (fps <= 0) {
+            return;
+        }
+
+        fps_ = fps;
+        if (is_timer_driven_) {
+            timer_.setDuration(1000 / fps_);
+        }
+    }
+
+    void Animator2::setRepeat(bool repeat) {
+        is_repeat_ = repeat;
+    }
+
+    void Animator2::setDuration(uint64_t duration) {
+        duration_ = duration;
+    }
+
+    void Animator2::setInterpolator(Interpolator* ipr) {
+        if (!ipr || interpolator_.get() == ipr) {
+            return;
+        }
+        interpolator_.reset(ipr);
+    }
+
+    void Animator2::setListener(AnimationListener* listener) {
+        listener_ = listener;
+    }
+
+    void Animator2::setInitValue(double init_val) {
+        init_val_ = init_val;
+    }
+
+    bool Animator2::isRepeat() const {
+        return is_repeat_;
+    }
+
+    bool Animator2::isRunning() const {
+        return is_running_;
+    }
+
+    bool Animator2::isFinished() const {
+        return is_finished_;
+    }
+
+    int Animator2::getFps() const {
+        return fps_;
+    }
+
+    uint64_t Animator2::getDuration() const {
+        return duration_;
+    }
+
+    double Animator2::getCurValue() const {
+        return is_started_ ? cur_val_ : init_val_;
+    }
+
+    double Animator2::getInitValue() const {
+        return init_val_;
+    }
+
+    Interpolator* Animator2::getInterpolator() const {
+        return interpolator_.get();
+    }
+
+    void Animator2::AnimationProgress() {
+        update();
+    }
+
+    // static
+    uint64_t Animator2::upTimeMillis() {
+        return TimeUtils::upTimeMillisPrecise();
+    }
+
+}

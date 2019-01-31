@@ -1,26 +1,21 @@
 #ifndef UKIVE_DRAWABLE_RIPPLE_DRAWABLE_H_
 #define UKIVE_DRAWABLE_RIPPLE_DRAWABLE_H_
 
-#include "ukive/animation/animator.h"
+#include "ukive/animation/animator2.h"
 #include "ukive/drawable/layer_drawable.h"
 #include "ukive/graphics/color.h"
-
-#define DOWN_UP_SEC      0.2
-#define HOVER_LEAVE_SEC  0.2
-
-#define HOVER_ALPHA  0.07
-#define DOWN_ALPHA   0.13
 
 
 namespace ukive {
 
     class Window;
 
-    class RippleDrawable
-        : public LayerDrawable, public Animator::OnValueChangedListener
+    class RippleDrawable :
+        public LayerDrawable,
+        public AnimationListener
     {
     public:
-        RippleDrawable(Window* win);
+        RippleDrawable();
         ~RippleDrawable();
 
         void setTintColor(Color tint);
@@ -29,27 +24,22 @@ namespace ukive {
 
         float getOpacity() override;
 
-        void onValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            double newValue, double previousValue) override;
+        // AnimationListener
+        void onAnimationProgress(Animator2* animator) override;
 
     protected:
         void onBoundChanged(const Rect& new_bound) override;
-        bool onStateChanged(int newState, int prevState) override;
+        bool onStateChanged(int new_state, int prev_state) override;
 
     private:
         double alpha_;
         Color tint_color_;
 
-        Window* owner_win_;
-
-        Animator* up_animator_;
-        Animator* down_animator_;
-        Animator* hover_animator_;
-        Animator* leave_animator_;
-        Animator* ripple_animator_;
+        Animator2 up_animator_;
+        Animator2 down_animator_;
+        Animator2 hover_animator_;
+        Animator2 leave_animator_;
+        Animator2 ripple_animator_;
 
         std::unique_ptr<Canvas> mask_off_;
         std::unique_ptr<Canvas> content_off_;

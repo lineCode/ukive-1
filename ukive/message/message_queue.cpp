@@ -1,8 +1,8 @@
 ﻿#include "message_queue.h"
 
 #include "ukive/log.h"
+#include "ukive/message/cycler.h"
 #include "ukive/message/message.h"
-#include "ukive/system/time_utils.h"
 
 
 namespace ukive {
@@ -51,12 +51,11 @@ namespace ukive {
             msg->next = ptr;
             message_ = msg;
         } else {
-            Message* prev = nullptr;
+            Message* prev;
             while (true) {
                 prev = ptr;
                 ptr = ptr->next;
-                if (!ptr || !ptr->target
-                    || msg->when < ptr->when) {
+                if (!ptr || !ptr->target || msg->when < ptr->when) {
                     break;
                 }
             }
@@ -72,23 +71,20 @@ namespace ukive {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
         Message* ptr = message_;
-        Message* prev = nullptr;
-        uint64_t now = TimeUtils::upTimeMillis();
 
         // find barrier
         while (ptr && ptr->target) {
-            prev = ptr;
             ptr = ptr->next;
         }
 
         CHECK(ptr) << "Cannot find barrier!";
 
         // over the barrier
-        prev = ptr;
+        Message* prev = ptr;
         ptr = ptr->next;
 
         while (ptr) {
-            if (ptr->when <= now) {
+            if (ptr->when <= ptr->target->now()) {
                 prev->next = ptr->next;
                 Message* msg = ptr;
                 return msg;
@@ -277,11 +273,7 @@ namespace ukive {
                 } else {
                     message_ = ptr->next;
                 }
-
-                Message* msg = ptr;
-                ptr = ptr->next;
-
-                msg->recycle();
+                ptr->recycle();
                 break;
             }
 
