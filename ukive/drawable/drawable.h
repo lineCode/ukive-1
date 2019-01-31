@@ -22,7 +22,7 @@ namespace ukive {
         virtual ~Drawable() = default;
 
         void setBounds(const Rect& rect);
-        void setBounds(int left, int top, int right, int bottom);
+        void setBounds(int left, int top, int width, int height);
 
         bool setState(int state);
         void setHotspot(int x, int y);

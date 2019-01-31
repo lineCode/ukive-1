@@ -82,6 +82,7 @@ namespace ukive {
     }
 
     MessageLooper* MessageLooper::myLooper() {
+        DCHECK(looper_);
         return looper_.get();
     }
 

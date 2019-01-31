@@ -16,7 +16,7 @@ namespace ukive {
     class Cycler {
     public:
         Cycler();
-        Cycler(MessageLooper* looper);
+        explicit Cycler(MessageLooper* looper);
         virtual ~Cycler();
 
         void post(Executable* exec);

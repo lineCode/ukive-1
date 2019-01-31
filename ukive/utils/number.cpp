@@ -1,5 +1,7 @@
 #include "number.h"
 
+#include <sstream>
+
 #include "ukive/log.h"
 
 
@@ -71,6 +73,12 @@ namespace ukive {
         }
 
         return static_cast<int>(result);
+    }
+
+    string16 Number::toStringHex(uint32_t i) {
+        std::wstringstream ss;
+        ss << std::hex << i;
+        return ss.str();
     }
 
 }

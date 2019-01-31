@@ -16,8 +16,8 @@
 namespace ukive {
 
     Canvas::Canvas(int width, int height)
-        :is_texture_target_(true) {
-
+        :is_texture_target_(true)
+    {
         d3d_tex2d_ = Renderer::createTexture2D(width, height);
         auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
         if (!dxgi_surface) {
@@ -31,14 +31,12 @@ namespace ukive {
     }
 
     Canvas::Canvas(ComPtr<ID2D1RenderTarget> rt)
-        :is_texture_target_(false) {
-
+        : is_texture_target_(false)
+    {
         initCanvas(rt);
     }
 
-    Canvas::~Canvas() {
-    }
-
+    Canvas::~Canvas() {}
 
     void Canvas::initCanvas(ComPtr<ID2D1RenderTarget> rt) {
         opacity_ = 1.f;
@@ -48,7 +46,6 @@ namespace ukive {
         render_target_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
         render_target_->CreateBitmapBrush(nullptr, &bitmap_brush_);
     }
-
 
     void Canvas::setOpacity(float opacity) {
         if (opacity == opacity_) {
@@ -78,7 +75,6 @@ namespace ukive {
         render_target_->Clear(d2d_color);
     }
 
-
     void Canvas::beginDraw() {
         render_target_->BeginDraw();
     }
@@ -90,7 +86,6 @@ namespace ukive {
         }
     }
 
-
     void Canvas::popClip() {
         render_target_->PopAxisAlignedClip();
     }
@@ -100,7 +95,6 @@ namespace ukive {
         render_target_->PushAxisAlignedClip(
             d2d_rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     }
-
 
     void Canvas::pushLayer(ID2D1Geometry* clipGeometry) {
         if (layer_counter_ > 0) {
@@ -158,7 +152,6 @@ namespace ukive {
 
         --layer_counter_;
     }
-
 
     void Canvas::save() {
         ComPtr<ID2D1Factory> factory;
@@ -226,7 +219,6 @@ namespace ukive {
         return {};
     }
 
-
     void Canvas::scale(float sx, float sy) {
         scale(sx, sy, 0.f, 0.f);
     }
@@ -250,9 +242,8 @@ namespace ukive {
         render_target_->SetTransform(matrix_.getNative());
     }
 
-
     void Canvas::setMatrix(const Matrix& matrix) {
-        matrix_ = matrix;
+        matrix_ = matrix_ * matrix;
         render_target_->SetTransform(matrix_.getNative());
     }
 
@@ -260,11 +251,10 @@ namespace ukive {
         return matrix_;
     }
 
-
     void Canvas::fillOpacityMask(
         float width, float height,
-        Bitmap* mask, Bitmap* content) {
-
+        Bitmap* mask, Bitmap* content)
+    {
         bitmap_brush_->SetBitmap(content->getNative().get());
 
         D2D1_RECT_F rect = D2D1::RectF(0, 0, width, height);
@@ -276,15 +266,15 @@ namespace ukive {
         render_target_->SetAntialiasMode(mode);
     }
 
-
     void Canvas::drawLine(
-        const PointF& start, const PointF& end, const Color& color) {
+        const PointF& start, const PointF& end, const Color& color)
+    {
         drawLine(start, end, 1, color);
     }
 
     void Canvas::drawLine(
-        const PointF& start, const PointF& end, float stroke_width, const Color& color) {
-
+        const PointF& start, const PointF& end, float stroke_width, const Color& color)
+    {
         D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
 
@@ -315,7 +305,6 @@ namespace ukive {
         render_target_->DrawRectangle(d2d_rect, solid_brush_.get(), stroke_width);
     }
 
-
     void Canvas::fillRect(const RectF& rect, const Color& color) {
         D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
@@ -326,10 +315,9 @@ namespace ukive {
         render_target_->FillRectangle(d2d_rect, solid_brush_.get());
     }
 
-
     void Canvas::drawRoundRect(
-        const RectF& rect, float radius, const Color& color) {
-
+        const RectF& rect, float radius, const Color& color)
+    {
         D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect {
@@ -342,8 +330,8 @@ namespace ukive {
 
     void Canvas::drawRoundRect(
         const RectF& rect, float stroke_width,
-        float radius, const Color& color) {
-
+        float radius, const Color& color)
+    {
         D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect {
@@ -355,8 +343,8 @@ namespace ukive {
     }
 
     void Canvas::fillRoundRect(
-        const RectF& rect, float radius, const Color& color) {
-
+        const RectF& rect, float radius, const Color& color)
+    {
         D2D1_COLOR_F d2d_color {
             color.r, color.g, color.b, color.a, };
         D2D1_RECT_F d2d_rect {
@@ -366,7 +354,6 @@ namespace ukive {
         render_target_->FillRoundedRectangle(
             D2D1::RoundedRect(d2d_rect, radius, radius), solid_brush_.get());
     }
-
 
     void Canvas::drawCircle(float cx, float cy, float radius, const Color& color) {
         drawOval(cx, cy, radius, radius, color);
@@ -404,7 +391,6 @@ namespace ukive {
         fillOval(cx, cy, radius, radius, color);
     }
 
-
     void Canvas::drawOval(float cx, float cy, float rx, float ry, const Color& color) {
         D2D1_COLOR_F _color = {
             color.r, color.g, color.b, color.a, };
@@ -437,7 +423,6 @@ namespace ukive {
     void Canvas::fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush) {
         render_target_->FillGeometry(geo, brush);
     }
-
 
     void Canvas::drawBitmap(Bitmap* bitmap) {
         if (!bitmap) {
@@ -498,11 +483,10 @@ namespace ukive {
             d2d_src_rect);
     }
 
-
     void Canvas::drawText(
         const string16& text, IDWriteTextFormat* textFormat,
-        const RectF& layoutRect, const Color& color) {
-
+        const RectF& layoutRect, const Color& color)
+    {
         if (!textFormat) {
             return;
         }
@@ -519,8 +503,8 @@ namespace ukive {
 
     void Canvas::drawTextLayout(
         float x, float y,
-        IDWriteTextLayout* textLayout, const Color& color) {
-
+        IDWriteTextLayout* textLayout, const Color& color)
+    {
         if (!textLayout) {
             return;
         }
@@ -533,8 +517,8 @@ namespace ukive {
 
     void Canvas::drawTextLayoutWithEffect(
         View* v, float x, float y,
-        IDWriteTextLayout* textLayout, const Color& color) {
-
+        IDWriteTextLayout* textLayout, const Color& color)
+    {
         if (!text_renderer_) {
             text_renderer_ = new TextRenderer(render_target_);
             text_renderer_->setOpacity(opacity_);

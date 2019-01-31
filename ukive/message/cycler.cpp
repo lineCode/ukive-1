@@ -38,11 +38,11 @@ namespace ukive {
 
 
     void Cycler::post(const std::function<void()>& func, int what) {
-        postDelayed(func, 0);
+        postDelayed(func, 0, what);
     }
 
     void Cycler::postDelayed(const std::function<void()>& func, uint64_t millis, int what) {
-        postAtTime(func, millis + TimeUtils::upTimeMillis());
+        postAtTime(func, millis + TimeUtils::upTimeMillis(), what);
     }
 
     void Cycler::postAtTime(const std::function<void()>& func, uint64_t at_time_millis, int what) {

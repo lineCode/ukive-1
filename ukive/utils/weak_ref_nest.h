@@ -55,8 +55,10 @@ namespace ukive {
         }
 
         void revoke() {
-            flag_->available = false;
-            flag_.reset();
+            if (flag_) {
+                flag_->available = false;
+                flag_.reset();
+            }
         }
 
     private:

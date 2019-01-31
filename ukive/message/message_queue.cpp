@@ -8,14 +8,12 @@
 namespace ukive {
 
     MessageQueue::MessageQueue()
-        :message_(nullptr),
-        is_quitting_(false),
-        has_barrier_(false) {
-    }
+        : is_quitting_(false),
+          has_barrier_(false),
+          message_(nullptr) {}
 
     MessageQueue::~MessageQueue() {
     }
-
 
     void MessageQueue::quit() {
         std::lock_guard<std::mutex> lk(queue_sync_);
@@ -45,8 +43,11 @@ namespace ukive {
 
         Message* ptr = message_;
 
-        if (!ptr || !ptr->target
-            || msg->when == 0 || msg->when < ptr->when) {
+        if (!ptr ||
+            !ptr->target ||
+            msg->when == 0 ||
+            msg->when < ptr->when)
+        {
             msg->next = ptr;
             message_ = msg;
         } else {
@@ -100,7 +101,6 @@ namespace ukive {
         return nullptr;
     }
 
-
     void MessageQueue::remove(Cycler* c, void* data) {
         if (!c) {
             return;
@@ -111,8 +111,9 @@ namespace ukive {
         Message* ptr = message_;
         Message* prev = nullptr;
         while (ptr) {
-            if (ptr->target == c
-                && (!data || ptr->data == data)) {
+            if (ptr->target == c &&
+                (!data || ptr->data == data))
+            {
                 if (prev) {
                     prev->next = ptr->next;
                 } else {
@@ -141,13 +142,13 @@ namespace ukive {
         Message* ptr = message_;
         Message* prev = nullptr;
         while (ptr) {
-            if (ptr->target == c
-                && ptr->what == what
-                && (!data || ptr->data == data)) {
+            if (ptr->target == c &&
+                ptr->what == what &&
+                (!data || ptr->data == data))
+            {
                 if (prev) {
                     prev->next = ptr->next;
-                }
-                else {
+                } else {
                     message_ = ptr->next;
                 }
 
@@ -173,9 +174,10 @@ namespace ukive {
         Message* ptr = message_;
         Message* prev = nullptr;
         while (ptr) {
-            if (ptr->target == c
-                && ptr->callback == exec
-                && (!data || ptr->data == data)) {
+            if (ptr->target == c &&
+                ptr->callback == exec &&
+                (!data || ptr->data == data))
+            {
                 if (prev) {
                     prev->next = ptr->next;
                 } else {
@@ -195,17 +197,15 @@ namespace ukive {
     }
 
     void MessageQueue::removeAllLocked() {
-        Message* ptr = message_;
-        Message* msg = nullptr;
+        auto ptr = message_;
         while (ptr) {
-            msg = ptr;
+            auto msg = ptr;
             ptr = ptr->next;
             msg->recycle();
         }
 
         message_ = nullptr;
     }
-
 
     bool MessageQueue::contains(Cycler* c, int what, void* data) {
         if (!c) {
@@ -216,9 +216,10 @@ namespace ukive {
 
         Message* ptr = message_;
         while (ptr) {
-            if (ptr->target == c
-                && ptr->what == what
-                && (!data || ptr->data == data)) {
+            if (ptr->target == c &&
+                ptr->what == what &&
+                (!data || ptr->data == data))
+            {
                 return true;
             }
             ptr = ptr->next;
@@ -236,9 +237,10 @@ namespace ukive {
 
         Message* ptr = message_;
         while (ptr) {
-            if (ptr->target == c
-                && ptr->callback == exec
-                && (data == nullptr || ptr->data == data)) {
+            if (ptr->target == c &&
+                ptr->callback == exec &&
+                (data == nullptr || ptr->data == data))
+            {
                 return true;
             }
             ptr = ptr->next;
@@ -247,7 +249,6 @@ namespace ukive {
         return false;
     }
 
-
     void MessageQueue::addBarrier() {
         std::lock_guard<std::mutex> lk(queue_sync_);
 
@@ -255,7 +256,7 @@ namespace ukive {
             return;
         }
 
-        Message* barrier = Message::obtain();
+        auto barrier = Message::obtain();
         if (message_) {
             barrier->next = message_;
         }

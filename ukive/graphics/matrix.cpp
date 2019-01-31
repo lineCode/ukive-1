@@ -18,6 +18,12 @@ namespace ukive {
         return *this;
     }
 
+    Matrix Matrix::operator*(const Matrix &rhs) const {
+        Matrix m;
+        m.set(matrix_native_ * rhs.matrix_native_);
+        return m;
+    }
+
     void Matrix::set(const D2D1::Matrix3x2F &native) {
         matrix_native_ = native;
     }

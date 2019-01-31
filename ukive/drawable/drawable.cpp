@@ -24,7 +24,8 @@ namespace ukive {
         if (bounds_.left == left
             && bounds_.top == top
             && bounds_.right == left + width
-            && bounds_.bottom == top + height) {
+            && bounds_.bottom == top + height)
+        {
             return;
         }
 

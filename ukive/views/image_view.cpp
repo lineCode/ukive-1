@@ -9,15 +9,13 @@
 
 namespace ukive {
 
-    ImageView::ImageView(Window* wnd)
-        : View(wnd),
+    ImageView::ImageView(Window* w)
+        : View(w),
           scale_type_(FIT_WHEN_LARGE),
           bitmap_drawable_(nullptr) {
     }
 
-    ImageView::~ImageView() {
-    }
-
+    ImageView::~ImageView() {}
 
     void ImageView::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_width = 0;
