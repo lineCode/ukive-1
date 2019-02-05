@@ -52,8 +52,9 @@ namespace ukive {
             return 0;
         }
 
-        if (result > std::numeric_limits<int>::max()
-            || result < std::numeric_limits<int>::min()) {
+        if (result > std::numeric_limits<int>::max() ||
+            result < std::numeric_limits<int>::min())
+        {
             return 0;
         }
 
@@ -67,18 +68,13 @@ namespace ukive {
             return 0;
         }
 
-        if (result > std::numeric_limits<int>::max()
-            || result < std::numeric_limits<int>::min()) {
+        if (result > std::numeric_limits<int>::max() ||
+            result < std::numeric_limits<int>::min())
+        {
             return 0;
         }
 
         return static_cast<int>(result);
-    }
-
-    string16 Number::toStringHex(uint32_t i) {
-        std::wstringstream ss;
-        ss << std::hex << i;
-        return ss.str();
     }
 
 }

@@ -178,6 +178,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp" />
+    <ClCompile Include="decompiler\code_data_provider.cpp" />
+    <ClCompile Include="decompiler\debugger.cpp" />
+    <ClCompile Include="decompiler\decompiler_window.cpp" />
+    <ClCompile Include="decompiler\intel_instructions.cpp" />
+    <ClCompile Include="decompiler\intel_instruction_params.cpp" />
+    <ClCompile Include="decompiler\opcode_list_adapter.cpp" />
+    <ClCompile Include="decompiler\opcode_map.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="decompiler\pe_file.cpp" />
     <ClCompile Include="direct3d\assist_configure.cpp" />
     <ClCompile Include="direct3d\camera.cpp" />
     <ClCompile Include="direct3d\graph_creator.cpp" />
@@ -204,6 +217,14 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="decompiler\code_data_provider.h" />
+    <ClInclude Include="decompiler\debugger.h" />
+    <ClInclude Include="decompiler\decompiler_window.h" />
+    <ClInclude Include="decompiler\intel_instructions.h" />
+    <ClInclude Include="decompiler\intel_instruction_params.h" />
+    <ClInclude Include="decompiler\opcode_list_adapter.h" />
+    <ClInclude Include="decompiler\opcode_map.h" />
+    <ClInclude Include="decompiler\pe_file.h" />
     <ClInclude Include="direct3d\assist_configure.h" />
     <ClInclude Include="direct3d\camera.h" />
     <ClInclude Include="direct3d\graph_creator.h" />

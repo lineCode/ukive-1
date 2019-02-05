@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 
 namespace ukive {
@@ -32,6 +33,20 @@ namespace ukive {
         const string16& base,
         const string16& match,
         string16::size_type off = 0);
+        
+    template <typename T>
+    string8 toString8Hex(T i) {
+        std::stringstream ss;
+        ss << std::hex << std::uppercase << i;
+        return ss.str();
+    }
+
+    template <typename T>
+    string16 toString16Hex(T i) {
+        std::wstringstream ss;
+        ss << std::hex << std::uppercase << i;
+        return ss.str();
+    }
 
 }
 

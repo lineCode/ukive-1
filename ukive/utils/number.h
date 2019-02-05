@@ -17,8 +17,6 @@ namespace ukive {
         static int parseInt(const string8& s, int radix = 10);
         static int parseInt(const string16& s, int radix = 10);
 
-        static string16 toStringHex(uint32_t i);
-
     private:
         static wchar_t digitc_[];
     };

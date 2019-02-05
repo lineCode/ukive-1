@@ -11,6 +11,7 @@
 #include "shell/test/text/text_window.h"
 #include "shell/test/bitmap_research/bitmap_research_window.h"
 #include "shell/test/shadow/shadow_window.h"
+#include "shell/decompiler/decompiler_window.h"
 
 
 int APIENTRY wWinMain(
@@ -68,6 +69,15 @@ int APIENTRY wWinMain(
     ////thr_dimen_window->setTranslucent(true);
     //thr_dimen_window->center();
     //thr_dimen_window->show();
+
+    //auto dpr_window = std::make_shared<shell::DecompilerWindow>();
+    //dpr_window->setTitle(L"Decompiler");
+    //dpr_window->setWidth(ukive::Application::dpToPx(600));
+    //dpr_window->setHeight(ukive::Application::dpToPx(600));
+    //dpr_window->setFrameType(ukive::Window::FRAME_ZERO);
+    ////thr_dimen_window->setTranslucent(true);
+    //dpr_window->center();
+    //dpr_window->show();
 
     app->run();
 
