@@ -35,7 +35,7 @@ namespace ukive {
         std::lock_guard<std::mutex> lk(looper_sync_);
 
         if (looper_) {
-            CHECK(Log::FATAL) << "Only one Looper may be created per thread!";
+            CHECK(false) << "Only one Looper may be created per thread!";
             return;
         }
 
@@ -47,7 +47,7 @@ namespace ukive {
         std::lock_guard<std::mutex> lk(looper_sync_);
 
         if (main_looper_) {
-            CHECK(Log::FATAL) << "The main Looper has already been prepared!";
+            CHECK(false) << "The main Looper has already been prepared!";
         }
         main_looper_ = myLooper();
     }
@@ -55,7 +55,7 @@ namespace ukive {
     bool MessageLooper::loop() {
         MessageLooper* looper = myLooper();
         if (!looper) {
-            CHECK(Log::FATAL) << "No Looper; Looper.prepare() wasn't called on this thread!";
+            CHECK(false) << "No Looper; Looper.prepare() wasn't called on this thread!";
         }
 
         MessageQueue* queue = looper->getQueue();

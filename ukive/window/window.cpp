@@ -550,7 +550,8 @@ namespace ukive {
     }
 
     void Window::onCreate() {
-        labour_cycler_ = new UpdateCycler(this);
+        labour_cycler_ = new Cycler();
+        labour_cycler_->setListener(this);
 
         root_layout_ = new RootLayout(this);
         root_layout_->setId(0);
@@ -888,14 +889,13 @@ namespace ukive {
         canvas_ = new Canvas(renderer_->getRenderTarget());
     }
 
-
-    void Window::UpdateCycler::handleMessage(Message* msg) {
+    void Window::onHandleMessage(Message* msg) {
         switch (msg->what) {
         case SCHEDULE_RENDER:
-            win_->performRefresh();
+            performRefresh();
             break;
         case SCHEDULE_LAYOUT:
-            win_->performLayout();
+            performLayout();
             break;
         default:
             break;

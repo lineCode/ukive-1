@@ -20,7 +20,7 @@ namespace ukive {
         static string16 toStringHex(uint32_t i);
 
     private:
-        static wchar_t mDigitc[];
+        static wchar_t digitc_[];
     };
 }
 

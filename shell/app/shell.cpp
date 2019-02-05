@@ -15,8 +15,8 @@
 
 int APIENTRY wWinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    LPWSTR lpCmdLine, int nCmdShow) {
-
+    LPWSTR lpCmdLine, int nCmdShow)
+{
     ukive::InitLogging();
 
     LOG(Log::INFO) << "Application start.";

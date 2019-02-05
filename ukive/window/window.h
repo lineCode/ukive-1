@@ -33,7 +33,7 @@ namespace ukive {
     struct ClassInfo;
 
 
-    class Window : public SwapChainResizeNotifier {
+    class Window : public SwapChainResizeNotifier, public CyclerListener {
     public:
         enum FrameType {
             FRAME_NATIVE,
@@ -166,21 +166,12 @@ namespace ukive {
     protected:
         void onPreSwapChainResize() override;
         void onPostSwapChainResize() override;
+        void onHandleMessage(Message* msg) override;
 
     private:
         enum {
             SCHEDULE_RENDER = 0,
             SCHEDULE_LAYOUT = 1,
-        };
-
-        class UpdateCycler : public Cycler {
-        public:
-            UpdateCycler(Window* window)
-                :win_(window) {}
-
-            void handleMessage(Message* msg) override;
-        private:
-            Window* win_;
         };
 
         class AnimStateChangedListener

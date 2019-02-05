@@ -73,26 +73,28 @@ namespace ukive {
     string8 trimString(const string8& str, bool all) {
         auto result = str;
         if (all) {
-            for (size_t i = 0; i < result.length();) {
-                if (result[i] == ' ') {
-                    result.erase(i);
+            for (auto it = result.begin(); it != result.end();) {
+                if (*it == ' ') {
+                    it = result.erase(it);
                 } else {
-                    ++i;
+                    ++it;
                 }
             }
         } else {
-            while (!result.empty()) {
-                if (result[0] != ' ') {
-                    break;
-                }
-                result.erase(0);
+            auto i = result.find_first_not_of(' ');
+            if (i == string8::npos) {
+                return "";
+            }
+            if (i > 0) {
+                result.erase(0, i);
             }
 
-            while (!result.empty()) {
-                if (result[result.length() - 1] != ' ') {
-                    break;
-                }
-                result.erase(result.length() - 1);
+            i = result.find_last_not_of(' ');
+            if (i == string8::npos) {
+                return "";
+            }
+            if (i + 1 < result.length()) {
+                result.erase(i + 1);
             }
         }
 
@@ -102,26 +104,28 @@ namespace ukive {
     string16 trimString(const string16& str, bool all) {
         auto result = str;
         if (all) {
-            for (size_t i = 0; i < result.length();) {
-                if (result[i] == L' ') {
-                    result.erase(i);
+            for (auto it = result.begin(); it != result.end();) {
+                if (*it == L' ') {
+                    it = result.erase(it);
                 } else {
-                    ++i;
+                    ++it;
                 }
             }
         } else {
-            while (!result.empty()) {
-                if (result[0] != L' ') {
-                    break;
-                }
-                result.erase(0);
+            auto i = result.find_first_not_of(L' ');
+            if (i == string8::npos) {
+                return L"";
+            }
+            if (i > 0) {
+                result.erase(0, i);
             }
 
-            while (!result.empty()) {
-                if (result[result.length() - 1] != L' ') {
-                    break;
-                }
-                result.erase(result.length() - 1);
+            i = result.find_last_not_of(L' ');
+            if (i == string8::npos) {
+                return L"";
+            }
+            if (i + 1 < result.length()) {
+                result.erase(i + 1);
             }
         }
 

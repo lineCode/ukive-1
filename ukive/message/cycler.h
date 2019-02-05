@@ -13,11 +13,22 @@ namespace ukive {
     class Message;
     class MessageLooper;
 
+
+    class CyclerListener {
+    public:
+        virtual ~CyclerListener() = default;
+
+        virtual void onHandleMessage(Message* msg) = 0;
+    };
+
+
     class Cycler {
     public:
         Cycler();
         explicit Cycler(MessageLooper* looper);
         virtual ~Cycler();
+
+        void setListener(CyclerListener* l);
 
         void post(Executable* exec);
         void postDelayed(Executable* exec, uint64_t millis);
@@ -45,10 +56,10 @@ namespace ukive {
         void removeMessages(int what, void* data);
 
         void dispatchMessage(Message* msg);
-        virtual void handleMessage(Message* msg);
 
     private:
         MessageLooper* looper_;
+        CyclerListener* listener_;
     };
 
 }
