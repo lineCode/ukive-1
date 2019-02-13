@@ -1,6 +1,7 @@
 ﻿#include "test_window.h"
 
 #include <functional>
+#include <fstream>
 
 #include <dwmapi.h>
 
@@ -24,6 +25,7 @@
 #include "ukive/utils/weak_bind.h"
 #include "ukive/views/list/grid_list_layouter.h"
 #include "ukive/views/list/linear_list_layouter.h"
+#include "ukive/utils/xml/xml_parser.h"
 
 #include "shell/test/list/test_adapter.h"
 
@@ -55,6 +57,25 @@ namespace shell {
         Window::onCreate();
 
         showTitleBar();
+
+        /*{
+            std::fstream reader("D:\\test.xml");
+
+            auto cpos = reader.tellg();
+            reader.seekg(0, std::ios_base::end);
+            auto charSize = reader.tellg();
+            reader.seekg(cpos);
+
+            std::unique_ptr<char[]> buf(new char[charSize]());
+            reader.read(buf.get(), charSize);
+
+            string8 str(buf.get(), charSize);
+
+            ukive::XMLParser parser;
+            if (!parser.parse(str)) {
+                DCHECK(false);
+            }
+        }*/
 
         inflateGroup();
         //inflateListView();

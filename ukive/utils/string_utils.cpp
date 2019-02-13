@@ -133,7 +133,7 @@ namespace ukive {
     }
 
     std::vector<string8> splitString(const string8& str, const string8& token) {
-        size_t prev_index = 0;
+        string8::size_type prev_index = 0;
         std::vector<string8> str_vec;
         for (;;) {
             auto cur_index = str.find(",", prev_index);
@@ -152,7 +152,7 @@ namespace ukive {
     }
 
     std::vector<string16> splitString(const string16& str, const string16& token) {
-        size_t prev_index = 0;
+        string8::size_type prev_index = 0;
         std::vector<string16> str_vec;
         for (;;) {
             auto cur_index = str.find(L",", prev_index);
@@ -168,6 +168,32 @@ namespace ukive {
         }
 
         return str_vec;
+    }
+
+    bool startWith(
+        const string8& base,
+        const string8& match,
+        string8::size_type off)
+    {
+        for (string8::size_type i = 0; i < match.length(); ++i) {
+            if (off >= base.length()) return false;
+            if (base[off] != match[i]) return false;
+            ++off;
+        }
+        return true;
+    }
+
+    bool startWith(
+        const string16& base,
+        const string16& match,
+        string16::size_type off)
+    {
+        for (string16::size_type i = 0; i < match.length(); ++i) {
+            if (off >= base.length()) return false;
+            if (base[off] != match[i]) return false;
+            ++off;
+        }
+        return true;
     }
 
 }

@@ -342,6 +342,9 @@
     <ClCompile Include="utils\win10_version.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="utils\xml\xml_parser.cpp">
+      <Filter>utils\xml</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -733,6 +736,9 @@
     <ClInclude Include="utils\weak_ref_nest.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="utils\xml\xml_parser.h">
+      <Filter>utils\xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -797,6 +803,9 @@
     </Filter>
     <Filter Include="views\title_bar">
       <UniqueIdentifier>{58d30b33-09a0-48c8-9859-84fef49669e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\xml">
+      <UniqueIdentifier>{b60392f2-edcb-453d-97b4-e34c386651a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

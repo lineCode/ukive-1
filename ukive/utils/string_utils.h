@@ -24,6 +24,15 @@ namespace ukive {
     std::vector<string8> splitString(const string8& str, const string8& token);
     std::vector<string16> splitString(const string16& str, const string16& token);
 
+    bool startWith(
+        const string8& base,
+        const string8& match,
+        string8::size_type off = 0);
+    bool startWith(
+        const string16& base,
+        const string16& match,
+        string16::size_type off = 0);
+
 }
 
 using string8 = ukive::string8;
