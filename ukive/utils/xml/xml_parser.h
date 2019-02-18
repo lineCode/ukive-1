@@ -1,40 +1,27 @@
 #ifndef UKIVE_UTILS_XML_PARSER_H_
 #define UKIVE_UTILS_XML_PARSER_H_
 
-#include <map>
 #include <memory>
 
 #include "ukive/utils/string_utils.h"
+
+#include "ukive/utils/xml/xml_structs.h"
 
 
 namespace ukive {
 
     class XMLParser {
     public:
+        using Prolog = xml::Prolog;
+        using Content = xml::Content;
+        using Element = xml::Element;
         using crstring8 = const string8&;
         using index_t = string8::size_type;
 
-        struct Prolog {
-            string8 version;
-            string8 charset;
-        };
-
-        struct Element {
-            string8 tag_name;
-            std::map<string8, string8> attrs;
-            std::vector<string8> contents;
-            std::vector<std::shared_ptr<Element>> children;
-            Element* parent;
-
-            Element()
-                : parent(nullptr) {}
-        };
-
         XMLParser();
 
-        bool parse(crstring8 str);
-        const Prolog* getProlog() const;
-        const Element* getRootElement() const;
+        bool parse(crstring8 str, std::shared_ptr<Element>* out);
+        const Prolog& getProlog() const;
 
     private:
         enum class DocStepper {
@@ -90,7 +77,6 @@ namespace ukive {
         DocStepper doc_stepper_;
 
         Prolog prolog_;
-        std::shared_ptr<Element> root_element_;
     };
 
 }

@@ -345,6 +345,12 @@
     <ClCompile Include="utils\xml\xml_parser.cpp">
       <Filter>utils\xml</Filter>
     </ClCompile>
+    <ClCompile Include="utils\xml\xml_writer.cpp">
+      <Filter>utils\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\xml\xml_structs.cpp">
+      <Filter>utils\xml</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -737,6 +743,12 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\xml\xml_parser.h">
+      <Filter>utils\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\xml\xml_writer.h">
+      <Filter>utils\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\xml\xml_structs.h">
       <Filter>utils\xml</Filter>
     </ClInclude>
   </ItemGroup>

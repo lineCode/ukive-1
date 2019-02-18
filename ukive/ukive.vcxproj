@@ -262,6 +262,8 @@
     <ClInclude Include="utils\weak_ref_nest.h" />
     <ClInclude Include="utils\win10_version.h" />
     <ClInclude Include="utils\xml\xml_parser.h" />
+    <ClInclude Include="utils\xml\xml_structs.h" />
+    <ClInclude Include="utils\xml\xml_writer.h" />
     <ClInclude Include="views\button.h" />
     <ClInclude Include="views\chart_view.h" />
     <ClInclude Include="views\check_box.h" />
@@ -385,6 +387,8 @@
     <ClCompile Include="utils\unicode.cpp" />
     <ClCompile Include="utils\win10_version.cpp" />
     <ClCompile Include="utils\xml\xml_parser.cpp" />
+    <ClCompile Include="utils\xml\xml_structs.cpp" />
+    <ClCompile Include="utils\xml\xml_writer.cpp" />
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\chart_view.cpp" />
     <ClCompile Include="views\check_box.cpp" />

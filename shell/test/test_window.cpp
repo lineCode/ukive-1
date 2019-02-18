@@ -26,6 +26,7 @@
 #include "ukive/views/list/grid_list_layouter.h"
 #include "ukive/views/list/linear_list_layouter.h"
 #include "ukive/utils/xml/xml_parser.h"
+#include "ukive/utils/xml/xml_writer.h"
 
 #include "shell/test/list/test_adapter.h"
 
@@ -58,7 +59,7 @@ namespace shell {
 
         showTitleBar();
 
-        /*{
+        {
             std::fstream reader("D:\\test.xml");
 
             auto cpos = reader.tellg();
@@ -72,10 +73,17 @@ namespace shell {
             string8 str(buf.get(), charSize);
 
             ukive::XMLParser parser;
-            if (!parser.parse(str)) {
+            std::shared_ptr<ukive::xml::Element> root;
+            if (!parser.parse(str, &root)) {
                 DCHECK(false);
             }
-        }*/
+
+            string8 xml_str;
+            ukive::XMLWriter writer;
+            if (!writer.write(*root, &xml_str)) {
+                DCHECK(false);
+            }
+        }
 
         inflateGroup();
         //inflateListView();

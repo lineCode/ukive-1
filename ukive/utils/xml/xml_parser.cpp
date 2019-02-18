@@ -1,8 +1,13 @@
 #include "ukive/utils/xml/xml_parser.h"
 
+#include "ukive/log.h"
+
+#define RET_FALSE  \
+    { return false; }
+
 #define ADV_IDX(adv)  \
     idx += (adv);  \
-    if (idx >= str.length()) return false;
+    if (idx >= str.length()) RET_FALSE;
 
 #define LOOP_S()  \
     while(isSpace(str[idx])) { ADV_IDX(1); }
@@ -11,7 +16,7 @@
     while(isDigit(str[idx])) { ADV_IDX(1); }
 
 #define ONE_LOOP_S()  \
-    if (!isSpace(str[idx])) return false;  \
+    if (!isSpace(str[idx])) RET_FALSE;  \
     ADV_IDX(1); LOOP_S();
 
 
@@ -20,42 +25,45 @@ namespace ukive {
     XMLParser::XMLParser()
         : doc_stepper_(DocStepper::None) {}
 
-    bool XMLParser::parse(crstring8 str) {
+    bool XMLParser::parse(crstring8 str, std::shared_ptr<Element>* out) {
+        if (!out || out->get()) RET_FALSE;
         prolog_.version.clear();
         prolog_.charset.clear();
-        root_element_.reset();
         doc_stepper_ = DocStepper::None;
 
-        if (str.empty()) return false;
+        if (str.empty()) RET_FALSE;
         // UTF-8 BOM
         index_t cur_index = 0;
         if (str[0] == 0xEFi8) {
-            if (str.length() <= 3) return false;
-            if (str[1] != 0xBBi8 || str[2] != 0xBFi8) return false;
+            if (str.length() <= 3) RET_FALSE;
+            if (str[1] != 0xBBi8 || str[2] != 0xBFi8) RET_FALSE;
             cur_index = 3;
         }
 
-        string8 content;
-        auto cur_element = root_element_.get();
+        string8 char_data;
+        auto cur_element = out->get();
 
         for (auto i = cur_index; i < str.length(); ++i) {
             if (str[i] == '<') {
-                if (!content.empty()) {
+                if (!char_data.empty()) {
+                    Content content;
+                    content.type = Content::Type::CharData;
+                    content.char_data = char_data;
                     cur_element->contents.push_back(content);
-                    content.clear();
+                    char_data.clear();
                 }
 
                 if (startWith(str, "<?", i)) {
                     QuesTagType type;
-                    if (!parseQuesTag(str, i + 2, &i, &type)) return false;
+                    if (!parseQuesTag(str, i + 2, &i, &type)) RET_FALSE;
                     if (type == QuesTagType::Prolog) {
                         doc_stepper_ = DocStepper::Prolog;
                     }
                 } else if (startWith(str, "<!", i)) {
                     ExclTagType type;
-                    if (!parseExclTag(str, i + 2, &i, &type)) return false;
+                    if (!parseExclTag(str, i + 2, &i, &type)) RET_FALSE;
                 } else {
-                    if (doc_stepper_ == DocStepper::Misc) return false;
+                    if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
 
                     NormTagType type;
                     auto tmp = std::make_shared<Element>();
@@ -65,15 +73,18 @@ namespace ukive {
                     case NormTagType::StartTag:
                         if (cur_element) {
                             tmp->parent = cur_element;
-                            cur_element->children.push_back(tmp);
+                            Content content;
+                            content.type = Content::Type::Element;
+                            content.element = tmp;
+                            cur_element->contents.push_back(content);
                         } else {
-                            root_element_ = tmp;
+                            *out = tmp;
                         }
                         cur_element = tmp.get();
                         break;
                     case NormTagType::EndTag:
-                        if (!cur_element) return false;
-                        if (cur_element->tag_name != tmp->tag_name) return false;
+                        if (!cur_element) RET_FALSE;
+                        if (cur_element->tag_name != tmp->tag_name) RET_FALSE;
                         cur_element = cur_element->parent;
                         if (!cur_element) {
                             doc_stepper_ = DocStepper::Misc;
@@ -82,9 +93,12 @@ namespace ukive {
                     case NormTagType::EmptyTag:
                         if (cur_element) {
                             tmp->parent = cur_element;
-                            cur_element->children.push_back(tmp);
+                            Content content;
+                            content.type = Content::Type::Element;
+                            content.element = tmp;
+                            cur_element->contents.push_back(content);
                         } else {
-                            root_element_ = tmp;
+                            *out = tmp;
                             cur_element = tmp.get();
                             doc_stepper_ = DocStepper::Misc;
                         }
@@ -93,61 +107,57 @@ namespace ukive {
                 }
             } else {
                 if (doc_stepper_ == DocStepper::None) {
-                    return false;
+                    RET_FALSE;
                 }
                 if (doc_stepper_ == DocStepper::Prolog) {
-                    if (!isSpace(str[i])) return false;
+                    if (!isSpace(str[i])) RET_FALSE;
                 } else if (doc_stepper_ == DocStepper::Elements) {
-                    content.push_back(str[i]);
+                    char_data.push_back(str[i]);
                 } else if(doc_stepper_ == DocStepper::Misc){
-                    if (!isSpace(str[i]) && str[i] != 0) return false;
+                    if (!isSpace(str[i]) && str[i] != 0) RET_FALSE;
                 }
             }
         }
 
-        if (cur_element) return false;
+        if (cur_element) RET_FALSE;
 
         return true;
     }
 
-    const XMLParser::Prolog* XMLParser::getProlog() const {
-        return &prolog_;
-    }
-
-    const XMLParser::Element* XMLParser::getRootElement() const {
-        return root_element_.get();
+    const XMLParser::Prolog& XMLParser::getProlog() const {
+        return prolog_;
     }
 
     bool XMLParser::parseQuesTag(crstring8 str, index_t idx, index_t* p_idx, QuesTagType* type) {
-        if (idx >= str.length()) return false;
+        if (idx >= str.length()) RET_FALSE;
 
         if (startWith(str, "xml", idx)) {
-            if (doc_stepper_ != DocStepper::None) return false;
+            if (doc_stepper_ != DocStepper::None) RET_FALSE;
             *type = QuesTagType::Prolog;
             // Prolog
             ADV_IDX(3);
 
             // VersionInfo
             ONE_LOOP_S();
-            if (!startWith(str, "version", idx)) return false;
+            if (!startWith(str, "version", idx)) RET_FALSE;
             ADV_IDX(7);
             if (!parseEq(str, idx, &idx)) return false;
-            if (str[idx] != '\"' && str[idx] != '\'') return false;
+            if (str[idx] != '\"' && str[idx] != '\'') RET_FALSE;
             auto cur_sign = str[idx];
             ADV_IDX(1);
-            if (!startWith(str, "1.", idx)) return false;
+            if (!startWith(str, "1.", idx)) RET_FALSE;
             ADV_IDX(2);
             auto ver_start_idx = idx;
             LOOP_DIGIT();
             prolog_.version = str.substr(ver_start_idx, idx - ver_start_idx);
-            if (str[idx] != cur_sign) return false;
+            if (str[idx] != cur_sign) RET_FALSE;
             ADV_IDX(1);
 
             parseEncodingDecl(str, idx, &idx);
             parseSDDecl(str, idx, &idx);
 
             LOOP_S();
-            if (!startWith(str, "?>", idx)) return false;
+            if (!startWith(str, "?>", idx)) RET_FALSE;
             ADV_IDX(1);
         } else {
             *type = QuesTagType::PIs;
@@ -166,10 +176,10 @@ namespace ukive {
     }
 
     bool XMLParser::parseExclTag(crstring8 str, index_t idx, index_t* p_idx, ExclTagType* type) {
-        if (idx >= str.length()) return false;
+        if (idx >= str.length()) RET_FALSE;
 
         if (startWith(str, "[CDATA[", idx)) {
-            if (doc_stepper_ == DocStepper::Misc) return false;
+            if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::CDATA;
             ADV_IDX(7);
             while (!startWith(str, "]]>", idx)) {
@@ -178,7 +188,7 @@ namespace ukive {
             }
             ADV_IDX(2);
         } else if (str[idx] == '[') {
-            if (doc_stepper_ == DocStepper::Misc) return false;
+            if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::COND_SECT;
             ADV_IDX(1);
             while (!startWith(str, "]]>", idx)) {
@@ -187,7 +197,7 @@ namespace ukive {
             }
             ADV_IDX(2);
         } else if (startWith(str, "DOCTYPE", idx)) {
-            if (doc_stepper_ == DocStepper::Misc) return false;
+            if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::DOCTYPE;
             ADV_IDX(7);
             while (!startWith(str, ">", idx)) {
@@ -195,7 +205,7 @@ namespace ukive {
                 ADV_IDX(1);
             }
         } else if (startWith(str, "ENTITY", idx)) {
-            if (doc_stepper_ == DocStepper::Misc) return false;
+            if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::ENTITY;
             ADV_IDX(6);
             while (!startWith(str, ">", idx)) {
@@ -203,7 +213,7 @@ namespace ukive {
                 ADV_IDX(1);
             }
         } else if (startWith(str, "ELEMENT", idx)) {
-            if (doc_stepper_ == DocStepper::Misc) return false;
+            if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::ELEMENT;
             ADV_IDX(7);
             while (!startWith(str, ">", idx)) {
@@ -211,7 +221,7 @@ namespace ukive {
                 ADV_IDX(1);
             }
         } else if (startWith(str, "ATTLIST", idx)) {
-            if (doc_stepper_ == DocStepper::Misc) return false;
+            if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
             *type = ExclTagType::ATTLIST;
             ADV_IDX(7);
             while (!startWith(str, ">", idx)) {
@@ -227,10 +237,10 @@ namespace ukive {
                 // TODO:
                 ADV_IDX(1);
             }
-            if (illegal) return false;
+            if (illegal) RET_FALSE;
             ADV_IDX(2);
         } else {
-            return false;
+            RET_FALSE;
         }
 
         *p_idx = idx;
@@ -238,7 +248,7 @@ namespace ukive {
     }
 
     bool XMLParser::parseNormTag(crstring8 str, index_t idx, index_t* p_idx, NormTagType* type, Element* cur) {
-        if (idx >= str.length()) return false;
+        if (idx >= str.length()) RET_FALSE;
 
         if (str[idx] == '/') {
             *type = NormTagType::EndTag;
@@ -249,7 +259,7 @@ namespace ukive {
                 if (isSpace(str[idx])) {
                     has_space = true;
                 } else {
-                    if (has_space) return false;
+                    if (has_space) RET_FALSE;
                 }
                 ADV_IDX(1);
             }
@@ -262,7 +272,7 @@ namespace ukive {
                 if (str[idx] == '>') {
                     *type = NormTagType::StartTag;
                     if (stepper == ElementStepper::TAG_NAME) {
-                        if (idx - name_start_idx == 0) return false;
+                        if (idx - name_start_idx == 0) RET_FALSE;
                         cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
                     }
                     break;
@@ -270,7 +280,7 @@ namespace ukive {
                 if (startWith(str, "/>", idx)) {
                     *type = NormTagType::EmptyTag;
                     if (stepper == ElementStepper::TAG_NAME) {
-                        if (idx - name_start_idx == 0) return false;
+                        if (idx - name_start_idx == 0) RET_FALSE;
                         cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
                     }
                     ADV_IDX(1);
@@ -279,7 +289,7 @@ namespace ukive {
 
                 if (isSpace(str[idx])) {
                     if (stepper == ElementStepper::TAG_NAME) {
-                        if (idx - name_start_idx == 0) return false;
+                        if (idx - name_start_idx == 0) RET_FALSE;
                         cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
                         stepper = ElementStepper::ATTR_NAME;
                     } else if (stepper == ElementStepper::ATTR_NAME) {
@@ -290,9 +300,9 @@ namespace ukive {
                     if (stepper == ElementStepper::TAG_NAME) {
                         if (first_char) {
                             first_char = false;
-                            if (!isNameStartChar(str[idx])) return false;
+                            if (!isNameStartChar(str[idx])) RET_FALSE;
                         } else {
-                            if (!isNameChar(str[idx])) return false;
+                            if (!isNameChar(str[idx])) RET_FALSE;
                         }
                         ADV_IDX(1);
                     } else if (stepper == ElementStepper::ATTR_NAME) {
@@ -308,19 +318,19 @@ namespace ukive {
 
     bool XMLParser::parseEncodingDecl(crstring8 str, index_t idx, index_t* p_idx) {
         ONE_LOOP_S();
-        if (!startWith(str, "encoding", idx)) return false;
+        if (!startWith(str, "encoding", idx)) RET_FALSE;
         ADV_IDX(8);
         if (!parseEq(str, idx, &idx)) return false;
-        if (str[idx] != '\"' && str[idx] != '\'') return false;
+        if (str[idx] != '\"' && str[idx] != '\'') RET_FALSE;
         auto cur_sign = str[idx];
         ADV_IDX(1);
-        if (!isAlphaBet(str[idx])) return false;
+        if (!isAlphaBet(str[idx])) RET_FALSE;
         auto enc_start_idx = idx;
         ADV_IDX(1);
         while (isEncNameChar(str[idx])) {
             ADV_IDX(1);
         }
-        if (str[idx] != cur_sign) return false;
+        if (str[idx] != cur_sign) RET_FALSE;
         prolog_.charset = str.substr(enc_start_idx, idx - enc_start_idx);
         ADV_IDX(1);
 
@@ -330,10 +340,10 @@ namespace ukive {
 
     bool XMLParser::parseSDDecl(crstring8 str, index_t idx, index_t* p_idx) {
         ONE_LOOP_S();
-        if (!startWith(str, "standalone", idx)) return false;
+        if (!startWith(str, "standalone", idx)) RET_FALSE;
         ADV_IDX(10);
         if (!parseEq(str, idx, &idx)) return false;
-        if (str[idx] != '\"' && str[idx] != '\'') return false;
+        if (str[idx] != '\"' && str[idx] != '\'') RET_FALSE;
         auto cur_sign = str[idx];
         ADV_IDX(1);
         if (startWith(str, "yes", idx)) {
@@ -341,9 +351,9 @@ namespace ukive {
         } else if (startWith(str, "no", idx)) {
             ADV_IDX(2);
         } else {
-            return false;
+            RET_FALSE;
         }
-        if (str[idx] != cur_sign) return false;
+        if (str[idx] != cur_sign) RET_FALSE;
         ADV_IDX(1);
 
         *p_idx = idx;
@@ -352,7 +362,7 @@ namespace ukive {
 
     bool XMLParser::parseEq(crstring8 str, index_t idx, index_t* p_idx) {
         LOOP_S();
-        if (str[idx] != '=') return false;
+        if (str[idx] != '=') RET_FALSE;
         ADV_IDX(1);
         LOOP_S();
 
@@ -366,24 +376,24 @@ namespace ukive {
         while (!isSpace(str[idx]) && str[idx] != '=') {
             if (name_first) {
                 name_first = false;
-                if (!isNameStartChar(str[idx])) return false;
+                if (!isNameStartChar(str[idx])) RET_FALSE;
             } else {
-                if (!isNameChar(str[idx])) return false;
+                if (!isNameChar(str[idx])) RET_FALSE;
             }
             ADV_IDX(1);
         }
         auto attr_name = str.substr(attr_name_start_idx, idx - attr_name_start_idx);
-        if (cur->attrs.find(attr_name) != cur->attrs.end()) return false;
+        if (cur->attrs.find(attr_name) != cur->attrs.end()) RET_FALSE;
 
         if (!parseEq(str, idx, &idx)) return false;
-        if (str[idx] != '\"' && str[idx] != '\'') return false;
+        if (str[idx] != '\"' && str[idx] != '\'') RET_FALSE;
         auto cur_sign = str[idx];
         ADV_IDX(1);
         auto attr_val_start_idx = idx;
         while (str[idx] != '\"' && str[idx] != '\'') {
             ADV_IDX(1);
         }
-        if (str[idx] != cur_sign) return false;
+        if (str[idx] != cur_sign) RET_FALSE;
         auto attr_val = str.substr(attr_val_start_idx, idx - attr_val_start_idx);
         ADV_IDX(1);
 
@@ -438,7 +448,7 @@ namespace ukive {
         return (isNameStartChar(val) ||
             val == '-' ||
             val == '.' ||
-            (val >= 0 && val <= 9) ||
+            (val >= '0' && val <= '9') ||
             val == 0xB7 ||
             (val >= 0x300 && val <= 0x36F) ||
             (val >= 0x203F && val <= 0x2040));
