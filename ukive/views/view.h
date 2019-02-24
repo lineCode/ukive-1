@@ -1,6 +1,7 @@
 ﻿#ifndef UKIVE_VIEWS_VIEW_H_
 #define UKIVE_VIEWS_VIEW_H_
 
+#include <map>
 #include <memory>
 
 #include "ukive/utils/executable.h"
@@ -23,6 +24,9 @@ namespace ukive {
 
     class View {
     public:
+        using Attributes = std::map<string16, string16>;
+        using AttrsRef = const Attributes&;
+
         enum Gravity {
             LEFT,
             TOP,
@@ -46,6 +50,7 @@ namespace ukive {
         };
 
         explicit View(Window* w);
+        View(Window* w, AttrsRef attrs);
         virtual ~View();
 
         ViewAnimator* animate();
@@ -179,6 +184,8 @@ namespace ukive {
 
         virtual void onAttachedToWindow();
         virtual void onDetachedFromWindow();
+
+        virtual bool isViewGroup() const;
 
     protected:
         void setMeasuredSize(int width, int height);

@@ -17,6 +17,7 @@ namespace ukive {
         public OnWindowStatusChangedListener {
     public:
         explicit TitleBar(Window* w);
+        TitleBar(Window* w, AttrsRef attrs);
         ~TitleBar();
 
         // OnClickListener

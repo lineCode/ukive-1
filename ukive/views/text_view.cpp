@@ -15,6 +15,9 @@
 #include "ukive/text/text_drawing_effect.h"
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_item.h"
+#include "ukive/resources/dimension_utils.h"
+
+#include "oigka/layout_constants.h"
 
 
 namespace ukive {
@@ -35,11 +38,21 @@ namespace ukive {
         };
     }
 
-    TextView::TextView(Window* wnd)
-        :View(wnd),
-        text_color_(Color::Black),
-        sel_bg_color_(Color::Blue200)
+    TextView::TextView(Window* w)
+        : TextView(w, {}) {}
+
+    TextView::TextView(Window* w, AttrsRef attrs)
+        : View(w, attrs),
+          text_color_(Color::Black),
+          sel_bg_color_(Color::Blue200)
     {
+        is_selectable_ = resolveAttrBool(attrs, oigka::kAttrTextViewIsSelectable, false);
+        is_editable_ = resolveAttrBool(attrs, oigka::kAttrTextViewIsEditable, false);
+
+        auto text = resolveAttrString(attrs, oigka::kAttrTextViewText, L"");
+        base_text_ = new Editable(text);
+        base_text_->addEditWatcher(this);
+
         initTextView();
     }
 
@@ -53,8 +66,6 @@ namespace ukive {
     void TextView::initTextView() {
         text_size_ = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
         is_auto_wrap_ = true;
-        is_editable_ = false;
-        is_selectable_ = false;
         is_plkey_down_ = false;
         is_prkey_down_ = false;
         is_plkey_down_on_text_ = false;
@@ -77,9 +88,6 @@ namespace ukive {
 
         input_connection_ = new InputConnection(this);
         text_key_listener_ = new TextKeyListener();
-
-        base_text_ = new Editable(L"");
-        base_text_->addEditWatcher(this);
 
         makeNewTextFormat();
         makeNewTextLayout(0.f, 0.f, false);

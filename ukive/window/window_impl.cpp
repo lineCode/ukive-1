@@ -17,8 +17,6 @@
 #include "ukive/utils/win10_version.h"
 #include "ukive/utils/dynamic_windows_api.h"
 
-#include "shell/test/frame/custom_non_client_frame.h"
-
 #define MI_WP_SIGNATURE  0xFF515700
 #define SIGNATURE_MASK   0xFFFFFF00
 #define TOUCH_PEN_MASK   0x80
@@ -620,8 +618,6 @@ namespace ukive {
 
     LRESULT WindowImpl::onNCCreate(WPARAM wParam, LPARAM lParam, bool* handled) {
         if (delegate_->getFrameType() == Window::FRAME_CUSTOM) {
-            non_client_frame_.reset(new shell::CustomNonClientFrame());
-        } else if (delegate_->getFrameType() == Window::FRAME_ZERO) {
             non_client_frame_.reset(new DrawableNonClientFrame());
         } else {
             non_client_frame_.reset(new DefaultNonClientFrame());

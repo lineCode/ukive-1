@@ -4,7 +4,12 @@
 namespace ukive {
 
     ChartView::ChartView(Window* w)
-        : View(w) {
+        : ChartView(w, {}) {
+    }
+
+    ChartView::ChartView(Window* w, AttrsRef attrs)
+        : View(w, attrs) {
+
     }
 
     void ChartView::onMeasure(int width, int height, int width_mode, int height_mode) {

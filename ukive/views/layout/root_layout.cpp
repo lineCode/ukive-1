@@ -7,6 +7,7 @@
 #include "ukive/window/window.h"
 #include "ukive/views/debug_view.h"
 #include "ukive/views/title_bar/title_bar.h"
+#include "ukive/resources/layout_instantiator.h"
 
 
 namespace {
@@ -18,7 +19,10 @@ namespace {
 namespace ukive {
 
     RootLayout::RootLayout(Window* w)
-        : NonClientLayout(w),
+        :RootLayout(w, {}) {}
+
+    RootLayout::RootLayout(Window* w, AttrsRef attrs)
+        : NonClientLayout(w, attrs),
           title_bar_(nullptr),
           debug_view_(nullptr),
           shade_layout_(nullptr),
@@ -38,17 +42,17 @@ namespace ukive {
         }
     }
 
-    LayoutParams* RootLayout::generateLayoutParams(const LayoutParams& lp) {
+    LayoutParams* RootLayout::generateLayoutParams(const LayoutParams& lp) const {
         return new RootLayoutParams(lp);
     }
 
-    LayoutParams* RootLayout::generateDefaultLayoutParams() {
+    LayoutParams* RootLayout::generateDefaultLayoutParams() const {
         return new RootLayoutParams(
             RootLayoutParams::MATCH_PARENT,
             RootLayoutParams::MATCH_PARENT);
     }
 
-    bool RootLayout::checkLayoutParams(LayoutParams* lp) {
+    bool RootLayout::checkLayoutParams(LayoutParams* lp) const {
         return typeid(*lp) == typeid(RootLayoutParams);
     }
 
@@ -56,7 +60,7 @@ namespace ukive {
         int title_bar_height = getWindow()->dpToPx(kTitleBarHeight);
         if (!title_bar_) {
             if (content_view_) {
-                content_view_->getLayoutParams()->topMargin = title_bar_height;
+                content_view_->getLayoutParams()->top_margin = title_bar_height;
             }
 
             title_bar_ = new TitleBar(getWindow());
@@ -65,7 +69,7 @@ namespace ukive {
             content_layout_->addView(title_bar_);
         } else {
             if (content_view_) {
-                content_view_->getLayoutParams()->topMargin = title_bar_height;
+                content_view_->getLayoutParams()->top_margin = title_bar_height;
             }
             title_bar_->setVisibility(View::VISIBLE);
         }
@@ -74,7 +78,7 @@ namespace ukive {
     void RootLayout::hideTitleBar() {
         if (title_bar_) {
             if (content_view_) {
-                content_view_->getLayoutParams()->topMargin = 0;
+                content_view_->getLayoutParams()->top_margin = 0;
             }
             title_bar_->setVisibility(View::VANISHED);
         }
@@ -83,7 +87,7 @@ namespace ukive {
     void RootLayout::removeTitleBar() {
         if (title_bar_) {
             if (content_view_) {
-                content_view_->getLayoutParams()->topMargin = 0;
+                content_view_->getLayoutParams()->top_margin = 0;
             }
             content_layout_->removeView(title_bar_);
             title_bar_ = nullptr;
@@ -148,6 +152,12 @@ namespace ukive {
         return debug_view_;
     }
 
+    void RootLayout::setContent(int id) {
+        LayoutInstantiator instantiator;
+        auto content_view = instantiator.instantiate(getWindow(), id);
+        setContent(content_view);
+    }
+
     void RootLayout::setContent(View* content) {
         if (content == content_view_ || !content) {
             return;
@@ -161,7 +171,7 @@ namespace ukive {
         auto lp = new LayoutParams(
             LayoutParams::MATCH_PARENT, LayoutParams::MATCH_PARENT);
         if (title_bar_ && title_bar_->getVisibility() != View::VANISHED) {
-            lp->topMargin = getWindow()->dpToPx(kTitleBarHeight);
+            lp->top_margin = getWindow()->dpToPx(kTitleBarHeight);
         }
 
         content_layout_->addView(0, content, lp);

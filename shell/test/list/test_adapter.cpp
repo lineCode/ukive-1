@@ -22,10 +22,10 @@ namespace shell {
             new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::FIT_CONTENT));
 
         auto layout_lp = layout->getLayoutParams();
-        layout_lp->leftMargin = 4;
-        layout_lp->topMargin = 4;
-        layout_lp->rightMargin = 4;
-        layout_lp->bottomMargin = 4;
+        layout_lp->left_margin = 4;
+        layout_lp->top_margin = 4;
+        layout_lp->right_margin = 4;
+        layout_lp->bottom_margin = 4;
 
         using Rlp = ukive::RestraintLayoutParams;
 

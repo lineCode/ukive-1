@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    layout_width="match_parent"
+    layout_height="match_parent">
+
+    <LinearLayout
+        layout_width="match_parent"
+        layout_height="match_parent">
+
+        <TextView
+            id="@+id/tv_dev_text_params"
+            layout_width="fit_content"
+            layout_height="fit_content"
+            layout_margin="12dp"
+            text=""
+            is_selectable="false"
+            is_editable="false"
+            padding="6dp" />
+
+        <TextView
+            id="@+id/tv_test_txt"
+            layout_width="match_parent"
+            layout_height="fit_content"
+            layout_margin="12dp"
+            text="iii"
+            is_selectable="true"
+            is_editable="true"
+            background="?colordrawable/white"
+            elevation="3dp"
+            padding="6dp" />
+
+        <ImageView
+            id="@+id/iv_test_img"
+            layout_width="fit_content"
+            layout_height="fit_content" />
+
+        <Button
+            id="@+id/bt_test_button"
+            layout_width="fit_content"
+            layout_height="fit_content"
+            layout_margin="12dp" />
+
+    </LinearLayout>
+
+</ScrollView>

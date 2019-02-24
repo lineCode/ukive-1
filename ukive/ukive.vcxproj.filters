@@ -351,6 +351,15 @@
     <ClCompile Include="utils\xml\xml_structs.cpp">
       <Filter>utils\xml</Filter>
     </ClCompile>
+    <ClCompile Include="resources\layout_instantiator.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\xml\xml_pedometer.cpp">
+      <Filter>utils\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="resources\dimension_utils.cpp">
+      <Filter>resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -751,6 +760,15 @@
     <ClInclude Include="utils\xml\xml_structs.h">
       <Filter>utils\xml</Filter>
     </ClInclude>
+    <ClInclude Include="resources\layout_instantiator.h">
+      <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\xml\xml_pedometer.h">
+      <Filter>utils\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="resources\dimension_utils.h">
+      <Filter>resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -818,6 +836,9 @@
     </Filter>
     <Filter Include="utils\xml">
       <UniqueIdentifier>{b60392f2-edcb-453d-97b4-e34c386651a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{74a72a50-3993-40f9-bdd2-940dc88aa351}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

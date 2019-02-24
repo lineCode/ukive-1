@@ -17,7 +17,8 @@ namespace ukive {
             LAYOUT
         };
 
-        DebugView(Window* w);
+        explicit DebugView(Window* w);
+        DebugView(Window* w, AttrsRef attrs);
 
         void toggleMode();
         void addDuration(uint64_t duration);

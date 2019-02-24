@@ -18,7 +18,7 @@ namespace ukive {
     class Application {
     public:
         Application();
-        Application(wchar_t* cl);
+        explicit Application(wchar_t* cl);
         Application(int argc, wchar_t* argv[]);
         ~Application();
 

@@ -14,6 +14,8 @@
 #include "ukive/text/word_breaker.h"
 #include "ukive/utils/stl_utils.h"
 #include "ukive/utils/dynamic_windows_api.h"
+#include "ukive/files/file.h"
+#include "ukive/resources/layout_instantiator.h"
 
 
 #pragma comment(lib, "comctl32.lib")
@@ -27,7 +29,7 @@
 
 namespace ukive {
 
-    int Application::view_uid_ = 10000;
+    int Application::view_uid_ = 10;
     bool Application::vsync_enabled_ = true;
     Application* Application::instance_ = nullptr;
 
@@ -64,16 +66,18 @@ namespace ukive {
     void Application::initApplication() {
         HRESULT hr = ::CoInitialize(nullptr);
         if (FAILED(hr)) {
-            LOG(Log::ERR) << "failed to init COM.";
+            LOG(Log::ERR) << "Failed to initialize COM";
         }
 
         Message::init(50);
         MessageLooper::prepareMainLooper();
         WordBreaker::initGlobal();
 
+        LayoutInstantiator::init();
+
         hr = AnimationManager::initGlobal();
         if (FAILED(hr)) {
-            LOG(Log::ERR) << "Init anim library failed.";
+            LOG(Log::ERR) << "Failed to initialize anim library";
         }
 
         graphic_device_manager_.reset(new GraphicDeviceManager());
@@ -84,7 +88,7 @@ namespace ukive {
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
         if (FAILED(hr)) {
-            LOG(Log::ERR) << "Init Tsf failed.";
+            LOG(Log::ERR) << "Failed to initialize TSF";
         }
     }
 
@@ -232,10 +236,7 @@ namespace ukive {
         }
 
         if (dir) {
-            auto i = file_name.find_last_of(L"\\");
-            if (i != string16::npos) {
-                file_name = file_name.substr(0, i);
-            }
+            file_name = File(file_name).getParentPath();
         }
 
         return file_name;

@@ -15,55 +15,85 @@
 #include "ukive/message/cycler.h"
 #include "ukive/graphics/point.h"
 #include "ukive/graphics/direct3d/effects/shadow_effect.h"
+#include "ukive/resources/dimension_utils.h"
+
+#include "oigka/layout_constants.h"
 
 
 namespace ukive {
 
     View::View(Window* w)
-        :id_(Application::getViewID()),
-        flags_(0),
-        scroll_x_(0),
-        scroll_y_(0),
-        measured_width_(0),
-        measured_height_(0),
-        old_pm_width_(0),
-        old_pm_height_(0),
-        old_pm_width_mode_(UNKNOWN),
-        old_pm_height_mode_(UNKNOWN),
-        min_width_(0),
-        min_height_(0),
-        visibility_(VISIBLE),
-        elevation_(0.f),
-        has_focus_(false),
-        is_enabled_(true),
-        is_attached_to_window_(false),
-        is_input_event_at_last_(false),
-        is_pressed_(false),
-        is_focusable_(false),
-        is_receive_outside_input_event_(false),
-        is_mouse_down_(false),
-        is_touch_down_(false),
-        window_(w),
-        mAlpha(1.0),
-        mScaleX(1.0),
-        mScaleY(1.0),
-        mTranslateX(0.0),
-        mTranslateY(0.0),
-        mPivotX(0.0),
-        mPivotY(0.0),
-        mRevealType(ViewAnimator::REVEAL_CIRCULE),
-        mHasReveal(false),
-        mRevealRadius(0.0),
-        mRevealCenterX(0.0),
-        mRevealCenterY(0.0),
-        mRevealWidthRadius(0.0),
-        mRevealHeightRadius(0.0),
-        cur_ev_(std::make_unique<InputEvent>()),
-        parent_(nullptr),
-        click_listener_(nullptr),
-        click_performer_(new ClickPerformer(this)),
-        input_connection_(nullptr) {}
+        : View(w, {}) {}
 
+    View::View(Window* w, AttrsRef attrs)
+        : id_(Application::getViewID()),
+          flags_(0),
+          scroll_x_(0),
+          scroll_y_(0),
+          measured_width_(0),
+          measured_height_(0),
+          old_pm_width_(0),
+          old_pm_height_(0),
+          old_pm_width_mode_(UNKNOWN),
+          old_pm_height_mode_(UNKNOWN),
+          min_width_(0),
+          min_height_(0),
+          visibility_(VISIBLE),
+          elevation_(0.f),
+          has_focus_(false),
+          is_enabled_(true),
+          is_attached_to_window_(false),
+          is_input_event_at_last_(false),
+          is_pressed_(false),
+          is_focusable_(false),
+          is_receive_outside_input_event_(false),
+          is_mouse_down_(false),
+          is_touch_down_(false),
+          window_(w),
+          mAlpha(1.0),
+          mScaleX(1.0),
+          mScaleY(1.0),
+          mTranslateX(0.0),
+          mTranslateY(0.0),
+          mPivotX(0.0),
+          mPivotY(0.0),
+          mRevealType(ViewAnimator::REVEAL_CIRCULE),
+          mHasReveal(false),
+          mRevealRadius(0.0),
+          mRevealCenterX(0.0),
+          mRevealCenterY(0.0),
+          mRevealWidthRadius(0.0),
+          mRevealHeightRadius(0.0),
+          cur_ev_(std::make_unique<InputEvent>()),
+          parent_(nullptr),
+          click_listener_(nullptr),
+          click_performer_(new ClickPerformer(this)),
+          input_connection_(nullptr)
+    {
+        auto it = attrs.find(oigka::kAttrViewId);
+        if (it != attrs.end()) {
+            if (!stringToNumber(it->second, &id_)) {
+                LOG(Log::WARNING) << "Cannot convert View id: " << it->second;
+            }
+        }
+
+        Rect padding;
+        padding.left = padding.right = padding.top = padding.bottom
+            = resolveAttrDimension(getWindow(), attrs, oigka::kAttrViewPadding, 0);
+        padding.left = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrViewPaddingStart, padding.left);
+        padding.right = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrViewPaddingEnd, padding.right);
+        padding.top = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrViewPaddingTop, padding.top);
+        padding.bottom = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrViewPaddingBottom, padding.bottom);
+
+        setPadding(padding.left, padding.top, padding.right, padding.bottom);
+
+        float elevation = resolveAttrDimension(getWindow(), attrs, oigka::kAttrViewElevation, 0);
+        setElevation(elevation);
+    }
 
     View::~View() {
         delete click_performer_;
@@ -73,7 +103,6 @@ namespace ukive {
             delete input_connection_;
         }
     }
-
 
     ViewAnimator* View::animate() {
         if (!animator_) {
@@ -326,7 +355,6 @@ namespace ukive {
         click_listener_ = l;
     }
 
-
     int View::getId() const {
         return id_;
     }
@@ -440,7 +468,6 @@ namespace ukive {
         return padding_.bottom;
     }
 
-
     LayoutParams* View::getLayoutParams() const {
         return layout_params_.get();
     }
@@ -449,11 +476,9 @@ namespace ukive {
         return parent_;
     }
 
-
     Window* View::getWindow() const {
         return window_;
     }
-
 
     Drawable* View::getBackground() const {
         return bg_drawable_.get();
@@ -462,7 +487,6 @@ namespace ukive {
     Drawable* View::getForeground() const {
         return fg_drawable_.get();
     }
-
 
     Rect View::getBounds() const {
         return bounds_;
@@ -1183,6 +1207,10 @@ namespace ukive {
         if (animator_) {
             animator_->cancel();
         }
+    }
+
+    bool View::isViewGroup() const {
+        return false;
     }
 
     bool View::onInputEvent(InputEvent* e) {

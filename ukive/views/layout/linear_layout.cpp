@@ -5,27 +5,52 @@
 
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/utils/stl_utils.h"
+#include "ukive/resources/dimension_utils.h"
+
+#include "oigka/layout_constants.h"
 
 
 namespace ukive {
 
     LinearLayout::LinearLayout(Window* w)
-        :ViewGroup(w),
-        orientation_(VERTICAL) {}
+        : LinearLayout(w, {}) {}
 
+    LinearLayout::LinearLayout(Window* w, AttrsRef attrs)
+        : ViewGroup(w, attrs),
+          orientation_(VERTICAL)
+    {
+        auto ori = resolveAttrString(
+            attrs, oigka::kAttrLinearLayoutViewOri, oigka::kAttrValLinearLayoutViewOriVert);
+        if (isEqual(ori, oigka::kAttrValLinearLayoutViewOriVert, false)) {
+            orientation_ = VERTICAL;
+        } else if (isEqual(ori, oigka::kAttrValLinearLayoutViewOriHori, false)) {
+            orientation_ = HORIZONTAL;
+        }
+    }
 
-    LayoutParams* LinearLayout::generateLayoutParams(const LayoutParams& lp) {
+    LayoutParams* LinearLayout::generateLayoutParams(const LayoutParams& lp) const {
         return new LinearLayoutParams(lp);
     }
 
-    LayoutParams* LinearLayout::generateDefaultLayoutParams() {
+    LayoutParams* LinearLayout::generateDefaultLayoutParams() const {
         return new LinearLayoutParams(
             LayoutParams::FIT_CONTENT,
             LayoutParams::FIT_CONTENT);
     }
 
-    bool LinearLayout::checkLayoutParams(LayoutParams* lp) {
+    bool LinearLayout::checkLayoutParams(LayoutParams* lp) const {
         return typeid(*lp) == typeid(LinearLayoutParams);
+    }
+
+    LayoutParams* LinearLayout::generateLayoutParamsByAttrs(AttrsRef attrs) const {
+        auto lp = ViewGroup::generateLayoutParamsByAttrs(attrs);
+        auto llp = static_cast<LinearLayoutParams*>(generateLayoutParams(*lp));
+        delete lp;
+
+        auto weight = resolveAttrInt(attrs, oigka::kAttrLinearLayoutWeight, 0);
+        llp->weight = weight;
+
+        return llp;
     }
 
     void LinearLayout::measureLinearChild(
@@ -36,8 +61,8 @@ namespace ukive {
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
-        int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
+        int hori_margin = child_lp->left_margin + child_lp->right_margin;
+        int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
         int childWidth;
         int childWidthSpec;
@@ -68,8 +93,8 @@ namespace ukive {
                 int hori_padding = getPaddingLeft() + getPaddingRight();
                 int vert_padding = getPaddingTop() + getPaddingBottom();
 
-                int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
-                int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
+                int hori_margin = child_lp->left_margin + child_lp->right_margin;
+                int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
                 int childWidth;
                 int childWidthSpec;
@@ -131,8 +156,8 @@ namespace ukive {
                 int hori_padding = getPaddingLeft() + getPaddingRight();
                 int vert_padding = getPaddingTop() + getPaddingBottom();
 
-                int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
-                int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
+                int hori_margin = child_lp->left_margin + child_lp->right_margin;
+                int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
                 int childWidth;
                 int childWidthSpec;
@@ -199,8 +224,8 @@ namespace ukive {
 
 
     void LinearLayout::measureVertical(int width, int height, int width_mode, int height_mode) {
-        int final_width = 0;
-        int final_height = 0;
+        int final_width;
+        int final_height;
 
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
@@ -233,7 +258,7 @@ namespace ukive {
                 auto child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     auto lp = child->getLayoutParams();
-                    total_height += child->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
+                    total_height += child->getMeasuredHeight() + lp->top_margin + lp->bottom_margin;
                 }
             }
             final_height = std::min(height, total_height + vert_padding);
@@ -246,7 +271,7 @@ namespace ukive {
                 auto child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     auto lp = child->getLayoutParams();
-                    total_height += child->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
+                    total_height += child->getMeasuredHeight() + lp->top_margin + lp->bottom_margin;
                 }
             }
             final_height = std::max(getMinimumHeight(), total_height + vert_padding);
@@ -263,8 +288,8 @@ namespace ukive {
     }
 
     void LinearLayout::measureHorizontal(int width, int height, int width_mode, int height_mode) {
-        int final_width = 0;
-        int final_height = 0;
+        int final_width;
+        int final_height;
 
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
@@ -279,7 +304,7 @@ namespace ukive {
                 auto child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     auto lp = child->getLayoutParams();
-                    total_width += child->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
+                    total_width += child->getMeasuredWidth() + lp->left_margin + lp->right_margin;
                 }
             }
             final_width = std::min(total_width + hori_padding, width);
@@ -292,7 +317,7 @@ namespace ukive {
                 auto child = getChildAt(i);
                 if (child->getVisibility() != View::VANISHED) {
                     auto lp = child->getLayoutParams();
-                    total_width += child->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
+                    total_width += child->getMeasuredWidth() + lp->left_margin + lp->right_margin;
                 }
             }
             final_width = std::max(getMinimumWidth(), total_width + hori_padding);
@@ -338,15 +363,15 @@ namespace ukive {
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();
 
-                cur_top += lp->topMargin;
+                cur_top += lp->top_margin;
 
                 child->layout(
-                    getPaddingLeft() + lp->leftMargin,
+                    getPaddingLeft() + lp->left_margin,
                     cur_top,
-                    getPaddingLeft() + lp->leftMargin + width,
+                    getPaddingLeft() + lp->left_margin + width,
                     cur_top + height);
 
-                cur_top += height + lp->bottomMargin;
+                cur_top += height + lp->bottom_margin;
             }
         }
     }
@@ -362,15 +387,15 @@ namespace ukive {
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();
 
-                cur_left += lp->leftMargin;
+                cur_left += lp->left_margin;
 
                 child->layout(
                     cur_left,
-                    getPaddingTop() + lp->topMargin,
+                    getPaddingTop() + lp->top_margin,
                     cur_left + width,
-                    getPaddingTop() + lp->topMargin + height);
+                    getPaddingTop() + lp->top_margin + height);
 
-                cur_left += width + lp->rightMargin;
+                cur_left += width + lp->right_margin;
             }
         }
     }

@@ -38,7 +38,6 @@ namespace ukive {
         enum FrameType {
             FRAME_NATIVE,
             FRAME_CUSTOM,
-            FRAME_ZERO,
         };
 
         Window();
@@ -63,6 +62,7 @@ namespace ukive {
         void setMinWidth(int min_width);
         void setMinHeight(int min_height);
         void setCurrentCursor(Cursor cursor);
+        void setContentView(int layout_id);
         void setContentView(View* content);
         void setBackgroundColor(Color color);
         void setTranslucent(bool translucent);

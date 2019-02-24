@@ -16,6 +16,7 @@ namespace ukive {
     class RootLayout : public NonClientLayout {
     public:
         explicit RootLayout(Window* w);
+        RootLayout(Window* w, AttrsRef attrs);
         ~RootLayout();
 
         void showTitleBar();
@@ -33,6 +34,7 @@ namespace ukive {
         TitleBar* getTitleBar() const;
         DebugView* getDebugView() const;
 
+        void setContent(int id);
         void setContent(View* content);
 
         void requestLayout() override;
@@ -40,9 +42,9 @@ namespace ukive {
         HitPoint onNCHitTest(int x, int y) override;
 
     protected:
-        LayoutParams* generateLayoutParams(const LayoutParams& lp) override;
-        LayoutParams* generateDefaultLayoutParams() override;
-        bool checkLayoutParams(LayoutParams* lp) override;
+        LayoutParams* generateLayoutParams(const LayoutParams& lp) const override;
+        LayoutParams* generateDefaultLayoutParams() const override;
+        bool checkLayoutParams(LayoutParams* lp) const override;
 
     private:
         TitleBar* title_bar_;

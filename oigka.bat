@@ -1,0 +1,1 @@
+CALL oigka shell\resources build\x86\Debug

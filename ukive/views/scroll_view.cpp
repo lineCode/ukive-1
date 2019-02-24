@@ -10,12 +10,14 @@
 namespace ukive {
 
     ScrollView::ScrollView(Window* w)
-        : ViewGroup(w),
+        : ScrollView(w, {}) {}
+
+    ScrollView::ScrollView(Window* w, AttrsRef attrs)
+        : ViewGroup(w, attrs),
           mouse_x_cache_(0),
           mouse_y_cache_(0),
           saved_pointer_type_(InputEvent::PT_NONE),
-          scroller_(nullptr) { }
-
+          scroller_(nullptr) {}
 
     bool ScrollView::canScroll() {
         View* child = getChildAt(0);
@@ -140,8 +142,8 @@ namespace ukive {
             int width = child->getMeasuredWidth();
             int height = child->getMeasuredHeight();
 
-            int child_left = getPaddingLeft() + lp->leftMargin;
-            int child_top = getPaddingTop() + lp->topMargin;
+            int child_left = getPaddingLeft() + lp->left_margin;
+            int child_top = getPaddingTop() + lp->top_margin;
 
             child->layout(
                 child_left, child_top,

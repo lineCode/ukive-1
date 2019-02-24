@@ -21,7 +21,8 @@ namespace ukive {
         public Editable::EditWatcher,
         public TextActionModeCallback {
     public:
-        TextView(Window* w);
+        explicit TextView(Window* w);
+        TextView(Window* w, AttrsRef attrs);
         ~TextView();
 
         void onBeginProcess();

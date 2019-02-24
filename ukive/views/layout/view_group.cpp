@@ -7,31 +7,74 @@
 #include "ukive/graphics/canvas.h"
 #include "ukive/log.h"
 #include "ukive/utils/stl_utils.h"
+#include "ukive/resources/dimension_utils.h"
+
+#include "oigka/layout_constants.h"
 
 
 namespace ukive {
 
     ViewGroup::ViewGroup(Window* w)
-        :View(w) {
+        : ViewGroup(w, {}) {
+    }
+
+    ViewGroup::ViewGroup(Window* w, AttrsRef attrs)
+        : View(w, attrs) {
+
     }
 
     ViewGroup::~ViewGroup() {
         STLDeleteElements(&views_);
     }
 
-
-    bool ViewGroup::checkLayoutParams(LayoutParams* lp) {
+    bool ViewGroup::checkLayoutParams(LayoutParams* lp) const {
         return lp != nullptr;
     }
 
-    LayoutParams* ViewGroup::generateDefaultLayoutParams() {
+    LayoutParams* ViewGroup::generateDefaultLayoutParams() const {
         return new LayoutParams(
             LayoutParams::FIT_CONTENT,
             LayoutParams::FIT_CONTENT);
     }
 
-    LayoutParams* ViewGroup::generateLayoutParams(const LayoutParams &lp) {
+    LayoutParams* ViewGroup::generateLayoutParams(const LayoutParams &lp) const {
         return new LayoutParams(lp);
+    }
+
+    LayoutParams* ViewGroup::generateLayoutParamsByAttrs(AttrsRef attrs) const {
+        int width = LayoutParams::FIT_CONTENT;
+        int height = LayoutParams::FIT_CONTENT;
+
+        auto width_attr = resolveAttrString(
+            attrs, oigka::kAttrLayoutWidth, oigka::kAttrValLayoutFit);
+        if (isEqual(width_attr, oigka::kAttrValLayoutFit, false)) {
+            width = LayoutParams::FIT_CONTENT;
+        } else if (isEqual(width_attr, oigka::kAttrValLayoutMatch, false)) {
+            width = LayoutParams::MATCH_PARENT;
+        }
+
+        auto height_attr = resolveAttrString(
+            attrs, oigka::kAttrLayoutHeight, oigka::kAttrValLayoutFit);
+        if (isEqual(height_attr, oigka::kAttrValLayoutFit, false)) {
+            height = LayoutParams::FIT_CONTENT;
+        } else if (isEqual(height_attr, oigka::kAttrValLayoutMatch, false)) {
+            height = LayoutParams::MATCH_PARENT;
+        }
+
+        auto lp = new LayoutParams(width, height);
+        lp->left_margin = lp->right_margin = lp->top_margin = lp->bottom_margin
+            = resolveAttrDimension(getWindow(), attrs, oigka::kAttrLayoutMargin, 0);
+
+        lp->left_margin = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrLayoutMarginStart, lp->left_margin);
+        lp->right_margin = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrLayoutMarginEnd, lp->right_margin);
+        lp->top_margin = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrLayoutMarginTop, lp->top_margin);
+        lp->bottom_margin = resolveAttrDimension(
+            getWindow(), attrs, oigka::kAttrLayoutMarginBottom, lp->bottom_margin);
+
+        return lp;
     }
 
     int ViewGroup::getWrappedWidth() {
@@ -40,7 +83,7 @@ namespace ukive {
             if (view->getVisibility() != View::VANISHED) {
                 auto lp = view->getLayoutParams();
 
-                int childWidth = view->getMeasuredWidth() + lp->leftMargin + lp->rightMargin;
+                int childWidth = view->getMeasuredWidth() + lp->left_margin + lp->right_margin;
                 if (childWidth > wrapped_width) {
                     wrapped_width = childWidth;
                 }
@@ -56,7 +99,7 @@ namespace ukive {
             if (view->getVisibility() != View::VANISHED) {
                 auto lp = view->getLayoutParams();
 
-                int childHeight = view->getMeasuredHeight() + lp->topMargin + lp->bottomMargin;
+                int childHeight = view->getMeasuredHeight() + lp->top_margin + lp->bottom_margin;
                 if (childHeight > wrapped_height) {
                     wrapped_height = childHeight;
                 }
@@ -65,7 +108,6 @@ namespace ukive {
 
         return wrapped_height;
     }
-
 
     void ViewGroup::onAttachedToWindow() {
         View::onAttachedToWindow();
@@ -87,6 +129,9 @@ namespace ukive {
         }
     }
 
+    bool ViewGroup::isViewGroup() const {
+        return true;
+    }
 
     void ViewGroup::addView(View* v, LayoutParams* params) {
         addView(STLCInt(views_.size()), v, params);
@@ -243,7 +288,6 @@ namespace ukive {
             view->discardPendingOperations();
         }
     }
-
 
     bool ViewGroup::dispatchPointerEvent(InputEvent* e) {
         bool consumed = false;
@@ -410,8 +454,8 @@ namespace ukive {
         int hori_padding = getPaddingLeft() + getPaddingRight();
         int vert_padding = getPaddingTop() + getPaddingBottom();
 
-        int hori_margin = child_lp->leftMargin + child_lp->rightMargin;
-        int vert_margin = child_lp->topMargin + child_lp->bottomMargin;
+        int hori_margin = child_lp->left_margin + child_lp->right_margin;
+        int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
         int child_w;
         int child_w_mode;

@@ -133,8 +133,8 @@ namespace ukive {
 
         RootLayoutParams* baselp
             = new RootLayoutParams(width_, height_);
-        baselp->leftMargin = x;
-        baselp->topMargin = y;
+        baselp->left_margin = x;
+        baselp->top_margin = y;
 
         decor_view_->setLayoutParams(baselp);
 
@@ -160,8 +160,8 @@ namespace ukive {
 
         RootLayoutParams* baselp
             = (RootLayoutParams*)decor_view_->getLayoutParams();
-        baselp->leftMargin = x;
-        baselp->topMargin = y;
+        baselp->left_margin = x;
+        baselp->top_margin = y;
 
         decor_view_->setLayoutParams(baselp);
     }

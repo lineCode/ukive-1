@@ -12,10 +12,13 @@ namespace ukive {
     Color border_color = Color::Blue500;
 
     NonClientLayout::NonClientLayout(Window* w)
-        : ViewGroup(w)
+        : NonClientLayout(w, {}) {}
+
+    NonClientLayout::NonClientLayout(Window* w, AttrsRef attrs)
+        : ViewGroup(w, attrs)
     {
         if (w->isTranslucent() ||
-            w->getFrameType() == Window::FRAME_ZERO)
+            w->getFrameType() == Window::FRAME_CUSTOM)
         {
             nc_padding_.set(w->dpToPx(0), w->dpToPx(0), 0, 0);
             sh_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
@@ -126,8 +129,8 @@ namespace ukive {
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();
 
-                int child_left = getPaddingLeft() + nc_padding_.left + lp->leftMargin;
-                int child_top = getPaddingTop() + nc_padding_.top + lp->topMargin;
+                int child_left = getPaddingLeft() + nc_padding_.left + lp->left_margin;
+                int child_top = getPaddingTop() + nc_padding_.top + lp->top_margin;
 
                 child->layout(
                     child_left, child_top,

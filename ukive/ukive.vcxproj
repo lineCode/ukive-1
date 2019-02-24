@@ -110,7 +110,7 @@
       </AdditionalDependencies>
     </Lib>
     <FxCompile>
-      <ObjectFileOutput>$(SolutionDir)build\$(Configuration)\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(SolutionDir)build\x86\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>4.0</ShaderModel>
     </FxCompile>
   </ItemDefinitionGroup>
@@ -127,6 +127,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <FxCompile>
+      <ObjectFileOutput>$(SolutionDir)build\x64\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -148,7 +151,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <FxCompile>
-      <ObjectFileOutput>$(SolutionDir)build\$(Configuration)\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(SolutionDir)build\x86\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>4.0</ShaderModel>
     </FxCompile>
   </ItemDefinitionGroup>
@@ -169,6 +172,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <FxCompile>
+      <ObjectFileOutput>$(SolutionDir)build\x64\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="animation\animation_manager.h" />
@@ -227,6 +233,8 @@
     <ClInclude Include="message\message.h" />
     <ClInclude Include="message\message_looper.h" />
     <ClInclude Include="message\message_queue.h" />
+    <ClInclude Include="resources\dimension_utils.h" />
+    <ClInclude Include="resources\layout_instantiator.h" />
     <ClInclude Include="system\clipboard_manager.h" />
     <ClInclude Include="system\qpc_service.h" />
     <ClInclude Include="system\reg_manager.h" />
@@ -262,6 +270,7 @@
     <ClInclude Include="utils\weak_ref_nest.h" />
     <ClInclude Include="utils\win10_version.h" />
     <ClInclude Include="utils\xml\xml_parser.h" />
+    <ClInclude Include="utils\xml\xml_pedometer.h" />
     <ClInclude Include="utils\xml\xml_structs.h" />
     <ClInclude Include="utils\xml\xml_writer.h" />
     <ClInclude Include="views\button.h" />
@@ -357,6 +366,8 @@
     <ClCompile Include="message\message.cpp" />
     <ClCompile Include="message\message_looper.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
+    <ClCompile Include="resources\dimension_utils.cpp" />
+    <ClCompile Include="resources\layout_instantiator.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
     <ClCompile Include="system\qpc_service.cpp" />
     <ClCompile Include="system\reg_manager.cpp" />
@@ -387,6 +398,7 @@
     <ClCompile Include="utils\unicode.cpp" />
     <ClCompile Include="utils\win10_version.cpp" />
     <ClCompile Include="utils\xml\xml_parser.cpp" />
+    <ClCompile Include="utils\xml\xml_pedometer.cpp" />
     <ClCompile Include="utils\xml\xml_structs.cpp" />
     <ClCompile Include="utils\xml\xml_writer.cpp" />
     <ClCompile Include="views\button.cpp" />
@@ -434,10 +446,6 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)build\x64\$(Configuration)\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)build\x64\$(Configuration)\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)build\x86\$(Configuration)\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)build\x86\$(Configuration)\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="graphics\direct3d\hlsl\shadow_effect_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
@@ -446,10 +454,6 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)build\x64\$(Configuration)\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)build\x64\$(Configuration)\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)build\x86\$(Configuration)\%(Filename).cso</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)build\x86\$(Configuration)\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

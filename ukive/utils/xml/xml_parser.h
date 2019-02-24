@@ -6,6 +6,7 @@
 #include "ukive/utils/string_utils.h"
 
 #include "ukive/utils/xml/xml_structs.h"
+#include "ukive/utils/xml/xml_pedometer.h"
 
 
 namespace ukive {
@@ -22,6 +23,7 @@ namespace ukive {
 
         bool parse(crstring8 str, std::shared_ptr<Element>* out);
         const Prolog& getProlog() const;
+        const XMLPedometer& getPedometer() const;
 
     private:
         enum class DocStepper {
@@ -74,9 +76,11 @@ namespace ukive {
         bool isNameChar(uint32_t val) const;
         bool isEncNameChar(uint32_t val) const;
 
-        DocStepper doc_stepper_;
+        bool checkTagName(crstring8 str) const;
 
         Prolog prolog_;
+        DocStepper doc_stepper_;
+        XMLPedometer pedometer_;
     };
 
 }

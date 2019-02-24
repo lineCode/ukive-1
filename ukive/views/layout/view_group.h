@@ -11,6 +11,7 @@ namespace ukive {
     class ViewGroup : public View {
     public:
         explicit ViewGroup(Window* w);
+        ViewGroup(Window* w, AttrsRef attrs);
         ~ViewGroup();
 
         bool dispatchInputEvent(InputEvent* e) override;
@@ -22,9 +23,12 @@ namespace ukive {
             int left, int top, int right, int bottom) override {}
 
         virtual bool onInterceptInputEvent(InputEvent* e);
+        virtual LayoutParams* generateLayoutParamsByAttrs(AttrsRef attrs) const;
 
         void onAttachedToWindow() override;
         void onDetachedFromWindow() override;
+
+        bool isViewGroup() const override;
 
         void addView(View* v, LayoutParams* params = nullptr);
         void addView(int index, View* v, LayoutParams* params = nullptr);
@@ -70,9 +74,9 @@ namespace ukive {
         virtual bool dispatchPointerEvent(InputEvent* e);
         virtual bool dispatchKeyboardEvent(InputEvent* e);
 
-        virtual bool checkLayoutParams(LayoutParams* lp);
-        virtual LayoutParams* generateDefaultLayoutParams();
-        virtual LayoutParams* generateLayoutParams(const LayoutParams& lp);
+        virtual bool checkLayoutParams(LayoutParams* lp) const;
+        virtual LayoutParams* generateDefaultLayoutParams() const;
+        virtual LayoutParams* generateLayoutParams(const LayoutParams& lp) const;
 
         int getWrappedWidth();
         int getWrappedHeight();

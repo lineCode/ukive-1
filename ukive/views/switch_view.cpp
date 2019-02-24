@@ -27,13 +27,16 @@ namespace ukive {
 
     }
 
-    SwitchView::SwitchView(Window* wnd)
-        :View(wnd) {
+    SwitchView::SwitchView(Window* w)
+        : SwitchView(w, {}) {
+    }
+
+    SwitchView::SwitchView(Window* w, AttrsRef attrs)
+        : View(w, attrs) {
     }
 
     SwitchView::~SwitchView() {
     }
-
 
     void SwitchView::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_w = kDefaultTrackWidth

@@ -21,36 +21,36 @@ namespace ukive {
 
     int ListAdapter::ViewHolder::getMgdLeft() const {
         return item_view->getLeft() -
-            item_view->getLayoutParams()->leftMargin - ex_margins.left;
+            item_view->getLayoutParams()->left_margin - ex_margins.left;
     }
 
     int ListAdapter::ViewHolder::getMgdTop() const {
         return item_view->getTop() -
-            item_view->getLayoutParams()->topMargin - ex_margins.top;
+            item_view->getLayoutParams()->top_margin - ex_margins.top;
     }
 
     int ListAdapter::ViewHolder::getMgdRight() const {
         return item_view->getRight() +
-            item_view->getLayoutParams()->rightMargin + ex_margins.right;
+            item_view->getLayoutParams()->right_margin + ex_margins.right;
     }
 
     int ListAdapter::ViewHolder::getMgdBottom() const {
         return item_view->getBottom() +
-            item_view->getLayoutParams()->bottomMargin + ex_margins.bottom;
+            item_view->getLayoutParams()->bottom_margin + ex_margins.bottom;
     }
 
     int ListAdapter::ViewHolder::getMgdWidth() const {
         return item_view->getWidth() +
-            item_view->getLayoutParams()->leftMargin +
-            item_view->getLayoutParams()->rightMargin +
+            item_view->getLayoutParams()->left_margin +
+            item_view->getLayoutParams()->right_margin +
             ex_margins.left +
             ex_margins.right;
     }
 
     int ListAdapter::ViewHolder::getMgdHeight() const {
         return item_view->getHeight() +
-            item_view->getLayoutParams()->topMargin +
-            item_view->getLayoutParams()->bottomMargin +
+            item_view->getLayoutParams()->top_margin +
+            item_view->getLayoutParams()->bottom_margin +
             ex_margins.top +
             ex_margins.bottom;
     }

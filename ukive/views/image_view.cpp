@@ -10,7 +10,10 @@
 namespace ukive {
 
     ImageView::ImageView(Window* w)
-        : View(w),
+        : ImageView(w, {}) {}
+
+    ImageView::ImageView(Window* w, AttrsRef attrs)
+        : View(w, attrs),
           scale_type_(FIT_WHEN_LARGE),
           bitmap_drawable_(nullptr) {
     }

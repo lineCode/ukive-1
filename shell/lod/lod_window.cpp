@@ -83,8 +83,8 @@ namespace shell {
         ukive::Direct3DView* lodView = new ukive::Direct3DView(this, terrain_scene_);
         ukive::LinearLayoutParams *d3dViewLp = new ukive::LinearLayoutParams(
             0, ukive::LayoutParams::MATCH_PARENT);
-        d3dViewLp->leftMargin = d3dViewLp->topMargin
-            = d3dViewLp->rightMargin = d3dViewLp->bottomMargin = dpToPx(8);
+        d3dViewLp->left_margin = d3dViewLp->top_margin
+            = d3dViewLp->right_margin = d3dViewLp->bottom_margin = dpToPx(8);
         d3dViewLp->weight = 2;
         lodView->setLayoutParams(d3dViewLp);
         lodView->setBackground(new ukive::ColorDrawable(ukive::Color::White));

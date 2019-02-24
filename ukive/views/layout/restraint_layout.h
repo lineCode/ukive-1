@@ -10,12 +10,23 @@ namespace ukive {
 
     class RestraintLayout : public ViewGroup {
     public:
-        RestraintLayout(Window* w);
+        explicit RestraintLayout(Window* w);
+        RestraintLayout(Window* w, AttrsRef attrs);
+
+        // ViewGroup
+        void onMeasure(
+            int width, int height,
+            int widthMode, int heightMode) override;
+        void onLayout(
+            bool changed, bool sizeChanged,
+            int left, int top, int right, int bottom) override;
 
     protected:
-        LayoutParams* generateLayoutParams(const LayoutParams &lp) override;
-        LayoutParams* generateDefaultLayoutParams() override;
-        bool checkLayoutParams(LayoutParams* lp) override;
+        // ViewGroup
+        LayoutParams* generateLayoutParams(const LayoutParams &lp) const override;
+        LayoutParams* generateDefaultLayoutParams() const override;
+        LayoutParams* generateLayoutParamsByAttrs(AttrsRef attrs) const override;
+        bool checkLayoutParams(LayoutParams* lp) const override;
 
     private:
         void clearMeasureFlag();
@@ -52,14 +63,6 @@ namespace ukive {
         void layoutChildHorizontal(
             View* child, RestraintLayoutParams* lp,
             int left, int right);
-
-    public:
-        void onMeasure(
-            int width, int height,
-            int widthMode, int heightMode) override;
-        void onLayout(
-            bool changed, bool sizeChanged,
-            int left, int top, int right, int bottom) override;
     };
 
 }

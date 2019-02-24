@@ -15,7 +15,8 @@ namespace ukive {
             HORIZONTAL = 2
         };
 
-        LinearLayout(Window* w);
+        explicit LinearLayout(Window* w);
+        LinearLayout(Window* w, AttrsRef attrs);
 
         void setOrientation(int orientation);
 
@@ -27,9 +28,10 @@ namespace ukive {
             int left, int top, int right, int bottom) override;
 
     protected:
-        bool checkLayoutParams(LayoutParams* lp) override;
-        LayoutParams* generateDefaultLayoutParams() override;
-        LayoutParams* generateLayoutParams(const LayoutParams& lp) override;
+        bool checkLayoutParams(LayoutParams* lp) const override;
+        LayoutParams* generateDefaultLayoutParams() const override;
+        LayoutParams* generateLayoutParams(const LayoutParams& lp) const override;
+        LayoutParams* generateLayoutParamsByAttrs(AttrsRef attrs) const override;
 
     private:
         void measureLinearChild(

@@ -11,6 +11,7 @@ namespace ukive {
     class SeekBar : public View, public Animator::OnValueChangedListener {
     public:
         explicit SeekBar(Window* w);
+        SeekBar(Window* w, AttrsRef attrs);
         ~SeekBar();
 
         void setMaximum(float maximum);

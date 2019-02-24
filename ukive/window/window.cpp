@@ -122,6 +122,10 @@ namespace ukive {
         impl_->setCurrentCursor(cursor);
     }
 
+    void Window::setContentView(int layout_id) {
+        root_layout_->setContent(layout_id);
+    }
+
     void Window::setContentView(View* content) {
         root_layout_->setContent(content);
     }

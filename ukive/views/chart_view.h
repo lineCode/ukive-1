@@ -10,7 +10,8 @@ namespace ukive {
 
     class ChartView : public View {
     public:
-        ChartView(Window* w);
+        explicit ChartView(Window* w);
+        ChartView(Window* w, AttrsRef attrs);
 
         void addData(float dat);
         void clear();

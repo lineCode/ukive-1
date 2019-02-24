@@ -5,19 +5,31 @@
 #define RET_FALSE  \
     { return false; }
 
+#define ADV_PEDO(adv)  \
+    pedometer_.step(adv);
+
 #define ADV_IDX(adv)  \
+    idx += (adv);  \
+    ADV_PEDO(adv);  \
+    if (idx >= str.length()) RET_FALSE;
+
+#define ADV_IDX_NO_PEDO(adv)  \
     idx += (adv);  \
     if (idx >= str.length()) RET_FALSE;
 
 #define LOOP_S()  \
-    while(isSpace(str[idx])) { ADV_IDX(1); }
+    while(isSpace(str[idx])) {  \
+        pedometer_.space(str[idx]);  \
+        ADV_IDX_NO_PEDO(1);  \
+    }
 
 #define LOOP_DIGIT()  \
     while(isDigit(str[idx])) { ADV_IDX(1); }
 
 #define ONE_LOOP_S()  \
     if (!isSpace(str[idx])) RET_FALSE;  \
-    ADV_IDX(1); LOOP_S();
+    pedometer_.space(str[idx]);  \
+    ADV_IDX_NO_PEDO(1); LOOP_S();
 
 
 namespace ukive {
@@ -26,10 +38,12 @@ namespace ukive {
         : doc_stepper_(DocStepper::None) {}
 
     bool XMLParser::parse(crstring8 str, std::shared_ptr<Element>* out) {
-        if (!out || out->get()) RET_FALSE;
+        DCHECK(out && !*out);
+
         prolog_.version.clear();
         prolog_.charset.clear();
         doc_stepper_ = DocStepper::None;
+        pedometer_.reset();
 
         if (str.empty()) RET_FALSE;
         // UTF-8 BOM
@@ -55,18 +69,21 @@ namespace ukive {
 
                 if (startWith(str, "<?", i)) {
                     QuesTagType type;
+                    ADV_PEDO(2);
                     if (!parseQuesTag(str, i + 2, &i, &type)) RET_FALSE;
                     if (type == QuesTagType::Prolog) {
                         doc_stepper_ = DocStepper::Prolog;
                     }
                 } else if (startWith(str, "<!", i)) {
                     ExclTagType type;
+                    ADV_PEDO(2);
                     if (!parseExclTag(str, i + 2, &i, &type)) RET_FALSE;
                 } else {
                     if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
 
                     NormTagType type;
                     auto tmp = std::make_shared<Element>();
+                    ADV_PEDO(1);
                     if (!parseNormTag(str, i + 1, &i, &type, tmp.get())) return false;
                     doc_stepper_ = DocStepper::Elements;
                     switch (type) {
@@ -111,10 +128,21 @@ namespace ukive {
                 }
                 if (doc_stepper_ == DocStepper::Prolog) {
                     if (!isSpace(str[i])) RET_FALSE;
+                    pedometer_.space(str[i]);
                 } else if (doc_stepper_ == DocStepper::Elements) {
                     char_data.push_back(str[i]);
+                    if (isSpace(str[i])) {
+                        pedometer_.space(str[i]);
+                    } else {
+                        pedometer_.step(1);
+                    }
                 } else if(doc_stepper_ == DocStepper::Misc){
                     if (!isSpace(str[i]) && str[i] != 0) RET_FALSE;
+                    if (isSpace(str[i])) {
+                        pedometer_.space(str[i]);
+                    } else {
+                        pedometer_.step(1);
+                    }
                 }
             }
         }
@@ -126,6 +154,10 @@ namespace ukive {
 
     const XMLParser::Prolog& XMLParser::getProlog() const {
         return prolog_;
+    }
+
+    const XMLPedometer& XMLParser::getPedometer() const {
+        return pedometer_;
     }
 
     bool XMLParser::parseQuesTag(crstring8 str, index_t idx, index_t* p_idx, QuesTagType* type) {
@@ -153,8 +185,18 @@ namespace ukive {
             if (str[idx] != cur_sign) RET_FALSE;
             ADV_IDX(1);
 
-            parseEncodingDecl(str, idx, &idx);
-            parseSDDecl(str, idx, &idx);
+            pedometer_.save();
+            if (!parseEncodingDecl(str, idx, &idx)) {
+                pedometer_.restore();
+            } else {
+                pedometer_.discard();
+            }
+            pedometer_.save();
+            if (!parseSDDecl(str, idx, &idx)) {
+                pedometer_.restore();
+            } else {
+                pedometer_.discard();
+            }
 
             LOOP_S();
             if (!startWith(str, "?>", idx)) RET_FALSE;
@@ -164,9 +206,12 @@ namespace ukive {
             // PIs
             while (!startWith(str, "?>", idx)) {
                 if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
                     // TODO:
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
                 }
-                ADV_IDX(1);
             }
             ADV_IDX(1);
         }
@@ -184,7 +229,12 @@ namespace ukive {
             ADV_IDX(7);
             while (!startWith(str, "]]>", idx)) {
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
             ADV_IDX(2);
         } else if (str[idx] == '[') {
@@ -193,7 +243,12 @@ namespace ukive {
             ADV_IDX(1);
             while (!startWith(str, "]]>", idx)) {
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
             ADV_IDX(2);
         } else if (startWith(str, "DOCTYPE", idx)) {
@@ -202,7 +257,12 @@ namespace ukive {
             ADV_IDX(7);
             while (!startWith(str, ">", idx)) {
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
         } else if (startWith(str, "ENTITY", idx)) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
@@ -210,7 +270,12 @@ namespace ukive {
             ADV_IDX(6);
             while (!startWith(str, ">", idx)) {
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
         } else if (startWith(str, "ELEMENT", idx)) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
@@ -218,7 +283,12 @@ namespace ukive {
             ADV_IDX(7);
             while (!startWith(str, ">", idx)) {
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
         } else if (startWith(str, "ATTLIST", idx)) {
             if (doc_stepper_ == DocStepper::Misc) RET_FALSE;
@@ -226,7 +296,12 @@ namespace ukive {
             ADV_IDX(7);
             while (!startWith(str, ">", idx)) {
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
         } else if (startWith(str, "--", idx)) {
             *type = ExclTagType::COMMENT;
@@ -235,7 +310,12 @@ namespace ukive {
             while (!startWith(str, "-->", idx)) {
                 illegal = (str[idx] == '-');
                 // TODO:
-                ADV_IDX(1);
+                if (isSpace(str[idx])) {
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
+                } else {
+                    ADV_IDX(1);
+                }
             }
             if (illegal) RET_FALSE;
             ADV_IDX(2);
@@ -258,12 +338,15 @@ namespace ukive {
             while (str[idx] != '>') {
                 if (isSpace(str[idx])) {
                     has_space = true;
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
                 } else {
                     if (has_space) RET_FALSE;
+                    ADV_IDX(1);
                 }
-                ADV_IDX(1);
             }
             cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
+            if (!checkTagName(cur->tag_name)) RET_FALSE;
         } else {
             bool first_char = true;
             auto stepper = ElementStepper::TAG_NAME;
@@ -274,6 +357,7 @@ namespace ukive {
                     if (stepper == ElementStepper::TAG_NAME) {
                         if (idx - name_start_idx == 0) RET_FALSE;
                         cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
+                        if (!checkTagName(cur->tag_name)) RET_FALSE;
                     }
                     break;
                 }
@@ -282,6 +366,7 @@ namespace ukive {
                     if (stepper == ElementStepper::TAG_NAME) {
                         if (idx - name_start_idx == 0) RET_FALSE;
                         cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
+                        if (!checkTagName(cur->tag_name)) RET_FALSE;
                     }
                     ADV_IDX(1);
                     break;
@@ -291,11 +376,13 @@ namespace ukive {
                     if (stepper == ElementStepper::TAG_NAME) {
                         if (idx - name_start_idx == 0) RET_FALSE;
                         cur->tag_name = str.substr(name_start_idx, idx - name_start_idx);
+                        if (!checkTagName(cur->tag_name)) RET_FALSE;
                         stepper = ElementStepper::ATTR_NAME;
                     } else if (stepper == ElementStepper::ATTR_NAME) {
                         // Do nothing
                     }
-                    ADV_IDX(1);
+                    pedometer_.space(str[idx]);
+                    ADV_IDX_NO_PEDO(1);
                 } else {
                     if (stepper == ElementStepper::TAG_NAME) {
                         if (first_char) {
@@ -460,6 +547,10 @@ namespace ukive {
             val == '.' ||
             val == '-' ||
             val == '_');
+    }
+
+    bool XMLParser::checkTagName(crstring8 str) const {
+        return !isEqual(str, "xml", false);
     }
 
 }

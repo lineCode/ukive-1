@@ -47,6 +47,9 @@
     <Filter Include="decompiler">
       <UniqueIdentifier>{7a185f92-26cd-467b-b88d-2e481f617de7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources\layout">
+      <UniqueIdentifier>{32702468-1b1f-4d2b-9b1a-7679a1ce6bf7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -255,5 +258,13 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="application.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="resources\layout\test_window_group_layout.xml">
+      <Filter>resources\layout</Filter>
+    </Xml>
+    <Xml Include="resources\layout\test_window_list_layout.xml">
+      <Filter>resources\layout</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

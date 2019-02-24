@@ -10,6 +10,7 @@ namespace ukive {
     class NonClientLayout : public ViewGroup {
     public:
         explicit NonClientLayout(Window* w);
+        NonClientLayout(Window* w, AttrsRef attrs);
 
         virtual HitPoint onNCHitTest(int x, int y);
 

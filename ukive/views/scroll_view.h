@@ -12,6 +12,7 @@ namespace ukive {
     class ScrollView : public ViewGroup {
     public:
         explicit ScrollView(Window* w);
+        ScrollView(Window* w, AttrsRef attrs);
 
         void onMeasure(
             int width, int height,

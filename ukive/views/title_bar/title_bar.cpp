@@ -12,8 +12,11 @@
 namespace ukive {
 
     TitleBar::TitleBar(Window* w)
-        : FrameLayout(w),
-        title_tv_(nullptr)
+        :TitleBar(w, {}) {}
+
+    TitleBar::TitleBar(Window* w, AttrsRef attrs)
+        : FrameLayout(w, attrs),
+          title_tv_(nullptr)
     {
         setElevation(w->dpToPx(4));
         setBackground(new ColorDrawable(Color::Blue400));

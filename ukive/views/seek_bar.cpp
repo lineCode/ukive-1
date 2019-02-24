@@ -13,7 +13,11 @@
 namespace ukive {
 
     SeekBar::SeekBar(Window* w)
-        :View(w) {
+        : SeekBar(w, {}) {}
+
+    SeekBar::SeekBar(Window* w, AttrsRef attrs)
+        : View(w, attrs)
+    {
         initSeekBar();
     }
 
@@ -21,7 +25,6 @@ namespace ukive {
         delete thumb_in_animator_;
         delete thumb_out_animator_;
     }
-
 
     void SeekBar::initSeekBar()
     {
