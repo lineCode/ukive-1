@@ -15,36 +15,44 @@ namespace ukive {
             HORIZONTAL = 2
         };
 
-        LinearLayout(Window* w);
+        explicit LinearLayout(Window* w);
+        LinearLayout(Window* w, AttrsRef attrs);
 
         void setOrientation(int orientation);
 
         void onMeasure(
             int width, int height,
-            int widthSpec, int heightSpec) override;
+            int width_mode, int height_mode) override;
         void onLayout(
-            bool changed, bool sizeChanged,
+            bool changed, bool size_changed,
             int left, int top, int right, int bottom) override;
 
     protected:
-        bool checkLayoutParams(LayoutParams* lp) override;
-        LayoutParams* generateDefaultLayoutParams() override;
-        LayoutParams* generateLayoutParams(const LayoutParams& lp) override;
+        bool checkLayoutParams(LayoutParams* lp) const override;
+        LayoutParams* generateDefaultLayoutParams() const override;
+        LayoutParams* generateLayoutParams(const LayoutParams& lp) const override;
+        LayoutParams* generateLayoutParamsByAttrs(AttrsRef attrs) const override;
 
     private:
-        void measureWeightedChildren(
-            int totalWeight,
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
-        void measureSequenceChildren(
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
-        void measureLinearLayoutChildren(
-            int parentWidth, int parentHeight,
-            int parentWidthMode, int parentHeightMode);
+        void measureLinearChild(
+            View* child, int parent_w, int parent_h, int parent_wm, int parent_hm);
 
-        void measureVertical(int width, int height, int widthSpec, int heightSpec);
-        void measureHorizontal(int width, int height, int widthSpec, int heightSpec);
+        void measureWeightedChildren(
+            int total_weight,
+            int parent_w, int parent_h,
+            int parent_wm, int parent_hm);
+        void measureSequenceChildren(
+            int parent_w, int parent_h,
+            int parent_wm, int parent_hm);
+        void measureFillModeChildren(
+            int parent_w, int parent_h,
+            int parent_wm, int parent_hm);
+        void measureLinearLayoutChildren(
+            int parent_w, int parent_h,
+            int parent_wm, int parent_hm);
+
+        void measureVertical(int width, int height, int width_mode, int height_mode);
+        void measureHorizontal(int width, int height, int width_mode, int height_mode);
 
         void layoutVertical(int left, int top, int right, int bottom);
         void layoutHorizontal(int left, int top, int right, int bottom);

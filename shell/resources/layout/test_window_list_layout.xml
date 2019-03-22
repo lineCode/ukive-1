@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RestraintLayout
+    id="@+id/rl_outer_layout"
+    layout_width="match_parent"
+    layout_height="match_parent">
+
+    <Button
+        id="@+id/bt_dwm_button"
+        layout_width="fit_content"
+        layout_height="fit_content"
+        layout_margin="12dp"
+        text="Switch DWM"
+        layout_start_handle_id="@id/rl_outer_layout"
+        layout_start_handle_margin="12dp"
+        layout_top_handle_id="@id/rl_outer_layout"
+        layout_top_handle_margin="12dp" />
+
+    <ListView
+        id="@+id/lv_test_list"
+        layout_width="match_parent"
+        layout_height="match_parent"
+        layout_start_handle_id="@id/rl_outer_layout"
+        layout_start_handle_margin="8dp"
+        layout_top_handle_id="@id/bt_dwm_button"
+        layout_top_handle_edge="bottom"
+        layout_top_handle_margin="8dp"
+        layout_end_handle_id="@id/rl_outer_layout"
+        layout_end_handle_margin="8dp"
+        layout_bottom_handle_id="@id/rl_outer_layout"
+        layout_bottom_handle_margin="8dp" />
+
+</RestraintLayout>

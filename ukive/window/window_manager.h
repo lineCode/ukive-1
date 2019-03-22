@@ -14,8 +14,8 @@ namespace ukive {
         static WindowManager* getInstance();
 
         void addWindow(Window *window);
-        size_t getWindowCount();
-        Window* getWindow(size_t index);
+        int getWindowCount();
+        Window* getWindow(int index);
         void removeWindow(Window *window);
 
     private:

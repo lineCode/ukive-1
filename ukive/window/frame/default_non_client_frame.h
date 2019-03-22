@@ -8,13 +8,16 @@
 
 namespace ukive {
 
-    class Window;
+    class WindowImpl;
 
     class DefaultNonClientFrame : public NonClientFrame {
     public:
         int onNcCreate(WindowImpl* w, bool* handled) override;
         int onNcDestroy(bool* handled) override;
         void onTranslucentChanged(bool translucent) override {}
+
+        void getClientInsets(RECT* rect) override;
+        void getClientOffset(POINT* offset) override;
 
         LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onMouseMove(WPARAM wParam, LPARAM lParam, bool* handled) override;
@@ -30,6 +33,9 @@ namespace ukive {
         LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onDwmCompositionChanged(bool* handled) override;
         LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) override;
+
+    private:
+        WindowImpl* window_;
     };
 
 }

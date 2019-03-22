@@ -11,8 +11,11 @@ namespace ukive {
         static bool registerApplication();
         static bool unregisterApplication();
 
+        static bool registerProgId(const string16& progid, const string16& cmd);
+        static bool unregisterProgId(const string16& progid);
+
         static bool associateExtName(
-            const string16& ext_name, const string16& progid, const string16& cmd);
+            const string16& ext_name, const string16& progid);
         static bool unassociateExtName(
             const string16& ext_name, const string16& progid);
 

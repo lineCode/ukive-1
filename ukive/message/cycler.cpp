@@ -8,18 +8,21 @@
 
 namespace ukive {
 
-    Cycler::Cycler() {
-        looper_ = MessageLooper::myLooper();
-    }
+    Cycler::Cycler()
+        : looper_(MessageLooper::myLooper()),
+          listener_(nullptr) {}
 
-    Cycler::Cycler(MessageLooper* looper) {
-        looper_ = looper;
-    }
+    Cycler::Cycler(MessageLooper* looper)
+        : looper_(looper),
+          listener_(nullptr) {}
 
     Cycler::~Cycler() {
         looper_->getQueue()->remove(this, nullptr);
     }
 
+    void Cycler::setListener(CyclerListener* l) {
+        listener_ = l;
+    }
 
     void Cycler::post(Executable* exec) {
         postDelayed(exec, 0);
@@ -36,13 +39,12 @@ namespace ukive {
         sendMessageAtTime(msg, at_time_millis);
     }
 
-
     void Cycler::post(const std::function<void()>& func, int what) {
-        postDelayed(func, 0);
+        postDelayed(func, 0, what);
     }
 
     void Cycler::postDelayed(const std::function<void()>& func, uint64_t millis, int what) {
-        postAtTime(func, millis + TimeUtils::upTimeMillis());
+        postAtTime(func, millis + TimeUtils::upTimeMillis(), what);
     }
 
     void Cycler::postAtTime(const std::function<void()>& func, uint64_t at_time_millis, int what) {
@@ -53,7 +55,6 @@ namespace ukive {
         sendMessageAtTime(msg, at_time_millis);
     }
 
-
     bool Cycler::hasCallbacks(Executable* exec) {
         return looper_->getQueue()->contains(this, exec, nullptr);
     }
@@ -61,7 +62,6 @@ namespace ukive {
     void Cycler::removeCallbacks(Executable* exec) {
         looper_->getQueue()->remove(this, exec, nullptr);
     }
-
 
     void Cycler::sendEmptyMessage(int what) {
         sendEmptyMessageDelayed(what, 0);
@@ -91,12 +91,10 @@ namespace ukive {
         enqueueMessage(msg);
     }
 
-
     void Cycler::enqueueMessage(Message* msg) {
         msg->target = this;
         looper_->getQueue()->enqueue(msg);
     }
-
 
     bool Cycler::hasMessages(int what) {
         return looper_->getQueue()->contains(this, what, nullptr);
@@ -114,17 +112,16 @@ namespace ukive {
         looper_->getQueue()->remove(this, what, data);
     }
 
-
     void Cycler::dispatchMessage(Message* msg) {
         if (msg->callback) {
             msg->callback->run();
         } else if (msg->func) {
             msg->func();
         } else {
-            handleMessage(msg);
+            if (listener_) {
+                listener_->onHandleMessage(msg);
+            }
         }
     }
-
-    void Cycler::handleMessage(Message* msg) {}
 
 }

@@ -1,6 +1,7 @@
 ﻿#include "test_window.h"
 
 #include <functional>
+#include <fstream>
 
 #include <dwmapi.h>
 
@@ -24,23 +25,18 @@
 #include "ukive/utils/weak_bind.h"
 #include "ukive/views/list/grid_list_layouter.h"
 #include "ukive/views/list/linear_list_layouter.h"
+#include "ukive/utils/xml/xml_parser.h"
+#include "ukive/utils/xml/xml_writer.h"
+#include "ukive/files/file.h"
 
 #include "shell/test/list/test_adapter.h"
+#include "shell/resources/oigka_resources_id.h"
 
-
-namespace {
-    enum {
-        kTextViewId = 1001,
-        kImageViewId,
-    };
-}
 
 namespace shell {
 
     TestWindow::TestWindow()
         : Window(),
-          min_button_(nullptr),
-          max_button_(nullptr),
           dwm_button_(nullptr) {
     }
 
@@ -56,21 +52,20 @@ namespace shell {
     void TestWindow::onCreate() {
         Window::onCreate();
 
+        showTitleBar();
         //inflateGroup();
         inflateListView();
     }
 
     void TestWindow::onClick(ukive::View* v) {
-        if (v == min_button_) {
-            minimize();
-        } else if (v == max_button_) {
-            if (isMaximum()) {
-                restore();
+        if (v == dwm_button_) {
+            if (isTitleBarShowing()) {
+                hideTitleBar();
             } else {
-                maximize();
+                showTitleBar();
             }
-        } else if (v == dwm_button_) {
-            BOOL enable_aero = true;
+
+            /*BOOL enable_aero = true;
             BOOL new_aero = true;
             ::DwmIsCompositionEnabled(&enable_aero);
             if (enable_aero) {
@@ -79,20 +74,12 @@ namespace shell {
                 ::DwmEnableComposition(DWM_EC_ENABLECOMPOSITION);
             }
 
-            ::DwmIsCompositionEnabled(&new_aero);
+            ::DwmIsCompositionEnabled(&new_aero);*/
         }
     }
 
     void TestWindow::inflateGroup() {
-        auto scrollView = new ukive::ScrollView(this);
-        scrollView->setLayoutParams(
-            new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
-
-        setContentView(scrollView);
-
-        auto linearLayout = new ukive::LinearLayout(this);
-        scrollView->addView(linearLayout,
-            new ukive::LayoutParams(ukive::LayoutParams::MATCH_PARENT, ukive::LayoutParams::MATCH_PARENT));
+        setContentView(Res::Layout::test_window_group_layout_xml);
 
         DXGI_OUTPUT_DESC outputDesc;
         DXGI_ADAPTER_DESC adapterDesc;
@@ -101,101 +88,32 @@ namespace shell {
         adapter->GetDesc(&adapterDesc);
         output->GetDesc(&outputDesc);
 
-        std::wstring adapterName(adapterDesc.Description);
-        std::wstring outputName(outputDesc.DeviceName);
-
         std::wstring deviceDesc;
-        deviceDesc.append(L"Device: ").append(adapterName)
-            .append(L"\n").append(L"Monitor: ").append(outputName);
+        deviceDesc.append(L"Device: ").append(adapterDesc.Description)
+            .append(L"\n").append(L"Monitor: ").append(outputDesc.DeviceName);
 
-
-        ukive::TextView* deviceTextView = new ukive::TextView(this);
-        deviceTextView->setIsSelectable(false);
-        deviceTextView->setIsEditable(false);
+        auto deviceTextView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_dev_text_params));
         deviceTextView->setText(deviceDesc);
-        deviceTextView->setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6));
 
-        ukive::LayoutParams* deviceTextParams = new ukive::LayoutParams(
-            ukive::LayoutParams::FIT_CONTENT,
-            ukive::LayoutParams::FIT_CONTENT);
-        deviceTextParams->leftMargin = deviceTextParams->rightMargin
-            = deviceTextParams->topMargin = deviceTextParams->bottomMargin = dpToPx(12);
-
-        linearLayout->addView(deviceTextView, deviceTextParams);
-
-
-        ukive::LayoutParams* textParams = new ukive::LayoutParams(
-            ukive::LayoutParams::MATCH_PARENT,
-            ukive::LayoutParams::FIT_CONTENT);
-        textParams->leftMargin = textParams->rightMargin
-            = textParams->topMargin = textParams->bottomMargin = dpToPx(12);
-
-        ukive::TextView* textView = new ukive::TextView(this);
-        textView->setId(kTextViewId);
-        textView->setIsSelectable(true);
-        textView->setIsEditable(true);
+        auto textView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_test_txt));
         textView->setText(L"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii这是一个示例程序，\n\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。");
         textView->setBackground(new ukive::ColorDrawable(ukive::Color::White));
-        textView->setPadding(dpToPx(6), dpToPx(6), dpToPx(6), dpToPx(6));
-        textView->setElevation(3.f);
 
         ukive::UnderlineSpan* span = new ukive::UnderlineSpan(3, 5);
         textView->getEditable()->addSpan(span);
 
-        linearLayout->addView(textView, textParams);
-
+        auto imageView = static_cast<ukive::ImageView*>(findViewById(Res::Id::iv_test_img));
         std::wstring imgFileName = ukive::Application::getExecFileName(true);
-        auto bitmap = ukive::BitmapFactory::decodeFile(this, imgFileName + L"\\freshpaint.png");
-        ukive::ImageView* imageView = new ukive::ImageView(this);
-        imageView->setId(kImageViewId);
+        auto bitmap = ukive::BitmapFactory::decodeFile(this, ukive::File(imgFileName, L"freshpaint.png").getPath());
         imageView->setImageBitmap(bitmap);
-
-        linearLayout->addView(imageView);
-
-
-        ukive::Button* button = new ukive::Button(this);
-        ukive::LayoutParams* buttonParams = new ukive::LayoutParams(
-            ukive::LayoutParams::FIT_CONTENT,
-            ukive::LayoutParams::FIT_CONTENT);
-        buttonParams->leftMargin = buttonParams->rightMargin
-            = buttonParams->topMargin = buttonParams->bottomMargin = dpToPx(12);
-
-        linearLayout->addView(button, buttonParams);
     }
 
     void TestWindow::inflateListView() {
-        using Rlp = ukive::RestraintLayoutParams;
-        auto layout = new ukive::RestraintLayout(this);
-        layout->setLayoutParams(
-            new ukive::LayoutParams(
-                ukive::LayoutParams::MATCH_PARENT,
-                ukive::LayoutParams::MATCH_PARENT));
-        setContentView(layout);
+        setContentView(Res::Layout::test_window_list_layout_xml);
 
         // Buttons
-        min_button_ = new ukive::Button(this);
-        min_button_->setOnClickListener(this);
-        min_button_->setText(L"Minimum");
-        auto min_btn_lp = Rlp::Builder()
-            .start(layout->getId(), Rlp::START, dpToPx(4))
-            .top(layout->getId(), Rlp::TOP, dpToPx(4)).build();
-        layout->addView(min_button_, min_btn_lp);
-
-        max_button_ = new ukive::Button(this);
-        max_button_->setOnClickListener(this);
-        max_button_->setText(L"Maximum");
-        auto max_btn_lp = Rlp::Builder()
-            .start(min_button_->getId(), Rlp::END, dpToPx(4))
-            .top(layout->getId(), Rlp::TOP, dpToPx(4)).build();
-        layout->addView(max_button_, max_btn_lp);
-
-        dwm_button_ = new ukive::Button(this);
+        dwm_button_ = static_cast<ukive::Button*>(findViewById(Res::Id::bt_dwm_button));
         dwm_button_->setOnClickListener(this);
-        dwm_button_->setText(L"Switch DWM");
-        auto dwm_btn_lp = Rlp::Builder()
-            .start(max_button_->getId(), Rlp::END, dpToPx(4))
-            .top(layout->getId(), Rlp::TOP, dpToPx(4)).build();
-        layout->addView(dwm_button_, dwm_btn_lp);
 
         // ListView
         auto adapter = new TestAdapter();
@@ -203,18 +121,9 @@ namespace shell {
             adapter->AddItem(0, L"test", L"test test");
         }
 
-        auto list_view = new ukive::ListView(this);
+        auto list_view = static_cast<ukive::ListView*>(findViewById(Res::Id::lv_test_list));
         list_view->setLayouter(new ukive::GridListLayouter());
         list_view->setAdapter(adapter);
-
-        auto list_lp = Rlp::Builder(
-            ukive::LayoutParams::MATCH_PARENT,
-            ukive::LayoutParams::MATCH_PARENT)
-            .start(layout->getId(), Rlp::START, dpToPx(2))
-            .top(min_button_->getId(), Rlp::BOTTOM, dpToPx(4))
-            .end(layout->getId(), Rlp::END, dpToPx(2))
-            .bottom(layout->getId(), Rlp::BOTTOM, dpToPx(2)).build();
-        layout->addView(list_view, list_lp);
     }
 
 }

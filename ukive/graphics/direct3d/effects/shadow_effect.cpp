@@ -41,11 +41,11 @@ namespace ukive {
         ukive::string16 shader_path = ukive::Application::getExecFileName(true);
 
         ukive::Space::createVertexShader(
-            shader_path + L"\\shadow_effect_vs.cso",
+            shader_path + L"\\shaders\\shadow_effect_vs.cso",
             layout, ARRAYSIZE(layout), &vertex_shader_, &input_layout_);
 
         ukive::Space::createPixelShader(
-            shader_path + L"\\shadow_effect_ps.cso", &pixel_shader_);
+            shader_path + L"\\shaders\\shadow_effect_ps.cso", &pixel_shader_);
 
         const_buffer_ = ukive::Space::createConstantBuffer(sizeof(ConstBuffer));
         ps_const_buffer_ = ukive::Space::createConstantBuffer(sizeof(PSConstBuffer));

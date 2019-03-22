@@ -8,7 +8,8 @@ namespace ukive {
 
     class FrameLayout : public ViewGroup {
     public:
-        FrameLayout(Window* w);
+        explicit FrameLayout(Window* w);
+        FrameLayout(Window* w, AttrsRef attrs);
 
         void onMeasure(
             int width, int height, int widthSpec, int heightSpec) override;

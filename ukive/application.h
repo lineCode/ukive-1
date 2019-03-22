@@ -18,14 +18,14 @@ namespace ukive {
     class Application {
     public:
         Application();
-        Application(wchar_t* cl);
+        explicit Application(wchar_t* cl);
         Application(int argc, wchar_t* argv[]);
         ~Application();
 
         void run();
 
-        static size_t getCommandCount();
-        static string16 getCommand(size_t index);
+        static int getCommandCount();
+        static string16 getCommand(int index);
 
         static int getScreenWidth();
         static int getScreenHeight();
@@ -60,7 +60,7 @@ namespace ukive {
         static bool vsync_enabled_;
         static Application* instance_;
 
-        std::vector<std::wstring> command_list_;
+        std::vector<string16> command_list_;
 
         std::unique_ptr<TsfManager> tsf_manager_;
         std::unique_ptr<WICManager> wic_manager_;

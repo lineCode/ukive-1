@@ -8,7 +8,8 @@ namespace ukive {
 
     class SpinnerView : public TextView {
     public:
-        SpinnerView(Window* w);
+        explicit SpinnerView(Window* w);
+        SpinnerView(Window* w, AttrsRef attrs);
         ~SpinnerView();
     };
 

@@ -8,7 +8,8 @@ namespace ukive {
 
     class CheckBox : public TextView {
     public:
-        CheckBox(Window* w);
+        explicit CheckBox(Window* w);
+        CheckBox(Window* w, AttrsRef attrs);
 
         void setChecked(bool checked);
 

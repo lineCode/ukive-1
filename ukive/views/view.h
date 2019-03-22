@@ -1,6 +1,7 @@
 ﻿#ifndef UKIVE_VIEWS_VIEW_H_
 #define UKIVE_VIEWS_VIEW_H_
 
+#include <map>
 #include <memory>
 
 #include "ukive/utils/executable.h"
@@ -23,6 +24,9 @@ namespace ukive {
 
     class View {
     public:
+        using Attributes = std::map<string16, string16>;
+        using AttrsRef = const Attributes&;
+
         enum Gravity {
             LEFT,
             TOP,
@@ -45,7 +49,8 @@ namespace ukive {
             UNKNOWN
         };
 
-        View(Window* w);
+        explicit View(Window* w);
+        View(Window* w, AttrsRef attrs);
         virtual ~View();
 
         ViewAnimator* animate();
@@ -77,13 +82,12 @@ namespace ukive {
         void setForeground(Drawable* drawable);
         void setPadding(int left, int top, int right, int bottom);
         void setLayoutParams(LayoutParams* params);
-        void setIsInputEventAtLast(bool isInput);
+        void setIsInputEventAtLast(bool is_last);
         void setPressed(bool pressed);
         void setCurrentCursor(Cursor cursor);
         void setFocusable(bool focusable);
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
-        void setCanConsumeMouseEvent(bool enable);
         void setMinimumWidth(int width);
         void setMinimumHeight(int height);
         void setOnClickListener(OnClickListener* l);
@@ -152,10 +156,9 @@ namespace ukive {
         bool hasFocus() const;
         bool isFocusable() const;
         bool isLayouted() const;
-        bool isLocalMouseInThis(InputEvent* e) const;
-        bool isParentMouseInThis(InputEvent* e) const;
+        bool isLocalPointerInThis(InputEvent* e) const;
+        bool isParentPointerInThis(InputEvent* e) const;
         bool isReceiveOutsideInputEvent() const;
-        bool canConsumeMouseEvent() const;
 
         void scrollTo(int x, int y);
         void scrollBy(int dx, int dy);
@@ -171,6 +174,7 @@ namespace ukive {
 
         void requestFocus();
         void discardFocus();
+        void discardMouseCapture();
         void discardPendingOperations();
 
         virtual View* findViewById(int id) const;
@@ -181,8 +185,10 @@ namespace ukive {
         virtual void onAttachedToWindow();
         virtual void onDetachedFromWindow();
 
+        virtual bool isViewGroup() const;
+
     protected:
-        void setMeasuredDimension(int width, int height);
+        void setMeasuredSize(int width, int height);
 
         void performClick();
 
@@ -192,6 +198,7 @@ namespace ukive {
         void drawBackground(Canvas* canvas);
         void drawForeground(Canvas* canvas);
 
+        bool dispatchInputEventToThis(InputEvent* e);
         virtual void dispatchDraw(Canvas* canvas) {}
         virtual void dispatchDiscardFocus() {}
         virtual void dispatchDiscardPendingOperations() {}
@@ -219,7 +226,7 @@ namespace ukive {
 
     private:
         enum Flags : uint32_t {
-            MEASURED_DIMENSION_SET = 1,
+            MEASURED_SIZE_SET = 1,
             FORCE_LAYOUT = 1 << 1,
             BOUNDS_SET = 1 << 2,
             NEED_LAYOUT = 1 << 3,
@@ -240,7 +247,7 @@ namespace ukive {
         void updateDrawableState();
         void updateBackgroundState();
         void updateForegroundState();
-
+        bool processInputEvent(InputEvent* e);
 
         int id_;
         Rect bounds_;
@@ -272,7 +279,8 @@ namespace ukive {
         bool is_pressed_;
         bool is_focusable_;
         bool is_receive_outside_input_event_;
-        bool can_consume_mouse_event_;
+        bool is_mouse_down_;
+        bool is_touch_down_;
 
         Window* window_;
         std::unique_ptr<Drawable> bg_drawable_;
@@ -298,6 +306,7 @@ namespace ukive {
         std::unique_ptr<ViewAnimator> animator_;
         std::unique_ptr<ShadowEffect> shadow_effect_;
         std::unique_ptr<LayoutParams> layout_params_;
+        std::unique_ptr<InputEvent> cur_ev_;
 
         View* parent_;
         OnClickListener* click_listener_;

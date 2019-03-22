@@ -13,62 +13,62 @@
 namespace ukive {
 
     SeekBar::SeekBar(Window* w)
-        :View(w) {
+        : SeekBar(w, {}) {}
+
+    SeekBar::SeekBar(Window* w, AttrsRef attrs)
+        : View(w, attrs)
+    {
         initSeekBar();
     }
 
     SeekBar::~SeekBar() {
-        delete mThumbInAnimator;
-        delete mThumbOutAnimator;
+        delete thumb_in_animator_;
+        delete thumb_out_animator_;
     }
-
 
     void SeekBar::initSeekBar()
     {
-        mMaximum = 100.f;
-        mSeekPercent = 0.f;
-        mIsMouseLeftKeyAvailable = false;
+        maximum_ = 100.f;
+        seek_percent_ = 0.f;
+        is_pointer_left_key_available_ = false;
         listener_ = nullptr;
 
-        mThumbInAnimator = new Animator(getWindow()->getAnimationManager());
-        mThumbOutAnimator = new Animator(getWindow()->getAnimationManager());
+        thumb_in_animator_ = new Animator(getWindow()->getAnimationManager());
+        thumb_out_animator_ = new Animator(getWindow()->getAnimationManager());
 
-        mSeekTrackHeight = getWindow()->dpToPx(2);
-        if (mSeekTrackHeight % 2 != 0) {
-            ++mSeekTrackHeight;
+        track_height_ = getWindow()->dpToPx(2);
+        if (track_height_ % 2 != 0) {
+            ++track_height_;
         }
 
-        mSeekThumbMinDiameter = getWindow()->dpToPx(10);
-        if (mSeekThumbMinDiameter % 2 != 0) {
-            ++mSeekThumbMinDiameter;
+        thumb_min_diameter_ = getWindow()->dpToPx(10);
+        if (thumb_min_diameter_ % 2 != 0) {
+            ++thumb_min_diameter_;
         }
 
-        mSeekThumbMaxDiameter = getWindow()->dpToPx(14);
-        if (mSeekThumbMaxDiameter % 2 != 0) {
-            ++mSeekThumbMaxDiameter;
+        thumb_max_diameter_ = getWindow()->dpToPx(14);
+        if (thumb_max_diameter_ % 2 != 0) {
+            ++thumb_max_diameter_;
         }
 
-        mSeekThumbCurDiameter = mSeekThumbMinDiameter;
+        thumb_cur_diameter_ = thumb_min_diameter_;
     }
 
-
-    void SeekBar::setMaximum(float max) {
-        if (mMaximum > 0) {
-            mMaximum = max;
+    void SeekBar::setMaximum(float maximum) {
+        if (maximum_ > 0) {
+            maximum_ = maximum;
         }
     }
 
-    void SeekBar::setProgress(float progress, bool notify)
-    {
-        float prog = std::min(mMaximum, progress);
-        float percent = prog / mMaximum;
-        if (percent != mSeekPercent)
-        {
-            mSeekPercent = percent;
+    void SeekBar::setProgress(float progress, bool notify) {
+        float prog = std::min(maximum_, progress);
+        float percent = prog / maximum_;
+        if (percent != seek_percent_) {
+            seek_percent_ = percent;
 
             if (notify && listener_) {
-                listener_->onSeekValueChanged(this, mSeekPercent*mMaximum);
-                listener_->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
+                listener_->onSeekValueChanged(this, seek_percent_*maximum_);
+                listener_->onSeekIntegerValueChanged(this, static_cast<int>(seek_percent_*maximum_));
             }
 
             invalidate();
@@ -76,168 +76,157 @@ namespace ukive {
     }
 
     float SeekBar::getProgress() {
-        return mMaximum * mSeekPercent;
+        return maximum_ * seek_percent_;
     }
 
     void SeekBar::setOnSeekValueChangedListener(OnSeekValueChangedListener* l) {
         listener_ = l;
     }
 
+    bool SeekBar::isPointerInThumb(int x, int y) {
+        float thumb_radius = thumb_max_diameter_ / 2.f;
+        int track_width = getWidth() - thumb_max_diameter_ - getPaddingLeft() - getPaddingRight();
 
-    bool SeekBar::isMouseInThumb(int mouseX, int mouseY)
-    {
-        float thumbRadius = mSeekThumbMaxDiameter / 2.f;
-        int trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
+        float thumb_center_x_in_track = track_width * seek_percent_ + thumb_radius;
+        float thumb_center_y_in_track = getPaddingTop() + thumb_radius;
 
-        float thumbCenterXInTrack = trackWidth*mSeekPercent + thumbRadius;
-        float thumbCenterYInTrack = getPaddingTop() + thumbRadius;
-
-        if (((mouseX - getPaddingLeft()) >= (thumbCenterXInTrack - thumbRadius))
-            && ((mouseX - getPaddingLeft()) <= (thumbCenterXInTrack + thumbRadius)))
+        if (((x - getPaddingLeft()) >= (thumb_center_x_in_track - thumb_radius))
+            && ((x - getPaddingLeft()) <= (thumb_center_x_in_track + thumb_radius)))
         {
-            if ((mouseY - getPaddingTop()) >= (thumbCenterYInTrack - thumbRadius)
-                && (mouseY - getPaddingTop()) <= (thumbCenterYInTrack + thumbRadius))
+            if ((y - getPaddingTop()) >= (thumb_center_y_in_track - thumb_radius)
+                && (y - getPaddingTop()) <= (thumb_center_y_in_track + thumb_radius))
                 return true;
         }
 
         return false;
     }
 
-    bool SeekBar::isMouseInTrack(int mouseX, int mouseY)
-    {
+    bool SeekBar::isPointerInTrack(int x, int y) {
         float trackSpace = getWidth() - getPaddingLeft() - getPaddingRight();
 
-        if ((mouseX - getPaddingLeft()) >= 0
-            && (mouseX - getPaddingLeft()) <= trackSpace)
+        if ((x - getPaddingLeft()) >= 0 &&
+            (x - getPaddingLeft()) <= trackSpace)
         {
-            if ((mouseY - getPaddingTop()) >= 0
-                && (mouseY - getPaddingTop()) <= mSeekThumbMaxDiameter)
+            if ((y - getPaddingTop()) >= 0 &&
+                (y - getPaddingTop()) <= thumb_max_diameter_)
+            {
                 return true;
+            }
         }
 
         return false;
     }
 
-    void SeekBar::computePercent(int mouseX, int mouseY)
-    {
-        float mouseInTrack = mouseX - getPaddingLeft() - mSeekThumbMaxDiameter / 2.f;
-        float trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
-        mSeekPercent = std::max(0.f, mouseInTrack / trackWidth);
-        mSeekPercent = std::min(1.f, mSeekPercent);
+    void SeekBar::computePercent(int x, int y) {
+        float mouse_in_track = x - getPaddingLeft() - thumb_max_diameter_ / 2.f;
+        float track_width = getWidth() - thumb_max_diameter_ - getPaddingLeft() - getPaddingRight();
+        seek_percent_ = std::max(0.f, mouse_in_track / track_width);
+        seek_percent_ = std::min(1.f, seek_percent_);
 
-        if (listener_)
-        {
-            listener_->onSeekValueChanged(this, mSeekPercent*mMaximum);
-            listener_->onSeekIntegerValueChanged(this, static_cast<int>(mSeekPercent*mMaximum));
+        if (listener_) {
+            listener_->onSeekValueChanged(this, seek_percent_*maximum_);
+            listener_->onSeekIntegerValueChanged(this, static_cast<int>(seek_percent_*maximum_));
         }
     }
 
-    void SeekBar::startZoomInAnimation()
-    {
-        if (mSeekThumbCurDiameter < mSeekThumbMaxDiameter)
-        {
-            mThumbInAnimator->stop();
-            mThumbOutAnimator->stop();
+    void SeekBar::startZoomInAnimation() {
+        if (thumb_cur_diameter_ < thumb_max_diameter_) {
+            thumb_in_animator_->stop();
+            thumb_out_animator_->stop();
 
-            mThumbInAnimator->addVariable(0,
-                mSeekThumbCurDiameter,
-                mSeekThumbMinDiameter,
-                mSeekThumbMaxDiameter);
-            mThumbInAnimator->setOnValueChangedListener(0, this);
-            mThumbInAnimator->startTransition(
-                0, Transition::linearTransition(0.1, mSeekThumbMaxDiameter));
+            thumb_in_animator_->addVariable(0,
+                thumb_cur_diameter_,
+                thumb_min_diameter_,
+                thumb_max_diameter_);
+            thumb_in_animator_->setOnValueChangedListener(0, this);
+            thumb_in_animator_->startTransition(
+                0, Transition::linearTransition(0.1, thumb_max_diameter_));
         }
     }
 
-    void SeekBar::startZoomOutAnimation()
-    {
-        if (mSeekThumbCurDiameter > mSeekThumbMinDiameter)
-        {
-            mThumbInAnimator->stop();
-            mThumbOutAnimator->stop();
+    void SeekBar::startZoomOutAnimation() {
+        if (thumb_cur_diameter_ > thumb_min_diameter_) {
+            thumb_in_animator_->stop();
+            thumb_out_animator_->stop();
 
-            mThumbOutAnimator->addVariable(0,
-                mSeekThumbCurDiameter,
-                mSeekThumbMinDiameter,
-                mSeekThumbMaxDiameter);
-            mThumbOutAnimator->setOnValueChangedListener(0, this);
-            mThumbOutAnimator->startTransition(
-                0, Transition::linearTransition(0.1, mSeekThumbMinDiameter));
+            thumb_out_animator_->addVariable(0,
+                thumb_cur_diameter_,
+                thumb_min_diameter_,
+                thumb_max_diameter_);
+            thumb_out_animator_->setOnValueChangedListener(0, this);
+            thumb_out_animator_->startTransition(
+                0, Transition::linearTransition(0.1, thumb_min_diameter_));
         }
     }
 
 
     void SeekBar::onMeasure(
-        int width, int height,
-        int widthMode, int heightMode)
+        int width, int height, int width_mode, int height_mode)
     {
-        int finalWidth = 0;
-        int finalHeight = 0;
+        int final_width = 0;
+        int final_height = 0;
 
-        int hPadding = getPaddingLeft() + getPaddingRight();
-        int vPadding = getPaddingTop() + getPaddingBottom();
+        int h_padding = getPaddingLeft() + getPaddingRight();
+        int v_padding = getPaddingTop() + getPaddingBottom();
 
-        switch (widthMode)
-        {
-        case EXACTLY:
-            finalWidth = width;
-            break;
-
+        switch (width_mode) {
         case FIT:
-            finalWidth = std::max(width, getMinimumWidth());
+            final_width = std::max(width, getMinimumWidth());
             break;
 
         case UNKNOWN:
-            finalWidth = std::max(0, getMinimumWidth());
+            final_width = std::max(0, getMinimumWidth());
+            break;
+
+        case EXACTLY:
+        default:
+            final_width = width;
             break;
         }
 
-        switch (heightMode)
-        {
-        case EXACTLY:
-            finalHeight = height;
-            break;
-
+        switch (height_mode) {
         case FIT:
-            finalHeight = std::min(height, mSeekThumbMaxDiameter + vPadding);
-            finalHeight = std::max(finalHeight, getMinimumHeight());
+            final_height = std::min(height, thumb_max_diameter_ + v_padding);
+            final_height = std::max(final_height, getMinimumHeight());
             break;
 
         case UNKNOWN:
-            finalHeight = std::max(mSeekThumbMaxDiameter + vPadding, getMinimumHeight());
+            final_height = std::max(thumb_max_diameter_ + v_padding, getMinimumHeight());
+            break;
+
+        case EXACTLY:
+        default:
+            final_height = height;
             break;
         }
 
-        setMeasuredDimension(finalWidth, finalHeight);
+        setMeasuredSize(final_width, final_height);
     }
 
-    void SeekBar::onDraw(Canvas *canvas)
-    {
-        float left = mSeekThumbMaxDiameter / 2.f;
-        float top = (mSeekThumbMaxDiameter - mSeekTrackHeight) / 2.f;
-        float trackWidth = getWidth() - mSeekThumbMaxDiameter - getPaddingLeft() - getPaddingRight();
+    void SeekBar::onDraw(Canvas* canvas) {
+        float left = thumb_max_diameter_ / 2.f;
+        float top = (thumb_max_diameter_ - track_height_) / 2.f;
+        float trackWidth = getWidth() - thumb_max_diameter_ - getPaddingLeft() - getPaddingRight();
 
-        float cur_pos = trackWidth * mSeekPercent;
-        float centerX = left + cur_pos;
-        float centerY = mSeekThumbMaxDiameter / 2.f;
+        float cur_pos = trackWidth * seek_percent_;
+        float center_x = left + cur_pos;
+        float center_y = thumb_max_diameter_ / 2.f;
 
-        if (centerX < mSeekThumbMinDiameter) {
-            canvas->fillRect(RectF(left, top, trackWidth, mSeekTrackHeight), Color::Grey300);
+        if (center_x < thumb_min_diameter_) {
+            canvas->fillRect(RectF(left, top, trackWidth, track_height_), Color::Grey300);
         } else {
-            canvas->fillRect(RectF(left, top, cur_pos, mSeekTrackHeight), Color::Blue400);
-            canvas->fillRect(RectF(centerX, top, trackWidth - cur_pos, mSeekTrackHeight), Color::Grey300);
+            canvas->fillRect(RectF(left, top, cur_pos, track_height_), Color::Blue400);
+            canvas->fillRect(RectF(center_x, top, trackWidth - cur_pos, track_height_), Color::Grey300);
         }
 
-        canvas->fillCircle(centerX, centerY, mSeekThumbCurDiameter / 2.f, Color::Blue400);
+        canvas->fillCircle(center_x, center_y, thumb_cur_diameter_ / 2.f, Color::Blue400);
     }
 
-    bool SeekBar::onInputEvent(InputEvent *e)
-    {
+    bool SeekBar::onInputEvent(InputEvent* e) {
         View::onInputEvent(e);
 
-        switch (e->getEvent())
-        {
-        case InputEvent::EVM_LEAVE_VIEW:
+        switch (e->getEvent()) {
+        case InputEvent::EV_LEAVE_VIEW:
         {
             startZoomOutAnimation();
             break;
@@ -245,18 +234,14 @@ namespace ukive {
 
         case InputEvent::EVM_DOWN:
         {
-            if (e->getMouseKey() == InputEvent::MK_LEFT)
-            {
-                if (isMouseInThumb(e->getMouseX(), e->getMouseY()))
-                {
-                    mIsMouseLeftKeyAvailable = true;
-                    computePercent(e->getMouseX(), e->getMouseY());
+            if (e->getMouseKey() == InputEvent::MK_LEFT) {
+                if (isPointerInThumb(e->getX(), e->getY())) {
+                    is_pointer_left_key_available_ = true;
+                    computePercent(e->getX(), e->getY());
                     invalidate();
-                }
-                else if (isMouseInTrack(e->getMouseX(), e->getMouseY()))
-                {
-                    mIsMouseLeftKeyAvailable = true;
-                    computePercent(e->getMouseX(), e->getMouseY());
+                } else if (isPointerInTrack(e->getX(), e->getY())) {
+                    is_pointer_left_key_available_ = true;
+                    computePercent(e->getX(), e->getY());
                     startZoomInAnimation();
                 }
             }
@@ -264,34 +249,63 @@ namespace ukive {
             break;
         }
 
+        case InputEvent::EVT_DOWN:
+        {
+            if (isPointerInThumb(e->getX(), e->getY())) {
+                is_pointer_left_key_available_ = true;
+                computePercent(e->getX(), e->getY());
+                invalidate();
+            } else if (isPointerInTrack(e->getX(), e->getY())) {
+                is_pointer_left_key_available_ = true;
+                computePercent(e->getX(), e->getY());
+                startZoomInAnimation();
+            }
+            break;
+        }
+
         case InputEvent::EVM_MOVE:
         {
-            if (mIsMouseLeftKeyAvailable)
-            {
-                computePercent(e->getMouseX(), e->getMouseY());
+            if (is_pointer_left_key_available_) {
+                computePercent(e->getX(), e->getY());
                 invalidate();
-            }
-            else
-            {
-                if (isMouseInThumb(e->getMouseX(), e->getMouseY()))
+            } else {
+                if (isPointerInThumb(e->getX(), e->getY())) {
                     startZoomInAnimation();
-                else
+                } else {
                     startZoomOutAnimation();
+                }
+            }
+            break;
+        }
+
+        case InputEvent::EVT_MOVE:
+        {
+            if (is_pointer_left_key_available_) {
+                computePercent(e->getX(), e->getY());
+                invalidate();
             }
             break;
         }
 
         case InputEvent::EVM_UP:
         {
-            if (e->getMouseKey() == InputEvent::MK_LEFT)
-            {
-                if (mIsMouseLeftKeyAvailable)
-                {
-                    mIsMouseLeftKeyAvailable = false;
+            if (e->getMouseKey() == InputEvent::MK_LEFT) {
+                if (is_pointer_left_key_available_) {
+                    is_pointer_left_key_available_ = false;
                 }
             }
             break;
         }
+
+        case InputEvent::EVT_UP:
+        {
+            if (is_pointer_left_key_available_) {
+                is_pointer_left_key_available_ = false;
+            }
+            break;
+        }
+        default:
+            break;
         }
 
         return true;
@@ -304,7 +318,7 @@ namespace ukive {
         IUIAnimationVariable *variable,
         double newValue, double previousValue)
     {
-        mSeekThumbCurDiameter = newValue;
+        thumb_cur_diameter_ = newValue;
     }
 
     void SeekBar::onIntegerValueChanged(

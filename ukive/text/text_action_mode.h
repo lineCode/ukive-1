@@ -5,7 +5,7 @@
 
 #include "ukive/menu/menu_callback.h"
 #include "ukive/menu/inner_window.h"
-#include "ukive/utils/weak_bind.h"
+#include "ukive/utils/weak_ref_nest.h"
 
 
 namespace ukive {
@@ -16,10 +16,7 @@ namespace ukive {
     class MenuItem;
     class TextActionModeCallback;
 
-    class TextActionMode :
-        public MenuCallback,
-        public SharedHelper<TextActionMode>
-    {
+    class TextActionMode : public MenuCallback {
     public:
         TextActionMode(Window* window, TextActionModeCallback* callback);
         ~TextActionMode();
@@ -49,6 +46,7 @@ namespace ukive {
 
         MenuImpl* menu_impl_;
         std::shared_ptr<InnerWindow> inner_window_;
+        WeakRefNest<TextActionMode> weak_ref_nest_;
     };
 
 }

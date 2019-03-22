@@ -5,14 +5,27 @@
 #include "ukive/drawable/ripple_drawable.h"
 #include "ukive/graphics/color.h"
 
+#include "oigka/layout_constants.h"
+
 
 namespace ukive {
 
-    Button::Button(Window *w)
-        :TextView(w) {
+    Button::Button(Window* w)
+        : Button(w, {})
+    {}
+
+    Button::Button(Window *w, AttrsRef attrs)
+        : TextView(w, attrs)
+    {
+        if (attrs.find(oigka::kAttrTextViewText) == attrs.end()) {
+            setText(L"Button");
+        }
+        setTextSize(13);
+        setIsEditable(false);
+        setIsSelectable(false);
+
         initButton();
     }
-
 
     void Button::initButton() {
         shape_drawable_ = new ShapeDrawable(ShapeDrawable::ROUND_RECT);
@@ -22,11 +35,6 @@ namespace ukive {
 
         ripple_background_ = new RippleDrawable(getWindow());
         ripple_background_->addDrawable(shape_drawable_);
-
-        setText(L"Button");
-        setTextSize(13);
-        setIsEditable(false);
-        setIsSelectable(false);
 
         setPadding(
             getWindow()->dpToPx(24),
@@ -39,6 +47,7 @@ namespace ukive {
 
     void Button::setButtonColor(Color color) {
         shape_drawable_->setSolidColor(color);
+        invalidate();
     }
 
 }

@@ -11,13 +11,18 @@
 #include "shell/test/text/text_window.h"
 #include "shell/test/bitmap_research/bitmap_research_window.h"
 #include "shell/test/shadow/shadow_window.h"
+#include "shell/decompiler/decompiler_window.h"
 
 
 int APIENTRY wWinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    LPWSTR lpCmdLine, int nCmdShow) {
-
-    ukive::InitLogging();
+    LPWSTR lpCmdLine, int nCmdShow)
+{
+    ukive::Log::Params log_params;
+    log_params.file_name = L"Debug.log";
+    log_params.short_file_name = false;
+    log_params.target = ukive::Log::OutputTarget::DBG_STR | ukive::Log::OutputTarget::FILE;
+    ukive::InitLogging(log_params);
 
     LOG(Log::INFO) << "Application start.";
 
@@ -56,7 +61,7 @@ int APIENTRY wWinMain(
     test_window->setTitle(L"Test");
     test_window->setWidth(ukive::Application::dpToPx(600));
     test_window->setHeight(ukive::Application::dpToPx(600));
-    test_window->setFrameType(ukive::Window::FRAME_ZERO);
+    test_window->setFrameType(ukive::Window::FRAME_CUSTOM);
     test_window->setTranslucent(false);
     test_window->center();
     test_window->show();
@@ -68,6 +73,15 @@ int APIENTRY wWinMain(
     ////thr_dimen_window->setTranslucent(true);
     //thr_dimen_window->center();
     //thr_dimen_window->show();
+
+    //auto dpr_window = std::make_shared<shell::DecompilerWindow>();
+    //dpr_window->setTitle(L"Decompiler");
+    //dpr_window->setWidth(ukive::Application::dpToPx(600));
+    //dpr_window->setHeight(ukive::Application::dpToPx(600));
+    //dpr_window->setFrameType(ukive::Window::FRAME_CUSTOM);
+    ////thr_dimen_window->setTranslucent(true);
+    //dpr_window->center();
+    //dpr_window->show();
 
     app->run();
 

@@ -4,11 +4,16 @@
 #include <functional>
 #include <memory>
 
+#include "ukive/utils/weak_ref_nest.h"
+
 
 namespace ukive {
 
     using Solid = std::function<void()>;
 
+    /**
+     * WeakPtr
+     */
     template <typename T>
     class SharedHelper : public std::enable_shared_from_this<T> {
     public:
@@ -18,9 +23,8 @@ namespace ukive {
         std::weak_ptr<const T> w_this() const { return weak_from_this(); }
     };
 
-
     template <typename Ret>
-    struct Wrapper {
+    struct WeakPtrWrapper {
         template <typename Obj>
         Ret operator()(const std::weak_ptr<Obj>& obj, const Solid& bound_func, Ret& def_ret) {
             if (auto ptr = obj.lock()) {
@@ -33,7 +37,7 @@ namespace ukive {
 
     // 无返回值的特例
     template <>
-    struct Wrapper<void> {
+    struct WeakPtrWrapper<void> {
         template <typename Obj>
         void operator()(const std::weak_ptr<Obj>& obj, Solid& bound_func) {
             if (auto ptr = obj.lock()) {
@@ -43,20 +47,64 @@ namespace ukive {
     };
 
     template <typename Func, typename Obj, typename... Types>
-    std::function<void()> weak_bind(Func&& func, const std::shared_ptr<Obj>& obj, Types&&... args) {
+    std::function<void()> weakptr_bind(Func&& func, const std::shared_ptr<Obj>& obj, Types&&... args) {
         return std::bind(
-            Wrapper<void>(),
+            WeakPtrWrapper<void>(),
             std::weak_ptr<Obj>(obj),
             std::function<void()>(std::bind(func, obj.get(), std::forward<Types>(args)...)));
     }
 
     template <typename Ret, typename Func, typename Obj, typename... Types>
-    std::function<Ret()> weak_ret_bind(
+    std::function<Ret()> weakptr_ret_bind(
         Ret&& def_ret, Func&& func, const std::shared_ptr<Obj>& obj, Types&&... args) {
         return std::bind(
-            Wrapper<Ret>(),
+            WeakPtrWrapper<Ret>(),
             std::weak_ptr<Obj>(obj),
             std::function<Ret()>(std::bind(func, obj.get(), std::forward<Types>(args)...)), def_ret);
+    }
+
+
+    /**
+     * WeakRef
+     */
+    template <typename Ret>
+    struct WeakRefWrapper {
+        template <typename Obj>
+        Ret operator()(const WeakRef<Obj>& ref, const Solid& bound_func, Ret& def_ret) {
+            if (ref.isAvailable()) {
+                return bound_func();
+            }
+
+            return def_ret;
+        }
+    };
+
+    // 无返回值的特例
+    template <>
+    struct WeakRefWrapper<void> {
+        template <typename Obj>
+        void operator()(const WeakRef<Obj>& ref, Solid& bound_func) {
+            if (ref.isAvailable()) {
+                bound_func();
+            }
+        }
+    };
+
+    template <typename Func, typename Obj, typename... Types>
+    std::function<void()> weakref_bind(Func&& func, const WeakRef<Obj>& obj, Types&&... args) {
+        return std::bind(
+            WeakRefWrapper<void>(),
+            obj,
+            std::function<void()>(std::bind(func, obj.getPtr(), std::forward<Types>(args)...)));
+    }
+
+    template <typename Ret, typename Func, typename Obj, typename... Types>
+    std::function<Ret()> weakref_ret_bind(
+        Ret&& def_ret, Func&& func, const WeakRef<Obj>& obj, Types&&... args) {
+        return std::bind(
+            WeakRefWrapper<Ret>(),
+            obj,
+            std::function<Ret()>(std::bind(func, obj.getPtr(), std::forward<Types>(args)...)), def_ret);
     }
 }
 

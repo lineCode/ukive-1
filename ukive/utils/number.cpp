@@ -1,11 +1,13 @@
 #include "number.h"
 
+#include <sstream>
+
 #include "ukive/log.h"
 
 
 namespace ukive {
 
-    wchar_t Number::mDigitc[] = {
+    wchar_t Number::digitc_[] = {
         L'0',L'1',L'2',L'3',L'4',
         L'5',L'6',L'7',L'8',L'9',
         L'a',L'b',L'c',L'd',L'e',
@@ -50,8 +52,9 @@ namespace ukive {
             return 0;
         }
 
-        if (result > std::numeric_limits<int>::max()
-            || result < std::numeric_limits<int>::min()) {
+        if (result > std::numeric_limits<int>::max() ||
+            result < std::numeric_limits<int>::min())
+        {
             return 0;
         }
 
@@ -65,8 +68,9 @@ namespace ukive {
             return 0;
         }
 
-        if (result > std::numeric_limits<int>::max()
-            || result < std::numeric_limits<int>::min()) {
+        if (result > std::numeric_limits<int>::max() ||
+            result < std::numeric_limits<int>::min())
+        {
             return 0;
         }
 

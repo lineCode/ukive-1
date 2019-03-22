@@ -5,7 +5,7 @@
 
 #include "ukive/menu/menu_callback.h"
 #include "ukive/menu/inner_window.h"
-#include "ukive/utils/weak_bind.h"
+#include "ukive/utils/weak_ref_nest.h"
 
 
 namespace ukive {
@@ -16,9 +16,7 @@ namespace ukive {
     class MenuItem;
     class ContextMenuCallback;
 
-    class ContextMenu :
-        public MenuCallback,
-        public SharedHelper<ContextMenu> {
+    class ContextMenu : public MenuCallback {
     public:
         ContextMenu(Window* window, ContextMenuCallback* callback);
         ~ContextMenu();
@@ -47,6 +45,7 @@ namespace ukive {
 
         MenuImpl* menu_;
         std::shared_ptr<InnerWindow> inner_window_;
+        WeakRefNest<ContextMenu> weak_ref_nest_;
     };
 
 }

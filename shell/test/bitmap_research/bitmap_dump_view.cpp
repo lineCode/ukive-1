@@ -127,8 +127,8 @@ namespace shell {
     bool BitmapDumpView::onInputEvent(ukive::InputEvent *e) {
         switch (e->getEvent()) {
         case ukive::InputEvent::EVM_WHEEL:
-            wheel_start_x_ = e->getMouseX();
-            wheel_start_y_ = e->getMouseY();
+            wheel_start_x_ = e->getX();
+            wheel_start_y_ = e->getY();
             if (e->getMouseWheel() > 0) {
                 scale_factor_ = 1.1f;
             }
@@ -141,19 +141,19 @@ namespace shell {
 
         case ukive::InputEvent::EVM_DOWN:
             is_mouse_down_ = true;
-            prev_x_ = start_x_ = e->getMouseX();
-            prev_y_ = start_y_ = e->getMouseY();
+            prev_x_ = start_x_ = e->getX();
+            prev_y_ = start_y_ = e->getY();
             break;
         case ukive::InputEvent::EVM_MOVE:
             if (is_mouse_down_) {
-                int dx = e->getMouseX() - prev_x_;
-                int dy = e->getMouseY() - prev_y_;
+                int dx = e->getX() - prev_x_;
+                int dy = e->getY() - prev_y_;
 
                 total_trans_x_ += dx;
                 total_trans_y_ += dy;
 
-                prev_x_ = e->getMouseX();
-                prev_y_ = e->getMouseY();
+                prev_x_ = e->getX();
+                prev_y_ = e->getY();
 
                 matrix_.preTranslate(dx, dy);
                 invalidate();

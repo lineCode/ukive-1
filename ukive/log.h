@@ -48,9 +48,6 @@
 
 namespace ukive {
 
-    void InitLogging();
-    void UninitLogging();
-
     class Log {
     public:
         enum Severity {
@@ -60,7 +57,20 @@ namespace ukive {
             FATAL
         };
 
+        enum OutputTarget {
+            CONSOLE = 1 << 0,
+            FILE =    1 << 1,
+            DBG_STR = 1 << 2,
+        };
+
+        struct Params {
+            int target;
+            bool short_file_name;
+            string16 file_name;
+        };
+
         static void debugBreak();
+        static void debugBreakIfInDebugger();
 
         Log(const wchar_t* file_name, int line_number, Severity level);
         ~Log();
@@ -79,6 +89,10 @@ namespace ukive {
         LogVoidify() = default;
         void operator&(std::wostream& s) {}
     };
+
+
+    void InitLogging(const Log::Params& params);
+    void UninitLogging();
 
 }
 

@@ -44,6 +44,12 @@
     <Filter Include="test\3d">
       <UniqueIdentifier>{8cfa8f7b-f4e2-4aff-bd98-2cf54675f6ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="decompiler">
+      <UniqueIdentifier>{7a185f92-26cd-467b-b88d-2e481f617de7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources\layout">
+      <UniqueIdentifier>{32702468-1b1f-4d2b-9b1a-7679a1ce6bf7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -105,6 +111,30 @@
     </ClCompile>
     <ClCompile Include="test\3d\motion_window.cpp">
       <Filter>test\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\decompiler_window.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\pe_file.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\intel_instructions.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\opcode_map.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\intel_instruction_params.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\debugger.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\opcode_list_adapter.cpp">
+      <Filter>decompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="decompiler\code_data_provider.cpp">
+      <Filter>decompiler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +198,30 @@
     <ClInclude Include="test\3d\motion_window.h">
       <Filter>test\3d</Filter>
     </ClInclude>
+    <ClInclude Include="decompiler\decompiler_window.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\pe_file.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\intel_instructions.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\opcode_map.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\intel_instruction_params.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\debugger.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\opcode_list_adapter.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="decompiler\code_data_provider.h">
+      <Filter>decompiler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\shell.ico">
@@ -204,5 +258,13 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="application.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="resources\layout\test_window_group_layout.xml">
+      <Filter>resources\layout</Filter>
+    </Xml>
+    <Xml Include="resources\layout\test_window_list_layout.xml">
+      <Filter>resources\layout</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

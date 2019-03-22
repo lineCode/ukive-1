@@ -18,9 +18,7 @@ namespace ukive {
         static int parseInt(const string16& s, int radix = 10);
 
     private:
-        Number();
-
-        static wchar_t mDigitc[];
+        static wchar_t digitc_[];
     };
 }
 

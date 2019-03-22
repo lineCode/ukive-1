@@ -34,11 +34,11 @@ namespace shell {
         ukive::string16 shader_path = ukive::Application::getExecFileName(true);
 
         ukive::Space::createVertexShader(
-            shader_path + L"\\terrain_vertex_shader.cso",
+            shader_path + L"\\shaders\\terrain_vertex_shader.cso",
             layout, ARRAYSIZE(layout), &vertex_shader_, &input_layout_);
 
         ukive::Space::createPixelShader(
-            shader_path + L"\\terrain_pixel_shader.cso",
+            shader_path + L"\\shaders\\terrain_pixel_shader.cso",
             &pixel_shader_);
 
         const_buffer_ = ukive::Space::createConstantBuffer(sizeof(MatrixConstBuffer));

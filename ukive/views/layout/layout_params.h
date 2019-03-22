@@ -18,10 +18,10 @@ namespace ukive {
         int width;
         int height;
 
-        int leftMargin;
-        int topMargin;
-        int rightMargin;
-        int bottomMargin;
+        int left_margin;
+        int top_margin;
+        int right_margin;
+        int bottom_margin;
     };
 
 }

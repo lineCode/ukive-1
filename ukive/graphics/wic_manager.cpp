@@ -60,7 +60,7 @@ namespace ukive {
             WICDecodeMetadataCacheOnLoad,          // Cache metadata on load
             &decoder);
         if (FAILED(hr)) {
-            DCHECK(false);
+            DLOG(Log::WARNING) << "Failed to decode file: " << file_name << " " << std::hex << hr;
             return {};
         }
 

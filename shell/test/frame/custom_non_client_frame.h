@@ -25,6 +25,9 @@ namespace shell {
         int onNcDestroy(bool* handled) override;
         void onTranslucentChanged(bool translucent) override;
 
+        void getClientInsets(RECT* rect) override;
+        void getClientOffset(POINT* offset) override;
+
         LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onMouseMove(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT OnLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;

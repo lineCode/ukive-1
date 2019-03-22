@@ -96,6 +96,7 @@ namespace ukive {
         {
             if (prev_state == STATE_HOVERED) {
                 hover_animator_->stop();
+                hover_animator_->setOnValueChangedListener(0, nullptr);
                 alpha_ = hover_animator_->getValue(0);
 
                 leave_animator_->addVariable(0, alpha_, 0, 1);

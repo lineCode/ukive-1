@@ -173,7 +173,7 @@ namespace ukive {
         selections[0].acpStart = selStart;
         selections[0].acpEnd = selEnd;
         selections[0].style.fInterimChar = FALSE;
-        selections[0].style.ase = TS_AE_NONE;
+        selections[0].style.ase = TS_AE_END;
 
         *fetchedCount = 1;
 

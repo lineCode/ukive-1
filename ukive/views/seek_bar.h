@@ -8,10 +8,10 @@
 
 namespace ukive {
 
-    class SeekBar : public View, public Animator::OnValueChangedListener
-    {
+    class SeekBar : public View, public Animator::OnValueChangedListener {
     public:
-        SeekBar(Window* w);
+        explicit SeekBar(Window* w);
+        SeekBar(Window* w, AttrsRef attrs);
         ~SeekBar();
 
         void setMaximum(float maximum);
@@ -22,7 +22,7 @@ namespace ukive {
 
         void onMeasure(
             int width, int height,
-            int widthMode, int heightMode) override;
+            int width_mode, int height_mode) override;
 
         void onDraw(Canvas* canvas) override;
 
@@ -42,24 +42,24 @@ namespace ukive {
     private:
         void initSeekBar();
 
-        bool isMouseInThumb(int mouseX, int mouseY);
-        bool isMouseInTrack(int mouseX, int mouseY);
-        void computePercent(int mouseX, int mouseY);
+        bool isPointerInThumb(int x, int y);
+        bool isPointerInTrack(int x, int y);
+        void computePercent(int x, int y);
 
         void startZoomInAnimation();
         void startZoomOutAnimation();
 
-        int mSeekTrackHeight;
-        int mSeekThumbMinDiameter;
-        int mSeekThumbMaxDiameter;
-        float mSeekThumbCurDiameter;
+        int track_height_;
+        int thumb_min_diameter_;
+        int thumb_max_diameter_;
+        float thumb_cur_diameter_;
 
-        float mMaximum;
-        float mSeekPercent;
-        bool mIsMouseLeftKeyAvailable;
+        float maximum_;
+        float seek_percent_;
+        bool is_pointer_left_key_available_;
 
-        Animator* mThumbInAnimator;
-        Animator* mThumbOutAnimator;
+        Animator* thumb_in_animator_;
+        Animator* thumb_out_animator_;
         OnSeekValueChangedListener* listener_;
     };
 

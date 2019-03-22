@@ -4,13 +4,12 @@
 
 #include "ukive/log.h"
 #include "ukive/application.h"
-#include "ukive/utils/hresult_utils.h"
 
 
 namespace ukive {
 
     void Space::drawObjects(DrawingObjectManager::DrawingObject* object) {
-        if (object == nullptr) {
+        if (!object) {
             return;
         }
 
@@ -34,15 +33,14 @@ namespace ukive {
         gdm->getD3DDeviceContext()->DrawIndexed(indexCount, 0, 0);
     }
 
-
     void Space::setVertexShader(ID3D11VertexShader* shader) {
         auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->VSSetShader(shader, 0, 0);
+        gdm->getD3DDeviceContext()->VSSetShader(shader, nullptr, 0);
     }
 
     void Space::setPixelShader(ID3D11PixelShader* shader) {
         auto gdm = Application::getGraphicDeviceManager();
-        gdm->getD3DDeviceContext()->PSSetShader(shader, 0, 0);
+        gdm->getD3DDeviceContext()->PSSetShader(shader, nullptr, 0);
     }
 
     void Space::setInputLayout(ID3D11InputLayout* inputLayout) {
@@ -67,18 +65,17 @@ namespace ukive {
         D3D11_INPUT_ELEMENT_DESC* layout,
         UINT layout_count,
         ID3D11VertexShader** vertex_shader,
-        ID3D11InputLayout** input_layout) {
-
+        ID3D11InputLayout** input_layout)
+    {
         std::ifstream reader(file_name.c_str(), std::ios::binary);
         if (!reader) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to open file: " << file_name.c_str();
             return;
         }
 
         auto cpos = reader.tellg();
         reader.seekg(0, std::ios_base::end);
-        size_t charSize = (size_t)reader.tellg();
+        auto charSize = reader.tellg();
         reader.seekg(cpos);
 
         std::unique_ptr<char[]> buf(new char[charSize]());
@@ -87,9 +84,8 @@ namespace ukive {
         auto gdm = Application::getGraphicDeviceManager();
 
         HRESULT hr = gdm->getD3DDevice()->CreateVertexShader(
-            buf.get(), charSize, 0, vertex_shader);
+            buf.get(), charSize, nullptr, vertex_shader);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create vertex shader: " << hr;
         }
 
@@ -97,42 +93,39 @@ namespace ukive {
             layout, layout_count,
             buf.get(), charSize, input_layout);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create input layout: " << hr;
         }
     }
 
     void Space::createPixelShader(
         const string16& file_name,
-        ID3D11PixelShader** pixel_shader) {
-
+        ID3D11PixelShader** pixel_shader)
+    {
         std::ifstream reader(file_name.c_str(), std::ios::binary);
         if (!reader) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to open file: " << file_name.c_str();
             return;
         }
 
         auto cpos = reader.tellg();
         reader.seekg(0, std::ios_base::end);
-        size_t charSize = (size_t)reader.tellg();
+        auto charSize = reader.tellg();
         reader.seekg(cpos);
 
         std::unique_ptr<char[]> buf(new char[charSize]());
         reader.read(buf.get(), charSize);
 
         HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()->CreatePixelShader(
-            buf.get(), charSize, 0, pixel_shader);
+            buf.get(), charSize, nullptr, pixel_shader);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create pixel shader: " << hr;
         }
     }
 
 
     ComPtr<ID3D11Buffer> Space::createVertexBuffer(
-        void* vertices, UINT struct_size, UINT vertex_count) {
-
+        void* vertices, UINT struct_size, UINT vertex_count)
+    {
         D3D11_BUFFER_DESC vb_desc;
         D3D11_SUBRESOURCE_DATA vertex_data;
 
@@ -151,7 +144,6 @@ namespace ukive {
         HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()
             ->CreateBuffer(&vb_desc, &vertex_data, &vertex_buffer);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create vertex buffer: " << hr;
         }
 
@@ -180,7 +172,6 @@ namespace ukive {
         HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()
             ->CreateBuffer(&ib_desc, &index_data, &index_buffer);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create index buffer: " << hr;
         }
 
@@ -199,9 +190,8 @@ namespace ukive {
 
         ComPtr<ID3D11Buffer> buffer;
         HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()
-            ->CreateBuffer(&cb_desc, 0, &buffer);
+            ->CreateBuffer(&cb_desc, nullptr, &buffer);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create const buffer: " << hr;
         }
 
@@ -209,10 +199,9 @@ namespace ukive {
     }
 
     D3D11_MAPPED_SUBRESOURCE Space::lockResource(ID3D11Resource* resource) {
-        HRESULT hr = E_FAIL;
         D3D11_MAPPED_SUBRESOURCE mappedResource;
 
-        hr = Application::getGraphicDeviceManager()->getD3DDeviceContext()
+        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDeviceContext()
             ->Map(resource, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
         if (SUCCEEDED(hr)) {
             return mappedResource;

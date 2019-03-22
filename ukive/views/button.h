@@ -12,7 +12,8 @@ namespace ukive {
 
     class Button : public TextView {
     public:
-        Button(Window* w);
+        explicit Button(Window* w);
+        Button(Window* w, AttrsRef attrs);
 
         void setButtonColor(Color color);
 

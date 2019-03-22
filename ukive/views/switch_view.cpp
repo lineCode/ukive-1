@@ -27,13 +27,16 @@ namespace ukive {
 
     }
 
-    SwitchView::SwitchView(Window* wnd)
-        :View(wnd) {
+    SwitchView::SwitchView(Window* w)
+        : SwitchView(w, {}) {
+    }
+
+    SwitchView::SwitchView(Window* w, AttrsRef attrs)
+        : View(w, attrs) {
     }
 
     SwitchView::~SwitchView() {
     }
-
 
     void SwitchView::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_w = kDefaultTrackWidth
@@ -43,7 +46,7 @@ namespace ukive {
         final_w += getPaddingLeft() + getPaddingRight();
         final_h += getPaddingTop() + getPaddingBottom();
 
-        setMeasuredDimension(final_w, final_h);
+        setMeasuredSize(final_w, final_h);
     }
 
     void SwitchView::onDraw(Canvas* canvas) {

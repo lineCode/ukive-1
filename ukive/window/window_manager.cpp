@@ -2,6 +2,7 @@
 
 #include "ukive/log.h"
 #include "ukive/window/window.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -34,16 +35,17 @@ namespace ukive {
         window_list_.push_back(window);
     }
 
-    size_t WindowManager::getWindowCount() {
-        return window_list_.size();
+    int WindowManager::getWindowCount() {
+        return STLCInt(window_list_.size());
     }
 
-    Window* WindowManager::getWindow(size_t index) {
-        if (index >= window_list_.size()) {
+    Window* WindowManager::getWindow(int index) {
+        auto i = STLCST(window_list_, index);
+        if (i >= window_list_.size()) {
             LOG(Log::ERR) << "Out of bounds.";
             return nullptr;
         }
-        return window_list_.at(index);
+        return window_list_.at(i);
     }
 
     void WindowManager::removeWindow(Window *window) {

@@ -7,9 +7,11 @@
 
 namespace ukive {
 
-    FrameLayout::FrameLayout(Window* wnd)
-        :ViewGroup(wnd) {}
+    FrameLayout::FrameLayout(Window* w)
+        : FrameLayout(w, {}) {}
 
+    FrameLayout::FrameLayout(Window* w, AttrsRef attrs)
+        : ViewGroup(w, attrs) {}
 
     void FrameLayout::onMeasure(int width, int height, int widthSpec, int heightSpec) {
         int final_width = 0;
@@ -56,7 +58,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
 
@@ -64,19 +66,16 @@ namespace ukive {
         bool changed, bool sizeChanged,
         int left, int top, int right, int bottom)
     {
-        View* child = nullptr;
-        LayoutParams* lp = nullptr;
-
         for (int i = 0; i < getChildCount(); ++i) {
-            child = getChildAt(i);
+            auto child = getChildAt(i);
             if (child->getVisibility() != View::VANISHED) {
-                lp = child->getLayoutParams();
+                auto lp = child->getLayoutParams();
 
                 int width = child->getMeasuredWidth();
                 int height = child->getMeasuredHeight();
 
-                int child_left = getPaddingLeft() + lp->leftMargin;
-                int child_top = getPaddingTop() + lp->topMargin;
+                int child_left = getPaddingLeft() + lp->left_margin;
+                int child_top = getPaddingTop() + lp->top_margin;
 
                 child->layout(
                     child_left, child_top,

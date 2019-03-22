@@ -36,6 +36,11 @@ namespace ukive {
         BOTTOM_LEFT,
         BOTTOM,
         BOTTOM_RIGHT,
+        CAPTION,
+        SYS_MENU,
+        MIN_BUTTON,
+        MAX_BUTTON,
+        CLOSE_BUTTON,
     };
 
 }

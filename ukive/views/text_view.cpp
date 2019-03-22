@@ -15,6 +15,9 @@
 #include "ukive/text/text_drawing_effect.h"
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_item.h"
+#include "ukive/resources/dimension_utils.h"
+
+#include "oigka/layout_constants.h"
 
 
 namespace ukive {
@@ -35,11 +38,21 @@ namespace ukive {
         };
     }
 
-    TextView::TextView(Window* wnd)
-        :View(wnd),
-        text_color_(Color::Black),
-        sel_bg_color_(Color::Blue200)
+    TextView::TextView(Window* w)
+        : TextView(w, {}) {}
+
+    TextView::TextView(Window* w, AttrsRef attrs)
+        : View(w, attrs),
+          text_color_(Color::Black),
+          sel_bg_color_(Color::Blue200)
     {
+        is_selectable_ = resolveAttrBool(attrs, oigka::kAttrTextViewIsSelectable, false);
+        is_editable_ = resolveAttrBool(attrs, oigka::kAttrTextViewIsEditable, false);
+
+        auto text = resolveAttrString(attrs, oigka::kAttrTextViewText, L"");
+        base_text_ = new Editable(text);
+        base_text_->addEditWatcher(this);
+
         initTextView();
     }
 
@@ -53,11 +66,9 @@ namespace ukive {
     void TextView::initTextView() {
         text_size_ = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
         is_auto_wrap_ = true;
-        is_editable_ = false;
-        is_selectable_ = false;
-        is_mouse_left_key_down_ = false;
-        is_mouse_right_key_down_ = false;
-        is_mouse_left_key_down_on_text_ = false;
+        is_plkey_down_ = false;
+        is_prkey_down_ = false;
+        is_plkey_down_on_text_ = false;
 
         line_spacing_multiple_ = 1.f;
         line_spacing_method_ = DWRITE_LINE_SPACING_METHOD_DEFAULT;
@@ -77,9 +88,6 @@ namespace ukive {
 
         input_connection_ = new InputConnection(this);
         text_key_listener_ = new TextKeyListener();
-
-        base_text_ = new Editable(L"");
-        base_text_->addEditWatcher(this);
 
         makeNewTextFormat();
         makeNewTextLayout(0.f, 0.f, false);
@@ -525,12 +533,6 @@ namespace ukive {
             break;
         }
 
-        case EXACTLY:
-            text_layout_->SetMaxWidth(
-                static_cast<float>(width - hori_padding));
-            final_width = width;
-            break;
-
         case UNKNOWN:
             text_layout_->SetMaxWidth(0.f);
             text_layout_->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
@@ -543,6 +545,13 @@ namespace ukive {
 
             text_layout_->SetMaxWidth(
                 static_cast<float>(final_width - hori_padding));
+            break;
+
+        case EXACTLY:
+        default:
+            text_layout_->SetMaxWidth(
+                static_cast<float>(width - hori_padding));
+            final_width = width;
             break;
         }
 
@@ -565,12 +574,6 @@ namespace ukive {
             break;
         }
 
-        case EXACTLY:
-            text_layout_->SetMaxHeight(
-                static_cast<float>(height - vert_padding));
-            final_height = height;
-            break;
-
         case UNKNOWN:
             text_layout_->SetMaxHeight(0.f);
 
@@ -580,9 +583,16 @@ namespace ukive {
             text_layout_->SetMaxHeight(
                 static_cast<float>(final_height - vert_padding));
             break;
+
+        case EXACTLY:
+        default:
+            text_layout_->SetMaxHeight(
+                static_cast<float>(height - vert_padding));
+            final_height = height;
+            break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
     void TextView::onLayout(
@@ -614,51 +624,56 @@ namespace ukive {
         View::onInputEvent(e);
 
         switch (e->getEvent()) {
-        case InputEvent::EVM_LEAVE_VIEW:
+        case InputEvent::EV_CANCEL:
+        case InputEvent::EV_LEAVE_VIEW:
         {
-            setCurrentCursor(Cursor::ARROW);
+            is_plkey_down_ = false;
+            is_plkey_down_on_text_ = false;
+            is_prkey_down_ = false;
+            if (e->isMouseEvent()) {
+                setCurrentCursor(Cursor::ARROW);
+            }
             return true;
         }
 
         case InputEvent::EVM_SCROLL_ENTER:
         {
-            if (is_selectable_)
+            if (is_selectable_) {
                 setCurrentCursor(Cursor::IBEAM);
+            }
             return true;
         }
 
         case InputEvent::EVM_DOWN:
         {
-            bool isMouseKeyDown = false;
-            bool isMouseKeyDownOnText = false;
-
-            if (e->getMouseKey() == InputEvent::MK_LEFT
-                || e->getMouseKey() == InputEvent::MK_RIGHT) {
+            if (e->getMouseKey() == InputEvent::MK_LEFT ||
+                e->getMouseKey() == InputEvent::MK_RIGHT)
+            {
                 if (text_action_mode_ != nullptr) {
                     text_action_mode_->close();
                 }
 
-                isMouseKeyDown = true;
-                isMouseKeyDownOnText = isHitText(
-                    e->getMouseX() - getPaddingLeft() + getScrollX(),
-                    e->getMouseY() - getPaddingTop() + getScrollY());
+                bool is_down = true;
+                bool is_down_on_text = isHitText(
+                    e->getX() - getPaddingLeft() + getScrollX(),
+                    e->getY() - getPaddingTop() + getScrollY());
 
-                if (is_selectable_ && isMouseKeyDownOnText) {
+                if (is_selectable_ && (is_down_on_text || is_editable_)) {
                     setCurrentCursor(Cursor::IBEAM);
                 }
 
                 if (e->getMouseKey() == InputEvent::MK_LEFT) {
-                    is_mouse_left_key_down_ = isMouseKeyDown;
-                    is_mouse_left_key_down_on_text_ = isMouseKeyDownOnText;
+                    is_plkey_down_ = is_down;
+                    is_plkey_down_on_text_ = is_down_on_text;
                 } else if (e->getMouseKey() == InputEvent::MK_RIGHT) {
-                    is_mouse_right_key_down_ = isMouseKeyDown;
+                    is_prkey_down_ = is_down;
                     //mIsMouseRightKeyDownOnText = isMouseKeyDownOnText;
                 }
 
                 if (e->getMouseKey() != InputEvent::MK_RIGHT || !hasSelection()) {
                     first_sel_ = getHitTextPosition(
-                        e->getMouseX() - getPaddingLeft() + getScrollX(),
-                        e->getMouseY() - getPaddingTop() + getScrollY());
+                        e->getX() - getPaddingLeft() + getScrollX(),
+                        e->getY() - getPaddingTop() + getScrollY());
 
                     base_text_->setSelection(first_sel_);
                 }
@@ -666,24 +681,30 @@ namespace ukive {
             return true;
         }
 
+        case InputEvent::EVT_DOWN:
+        {
+            return true;
+        }
+
         case InputEvent::EVM_UP:
         {
             if (e->getMouseKey() == InputEvent::MK_LEFT) {
-                is_mouse_left_key_down_ = false;
-                is_mouse_left_key_down_on_text_ = false;
+                is_plkey_down_ = false;
+                is_plkey_down_on_text_ = false;
 
                 if (is_selectable_
                     && (isHitText(
-                        e->getMouseX() - getPaddingLeft() + getScrollX(),
-                        e->getMouseY() - getPaddingTop() + getScrollY()) || is_editable_))
+                        e->getX() - getPaddingLeft() + getScrollX(),
+                        e->getY() - getPaddingTop() + getScrollY()) || is_editable_))
+                {
                     setCurrentCursor(Cursor::IBEAM);
-                else {
+                } else {
                     setCurrentCursor(Cursor::ARROW);
                 }
             } else if (e->getMouseKey() == InputEvent::MK_RIGHT) {
-                prev_x_ = e->getMouseX();
-                prev_y_ = e->getMouseY();
-                is_mouse_right_key_down_ = false;
+                prev_x_ = e->getX();
+                prev_y_ = e->getY();
+                is_prkey_down_ = false;
 
                 if (is_editable_ || is_selectable_) {
                     text_action_mode_ = getWindow()->startTextActionMode(this);
@@ -692,13 +713,30 @@ namespace ukive {
             return true;
         }
 
+        case InputEvent::EVT_UP:
+        {
+            if (text_action_mode_ != nullptr) {
+                text_action_mode_->close();
+            }
+
+            bool is_down_on_text = isHitText(
+                e->getX() - getPaddingLeft() + getScrollX(),
+                e->getY() - getPaddingTop() + getScrollY());
+
+            first_sel_ = getHitTextPosition(
+                e->getX() - getPaddingLeft() + getScrollX(),
+                e->getY() - getPaddingTop() + getScrollY());
+            base_text_->setSelection(first_sel_);
+            return true;
+        }
+
         case InputEvent::EVM_MOVE:
         {
-            if (is_mouse_left_key_down_) {
+            if (is_plkey_down_) {
                 unsigned int start = first_sel_;
                 unsigned int end = getHitTextPosition(
-                    e->getMouseX() - getPaddingLeft() + getScrollX(),
-                    e->getMouseY() - getPaddingTop() + getScrollY());
+                    e->getX() - getPaddingLeft() + getScrollX(),
+                    e->getY() - getPaddingTop() + getScrollY());
 
                 last_sel_ = end;
 
@@ -712,13 +750,19 @@ namespace ukive {
             } else {
                 if (is_selectable_
                     && (isHitText(
-                        e->getMouseX() - getPaddingLeft() + getScrollX(),
-                        e->getMouseY() - getPaddingTop() + getScrollY()) || is_editable_)) {
+                        e->getX() - getPaddingLeft() + getScrollX(),
+                        e->getY() - getPaddingTop() + getScrollY()) || is_editable_))
+                {
                     setCurrentCursor(Cursor::IBEAM);
                 } else {
                     setCurrentCursor(Cursor::ARROW);
                 }
             }
+            return true;
+        }
+
+        case InputEvent::EVT_MOVE:
+        {
             return true;
         }
 
@@ -1202,9 +1246,11 @@ namespace ukive {
                 invalidate();
             }
 
-            if (is_editable_ && hasFocus()) {
+            if (is_editable_) {
                 locateTextBlink(ns);
-                text_blink_->show();
+                if (hasFocus()) {
+                    text_blink_->show();
+                }
             }
         } else {
             setSelection(ns, ne);

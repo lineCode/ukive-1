@@ -5,7 +5,7 @@ namespace ukive {
 
     LayoutParams::LayoutParams(int width, int height)
         :width(width), height(height),
-        leftMargin(0), topMargin(0), rightMargin(0), bottomMargin(0) {
+        left_margin(0), top_margin(0), right_margin(0), bottom_margin(0) {
     }
 
 }

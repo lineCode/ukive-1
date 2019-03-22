@@ -22,6 +22,7 @@ namespace ukive {
         };
 
         explicit ImageView(Window* w);
+        ImageView(Window* w, AttrsRef attrs);
         ~ImageView();
 
         void onMeasure(int width, int height, int width_mode, int height_mode) override;

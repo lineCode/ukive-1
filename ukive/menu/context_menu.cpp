@@ -6,19 +6,20 @@
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_impl.h"
 #include "ukive/graphics/color.h"
-#include "ukive/utils/executable.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/window/window.h"
+#include "ukive/utils/weak_bind.h"
 
 
 namespace ukive {
 
     ContextMenu::ContextMenu(
         Window* window, ContextMenuCallback* callback)
-        :window_(window),
-        callback_(callback),
-        is_finished_(true) {
-
+        : is_finished_(true),
+          window_(window),
+          callback_(callback),
+          weak_ref_nest_(this)
+    {
         menu_width_ = window->dpToPx(92);
         menu_item_height_ = window->dpToPx(36);
 
@@ -65,7 +66,8 @@ namespace ukive {
 
         // 异步打开 ContextMenu，以防止在输入事件处理流程中
         // 打开菜单时出现问题。
-        window_->getCycler()->post(weak_bind(&ContextMenu::showAsync, s_this(), x, y));
+        window_->getCycler()->post(
+            weakref_bind(&ContextMenu::showAsync, weak_ref_nest_.getRef(), x, y));
     }
 
     void ContextMenu::close() {
@@ -74,10 +76,12 @@ namespace ukive {
 
         is_finished_ = true;
         callback_->onDestroyContextMenu(this);
+        window_->notifyContextMenuClose();
 
         // 异步关闭 ContextMenu，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
-        window_->getCycler()->post(weak_bind(&ContextMenu::closeAsync, s_this()));
+        window_->getCycler()->post(
+            weakref_bind(&ContextMenu::closeAsync, weak_ref_nest_.getRef()));
     }
 
     void ContextMenu::showAsync(int x, int y) {
@@ -107,6 +111,8 @@ namespace ukive {
 
         inner_window_->getDecorView()->animate()->
             setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
+
+        delete this;
     }
 
 }

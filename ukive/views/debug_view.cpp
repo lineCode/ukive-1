@@ -8,12 +8,14 @@
 namespace ukive {
 
     DebugView::DebugView(Window* w)
-        :View(w),
-        mode_(Mode::RENDER),
-        strip_width_(w->dpToPx(4)),
-        screen_width_(Application::getScreenWidth()) {
-    }
+        : DebugView(w, {}) {}
 
+    DebugView::DebugView(Window* w, AttrsRef attrs)
+        : View(w, attrs),
+          strip_width_(w->dpToPx(4)),
+          screen_width_(Application::getScreenWidth()),
+          mode_(Mode::RENDER) {
+    }
 
     void DebugView::onDraw(Canvas* canvas) {
         View::onDraw(canvas);

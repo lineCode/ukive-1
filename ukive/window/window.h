@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #include <memory>
+#include <vector>
 
 #include "ukive/message/cycler.h"
 #include "ukive/utils/string_utils.h"
@@ -21,20 +22,22 @@ namespace ukive {
     class Renderer;
     class InputEvent;
     class WindowImpl;
+    class TitleBar;
     class RootLayout;
     class AnimationManager;
     class ContextMenu;
     class ContextMenuCallback;
     class TextActionMode;
     class TextActionModeCallback;
+    class OnWindowStatusChangedListener;
     struct ClassInfo;
 
-    class Window : public SwapChainResizeNotifier {
+
+    class Window : public SwapChainResizeNotifier, public CyclerListener {
     public:
         enum FrameType {
             FRAME_NATIVE,
             FRAME_CUSTOM,
-            FRAME_ZERO,
         };
 
         Window();
@@ -59,11 +62,13 @@ namespace ukive {
         void setMinWidth(int min_width);
         void setMinHeight(int min_height);
         void setCurrentCursor(Cursor cursor);
+        void setContentView(int layout_id);
         void setContentView(View* content);
         void setBackgroundColor(Color color);
         void setTranslucent(bool translucent);
         void setStartupWindow(bool enable);
         void setFrameType(FrameType type);
+        void setLastInputView(View* v);
 
         int getX() const;
         int getY() const;
@@ -73,6 +78,7 @@ namespace ukive {
         int getMinHeight() const;
         int getClientWidth() const;
         int getClientHeight() const;
+        string16 getTitle() const;
         RootLayout* getRootLayout() const;
         Color getBackgroundColor() const;
         Cycler* getCycler() const;
@@ -80,20 +86,32 @@ namespace ukive {
         HWND getHandle() const;
         AnimationManager* getAnimationManager() const;
         FrameType getFrameType() const;
+        View* getLastInputView() const;
+        TitleBar* getTitleBar() const;
 
         bool isShowing() const;
-        bool isCursorInClient() const;
         bool isTranslucent() const;
         bool isStartupWindow() const;
         bool isMinimum() const;
         bool isMaximum() const;
+        bool isTitleBarShowing() const;
+
+        void showTitleBar();
+        void hideTitleBar();
+        void removeTitleBar();
+
+        void addStatusChangedListener(OnWindowStatusChangedListener* l);
+        void removeStatusChangedListener(OnWindowStatusChangedListener* l);
+
+        void convScreenToClient(Point* p);
+        void convClientToScreen(Point* p);
 
         void captureMouse(View* v);
-        void releaseMouse();
+        void releaseMouse(bool all = false);
 
-        //当一个widget获取到焦点时，应调用此方法。
+        // 当一个 View 获取到焦点时，应调用此方法。
         void captureKeyboard(View* v);
-        //当一个widget放弃焦点时，应调用此方法。
+        // 当一个 View 放弃焦点时，应调用此方法。
         void releaseKeyboard();
 
         View* getMouseHolder() const;
@@ -108,11 +126,13 @@ namespace ukive {
         void performRefresh();
         void performRefresh(int left, int top, int right, int bottom);
 
-        View* findViewById(int id);
+        View* findViewById(int id) const;
 
         ContextMenu* startContextMenu(
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
+        void notifyContextMenuClose();
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);
+        void notifyTextActionModeClose();
 
         float dpToPx(float dp);
         float pxToDp(float px);
@@ -125,6 +145,8 @@ namespace ukive {
         virtual void onActivate(int param);
         virtual void onSetFocus();
         virtual void onKillFocus();
+        virtual void onSetText(const string16& text);
+        virtual void onSetIcon();
         virtual void onDraw(const Rect& rect);
         virtual void onMove(int x, int y);
         virtual void onResize(
@@ -144,21 +166,12 @@ namespace ukive {
     protected:
         void onPreSwapChainResize() override;
         void onPostSwapChainResize() override;
+        void onHandleMessage(Message* msg) override;
 
     private:
         enum {
             SCHEDULE_RENDER = 0,
             SCHEDULE_LAYOUT = 1,
-        };
-
-        class UpdateCycler : public Cycler {
-        public:
-            UpdateCycler(Window* window)
-                :win_(window) {}
-
-            void handleMessage(Message* msg) override;
-        private:
-            Window* win_;
         };
 
         class AnimStateChangedListener
@@ -200,16 +213,18 @@ namespace ukive {
         View* mouse_holder_;
         View* focus_holder_;
         View* focus_holder_backup_;
+        View* last_input_view_;
         int mouse_holder_ref_;
 
-        std::shared_ptr<ContextMenu> context_menu_;
-        std::shared_ptr<TextActionMode> text_action_mode_;
+        ContextMenu* context_menu_;
+        TextActionMode* text_action_mode_;
 
         AnimationManager* anim_mgr_;
         AnimationManager::OnStateChangedListener* mStateChangedListener;
-
         AnimStateChangedListener* mAnimStateChangedListener;
         AnimTimerEventListener* mAnimTimerEventListener;
+
+        std::vector<OnWindowStatusChangedListener*> status_changed_listeners_;
 
         Color background_color_;
         bool is_startup_window_;

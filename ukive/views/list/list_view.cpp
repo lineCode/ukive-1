@@ -13,13 +13,15 @@
 namespace ukive {
 
     ListView::ListView(Window* w)
-        : ViewGroup(w),
+        : ListView(w, {}) {}
+
+    ListView::ListView(Window* w, AttrsRef attrs)
+        : ViewGroup(w, attrs),
           initial_layouted_(false)
     {
         scroll_bar_ = std::make_unique<OverlayScrollBar>();
         recycler_ = std::make_unique<ViewHolderRecycler>(this);
     }
-
 
     void ListView::onLayout(
         bool changed, bool size_changed,
@@ -163,13 +165,13 @@ namespace ukive {
             0, View::UNKNOWN, 0,
             child_lp->height, &child_height, &child_height_mode);
 
-        int width_margin = child_lp->leftMargin +
-            child_lp->rightMargin +
+        int width_margin = child_lp->left_margin +
+            child_lp->right_margin +
             holder->ex_margins.left +
             holder->ex_margins.right;
 
-        int height_margin = child_lp->topMargin +
-            child_lp->bottomMargin +
+        int height_margin = child_lp->top_margin +
+            child_lp->bottom_margin +
             holder->ex_margins.top +
             holder->ex_margins.bottom;
 
@@ -184,10 +186,10 @@ namespace ukive {
     {
         auto child_lp = holder->item_view->getLayoutParams();
         holder->item_view->layout(
-            left + child_lp->leftMargin + holder->ex_margins.left,
-            top + child_lp->topMargin + holder->ex_margins.top,
-            left + width - child_lp->rightMargin - holder->ex_margins.right,
-            top + height - child_lp->bottomMargin - holder->ex_margins.bottom);
+            left + child_lp->left_margin + holder->ex_margins.left,
+            top + child_lp->top_margin + holder->ex_margins.top,
+            left + width - child_lp->right_margin - holder->ex_margins.right,
+            top + height - child_lp->bottom_margin - holder->ex_margins.bottom);
     }
 
     void ListView::updateOverlayScrollBar() {

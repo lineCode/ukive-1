@@ -3,26 +3,37 @@
 #include <typeinfo>
 
 #include "ukive/views/layout/frame_layout.h"
-#include "ukive/views/layout/linear_layout.h"
-#include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/layout/root_layout_params.h"
 #include "ukive/window/window.h"
 #include "ukive/views/debug_view.h"
+#include "ukive/views/title_bar/title_bar.h"
+#include "ukive/resources/layout_instantiator.h"
 
+
+namespace {
+
+    const int kTitleBarHeight = 42;
+
+}
 
 namespace ukive {
 
     RootLayout::RootLayout(Window* w)
-        : NonClientLayout(w),
-          debug_view_(nullptr),
-          shade_added_(false) {
+        :RootLayout(w, {}) {}
 
-        content_layout_ = new LinearLayout(getWindow());
-        content_layout_->setOrientation(LinearLayout::VERTICAL);
+    RootLayout::RootLayout(Window* w, AttrsRef attrs)
+        : NonClientLayout(w, attrs),
+          title_bar_(nullptr),
+          debug_view_(nullptr),
+          shade_layout_(nullptr),
+          content_layout_(nullptr),
+          content_view_(nullptr),
+          shade_added_(false)
+    {
+        content_layout_ = new FrameLayout(getWindow());
         addView(content_layout_);
 
         shade_layout_ = new FrameLayout(getWindow());
-        shade_layout_->setCanConsumeMouseEvent(false);
     }
 
     RootLayout::~RootLayout() {
@@ -31,19 +42,56 @@ namespace ukive {
         }
     }
 
-
-    LayoutParams* RootLayout::generateLayoutParams(const LayoutParams &lp) {
+    LayoutParams* RootLayout::generateLayoutParams(const LayoutParams& lp) const {
         return new RootLayoutParams(lp);
     }
 
-    LayoutParams* RootLayout::generateDefaultLayoutParams() {
+    LayoutParams* RootLayout::generateDefaultLayoutParams() const {
         return new RootLayoutParams(
             RootLayoutParams::MATCH_PARENT,
             RootLayoutParams::MATCH_PARENT);
     }
 
-    bool RootLayout::checkLayoutParams(LayoutParams* lp) {
+    bool RootLayout::checkLayoutParams(LayoutParams* lp) const {
         return typeid(*lp) == typeid(RootLayoutParams);
+    }
+
+    void RootLayout::showTitleBar() {
+        int title_bar_height = getWindow()->dpToPx(kTitleBarHeight);
+        if (!title_bar_) {
+            if (content_view_) {
+                content_view_->getLayoutParams()->top_margin = title_bar_height;
+            }
+
+            title_bar_ = new TitleBar(getWindow());
+            title_bar_->setLayoutParams(
+                new LayoutParams(LayoutParams::MATCH_PARENT, title_bar_height));
+            content_layout_->addView(title_bar_);
+        } else {
+            if (content_view_) {
+                content_view_->getLayoutParams()->top_margin = title_bar_height;
+            }
+            title_bar_->setVisibility(View::VISIBLE);
+        }
+    }
+
+    void RootLayout::hideTitleBar() {
+        if (title_bar_) {
+            if (content_view_) {
+                content_view_->getLayoutParams()->top_margin = 0;
+            }
+            title_bar_->setVisibility(View::VANISHED);
+        }
+    }
+
+    void RootLayout::removeTitleBar() {
+        if (title_bar_) {
+            if (content_view_) {
+                content_view_->getLayoutParams()->top_margin = 0;
+            }
+            content_layout_->removeView(title_bar_);
+            title_bar_ = nullptr;
+        }
     }
 
     void RootLayout::addShade(View* shade) {
@@ -66,14 +114,13 @@ namespace ukive {
         }
     }
 
-    void RootLayout::addDebugView() {
+    void RootLayout::showDebugView() {
         if (!debug_view_) {
             debug_view_ = new DebugView(getWindow());
             debug_view_->setLayoutParams(
                 new LayoutParams(
                     LayoutParams::MATCH_PARENT,
                     LayoutParams::MATCH_PARENT));
-            debug_view_->setCanConsumeMouseEvent(false);
             addView(debug_view_);
         }
     }
@@ -89,29 +136,71 @@ namespace ukive {
         if (debug_view_) {
             removeDebugView();
         } else {
-            addDebugView();
+            showDebugView();
         }
+    }
+
+    bool RootLayout::isTitleBarShowing() const {
+        return title_bar_ && title_bar_->getVisibility() == View::VISIBLE;
+    }
+
+    TitleBar* RootLayout::getTitleBar() const {
+        return title_bar_;
     }
 
     DebugView* RootLayout::getDebugView() const {
         return debug_view_;
     }
 
-    void RootLayout::addContent(View* content) {
+    void RootLayout::setContent(int id) {
+        LayoutInstantiator instantiator;
+        auto content_view = instantiator.instantiate(getWindow(), id);
+        setContent(content_view);
+    }
+
+    void RootLayout::setContent(View* content) {
+        if (content == content_view_ || !content) {
+            return;
+        }
+
+        if (content_view_) {
+            content_layout_->removeView(content_view_);
+        }
+
+        content_view_ = content;
         auto lp = new LayoutParams(
             LayoutParams::MATCH_PARENT, LayoutParams::MATCH_PARENT);
-        content_layout_->addView(content, lp);
+        if (title_bar_ && title_bar_->getVisibility() != View::VANISHED) {
+            lp->top_margin = getWindow()->dpToPx(kTitleBarHeight);
+        }
+
+        content_layout_->addView(0, content, lp);
     }
 
 
     void RootLayout::requestLayout() {
         NonClientLayout::requestLayout();
-
         getWindow()->requestLayout();
     }
 
     View* RootLayout::findViewById(int id) const {
         return content_layout_->findViewById(id);
+    }
+
+    HitPoint RootLayout::onNCHitTest(int x, int y) {
+        auto hit_point = NonClientLayout::onNCHitTest(x, y);
+        if (hit_point == HitPoint::CLIENT &&
+            title_bar_ &&
+            title_bar_->getVisibility() == View::VISIBLE)
+        {
+            x -= content_layout_->getLeft();
+            y -= content_layout_->getTop();
+            auto bounds = title_bar_->getBounds();
+            if (bounds.hit(x, y)) {
+                hit_point = title_bar_->onNCHitTest(x - bounds.left, y - bounds.top);
+            }
+        }
+        return hit_point;
     }
 
 }

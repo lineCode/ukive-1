@@ -3,10 +3,14 @@
 
 #include <Windows.h>
 #include <windowsx.h>
+#include <tpcshrd.h>
 
+#include <map>
 #include <memory>
+#include <vector>
 
 #include "ukive/graphics/cursor.h"
+#include "ukive/graphics/point.h"
 #include "ukive/utils/string_utils.h"
 
 #define WM_NCDRAWCLASSIC1  0xAE
@@ -59,6 +63,8 @@ namespace ukive {
         int getY() const;
         int getWidth() const;
         int getHeight() const;
+        int getClientOffX() const;
+        int getClientOffY() const;
         int getClientWidth() const;
         int getClientHeight() const;
         int getDpi() const;
@@ -67,7 +73,6 @@ namespace ukive {
 
         bool isCreated() const;
         bool isShowing() const;
-        bool isCursorInClient() const;
         bool isTranslucent() const;
         bool isMinimum() const;
         bool isMaximum() const;
@@ -84,16 +89,29 @@ namespace ukive {
         void setWindowStyle(int style, bool ex, bool enabled);
         void sendFrameChanged();
 
+        void convScreenToClient(Point* p);
+        void convClientToScreen(Point* p);
+
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     private:
+        struct TouchInputCache {
+            std::unique_ptr<TOUCHINPUT[]> cache;
+            UINT size = 0;
+        };
+
         void setWindowRectShape();
+        static void disableTouchFeedback(HWND hWnd);
+        int getPointerTypeFromMouseMsg();
 
         LRESULT processDWMProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP);
 
         LRESULT processWindowMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, bool* handled) {
             WINDOW_MSG_RANGE_HANDLER(WM_MOUSEFIRST, WM_MOUSELAST, onMouseRange);
             WINDOW_MSG_RANGE_HANDLER(WM_NCMOUSEFIRST, WM_NCMOUSELAST, onMouseRange);
+
+            WINDOW_MSG_HANDLER(WM_MOUSEHOVER, onMouseHover);
+            WINDOW_MSG_HANDLER(WM_MOUSELEAVE, onMouseLeave);
 
             WINDOW_MSG_HANDLER(WM_NCCREATE, onNCCreate);
             WINDOW_MSG_HANDLER(WM_CREATE, onCreate);
@@ -116,6 +134,8 @@ namespace ukive {
             WINDOW_MSG_HANDLER(WM_SETCURSOR, onSetCursor);
             WINDOW_MSG_HANDLER(WM_SETFOCUS, onSetFocus);
             WINDOW_MSG_HANDLER(WM_KILLFOCUS, onKillFocus);
+            WINDOW_MSG_HANDLER(WM_SETTEXT, onSetText);
+            WINDOW_MSG_HANDLER(WM_SETICON, onSetIcon);
             WINDOW_MSG_HANDLER(WM_MOVE, onMove);
             WINDOW_MSG_HANDLER(WM_SIZE, onSize);
             WINDOW_MSG_HANDLER(WM_MOVING, onMoving);
@@ -142,6 +162,8 @@ namespace ukive {
         LRESULT onNCHitTest(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onNCCalCSize(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onMouseRange(UINT uMsg, WPARAM wParam, LPARAM lParam, bool* handled);
+        LRESULT onMouseHover(WPARAM wParam, LPARAM lParam, bool* handled);
+        LRESULT onMouseLeave(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onClose(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onDestroy(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onNCDestroy(WPARAM wParam, LPARAM lParam, bool* handled);
@@ -154,6 +176,8 @@ namespace ukive {
         LRESULT onSetCursor(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onSetFocus(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onKillFocus(WPARAM wParam, LPARAM lParam, bool* handled);
+        LRESULT onSetText(WPARAM wParam, LPARAM lParam, bool* handled);
+        LRESULT onSetIcon(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onMove(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onSize(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onMoving(WPARAM wParam, LPARAM lParam, bool* handled);
@@ -206,6 +230,9 @@ namespace ukive {
         bool is_translucent_;
         bool is_enable_mouse_track_;
         bool is_first_nccalc_;
+
+        TouchInputCache ti_cache_;
+        std::map<DWORD, TOUCHINPUT> prev_ti_;
     };
 
 }

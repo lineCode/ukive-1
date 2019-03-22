@@ -6,9 +6,15 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shell", "shell\shell.vcxproj", "{58F52DDE-C924-4F42-8DF1-E9E7AE93B9D5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6C135376-870C-4C39-B198-2FFC8E947FFD} = {6C135376-870C-4C39-B198-2FFC8E947FFD}
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4} = {6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ukive", "ukive\ukive.vcxproj", "{6C135376-870C-4C39-B198-2FFC8E947FFD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oigka", "oigka\oigka.vcxproj", "{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C135376-870C-4C39-B198-2FFC8E947FFD} = {6C135376-870C-4C39-B198-2FFC8E947FFD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +40,14 @@ Global
 		{6C135376-870C-4C39-B198-2FFC8E947FFD}.Release|x64.Build.0 = Release|x64
 		{6C135376-870C-4C39-B198-2FFC8E947FFD}.Release|x86.ActiveCfg = Release|Win32
 		{6C135376-870C-4C39-B198-2FFC8E947FFD}.Release|x86.Build.0 = Release|Win32
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Debug|x64.ActiveCfg = Debug|x64
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Debug|x64.Build.0 = Debug|x64
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Debug|x86.ActiveCfg = Debug|Win32
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Debug|x86.Build.0 = Debug|Win32
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Release|x64.ActiveCfg = Release|x64
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Release|x64.Build.0 = Release|x64
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Release|x86.ActiveCfg = Release|Win32
+		{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

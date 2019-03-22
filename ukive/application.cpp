@@ -12,6 +12,10 @@
 #include "ukive/message/message_looper.h"
 #include "ukive/animation/animation_manager.h"
 #include "ukive/text/word_breaker.h"
+#include "ukive/utils/stl_utils.h"
+#include "ukive/utils/dynamic_windows_api.h"
+#include "ukive/files/file.h"
+#include "ukive/resources/layout_instantiator.h"
 
 
 #pragma comment(lib, "comctl32.lib")
@@ -20,13 +24,12 @@
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-//#pragma comment(lib, "Shcore.lib")
 #pragma comment(lib, "winmm.lib")
 
 
 namespace ukive {
 
-    int Application::view_uid_ = 10000;
+    int Application::view_uid_ = 10;
     bool Application::vsync_enabled_ = true;
     Application* Application::instance_ = nullptr;
 
@@ -63,16 +66,18 @@ namespace ukive {
     void Application::initApplication() {
         HRESULT hr = ::CoInitialize(nullptr);
         if (FAILED(hr)) {
-            LOG(Log::ERR) << "failed to init COM.";
+            LOG(Log::ERR) << "Failed to initialize COM";
         }
 
         Message::init(50);
         MessageLooper::prepareMainLooper();
         WordBreaker::initGlobal();
 
+        LayoutInstantiator::init();
+
         hr = AnimationManager::initGlobal();
         if (FAILED(hr)) {
-            LOG(Log::ERR) << "Init anim library failed.";
+            LOG(Log::ERR) << "Failed to initialize anim library";
         }
 
         graphic_device_manager_.reset(new GraphicDeviceManager());
@@ -83,7 +88,7 @@ namespace ukive {
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
         if (FAILED(hr)) {
-            LOG(Log::ERR) << "Init Tsf failed.";
+            LOG(Log::ERR) << "Failed to initialize TSF";
         }
     }
 
@@ -107,36 +112,41 @@ namespace ukive {
             return;
         }
 
-        std::wstring cmd_string = cmd_line;
-        if (cmd_string.empty()) {
-            return;
-        }
+        command_list_.clear();
 
-        size_t i = cmd_string.find(L" ");
-        if (i == std::wstring::npos) {
-            command_list_.push_back(cmd_string);
-            return;
-        }
+        string16 cur_cmd;
+        string16 cmd_string = cmd_line;
+        bool in_quote = false;
 
-        size_t new_start = 0;
-
-        while (i != std::wstring::npos) {
-            std::wstring tmp = cmd_string.substr(new_start, i - new_start);
-            if (!tmp.empty()) {
-                command_list_.push_back(tmp);
-            }
-
-            new_start = i + 1;
-            i = cmd_string.find(L" ", new_start);
-            if (i == std::wstring::npos) {
-                tmp = cmd_string.substr(new_start, cmd_string.length() - new_start);
-                if (!tmp.empty()) {
-                    command_list_.push_back(tmp);
+        for (auto ch : cmd_string) {
+            if (ch == L' ') {
+                if (in_quote) {
+                    cur_cmd.push_back(ch);
+                } else {
+                    if (!cur_cmd.empty()) {
+                        command_list_.push_back(cur_cmd);
+                        cur_cmd.clear();
+                    }
                 }
+            } else if (ch == L'"') {
+                if (in_quote) {
+                    in_quote = false;
+                    if (!cur_cmd.empty()) {
+                        command_list_.push_back(cur_cmd);
+                        cur_cmd.clear();
+                    }
+                } else {
+                    in_quote = true;
+                }
+            } else {
+                cur_cmd.push_back(ch);
             }
+        }
+
+        if (!cur_cmd.empty()) {
+            command_list_.push_back(cur_cmd);
         }
     }
-
 
     void Application::run() {
         MSG msg;
@@ -157,13 +167,13 @@ namespace ukive {
                 DWORD result = ::MsgWaitForMultipleObjectsEx(
                     0, nullptr, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
                 if (result == WAIT_OBJECT_0) {
-                    int i = 0;
+                    //
                 }
             }
 
             DWORD status = ::GetQueueStatus(QS_INPUT);
             if (HIWORD(status) & QS_INPUT) {
-                int i = 0;
+                //
             }
 
             while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -179,14 +189,13 @@ namespace ukive {
         }
     }
 
-
-    string16 Application::getCommand(size_t index) {
-        return instance_->command_list_.at(index);
+    string16 Application::getCommand(int index) {
+        return instance_->command_list_.at(
+            STLCST(instance_->command_list_, index));
     }
 
-
-    size_t Application::getCommandCount() {
-        return instance_->command_list_.size();
+    int Application::getCommandCount() {
+        return STLCInt(instance_->command_list_.size());
     }
 
     void Application::setVSync(bool enable){
@@ -227,10 +236,7 @@ namespace ukive {
         }
 
         if (dir) {
-            auto i = file_name.find_last_of(L"\\");
-            if (i != string16::npos) {
-                file_name = file_name.substr(0, i);
-            }
+            file_name = File(file_name).getParentPath();
         }
 
         return file_name;
@@ -255,14 +261,9 @@ namespace ukive {
             HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
 
             UINT dpi_x = 96, dpi_y = 96;
-            using GetDpiForMonitorPtr = HRESULT(STDAPICALLTYPE*)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
-            auto func = reinterpret_cast<GetDpiForMonitorPtr>(
-                ::GetProcAddress(::LoadLibraryW(L"Shcore.dll"), "GetDpiForMonitor"));
-            if (func) {
-                HRESULT hr = func(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
-                if (SUCCEEDED(hr)) {
-                    return dpi_x;
-                }
+            HRESULT hr = UDGetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
+            if (SUCCEEDED(hr)) {
+                return dpi_x;
             }
         }
 

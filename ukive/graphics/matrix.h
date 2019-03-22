@@ -20,6 +20,7 @@ namespace ukive {
         Matrix();
         Matrix(const Matrix &rhs);
         Matrix& operator=(const Matrix &rhs);
+        Matrix operator*(const Matrix &rhs) const;
 
         void set(const D2D1::Matrix3x2F &native);
         void set(const D2D1_MATRIX_3X2_F &native);

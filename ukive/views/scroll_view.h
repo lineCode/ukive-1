@@ -9,27 +9,27 @@ namespace ukive {
     class Scroller;
     class InputEvent;
 
-    class ScrollView : public ViewGroup
-    {
+    class ScrollView : public ViewGroup {
     public:
-        ScrollView(Window* w);
+        explicit ScrollView(Window* w);
+        ScrollView(Window* w, AttrsRef attrs);
 
         void onMeasure(
             int width, int height,
-            int widthSpec, int heightSpec) override;
+            int width_mode, int height_mode) override;
 
         void onLayout(
             bool changed, bool sizeChanged,
             int left, int top, int right, int bottom) override;
 
         void onSizeChanged(
-            int width, int height, int oldWidth, int oldHeight) override;
+            int width, int height, int old_w, int old_h) override;
 
         void onScrollChanged(
             int scrollX, int scrollY, int oldScrollX, int oldScrollY) override;
 
         bool onInputEvent(InputEvent* e) override;
-        bool onInterceptMouseEvent(InputEvent* e) override;
+        bool onInterceptInputEvent(InputEvent* e) override;
 
     private:
         bool canScroll();
@@ -38,10 +38,11 @@ namespace ukive {
 
         void processVerticalScroll(int dy);
 
-        int mMouseXCache;
-        int mMouseYCache;
+        int mouse_x_cache_;
+        int mouse_y_cache_;
+        int saved_pointer_type_;
 
-        Scroller* mScroller;
+        Scroller* scroller_;
     };
 
 }

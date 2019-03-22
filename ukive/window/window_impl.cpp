@@ -13,8 +13,13 @@
 #include "ukive/window/frame/default_non_client_frame.h"
 #include "ukive/window/frame/drawable_non_client_frame.h"
 #include "ukive/event/input_event.h"
+#include "ukive/utils/stl_utils.h"
+#include "ukive/utils/win10_version.h"
+#include "ukive/utils/dynamic_windows_api.h"
 
-#include "shell/test/frame/custom_non_client_frame.h"
+#define MI_WP_SIGNATURE  0xFF515700
+#define SIGNATURE_MASK   0xFFFFFF00
+#define TOUCH_PEN_MASK   0x80
 
 
 namespace ukive {
@@ -238,6 +243,18 @@ namespace ukive {
         return height_;
     }
 
+    int WindowImpl::getClientOffX() const {
+        POINT p;
+        non_client_frame_->getClientOffset(&p);
+        return p.x;
+    }
+
+    int WindowImpl::getClientOffY() const {
+        POINT p;
+        non_client_frame_->getClientOffset(&p);
+        return p.y;
+    }
+
     int WindowImpl::getClientWidth() const {
         if (!::IsWindow(hWnd_)) {
             return 0;
@@ -245,7 +262,12 @@ namespace ukive {
 
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
-        return rect.right - rect.left;
+        int width = rect.right - rect.left;
+
+        non_client_frame_->getClientInsets(&rect);
+        width -= (rect.left + rect.right);
+
+        return std::max(width, 0);
     }
 
     int WindowImpl::getClientHeight() const {
@@ -255,24 +277,23 @@ namespace ukive {
 
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
-        return rect.bottom - rect.top;
+        int height = rect.bottom - rect.top;
+
+        non_client_frame_->getClientInsets(&rect);
+        height -= (rect.top + rect.bottom);
+
+        return std::max(height, 0);
     }
 
     int WindowImpl::getDpi() const {
         if (!::IsWindow(hWnd_)) {
-            return 0;
+            return 96;
         }
 
-        // TODO: Windows 10 1607
-        if (::IsWindows10OrGreater()) {
-            using GetDpiForWindowPtr = UINT(WINAPI*)(HWND);
-            auto func = reinterpret_cast<GetDpiForWindowPtr>(
-                ::GetProcAddress(::LoadLibraryW(L"User32.dll"), "GetDpiForWindow"));
-            if (func) {
-                int dpi_x = func(hWnd_);
-                if (dpi_x > 0) {
-                    return dpi_x;
-                }
+        if (isWin10Ver1607OrGreater()) {
+            int dpi_x = STLCInt(UDGetDpiForWindow(hWnd_));
+            if (dpi_x > 0) {
+                return dpi_x;
             }
         }
 
@@ -300,33 +321,6 @@ namespace ukive {
         return is_showing_;
     }
 
-    bool WindowImpl::isCursorInClient() const {
-        RECT clientRect;
-        RECT clientInScreenRect;
-        POINT cursorPos;
-        POINT convertPos;
-
-        ::GetCursorPos(&cursorPos);
-        ::GetClientRect(hWnd_, &clientRect);
-
-        int clientWidth = clientRect.right - clientRect.left;
-        int clientHeight = clientRect.bottom - clientRect.top;
-
-        convertPos.x = clientRect.left;
-        convertPos.y = clientRect.top;
-        ::ClientToScreen(hWnd_, &convertPos);
-
-        clientInScreenRect.left = convertPos.x;
-        clientInScreenRect.top = convertPos.y;
-        clientInScreenRect.right = clientInScreenRect.left + clientWidth;
-        clientInScreenRect.bottom = clientInScreenRect.top + clientHeight;
-
-        return (cursorPos.x >= clientInScreenRect.left
-            && cursorPos.x < clientInScreenRect.right
-            && cursorPos.y >= clientInScreenRect.top
-            && cursorPos.y < clientInScreenRect.bottom);
-    }
-
     bool WindowImpl::isTranslucent() const {
         return is_translucent_;
     }
@@ -348,21 +342,21 @@ namespace ukive {
     }
 
     void WindowImpl::setMouseCaptureRaw() {
-        if (!is_created_) {
+        if (!::IsWindow(hWnd_)) {
             return;
         }
         ::SetCapture(hWnd_);
     }
 
     void WindowImpl::releaseMouseCaptureRaw() {
-        if (!is_created_) {
+        if (!::IsWindow(hWnd_)) {
             return;
         }
         ::ReleaseCapture();
     }
 
     void WindowImpl::setMouseTrack() {
-        if (!is_created_) {
+        if (!::IsWindow(hWnd_)) {
             return;
         }
 
@@ -395,6 +389,20 @@ namespace ukive {
             SWP_NOSENDCHANGING | SWP_NOSIZE | SWP_NOZORDER);
     }
 
+    void WindowImpl::convScreenToClient(Point* p) {
+        POINT raw_p = { p->x, p->y };
+        ::ScreenToClient(hWnd_, &raw_p);
+        p->x = raw_p.x;
+        p->y = raw_p.y;
+    }
+
+    void WindowImpl::convClientToScreen(Point* p) {
+        POINT raw_p = { p->x, p->y };
+        ::ClientToScreen(hWnd_, &raw_p);
+        p->x = raw_p.x;
+        p->y = raw_p.y;
+    }
+
     void WindowImpl::setWindowRectShape() {
         HRGN prev_rgn = ::CreateRectRgn(0, 0, 0, 0);
         int type = ::GetWindowRgn(hWnd_, prev_rgn);
@@ -411,6 +419,34 @@ namespace ukive {
         }
 
         ::DeleteObject(prev_rgn);
+    }
+
+    void WindowImpl::disableTouchFeedback(HWND hWnd) {
+        if (::IsWindows8OrGreater()) {
+            BOOL enabled = FALSE;
+            UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_TAP, 0, sizeof(BOOL), &enabled);
+            UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &enabled);
+            UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &enabled);
+        }
+    }
+
+    int WindowImpl::getPointerTypeFromMouseMsg() {
+        int pointer_type;
+        auto info = ::GetMessageExtraInfo();
+        if ((info & SIGNATURE_MASK) == MI_WP_SIGNATURE) {
+            // Generated by Pen or Touch
+            if (info & TOUCH_PEN_MASK) {
+                // Touch
+                pointer_type = InputEvent::PT_TOUCH;
+            } else {
+                // Pen
+                pointer_type = InputEvent::PT_PEN;
+            }
+        } else {
+            // Generated by Mouse
+            pointer_type = InputEvent::PT_MOUSE;
+        }
+        return pointer_type;
     }
 
     bool WindowImpl::isMouseTrackEnabled() {
@@ -498,42 +534,62 @@ namespace ukive {
     }
 
     bool WindowImpl::onTouch(const TOUCHINPUT* inputs, int size) {
-        DCHECK(size > 0);
-
-        InputEvent ev;
-
+        bool consumed = false;
         for (int i = 0; i < size; ++i) {
-            auto& ti = inputs[i];
-            bool need_process = false;
+            InputEvent ev;
+            ev.setPointerType(InputEvent::PT_TOUCH);
+            bool has_move = false;
+            bool has_down_up = false;
+            auto& input = inputs[i];
+            if (input.dwFlags & TOUCHEVENTF_DOWN) {
+                DLOG(Log::INFO) << "TOUCH DOWN";
 
-            if (ti.dwFlags & TOUCHEVENTF_DOWN) {
-                need_process = true;
-                ev.setEvent(size > 1 ? InputEvent::EVT_MULTI_DOWN : InputEvent::EVT_DOWN);
-            } else if (ti.dwFlags & TOUCHEVENTF_UP) {
-                need_process = true;
-                ev.setEvent(size > 1 ? InputEvent::EVT_MULTI_UP : InputEvent::EVT_UP);
-            } else if (ti.dwFlags & TOUCHEVENTF_MOVE) {
-                need_process = true;
-                ev.setEvent(InputEvent::EVT_MOVE);
+                DCHECK(!has_down_up);
+                DCHECK(prev_ti_.find(input.dwID) == prev_ti_.end());
+                has_down_up = true;
+                ev.setEvent(InputEvent::EVT_DOWN);
+                ev.setCurTouchId(STLCInt(input.dwID));
+                prev_ti_[input.dwID] = input;
+            } else if (input.dwFlags & TOUCHEVENTF_UP) {
+                DLOG(Log::INFO) << "TOUCH UP";
+
+                DCHECK(!has_down_up);
+                auto it = prev_ti_.find(input.dwID);
+                DCHECK(it != prev_ti_.end());
+                has_down_up = true;
+                ev.setEvent(InputEvent::EVT_UP);
+                ev.setCurTouchId(STLCInt(input.dwID));
+                prev_ti_.erase(it);
+            } else if (input.dwFlags & TOUCHEVENTF_MOVE) {
+                if (!has_down_up && !has_move) {
+                    auto it = prev_ti_.find(input.dwID);
+                    DCHECK(it != prev_ti_.end());
+                    if (input.x != it->second.x || input.y != it->second.y) {
+                        has_move = true;
+                        ev.setEvent(InputEvent::EVT_MOVE);
+                        ev.setCurTouchId(STLCInt(input.dwID));
+                    }
+                }
+                prev_ti_[input.dwID] = input;
             }
 
-            if (need_process) {
-                ev.setMouseRawX(TOUCH_COORD_TO_PIXEL(ti.x));
-                ev.setMouseRawY(TOUCH_COORD_TO_PIXEL(ti.y));
+            if (has_down_up || has_move) {
+                int tx = TOUCH_COORD_TO_PIXEL(input.x);
+                int ty = TOUCH_COORD_TO_PIXEL(input.y);
 
-                ::POINT pt;
-                pt.x = TOUCH_COORD_TO_PIXEL(ti.x);
-                pt.y = TOUCH_COORD_TO_PIXEL(ti.y);
+                POINT pt = { tx, ty };
                 ::ScreenToClient(hWnd_, &pt);
 
-                ev.setMouseX(pt.x);
-                ev.setMouseY(pt.y);
+                ev.setRawX(pt.x);
+                ev.setRawY(pt.y);
+                ev.setX(pt.x);
+                ev.setY(pt.y);
 
-                return onInputEvent(&ev);
+                consumed |= onInputEvent(&ev);
             }
         }
 
-        return true;
+        return consumed;
     }
 
     bool WindowImpl::onInputEvent(InputEvent* e) {
@@ -562,8 +618,6 @@ namespace ukive {
 
     LRESULT WindowImpl::onNCCreate(WPARAM wParam, LPARAM lParam, bool* handled) {
         if (delegate_->getFrameType() == Window::FRAME_CUSTOM) {
-            non_client_frame_.reset(new shell::CustomNonClientFrame());
-        } else if (delegate_->getFrameType() == Window::FRAME_ZERO) {
             non_client_frame_.reset(new DrawableNonClientFrame());
         } else {
             non_client_frame_.reset(new DefaultNonClientFrame());
@@ -635,6 +689,11 @@ namespace ukive {
             case HitPoint::BOTTOM_LEFT:win_hp = HTBOTTOMLEFT; break;
             case HitPoint::BOTTOM:win_hp = HTBOTTOM; break;
             case HitPoint::BOTTOM_RIGHT:win_hp = HTBOTTOMRIGHT; break;
+            case HitPoint::CAPTION:win_hp = HTCAPTION; break;
+            case HitPoint::SYS_MENU:win_hp = HTSYSMENU; break;
+            case HitPoint::MIN_BUTTON:win_hp = HTMINBUTTON; break;
+            case HitPoint::MAX_BUTTON:win_hp = HTMAXBUTTON; break;
+            case HitPoint::CLOSE_BUTTON:win_hp = HTCLOSE; break;
             default: win_hp = HTCLIENT; break;
             }
 
@@ -681,18 +740,21 @@ namespace ukive {
 
         case WM_LBUTTONDOWN:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseKey(InputEvent::MK_LEFT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
 
             if (onInputEvent(&ev)) {
                 *handled = true;
@@ -703,8 +765,10 @@ namespace ukive {
 
         case WM_LBUTTONUP:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
@@ -715,11 +779,12 @@ namespace ukive {
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_UP);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseKey(InputEvent::MK_LEFT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -729,18 +794,21 @@ namespace ukive {
 
         case WM_RBUTTONDOWN:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseKey(InputEvent::MK_RIGHT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -750,18 +818,21 @@ namespace ukive {
 
         case WM_RBUTTONUP:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_UP);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseKey(InputEvent::MK_RIGHT);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -771,18 +842,21 @@ namespace ukive {
 
         case WM_MBUTTONDOWN:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_DOWN);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseKey(InputEvent::MK_MIDDLE);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -792,18 +866,21 @@ namespace ukive {
 
         case WM_MBUTTONUP:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_UP);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseKey(InputEvent::MK_MIDDLE);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -813,8 +890,10 @@ namespace ukive {
 
         case WM_MOUSEMOVE:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
@@ -825,42 +904,11 @@ namespace ukive {
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_MOVE);
-            ev.setMouseX(GET_X_LPARAM(lParam));
-            ev.setMouseY(GET_Y_LPARAM(lParam));
-            ev.setMouseRawX(GET_X_LPARAM(lParam));
-            ev.setMouseRawY(GET_Y_LPARAM(lParam));
-            if (onInputEvent(&ev)) {
-                *handled = true;
-                return 0;
-            }
-            break;
-        }
-
-        case WM_MOUSELEAVE:
-        {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
-                return 0;
-            }
-
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVM_LEAVE_WIN);
-            if (onInputEvent(&ev)) {
-                *handled = true;
-                return 0;
-            }
-            break;
-        }
-
-        case WM_MOUSEHOVER:
-        {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
-                return 0;
-            }
-
-            InputEvent ev;
-            ev.setEvent(InputEvent::EVM_HOVER);
+            ev.setPointerType(InputEvent::PT_MOUSE);
+            ev.setX(GET_X_LPARAM(lParam));
+            ev.setY(GET_Y_LPARAM(lParam));
+            ev.setRawX(GET_X_LPARAM(lParam));
+            ev.setRawY(GET_Y_LPARAM(lParam));
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -870,13 +918,16 @@ namespace ukive {
 
         case WM_MOUSEWHEEL:
         {
-            if (::GetMessageExtraInfo() != 0) {
-                *handled = true;
+            int p_type = getPointerTypeFromMouseMsg();
+            if (p_type != InputEvent::PT_MOUSE &&
+                p_type != InputEvent::PT_PEN)
+            {
                 return 0;
             }
 
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_WHEEL);
+            ev.setPointerType(InputEvent::PT_MOUSE);
             ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
 
             ::POINT pt;
@@ -884,10 +935,10 @@ namespace ukive {
             pt.y = GET_Y_LPARAM(lParam);
             ::ScreenToClient(hWnd_, &pt);
 
-            ev.setMouseX(pt.x);
-            ev.setMouseY(pt.y);
-            ev.setMouseRawX(pt.x);
-            ev.setMouseRawY(pt.y);
+            ev.setX(pt.x);
+            ev.setY(pt.y);
+            ev.setRawX(pt.x);
+            ev.setRawY(pt.y);
             if (onInputEvent(&ev)) {
                 *handled = true;
                 return 0;
@@ -896,6 +947,44 @@ namespace ukive {
         default:
         break;
         }
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMouseHover(WPARAM wParam, LPARAM lParam, bool* handled) {
+        int p_type = getPointerTypeFromMouseMsg();
+        if (p_type != InputEvent::PT_MOUSE &&
+            p_type != InputEvent::PT_PEN)
+        {
+            return 0;
+        }
+
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVM_HOVER);
+        ev.setPointerType(InputEvent::PT_MOUSE);
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return 0;
+        }
+
+        return 0;
+    }
+
+    LRESULT WindowImpl::onMouseLeave(WPARAM wParam, LPARAM lParam, bool* handled) {
+        int p_type = getPointerTypeFromMouseMsg();
+        if (p_type != InputEvent::PT_MOUSE &&
+            p_type != InputEvent::PT_PEN)
+        {
+            return 0;
+        }
+
+        InputEvent ev;
+        ev.setEvent(InputEvent::EVM_LEAVE_WIN);
+        ev.setPointerType(InputEvent::PT_MOUSE);
+        if (onInputEvent(&ev)) {
+            *handled = true;
+            return 0;
+        }
+
         return 0;
     }
 
@@ -974,7 +1063,9 @@ namespace ukive {
     }
 
     LRESULT WindowImpl::onSetCursor(WPARAM wParam, LPARAM lParam, bool* handled) {
-        if (isCursorInClient()) {
+        int hit_code = LOWORD(lParam);
+
+        if (hit_code == HTCLIENT) {
             *handled = true;
             setCurrentCursor(cursor_);
             return TRUE;
@@ -992,6 +1083,17 @@ namespace ukive {
         return 0;
     }
 
+    LRESULT WindowImpl::onSetText(WPARAM wParam, LPARAM lParam, bool* handled) {
+        auto text = reinterpret_cast<wchar_t*>(lParam);
+        delegate_->onSetText(text);
+        return 0;
+    }
+
+    LRESULT WindowImpl::onSetIcon(WPARAM wParam, LPARAM lParam, bool* handled) {
+        delegate_->onSetIcon();
+        return 0;
+    }
+
     LRESULT WindowImpl::onMove(WPARAM wParam, LPARAM lParam, bool* handled) {
         int x_px = LOWORD(lParam);
         int y_px = HIWORD(lParam);
@@ -1004,13 +1106,15 @@ namespace ukive {
             setWindowRectShape();
         }
 
-        RECT winRect;
-        ::GetWindowRect(hWnd_, &winRect);
+        RECT w_rect;
+        ::GetWindowRect(hWnd_, &w_rect);
+        RECT c_rect;
+        ::GetClientRect(hWnd_, &c_rect);
 
-        int width_px = winRect.right - winRect.left;
-        int height_px = winRect.bottom - winRect.top;
-        int client_width_px = LOWORD(lParam);
-        int client_height_px = HIWORD(lParam);
+        int width_px = w_rect.right - w_rect.left;
+        int height_px = w_rect.bottom - w_rect.top;
+        int client_width_px = c_rect.right - c_rect.left;
+        int client_height_px = c_rect.bottom - c_rect.top;
 
         onResize(wParam, width_px, height_px, client_width_px, client_height_px);
         auto nc_result = non_client_frame_->onSize(wParam, lParam, handled);
@@ -1061,6 +1165,7 @@ namespace ukive {
     LRESULT WindowImpl::onKeyDown(WPARAM wParam, LPARAM lParam, bool* handled) {
         InputEvent ev;
         ev.setEvent(InputEvent::EVK_DOWN);
+        ev.setPointerType(InputEvent::PT_KEYBOARD);
         ev.setKeyboardVirtualKey(wParam, lParam);
 
         if (onInputEvent(&ev)) {
@@ -1073,6 +1178,7 @@ namespace ukive {
     LRESULT WindowImpl::onKeyUp(WPARAM wParam, LPARAM lParam, bool* handled) {
         InputEvent ev;
         ev.setEvent(InputEvent::EVK_UP);
+        ev.setPointerType(InputEvent::PT_KEYBOARD);
         ev.setKeyboardVirtualKey(wParam, lParam);
 
         if (onInputEvent(&ev)) {
@@ -1085,6 +1191,7 @@ namespace ukive {
     LRESULT WindowImpl::onChar(WPARAM wParam, LPARAM lParam, bool* handled) {
         InputEvent ev;
         ev.setEvent(InputEvent::EVK_CHAR);
+        ev.setPointerType(InputEvent::PT_KEYBOARD);
         ev.setKeyboardCharKey(wParam, lParam);
 
         if (onInputEvent(&ev)) {
@@ -1108,11 +1215,18 @@ namespace ukive {
             return 0;
         }
 
-        std::unique_ptr<TOUCHINPUT[]> inputs(new TOUCHINPUT[input_count]);
+        if (input_count > ti_cache_.size) {
+            ti_cache_.cache.reset(new TOUCHINPUT[input_count]);
+            ti_cache_.size = input_count;
+        }
+
         if (::GetTouchInputInfo(
-            reinterpret_cast<HTOUCHINPUT>(lParam), input_count, inputs.get(), sizeof(TOUCHINPUT)))
+            reinterpret_cast<HTOUCHINPUT>(lParam),
+            input_count,
+            ti_cache_.cache.get(),
+            sizeof(TOUCHINPUT)))
         {
-            *handled = onTouch(inputs.get(), input_count);
+            *handled = onTouch(ti_cache_.cache.get(), STLCInt(input_count));
             ::CloseTouchInputHandle(reinterpret_cast<HTOUCHINPUT>(lParam));
 
             if (*handled) {
@@ -1146,7 +1260,6 @@ namespace ukive {
         HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP)
     {
         LRESULT ret = 0;
-        HRESULT hr = S_OK;
         bool call_dwp = true;
 
         call_dwp = !::DwmDefWindowProc(hWnd, message, wParam, lParam, &ret);
@@ -1188,6 +1301,7 @@ namespace ukive {
         WindowImpl* window = nullptr;
         if (uMsg == WM_NCCREATE) {
             //::EnableNonClientDpiScaling(hWnd);
+            disableTouchFeedback(hWnd);
             if (::RegisterTouchWindow(hWnd, TWF_WANTPALM) == 0) {
                 LOG(Log::WARNING) << "Failed to register touch window: " << GetLastError();
             }

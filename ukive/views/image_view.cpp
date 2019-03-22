@@ -9,15 +9,16 @@
 
 namespace ukive {
 
-    ImageView::ImageView(Window* wnd)
-        : View(wnd),
+    ImageView::ImageView(Window* w)
+        : ImageView(w, {}) {}
+
+    ImageView::ImageView(Window* w, AttrsRef attrs)
+        : View(w, attrs),
           scale_type_(FIT_WHEN_LARGE),
           bitmap_drawable_(nullptr) {
     }
 
-    ImageView::~ImageView() {
-    }
-
+    ImageView::~ImageView() {}
 
     void ImageView::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_width = 0;
@@ -78,7 +79,7 @@ namespace ukive {
             break;
         }
 
-        setMeasuredDimension(final_width, final_height);
+        setMeasuredSize(final_width, final_height);
     }
 
     void ImageView::onDraw(Canvas* canvas) {

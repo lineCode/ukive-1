@@ -17,6 +17,7 @@ namespace ukive {
     class ListView : public ViewGroup, public ListDataSetChangedListener {
     public:
         explicit ListView(Window* w);
+        ListView(Window* w, AttrsRef attrs);
 
         // ViewGroup
         void onLayout(

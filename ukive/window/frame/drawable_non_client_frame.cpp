@@ -5,6 +5,7 @@
 
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
+#include "ukive/log.h"
 
 
 namespace ukive {
@@ -12,7 +13,6 @@ namespace ukive {
     DrawableNonClientFrame::DrawableNonClientFrame()
         : window_(nullptr),
           vanish_captain_(false) { }
-
 
     int DrawableNonClientFrame::onNcCreate(WindowImpl* w, bool* handled) {
         *handled = false;
@@ -41,6 +41,34 @@ namespace ukive {
             if (!Application::isAeroEnabled()) {
                 window_->setWindowStyle(WS_CAPTION, false, false);
             }
+        }
+    }
+
+    void DrawableNonClientFrame::getClientInsets(RECT* rect) {
+        DCHECK(rect);
+        if (window_->isTranslucent()) {
+            int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+            rect->left = border_thickness;
+            rect->right = border_thickness;
+            rect->top = border_thickness;
+            rect->bottom = border_thickness;
+        } else {
+            rect->left = 0;
+            rect->right = 0;
+            rect->top = 0;
+            rect->bottom = (window_->isMaximum() ? 0 : 1);
+        }
+    }
+
+    void DrawableNonClientFrame::getClientOffset(POINT* offset) {
+        DCHECK(offset);
+        if (window_->isTranslucent() && window_->isMaximum()) {
+            int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+            offset->x = border_thickness;
+            offset->y = border_thickness;
+        } else {
+            offset->x = 0;
+            offset->y = 0;
         }
     }
 
@@ -95,17 +123,14 @@ namespace ukive {
         *handled = true;
         *pass_to_window = true;
 
-        int x = GET_X_LPARAM(lParam);
-        int y = GET_Y_LPARAM(lParam);
+        Point cp;
+        cp.x = GET_X_LPARAM(lParam);
+        cp.y = GET_Y_LPARAM(lParam);
 
-        RECT win_rect;
-        ::GetWindowRect(window_->getHandle(), &win_rect);
+        window_->convScreenToClient(&cp);
 
-        x -= win_rect.left;
-        y -= win_rect.top;
-
-        p->x = x;
-        p->y = y;
+        p->x = cp.x;
+        p->y = cp.y;
 
         return 0;
     }
@@ -115,10 +140,25 @@ namespace ukive {
         if (wParam == TRUE) {
             // 直接移除整个非客户区。
             auto ncp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
-            ncp->rgrc[0].left += 0;
-            ncp->rgrc[0].top += 0;
-            ncp->rgrc[0].right -= 0;
-            ncp->rgrc[0].bottom -= 0;
+            if (window_->isTranslucent()) {
+                ncp->rgrc[0].left += 0;
+                ncp->rgrc[0].top += 0;
+                ncp->rgrc[0].right -= 0;
+                ncp->rgrc[0].bottom -= 0;
+            } else {
+                if (window_->isMaximum()) {
+                    int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+                    ncp->rgrc[0].left += border_thickness;
+                    ncp->rgrc[0].top += border_thickness;
+                    ncp->rgrc[0].right -= border_thickness;
+                    ncp->rgrc[0].bottom -= border_thickness;
+                } else {
+                    ncp->rgrc[0].left += 0;
+                    ncp->rgrc[0].top += 0;
+                    ncp->rgrc[0].right -= 0;
+                    ncp->rgrc[0].bottom -= -1;
+                }
+            }
         }
 
         return 0;

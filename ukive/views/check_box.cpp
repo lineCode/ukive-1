@@ -7,13 +7,15 @@
 namespace ukive {
 
     CheckBox::CheckBox(Window* w)
-        :TextView(w),
-        checked_(false) {
+        : CheckBox(w, {}) {}
 
+    CheckBox::CheckBox(Window* w, AttrsRef attrs)
+        : TextView(w, attrs),
+          checked_(false)
+    {
         setPadding(w->dpToPx(24), w->dpToPx(8), w->dpToPx(8), w->dpToPx(8));
         setBackground(new CheckDrawable(w));
     }
-
 
     void CheckBox::setChecked(bool checked) {
         if (checked == checked_) {
