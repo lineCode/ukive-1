@@ -1,5 +1,5 @@
-#ifndef DECOMPILER_OPCODE_MAP_H_
-#define DECOMPILER_OPCODE_MAP_H_
+#ifndef DISASSEMBLER_OPCODE_MAP_H_
+#define DISASSEMBLER_OPCODE_MAP_H_
 
 #include <functional>
 #include <unordered_map>
@@ -119,4 +119,4 @@ namespace dpr {
 
 }
 
-#endif  // DECOMPILER_OPCODE_MAP_H_
+#endif  // DISASSEMBLER_OPCODE_MAP_H_

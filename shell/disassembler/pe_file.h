@@ -1,5 +1,5 @@
-#ifndef DECOMPILER_PE_FILE_H_
-#define DECOMPILER_PE_FILE_H_
+#ifndef DISASSEMBLER_PE_FILE_H_
+#define DISASSEMBLER_PE_FILE_H_
 
 #include <cstdint>
 
@@ -429,4 +429,4 @@ namespace dpr {
 
 }
 
-#endif  // DECOMPILER_PE_FILE_H_
+#endif  // DISASSEMBLER_PE_FILE_H_

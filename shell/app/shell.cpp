@@ -11,7 +11,7 @@
 #include "shell/test/text/text_window.h"
 #include "shell/test/bitmap_research/bitmap_research_window.h"
 #include "shell/test/shadow/shadow_window.h"
-#include "shell/decompiler/decompiler_window.h"
+#include "shell/disassembler/disassembler_window.h"
 
 
 int APIENTRY wWinMain(
@@ -74,14 +74,14 @@ int APIENTRY wWinMain(
     //thr_dimen_window->center();
     //thr_dimen_window->show();
 
-    //auto dpr_window = std::make_shared<shell::DecompilerWindow>();
-    //dpr_window->setTitle(L"Decompiler");
-    //dpr_window->setWidth(ukive::Application::dpToPx(600));
-    //dpr_window->setHeight(ukive::Application::dpToPx(600));
-    //dpr_window->setFrameType(ukive::Window::FRAME_CUSTOM);
-    ////thr_dimen_window->setTranslucent(true);
-    //dpr_window->center();
-    //dpr_window->show();
+    //auto dar_window = std::make_shared<shell::DisassemblerWindow>();
+    //dar_window->setTitle(L"Disassembler");
+    //dar_window->setWidth(ukive::Application::dpToPx(600));
+    //dar_window->setHeight(ukive::Application::dpToPx(600));
+    //dar_window->setFrameType(ukive::Window::FRAME_CUSTOM);
+    ////dar_window->setTranslucent(true);
+    //dar_window->center();
+    //dar_window->show();
 
     app->run();
 

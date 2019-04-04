@@ -1,5 +1,5 @@
-#ifndef DECOMPILER_INTEL_INSTRUCTIONS_H_
-#define DECOMPILER_INTEL_INSTRUCTIONS_H_
+#ifndef DISASSEMBLER_INTEL_INSTRUCTIONS_H_
+#define DISASSEMBLER_INTEL_INSTRUCTIONS_H_
 
 #include <cstdint>
 
@@ -335,4 +335,4 @@ namespace dpr {
     bool parseTableItem(const string8& item, ParsedItem* out);
 }
 
-#endif  // DECOMPILER_INTEL_INSTRUCTIONS_H_
+#endif  // DISASSEMBLER_INTEL_INSTRUCTIONS_H_

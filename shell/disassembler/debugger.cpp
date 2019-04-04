@@ -1,4 +1,4 @@
-#include "shell/decompiler/debugger.h"
+#include "shell/disassembler/debugger.h"
 
 #include <memory>
 

@@ -1,5 +1,5 @@
-#ifndef DECOMPILER_DECOMPILER_WINDOW_H_
-#define DECOMPILER_DECOMPILER_WINDOW_H_
+#ifndef DISASSEMBLER_DECOMPILER_WINDOW_H_
+#define DISASSEMBLER_DECOMPILER_WINDOW_H_
 
 #include "ukive/window/window.h"
 #include "ukive/views/click_listener.h"
@@ -19,12 +19,12 @@ namespace shell {
 
     class OpcodeListAdapter;
 
-    class DecompilerWindow :
+    class DisassemblerWindow :
         public ukive::Window,
         public ukive::OnClickListener,
         public dpr::DebuggerBridge {
     public:
-        DecompilerWindow();
+        DisassemblerWindow();
 
         // ukive::Window
         void onCreate() override;
@@ -48,4 +48,4 @@ namespace shell {
 
 }
 
-#endif  // !DECOMPILER_DECOMPILER_WINDOW_H_
+#endif  // DISASSEMBLER_DECOMPILER_WINDOW_H_

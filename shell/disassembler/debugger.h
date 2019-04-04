@@ -1,5 +1,5 @@
-#ifndef DECOMPILER_DEBUGGER_H_
-#define DECOMPILER_DEBUGGER_H_
+#ifndef DISASSEMBLER_DEBUGGER_H_
+#define DISASSEMBLER_DEBUGGER_H_
 
 #include <condition_variable>
 #include <thread>
@@ -104,4 +104,4 @@ namespace dpr {
 
 }
 
-#endif  // DECOMPILER_DEBUGGER_H_
+#endif  // DISASSEMBLER_DEBUGGER_H_

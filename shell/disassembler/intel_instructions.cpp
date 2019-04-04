@@ -1,4 +1,4 @@
-#include "intel_instructions.h"
+#include "shell/disassembler/intel_instructions.h"
 
 #include "ukive/log.h"
 #include "ukive/utils/number.h"

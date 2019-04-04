@@ -1,5 +1,5 @@
-#ifndef DECOMPILER_OPCODE_LIST_ADAPTER_H_
-#define DECOMPILER_OPCODE_LIST_ADAPTER_H_
+#ifndef DISASSEMBLER_OPCODE_LIST_ADAPTER_H_
+#define DISASSEMBLER_OPCODE_LIST_ADAPTER_H_
 
 #include "ukive/views/list/list_adapter.h"
 
@@ -56,4 +56,4 @@ namespace shell {
 
 }
 
-#endif  // DECOMPILER_OPCODE_LIST_ADAPTER_H_
+#endif  // DISASSEMBLER_OPCODE_LIST_ADAPTER_H_
