@@ -17,6 +17,13 @@
             is_editable="false"
             padding="6dp" />
 
+      <CheckBox
+            id="@+id/cb_anim_test"
+            layout_width="fit_content"
+            layout_height="fit_content"
+            text="测试用"
+            layout_margin="12dp" />
+
         <TextView
             id="@+id/tv_test_txt"
             layout_width="match_parent"

@@ -452,7 +452,6 @@ namespace ukive {
         return visibility_;
     }
 
-
     int View::getPaddingLeft() const {
         return padding_.left;
     }
@@ -594,6 +593,10 @@ namespace ukive {
     }
 
     void View::draw(Canvas* canvas) {
+        if (animator_) {
+            animator_->onPreViewDraw();
+        }
+
         // 应用动画变量
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
@@ -729,6 +732,10 @@ namespace ukive {
         }
 
         canvas->restore();
+
+        if (animator_) {
+            animator_->onPostViewDraw();
+        }
     }
 
     bool View::needDrawBackground() {

@@ -5,18 +5,16 @@
 namespace ukive {
 
     class Window;
-    class Animator;
 
     class Scroller {
     public:
-        Scroller(Window* wnd);
+        explicit Scroller(Window* wnd);
         ~Scroller();
 
         void fling(int startX, int startY, float velocityX, float velocityY);
         void startScroll(int startX, int startY, int dx, int dy, double duration);
 
     private:
-        Animator* animator_;
     };
 
 }

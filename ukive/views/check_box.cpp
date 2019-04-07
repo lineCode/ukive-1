@@ -22,6 +22,7 @@ namespace ukive {
             return;
         }
         checked_ = checked;
+        // TODO:
         static_cast<CheckDrawable*>(getBackground())->setChecked(checked);
         invalidate();
     }

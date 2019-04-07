@@ -15,7 +15,7 @@ namespace ukive {
     public:
         class InnerDecorView : public FrameLayout {
         public:
-            InnerDecorView(InnerWindow* inner);
+            explicit InnerDecorView(InnerWindow* inner);
             ~InnerDecorView();
 
             bool onInterceptInputEvent(InputEvent* e) override;
@@ -25,7 +25,7 @@ namespace ukive {
             InnerWindow* inner_window_;
         };
 
-        InnerWindow(Window* wnd);
+        explicit InnerWindow(Window* wnd);
         virtual ~InnerWindow();
 
         void setWidth(int width);

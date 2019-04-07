@@ -7,7 +7,8 @@
 namespace ukive {
 
     Animator2::Animator2(bool timer_driven)
-        : fps_(60),
+        : id_(0),
+          fps_(60),
           cur_val_(0),
           init_val_(0),
           duration_(250),
@@ -132,6 +133,10 @@ namespace ukive {
         start_time_ = upTimeMillis();
     }
 
+    void Animator2::setId(int id) {
+        id_ = id;
+    }
+
     void Animator2::setFps(int fps) {
         if (fps <= 0) {
             return;
@@ -176,6 +181,10 @@ namespace ukive {
 
     bool Animator2::isFinished() const {
         return is_finished_;
+    }
+
+    int Animator2::getId() const {
+        return id_;
     }
 
     int Animator2::getFps() const {

@@ -3,304 +3,233 @@
 #include "ukive/views/view.h"
 #include "ukive/window/window.h"
 
+#include "ukive/animation/interpolator.h"
+
 
 namespace ukive {
 
     ViewAnimator::ViewAnimator(View* v)
-        :duration_(0.2),
-        owner_view_(v) {
-
-        animator_ = std::make_unique<Animator>(
-            owner_view_->getWindow()->getAnimationManager());
+        : duration_(0.2),
+          owner_view_(v),
+          listener_(nullptr)
+    {
+        director_.setListener(this);
     }
 
     ViewAnimator::~ViewAnimator() {
     }
 
-
     void ViewAnimator::start() {
-        animator_->start();
+        director_.start();
+        owner_view_->invalidate();
     }
 
     void ViewAnimator::cancel() {
-        animator_->stop();
+        director_.stop();
     }
 
-    ViewAnimator* ViewAnimator::setDuration(double duration) {
+    ViewAnimator* ViewAnimator::setDuration(uint64_t duration) {
         duration_ = duration;
         return this;
     }
 
-
     ViewAnimator* ViewAnimator::x(double x) {
-        using lim = std::numeric_limits<double>;
-
-        animator_->addVariable(
-            VIEW_ANIM_X, owner_view_->getX(),
-            -(lim::max)(), (lim::max)());
-        animator_->addTransition(
-            VIEW_ANIM_X, Transition::linearTransition(duration_, x));
-        animator_->setOnValueChangedListener(VIEW_ANIM_X, this);
-
+        director_.addAnimator(VIEW_ANIM_X);
+        director_.setInitValue(VIEW_ANIM_X, owner_view_->getX());
+        director_.setDuration(VIEW_ANIM_X, duration_);
+        director_.setInterpolator(VIEW_ANIM_X, new LinearInterpolator(x));
         return this;
     }
 
     ViewAnimator* ViewAnimator::y(double y) {
-        using lim = std::numeric_limits<double>;
-
-        animator_->addVariable(
-            VIEW_ANIM_Y, owner_view_->getY(),
-            -(lim::max)(), (lim::max)());
-        animator_->addTransition(
-            VIEW_ANIM_Y, Transition::linearTransition(duration_, y));
-        animator_->setOnValueChangedListener(VIEW_ANIM_Y, this);
-
+        director_.addAnimator(VIEW_ANIM_Y);
+        director_.setInitValue(VIEW_ANIM_Y, owner_view_->getY());
+        director_.setDuration(VIEW_ANIM_Y, duration_);
+        director_.setInterpolator(VIEW_ANIM_Y, new LinearInterpolator(y));
         return this;
     }
 
     ViewAnimator* ViewAnimator::alpha(double value) {
-        animator_->addVariable(
-            VIEW_ANIM_ALPHA, owner_view_->getAlpha(), 0, 1);
-        animator_->addTransition(
-            VIEW_ANIM_ALPHA, Transition::linearTransition(duration_, value));
-        animator_->setOnValueChangedListener(VIEW_ANIM_ALPHA, this);
-
+        director_.addAnimator(VIEW_ANIM_ALPHA);
+        director_.setInitValue(VIEW_ANIM_ALPHA, owner_view_->getAlpha());
+        director_.setDuration(VIEW_ANIM_ALPHA, duration_);
+        director_.setInterpolator(VIEW_ANIM_ALPHA, new LinearInterpolator(value));
         return this;
     }
 
     ViewAnimator* ViewAnimator::scaleX(double value) {
-        using lim = std::numeric_limits<double>;
-
-        animator_->addVariable(
-            VIEW_ANIM_SCALE_X, owner_view_->getScaleX(),
-            -(lim::max)(), (lim::max)());
-        animator_->addTransition(
-            VIEW_ANIM_SCALE_X, Transition::linearTransition(duration_, value));
-        animator_->setOnValueChangedListener(VIEW_ANIM_SCALE_X, this);
-
+        director_.addAnimator(VIEW_ANIM_SCALE_X);
+        director_.setInitValue(VIEW_ANIM_SCALE_X, owner_view_->getScaleX());
+        director_.setDuration(VIEW_ANIM_SCALE_X, duration_);
+        director_.setInterpolator(VIEW_ANIM_SCALE_X, new LinearInterpolator(value));
         return this;
     }
 
     ViewAnimator* ViewAnimator::scaleY(double value) {
-        using lim = std::numeric_limits<double>;
-
-        animator_->addVariable(
-            VIEW_ANIM_SCALE_Y, owner_view_->getScaleY(),
-            -(lim::max)(), (lim::max)());
-        animator_->addTransition(
-            VIEW_ANIM_SCALE_Y, Transition::linearTransition(duration_, value));
-        animator_->setOnValueChangedListener(VIEW_ANIM_SCALE_Y, this);
-
+        director_.addAnimator(VIEW_ANIM_SCALE_Y);
+        director_.setInitValue(VIEW_ANIM_SCALE_Y, owner_view_->getScaleY());
+        director_.setDuration(VIEW_ANIM_SCALE_Y, duration_);
+        director_.setInterpolator(VIEW_ANIM_SCALE_Y, new LinearInterpolator(value));
         return this;
     }
 
     ViewAnimator* ViewAnimator::translateX(double value) {
-        using lim = std::numeric_limits<double>;
-
-        animator_->addVariable(
-            VIEW_ANIM_TRANSLATE_X, owner_view_->getTranslateX(),
-            -(lim::max)(), (lim::max)());
-        animator_->addTransition(
-            VIEW_ANIM_TRANSLATE_X, Transition::linearTransition(duration_, value));
-        animator_->setOnValueChangedListener(VIEW_ANIM_TRANSLATE_X, this);
-
+        director_.addAnimator(VIEW_ANIM_TRANSLATE_X);
+        director_.setInitValue(VIEW_ANIM_TRANSLATE_X, owner_view_->getTranslateX());
+        director_.setDuration(VIEW_ANIM_TRANSLATE_X, duration_);
+        director_.setInterpolator(VIEW_ANIM_TRANSLATE_X, new LinearInterpolator(value));
         return this;
     }
 
     ViewAnimator* ViewAnimator::translateY(double value) {
-        using lim = std::numeric_limits<double>;
+        director_.addAnimator(VIEW_ANIM_TRANSLATE_Y);
+        director_.setInitValue(VIEW_ANIM_TRANSLATE_Y, owner_view_->getTranslateY());
+        director_.setDuration(VIEW_ANIM_TRANSLATE_Y, duration_);
+        director_.setInterpolator(VIEW_ANIM_TRANSLATE_Y, new LinearInterpolator(value));
+        return this;
+    }
 
-        animator_->addVariable(
-            VIEW_ANIM_TRANSLATE_Y, owner_view_->getTranslateY(),
-            -(lim::max)(), (lim::max)());
-        animator_->addTransition(
-            VIEW_ANIM_TRANSLATE_Y, Transition::linearTransition(duration_, value));
-        animator_->setOnValueChangedListener(VIEW_ANIM_TRANSLATE_Y, this);
+    ViewAnimator* ViewAnimator::rectReveal(
+        double center_x, double center_y,
+        double start_hori_radius, double end_hori_radius,
+        double start_vert_radius, double end_vert_radius)
+    {
+        director_.addAnimator(VIEW_ANIM_RECT_REVEAL_R_X);
+        director_.setInitValue(VIEW_ANIM_RECT_REVEAL_R_X, start_hori_radius);
+        director_.setDuration(VIEW_ANIM_RECT_REVEAL_R_X, 100);
+        director_.setInterpolator(VIEW_ANIM_RECT_REVEAL_R_X, new LinearInterpolator(end_hori_radius));
+
+        director_.addAnimator(VIEW_ANIM_RECT_REVEAL_R_Y);
+        director_.addAnimator(VIEW_ANIM_RECT_REVEAL_R_Y);
+        director_.setInitValue(VIEW_ANIM_RECT_REVEAL_R_Y, start_vert_radius);
+        director_.setDuration(VIEW_ANIM_RECT_REVEAL_R_Y, 200);
+        director_.setInterpolator(VIEW_ANIM_RECT_REVEAL_R_Y, new LinearInterpolator(end_vert_radius));
+
+        owner_view_->setHasReveal(true);
+        owner_view_->setRevealType(REVEAL_RECT);
+        owner_view_->setRevealCenterX(center_x);
+        owner_view_->setRevealCenterY(center_y);
+        owner_view_->setRevealWidthRadius(start_hori_radius);
+        owner_view_->setRevealHeightRadius(start_vert_radius);
 
         return this;
     }
 
-    ViewAnimator* ViewAnimator::setListener(Animator::OnAnimatorListener* l) {
-        animator_->setOnStateChangedListener(l);
+    ViewAnimator* ViewAnimator::circleReveal(
+        double center_x, double center_y, double start_radius, double end_radius)
+    {
+        director_.addAnimator(VIEW_ANIM_CIRCLE_REVEAL_R);
+        director_.setInitValue(VIEW_ANIM_CIRCLE_REVEAL_R, start_radius);
+        director_.setDuration(VIEW_ANIM_CIRCLE_REVEAL_R, 150);
+        director_.setInterpolator(VIEW_ANIM_CIRCLE_REVEAL_R, new LinearInterpolator(end_radius));
+
+        owner_view_->setHasReveal(true);
+        owner_view_->setRevealType(REVEAL_CIRCULE);
+        owner_view_->setRevealCenterX(center_x);
+        owner_view_->setRevealCenterY(center_y);
+        owner_view_->setRevealRadius(start_radius);
+
         return this;
     }
 
-
-    Animator* ViewAnimator::createRectReveal(
-        View* v, double centerX, double centerY,
-        double startWidthRadius, double endWidthRadius,
-        double startHeightRadius, double endHeightRadius) {
-
-        using lim = std::numeric_limits<double>;
-
-        Animator* animator = new Animator(
-            v->getWindow()->getAnimationManager());
-        animator->addVariable(0, startWidthRadius, -(lim::max)(), (lim::max)());
-        animator->addTransition(0, Transition::linearTransition(0.1, endWidthRadius));
-        animator->addVariable(1, startHeightRadius, -(lim::max)(), (lim::max)());
-        animator->addTransition(1, Transition::linearTransition(0.2, endHeightRadius));
-
-        v->setHasReveal(true);
-        v->setRevealType(REVEAL_RECT);
-        v->setRevealCenterX(centerX);
-        v->setRevealCenterY(centerY);
-        v->setRevealWidthRadius(startWidthRadius);
-        v->setRevealHeightRadius(startHeightRadius);
-
-        class RevealValueListener
-            : public Animator::OnValueChangedListener {
-        public:
-            RevealValueListener(View* w)
-                :view_(w) {}
-
-            void onValueChanged(
-                unsigned int varIndex,
-                IUIAnimationStoryboard* storyboard,
-                IUIAnimationVariable* variable,
-                double newValue, double previousValue)
-            {
-                if (varIndex == 0) {
-                    view_->setRevealWidthRadius(newValue);
-                } else if (varIndex == 1) {
-                    view_->setRevealHeightRadius(newValue);
-                }
-            }
-            void onIntegerValueChanged(
-                unsigned int varIndex,
-                IUIAnimationStoryboard* storyboard,
-                IUIAnimationVariable* variable,
-                int newValue, int previousValue) {}
-        private:
-            View* view_;
-        }*value_listener = new RevealValueListener(v);
-
-        class RevealStateListener
-            : public Animator::OnAnimatorListener {
-        public:
-            RevealStateListener(View* w)
-                :view_(w) {}
-
-            void onAnimationStart(Animator* animator) {}
-            void onAnimationEnd(Animator* animator) {
-                view_->setHasReveal(false);
-            }
-            void onAnimationCancel(Animator* animator) {
-                view_->setHasReveal(false);
-            }
-        private:
-            View* view_;
-        }*state_listener = new RevealStateListener(v);
-
-        animator->setOnValueChangedListener(0, value_listener);
-        animator->setOnValueChangedListener(1, value_listener);
-        animator->setOnStateChangedListener(state_listener);
-
-        return animator;
+    ViewAnimator* ViewAnimator::setListener(AnimationDirectorListener* l) {
+        listener_ = l;
+        return this;
     }
 
-    Animator* ViewAnimator::createCirculeReveal(
-        View* v, double centerX, double centerY, double startRadius, double endRadius)
-    {
-        using lim = std::numeric_limits<double>;
-
-        Animator* animator = new Animator(
-            v->getWindow()->getAnimationManager());
-        animator->addVariable(0, startRadius, -(lim::max)(), (lim::max)());
-        animator->addTransition(0, Transition::linearTransition(0.15, endRadius));
-
-        v->setHasReveal(true);
-        v->setRevealType(REVEAL_CIRCULE);
-        v->setRevealCenterX(centerX);
-        v->setRevealCenterY(centerY);
-        v->setRevealRadius(startRadius);
-
-        class RevealValueListener
-            : public Animator::OnValueChangedListener {
-        public:
-            RevealValueListener(View* w)
-                :view_(w) {}
-
-            void onValueChanged(
-                unsigned int varIndex,
-                IUIAnimationStoryboard* storyboard,
-                IUIAnimationVariable* variable,
-                double newValue, double previousValue)
-            {
-                view_->setRevealRadius(newValue);
-            }
-            void onIntegerValueChanged(
-                unsigned int varIndex,
-                IUIAnimationStoryboard* storyboard,
-                IUIAnimationVariable* variable,
-                int newValue, int previousValue) {}
-        private:
-            View* view_;
-        }*valueListener = new RevealValueListener(v);
-
-        class RevealStateListener
-            : public Animator::OnAnimatorListener {
-        public:
-            RevealStateListener(View* w)
-                :view_(w) {}
-
-            void onAnimationStart(Animator* animator) {
-            }
-            void onAnimationEnd(Animator* animator) {
-                view_->setHasReveal(false);
-            }
-            void onAnimationCancel(Animator* animator) {
-                view_->setHasReveal(false);
-            }
-        private:
-            View* view_;
-        }*stateListener = new RevealStateListener(v);
-
-        animator->setOnValueChangedListener(0, valueListener);
-        animator->setOnStateChangedListener(stateListener);
-
-        return animator;
+    ViewAnimator* ViewAnimator::setFinishedHandler(const FinishedHandler& h) {
+        finished_handler_ = h;
+        return this;
     }
 
+    void ViewAnimator::onPreViewDraw() {
+        director_.update();
+    }
 
-    void ViewAnimator::onValueChanged(
-        unsigned int varIndex,
-        IUIAnimationStoryboard* storyboard,
-        IUIAnimationVariable* variable,
-        double newValue, double previousValue)
-    {
-        switch (varIndex) {
-        case VIEW_ANIM_X:
-            owner_view_->setX(newValue);
-            break;
-        case VIEW_ANIM_Y:
-            owner_view_->setY(newValue);
-            break;
-        case VIEW_ANIM_ALPHA:
-            owner_view_->setAlpha(newValue);
-            break;
-        case VIEW_ANIM_SCALE_X:
-            owner_view_->setScaleX(newValue);
-            break;
-        case VIEW_ANIM_SCALE_Y:
-            owner_view_->setScaleY(newValue);
-            break;
-        case VIEW_ANIM_TRANSLATE_X:
-            owner_view_->setTranslateX(newValue);
-            break;
-        case VIEW_ANIM_TRANSLATE_Y:
-            owner_view_->setTranslateY(newValue);
-            break;
-        case VIEW_ANIM_REVEAL:
-            owner_view_->setRevealRadius(newValue);
-            break;
+    void ViewAnimator::onPostViewDraw() {
+        if (director_.isRunning()) {
+            owner_view_->invalidate();
         }
     }
 
-    void ViewAnimator::onIntegerValueChanged(
-        unsigned int varIndex,
-        IUIAnimationStoryboard* storyboard,
-        IUIAnimationVariable* variable,
-        int newValue, int previousValue) {
+    void ViewAnimator::onDirectorStarted(AnimationDirector* director, const Animator2* animator) {
+        if (listener_) {
+            listener_->onDirectorStarted(director, animator);
+        }
+    }
+
+    void ViewAnimator::onDirectorProgress(AnimationDirector* director, const Animator2* animator) {
+        double new_value = animator->getCurValue();
+
+        switch (animator->getId()) {
+        case VIEW_ANIM_X:
+            owner_view_->setX(new_value);
+            break;
+        case VIEW_ANIM_Y:
+            owner_view_->setY(new_value);
+            break;
+        case VIEW_ANIM_ALPHA:
+            owner_view_->setAlpha(new_value);
+            break;
+        case VIEW_ANIM_SCALE_X:
+            owner_view_->setScaleX(new_value);
+            break;
+        case VIEW_ANIM_SCALE_Y:
+            owner_view_->setScaleY(new_value);
+            break;
+        case VIEW_ANIM_TRANSLATE_X:
+            owner_view_->setTranslateX(new_value);
+            break;
+        case VIEW_ANIM_TRANSLATE_Y:
+            owner_view_->setTranslateY(new_value);
+            break;
+        case VIEW_ANIM_RECT_REVEAL_R_X:
+            owner_view_->setRevealWidthRadius(new_value);
+            break;
+        case VIEW_ANIM_RECT_REVEAL_R_Y:
+            owner_view_->setRevealHeightRadius(new_value);
+            break;
+        case VIEW_ANIM_CIRCLE_REVEAL_R:
+            owner_view_->setRevealRadius(new_value);
+            break;
+        default:
+            break;
+        }
+
+        if (listener_) {
+            listener_->onDirectorProgress(director, animator);
+        }
+    }
+
+    void ViewAnimator::onDirectorStopped(AnimationDirector* director, const Animator2* animator) {
+        if (listener_) {
+            listener_->onDirectorStopped(director, animator);
+        }
+    }
+
+    void ViewAnimator::onDirectorFinished(AnimationDirector* director, const Animator2* animator) {
+        if (animator) {
+            // TODO:
+            if (animator->getId() == VIEW_ANIM_RECT_REVEAL_R_Y ||
+                animator->getId() == VIEW_ANIM_CIRCLE_REVEAL_R)
+            {
+                owner_view_->setHasReveal(false);
+            }
+        }
+
+        if (listener_) {
+            listener_->onDirectorFinished(director, animator);
+        }
+
+        if (!animator && finished_handler_) {
+            finished_handler_(director);
+        }
+    }
+
+    void ViewAnimator::onDirectorReset(AnimationDirector* director, const Animator2* animator) {
+        if (listener_) {
+            listener_->onDirectorReset(director, animator);
+        }
     }
 
 }

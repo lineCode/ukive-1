@@ -13,6 +13,7 @@
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/scroll_view.h"
+#include "ukive/views/check_box.h"
 #include "ukive/views/image_view.h"
 #include "ukive/text/span/underline_span.h"
 #include "ukive/drawable/color_drawable.h"
@@ -39,9 +40,9 @@ namespace shell {
 
     TestWindow::TestWindow()
         : Window(),
-          animator1_(nullptr),
           dwm_button_(nullptr),
-          image_view_(nullptr) {}
+          image_view_(nullptr),
+          check_box_(nullptr) {}
 
     TestWindow::~TestWindow() {
     }
@@ -53,12 +54,6 @@ namespace shell {
 
     void TestWindow::onCreate() {
         Window::onCreate();
-
-        animator1_ = new ukive::Animator(getAnimationManager());
-        animator1_->addVariable(0, 0, 0, 400);
-        animator1_->addTransition(0, ukive::Transition::linearTransition(5, 400));
-        animator1_->setOnValueChangedListener(0, this);
-        //animator1_->start();
 
         animator_.setListener(this);
         animator_.setDuration(5 * 1000);
@@ -77,7 +72,7 @@ namespace shell {
 
         Window::onDraw(rect);
 
-        if (!animator_.isFinished()) {
+        if (animator_.isRunning()) {
             invalidate();
         }
     }
@@ -114,15 +109,6 @@ namespace shell {
         //invalidate();
     }
 
-    void TestWindow::onValueChanged(
-        unsigned varIndex,
-        IUIAnimationStoryboard* storyboard,
-        IUIAnimationVariable* variable,
-        double newValue, double previousValue)
-    {
-        image_view_->setX(newValue);
-    }
-
     void TestWindow::inflateGroup() {
         setContentView(Res::Layout::test_window_group_layout_xml);
 
@@ -139,6 +125,9 @@ namespace shell {
 
         auto deviceTextView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_dev_text_params));
         deviceTextView->setText(deviceDesc);
+
+        check_box_ = static_cast<ukive::CheckBox*>(findViewById(Res::Id::cb_anim_test));
+        check_box_->setChecked(true);
 
         auto textView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_test_txt));
         textView->setText(L"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii这是一个示例程序，\n\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。");

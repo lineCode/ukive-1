@@ -34,7 +34,6 @@ namespace ukive {
 
     private:
         void showAsync(int x, int y);
-        void closeAsync();
 
         int menu_width_;
         int menu_item_height_;

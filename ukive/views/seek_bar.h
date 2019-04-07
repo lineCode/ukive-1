@@ -2,13 +2,13 @@
 #define UKIVE_VIEWS_SEEK_BAR_H_
 
 #include "ukive/views/view.h"
-#include "ukive/animation/animator.h"
+#include "ukive/animation/animator2.h"
 #include "ukive/views/seek_value_changed_listener.h"
 
 
 namespace ukive {
 
-    class SeekBar : public View, public Animator::OnValueChangedListener {
+    class SeekBar : public View, public AnimationListener {
     public:
         explicit SeekBar(Window* w);
         SeekBar(Window* w, AttrsRef attrs);
@@ -28,16 +28,8 @@ namespace ukive {
 
         bool onInputEvent(InputEvent* e) override;
 
-        void onValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            double newValue, double previousValue) override;
-        void onIntegerValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            int newValue, int previousValue) override;
+        // AnimationListener
+        void onAnimationProgress(Animator2* animator) override;
 
     private:
         void initSeekBar();
@@ -58,8 +50,8 @@ namespace ukive {
         float seek_percent_;
         bool is_pointer_left_key_available_;
 
-        Animator* thumb_in_animator_;
-        Animator* thumb_out_animator_;
+        Animator2 thumb_in_animator_;
+        Animator2 thumb_out_animator_;
         OnSeekValueChangedListener* listener_;
     };
 

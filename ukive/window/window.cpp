@@ -33,8 +33,6 @@ namespace ukive {
           focus_holder_backup_(nullptr),
           last_input_view_(nullptr),
           mouse_holder_ref_(0),
-          context_menu_(nullptr),
-          text_action_mode_(nullptr),
           anim_mgr_(nullptr),
           mAnimStateChangedListener(nullptr),
           mAnimTimerEventListener(nullptr),
@@ -487,7 +485,7 @@ namespace ukive {
             return nullptr;
         }
 
-        context_menu_ = context_menu;
+        context_menu_.reset(context_menu);
 
         Rect rect = anchor->getBoundsInWindow();
 
@@ -512,10 +510,6 @@ namespace ukive {
         return context_menu;
     }
 
-    void Window::notifyContextMenuClose() {
-        context_menu_ = nullptr;
-    }
-
     TextActionMode* Window::startTextActionMode(TextActionModeCallback* callback) {
         auto action_mode = new TextActionMode(this, callback);
         if (!callback->onCreateActionMode(
@@ -532,14 +526,10 @@ namespace ukive {
             return nullptr;
         }
 
-        text_action_mode_ = action_mode;
+        text_action_mode_.reset(action_mode);
         text_action_mode_->show();
 
         return action_mode;
-    }
-
-    void Window::notifyTextActionModeClose() {
-        text_action_mode_ = nullptr;
     }
 
     float Window::dpToPx(float dp) {
@@ -772,12 +762,8 @@ namespace ukive {
     }
 
     void Window::onDestroy() {
-        if (context_menu_) {
-            context_menu_->close();
-        }
-        if (text_action_mode_) {
-            text_action_mode_->close();
-        }
+        context_menu_.reset();
+        text_action_mode_.reset();
 
         delete root_layout_;
 

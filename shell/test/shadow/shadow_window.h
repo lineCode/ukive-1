@@ -2,9 +2,8 @@
 #define SHELL_TEST_SHADOW_SHADOW_WINDOW_H_
 
 #include "ukive/window/window.h"
-#include "ukive/animation/animator.h"
+#include "ukive/animation/animator2.h"
 #include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/graphics/color.h"
 #include "ukive/utils/com_ptr.h"
 
 
@@ -17,30 +16,22 @@ namespace ukive {
 namespace shell {
 
     class ShadowWindow :
-        public ukive::Window, public ukive::Animator::OnValueChangedListener {
+        public ukive::Window, public ukive::AnimationListener {
     public:
-        using ukive::Window::Window;
+        ShadowWindow();
 
         void onCreate() override;
         void onDrawCanvas(ukive::Canvas* canvas) override;
         void onDestroy() override;
         bool onInputEvent(ukive::InputEvent* e) override;
 
-        void onValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            double newValue, double previousValue) override;
-        void onIntegerValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            int newValue, int previousValue) override;
+        // ukive::AnimationListener
+        void onAnimationProgress(ukive::Animator2* animator) override;
 
     private:
         ukive::Button* ce_button_;
 
-        ukive::Animator* animator_;
+        ukive::Animator2 animator_;
 
         ukive::ShadowEffect* d3d_effect_;
         ukive::ComPtr<ID2D1Bitmap> shadow_bmp_;

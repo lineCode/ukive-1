@@ -33,6 +33,7 @@ namespace ukive {
         void reset();
         void update();
 
+        void setId(int id);
         void setFps(int fps);
         void setRepeat(bool repeat);
         void setDuration(uint64_t duration);
@@ -44,18 +45,20 @@ namespace ukive {
         bool isRunning() const;
         bool isFinished() const;
 
+        int getId() const;
         int getFps() const;
         uint64_t getDuration() const;
         double getCurValue() const;
         double getInitValue() const;
         Interpolator* getInterpolator() const;
 
+    private:
         static uint64_t upTimeMillis();
 
-    private:
         void restart();
         void AnimationProgress();
 
+        int id_;
         int fps_;
         double cur_val_;
         double init_val_;

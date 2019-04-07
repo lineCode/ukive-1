@@ -9,26 +9,26 @@
 namespace ukive {
 
     InnerWindow::InnerWindow(Window* wnd)
-        :parent_(wnd),
-        elevation_(0.f),
-        is_showing_(false),
-        outside_touchable_(false),
-        dismiss_by_touch_outside_(false)
+        : width_(LayoutParams::FIT_CONTENT),
+          height_(LayoutParams::FIT_CONTENT),
+          elevation_(0.f),
+          outside_touchable_(false),
+          dismiss_by_touch_outside_(false),
+          background_drawable_(nullptr),
+          parent_(wnd),
+          content_view_(nullptr),
+          decor_view_(nullptr),
+          is_showing_(false)
     {
-        decor_view_ = nullptr;
-        content_view_ = nullptr;
-
-        background_drawable_ = nullptr;
-        width_ = LayoutParams::FIT_CONTENT;
-        height_ = LayoutParams::FIT_CONTENT;
     }
 
     InnerWindow::~InnerWindow() {
         if (decor_view_ && !is_showing_) {
             delete decor_view_;
+        } else {
+            dismiss();
         }
     }
-
 
     void InnerWindow::createDecorView() {
         decor_view_ = new InnerDecorView(this);
@@ -39,7 +39,6 @@ namespace ukive {
         decor_view_->setBackground(background_drawable_);
         decor_view_->setReceiveOutsideInputEvent(!outside_touchable_);
     }
-
 
     void InnerWindow::setWidth(int width) {
         width_ = width;
@@ -77,7 +76,6 @@ namespace ukive {
 
         content_view_ = contentView;
     }
-
 
     int InnerWindow::getWidth() {
         return width_;
@@ -119,7 +117,6 @@ namespace ukive {
         return is_showing_;
     }
 
-
     void InnerWindow::show(int x, int y) {
         if (!content_view_ || is_showing_) {
             return;
@@ -131,8 +128,7 @@ namespace ukive {
 
         createDecorView();
 
-        RootLayoutParams* baselp
-            = new RootLayoutParams(width_, height_);
+        auto baselp = new RootLayoutParams(width_, height_);
         baselp->left_margin = x;
         baselp->top_margin = y;
 
@@ -158,8 +154,7 @@ namespace ukive {
             return;
         }
 
-        RootLayoutParams* baselp
-            = (RootLayoutParams*)decor_view_->getLayoutParams();
+        auto baselp = static_cast<RootLayoutParams*>(decor_view_->getLayoutParams());
         baselp->left_margin = x;
         baselp->top_margin = y;
 
@@ -176,14 +171,12 @@ namespace ukive {
         is_showing_ = false;
     }
 
-
     InnerWindow::InnerDecorView::InnerDecorView(InnerWindow* inner)
         :FrameLayout(inner->getParent()),
         inner_window_(inner) {}
 
     InnerWindow::InnerDecorView::~InnerDecorView() {
     }
-
 
     bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent* e) {
         return false;

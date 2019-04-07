@@ -177,6 +177,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="animation\animation_director.h" />
     <ClInclude Include="animation\animation_manager.h" />
     <ClInclude Include="animation\animation_manager_event_handler.h" />
     <ClInclude Include="animation\animation_timer_handler.h" />
@@ -319,6 +320,7 @@
     <ClInclude Include="window\window_manager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="animation\animation_director.cpp" />
     <ClCompile Include="animation\animation_manager.cpp" />
     <ClCompile Include="animation\animation_manager_event_handler.cpp" />
     <ClCompile Include="animation\animation_timer_handler.cpp" />

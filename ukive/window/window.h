@@ -130,9 +130,7 @@ namespace ukive {
 
         ContextMenu* startContextMenu(
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
-        void notifyContextMenuClose();
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);
-        void notifyTextActionModeClose();
 
         float dpToPx(float dp);
         float pxToDp(float px);
@@ -216,8 +214,8 @@ namespace ukive {
         View* last_input_view_;
         int mouse_holder_ref_;
 
-        ContextMenu* context_menu_;
-        TextActionMode* text_action_mode_;
+        std::unique_ptr<ContextMenu> context_menu_;
+        std::unique_ptr<TextActionMode> text_action_mode_;
 
         AnimationManager* anim_mgr_;
         AnimationManager::OnStateChangedListener* mStateChangedListener;

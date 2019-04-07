@@ -5,18 +5,22 @@
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/point.h"
 #include "ukive/window/window.h"
+#include "ukive/animation/interpolator.h"
 
 
 namespace ukive {
 
     CheckDrawable::CheckDrawable(Window* w)
-        :win_(w),
-        checked_(false) {
-
-        anim_ = std::make_unique<Animator>(w->getAnimationManager());
+        : win_(w),
+          checked_(false)
+    {
+        anim_.setDuration(240);
+        anim_.setInterpolator(new LinearInterpolator(1));
     }
 
     void CheckDrawable::draw(Canvas* canvas) {
+        anim_.update();
+
         auto bound = getBounds();
 
         float hp_offset = 0.f;
@@ -38,7 +42,7 @@ namespace ukive {
             check_bounds, stroke_width, win_->dpToPx(1), Color::Blue400);
 
         if (checked_) {
-            auto value = static_cast<float>(anim_->getValue(0));
+            auto value = static_cast<float>(anim_.getCurValue());
 
             auto line1s = PointF(check_bounds.left + stroke_width, check_bounds.top + length / 2.f);
             auto line1e = PointF(check_bounds.left + length / 2.f, check_bounds.top + length - stroke_width);
@@ -51,14 +55,23 @@ namespace ukive {
             canvas->drawLine(line1s, line1s + vec1 * (std::min(value, 0.5f) * 2), std::floor(win_->dpToPx(3)), Color::Blue800);
             canvas->drawLine(line2s, line2s + vec2 * (std::max(value - 0.5f, 0.f) * 2), std::floor(win_->dpToPx(3)), Color::Blue800);
         }
+
+        if (anim_.isRunning()) {
+            invalidate();
+        }
     }
 
     void CheckDrawable::setChecked(bool checked) {
+        if (checked_ == checked) {
+            return;
+        }
+        checked_ = checked;
+
         if (checked_) {
-            anim_->addVariable(0, 0, 0, 1);
-            anim_->startTransition(0, Transition::linearTransition(0.24, 1));
+            anim_.reset();
+            anim_.start();
         } else {
-            anim_->stop();
+            anim_.stop();
         }
     }
 
@@ -73,10 +86,10 @@ namespace ukive {
             if (prev_state == STATE_PRESSED) {
                 checked_ = !checked_;
                 if (checked_) {
-                    anim_->addVariable(0, 0, 0, 1);
-                    anim_->startTransition(0, Transition::linearTransition(0.24, 1));
+                    anim_.reset();
+                    anim_.start();
                 } else {
-                    anim_->stop();
+                    anim_.stop();
                 }
                 need_redraw |= true;
             }

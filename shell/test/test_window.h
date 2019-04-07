@@ -3,18 +3,18 @@
 
 #include "ukive/views/click_listener.h"
 #include "ukive/window/window.h"
-#include "ukive/animation/animator.h"
 #include "ukive/animation/animator2.h"
 
 
 namespace ukive {
     class Button;
     class ImageView;
+    class CheckBox;
 }
 
 namespace shell {
 
-    class TestWindow : public ukive::Window, public ukive::OnClickListener, public ukive::AnimationListener, public ukive::Animator::OnValueChangedListener {
+    class TestWindow : public ukive::Window, public ukive::OnClickListener, public ukive::AnimationListener {
     public:
         TestWindow();
         ~TestWindow();
@@ -31,21 +31,15 @@ namespace shell {
         // ukive::AnimationListener
         void onAnimationProgress(ukive::Animator2* animator) override;
 
-        void onValueChanged(
-            unsigned varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            double newValue, double previousValue) override;
-
     private:
         void inflateGroup();
         void inflateListView();
 
-        ukive::Animator* animator1_;
         ukive::Animator2 animator_;
 
         ukive::Button* dwm_button_;
         ukive::ImageView* image_view_;
+        ukive::CheckBox* check_box_;
     };
 
 }
