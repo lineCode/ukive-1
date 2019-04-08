@@ -35,7 +35,7 @@ namespace ukive {
         item->setItemTitle(title);
 
         View* view = dynamic_cast<View*>(item);
-        view->setBackground(new RippleDrawable(getWindow()));
+        view->setBackground(new RippleDrawable());
         view->setOnClickListener(this);
 
         int insertedIndex = getChildCount();

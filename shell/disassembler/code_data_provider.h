@@ -1,11 +1,11 @@
-#ifndef DECOMPILER_CODE_DATA_PROVIDER_H_
-#define DECOMPILER_CODE_DATA_PROVIDER_H_
+#ifndef DISASSEMBLER_CODE_DATA_PROVIDER_H_
+#define DISASSEMBLER_CODE_DATA_PROVIDER_H_
 
 #include <cstdint>
 
 #include <Windows.h>
 
-#include "shell/decompiler/intel_instruction_params.h"
+#include "shell/disassembler/intel_instruction_params.h"
 
 
 namespace dpr {
@@ -51,4 +51,4 @@ namespace dpr {
 
 }
 
-#endif  // DECOMPILER_CODE_DATA_PROVIDER_H_
+#endif  // DISASSEMBLER_CODE_DATA_PROVIDER_H_

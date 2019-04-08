@@ -8,6 +8,7 @@
 #include "ukive/graphics/rect.h"
 #include "ukive/utils/string_utils.h"
 #include "ukive/graphics/cursor.h"
+#include "ukive/drawable/drawable.h"
 
 
 namespace ukive {
@@ -22,7 +23,7 @@ namespace ukive {
     class ViewAnimator;
     class ShadowEffect;
 
-    class View {
+    class View : public DrawableCallback {
     public:
         using Attributes = std::map<string16, string16>;
         using AttrsRef = const Attributes&;
@@ -197,6 +198,9 @@ namespace ukive {
 
         void drawBackground(Canvas* canvas);
         void drawForeground(Canvas* canvas);
+
+        // DrawableCallback
+        void onDrawableInvalidate(Drawable* d) override;
 
         bool dispatchInputEventToThis(InputEvent* e);
         virtual void dispatchDraw(Canvas* canvas) {}

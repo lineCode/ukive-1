@@ -4,12 +4,12 @@
 namespace ukive {
 
     Drawable::Drawable()
-        :start_x_(0.f),
-        start_y_(0.f),
-        state_(STATE_NONE),
-        prev_state_(STATE_NONE),
-        is_parent_has_focus_(false) {}
-
+        : start_x_(0.f),
+          start_y_(0.f),
+          state_(STATE_NONE),
+          prev_state_(STATE_NONE),
+          is_parent_has_focus_(false),
+          callback_(nullptr) {}
 
     void Drawable::setBounds(const Rect &rect) {
         if (bounds_ == rect) {
@@ -32,6 +32,10 @@ namespace ukive {
         bounds_.set(left, top, width, height);
 
         onBoundChanged(bounds_);
+    }
+
+    void Drawable::setCallback(DrawableCallback* callback) {
+        callback_ = callback;
     }
 
     bool Drawable::setState(int state) {
@@ -59,7 +63,6 @@ namespace ukive {
         return onFocusChanged(is_parent_has_focus_);
     }
 
-
     int Drawable::getState() const {
         return state_;
     }
@@ -74,6 +77,12 @@ namespace ukive {
 
     float Drawable::getOpacity() const {
         return 1.f;
+    }
+
+    void Drawable::invalidate() {
+        if (callback_) {
+            callback_->onDrawableInvalidate(this);
+        }
     }
 
     bool Drawable::onFocusChanged(bool focus) {

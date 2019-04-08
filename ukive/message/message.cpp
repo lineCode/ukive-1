@@ -3,24 +3,23 @@
 
 namespace ukive {
 
-    Message* Message::pool = 0;
+    Message* Message::pool = nullptr;
     uint64_t Message::pool_size = 0;
     bool Message::is_initialized = false;
     std::mutex Message::pool_sync;
 
 
     Message::Message()
-        :what(-1),
-        when(0),
-        target(0),
-        callback(nullptr),
-        data(nullptr),
-        next(nullptr) {
+        : what(-1),
+          when(0),
+          target(nullptr),
+          callback(nullptr),
+          data(nullptr),
+          next(nullptr) {
     }
 
     Message::~Message() {
     }
-
 
     void Message::init(uint64_t pool_capacity) {
         if (is_initialized)
@@ -55,7 +54,6 @@ namespace ukive {
         pool_size = 0;
     }
 
-
     Message* Message::obtain() {
         std::lock_guard<std::mutex> lk(pool_sync);
 
@@ -80,7 +78,7 @@ namespace ukive {
 
         what = -1;
         when = 0;
-        target = 0;
+        target = nullptr;
         callback = nullptr;
         func = nullptr;
         data = nullptr;

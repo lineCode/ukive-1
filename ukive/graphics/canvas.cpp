@@ -16,7 +16,7 @@
 namespace ukive {
 
     Canvas::Canvas(int width, int height)
-        :is_texture_target_(true)
+        : is_texture_target_(true)
     {
         d3d_tex2d_ = Renderer::createTexture2D(width, height);
         auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();

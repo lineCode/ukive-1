@@ -1,4 +1,4 @@
-﻿#include "animation_manager.h"
+﻿#include "ukive/animation/animation_manager.h"
 
 #include "ukive/animation/animation_manager_event_handler.h"
 #include "ukive/animation/animation_timer_handler.h"
@@ -119,6 +119,7 @@ namespace ukive {
                 hr = anim_timer_->SetTimerUpdateHandler(
                     pTimerUpdateHandler,
                     UI_ANIMATION_IDLE_BEHAVIOR_DISABLE);
+                anim_timer_->SetFrameRateThreshold(60);
                 pTimerUpdateHandler->Release();
             }
         } else {

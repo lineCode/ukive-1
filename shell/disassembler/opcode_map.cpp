@@ -1,4 +1,4 @@
-#include "opcode_map.h"
+#include "shell/disassembler/opcode_map.h"
 
 #define OPCODE_N64_64(i64, o64)  {                                   \
     if (cpu_mode == CPUMode::_64Bit) return OpcodeDesc::ofNor(o64);  \

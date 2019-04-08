@@ -1,4 +1,4 @@
-#include "shell/decompiler/decompiler_window.h"
+#include "shell/disassembler/disassembler_window.h"
 
 #include "ukive/log.h"
 #include "ukive/views/list/list_view.h"
@@ -18,13 +18,13 @@ namespace shell {
 
     using namespace dpr;
 
-    DecompilerWindow::DecompilerWindow()
+    DisassemblerWindow::DisassemblerWindow()
         : continue_btn_(nullptr),
           op_list_view_(nullptr),
           op_list_adapter_(nullptr) {
     }
 
-    void DecompilerWindow::onCreate() {
+    void DisassemblerWindow::onCreate() {
         Window::onCreate();
 
         using Rlp = ukive::RestraintLayoutParams;
@@ -69,14 +69,14 @@ namespace shell {
         debugger_.create(L"D:\\test.exe");
     }
 
-    void DecompilerWindow::onClick(ukive::View* v) {
+    void DisassemblerWindow::onClick(ukive::View* v) {
         if (v == continue_btn_) {
             continue_btn_->setEnabled(false);
             debugger_.resume();
         }
     }
 
-    void DecompilerWindow::onBreakpoint(const DebugInfo& info) {
+    void DisassemblerWindow::onBreakpoint(const DebugInfo& info) {
         /*processStaticInstructions(
             reinterpret_cast<uint8_t*>(info.sec_base_addr),
             info.bp_addr - info.sec_base_addr,
@@ -86,7 +86,7 @@ namespace shell {
         //debugger_.resume();
     }
 
-    void DecompilerWindow::onSingleStep(const DebugInfo& info) {
+    void DisassemblerWindow::onSingleStep(const DebugInfo& info) {
         /*processStaticInstructions(
             reinterpret_cast<uint8_t*>(info.sec_base_addr),
             info.bp_addr - info.sec_base_addr,
@@ -96,7 +96,7 @@ namespace shell {
         //debugger_.resume();
     }
 
-    void DecompilerWindow::processStaticInstructions(const uint8_t* buf, uint32_t ep, uint32_t size) {
+    void DisassemblerWindow::processStaticInstructions(const uint8_t* buf, uint32_t ep, uint32_t size) {
         ExtraInfo info;
 
         CodeSegInfo csi;
@@ -117,7 +117,7 @@ namespace shell {
         delete csi.provider;
     }
 
-    void DecompilerWindow::processDynamicInstructions(const DebugInfo& dbg_info) {
+    void DisassemblerWindow::processDynamicInstructions(const DebugInfo& dbg_info) {
         ExtraInfo info;
 
         op_list_adapter_->clear();

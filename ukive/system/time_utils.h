@@ -12,13 +12,8 @@ namespace ukive {
         ~TimeUtils();
 
         static uint64_t upTimeMillis();
-
-        static void enableHighResTimer();
-        static void disableHighResTimer();
-
-    private:
-        static int timer_res_;
-        static int op_counter_;
+        static uint64_t upTimeMillisPrecise();
+        static uint64_t upTimeMicros();
     };
 
 }

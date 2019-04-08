@@ -9,11 +9,18 @@ namespace ukive {
         : duration_(0),
           is_repeat_(false),
           is_running_(false),
+          cycler_(Cycler::TimeUnit::MillisPrecise),
           weak_ref_nest_(this) {}
 
+    Timer::~Timer() {
+        stop();
+    }
+
     void Timer::start() {
-        auto callback = weakref_bind(&Timer::onTimer, weak_ref_nest_.getRef());
-        cycler_.postDelayed(callback, duration_);
+        if (is_running_) {
+            return;
+        }
+        postToMessageLoop();
         is_running_ = true;
     }
 
@@ -30,7 +37,7 @@ namespace ukive {
         runner_ = runner;
     }
 
-    void Timer::setDuration(int duration) {
+    void Timer::setDuration(uint64_t duration) {
         duration_ = duration;
     }
 
@@ -42,7 +49,7 @@ namespace ukive {
         return is_running_;
     }
 
-    int Timer::getDuration() const {
+    uint64_t Timer::getDuration() const {
         return duration_;
     }
 
@@ -52,10 +59,17 @@ namespace ukive {
         }
 
         if (is_repeat_) {
-            start();
+            if (is_running_) {
+                postToMessageLoop();
+            }
         } else {
             is_running_ = false;
         }
+    }
+
+    void Timer::postToMessageLoop() {
+        auto callback = weakref_bind(&Timer::onTimer, weak_ref_nest_.getRef());
+        cycler_.postDelayed(callback, duration_);
     }
 
 }

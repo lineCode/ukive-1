@@ -1,5 +1,6 @@
 ﻿#include "cycler.h"
 
+#include "ukive/log.h"
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
 #include "ukive/system/time_utils.h"
@@ -8,13 +9,17 @@
 
 namespace ukive {
 
-    Cycler::Cycler()
-        : looper_(MessageLooper::myLooper()),
-          listener_(nullptr) {}
+    Cycler::Cycler(TimeUnit unit)
+        : time_unit_(unit),
+          looper_(MessageLooper::myLooper()),
+          listener_(nullptr) {
+    }
 
-    Cycler::Cycler(MessageLooper* looper)
-        : looper_(looper),
-          listener_(nullptr) {}
+    Cycler::Cycler(MessageLooper* looper, TimeUnit unit)
+        : time_unit_(unit),
+          looper_(looper),
+          listener_(nullptr) {
+    }
 
     Cycler::~Cycler() {
         looper_->getQueue()->remove(this, nullptr);
@@ -28,31 +33,31 @@ namespace ukive {
         postDelayed(exec, 0);
     }
 
-    void Cycler::postDelayed(Executable* exec, uint64_t millis) {
-        postAtTime(exec, millis + TimeUtils::upTimeMillis());
+    void Cycler::postDelayed(Executable* exec, uint64_t delay) {
+        postAtTime(exec, delay + now());
     }
 
-    void Cycler::postAtTime(Executable* exec, uint64_t at_time_millis) {
+    void Cycler::postAtTime(Executable* exec, uint64_t at_time) {
         Message* msg = Message::obtain();
         msg->callback = exec;
 
-        sendMessageAtTime(msg, at_time_millis);
+        sendMessageAtTime(msg, at_time);
     }
 
     void Cycler::post(const std::function<void()>& func, int what) {
         postDelayed(func, 0, what);
     }
 
-    void Cycler::postDelayed(const std::function<void()>& func, uint64_t millis, int what) {
-        postAtTime(func, millis + TimeUtils::upTimeMillis(), what);
+    void Cycler::postDelayed(const std::function<void()>& func, uint64_t delay, int what) {
+        postAtTime(func, delay + now(), what);
     }
 
-    void Cycler::postAtTime(const std::function<void()>& func, uint64_t at_time_millis, int what) {
+    void Cycler::postAtTime(const std::function<void()>& func, uint64_t at_time, int what) {
         Message* msg = Message::obtain();
         msg->func = func;
         msg->what = what;
 
-        sendMessageAtTime(msg, at_time_millis);
+        sendMessageAtTime(msg, at_time);
     }
 
     bool Cycler::hasCallbacks(Executable* exec) {
@@ -67,27 +72,27 @@ namespace ukive {
         sendEmptyMessageDelayed(what, 0);
     }
 
-    void Cycler::sendEmptyMessageDelayed(int what, uint64_t millis) {
-        sendEmptyMessageAtTime(what, millis + TimeUtils::upTimeMillis());
+    void Cycler::sendEmptyMessageDelayed(int what, uint64_t delay) {
+        sendEmptyMessageAtTime(what, delay + now());
     }
 
-    void Cycler::sendEmptyMessageAtTime(int what, uint64_t at_time_millis) {
+    void Cycler::sendEmptyMessageAtTime(int what, uint64_t at_time) {
         Message* msg = Message::obtain();
         msg->what = what;
 
-        sendMessageAtTime(msg, at_time_millis);
+        sendMessageAtTime(msg, at_time);
     }
 
     void Cycler::sendMessage(Message* msg) {
         sendMessageDelayed(msg, 0);
     }
 
-    void Cycler::sendMessageDelayed(Message* msg, uint64_t millis) {
-        sendMessageAtTime(msg, millis + TimeUtils::upTimeMillis());
+    void Cycler::sendMessageDelayed(Message* msg, uint64_t delay) {
+        sendMessageAtTime(msg, delay + now());
     }
 
-    void Cycler::sendMessageAtTime(Message* msg, uint64_t at_time_millis) {
-        msg->when = at_time_millis;
+    void Cycler::sendMessageAtTime(Message* msg, uint64_t at_time) {
+        msg->when = at_time;
         enqueueMessage(msg);
     }
 
@@ -122,6 +127,20 @@ namespace ukive {
                 listener_->onHandleMessage(msg);
             }
         }
+    }
+
+    uint64_t Cycler::now() const {
+        switch (time_unit_) {
+        case Millis:
+            return TimeUtils::upTimeMillis();
+        case MillisPrecise:
+            return TimeUtils::upTimeMillisPrecise();
+        case Micros:
+            return TimeUtils::upTimeMicros();
+        }
+
+        DCHECK(false);
+        return 0;
     }
 
 }

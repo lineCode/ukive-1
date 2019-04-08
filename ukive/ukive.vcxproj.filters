@@ -360,6 +360,15 @@
     <ClCompile Include="resources\dimension_utils.cpp">
       <Filter>resources</Filter>
     </ClCompile>
+    <ClCompile Include="animation\timer.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animator2.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\interpolator.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -768,6 +777,15 @@
     </ClInclude>
     <ClInclude Include="resources\dimension_utils.h">
       <Filter>resources</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\timer.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animator2.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\interpolator.h">
+      <Filter>animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

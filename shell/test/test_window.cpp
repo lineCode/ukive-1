@@ -28,6 +28,8 @@
 #include "ukive/utils/xml/xml_parser.h"
 #include "ukive/utils/xml/xml_writer.h"
 #include "ukive/files/file.h"
+#include "ukive/animation/interpolator.h"
+#include "ukive/system/time_utils.h"
 
 #include "shell/test/list/test_adapter.h"
 #include "shell/resources/oigka_resources_id.h"
@@ -37,12 +39,12 @@ namespace shell {
 
     TestWindow::TestWindow()
         : Window(),
-          dwm_button_(nullptr) {
-    }
+          animator1_(nullptr),
+          dwm_button_(nullptr),
+          image_view_(nullptr) {}
 
     TestWindow::~TestWindow() {
     }
-
 
     void TestWindow::onPreCreate(
         ukive::ClassInfo* info,
@@ -52,9 +54,38 @@ namespace shell {
     void TestWindow::onCreate() {
         Window::onCreate();
 
+        animator1_ = new ukive::Animator(getAnimationManager());
+        animator1_->addVariable(0, 0, 0, 400);
+        animator1_->addTransition(0, ukive::Transition::linearTransition(5, 400));
+        animator1_->setOnValueChangedListener(0, this);
+        //animator1_->start();
+
+        animator_.setListener(this);
+        animator_.setDuration(5 * 1000);
+        animator_.setInitValue(0);
+        animator_.setInterpolator(new ukive::LinearInterpolator(400));
+        animator_.setRepeat(true);
+        animator_.start();
+
         showTitleBar();
-        //inflateGroup();
-        inflateListView();
+        inflateGroup();
+        //inflateListView();
+    }
+
+    void TestWindow::onDraw(const ukive::Rect& rect) {
+        animator_.update();
+
+        Window::onDraw(rect);
+
+        if (!animator_.isFinished()) {
+            invalidate();
+        }
+    }
+
+    void TestWindow::onDestroy() {
+        Window::onDestroy();
+
+        animator_.stop();
     }
 
     void TestWindow::onClick(ukive::View* v) {
@@ -76,6 +107,20 @@ namespace shell {
 
             ::DwmIsCompositionEnabled(&new_aero);*/
         }
+    }
+
+    void TestWindow::onAnimationProgress(ukive::Animator2* animator) {
+        image_view_->setX(animator->getCurValue());
+        //invalidate();
+    }
+
+    void TestWindow::onValueChanged(
+        unsigned varIndex,
+        IUIAnimationStoryboard* storyboard,
+        IUIAnimationVariable* variable,
+        double newValue, double previousValue)
+    {
+        image_view_->setX(newValue);
     }
 
     void TestWindow::inflateGroup() {
@@ -102,10 +147,10 @@ namespace shell {
         ukive::UnderlineSpan* span = new ukive::UnderlineSpan(3, 5);
         textView->getEditable()->addSpan(span);
 
-        auto imageView = static_cast<ukive::ImageView*>(findViewById(Res::Id::iv_test_img));
+        image_view_ = static_cast<ukive::ImageView*>(findViewById(Res::Id::iv_test_img));
         std::wstring imgFileName = ukive::Application::getExecFileName(true);
         auto bitmap = ukive::BitmapFactory::decodeFile(this, ukive::File(imgFileName, L"freshpaint.png").getPath());
-        imageView->setImageBitmap(bitmap);
+        image_view_->setImageBitmap(bitmap);
     }
 
     void TestWindow::inflateListView() {

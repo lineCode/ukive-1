@@ -1,4 +1,4 @@
-#include "intel_instruction_params.h"
+#include "shell/disassembler/intel_instruction_params.h"
 
 
 namespace dpr {

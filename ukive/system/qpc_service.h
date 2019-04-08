@@ -3,9 +3,6 @@
 
 #include <cstdint>
 
-#include <Windows.h>
-
-
 namespace ukive {
 
     class QPCService {
@@ -13,12 +10,16 @@ namespace ukive {
         QPCService();
         ~QPCService() = default;
 
-        void Start();
-        uint64_t Stop();
+        void start();
+        uint64_t stop();
+
+        static uint64_t getTimeStampUs();
 
     private:
-        LARGE_INTEGER starting_time_;
-        static LARGE_INTEGER frequency_;
+        static bool fetchPerformanceFrequency();
+
+        uint64_t starting_time_;
+        static thread_local uint64_t frequency_;
     };
 
     class MMTimerService {
@@ -26,11 +27,19 @@ namespace ukive {
         MMTimerService();
         ~MMTimerService() = default;
 
-        void Start();
-        uint64_t Stop();
+        void start();
+        uint32_t stop();
+
+        static void enableHighResTimer();
+        static void disableHighResTimer();
+
+        static uint32_t getTimeStamp();
 
     private:
         uint32_t starting_time_;
+
+        static int timer_res_;
+        static int op_counter_;
     };
 }
 
