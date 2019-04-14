@@ -1,4 +1,4 @@
-#include "view_animator.h"
+#include "ukive/animation/view_animator.h"
 
 #include "ukive/views/view.h"
 #include "ukive/window/window.h"
@@ -152,13 +152,13 @@ namespace ukive {
         }
     }
 
-    void ViewAnimator::onDirectorStarted(AnimationDirector* director, const Animator2* animator) {
+    void ViewAnimator::onDirectorStarted(AnimationDirector* director, const Animator* animator) {
         if (listener_) {
             listener_->onDirectorStarted(director, animator);
         }
     }
 
-    void ViewAnimator::onDirectorProgress(AnimationDirector* director, const Animator2* animator) {
+    void ViewAnimator::onDirectorProgress(AnimationDirector* director, const Animator* animator) {
         double new_value = animator->getCurValue();
 
         switch (animator->getId()) {
@@ -201,13 +201,13 @@ namespace ukive {
         }
     }
 
-    void ViewAnimator::onDirectorStopped(AnimationDirector* director, const Animator2* animator) {
+    void ViewAnimator::onDirectorStopped(AnimationDirector* director, const Animator* animator) {
         if (listener_) {
             listener_->onDirectorStopped(director, animator);
         }
     }
 
-    void ViewAnimator::onDirectorFinished(AnimationDirector* director, const Animator2* animator) {
+    void ViewAnimator::onDirectorFinished(AnimationDirector* director, const Animator* animator) {
         if (animator) {
             // TODO:
             if (animator->getId() == VIEW_ANIM_RECT_REVEAL_R_Y ||
@@ -226,7 +226,7 @@ namespace ukive {
         }
     }
 
-    void ViewAnimator::onDirectorReset(AnimationDirector* director, const Animator2* animator) {
+    void ViewAnimator::onDirectorReset(AnimationDirector* director, const Animator* animator) {
         if (listener_) {
             listener_->onDirectorReset(director, animator);
         }

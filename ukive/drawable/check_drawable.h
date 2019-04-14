@@ -2,7 +2,7 @@
 #define UKIVE_DRAWABLE_CHECK_DRAWABLE_H_
 
 #include "ukive/drawable/drawable.h"
-#include "ukive/animation/animator2.h"
+#include "ukive/animation/animator.h"
 
 
 namespace ukive {
@@ -23,7 +23,7 @@ namespace ukive {
         Window* win_;
 
         bool checked_;
-        Animator2 anim_;
+        Animator anim_;
     };
 
 }

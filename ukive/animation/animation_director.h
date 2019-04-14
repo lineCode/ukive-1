@@ -4,23 +4,23 @@
 #include <map>
 #include <memory>
 
-#include "ukive/animation/animator2.h"
+#include "ukive/animation/animator.h"
 
 
 namespace ukive {
 
-    class Animator2;
+    class Animator;
     class AnimationDirector;
 
     class AnimationDirectorListener {
     public:
         virtual ~AnimationDirectorListener() = default;
 
-        virtual void onDirectorStarted(AnimationDirector* director, const Animator2* animator) {}
-        virtual void onDirectorProgress(AnimationDirector* director, const Animator2* animator) {}
-        virtual void onDirectorStopped(AnimationDirector* director, const Animator2* animator) {}
-        virtual void onDirectorFinished(AnimationDirector* director, const Animator2* animator) {}
-        virtual void onDirectorReset(AnimationDirector* director, const Animator2* animator) {}
+        virtual void onDirectorStarted(AnimationDirector* director, const Animator* animator) {}
+        virtual void onDirectorProgress(AnimationDirector* director, const Animator* animator) {}
+        virtual void onDirectorStopped(AnimationDirector* director, const Animator* animator) {}
+        virtual void onDirectorFinished(AnimationDirector* director, const Animator* animator) {}
+        virtual void onDirectorReset(AnimationDirector* director, const Animator* animator) {}
     };
 
     class AnimationDirector : public AnimationListener {
@@ -52,14 +52,14 @@ namespace ukive {
 
     private:
         // AnimationListener
-        void onAnimationStarted(Animator2* animator) override;
-        void onAnimationProgress(Animator2* animator) override;
-        void onAnimationStopped(Animator2* animator) override;
-        void onAnimationFinished(Animator2* animator) override;
-        void onAnimationReset(Animator2* animator) override;
+        void onAnimationStarted(Animator* animator) override;
+        void onAnimationProgress(Animator* animator) override;
+        void onAnimationStopped(Animator* animator) override;
+        void onAnimationFinished(Animator* animator) override;
+        void onAnimationReset(Animator* animator) override;
 
         AnimationDirectorListener* listener_;
-        std::map<int, std::unique_ptr<Animator2>> animators_;
+        std::map<int, std::unique_ptr<Animator>> animators_;
     };
 
 }

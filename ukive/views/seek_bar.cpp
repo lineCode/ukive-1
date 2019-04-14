@@ -312,7 +312,7 @@ namespace ukive {
         return true;
     }
 
-    void SeekBar::onAnimationProgress(Animator2* animator) {
+    void SeekBar::onAnimationProgress(Animator* animator) {
         thumb_cur_diameter_ = animator->getCurValue();
     }
 

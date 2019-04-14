@@ -1,289 +1,219 @@
-﻿#include "animator.h"
+#include "ukive/animation/animator.h"
 
-#include "ukive/log.h"
-#include "ukive/animation/animator_state_handler.h"
-#include "ukive/animation/animation_variable_change_handler.h"
+#include "ukive/animation/interpolator.h"
+#include "ukive/system/time_utils.h"
 
 
 namespace ukive {
 
-    Animator::Animator(AnimationManager* mgr) {
-        anim_mgr_ = mgr;
-        animator_state_listener_ = new AnimatorStateHandler(this);
-
-        HRESULT hr = anim_mgr_->getAnimationManager()
-            ->CreateStoryboard(&story_board_);
-        if (FAILED(hr)) {
-            DLOG(Log::FATAL) << "create storyboard failed.";
+    Animator::Animator(bool timer_driven)
+        : id_(0),
+          fps_(60),
+          cur_val_(0),
+          init_val_(0),
+          duration_(250),
+          elapsed_duration_(0),
+          start_time_(0),
+          is_repeat_(false),
+          is_started_(false),
+          is_running_(false),
+          is_finished_(false),
+          is_timer_driven_(timer_driven),
+          listener_(nullptr),
+          interpolator_(std::make_unique<LinearInterpolator>(1))
+    {
+        if (is_timer_driven_) {
+            timer_.setRepeat(true);
+            timer_.setRunner(std::bind(&Animator::AnimationProgress, this));
+            timer_.setDuration(1000 / fps_);
         }
-        story_board_->SetStoryboardEventHandler(animator_state_listener_);
     }
 
-    Animator::~Animator() {
-        stop();
-        animator_state_listener_->Release();
-    }
-
+    Animator::~Animator() {}
 
     void Animator::start() {
-        UI_ANIMATION_SECONDS time;
-        anim_mgr_->getAnimationTimer()->GetTime(&time);
-        story_board_->Schedule(time);
+        if (is_running_ || is_finished_) {
+            return;
+        }
+
+        if (!is_started_) {
+            is_started_ = true;
+            cur_val_ = init_val_;
+            interpolator_->setInitVal(init_val_);
+        }
+
+        is_finished_ = false;
+        start_time_ = upTimeMillis() - elapsed_duration_;
+
+        if (is_timer_driven_) {
+            timer_.start();
+        }
+        is_running_ = true;
+
+        if (listener_) {
+            listener_->onAnimationStarted(this);
+        }
     }
 
     void Animator::stop() {
-        story_board_->Abandon();
+        if (is_running_) {
+            if (is_timer_driven_) {
+                timer_.stop();
+            }
+            is_running_ = false;
+
+            elapsed_duration_ = upTimeMillis() - start_time_;
+
+            if (listener_) {
+                listener_->onAnimationStopped(this);
+            }
+        }
     }
 
-    void Animator::finish(double second) {
-        story_board_->Finish(second);
+    void Animator::finish() {
+        if (is_started_) {
+            if (is_timer_driven_) {
+                timer_.stop();
+            }
+            is_running_ = false;
+            is_finished_ = true;
+
+            cur_val_ = interpolator_->interpolate(1);
+
+            if (listener_) {
+                listener_->onAnimationFinished(this);
+            }
+        }
     }
 
     void Animator::reset() {
-        UI_ANIMATION_STORYBOARD_STATUS status;
-        story_board_->GetStatus(&status);
-        if (status == UI_ANIMATION_STORYBOARD_BUILDING) {
+        if (is_started_) {
+            if (is_timer_driven_) {
+                timer_.stop();
+            }
+            is_started_ = false;
+            is_running_ = false;
+            is_finished_ = false;
+
+            cur_val_ = init_val_;
+            elapsed_duration_ = 0;
+
+            if (listener_) {
+                listener_->onAnimationReset(this);
+            }
+        }
+    }
+
+    void Animator::update() {
+        if (!is_running_) {
             return;
         }
 
-        vars_.clear();
+        auto cur_time = upTimeMillis();
+        bool finished = (cur_time >= start_time_ + duration_);
+        double progress = finished ? 1 : static_cast<double>(cur_time - start_time_) / duration_;
+        cur_val_ = interpolator_->interpolate(progress);
 
-        story_board_->Abandon();
-        story_board_.reset();
-
-        HRESULT hr = anim_mgr_->getAnimationManager()
-            ->CreateStoryboard(&story_board_);
-        if (FAILED(hr)) {
-            DLOG(Log::FATAL) << "create storyboard failed.";
-            return;
-        }
-        story_board_->SetStoryboardEventHandler(animator_state_listener_);
-    }
-
-    void Animator::startTransition(unsigned int varIndex, std::shared_ptr<Transition> transition) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return;
+        if (listener_) {
+            listener_->onAnimationProgress(this);
         }
 
-        UI_ANIMATION_SECONDS time;
-        anim_mgr_->getAnimationTimer()->GetTime(&time);
-
-        anim_mgr_->getAnimationManager()->
-            ScheduleTransition(it->second.get(), transition->getTransition().get(), time);
+        if (finished) {
+            if (is_repeat_) {
+                restart();
+            } else {
+                finish();
+            }
+        }
     }
 
-    void Animator::setOnStateChangedListener(OnAnimatorListener* l) {
-        animator_state_listener_->setOnAnimatorListener(l);
+    void Animator::restart() {
+        cur_val_ = init_val_;
+        elapsed_duration_ = 0;
+        start_time_ = upTimeMillis();
     }
 
-    void Animator::setOnValueChangedListener(
-        unsigned int varIndex, OnValueChangedListener* l) {
+    void Animator::setId(int id) {
+        id_ = id;
+    }
 
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
+    void Animator::setFps(int fps) {
+        if (fps <= 0) {
             return;
         }
 
-        if (!l) {
-            it->second->SetVariableChangeHandler(nullptr);
-            it->second->SetVariableIntegerChangeHandler(nullptr);
-        } else {
-            auto handler = new AnimationVariableChangeHandler(l, varIndex);
-            it->second->SetVariableChangeHandler(handler);
-            it->second->SetVariableIntegerChangeHandler(handler);
-            handler->Release();
+        fps_ = fps;
+        if (is_timer_driven_) {
+            timer_.setDuration(1000 / fps_);
         }
     }
 
-    double Animator::getValue(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return 0;
-        }
-
-        double value = 0;
-        it->second->GetValue(&value);
-
-        return value;
+    void Animator::setRepeat(bool repeat) {
+        is_repeat_ = repeat;
     }
 
-    int Animator::getIntValue(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return 0;
-        }
-
-        int value = 0;
-        it->second->GetIntegerValue(&value);
-
-        return value;
+    void Animator::setDuration(uint64_t duration) {
+        duration_ = duration;
     }
 
-    double Animator::getPrevValue(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return 0;
+    void Animator::setInterpolator(Interpolator* ipr) {
+        if (!ipr || interpolator_.get() == ipr) {
+            return;
         }
-
-        double value = 0;
-        it->second->GetPreviousValue(&value);
-
-        return value;
+        interpolator_.reset(ipr);
     }
 
-    int Animator::getPrevIntValue(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return 0;
-        }
-
-        int value = 0;
-        it->second->GetPreviousIntegerValue(&value);
-
-        return value;
+    void Animator::setListener(AnimationListener* listener) {
+        listener_ = listener;
     }
 
-    double Animator::getFinalValue(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return 0;
-        }
-
-        double value = 0;
-        it->second->GetFinalValue(&value);
-
-        return value;
+    void Animator::setInitValue(double init_val) {
+        init_val_ = init_val;
     }
 
-    int Animator::getFinalIntValue(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return 0;
-        }
-
-        int value = 0;
-        it->second->GetFinalIntegerValue(&value);
-
-        return value;
+    bool Animator::isRepeat() const {
+        return is_repeat_;
     }
 
-    double Animator::getElapsedTime() {
-        double time = 0;
-        story_board_->GetElapsedTime(&time);
-        return time;
+    bool Animator::isRunning() const {
+        return is_running_;
     }
 
-    bool Animator::addVariable(
-        unsigned int varIndex, double initValue,
-        double lower, double upper) {
-
-        auto it = vars_.find(varIndex);
-        if (it != vars_.end()) {
-            vars_.erase(varIndex);
-        }
-
-        ComPtr<IUIAnimationVariable> var;
-
-        HRESULT hr = anim_mgr_->getAnimationManager()->
-            CreateAnimationVariable(initValue, &var);
-        if (FAILED(hr)) {
-            return false;
-        }
-
-        var->SetLowerBound(lower);
-        var->SetUpperBound(upper);
-
-        vars_.insert({ varIndex, var });
-
-        return true;
+    bool Animator::isFinished() const {
+        return is_finished_;
     }
 
-    bool Animator::addTransition(unsigned int varIndex, std::shared_ptr<Transition> transition) {
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return false;
-        }
-
-        HRESULT hr = story_board_->AddTransition(
-            it->second.get(), transition->getTransition().get());
-        if (FAILED(hr)) {
-            return false;
-        }
-
-        return true;
+    int Animator::getId() const {
+        return id_;
     }
 
-    bool Animator::addTransition(
-        unsigned int varIndex, std::shared_ptr<Transition> transition,
-        UI_ANIMATION_KEYFRAME key) {
-
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return false;
-        }
-
-        HRESULT hr = story_board_->AddTransitionAtKeyframe(
-            it->second.get(), transition->getTransition().get(), key);
-        if (FAILED(hr)) {
-            return false;
-        }
-
-        return true;
+    int Animator::getFps() const {
+        return fps_;
     }
 
-    bool Animator::addTransition(
-        unsigned int varIndex, std::shared_ptr<Transition> transition,
-        UI_ANIMATION_KEYFRAME startKey, UI_ANIMATION_KEYFRAME endKey) {
-
-        auto it = vars_.find(varIndex);
-        if (it == vars_.end()) {
-            return false;
-        }
-
-        HRESULT hr = story_board_->AddTransitionBetweenKeyframes(
-            it->second.get(), transition->getTransition().get(), startKey, endKey);
-        if (FAILED(hr)) {
-            return false;
-        }
-
-        return true;
+    uint64_t Animator::getDuration() const {
+        return duration_;
     }
 
-    bool Animator::addKey(
-        UI_ANIMATION_KEYFRAME existed, double offset, UI_ANIMATION_KEYFRAME* newKey) {
-
-        HRESULT hr = story_board_->AddKeyframeAtOffset(existed, offset, newKey);
-        if (FAILED(hr)) {
-            return false;
-        }
-
-        return true;
+    double Animator::getCurValue() const {
+        return is_started_ ? cur_val_ : init_val_;
     }
 
-    bool Animator::addKey(
-        std::shared_ptr<Transition> transition, UI_ANIMATION_KEYFRAME* newKey) {
-
-        HRESULT hr = story_board_->AddKeyframeAfterTransition(transition->getTransition().get(), newKey);
-        if (FAILED(hr)) {
-            return false;
-        }
-
-        return true;
+    double Animator::getInitValue() const {
+        return init_val_;
     }
 
-    bool Animator::hasVariable(unsigned int varIndex) {
-        auto it = vars_.find(varIndex);
-        return (it != vars_.end());
+    Interpolator* Animator::getInterpolator() const {
+        return interpolator_.get();
     }
 
-    bool Animator::removeVariable(unsigned int varIndex) {
-        if (!hasVariable(varIndex)) {
-            return false;
-        }
+    void Animator::AnimationProgress() {
+        update();
+    }
 
-        vars_.erase(varIndex);
-        return true;
+    // static
+    uint64_t Animator::upTimeMillis() {
+        return TimeUtils::upTimeMillisPrecise();
     }
 
 }

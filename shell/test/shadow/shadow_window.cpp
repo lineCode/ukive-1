@@ -102,7 +102,7 @@ namespace shell {
         return Window::onInputEvent(e);
     }
 
-    void ShadowWindow::onAnimationProgress(ukive::Animator2* animator) {
+    void ShadowWindow::onAnimationProgress(ukive::Animator* animator) {
         d3d_effect_->setRadius(animator->getCurValue());
         d3d_effect_->draw();
 

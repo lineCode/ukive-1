@@ -8,24 +8,24 @@
 
 namespace ukive {
 
-    class Animator2;
+    class Animator;
     class Interpolator;
 
     class AnimationListener {
     public:
         virtual ~AnimationListener() = default;
 
-        virtual void onAnimationStarted(Animator2* animator) {}
-        virtual void onAnimationProgress(Animator2* animator) {}
-        virtual void onAnimationStopped(Animator2* animator) {}
-        virtual void onAnimationFinished(Animator2* animator) {}
-        virtual void onAnimationReset(Animator2* animator) {}
+        virtual void onAnimationStarted(Animator* animator) {}
+        virtual void onAnimationProgress(Animator* animator) {}
+        virtual void onAnimationStopped(Animator* animator) {}
+        virtual void onAnimationFinished(Animator* animator) {}
+        virtual void onAnimationReset(Animator* animator) {}
     };
 
-    class Animator2 {
+    class Animator {
     public:
-        explicit Animator2(bool timer_driven = false);
-        ~Animator2();
+        explicit Animator(bool timer_driven = false);
+        ~Animator();
 
         void start();
         void stop();

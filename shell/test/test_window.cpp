@@ -104,7 +104,7 @@ namespace shell {
         }
     }
 
-    void TestWindow::onAnimationProgress(ukive::Animator2* animator) {
+    void TestWindow::onAnimationProgress(ukive::Animator* animator) {
         image_view_->setX(animator->getCurValue());
         //invalidate();
     }

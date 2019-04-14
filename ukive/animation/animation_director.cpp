@@ -7,7 +7,7 @@ namespace ukive {
         : listener_(nullptr) {}
 
     void AnimationDirector::addAnimator(int id) {
-        auto animator = std::make_unique<Animator2>();
+        auto animator = std::make_unique<Animator>();
         animator->setId(id);
         animator->setListener(this);
         animators_[id] = std::move(animator);
@@ -141,25 +141,25 @@ namespace ukive {
         return nullptr;
     }
 
-    void AnimationDirector::onAnimationStarted(Animator2* animator) {
+    void AnimationDirector::onAnimationStarted(Animator* animator) {
         if (listener_) {
             listener_->onDirectorStarted(this, animator);
         }
     }
 
-    void AnimationDirector::onAnimationProgress(Animator2* animator) {
+    void AnimationDirector::onAnimationProgress(Animator* animator) {
         if (listener_) {
             listener_->onDirectorProgress(this, animator);
         }
     }
 
-    void AnimationDirector::onAnimationStopped(Animator2* animator) {
+    void AnimationDirector::onAnimationStopped(Animator* animator) {
         if (listener_) {
             listener_->onDirectorStopped(this, animator);
         }
     }
 
-    void AnimationDirector::onAnimationFinished(Animator2* animator) {
+    void AnimationDirector::onAnimationFinished(Animator* animator) {
         if (listener_) {
             listener_->onDirectorFinished(this, animator);
         }
@@ -171,7 +171,7 @@ namespace ukive {
         }
     }
 
-    void AnimationDirector::onAnimationReset(Animator2* animator) {
+    void AnimationDirector::onAnimationReset(Animator* animator) {
         if (listener_) {
             listener_->onDirectorReset(this, animator);
         }

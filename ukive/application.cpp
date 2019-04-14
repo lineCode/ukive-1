@@ -1,7 +1,5 @@
 ﻿#include "application.h"
 
-#include <algorithm>
-
 #include <dwmapi.h>
 #include <ShellScalingAPI.h>
 #include <VersionHelpers.h>
@@ -10,13 +8,11 @@
 #include "ukive/log.h"
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
-#include "ukive/animation/animation_manager.h"
 #include "ukive/text/word_breaker.h"
 #include "ukive/utils/stl_utils.h"
 #include "ukive/utils/dynamic_windows_api.h"
 #include "ukive/files/file.h"
 #include "ukive/resources/layout_instantiator.h"
-
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -56,7 +52,6 @@ namespace ukive {
         instance_ = this;
     }
 
-
     Application::~Application() {
         cleanApplication();
 
@@ -75,11 +70,6 @@ namespace ukive {
 
         LayoutInstantiator::init();
 
-        hr = AnimationManager::initGlobal();
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Failed to initialize anim library";
-        }
-
         graphic_device_manager_.reset(new GraphicDeviceManager());
         graphic_device_manager_->init();
 
@@ -94,7 +84,6 @@ namespace ukive {
 
     void Application::cleanApplication() {
         Message::close();
-        AnimationManager::closeGlobal();
         WordBreaker::closeGlobal();
 
         tsf_manager_->close();
@@ -296,7 +285,6 @@ namespace ukive {
     GraphicDeviceManager* Application::getGraphicDeviceManager() {
         return instance_->graphic_device_manager_.get();
     }
-
 
     int Application::getScreenWidth(){
         return ::GetSystemMetrics(SM_CXSCREEN);

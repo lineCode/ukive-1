@@ -1,9 +1,7 @@
 #ifndef UKIVE_ANIMATION_VIEW_ANIMATOR_H_
 #define UKIVE_ANIMATION_VIEW_ANIMATOR_H_
 
-#include "ukive/animation/animator.h"
 #include "ukive/animation/animation_director.h"
-#include "ukive/animation/transition.h"
 
 
 namespace ukive {
@@ -47,11 +45,11 @@ namespace ukive {
         void onPostViewDraw();
 
         // AnimationDirectorListener
-        void onDirectorStarted(AnimationDirector* director, const Animator2* animator) override;
-        void onDirectorProgress(AnimationDirector* director, const Animator2* animator) override;
-        void onDirectorStopped(AnimationDirector* director, const Animator2* animator) override;
-        void onDirectorFinished(AnimationDirector* director, const Animator2* animator) override;
-        void onDirectorReset(AnimationDirector* director, const Animator2* animator) override;
+        void onDirectorStarted(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorProgress(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorStopped(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorFinished(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorReset(AnimationDirector* director, const Animator* animator) override;
 
     private:
         enum ViewAnimId {

@@ -9,7 +9,6 @@
 #include "ukive/message/cycler.h"
 #include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
-#include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
 #include "ukive/graphics/swapchain_resize_notifier.h"
 
@@ -24,7 +23,6 @@ namespace ukive {
     class WindowImpl;
     class TitleBar;
     class RootLayout;
-    class AnimationManager;
     class ContextMenu;
     class ContextMenuCallback;
     class TextActionMode;
@@ -84,7 +82,6 @@ namespace ukive {
         Cycler* getCycler() const;
         Renderer* getRenderer() const;
         HWND getHandle() const;
-        AnimationManager* getAnimationManager() const;
         FrameType getFrameType() const;
         View* getLastInputView() const;
         TitleBar* getTitleBar() const;
@@ -172,34 +169,6 @@ namespace ukive {
             SCHEDULE_LAYOUT = 1,
         };
 
-        class AnimStateChangedListener
-            : public AnimationManager::OnStateChangedListener {
-        public:
-            AnimStateChangedListener(Window* window)
-                :win_(window) {}
-
-            void onStateChanged(
-                UI_ANIMATION_MANAGER_STATUS newStatus,
-                UI_ANIMATION_MANAGER_STATUS previousStatus) override;
-        private:
-            Window* win_;
-        };
-
-        class AnimTimerEventListener
-            : public AnimationManager::OnTimerEventListener {
-        public:
-            AnimTimerEventListener(Window* window)
-                :window_(window) {}
-
-            void onPreUpdate() override;
-            void onPostUpdate() override;
-            void onRenderingTooSlow(unsigned int fps) override;
-
-        private:
-            Window* window_;
-        };
-
-
         std::unique_ptr<WindowImpl> impl_;
 
         Canvas* canvas_;
@@ -216,12 +185,6 @@ namespace ukive {
 
         std::unique_ptr<ContextMenu> context_menu_;
         std::unique_ptr<TextActionMode> text_action_mode_;
-
-        AnimationManager* anim_mgr_;
-        AnimationManager::OnStateChangedListener* mStateChangedListener;
-        AnimStateChangedListener* mAnimStateChangedListener;
-        AnimTimerEventListener* mAnimTimerEventListener;
-
         std::vector<OnWindowStatusChangedListener*> status_changed_listeners_;
 
         Color background_color_;

@@ -208,7 +208,7 @@ namespace ukive {
         return 1.0f;
     }
 
-    void RippleDrawable::onAnimationProgress(Animator2* animator) {
+    void RippleDrawable::onAnimationProgress(Animator* animator) {
         alpha_ = animator->getCurValue();
     }
 

@@ -2,7 +2,7 @@
 #define UKIVE_VIEWS_SEEK_BAR_H_
 
 #include "ukive/views/view.h"
-#include "ukive/animation/animator2.h"
+#include "ukive/animation/animator.h"
 #include "ukive/views/seek_value_changed_listener.h"
 
 
@@ -29,7 +29,7 @@ namespace ukive {
         bool onInputEvent(InputEvent* e) override;
 
         // AnimationListener
-        void onAnimationProgress(Animator2* animator) override;
+        void onAnimationProgress(Animator* animator) override;
 
     private:
         void initSeekBar();
@@ -50,8 +50,8 @@ namespace ukive {
         float seek_percent_;
         bool is_pointer_left_key_available_;
 
-        Animator2 thumb_in_animator_;
-        Animator2 thumb_out_animator_;
+        Animator thumb_in_animator_;
+        Animator thumb_out_animator_;
         OnSeekValueChangedListener* listener_;
     };
 

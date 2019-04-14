@@ -1,4 +1,4 @@
-#include "window.h"
+#include "ukive/window/window.h"
 
 #include "ukive/log.h"
 #include "ukive/application.h"
@@ -33,9 +33,6 @@ namespace ukive {
           focus_holder_backup_(nullptr),
           last_input_view_(nullptr),
           mouse_holder_ref_(0),
-          anim_mgr_(nullptr),
-          mAnimStateChangedListener(nullptr),
-          mAnimTimerEventListener(nullptr),
           background_color_(Color::White),
           is_startup_window_(false),
           min_width_(0),
@@ -203,10 +200,6 @@ namespace ukive {
 
     HWND Window::getHandle() const {
         return impl_->getHandle();
-    }
-
-    AnimationManager* Window::getAnimationManager() const {
-        return anim_mgr_;
     }
 
     Window::FrameType Window::getFrameType() const {
@@ -554,22 +547,8 @@ namespace ukive {
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
 
-        anim_mgr_ = new AnimationManager();
-        HRESULT hr = anim_mgr_->init();
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to init animation manager: " << hr;
-            return;
-        }
-
-        mAnimStateChangedListener = new AnimStateChangedListener(this);
-        anim_mgr_->setOnStateChangedListener(mAnimStateChangedListener);
-
-        //anim_mgr_->connectTimer(true);
-        //mAnimTimerEventListener = new AnimTimerEventListener(this);
-        //anim_mgr_->setTimerEventListener(mAnimTimerEventListener);
-
         renderer_ = new Renderer();
-        hr = renderer_->init(this);
+        HRESULT hr = renderer_->init(this);
         if (FAILED(hr)) {
             LOG(Log::FATAL) << "Failed to init renderer: " << hr;
             return;
@@ -632,10 +611,7 @@ namespace ukive {
     }
 
     void Window::onDraw(const Rect& rect) {
-        if (impl_->isCreated())
-        {
-            getAnimationManager()->update();
-
+        if (impl_->isCreated()) {
             bool ret = renderer_->render(
                 background_color_, [this]() {
 
@@ -656,11 +632,6 @@ namespace ukive {
 
             if (!ret) {
                 LOG(Log::FATAL) << "Failed to render.";
-                return;
-            }
-
-            if (getAnimationManager()->isBusy()) {
-                invalidate();
             }
         }
     }
@@ -774,13 +745,6 @@ namespace ukive {
         renderer_->close();
         delete renderer_;
         renderer_ = nullptr;
-
-        delete mAnimTimerEventListener;
-        delete mAnimStateChangedListener;
-
-        anim_mgr_->setOnStateChangedListener(nullptr);
-        anim_mgr_->close();
-        delete anim_mgr_;
         delete labour_cycler_;
 
         WindowManager::getInstance()->removeWindow(this);
@@ -890,28 +854,6 @@ namespace ukive {
         default:
             break;
         }
-    }
-
-    void Window::AnimStateChangedListener::onStateChanged(
-        UI_ANIMATION_MANAGER_STATUS newStatus,
-        UI_ANIMATION_MANAGER_STATUS previousStatus)
-    {
-        if (newStatus == UI_ANIMATION_MANAGER_BUSY &&
-            previousStatus == UI_ANIMATION_MANAGER_IDLE)
-        {
-            win_->invalidate();
-        }
-    }
-
-
-    void Window::AnimTimerEventListener::onPreUpdate() {
-    }
-
-    void Window::AnimTimerEventListener::onPostUpdate() {
-        window_->invalidate();
-    }
-
-    void Window::AnimTimerEventListener::onRenderingTooSlow(unsigned int fps) {
     }
 
 }

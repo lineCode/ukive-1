@@ -66,28 +66,7 @@
     <ClCompile Include="message\message_queue.cpp">
       <Filter>message</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animation_manager.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animation_manager_event_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animation_timer_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animation_variable_change_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animator.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animator_state_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
     <ClCompile Include="animation\scroller.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\transition.cpp">
       <Filter>animation</Filter>
     </ClCompile>
     <ClCompile Include="animation\view_animator.cpp">
@@ -363,13 +342,13 @@
     <ClCompile Include="animation\timer.cpp">
       <Filter>animation</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animator2.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
     <ClCompile Include="animation\interpolator.cpp">
       <Filter>animation</Filter>
     </ClCompile>
     <ClCompile Include="animation\animation_director.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animator.cpp">
       <Filter>animation</Filter>
     </ClCompile>
   </ItemGroup>
@@ -457,28 +436,7 @@
     <ClInclude Include="utils\hresult_utils.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="animation\animation_manager.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_manager_event_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_timer_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_variable_change_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animator.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animator_state_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
     <ClInclude Include="animation\scroller.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\transition.h">
       <Filter>animation</Filter>
     </ClInclude>
     <ClInclude Include="animation\view_animator.h">
@@ -784,13 +742,13 @@
     <ClInclude Include="animation\timer.h">
       <Filter>animation</Filter>
     </ClInclude>
-    <ClInclude Include="animation\animator2.h">
-      <Filter>animation</Filter>
-    </ClInclude>
     <ClInclude Include="animation\interpolator.h">
       <Filter>animation</Filter>
     </ClInclude>
     <ClInclude Include="animation\animation_director.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animator.h">
       <Filter>animation</Filter>
     </ClInclude>
   </ItemGroup>

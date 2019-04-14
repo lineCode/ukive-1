@@ -3,7 +3,7 @@
 
 #include "ukive/views/click_listener.h"
 #include "ukive/window/window.h"
-#include "ukive/animation/animator2.h"
+#include "ukive/animation/animator.h"
 
 
 namespace ukive {
@@ -29,13 +29,13 @@ namespace shell {
         void onClick(ukive::View* v) override;
 
         // ukive::AnimationListener
-        void onAnimationProgress(ukive::Animator2* animator) override;
+        void onAnimationProgress(ukive::Animator* animator) override;
 
     private:
         void inflateGroup();
         void inflateListView();
 
-        ukive::Animator2 animator_;
+        ukive::Animator animator_;
 
         ukive::Button* dwm_button_;
         ukive::ImageView* image_view_;
