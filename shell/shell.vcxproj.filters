@@ -50,6 +50,12 @@
     <Filter Include="disassembler">
       <UniqueIdentifier>{7a185f92-26cd-467b-b88d-2e481f617de7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\security">
+      <UniqueIdentifier>{08754313-9ea5-4177-a2c6-84ab0a9a4587}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\utils">
+      <UniqueIdentifier>{24d0f31e-a6a8-4890-a9a0-d797d84f0145}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -136,6 +142,15 @@
     <ClCompile Include="disassembler\disassembler_window.cpp">
       <Filter>disassembler</Filter>
     </ClCompile>
+    <ClCompile Include="test\security\crypto_unit_test.cpp">
+      <Filter>test\security</Filter>
+    </ClCompile>
+    <ClCompile Include="test\security\digest_unit_test.cpp">
+      <Filter>test\security</Filter>
+    </ClCompile>
+    <ClCompile Include="test\utils\big_integer_unit_test.cpp">
+      <Filter>test\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resources\resource.h">
@@ -221,6 +236,15 @@
     </ClInclude>
     <ClInclude Include="disassembler\disassembler_window.h">
       <Filter>disassembler</Filter>
+    </ClInclude>
+    <ClInclude Include="test\security\crypto_unit_test.h">
+      <Filter>test\security</Filter>
+    </ClInclude>
+    <ClInclude Include="test\security\digest_unit_test.h">
+      <Filter>test\security</Filter>
+    </ClInclude>
+    <ClInclude Include="test\utils\big_integer_unit_test.h">
+      <Filter>test\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

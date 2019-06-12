@@ -20,8 +20,8 @@ namespace ukive {
           callback_(callback),
           weak_ref_nest_(this)
     {
-        menu_width_ = window->dpToPx(92);
-        menu_item_height_ = window->dpToPx(36);
+        menu_width_ = int(window->dpToPx(92));
+        menu_item_height_ = int(window->dpToPx(36));
 
         menu_ = new MenuImpl(window);
         menu_->setCallback(this);
@@ -38,7 +38,6 @@ namespace ukive {
 
     ContextMenu::~ContextMenu() {}
 
-
     void ContextMenu::onCreateMenu(Menu* menu) {}
 
     void ContextMenu::onPrepareMenu(Menu* menu) {}
@@ -47,11 +46,9 @@ namespace ukive {
         return callback_->onContextMenuItemClicked(this, item);
     }
 
-
     Menu* ContextMenu::getMenu() {
         return menu_;
     }
-
 
     void ContextMenu::invalidateMenu() {
         if (is_finished_) return;

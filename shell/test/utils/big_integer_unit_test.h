@@ -1,0 +1,13 @@
+#ifndef SHELL_TEST_UTILS_BIG_INTEGER_UNIT_TEST_H_
+#define SHELL_TEST_UTILS_BIG_INTEGER_UNIT_TEST_H_
+
+
+namespace shell {
+namespace test {
+
+    void TEST_BIG_INTEGER();
+
+}
+}
+
+#endif  // SHELL_TEST_UTILS_BIG_INTEGER_UNIT_TEST_H_

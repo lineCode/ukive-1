@@ -23,7 +23,7 @@
     <ProjectGuid>{6C135376-870C-4C39-B198-2FFC8E947FFD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ukive</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -230,8 +230,15 @@
     <ClInclude Include="message\message.h" />
     <ClInclude Include="message\message_looper.h" />
     <ClInclude Include="message\message_queue.h" />
+    <ClInclude Include="net\http_client.h" />
+    <ClInclude Include="net\tls.h" />
     <ClInclude Include="resources\dimension_utils.h" />
     <ClInclude Include="resources\layout_instantiator.h" />
+    <ClInclude Include="security\crypto\aes.h" />
+    <ClInclude Include="security\crypto\rsa.h" />
+    <ClInclude Include="security\digest\md5.h" />
+    <ClInclude Include="security\digest\sha.h" />
+    <ClInclude Include="security\digest\sha_private.h" />
     <ClInclude Include="system\clipboard_manager.h" />
     <ClInclude Include="system\qpc_service.h" />
     <ClInclude Include="system\reg_manager.h" />
@@ -253,6 +260,10 @@
     <ClInclude Include="text\tsf_editor.h" />
     <ClInclude Include="text\tsf_manager.h" />
     <ClInclude Include="text\word_breaker.h" />
+    <ClInclude Include="utils\big_integer16.h" />
+    <ClInclude Include="utils\big_integer32.h" />
+    <ClInclude Include="utils\big_integer8.h" />
+    <ClInclude Include="utils\big_integer_converter.h" />
     <ClInclude Include="utils\com_ptr.h" />
     <ClInclude Include="utils\double.h" />
     <ClInclude Include="utils\dynamic_windows_api.h" />
@@ -360,8 +371,21 @@
     <ClCompile Include="message\message.cpp" />
     <ClCompile Include="message\message_looper.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
+    <ClCompile Include="net\http_client.cpp" />
+    <ClCompile Include="net\tls.cpp" />
     <ClCompile Include="resources\dimension_utils.cpp" />
     <ClCompile Include="resources\layout_instantiator.cpp" />
+    <ClCompile Include="security\crypto\aes.cpp" />
+    <ClCompile Include="security\crypto\rsa.cpp" />
+    <ClCompile Include="security\digest\hkdf.cpp" />
+    <ClCompile Include="security\digest\hmac.cpp" />
+    <ClCompile Include="security\digest\md5.cpp" />
+    <ClCompile Include="security\digest\sha1.cpp" />
+    <ClCompile Include="security\digest\sha224.cpp" />
+    <ClCompile Include="security\digest\sha256.cpp" />
+    <ClCompile Include="security\digest\sha384.cpp" />
+    <ClCompile Include="security\digest\sha512.cpp" />
+    <ClCompile Include="security\digest\usha.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
     <ClCompile Include="system\qpc_service.cpp" />
     <ClCompile Include="system\reg_manager.cpp" />
@@ -382,6 +406,10 @@
     <ClCompile Include="text\tsf_editor.cpp" />
     <ClCompile Include="text\tsf_manager.cpp" />
     <ClCompile Include="text\word_breaker.cpp" />
+    <ClCompile Include="utils\big_integer16.cpp" />
+    <ClCompile Include="utils\big_integer32.cpp" />
+    <ClCompile Include="utils\big_integer8.cpp" />
+    <ClCompile Include="utils\big_integer_converter.cpp" />
     <ClCompile Include="utils\double.cpp" />
     <ClCompile Include="utils\dynamic_windows_api.cpp" />
     <ClCompile Include="utils\float.cpp" />

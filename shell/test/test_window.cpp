@@ -31,9 +31,19 @@
 #include "ukive/files/file.h"
 #include "ukive/animation/interpolator.h"
 #include "ukive/system/time_utils.h"
+#include "ukive/net/http_client.h"
 
 #include "shell/test/list/test_adapter.h"
 #include "shell/resources/oigka_resources_id.h"
+#include "shell/test/security/digest_unit_test.h"
+#include "shell/test/utils/big_integer_unit_test.h"
+
+#include "ukive/security/digest/md5.h"
+#include "ukive/security/crypto/aes.h"
+#include "ukive/security/crypto/rsa.h"
+#include "ukive/system/qpc_service.h"
+#include "ukive/utils/big_integer8.h"
+#include "ukive/utils/big_integer16.h"
 
 
 namespace shell {
@@ -60,11 +70,25 @@ namespace shell {
         animator_.setInitValue(0);
         animator_.setInterpolator(new ukive::LinearInterpolator(400));
         animator_.setRepeat(true);
-        animator_.start();
+        //animator_.start();
 
         showTitleBar();
-        inflateGroup();
-        //inflateListView();
+        //inflateGroup();
+        inflateListView();
+
+        //test::TEST_MD5();
+        //test::TEST_SHA();
+        //test::TEST_BIG_INTEGER();
+
+        /*auto prime = ukive::crypto::RSA::getPrime();
+        auto prime_str = prime.toString();
+
+        ukive::net::HttpClient::initialize();
+
+        ukive::net::HttpClient client;
+        client.connect("");
+
+        ukive::net::HttpClient::unInitialize();*/
     }
 
     void TestWindow::onDraw(const ukive::Rect& rect) {

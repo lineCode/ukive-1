@@ -351,6 +351,57 @@
     <ClCompile Include="animation\animator.cpp">
       <Filter>animation</Filter>
     </ClCompile>
+    <ClCompile Include="net\http_client.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\tls.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\md5.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\aes.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\rsa.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer_converter.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha1.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha224.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha256.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha384.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha512.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\usha.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\hmac.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\hkdf.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer8.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer16.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer32.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -751,6 +802,39 @@
     <ClInclude Include="animation\animator.h">
       <Filter>animation</Filter>
     </ClInclude>
+    <ClInclude Include="net\http_client.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\tls.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="security\digest\md5.h">
+      <Filter>security\digest</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\aes.h">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\rsa.h">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer_converter.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="security\digest\sha_private.h">
+      <Filter>security\digest</Filter>
+    </ClInclude>
+    <ClInclude Include="security\digest\sha.h">
+      <Filter>security\digest</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer8.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer16.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer32.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -821,6 +905,18 @@
     </Filter>
     <Filter Include="resources">
       <UniqueIdentifier>{74a72a50-3993-40f9-bdd2-940dc88aa351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{a2ecb333-c529-43a7-932f-8774464dfdca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security">
+      <UniqueIdentifier>{ce349be7-ace0-4eea-b5ff-25f7838f23c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security\digest">
+      <UniqueIdentifier>{5eea4fcf-5d95-4399-bcb3-26f5a87b9e79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security\crypto">
+      <UniqueIdentifier>{7bf90690-59e2-4a8b-9948-afe6fc44071f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

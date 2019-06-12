@@ -4,8 +4,8 @@
 namespace ukive {
 
     Drawable::Drawable()
-        : start_x_(0.f),
-          start_y_(0.f),
+        : start_x_(0),
+          start_y_(0),
           state_(STATE_NONE),
           prev_state_(STATE_NONE),
           is_parent_has_focus_(false),

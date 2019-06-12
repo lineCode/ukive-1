@@ -52,7 +52,7 @@ namespace ukive {
         ripple_animator_.update();
 
         auto bound = getBounds();
-        Color color(0.f, 0.f, 0.f, alpha_);
+        Color color(0.f, 0.f, 0.f, float(alpha_));
 
         bool has_content = tint_color_.a > 0.f || color.a > 0.f || ripple_animator_.isRunning();
         if (has_content) {

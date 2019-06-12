@@ -23,7 +23,7 @@
     <ProjectGuid>{58F52DDE-C924-4F42-8DF1-E9E7AE93B9D5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>shell</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -229,9 +229,12 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="test\emulator\emulator_window.cpp" />
     <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
+    <ClCompile Include="test\security\crypto_unit_test.cpp" />
+    <ClCompile Include="test\security\digest_unit_test.cpp" />
     <ClCompile Include="test\shadow\shadow_window.cpp" />
     <ClCompile Include="test\test_window.cpp" />
     <ClCompile Include="test\text\text_window.cpp" />
+    <ClCompile Include="test\utils\big_integer_unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="application.manifest">
@@ -264,9 +267,12 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="test\emulator\emulator_window.h" />
     <ClInclude Include="test\frame\custom_non_client_frame.h" />
     <ClInclude Include="test\list\test_adapter.h" />
+    <ClInclude Include="test\security\crypto_unit_test.h" />
+    <ClInclude Include="test\security\digest_unit_test.h" />
     <ClInclude Include="test\shadow\shadow_window.h" />
     <ClInclude Include="test\test_window.h" />
     <ClInclude Include="test\text\text_window.h" />
+    <ClInclude Include="test\utils\big_integer_unit_test.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\shell.ico" />

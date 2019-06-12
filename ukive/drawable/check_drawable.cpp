@@ -25,8 +25,8 @@ namespace ukive {
 
         float hp_offset = 0.f;
         float total_offset = 0.f;
-        int length = std::ceil(win_->dpToPx(16));
-        int stroke_width = win_->dpToPx(2.5f);
+        int length = int(std::ceil(win_->dpToPx(16)));
+        int stroke_width = int(win_->dpToPx(2.5f));
         if (stroke_width % 2) {
             hp_offset = 0.5f;
         }

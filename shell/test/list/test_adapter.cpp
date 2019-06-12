@@ -9,6 +9,7 @@
 #include "ukive/views/text_view.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace shell {
@@ -75,7 +76,7 @@ namespace shell {
     }
 
     int TestAdapter::getItemCount() {
-        return data_list_.size();
+        return ukive::STLCInt(data_list_.size());
     }
 
     void TestAdapter::AddItem(int image_res_id, ukive::string16 title, ukive::string16 summary) {

@@ -21,12 +21,17 @@ namespace {
 namespace ukive {
 
     ShadowEffect::ShadowEffect()
-        :width_(0),
-        height_(0),
-        view_width_(0),
-        view_height_(0),
-        radius_(0),
-        elevation_(0.f) {
+        : width_(0),
+          height_(0),
+          view_width_(0),
+          view_height_(0),
+          radius_(0),
+          elevation_(0.f),
+          wvo_matrix_(),
+          world_matrix_(),
+          view_matrix_(),
+          ortho_matrix_(),
+          viewport_() {
 
         D3D11_INPUT_ELEMENT_DESC layout[1];
 
@@ -74,7 +79,6 @@ namespace ukive {
             LOG(Log::WARNING) << "Failed to create rasterizer state: " << hr;
         }
     }
-
 
     void ShadowEffect::draw() {
         ukive::Space::setVertexShader(vertex_shader_.get());

@@ -9,7 +9,7 @@
 namespace ukive {
 
     ViewAnimator::ViewAnimator(View* v)
-        : duration_(0.2),
+        : duration_(200),
           owner_view_(v),
           listener_(nullptr)
     {

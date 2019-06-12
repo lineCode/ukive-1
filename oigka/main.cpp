@@ -1,9 +1,5 @@
 #include <Windows.h>
 
-#include <iostream>
-#include <fstream>
-#include <map>
-
 #include "ukive/log.h"
 
 #include "oigka/layout_processor.h"
@@ -49,7 +45,7 @@ int APIENTRY wWinMain(
     ukive::Log::Params log_params;
     log_params.file_name = L"Oigka.log";
     log_params.short_file_name = true;
-    log_params.target = ukive::Log::OutputTarget::DBG_STR | ukive::Log::OutputTarget::CONSOLE;
+    log_params.target = ukive::Log::OutputTarget::CONSOLE;
     ukive::InitLogging(log_params);
 
     auto cmds = ukive::splitString(lpCmdLine, L" ", true);

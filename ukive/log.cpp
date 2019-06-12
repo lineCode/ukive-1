@@ -3,6 +3,7 @@
 #include <Windows.h>
 
 #include <fstream>
+#include <iostream>
 
 #include "ukive/application.h"
 #include "ukive/files/file.h"
@@ -47,9 +48,9 @@ namespace ukive {
     }
 
     Log::Log(const wchar_t* file_name, int line_number, Severity level)
-        :level_(level),
-        line_number_(line_number),
-        file_name_(file_name) {
+        : level_(level),
+          line_number_(line_number),
+          file_name_(file_name) {
     }
 
     Log::~Log() {
@@ -77,6 +78,9 @@ namespace ukive {
             if (console_output_handle_ != INVALID_HANDLE_VALUE) {
                 ::WriteConsoleW(console_output_handle_, msg.data(), msg.length(), nullptr, nullptr);
             }
+        }
+        if (log_params_.target & STANDARD) {
+            std::wcout << msg;
         }
 
         switch (level_) {

@@ -123,10 +123,10 @@ namespace oigka {
         string8 break_unit;
         string8 break_str;
         switch (line_break_) {
-        case LineBreak::CR: break_unit = "\r";
-        case LineBreak::LF: break_unit = "\n";
-        case LineBreak::CRLF: break_unit = "\r\n";
-        default: break_unit = "\r\n";
+        case LineBreak::CR: break_unit = "\r"; break;
+        case LineBreak::LF: break_unit = "\n"; break;
+        case LineBreak::CRLF: break_unit = "\r\n"; break;
+        default: break_unit = "\r\n"; break;
         }
 
         for (uint32_t i = 0; i < count; ++i) {
