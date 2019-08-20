@@ -16,10 +16,27 @@ namespace cyro {
         Point3 pos;
     };
 
+    struct Triangle {
+        int idx[3];
+        bool clipped;
+    };
+
     struct Polygon {
+        // 原始顶点数据
         std::vector<Vertex> vertices;
+        // 经过坐标变换和裁剪的顶点数据
         std::vector<Point4> t_vertices_4d;
+        // 索引数据（可能为空）
         std::vector<std::array<int, 3>> indices;
+
+        // 被裁剪的三角形的索引
+        std::vector<bool> cts_;
+
+        // 在世界坐标中裁剪生成的三角形
+        std::vector<Point3> cgtv_3d;
+        // 在屏幕坐标中裁剪生成的三角形
+        std::vector<Point4> cgtv_4d;
+        std::vector<std::array<int, 3>> cgti;
     };
 
     class Pipeline {
@@ -48,15 +65,16 @@ namespace cyro {
             double left, double right, double top, double bottom, double near, double far,
             const Vector3& eye, const Vector3& look, const Vector3& up);
         void clipTrianglesAfter(
-            double left, double right, double top, double bottom, double near, double far);
-        void clipTrianglesAfter2(
-            double left, double right, double top, double bottom, double near, double far);
+            double left, double right, double top, double bottom, double near, double far,
+            bool is_persp);
 
-        void clipEdge(const PlaneEqu& cp, Point3& a, Point3& b);
-        bool clipTriangle(const PlaneEqu& cp, Point3& p0, Point3& p1, Point3& p2);
+        void clipEdge(const PlaneEqu& cp, Point3& a, Point3& b, int* which_clipped);
+        bool clipTriangle(
+            const PlaneEqu& cp, const Point3 p[3], const int indices[3], Polygon* polygon);
 
-        void clipEdge(const PlaneEqu4D& cp, Point4& a, Point4& b);
-        bool clipTriangle(const PlaneEqu4D& cp, Point4& p0, Point4& p1, Point4& p2);
+        void clipEdge(const PlaneEqu4D& cp, Point4& a, Point4& b, int* which_clipped);
+        bool clipTriangle(
+            const PlaneEqu4D& cp, const Point4 p[3], const int indices[3], Polygon* polygon);
 
         int img_width_;
         int img_height_;

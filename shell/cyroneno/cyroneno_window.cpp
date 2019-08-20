@@ -10,10 +10,12 @@
 #include "shell/cyroneno/pipeline/rasterizer.h"
 #include "shell/cyroneno/pipeline/pipeline.h"
 #include "ukive/log.h"
+#include "ukive/views/title_bar/title_bar.h"
+
 
 namespace {
-    constexpr auto IMAGE_WIDTH = 400;
-    constexpr auto IMAGE_HEIGHT = 400;
+    constexpr auto IMAGE_WIDTH = 800;
+    constexpr auto IMAGE_HEIGHT = 800;
 }
 
 namespace shell {
@@ -27,29 +29,39 @@ namespace shell {
         showTitleBar();
         setBackgroundColor(ukive::Color(0.5f, 0.5f, 0.5f));
 
-        /*cyro::RayTracer ray_tracer;
-        auto image = ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT);*/
+        if (false) {
+            cyro::RayTracer ray_tracer;
+            auto image = ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT);
+            auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_.data());
 
-        /*cyro::Rasterizer rasterizer(IMAGE_WIDTH, IMAGE_HEIGHT);
-        rasterizer.drawLine({100, 100}, {200, 99}, cyro::Color(0, 0, 0, 1));
-        rasterizer.drawTriangle(
-            {50, 50}, {70, 200}, {300, 50},
-            cyro::Color(1, 0, 0, 1),
-            cyro::Color(0, 1, 0, 1),
-            cyro::Color(0, 0, 1, 1));
-        auto image = rasterizer.getOutput();*/
+            // Save to file
+            /*ukive::Application::getWICManager()->saveToPngFile(
+                IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr, L"test.png");*/
 
-        cyro::Pipeline pipeline(IMAGE_WIDTH, IMAGE_HEIGHT);
-        pipeline.launch();
-        auto image = pipeline.getOutput();
+            bmp_ = ukive::BitmapFactory::create(this, IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr);
+        } else {
+            /*cyro::Rasterizer rasterizer(IMAGE_WIDTH, IMAGE_HEIGHT);
+            rasterizer.drawLine({100, 100}, {200, 99}, cyro::Color(0, 0, 0, 1));
+            rasterizer.drawTriangle(
+                {50, 50}, {70, 200}, {300, 50},
+                cyro::Color(1, 0, 0, 1),
+                cyro::Color(0, 1, 0, 1),
+                cyro::Color(0, 0, 1, 1));
+            auto image = rasterizer.getOutput();*/
 
-        auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_.data());
+            cyro::Pipeline pipeline(IMAGE_WIDTH, IMAGE_HEIGHT);
+            pipeline.launch();
+            auto image = pipeline.getOutput();
 
-        // Save to file
-        /*ukive::Application::getWICManager()->saveToPngFile(
-            IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr, L"test.png");*/
+            auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_.data());
 
-        bmp_ = ukive::BitmapFactory::create(this, IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr);
+            // Save to file
+            /*ukive::Application::getWICManager()->saveToPngFile(
+                IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr, L"test.png");*/
+
+            bmp_ = ukive::BitmapFactory::create(this, IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr);
+        }
+
         invalidate();
     }
 
@@ -58,7 +70,7 @@ namespace shell {
 
         if (bmp_) {
             int x = (getClientWidth() - IMAGE_WIDTH) / 2;
-            int y = (getClientHeight() - IMAGE_HEIGHT) / 2;
+            int y = getTitleBar()->getHeight() + (getClientHeight() - getTitleBar()->getHeight() - IMAGE_HEIGHT) / 2;
 
             canvas->drawBitmap(x, y, bmp_.get());
         }

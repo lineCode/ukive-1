@@ -1,7 +1,11 @@
 #include "pipeline.h"
 
+#include "ukive/log.h"
+
 #include "../matrix.h"
 #include "../vector.h"
+
+#define PI 3.1415926535898
 
 
 namespace cyro {
@@ -11,12 +15,12 @@ namespace cyro {
           img_height_(image_height),
           rasterizer_(image_width, image_height),
           is_persp_(false),
-          flags_(CLIP_AFTER) {}
+          flags_(CLIP_BEFORE) {}
 
     void Pipeline::launch() {
         polygons_.clear();
 
-        constructCube();
+        //constructCube();
         constructSphere();
 
         processVertices();
@@ -53,7 +57,49 @@ namespace cyro {
     }
 
     void Pipeline::constructSphere() {
+        double r = 80;
+        int hori_div = 16;
+        int vert_div = 16;
+        double h_angle = 2 * PI / hori_div;
+        double v_angle = PI / vert_div;
 
+        Polygon sphere;
+        for (int i = 0; i <= vert_div; ++i) {
+            if (i == 0) {
+                sphere.vertices.push_back({ Point3(0, r, 0) });
+                for (int j = 0; j < hori_div; ++j) {
+                    sphere.indices.push_back({ 0, 1 + j, (1 + j) % hori_div + 1 });
+                }
+            } else if (i == vert_div) {
+                sphere.vertices.push_back({ Point3(0, -r, 0) });
+            } else {
+                double a = i * v_angle;
+                int start_idx = 1 + (i - 1) * hori_div;
+                int start_next_idx = 1 + i * hori_div;
+                for (int j = 0; j < hori_div; ++j) {
+                    double b = j * h_angle;
+                    sphere.vertices.push_back({
+                        Point3(r*std::sin(a)*std::cos(b), r*std::cos(a), r*std::sin(a)*std::sin(b)) });
+
+                    int cur_idx = start_idx + j;
+                    auto cur_1 = (cur_idx + 1 - start_idx) % hori_div + start_idx;
+                    if (i < vert_div - 1) {
+                        int nxt_idx = 1 + i * hori_div + j;
+                        auto next_1 = (nxt_idx + 1 - start_next_idx) % hori_div + start_next_idx;
+                        sphere.indices.push_back(
+                            { cur_idx, nxt_idx, next_1 });
+                        sphere.indices.push_back(
+                            { cur_idx, next_1, cur_1 });
+                    } else {
+                        int nxt_idx = 1 + i * hori_div;
+                        sphere.indices.push_back(
+                            { cur_idx, nxt_idx, cur_1 });
+                    }
+                }
+            }
+        }
+
+        polygons_.push_back(sphere);
     }
 
     ImagePng Pipeline::getOutput() const {
@@ -65,7 +111,7 @@ namespace cyro {
         double right = 87;
         double bottom = -87;
         double top = 87;
-        double near = -86;
+        double near = -96;
         double far = -87 * 3;
 
         Vector3 eye(100, 100, 100);
@@ -96,22 +142,28 @@ namespace cyro {
                 auto p = matrix * Point4(vertex.pos, 1);
                 polygon.t_vertices_4d.push_back(p);
             }
+
+            for (auto& vertex : polygon.cgtv_3d) {
+                auto p = matrix * Point4(vertex, 1);
+                polygon.cgtv_4d.push_back(p);
+            }
         }
 
         if (flags_ & Flags::CLIP_AFTER) {
-            // 在 4D 屏幕空间（像素空间）中裁剪。
-            // 使用透视投影时，每个点的坐标经过变换后，在除以 w 之前会被关于原点对称（每分量取相反数），
-            // 因此需要使用和正交投影不同的裁剪方法，即让裁剪面也关于原点对称。
-            if (is_persp_) {
-                clipTrianglesAfter(0, img_width_ - 1, img_height_ - 1, 0, 1, -1);
-            } else {
-                clipTrianglesAfter2(0, img_width_ - 1, img_height_ - 1, 0, 1, -1);
-            }
+            clipTrianglesAfter(0, img_width_ - 1, img_height_ - 1, 0, 1, -1, is_persp_);
         }
 
         if (is_persp_) {
             for (auto& polygon : polygons_) {
                 for (auto& vertex : polygon.t_vertices_4d) {
+                    auto& p = vertex;
+                    p.x_ /= p.w_;
+                    p.y_ /= p.w_;
+                    p.z_ /= p.w_;
+                    p.w_ = 1;
+                }
+
+                for (auto& vertex : polygon.cgtv_4d) {
                     auto& p = vertex;
                     p.x_ /= p.w_;
                     p.y_ /= p.w_;
@@ -125,9 +177,26 @@ namespace cyro {
     void Pipeline::rasterize() {
         for (const auto& polygon : polygons_) {
             if (polygon.indices.empty()) {
+                // 无索引，每三个顶点绘制一个三角形
                 int index = 0;
+                int ct_index = 0;
                 Point2 tri_pts[3];
                 for (const auto& p : polygon.t_vertices_4d) {
+                    tri_pts[index] = Point2(p.x_, p.y_);
+                    ++index;
+                    if (index >= 3) {
+                        index = 0;
+                        if (polygon.cts_[ct_index]) {
+                            rasterizer_.drawLine(tri_pts[0], tri_pts[1], Color(0, 0, 0, 1));
+                            rasterizer_.drawLine(tri_pts[1], tri_pts[2], Color(0, 0, 0, 1));
+                            rasterizer_.drawLine(tri_pts[2], tri_pts[0], Color(0, 0, 0, 1));
+                        }
+                        ++ct_index;
+                    }
+                }
+
+                index = 0;
+                for (const auto& p : polygon.cgtv_4d) {
                     tri_pts[index] = Point2(p.x_, p.y_);
                     ++index;
                     if (index >= 3) {
@@ -135,13 +204,37 @@ namespace cyro {
                         rasterizer_.drawLine(tri_pts[0], tri_pts[1], Color(0, 0, 0, 1));
                         rasterizer_.drawLine(tri_pts[1], tri_pts[2], Color(0, 0, 0, 1));
                         rasterizer_.drawLine(tri_pts[2], tri_pts[0], Color(0, 0, 0, 1));
+                        ++ct_index;
                     }
                 }
             } else {
+                // 有索引，按照索引绘制
+                int ct_index = 0;
                 for (const auto& index : polygon.indices) {
+                    if (polygon.cts_[ct_index]) {
+                        Point2 tri_pts[3];
+                        for (int i = 0; i < 3; ++i) {
+                            auto p = polygon.t_vertices_4d[index[i]];
+                            tri_pts[i] = Point2(p.x_, p.y_);
+                        }
+                        rasterizer_.drawLine(tri_pts[0], tri_pts[1], Color(0, 0, 0, 1));
+                        rasterizer_.drawLine(tri_pts[1], tri_pts[2], Color(0, 0, 0, 1));
+                        rasterizer_.drawLine(tri_pts[2], tri_pts[0], Color(0, 0, 0, 1));
+                    }
+                    ++ct_index;
+                }
+
+                int rv_size = polygon.t_vertices_4d.size();
+                for (const auto& index : polygon.cgti) {
                     Point2 tri_pts[3];
                     for (int i = 0; i < 3; ++i) {
-                        auto p = polygon.t_vertices_4d[index[i]];
+                        auto idx = index[i];
+                        Point4 p;
+                        if (idx >= rv_size) {
+                            p = polygon.cgtv_4d[idx - rv_size];
+                        } else {
+                            p = polygon.t_vertices_4d[idx];
+                        }
                         tri_pts[i] = Point2(p.x_, p.y_);
                     }
                     rasterizer_.drawLine(tri_pts[0], tri_pts[1], Color(0, 0, 0, 1));
@@ -207,59 +300,45 @@ namespace cyro {
 
         for (auto& polygon : polygons_) {
             if (polygon.indices.empty()) {
-                int index = 0;
-                Point3* tri_pts[3] {};
+                int tv_index = 0;
+                Point3 tri_pts[3];
                 for (auto& v : polygon.vertices) {
-                    tri_pts[index] = &v.pos;
-                    ++index;
-                    if (index >= 3) {
-                        index = 0;
+                    tri_pts[tv_index] = v.pos;
+                    ++tv_index;
+                    if (tv_index >= 3) {
+                        tv_index = 0;
 
-                        if (!clipTriangle(lcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(rcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(tcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(bcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(ncp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(fcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
+                        if (!clipTriangle(lcp, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(rcp, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(tcp, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(bcp, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(ncp, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(fcp, tri_pts, nullptr, &polygon))
+                        {
+                            polygon.cts_.push_back(false);
+                        } else {
+                            polygon.cts_.push_back(true);
                         }
                     }
                 }
             } else {
                 for (auto& index : polygon.indices) {
-                    Point3* tri_pts[3] {};
+                    Point3 tri_pts[3];
                     for (int i = 0; i < 3; ++i) {
                         auto& v = polygon.vertices[index[i]];
-                        tri_pts[i] = &v.pos;
+                        tri_pts[i] = v.pos;
                     }
 
-                    if (!clipTriangle(lcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(rcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(tcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(bcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(ncp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(fcp, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
+                    if (!clipTriangle(lcp, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(rcp, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(tcp, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(bcp, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(ncp, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(fcp, tri_pts, index.data(), &polygon))
+                    {
+                        polygon.cts_.push_back(false);
+                    } else {
+                        polygon.cts_.push_back(true);
                     }
                 }
             }
@@ -267,170 +346,69 @@ namespace cyro {
     }
 
     void Pipeline::clipTrianglesAfter(
-        double left, double right, double top, double bottom, double near, double far)
+        double left, double right, double top, double bottom, double near, double far,
+        bool is_persp)
     {
-        // left clip hyperplane
-        PlaneEqu4D lch(Vector4(1, 0, 0, -left), Point4(left, 0, 0, 1));
+        // 在 4D 屏幕空间（像素空间）中裁剪。
+        // 使用透视投影时，每个点的坐标经过变换后，在除以 w 之前会被关于原点对称（每分量取相反数），
+        // 因此需要使用和正交投影不同的裁剪方法，即让裁剪面也关于原点对称。
+        int inv = is_persp ? 1 : -1;
 
-        // right clip hyperplane
-        PlaneEqu4D rch(Vector4(-1, 0, 0, right), Point4(right, 0, 0, 1));
-
-        // bottom clip hyperplane
-        PlaneEqu4D bch(Vector4(0, 1, 0, -bottom), Point4(0, bottom, 0, 1));
-
-        // top clip hyperplane
-        PlaneEqu4D tch(Vector4(0, -1, 0, top), Point4(0, top, 0, 1));
-
-        // near clip hyperplane
-        PlaneEqu4D nch(Vector4(0, 0, -1, near), Point4(0, 0, near, 1));
-
-        // far clip hyperplane
-        PlaneEqu4D fch(Vector4(0, 0, 1, -far), Point4(0, 0, far, 1));
+        PlaneEqu4D lch(Vector4(1 * inv, 0, 0, -left * inv), Point4(left, 0, 0, 1));  // left clip hyperplane
+        PlaneEqu4D rch(Vector4(-1 * inv, 0, 0, right * inv), Point4(right, 0, 0, 1));  // right clip hyperplane
+        PlaneEqu4D bch(Vector4(0, 1 * inv, 0, -bottom * inv), Point4(0, bottom, 0, 1));  // bottom clip hyperplane
+        PlaneEqu4D tch(Vector4(0, -1 * inv, 0, top * inv), Point4(0, top, 0, 1));  // top clip hyperplane
+        PlaneEqu4D nch(Vector4(0, 0, -1 * inv, near * inv), Point4(0, 0, near, 1));  // near clip hyperplane
+        PlaneEqu4D fch(Vector4(0, 0, 1 * inv, -far * inv), Point4(0, 0, far, 1));  // far clip hyperplane
 
         for (auto& polygon : polygons_) {
             if (polygon.indices.empty()) {
                 int index = 0;
-                Point4* tri_pts[3]{};
+                Point4 tri_pts[3];
                 for (auto& v : polygon.t_vertices_4d) {
-                    tri_pts[index] = &v;
+                    tri_pts[index] = v;
                     ++index;
                     if (index >= 3) {
                         index = 0;
 
-                        if (!clipTriangle(lch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(rch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(tch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(bch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(nch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(fch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
+                        if (!clipTriangle(lch, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(rch, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(tch, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(bch, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(nch, tri_pts, nullptr, &polygon) ||
+                            !clipTriangle(fch, tri_pts, nullptr, &polygon))
+                        {
+                            polygon.cts_.push_back(false);
+                        } else {
+                            polygon.cts_.push_back(true);
                         }
                     }
                 }
             } else {
                 for (auto& index : polygon.indices) {
-                    Point4* tri_pts[3]{};
+                    Point4 tri_pts[3];
                     for (int i = 0; i < 3; ++i) {
                         auto& v = polygon.t_vertices_4d[index[i]];
-                        tri_pts[i] = &v;
+                        tri_pts[i] = v;
                     }
 
-                    if (!clipTriangle(lch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(rch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(tch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(bch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(nch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(fch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
+                    if (!clipTriangle(lch, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(rch, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(tch, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(bch, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(nch, tri_pts, index.data(), &polygon) ||
+                        !clipTriangle(fch, tri_pts, index.data(), &polygon))
+                    {
+                        polygon.cts_.push_back(false);
+                    } else {
+                        polygon.cts_.push_back(true);
                     }
                 }
             }
         }
     }
 
-    void Pipeline::clipTrianglesAfter2(
-        double left, double right, double top, double bottom, double near, double far)
-    {
-        // left clip hyperplane
-        PlaneEqu4D lch(Vector4(-1, 0, 0, left), Point4(left, 0, 0, 1));
-
-        // right clip hyperplane
-        PlaneEqu4D rch(Vector4(1, 0, 0, -right), Point4(right, 0, 0, 1));
-
-        // bottom clip hyperplane
-        PlaneEqu4D bch(Vector4(0, -1, 0, bottom), Point4(0, bottom, 0, 1));
-
-        // top clip hyperplane
-        PlaneEqu4D tch(Vector4(0, 1, 0, -top), Point4(0, top, 0, 1));
-
-        // near clip hyperplane
-        PlaneEqu4D nch(Vector4(0, 0, 1, -near), Point4(0, 0, near, 1));
-
-        // far clip hyperplane
-        PlaneEqu4D fch(Vector4(0, 0, -1, far), Point4(0, 0, far, 1));
-
-        for (auto& polygon : polygons_) {
-            if (polygon.indices.empty()) {
-                int index = 0;
-                Point4* tri_pts[3]{};
-                for (auto& v : polygon.t_vertices_4d) {
-                    tri_pts[index] = &v;
-                    ++index;
-                    if (index >= 3) {
-                        index = 0;
-
-                        if (!clipTriangle(lch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(rch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(tch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(bch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(nch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                        if (!clipTriangle(fch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                            continue;
-                        }
-                    }
-                }
-            } else {
-                for (auto& index : polygon.indices) {
-                    Point4* tri_pts[3]{};
-                    for (int i = 0; i < 3; ++i) {
-                        auto& v = polygon.t_vertices_4d[index[i]];
-                        tri_pts[i] = &v;
-                    }
-
-                    if (!clipTriangle(lch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(rch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(tch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(bch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(nch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                    if (!clipTriangle(fch, *tri_pts[0], *tri_pts[1], *tri_pts[2])) {
-                        continue;
-                    }
-                }
-            }
-        }
-    }
-
-    void Pipeline::clipEdge(const PlaneEqu& cp, Point3& a, Point3& b) {
+    void Pipeline::clipEdge(const PlaneEqu& cp, Point3& a, Point3& b, int* which_clipped) {
         auto fa = cp.cal(a);
         auto fb = cp.cal(b);
         if (fa * fb < 0) {
@@ -438,25 +416,112 @@ namespace cyro {
             auto p = a + (b - a)*t;
             if (fa > 0) {
                 a = p;
+                *which_clipped = 1;
             } else {
                 b = p;
+                *which_clipped = 2;
             }
+        } else {
+            *which_clipped = 0;
         }
     }
 
-    bool Pipeline::clipTriangle(const PlaneEqu& cp, Point3& p0, Point3& p1, Point3& p2) {
-        if (cp.cal(p0) > 0 && cp.cal(p1) > 0 && cp.cal(p2) > 0) {
-            p0 = {};
-            p1 = {};
-            p2 = {};
+    bool Pipeline::clipTriangle(
+        const PlaneEqu& cp, const Point3 p[3], const int indices[3], Polygon* polygon)
+    {
+        if (cp.cal(p[0]) > 0 && cp.cal(p[1]) > 0 && cp.cal(p[2]) > 0) {
             return false;
         }
-        clipEdge(cp, p0, p1);
-        clipEdge(cp, p0, p2);
-        return true;
+
+        int c01, c02, c12;
+        auto p0_org = p[0];
+        auto p1_org = p[1];
+        auto p2_org = p[2];
+        auto p0_tmp = p[0];
+        auto p1_tmp = p[1];
+        auto p2_tmp = p[2];
+        clipEdge(cp, p0_org, p1_org, &c01);
+        clipEdge(cp, p0_tmp, p2_org, &c02);
+        clipEdge(cp, p1_tmp, p2_tmp, &c12);
+
+        int n = polygon->vertices.size() + polygon->cgtv_3d.size();
+        if (c01 == 2 && c12 == 1) {
+            if (indices) {
+                // + (0, 1, 2)
+                polygon->cgtv_3d.push_back(p1_org);
+                polygon->cgti.push_back({ indices[0], n, indices[2] });
+                // + (1, n, 2)
+                polygon->cgtv_3d.push_back(p1_tmp);
+                polygon->cgti.push_back({ n, n + 1, indices[2] });
+            } else {
+                // + (0, 1, 2)
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p[0], p1_org, p[2] });
+                // + (1, n, 2)
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p1_org, p1_tmp, p[2] });
+            }
+        } else if (c02 == 2 && c12 == 2) {
+            if (indices) {
+                // + (0, 1, 2)
+                polygon->cgtv_3d.push_back(p2_org);
+                polygon->cgti.push_back({ indices[0], indices[1], n });
+                // + (1, n, 2)
+                polygon->cgtv_3d.push_back(p2_tmp);
+                polygon->cgti.push_back({ indices[1], n + 1, n });
+            } else {
+                // + (0, 1, 2)
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p[0], p[1], p2_org });
+                // + (1, n, 2)
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p[1], p2_tmp, p2_org });
+            }
+        } else if (c01 == 1 && c02 == 1) {
+            if (indices) {
+                // + (0, 1, 2)
+                polygon->cgtv_3d.push_back(p0_org);
+                polygon->cgti.push_back({ n, indices[1], indices[2] });
+                // + (0, 2, n)
+                polygon->cgtv_3d.push_back(p0_tmp);
+                polygon->cgti.push_back({ n, indices[2], n + 1 });
+            } else {
+                // + (0, 1, 2)
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p0_org, p[1], p[2] });
+                // + (0, 2, n)
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p0_org, p[2], p0_tmp });
+            }
+        } else if (c01 == 1 && c12 == 2) {
+            // + (0, 1, 2)
+            if (indices) {
+                polygon->cgtv_3d.push_back(p0_org);
+                polygon->cgtv_3d.push_back(p2_tmp);
+                polygon->cgti.push_back({ n, indices[1], n + 1 });
+            } else {
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p0_org, p[1], p2_tmp });
+            }
+        } else if (c02 == 1 && c12 == 1) {
+            // + (0, 1, 2)
+            if (indices) {
+                polygon->cgtv_3d.push_back(p0_tmp);
+                polygon->cgtv_3d.push_back(p1_tmp);
+                polygon->cgti.push_back({ n, n + 1, indices[2] });
+            } else {
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p0_tmp, p1_tmp, p[2] });
+            }
+        } else if (c01 == 2 && c02 == 2) {
+            // + (0, 1, 2)
+            if (indices) {
+                polygon->cgtv_3d.push_back(p1_org);
+                polygon->cgtv_3d.push_back(p2_org);
+                polygon->cgti.push_back({ indices[0], n, n + 1 });
+            } else {
+                polygon->cgtv_3d.insert(polygon->cgtv_3d.end(), { p[0], p1_org, p2_org });
+            }
+        } else {
+            return true;
+        }
+
+        return false;
     }
 
-    void Pipeline::clipEdge(const PlaneEqu4D& cp, Point4& a, Point4& b) {
+    void Pipeline::clipEdge(const PlaneEqu4D& cp, Point4& a, Point4& b, int* which_clipped) {
         auto fa = cp.cal(a);
         auto fb = cp.cal(b);
         if (fa * fb < 0) {
@@ -464,23 +529,110 @@ namespace cyro {
             auto p = a + (b - a)*t;
             if (fa > 0) {
                 a = p;
+                *which_clipped = 1;
             } else {
                 b = p;
+                *which_clipped = 2;
             }
+        } else {
+            *which_clipped = 0;
         }
     }
 
-    bool Pipeline::clipTriangle(const PlaneEqu4D& cp, Point4& p0, Point4& p1, Point4& p2) {
+    bool Pipeline::clipTriangle(
+        const PlaneEqu4D& cp, const Point4 p[3], const int indices[3], Polygon* polygon)
+    {
         // 当点位于法线指向的一边时，就认为该点位于裁剪面之外，需要处理
-        if (cp.cal(p0) > 0 && cp.cal(p1) > 0 && cp.cal(p2) > 0) {
-            p0 = {};
-            p1 = {};
-            p2 = {};
+        if (cp.cal(p[0]) > 0 && cp.cal(p[1]) > 0 && cp.cal(p[2]) > 0) {
             return false;
         }
-        clipEdge(cp, p0, p1);
-        clipEdge(cp, p0, p2);
-        return true;
+
+        int c01, c02, c12;
+        auto p0_org = p[0];
+        auto p1_org = p[1];
+        auto p2_org = p[2];
+        auto p0_tmp = p[0];
+        auto p1_tmp = p[1];
+        auto p2_tmp = p[2];
+        clipEdge(cp, p0_org, p1_org, &c01);
+        clipEdge(cp, p0_tmp, p2_org, &c02);
+        clipEdge(cp, p1_tmp, p2_tmp, &c12);
+
+        int n = polygon->t_vertices_4d.size() + polygon->cgtv_4d.size();
+        if (c01 == 2 && c12 == 1) {
+            if (indices) {
+                // + (0, 1, 2)
+                polygon->cgtv_4d.push_back(p1_org);
+                polygon->cgti.push_back({ indices[0], n, indices[2] });
+                // + (1, n, 2)
+                polygon->cgtv_4d.push_back(p1_tmp);
+                polygon->cgti.push_back({ n, n + 1, indices[2] });
+            } else {
+                // + (0, 1, 2)
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p[0], p1_org, p[2] });
+                // + (1, n, 2)
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p1_org, p1_tmp, p[2] });
+            }
+        } else if (c02 == 2 && c12 == 2) {
+            if (indices) {
+                // + (0, 1, 2)
+                polygon->cgtv_4d.push_back(p2_org);
+                polygon->cgti.push_back({ indices[0], indices[1], n });
+                // + (1, n, 2)
+                polygon->cgtv_4d.push_back(p2_tmp);
+                polygon->cgti.push_back({ indices[1], n + 1, n });
+            } else {
+                // + (0, 1, 2)
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p[0], p[1], p2_org });
+                // + (1, n, 2)
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p[1], p2_tmp, p2_org });
+            }
+        } else if (c01 == 1 && c02 == 1) {
+            if (indices) {
+                // + (0, 1, 2)
+                polygon->cgtv_4d.push_back(p0_org);
+                polygon->cgti.push_back({ n, indices[1], indices[2] });
+                // + (0, 2, n)
+                polygon->cgtv_4d.push_back(p0_tmp);
+                polygon->cgti.push_back({ n, indices[2], n + 1 });
+            } else {
+                // + (0, 1, 2)
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p0_org, p[1], p[2] });
+                // + (0, 2, n)
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p0_org, p[2], p0_tmp });
+            }
+        } else if (c01 == 1 && c12 == 2) {
+            // + (0, 1, 2)
+            if (indices) {
+                polygon->cgtv_4d.push_back(p0_org);
+                polygon->cgtv_4d.push_back(p2_tmp);
+                polygon->cgti.push_back({ n, indices[1], n + 1 });
+            } else {
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p0_org, p[1], p2_tmp });
+            }
+        } else if (c02 == 1 && c12 == 1) {
+            // + (0, 1, 2)
+            if (indices) {
+                polygon->cgtv_4d.push_back(p0_tmp);
+                polygon->cgtv_4d.push_back(p1_tmp);
+                polygon->cgti.push_back({ n, n + 1, indices[2] });
+            } else {
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p0_tmp, p1_tmp, p[2] });
+            }
+        } else if (c01 == 2 && c02 == 2) {
+            // + (0, 1, 2)
+            if (indices) {
+                polygon->cgtv_4d.push_back(p1_org);
+                polygon->cgtv_4d.push_back(p2_org);
+                polygon->cgti.push_back({ indices[0], n, n + 1 });
+            } else {
+                polygon->cgtv_4d.insert(polygon->cgtv_4d.end(), { p[0], p1_org, p2_org });
+            }
+        } else {
+            return true;
+        }
+
+        return false;
     }
 
 }
