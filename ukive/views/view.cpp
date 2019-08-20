@@ -26,6 +26,7 @@ namespace ukive {
 
     View::View(Window* w, AttrsRef attrs)
         : id_(Application::getViewID()),
+          outline_(OUTLINE_RECT),
           flags_(0),
           scroll_x_(0),
           scroll_y_(0),
@@ -356,6 +357,14 @@ namespace ukive {
         click_listener_ = l;
     }
 
+    void View::setOutline(Outline outline) {
+        if (outline == outline_) {
+            return;
+        }
+
+        outline_ = outline;
+    }
+
     int View::getId() const {
         return id_;
     }
@@ -450,6 +459,10 @@ namespace ukive {
 
     int View::getVisibility() const {
         return visibility_;
+    }
+
+    int View::getOutline() const {
+        return outline_;
     }
 
     int View::getPaddingLeft() const {
@@ -559,12 +572,35 @@ namespace ukive {
     }
 
     bool View::isLocalPointerInThis(InputEvent* e) const {
-        return (e->getX() >= 0 && e->getX() < getWidth()
-            && e->getY() >= 0 && e->getY() < getHeight());
+        switch (outline_) {
+        case OUTLINE_OVAL:
+        {
+            float a = getWidth() / 2.f;
+            float b = getHeight() / 2.f;
+            return std::pow(e->getX() / a - 1, 2) + std::pow(e->getY() / b - 1, 2) <= 1;
+        }
+
+        case OUTLINE_RECT:
+        default:
+            return (e->getX() >= 0 && e->getX() < getWidth()
+                && e->getY() >= 0 && e->getY() < getHeight());
+        }
     }
 
     bool View::isParentPointerInThis(InputEvent* e) const {
-        return bounds_.hit(e->getX(), e->getY());
+        switch (outline_) {
+        case OUTLINE_OVAL:
+        {
+            float a = getWidth() / 2.f;
+            float b = getHeight() / 2.f;
+            return std::pow((e->getX() - bounds_.left) / a - 1, 2)
+                + std::pow((e->getY() - bounds_.top) / b - 1, 2) <= 1;
+        }
+
+        case OUTLINE_RECT:
+        default:
+            return bounds_.hit(e->getX(), e->getY());
+        }
     }
 
     bool View::isReceiveOutsideInputEvent() const {

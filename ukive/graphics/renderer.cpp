@@ -341,7 +341,6 @@ namespace ukive {
             HRESULT hr = d2d_factory->CreateDCRenderTarget(
                 &properties, &render_target);
             if (FAILED(hr)) {
-                DCHECK(false);
                 LOG(Log::WARNING) << "Failed to create DC RenderTarget: " << hr;
                 return {};
             }
@@ -367,7 +366,6 @@ namespace ukive {
         ComPtr<ID3D11Texture2D> d3d_texture;
         HRESULT hr = d3d_device->CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create 2d texture: " << hr;
             return {};
         }
@@ -411,7 +409,6 @@ namespace ukive {
             locale_name.c_str(),
             &format);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create text format: " << hr;
             return {};
         }
@@ -430,7 +427,6 @@ namespace ukive {
         HRESULT hr = dwrite_factory->CreateTextLayout(
             text.c_str(), text.length(), format, max_width, max_height, &layout);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create text layout: " << hr;
             return {};
         }

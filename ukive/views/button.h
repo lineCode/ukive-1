@@ -2,7 +2,7 @@
 #define UKIVE_VIEWS_BUTTON_H_
 
 #include "ukive/views/text_view.h"
-#include "ukive/graphics/graphic_device_manager.h"
+#include "ukive/drawable/shape_drawable.h"
 
 
 namespace ukive {
@@ -16,6 +16,7 @@ namespace ukive {
         Button(Window* w, AttrsRef attrs);
 
         void setButtonColor(Color color);
+        void setButtonShape(ShapeDrawable::Shape shape);
 
     private:
         void initButton();

@@ -83,13 +83,13 @@ namespace ukive {
         ComPtr<ID3D11RenderTargetView> shadow2_rtv_;
         ComPtr<ID3D11ShaderResourceView> shadow2_srv_;
 
-        ukive::ComPtr<ID3D11Buffer> vert_buffer_;
-        ukive::ComPtr<ID3D11Buffer> index_buffer_;
-        ukive::ComPtr<ID3D11Buffer> const_buffer_;
-        ukive::ComPtr<ID3D11Buffer> ps_const_buffer_;
-        ukive::ComPtr<ID3D11InputLayout> input_layout_;
-        ukive::ComPtr<ID3D11PixelShader> pixel_shader_;
-        ukive::ComPtr<ID3D11VertexShader> vertex_shader_;
+        ComPtr<ID3D11Buffer> vert_buffer_;
+        ComPtr<ID3D11Buffer> index_buffer_;
+        ComPtr<ID3D11Buffer> const_buffer_;
+        ComPtr<ID3D11Buffer> ps_const_buffer_;
+        ComPtr<ID3D11InputLayout> input_layout_;
+        ComPtr<ID3D11PixelShader> pixel_shader_;
+        ComPtr<ID3D11VertexShader> vertex_shader_;
 
         D3D11_VIEWPORT viewport_;
         ComPtr<ID3D11RasterizerState> rasterizer_state_;

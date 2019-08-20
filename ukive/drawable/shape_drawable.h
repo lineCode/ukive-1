@@ -21,6 +21,7 @@ namespace ukive {
         void setSize(int width, int height);
         void setRadius(float radius);
 
+        void setShape(Shape shape);
         void setSolidEnable(bool enable);
         void setSolidColor(Color color);
         void setStrokeEnable(bool enable);
@@ -29,6 +30,7 @@ namespace ukive {
 
         void draw(Canvas* canvas) override;
 
+        int getShape() const;
         float getOpacity() const override;
         int getIncWidth() const override;
         int getIncHeight() const override;

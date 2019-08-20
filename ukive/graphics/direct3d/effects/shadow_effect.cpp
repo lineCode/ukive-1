@@ -31,8 +31,8 @@ namespace ukive {
           world_matrix_(),
           view_matrix_(),
           ortho_matrix_(),
-          viewport_() {
-
+          viewport_()
+    {
         D3D11_INPUT_ELEMENT_DESC layout[1];
 
         layout[0].SemanticName = "POSITION";
@@ -43,17 +43,17 @@ namespace ukive {
         layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[0].InstanceDataStepRate = 0;
 
-        ukive::string16 shader_path = ukive::Application::getExecFileName(true);
+        string16 shader_path = Application::getExecFileName(true);
 
-        ukive::Space::createVertexShader(
+        Space::createVertexShader(
             shader_path + L"\\shaders\\shadow_effect_vs.cso",
             layout, ARRAYSIZE(layout), &vertex_shader_, &input_layout_);
 
-        ukive::Space::createPixelShader(
+        Space::createPixelShader(
             shader_path + L"\\shaders\\shadow_effect_ps.cso", &pixel_shader_);
 
-        const_buffer_ = ukive::Space::createConstantBuffer(sizeof(ConstBuffer));
-        ps_const_buffer_ = ukive::Space::createConstantBuffer(sizeof(PSConstBuffer));
+        const_buffer_ = Space::createConstantBuffer(sizeof(ConstBuffer));
+        ps_const_buffer_ = Space::createConstantBuffer(sizeof(PSConstBuffer));
 
         D3D11_RASTERIZER_DESC rasterDesc;
         ZeroMemory(&rasterDesc, sizeof(rasterDesc));
@@ -75,16 +75,15 @@ namespace ukive {
         // 创建光栅化状态.
         HRESULT hr = device->CreateRasterizerState(&rasterDesc, &rasterizer_state_);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create rasterizer state: " << hr;
         }
     }
 
     void ShadowEffect::draw() {
-        ukive::Space::setVertexShader(vertex_shader_.get());
-        ukive::Space::setPixelShader(pixel_shader_.get());
-        ukive::Space::setInputLayout(input_layout_.get());
-        ukive::Space::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        Space::setVertexShader(vertex_shader_.get());
+        Space::setPixelShader(pixel_shader_.get());
+        Space::setInputLayout(input_layout_.get());
+        Space::setPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
         auto d3d_dc = Application::getGraphicDeviceManager()->getD3DDeviceContext();
 
@@ -98,16 +97,16 @@ namespace ukive {
         }
 
         // VS ConstBuffer
-        auto resource = ukive::Space::lockResource(const_buffer_.get());
+        auto resource = Space::lockResource(const_buffer_.get());
         (reinterpret_cast<ConstBuffer*>(resource.pData))->wvo = wvo_matrix_;
-        ukive::Space::unlockResource(const_buffer_.get());
+        Space::unlockResource(const_buffer_.get());
 
-        ukive::Space::setConstantBuffers(0, 1, &const_buffer_);
+        Space::setConstantBuffers(0, 1, &const_buffer_);
 
         // PS ConstBuffer
         resource = ukive::Space::lockResource(ps_const_buffer_.get());
         (reinterpret_cast<PSConstBuffer*>(resource.pData))->vertical = 0;
-        ukive::Space::unlockResource(ps_const_buffer_.get());
+        Space::unlockResource(ps_const_buffer_.get());
 
         d3d_dc->PSSetConstantBuffers(0, 1, &ps_const_buffer_);
 
@@ -122,9 +121,9 @@ namespace ukive {
         d3d_dc->DrawIndexed(6, 0, 0);
 
         // PS ConstBuffer
-        resource = ukive::Space::lockResource(ps_const_buffer_.get());
+        resource = Space::lockResource(ps_const_buffer_.get());
         (reinterpret_cast<PSConstBuffer*>(resource.pData))->vertical = 1;
-        ukive::Space::unlockResource(ps_const_buffer_.get());
+        Space::unlockResource(ps_const_buffer_.get());
 
         {
             d3d_dc->OMSetRenderTargets(1, &shadow2_rtv_, nullptr);
@@ -230,7 +229,6 @@ namespace ukive {
         bg_srv_.reset();
         HRESULT hr = device->CreateShaderResourceView(texture, nullptr, &bg_srv_);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create SRV: " << hr;
             return;
         }
@@ -238,7 +236,6 @@ namespace ukive {
         bg_rtv_.reset();
         hr = device->CreateRenderTargetView(texture, nullptr, &bg_rtv_);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create RTV: " << hr;
             return;
         }
@@ -254,7 +251,6 @@ namespace ukive {
         HRESULT hr = rt->CreateSharedBitmap(
             __uuidof(IDXGISurface), shadow2_tex2d_.cast<IDXGISurface>().get(), &bmp_prop, &bitmap);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create shared bitmap: " << hr;
             return {};
         }
@@ -266,15 +262,14 @@ namespace ukive {
     void ShadowEffect::createTexture(
         ComPtr<ID3D11Texture2D>& tex,
         ComPtr<ID3D11RenderTargetView>& rtv,
-        ComPtr<ID3D11ShaderResourceView>& srv) {
-
+        ComPtr<ID3D11ShaderResourceView>& srv)
+    {
         tex = Renderer::createTexture2D(width_, height_);
         auto device = Application::getGraphicDeviceManager()->getD3DDevice();
 
         srv.reset();
         HRESULT hr = device->CreateShaderResourceView(tex.get(), nullptr, &srv);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create SRV: " << hr;
             return;
         }
@@ -282,7 +277,6 @@ namespace ukive {
         rtv.reset();
         hr = device->CreateRenderTargetView(tex.get(), nullptr, &rtv);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create RTV: " << hr;
             return;
         }
@@ -325,14 +319,12 @@ namespace ukive {
 
         HRESULT hr = d3d_device->CreateTexture2D(&tex_desc, &data, &kernel_tex2d_);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create 2d texture: " << hr;
             return;
         }
 
         hr = d3d_device->CreateShaderResourceView(kernel_tex2d_.get(), nullptr, &kernel_srv_);
         if (FAILED(hr)) {
-            DCHECK(false);
             LOG(Log::WARNING) << "Failed to create SRV: " << hr;
             return;
         }

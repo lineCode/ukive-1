@@ -7,14 +7,14 @@
 namespace ukive {
 
     ShapeDrawable::ShapeDrawable(Shape shape)
-        :Drawable(),
-        width_(-1),
-        height_(-1),
-        shape_(shape),
-        has_solid_(false),
-        has_stroke_(false),
-        round_radius_(1.f),
-        stroke_width_(1.f) {
+        : Drawable(),
+          width_(-1),
+          height_(-1),
+          shape_(shape),
+          has_solid_(false),
+          has_stroke_(false),
+          round_radius_(1.f),
+          stroke_width_(1.f) {
     }
 
     ShapeDrawable::~ShapeDrawable() {
@@ -28,6 +28,15 @@ namespace ukive {
 
     void ShapeDrawable::setRadius(float radius) {
         round_radius_ = radius;
+    }
+
+    void ShapeDrawable::setShape(Shape shape) {
+        if (shape == shape_) {
+            return;
+        }
+
+        shape_ = shape;
+        invalidate();
     }
 
     void ShapeDrawable::setSolidEnable(bool enable) {
@@ -94,6 +103,10 @@ namespace ukive {
             break;
         }
         }
+    }
+
+    int ShapeDrawable::getShape() const {
+        return shape_;
     }
 
     float ShapeDrawable::getOpacity() const {

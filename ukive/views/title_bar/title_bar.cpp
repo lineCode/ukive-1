@@ -53,6 +53,7 @@ namespace ukive {
         close_btn_->setPadding(btn_padding, 0, btn_padding, 0);
         close_btn_->setOnClickListener(this);
         close_btn_->setButtonColor(Color::Red500);
+        close_btn_->setButtonShape(ShapeDrawable::OVAL);
         auto close_btn_lp = Rlp::Builder()
             .end(root_layout->getId(), Rlp::END, getWindow()->dpToPx(8))
             .top(root_layout->getId(), Rlp::TOP)
@@ -64,6 +65,7 @@ namespace ukive {
         max_btn_->setOnClickListener(this);
         max_btn_->setPadding(btn_padding, 0, btn_padding, 0);
         max_btn_->setButtonColor(Color::Yellow500);
+        max_btn_->setButtonShape(ShapeDrawable::OVAL);
         auto max_btn_lp = Rlp::Builder()
             .end(close_btn_->getId(), Rlp::START, getWindow()->dpToPx(8))
             .top(root_layout->getId(), Rlp::TOP)
@@ -75,16 +77,12 @@ namespace ukive {
         min_btn_->setOnClickListener(this);
         min_btn_->setPadding(btn_padding, 0, btn_padding, 0);
         min_btn_->setButtonColor(Color::Green500);
+        min_btn_->setButtonShape(ShapeDrawable::OVAL);
         auto min_btn_lp = Rlp::Builder()
             .end(max_btn_->getId(), Rlp::START, getWindow()->dpToPx(8))
             .top(root_layout->getId(), Rlp::TOP)
             .bottom(root_layout->getId(), Rlp::BOTTOM).build();
         root_layout->addView(min_btn_, min_btn_lp);
-    }
-
-    Drawable* TitleBar::getTitleButtonBackground() const {
-        auto d = new ShapeDrawable(ShapeDrawable::Shape::OVAL);
-        return d;
     }
 
     void TitleBar::onClick(View* v) {

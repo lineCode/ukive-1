@@ -1,7 +1,6 @@
 ﻿#include "button.h"
 
 #include "ukive/window/window.h"
-#include "ukive/drawable/shape_drawable.h"
 #include "ukive/drawable/ripple_drawable.h"
 #include "ukive/graphics/color.h"
 
@@ -47,6 +46,22 @@ namespace ukive {
 
     void Button::setButtonColor(Color color) {
         shape_drawable_->setSolidColor(color);
+        invalidate();
+    }
+
+    void Button::setButtonShape(ShapeDrawable::Shape shape) {
+        switch (shape) {
+        case ShapeDrawable::OVAL:
+            setOutline(OUTLINE_OVAL);
+            break;
+
+        case ShapeDrawable::RECT:
+        case ShapeDrawable::ROUND_RECT:
+        default:
+            setOutline(OUTLINE_RECT);
+            break;
+        }
+        shape_drawable_->setShape(shape);
         invalidate();
     }
 

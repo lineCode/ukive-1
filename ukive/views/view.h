@@ -50,6 +50,11 @@ namespace ukive {
             UNKNOWN
         };
 
+        enum Outline {
+            OUTLINE_RECT,
+            OUTLINE_OVAL,
+        };
+
         explicit View(Window* w);
         View(Window* w, AttrsRef attrs);
         virtual ~View();
@@ -92,6 +97,7 @@ namespace ukive {
         void setMinimumWidth(int width);
         void setMinimumHeight(int height);
         void setOnClickListener(OnClickListener* l);
+        void setOutline(Outline outline);
 
         // Invoked by framework.
         void setParent(View* parent);
@@ -122,6 +128,7 @@ namespace ukive {
         int getMeasuredHeight() const;
         float getElevation() const;
         int getVisibility() const;
+        int getOutline() const;
 
         int getMinimumWidth() const;
         int getMinimumHeight() const;
@@ -256,6 +263,7 @@ namespace ukive {
         int id_;
         Rect bounds_;
         Rect padding_;
+        Outline outline_;
 
         uint32_t flags_;
 
