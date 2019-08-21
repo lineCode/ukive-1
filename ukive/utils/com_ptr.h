@@ -63,7 +63,7 @@ namespace ukive {
             return &ptr_;
         }
 
-        bool operator ==(nullptr_t) const {
+        bool operator ==(std::nullptr_t) const {
             return ptr_ == nullptr;
         }
 
@@ -71,7 +71,7 @@ namespace ukive {
             return ptr_ == rhs.ptr_;
         }
 
-        bool operator !=(nullptr_t) const {
+        bool operator !=(std::nullptr_t) const {
             return ptr_ != nullptr;
         }
 

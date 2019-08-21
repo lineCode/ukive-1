@@ -1,6 +1,7 @@
 #ifndef UKIVE_WINDOW_FRAME_NON_CLIENT_FRAME_H_
 #define UKIVE_WINDOW_FRAME_NON_CLIENT_FRAME_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 

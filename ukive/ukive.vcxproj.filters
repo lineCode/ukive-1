@@ -402,6 +402,9 @@
     <ClCompile Include="utils\big_integer32.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="net\socket.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -834,6 +837,9 @@
     </ClInclude>
     <ClInclude Include="utils\big_integer32.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="net\socket.h">
+      <Filter>net</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #ifndef UKIVE_UTILS_WIN10_VERSION_H_
 #define UKIVE_UTILS_WIN10_VERSION_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 

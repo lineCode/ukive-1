@@ -1216,8 +1216,8 @@ namespace ukive {
 
     void TextView::onTextChanged(
         Editable* editable,
-        int start, int oldEnd, int newEnd) {
-
+        int start, int oldEnd, int newEnd)
+    {
         float maxWidth = text_layout_->GetMaxWidth();
         float maxHeight = text_layout_->GetMaxHeight();
 

@@ -1,6 +1,7 @@
 ﻿#include "editable.h"
 
 #include "ukive/text/span/span.h"
+#include "ukive/log.h"
 
 
 namespace ukive {
@@ -136,7 +137,12 @@ namespace ukive {
         uint32_t oldEnd = sel_end_;
 
         if (oldStart == oldEnd) {
-            text_.insert(oldEnd, text);
+            if (text_.length() < oldEnd) {
+                DCHECK(false);
+                text_.insert(text_.length(), text);
+            } else {
+                text_.insert(oldEnd, text);
+            }
             sel_beg_ += text.length();
             sel_end_ += text.length();
 
@@ -266,7 +272,6 @@ namespace ukive {
     std::size_t Editable::getSpanCount() const {
         return spans_.size();
     }
-
 
     void Editable::addEditWatcher(EditWatcher* watcher) {
         watchers_.push_back(watcher);

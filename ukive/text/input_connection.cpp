@@ -81,7 +81,6 @@ namespace ukive {
         }
 
         auto mgr = Application::getTsfManager();
-
         HRESULT hr = mgr->getThreadManager()->SetFocus(doc_mgr_.get());
         if (FAILED(hr)) {
             DLOG(Log::ERR) << "mount() failed.";
@@ -96,8 +95,7 @@ namespace ukive {
             return false;
         }
 
-        TsfManager* tsfMgr = Application::getTsfManager();
-
+        auto tsfMgr = Application::getTsfManager();
         HRESULT hr = tsfMgr->getThreadManager()->SetFocus(nullptr);
         if (FAILED(hr)) {
             DLOG(Log::ERR) << "unmount() failed.";

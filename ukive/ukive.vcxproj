@@ -231,6 +231,7 @@
     <ClInclude Include="message\message_looper.h" />
     <ClInclude Include="message\message_queue.h" />
     <ClInclude Include="net\http_client.h" />
+    <ClInclude Include="net\socket.h" />
     <ClInclude Include="net\tls.h" />
     <ClInclude Include="resources\dimension_utils.h" />
     <ClInclude Include="resources\layout_instantiator.h" />
@@ -372,6 +373,7 @@
     <ClCompile Include="message\message_looper.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
     <ClCompile Include="net\http_client.cpp" />
+    <ClCompile Include="net\socket.cpp" />
     <ClCompile Include="net\tls.cpp" />
     <ClCompile Include="resources\dimension_utils.cpp" />
     <ClCompile Include="resources\layout_instantiator.cpp" />

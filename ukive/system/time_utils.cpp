@@ -1,5 +1,6 @@
 ﻿#include "ukive/system/time_utils.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/system/qpc_service.h"

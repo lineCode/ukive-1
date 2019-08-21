@@ -1,5 +1,6 @@
 ﻿#include "text_key_listener.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/system/clipboard_manager.h"

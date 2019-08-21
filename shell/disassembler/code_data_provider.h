@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "shell/disassembler/intel_instruction_params.h"

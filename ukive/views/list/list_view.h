@@ -14,6 +14,15 @@ namespace ukive {
     class OverlayScrollBar;
     class ViewHolderRecycler;
 
+
+    class ListItemRecycledListener {
+    public:
+        virtual ~ListItemRecycledListener() = default;
+
+        virtual void onChildRecycled(ListAdapter::ViewHolder* holder) = 0;
+    };
+
+
     class ListView : public ViewGroup, public ListDataSetChangedListener {
     public:
         explicit ListView(Window* w);
@@ -30,6 +39,8 @@ namespace ukive {
         void setAdapter(ListAdapter* adapter);
         void setLayouter(ListLayouter* layouter);
         void scrollToPosition(int pos, int offset, bool smooth);
+
+        void setChildRecycledListener(ListItemRecycledListener* l);
 
     private:
         int determineVerticalScroll(int dy);
@@ -67,11 +78,14 @@ namespace ukive {
         void onItemRangeRemoved(int start_pos, int length) override;
 
         bool initial_layouted_;
+        bool force_layout_ = false;
 
         std::unique_ptr<ListAdapter> adapter_;
         std::unique_ptr<ListLayouter> layouter_;
         std::unique_ptr<OverlayScrollBar> scroll_bar_;
         std::unique_ptr<ViewHolderRecycler> recycler_;
+
+        ListItemRecycledListener* recycled_listener_ = nullptr;
 
         friend class GridListLayouter;
         friend class LinearListLayouter;

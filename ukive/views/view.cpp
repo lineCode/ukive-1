@@ -1249,7 +1249,7 @@ namespace ukive {
         is_attached_to_window_ = false;
 
         if (input_connection_) {
-            input_connection_->popEditor();
+            input_connection_->unmount();
         }
 
         if (animator_) {

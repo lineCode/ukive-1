@@ -5,6 +5,7 @@
 #include <thread>
 #include <map>
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/utils/string_utils.h"

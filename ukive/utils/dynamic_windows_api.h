@@ -1,6 +1,7 @@
 #ifndef UKIVE_UTILS_DYNAMIC_WINDOWS_API_H_
 #define UKIVE_UTILS_DYNAMIC_WINDOWS_API_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <ShellScalingAPI.h>
 

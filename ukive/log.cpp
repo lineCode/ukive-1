@@ -1,5 +1,6 @@
-#include "log.h"
+#include "ukive/log.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include <fstream>

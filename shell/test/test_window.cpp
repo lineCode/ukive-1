@@ -32,6 +32,7 @@
 #include "ukive/animation/interpolator.h"
 #include "ukive/system/time_utils.h"
 #include "ukive/net/http_client.h"
+#include "ukive/net/socket.h"
 
 #include "shell/test/list/test_adapter.h"
 #include "shell/resources/oigka_resources_id.h"
@@ -57,11 +58,6 @@ namespace shell {
     TestWindow::~TestWindow() {
     }
 
-    void TestWindow::onPreCreate(
-        ukive::ClassInfo* info,
-        int* win_style, int* win_ex_style) {
-    }
-
     void TestWindow::onCreate() {
         Window::onCreate();
 
@@ -81,14 +77,14 @@ namespace shell {
         //test::TEST_BIG_INTEGER();
 
         /*auto prime = ukive::crypto::RSA::getPrime();
-        auto prime_str = prime.toString();
+        auto prime_str = prime.toString();*/
 
-        ukive::net::HttpClient::initialize();
+        ukive::net::initializeSocket();
 
         ukive::net::HttpClient client;
         client.connect("");
 
-        ukive::net::HttpClient::unInitialize();*/
+        ukive::net::unInitializeSocket();
     }
 
     void TestWindow::onDraw(const ukive::Rect& rect) {

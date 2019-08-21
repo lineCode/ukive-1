@@ -27,7 +27,8 @@ namespace ukive {
         bool changed, bool size_changed,
         int left, int top, int right, int bottom)
     {
-        if (!initial_layouted_ || size_changed) {
+        if (!initial_layouted_ || size_changed || force_layout_) {
+            force_layout_ = false;
             recordCurPositionAndOffset();
             layoutAtPosition(true);
 
@@ -103,6 +104,10 @@ namespace ukive {
         }
     }
 
+    void ListView::setChildRecycledListener(ListItemRecycledListener* l) {
+        recycled_listener_ = l;
+    }
+
     int ListView::determineVerticalScroll(int dy) {
         if (dy > 0) {  // 向上滚动，当前页面内容下沉
             dy = fillTopChildViews(dy);
@@ -136,6 +141,9 @@ namespace ukive {
     }
 
     void ListView::recycleViewHolder(ListAdapter::ViewHolder* holder) {
+        if (recycled_listener_) {
+            recycled_listener_->onChildRecycled(holder);
+        }
         recycler_->recycleFromParent(holder);
     }
 
@@ -317,7 +325,9 @@ namespace ukive {
     void ListView::onDataSetChanged() {
         recordCurPositionAndOffset();
         directScrollToPosition(0, 0, true);
+        requestLayout();
         invalidate();
+        force_layout_ = true;
     }
 
     void ListView::onItemRangeInserted(int start_pos, int length) {

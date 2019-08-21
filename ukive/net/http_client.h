@@ -12,13 +12,17 @@ namespace net {
     public:
         HttpClient();
 
-        static void initialize();
-        static void unInitialize();
-
         bool connect(const std::string& url);
 
     private:
-        static bool is_initialized_;
+        struct URLInfo {
+            std::string scheme;
+            std::string host;
+            std::string path;
+            unsigned short port = 0;
+        };
+
+        bool getURLInfo(const std::string& url, URLInfo* info) const;
     };
 
 }

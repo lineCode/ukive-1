@@ -1,6 +1,7 @@
 #ifndef UKIVE_WINDOW_WINDOW_IMPL_H_
 #define UKIVE_WINDOW_WINDOW_IMPL_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <windowsx.h>
 #include <tpcshrd.h>

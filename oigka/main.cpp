@@ -1,3 +1,4 @@
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/log.h"
@@ -61,7 +62,9 @@ int APIENTRY wWinMain(
         result = processXMLFiles(resource_path, build_path);
     }
 
-    system("pause");
+    if (result != 0) {
+        system("pause");
+    }
 
     ukive::UninitLogging();
     return result;
