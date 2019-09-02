@@ -12,6 +12,11 @@ namespace dpr {
         _64Bit,
     };
 
+    struct Env {
+        CPUMode cpu_mode;
+        bool d;
+    };
+
     struct Prefix {
         uint8_t g1;
         uint8_t g2;
@@ -180,7 +185,7 @@ namespace dpr {
         uint64_t imme;
         uint32_t disp_length;
         uint32_t imme_length;
-        // 内存寻址时，访问的内存大小
+        // 内存寻址时，访问的内存地址大小
         uint32_t operand_size;
 
         bool is_digit;

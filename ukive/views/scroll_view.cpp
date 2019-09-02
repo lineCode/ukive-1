@@ -338,9 +338,6 @@ namespace ukive {
     void ScrollView::onComputeScroll() {
         if (scroller_.compute()) {
             auto dy = scroller_.getDeltaY();
-            if (dy == 0) {
-                return;
-            }
 
             if (!processVerticalScroll(dy)) {
                 if (!canScroll(dy > 0)) {

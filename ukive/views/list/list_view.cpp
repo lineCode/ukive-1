@@ -214,17 +214,14 @@ namespace ukive {
 
     void ListView::onComputeScroll() {
         if (scroller_.compute()) {
-            invalidate();
             auto dy = scroller_.getDeltaY();
-            if (dy == 0) {
-                return;
-            }
 
             if (!processVerticalScroll(dy)) {
                 if (!layouter_->canScroll(dy > 0 ? ListLayouter::TOP : ListLayouter::BOTTOM)) {
                     scroller_.finish();
                 }
             }
+            invalidate();
         }
     }
 

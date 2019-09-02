@@ -111,6 +111,11 @@ namespace dpr {
                                 auto signed_disp = getSignedDisp(sib_base.disp, sib_base.disp_length, has_prefix);
                                 cur_operand.append(signed_disp);
                             }
+                            auto& mrm_mem = op.modrm_field.mrm_mem;
+                            if (mrm_mem.disp_length > 0) {
+                                auto signed_disp = getSignedDisp(mrm_mem.disp, mrm_mem.disp_length, has_prefix);
+                                cur_operand.append(signed_disp);
+                            }
                             cur_operand.append("]");
                         } else {
                             bool has_prefix = false;
@@ -269,9 +274,9 @@ namespace dpr {
     };
 
     struct CodeSegInfo {
+        Env env;
         uint32_t cur;
         uint32_t size;
-        CPUMode cpu_mode;
         CodeDataProvider* provider;
 
         CodeSegInfo operator+(uint32_t off) const {

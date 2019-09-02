@@ -49,7 +49,7 @@ namespace dpr {
             return walkOnOneByteOpcodeMap(csi + 1, info);
         }
 
-        if (csi.cpu_mode == CPUMode::_64Bit) {
+        if (csi.env.cpu_mode == CPUMode::_64Bit) {
             // REX prefix
             if (cur_bytecode >= 0x40 && cur_bytecode <= 0x4F) {
                 RETURN_FAILED_IF(info->prefix.rex != 0);
@@ -86,7 +86,7 @@ namespace dpr {
                 return walkOnTwoByteOpcodeMap(csi + 2, info);
             }
 
-            if (csi.cpu_mode == CPUMode::_64Bit) {
+            if (csi.env.cpu_mode == CPUMode::_64Bit) {
                 uint8_t next_opcode = csi.get8(csi.cur + 1);
                 // REX prefix
                 if (next_opcode >= 0x40 && next_opcode <= 0x4F) {
@@ -178,7 +178,7 @@ namespace dpr {
             return false;
         }
 
-        auto mne = mne_func(csi.cpu_mode, prefix, SelConfig());
+        auto mne = mne_func(csi.env, prefix, SelConfig());
         if (mne.is_escape || mne.is_prefix || mne.is_undefined) {
             DCHECK(false);
             return false;
@@ -195,7 +195,7 @@ namespace dpr {
             auto modrm = csi.get8(csi.cur + 1);
 
             auto tail = mne.ext_tail;
-            mne = ext_func(csi.cpu_mode, prefix, modrm, byte1, SelConfig());
+            mne = ext_func(csi.env, prefix, modrm, byte1, SelConfig());
             if (mne.is_escape || mne.is_prefix || mne.is_extended || mne.is_undefined) {
                 DCHECK(false);
                 return false;
@@ -243,7 +243,7 @@ namespace dpr {
             return false;
         }
 
-        auto mne = mne_func(csi.cpu_mode, prefix, SelConfig());
+        auto mne = mne_func(csi.env, prefix, SelConfig());
         if (mne.is_escape || mne.is_prefix || mne.is_undefined) {
             DCHECK(false);
             return false;
@@ -260,7 +260,7 @@ namespace dpr {
             auto modrm = csi.get8(csi.cur + 1);
 
             auto tail = mne.ext_tail;
-            mne = ext_func(csi.cpu_mode, prefix, modrm, byte2, SelConfig());
+            mne = ext_func(csi.env, prefix, modrm, byte2, SelConfig());
             if (mne.is_escape || mne.is_prefix || mne.is_extended || mne.is_undefined) {
                 DCHECK(false);
                 return false;
@@ -314,7 +314,7 @@ namespace dpr {
             return false;
         }
 
-        auto mne = mne_func(csi.cpu_mode, prefix, SelConfig());
+        auto mne = mne_func(csi.env, prefix, SelConfig());
         if (mne.is_escape || mne.is_prefix || mne.is_undefined) {
             DCHECK(false);
             return false;
@@ -331,7 +331,7 @@ namespace dpr {
             auto modrm = csi.get8(csi.cur + 1);
 
             auto tail = mne.ext_tail;
-            mne = ext_func(csi.cpu_mode, prefix, modrm, byte3, SelConfig());
+            mne = ext_func(csi.env, prefix, modrm, byte3, SelConfig());
             if (mne.is_escape || mne.is_prefix || mne.is_extended || mne.is_undefined) {
                 DCHECK(false);
                 return false;
@@ -402,10 +402,10 @@ namespace dpr {
         if (abbr.length() >= 3) {
             if (abbr.substr(0, 1) == "e") {
                 uint32_t operand_size;
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     operand_size = selectOperandSize64(ss, prefix);
                 } else {
-                    operand_size = selectOperandSize(true, prefix);
+                    operand_size = selectOperandSize(csi.env.d, prefix);
                 }
 
                 if (operand_size == 2) {
@@ -423,10 +423,10 @@ namespace dpr {
 
             if (abbr.substr(0, 1) == "r") {
                 uint32_t operand_size;
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     operand_size = selectOperandSize64(ss, prefix);
                 } else {
-                    operand_size = selectOperandSize(true, prefix);
+                    operand_size = selectOperandSize(csi.env.d, prefix);
                 }
 
                 if (operand_size == 2) {
@@ -473,24 +473,24 @@ namespace dpr {
             // **direct address, no mrm, no sib
             if (oper_type == "p") {
                 uint32_t op_size;
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     op_size = selectOperandSize64(ss, prefix);
                 } else {
-                    op_size = selectOperandSize(true, prefix);
+                    op_size = selectOperandSize(csi.env.d, prefix);
                 }
                 if (op_size == 2) {
                     info->operands.push_back(
-                        Operand::ofPointer(csi.get16(csi.cur + 1), csi.get16(csi.cur + 3), 4, false));
+                        Operand::ofPointer(csi.get16(csi.cur + 3), csi.get16(csi.cur + 1), 4, false));
                     return true;
                 }
                 if (op_size == 4) {
                     info->operands.push_back(
-                        Operand::ofPointer(csi.get16(csi.cur + 1), csi.get32(csi.cur + 3), 6, false));
+                        Operand::ofPointer(csi.get16(csi.cur + 5), csi.get32(csi.cur + 1), 6, false));
                     return true;
                 }
                 if (op_size == 8) {
                     info->operands.push_back(
-                        Operand::ofPointer(csi.get16(csi.cur + 1), csi.get64(csi.cur + 3), 10, false));
+                        Operand::ofPointer(csi.get16(csi.cur + 9), csi.get64(csi.cur + 1), 10, false));
                     return true;
                 }
             }
@@ -516,9 +516,13 @@ namespace dpr {
                     info->operands.push_back(Operand::ofModRM(m_field, {}));
                     return true;
                 }
-
+                if (oper_type == "w") {
+                    m_field.selected_reg = m_field.mrm_reg.w_reg;
+                    info->operands.push_back(Operand::ofModRM(m_field, {}));
+                    return true;
+                }
                 if (oper_type == "v") {
-                    if (csi.cpu_mode == CPUMode::_64Bit) {
+                    if (csi.env.cpu_mode == CPUMode::_64Bit) {
                         auto op_size = selectOperandSize64(ss, prefix);
                         if (op_size == 2) {
                             m_field.selected_reg = m_field.mrm_reg.w_reg;
@@ -535,7 +539,7 @@ namespace dpr {
                             return false;
                         }
                     } else {
-                        auto op_size = selectOperandSize(true, prefix);
+                        auto op_size = selectOperandSize(csi.env.d, prefix);
                         if (op_size == 2) {
                             m_field.selected_reg = m_field.mrm_reg.w_reg;
                             info->operands.push_back(Operand::ofModRM(m_field, {}));
@@ -569,17 +573,36 @@ namespace dpr {
                     info->operands.push_back(operand);
                     return true;
                 }
+                if (oper_type == "w") {
+                    operand.operand_size = 2;
+                    info->operands.push_back(operand);
+                    return true;
+                }
                 if (oper_type == "v") {
                     operand.operand_size =
-                        (csi.cpu_mode == CPUMode::_64Bit ?
-                            selectOperandSize64(ss, prefix) : selectOperandSize(true, prefix));
+                        (csi.env.cpu_mode == CPUMode::_64Bit ?
+                            selectOperandSize64(ss, prefix) : selectOperandSize(csi.env.d, prefix));
                     info->operands.push_back(operand);
                     return true;
                 }
             }
         } else if (addr_mode == "F") {
-            //info->operands.push_back(Operand::ofReg("EFLAGS/RFLAGS"));
-            //return true;
+            if (oper_type == "v") {
+                uint32_t op_size;
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
+                    op_size = selectOperandSize64(ss, prefix);
+                } else {
+                    op_size = selectOperandSize(csi.env.d, prefix);
+                }
+                if (op_size == 2 || op_size == 4) {
+                    info->operands.push_back(Operand::ofReg("EFLAGS"));
+                    return true;
+                }
+                if (op_size == 8) {
+                    info->operands.push_back(Operand::ofReg("RFLAGS"));
+                    return true;
+                }
+            }
         } else if (addr_mode == "G") {
             info->has_modrm = true;
             ModRMField m_field;
@@ -597,7 +620,7 @@ namespace dpr {
             }
 
             if (oper_type == "v") {
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     auto op_size = selectOperandSize64(ss, prefix);
                     if (op_size == 2) {
                         m_field.selected_reg = m_field.mrm_reg.w_reg;
@@ -614,7 +637,7 @@ namespace dpr {
                         return false;
                     }
                 } else {
-                    auto op_size = selectOperandSize(true, prefix);
+                    auto op_size = selectOperandSize(csi.env.d, prefix);
                     if (op_size == 2) {
                         m_field.selected_reg = m_field.mrm_reg.w_reg;
                         info->operands.push_back(Operand::ofModRM(m_field, {}));
@@ -639,10 +662,10 @@ namespace dpr {
 
             if (oper_type == "z") {
                 uint32_t op_size;
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     op_size = selectOperandSize64(ss, prefix);
                 } else {
-                    op_size = selectOperandSize(true, prefix);
+                    op_size = selectOperandSize(csi.env.d, prefix);
                 }
 
                 if (op_size == 2) {
@@ -657,10 +680,10 @@ namespace dpr {
 
             if (oper_type == "v") {
                 uint32_t op_size;
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     op_size = selectOperandSize64(ss, prefix);
                 } else {
-                    op_size = selectOperandSize(true, prefix);
+                    op_size = selectOperandSize(csi.env.d, prefix);
                 }
 
                 if (op_size == 2) {
@@ -691,10 +714,10 @@ namespace dpr {
             if (oper_type == "z") {
                 uint32_t op_size;
                 auto imme_off = findImmeOffset(info);
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     op_size = selectOperandSize64(ss, prefix);
                 } else {
-                    op_size = selectOperandSize(true, prefix);
+                    op_size = selectOperandSize(csi.env.d, prefix);
                 }
 
                 if (op_size == 2) {
@@ -707,6 +730,7 @@ namespace dpr {
                 }
             }
         } else if (addr_mode == "M") {
+            int off = 1;
             info->has_modrm = true;
             ModRMField m_field;
             auto mrm = csi.get8(csi.cur + 1);
@@ -716,8 +740,22 @@ namespace dpr {
                 return false;
             }
             DCHECK(!m_field.is_reg);
-            DCHECK(!m_field.mrm_mem.has_sib);
-            auto operand = Operand::ofModRM(m_field, {});
+            Operand operand;
+            if (m_field.mrm_mem.has_sib) {
+                ++off;
+                info->has_sib = true;
+                SIBField s_field;
+                auto sib = csi.get8(csi.cur + 2);
+                info->sib = sib;
+                if (!parseSIBField(csi, prefix, mrm, sib, &s_field)) {
+                    DCHECK(false);
+                    return false;
+                }
+                operand = Operand::ofModRM(m_field, s_field);
+            } else {
+                operand = Operand::ofModRM(m_field, {});
+            }
+
             if (oper_type == "") {
                 operand.operand_size = 0;
                 info->operands.push_back(operand);
@@ -725,38 +763,38 @@ namespace dpr {
             }
             if (oper_type == "a") {
                 // 只有 BOUND 指令使用
-                operand.operand_size = selectOperandSize(true, prefix);
+                operand.operand_size = selectOperandSize(csi.env.d, prefix);
                 info->operands.push_back(operand);
                 return true;
             }
             if (oper_type == "p") {
                 uint32_t op_size;
                 operand.operand_size = 0;
-                if (csi.cpu_mode == CPUMode::_64Bit) {
+                if (csi.env.cpu_mode == CPUMode::_64Bit) {
                     op_size = selectOperandSize64(ss, prefix);
                 } else {
-                    op_size = selectOperandSize(true, prefix);
+                    op_size = selectOperandSize(csi.env.d, prefix);
                 }
                 if (op_size == 2) {
                     info->operands.push_back(
-                        Operand::ofPointer(csi.get16(csi.cur + 2), csi.get16(csi.cur + 4), 4, true));
+                        Operand::ofPointer(csi.get16(csi.cur + off + 2), csi.get16(csi.cur + off), 4, true));
                     return true;
                 }
                 if (op_size == 4) {
                     info->operands.push_back(
-                        Operand::ofPointer(csi.get16(csi.cur + 2), csi.get32(csi.cur + 4), 6, true));
+                        Operand::ofPointer(csi.get16(csi.cur + off + 4), csi.get32(csi.cur + off), 6, true));
                     return true;
                 }
                 if (op_size == 8) {
                     info->operands.push_back(
-                        Operand::ofPointer(csi.get16(csi.cur + 2), csi.get64(csi.cur + 4), 10, true));
+                        Operand::ofPointer(csi.get16(csi.cur + off + 8), csi.get64(csi.cur + off), 10, true));
                     return true;
                 }
             }
         } else if (addr_mode == "N") {
 
         } else if (addr_mode == "O") {
-            auto addr_size = selectAddressSize(true, prefix);
+            auto addr_size = selectAddressSize(csi.env.d, prefix);
             Operand operand;
             if (addr_size == 2) {
                 operand = Operand::ofDisp(csi.get16(csi.cur + 1), 2);
@@ -775,8 +813,8 @@ namespace dpr {
             }
             if (oper_type == "v") {
                 operand.operand_size =
-                    (csi.cpu_mode == CPUMode::_64Bit ?
-                        selectOperandSize64(ss, prefix) : selectOperandSize(true, prefix));
+                    (csi.env.cpu_mode == CPUMode::_64Bit ?
+                        selectOperandSize64(ss, prefix) : selectOperandSize(csi.env.d, prefix));
                 info->operands.push_back(operand);
                 return true;
             }
@@ -787,7 +825,23 @@ namespace dpr {
         } else if (addr_mode == "R") {
 
         } else if (addr_mode == "S") {
-
+            info->has_modrm = true;
+            ModRMField m_field;
+            auto mrm = csi.get8(csi.cur + 1);
+            info->modrm = mrm;
+            uint8_t ro = (mrm >> 3) & 0x7;
+            if (oper_type == "w") {
+                switch (ro) {
+                case 0: info->operands.push_back(Operand::ofReg("ES")); break;
+                case 1: info->operands.push_back(Operand::ofReg("CS")); break;
+                case 2: info->operands.push_back(Operand::ofReg("SS")); break;
+                case 3: info->operands.push_back(Operand::ofReg("DS")); break;
+                case 4: info->operands.push_back(Operand::ofReg("FS")); break;
+                case 5: info->operands.push_back(Operand::ofReg("GS")); break;
+                default: return false;
+                }
+                return true;
+            }
         } else if (addr_mode == "U") {
 
         } else if (addr_mode == "V") {
@@ -812,24 +866,24 @@ namespace dpr {
         uint8_t mod = modrm >> 6;
 
         if (use_reg || mod == 0x3) {
-            if (prefix.rex != 0 && csi.cpu_mode == CPUMode::_64Bit) {
+            if (prefix.rex != 0 && csi.env.cpu_mode == CPUMode::_64Bit) {
                 ro |= ((prefix.rex & 0x4) << 3);
             }
 
             field->is_reg = true;
-            field->mrm_reg = modrm_reg_map[use_reg ? ro : rm](csi.cpu_mode);
+            field->mrm_reg = modrm_reg_map[use_reg ? ro : rm](csi.env);
         } else {
             field->is_reg = false;
-            field->mrm_mem = modrm_mem_map[mod][rm](csi.cpu_mode);
+            field->mrm_mem = modrm_mem_map[mod][rm](csi.env);
 
             if (prefix.rex != 0 &&
-                csi.cpu_mode == CPUMode::_64Bit &&
+                csi.env.cpu_mode == CPUMode::_64Bit &&
                 !field->mrm_mem.has_sib)
             {
                 uint8_t rexb = (prefix.rex & 0x1);
                 if (rexb != 0) {
                     rm |= (rexb << 3);
-                    field->mrm_mem = modrm_mem_map[mod][rm](csi.cpu_mode);
+                    field->mrm_mem = modrm_mem_map[mod][rm](csi.env);
                 }
             }
 
@@ -860,13 +914,13 @@ namespace dpr {
         uint8_t index = (sib >> 3) & 0x7;
         uint8_t scale = sib >> 6;
 
-        if (prefix.rex != 0 && csi.cpu_mode == CPUMode::_64Bit) {
+        if (prefix.rex != 0 && csi.env.cpu_mode == CPUMode::_64Bit) {
             base |= ((prefix.rex & 0x1) << 3);
             index |= ((prefix.rex & 0x2) << 3);
         }
 
-        field->sib_scale = sib_scale_map[scale][index](csi.cpu_mode);
-        field->sib_base = sib_base_map[base](csi.cpu_mode, modrm);
+        field->sib_scale = sib_scale_map[scale][index](csi.env);
+        field->sib_base = sib_base_map[base](csi.env, modrm);
 
         switch (field->sib_base.disp_length) {
         case 0:
