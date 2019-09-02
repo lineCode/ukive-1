@@ -2,16 +2,20 @@
 #include <Windows.h>
 
 #include "ukive/log.h"
+#include "ukive/files/file.h"
 
 #include "oigka/layout_processor.h"
 #include "oigka/resource_header_processor.h"
 
 
 int processXMLFiles(const string16& res_path, const string16& build_path) {
-    string16 layout_xml_path = res_path + L"\\layout";
-    string16 header_file_path = res_path + L"\\oigka_resources_id.h";
+    ukive::File layout_xml_file = ukive::File(res_path, L"layout");
+    ukive::File header_file = ukive::File(res_path, L"oigka_resources_id.h");
+    ukive::File build_res_file = ukive::File(build_path, L"oigka");
 
-    string16 build_res_path = build_path + L"\\oigka";
+    string16 layout_xml_path = layout_xml_file.getPath();
+    string16 header_file_path = header_file.getPath();
+    string16 build_res_path = build_res_file.getPath();
 
     LOG(Log::INFO) << "Start processing...";
 
@@ -58,6 +62,20 @@ int APIENTRY wWinMain(
     if (result == 0) {
         string16 resource_path = cmds[0];
         string16 build_path = cmds[1];
+
+        if (resource_path.size() >= 2 &&
+            resource_path.front() == '"' &&
+            resource_path.back() == '"')
+        {
+            resource_path = resource_path.substr(1, resource_path.length() - 2);
+        }
+
+        if (build_path.size() >= 2 &&
+            build_path.front() == '"' &&
+            build_path.back() == '"')
+        {
+            build_path = build_path.substr(1, build_path.length() - 2);
+        }
 
         result = processXMLFiles(resource_path, build_path);
     }

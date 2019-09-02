@@ -151,16 +151,16 @@ namespace ukive {
 
     void InputConnection::determineInsert(
         long start, long end, unsigned long repLength,
-        long* resStart, long* resEnd) {
-
+        long* resStart, long* resEnd)
+    {
         *resStart = start;
         *resEnd = end;
     }
 
     bool InputConnection::getSelection(
         unsigned long startIndex, unsigned long maxCount,
-        TS_SELECTION_ACP* selections, unsigned long* fetchedCount) {
-
+        TS_SELECTION_ACP* selections, unsigned long* fetchedCount)
+    {
         if (startIndex != TF_DEFAULT_SELECTION || maxCount != 1) {
             return false;
         }
@@ -187,9 +187,9 @@ namespace ukive {
         int selEnd = selections[0].acpEnd;
 
         if (selStart == selEnd) {
-            text_view_->getEditable()->setSelectionForceNotify(selStart);
+            text_view_->getEditable()->setSelectionForceNotify(selStart, Editable::Reason::USER_INPUT);
         } else {
-            text_view_->getEditable()->setSelectionForceNotify(selStart, selEnd);
+            text_view_->getEditable()->setSelectionForceNotify(selStart, selEnd, Editable::Reason::USER_INPUT);
         }
 
         return true;
@@ -215,9 +215,9 @@ namespace ukive {
 
     void InputConnection::setText(long start, long end, std::wstring newText) {
         if (start == end) {
-            text_view_->getEditable()->insert(newText, start);
+            text_view_->getEditable()->insert(newText, start, Editable::Reason::USER_INPUT);
         } else {
-            text_view_->getEditable()->replace(newText, start, end - start);
+            text_view_->getEditable()->replace(newText, start, end - start, Editable::Reason::USER_INPUT);
         }
     }
 

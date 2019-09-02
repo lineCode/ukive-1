@@ -20,6 +20,10 @@ namespace ukive {
           initial_layouted_(false)
     {
         scroll_bar_ = std::make_unique<OverlayScrollBar>();
+        scroll_bar_->registerScrollHandler(std::bind(&ListView::onScrollBarChanged, this, std::placeholders::_1));
+        scroll_bar_->setScrollBarWidth(w->dpToPx(8));
+        scroll_bar_->setScrollBarMinWidth(w->dpToPx(16));
+
         recycler_ = std::make_unique<ViewHolderRecycler>(this);
     }
 
@@ -38,6 +42,8 @@ namespace ukive {
     }
 
     bool ListView::onInputEvent(InputEvent* e) {
+        bool result = false;
+
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
         {
@@ -51,11 +57,29 @@ namespace ukive {
             break;
         }
 
+        case InputEvent::EVM_DOWN:
+            result = point_down_ = scroll_bar_->onMousePressed({ e->getX(), e->getY() });
+            invalidate();
+            break;
+
+        case InputEvent::EVM_MOVE:
+            if (point_down_) {
+                result = true;
+                scroll_bar_->onMouseDragged({ e->getX(), e->getY() });
+                invalidate();
+            }
+            break;
+
+        case InputEvent::EVM_UP:
+        case InputEvent::EV_CANCEL:
+            point_down_ = false;
+            break;
+
         default:
             break;
         }
 
-        return ViewGroup::onInputEvent(e);
+        return ViewGroup::onInputEvent(e) | result;
     }
 
     void ListView::onDraw(Canvas* canvas) {
@@ -299,12 +323,14 @@ namespace ukive {
     }
 
     void ListView::onScrollBarChanged(int dy) {
-        int final_dy = determineVerticalScroll(dy);
+        auto height_pair = layouter_->computeTotalHeight(this, adapter_.get());
+        int final_dy = determineVerticalScroll(height_pair.first - dy);
         if (final_dy == 0) {
             return;
         }
 
         offsetChildViewTopAndBottom(final_dy);
+        recordCurPositionAndOffset();
         invalidate();
     }
 

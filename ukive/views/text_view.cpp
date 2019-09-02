@@ -92,7 +92,7 @@ namespace ukive {
         makeNewTextFormat();
         makeNewTextLayout(0.f, 0.f, false);
 
-        base_text_->setSelection(0);
+        base_text_->setSelection(0, Editable::Reason::API);
         locateTextBlink(0);
 
         setFocusable(is_editable_ | is_selectable_);
@@ -290,7 +290,7 @@ namespace ukive {
             uint32_t start = base_text_->getSelectionStart();
 
             if (base_text_->hasSelection()) {
-                base_text_->setSelection(start);
+                base_text_->setSelection(start, Editable::Reason::USER_INPUT);
             } else {
                 if (start > 0) {
                     size_t len = 1;
@@ -303,14 +303,14 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(start - len);
+                    base_text_->setSelection(start - len, Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_RIGHT) {
             uint32_t end = base_text_->getSelectionEnd();
 
             if (base_text_->hasSelection()) {
-                base_text_->setSelection(end);
+                base_text_->setSelection(end, Editable::Reason::USER_INPUT);
             } else {
                 if (end < base_text_->length()) {
                     size_t len = 1;
@@ -323,7 +323,7 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(end + len);
+                    base_text_->setSelection(end + len, Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_UP) {
@@ -347,7 +347,7 @@ namespace ukive {
                 &isTrailing, &isInside, &pointMetrics);
 
             base_text_->setSelection(
-                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0));
+                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0), Editable::Reason::USER_INPUT);
         } else if (keyCode == VK_DOWN) {
             uint32_t start;
             if (hasSelection() && (last_sel_ == base_text_->getSelectionStart()
@@ -369,7 +369,7 @@ namespace ukive {
                 &isTrailing, &isInside, &pointMetrics);
 
             base_text_->setSelection(
-                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0));
+                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0), Editable::Reason::USER_INPUT);
         }
     }
 
@@ -460,7 +460,7 @@ namespace ukive {
             }
 
             text_blink_->hide();
-            base_text_->setSelection(base_text_->getSelectionStart());
+            base_text_->setSelection(base_text_->getSelectionStart(), Editable::Reason::USER_INPUT);
             invalidate();
         }
     }
@@ -675,7 +675,7 @@ namespace ukive {
                         e->getX() - getPaddingLeft() + getScrollX(),
                         e->getY() - getPaddingTop() + getScrollY());
 
-                    base_text_->setSelection(first_sel_);
+                    base_text_->setSelection(first_sel_, Editable::Reason::USER_INPUT);
                 }
             }
             return true;
@@ -726,7 +726,7 @@ namespace ukive {
             first_sel_ = getHitTextPosition(
                 e->getX() - getPaddingLeft() + getScrollX(),
                 e->getY() - getPaddingTop() + getScrollY());
-            base_text_->setSelection(first_sel_);
+            base_text_->setSelection(first_sel_, Editable::Reason::USER_INPUT);
             return true;
         }
 
@@ -746,7 +746,7 @@ namespace ukive {
                     end = tmp;
                 }
 
-                base_text_->setSelection(start, end);
+                base_text_->setSelection(start, end, Editable::Reason::USER_INPUT);
             } else {
                 if (is_selectable_
                     && (isHitText(
@@ -876,8 +876,8 @@ namespace ukive {
 
 
     void TextView::setText(const string16& text) {
-        base_text_->replace(text, 0, base_text_->length());
-        base_text_->setSelection(0);
+        base_text_->replace(text, 0, base_text_->length(), Editable::Reason::API);
+        base_text_->setSelection(0, Editable::Reason::API);
     }
 
     void TextView::setTextSize(int size) {
@@ -1003,11 +1003,11 @@ namespace ukive {
 
 
     void TextView::setSelection(unsigned int position) {
-        base_text_->setSelection(position);
+        base_text_->setSelection(position, Editable::Reason::API);
     }
 
     void TextView::setSelection(unsigned int start, unsigned int end) {
-        base_text_->setSelection(start, end);
+        base_text_->setSelection(start, end, Editable::Reason::API);
     }
 
     void TextView::drawSelection(unsigned int start, unsigned int end) {
@@ -1216,7 +1216,7 @@ namespace ukive {
 
     void TextView::onTextChanged(
         Editable* editable,
-        int start, int oldEnd, int newEnd)
+        int start, int oldEnd, int newEnd, Editable::Reason r)
     {
         float maxWidth = text_layout_->GetMaxWidth();
         float maxHeight = text_layout_->GetMaxHeight();
@@ -1234,7 +1234,7 @@ namespace ukive {
 
     void TextView::onSelectionChanged(
         unsigned int ns, unsigned int ne,
-        unsigned int os, unsigned int oe) {
+        unsigned int os, unsigned int oe, Editable::Reason r) {
 
         if (ns == ne) {
             if (os != oe) {
@@ -1265,7 +1265,7 @@ namespace ukive {
         scrollToFit(true);
     }
 
-    void TextView::onSpanChanged(Span* span, SpanChange action) {
+    void TextView::onSpanChanged(Span* span, SpanChange action, Editable::Reason r) {
         DWRITE_TEXT_RANGE range;
         range.startPosition = span->getStart();
         range.length = span->getEnd() - span->getStart();
@@ -1339,7 +1339,7 @@ namespace ukive {
 
     void TextView::performCut() {
         ClipboardManager::saveToClipboard(getSelection());
-        base_text_->replace(L"");
+        base_text_->replace(L"", Editable::Reason::USER_INPUT);
 
         if (text_action_mode_) {
             text_action_mode_->close();
@@ -1355,11 +1355,11 @@ namespace ukive {
     }
 
     void TextView::performPaste() {
-        std::wstring content = ClipboardManager::getFromClipboard();
+        auto content = ClipboardManager::getFromClipboard();
         if (hasSelection()) {
-            base_text_->replace(content);
+            base_text_->replace(content, Editable::Reason::USER_INPUT);
         } else {
-            base_text_->insert(content);
+            base_text_->insert(content, Editable::Reason::USER_INPUT);
         }
 
         if (text_action_mode_) {

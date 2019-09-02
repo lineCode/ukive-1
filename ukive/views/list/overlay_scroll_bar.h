@@ -23,17 +23,19 @@ namespace ukive {
         void setBounds(int x, int y, int width, int height);
         void setBounds(const Rect& bounds);
 
+        void setScrollBarWidth(int width);
+        void setScrollBarMinWidth(int min_width);
+
         void onDraw(Canvas* canvas);
         bool onMousePressed(const Point& p);
-        void onMouseMoved(const Point& p);
         bool onMouseDragged(const Point& p);
 
     private:
         void moveScroller(int distance_y);
 
         int content_height_;
-        int distance_y_prev_;
-        float dragging_deviation_;
+        int scrollbar_width_;
+        int scrollbar_min_width_;
 
         Rect view_bounds_;
         Rect scrollbar_bounds_;

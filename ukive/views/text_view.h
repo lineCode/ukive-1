@@ -70,12 +70,12 @@ namespace ukive {
 
         void onTextChanged(
             Editable* editable,
-            int start, int oldEnd, int newEnd) override;
+            int start, int oldEnd, int newEnd, Editable::Reason r) override;
         void onSelectionChanged(
             unsigned int ns, unsigned int ne,
-            unsigned int os, unsigned int oe) override;
+            unsigned int os, unsigned int oe, Editable::Reason r) override;
         void onSpanChanged(
-            Span* span, SpanChange action) override;
+            Span* span, SpanChange action, Editable::Reason r) override;
 
         bool onCreateActionMode(TextActionMode* mode, Menu* menu) override;
         bool onPrepareActionMode(TextActionMode* mode, Menu* menu) override;

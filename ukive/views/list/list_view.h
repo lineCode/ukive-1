@@ -80,6 +80,8 @@ namespace ukive {
         bool initial_layouted_;
         bool force_layout_ = false;
 
+        bool point_down_ = false;
+
         std::unique_ptr<ListAdapter> adapter_;
         std::unique_ptr<ListLayouter> layouter_;
         std::unique_ptr<OverlayScrollBar> scroll_bar_;

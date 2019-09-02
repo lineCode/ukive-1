@@ -14,6 +14,11 @@ namespace ukive {
 
     class Editable {
     public:
+        enum class Reason {
+            USER_INPUT,
+            API
+        };
+
         class EditWatcher {
         public:
             virtual ~EditWatcher() = default;
@@ -26,39 +31,39 @@ namespace ukive {
 
             virtual void onTextChanged(
                 Editable* editable,
-                int start, int oldEnd, int newEnd) = 0;
+                int start, int oldEnd, int newEnd, Reason r) = 0;
 
             virtual void onSelectionChanged(
                 uint32_t ns, uint32_t ne,
-                uint32_t os, uint32_t oe) = 0;
+                uint32_t os, uint32_t oe, Reason r) = 0;
 
             virtual void onSpanChanged(
-                Span* span, SpanChange action) = 0;
+                Span* span, SpanChange action, Reason r) = 0;
         };
 
-        Editable(const string16& text);
+        explicit Editable(const string16& text);
         ~Editable();
 
         uint32_t length() const;
 
-        void append(const string16& text);
-        void insert(const string16& text, uint32_t position);
-        void remove(uint32_t start, uint32_t length);
-        void replace(const string16& text, uint32_t start, uint32_t length);
-        void clear();
+        void append(const string16& text, Reason r);
+        void insert(const string16& text, uint32_t position, Reason r);
+        void remove(uint32_t start, uint32_t length, Reason r);
+        void replace(const string16& text, uint32_t start, uint32_t length, Reason r);
+        void clear(Reason r);
 
-        void replace(const string16& find, const string16& replacement);
-        void replaceAll(const string16& find, const string16& replacement);
+        void replace(const string16& find, const string16& replacement, Reason r);
+        void replaceAll(const string16& find, const string16& replacement, Reason r);
 
-        void insert(const string16& text);
-        void remove();
-        void replace(const string16& text);
+        void insert(const string16& text, Reason r);
+        void remove(Reason r);
+        void replace(const string16& text, Reason r);
 
-        void setSelection(uint32_t selection);
-        void setSelection(uint32_t start, uint32_t end);
+        void setSelection(uint32_t selection, Reason r);
+        void setSelection(uint32_t start, uint32_t end, Reason r);
 
-        void setSelectionForceNotify(uint32_t selection);
-        void setSelectionForceNotify(uint32_t start, uint32_t end);
+        void setSelectionForceNotify(uint32_t selection, Reason r);
+        void setSelectionForceNotify(uint32_t start, uint32_t end, Reason r);
 
         uint32_t getSelectionStart() const;
         uint32_t getSelectionEnd() const;
@@ -68,10 +73,10 @@ namespace ukive {
         wchar_t at(size_t pos) const;
         string16 toString() const;
 
-        void addSpan(Span* span);
-        void removeSpan(std::size_t index);
-        void removeAllSpan();
-        Span* getSpan(std::size_t index);
+        void addSpan(Span* span, Reason r);
+        void removeSpan(std::size_t index, Reason r);
+        void removeAllSpan(Reason r);
+        Span* getSpan(std::size_t index) const;
         std::size_t getSpanCount() const;
 
         void addEditWatcher(EditWatcher* watcher);
@@ -79,14 +84,14 @@ namespace ukive {
 
     private:
         void notifyTextChanged(
-            uint32_t start, uint32_t oldEnd, uint32_t newEnd);
+            uint32_t start, uint32_t oldEnd, uint32_t newEnd, Reason r);
         void notifySelectionChanged(
-            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe);
+            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe, Reason r);
         void notifyEditWatcher(
             int start, int oldEnd, int newEnd,
-            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe);
+            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe, Reason r);
         void notifySpanChanged(
-            Span* span, EditWatcher::SpanChange action);
+            Span* span, EditWatcher::SpanChange action, Reason r);
 
         string16 text_;
         std::list<EditWatcher*> watchers_;

@@ -115,6 +115,9 @@
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -139,6 +142,9 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -169,6 +175,9 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -197,6 +206,9 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp" />

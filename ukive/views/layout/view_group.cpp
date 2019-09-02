@@ -372,7 +372,7 @@ namespace ukive {
         } else if (e->isKeyboardEvent()) {
             consumed = dispatchKeyboardEvent(e);
         } else {
-            consumed = onInputEvent(e);
+            consumed = View::dispatchInputEvent(e);
         }
 
         return consumed;

@@ -154,7 +154,7 @@ namespace shell {
         textView->setBackground(new ukive::ColorDrawable(ukive::Color::White));
 
         ukive::UnderlineSpan* span = new ukive::UnderlineSpan(3, 5);
-        textView->getEditable()->addSpan(span);
+        textView->getEditable()->addSpan(span, ukive::Editable::Reason::API);
 
         image_view_ = static_cast<ukive::ImageView*>(findViewById(Res::Id::iv_test_img));
         std::wstring imgFileName = ukive::Application::getExecFileName(true);
