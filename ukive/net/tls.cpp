@@ -1,9 +1,10 @@
-#include "ukive/net/tls.h"
+﻿#include "ukive/net/tls.h"
 
 #include <chrono>
 #include <random>
 
 #include "ukive/utils/stl_utils.h"
+#include "ukive/net/socket.h"
 
 
 namespace {
@@ -33,7 +34,7 @@ namespace ukive {
 namespace net {
 namespace tls {
 
-    void constructFragment(ContentType type, const stringu8& plain_text, stringu8* out) {
+    void TLS::makeFragment(ContentType type, const stringu8& plain_text, stringu8* out) {
         DCHECK(out && plain_text.size() <= std::pow(2U, 14U));
 
         // type
@@ -48,7 +49,35 @@ namespace tls {
         out->append(plain_text);
     }
 
-    void constructHandshake(HandshakeType type, stringu8* out) {
+    void TLS::parseFragment(const stringu8& raw) {
+        DCHECK(raw.size() >= 5);
+
+        auto type = ContentType(raw[0]);
+        auto major = raw[1];
+        auto minor = raw[2];
+        uint16_t length = (raw[3] << 8) | raw[4];
+
+        switch (type) {
+        case ContentType::Alert:
+        {
+            if (raw.size() - 5 < 2 || length != 2) {
+                DCHECK(false);
+                return;
+            }
+
+            auto level = AlertLevel(raw[5]);
+            auto descp = AlertDescription(raw[6]);
+
+            int i = 0;
+            break;
+        }
+
+        default:
+            break;
+        }
+    }
+
+    void TLS::constructHandshake(HandshakeType type, stringu8* out) {
         DCHECK(out);
 
         out->push_back(enum_cast(type));
@@ -66,7 +95,7 @@ namespace tls {
         out->append(message);
     }
 
-    void constructClientHello(stringu8* out) {
+    void TLS::constructClientHello(stringu8* out) {
         DCHECK(out);
 
         // client_version
@@ -74,23 +103,32 @@ namespace tls {
         out->push_back(3); // minor
 
         // random
-        out->append(getTimestampFromUInt32()); // gmt_unix_time
-        out->append(getRandomBytes(28));       // random_bytes
+        //out->append(getTimestampFromUInt32()); // gmt_unix_time
+        out->append(getRandomBytes(32));       // random_bytes
 
         // session_id
-        out->push_back(0);
+        out->push_back(32);
+        out->append(getRandomBytes(32));
 
         // cipher_suites
-        out->append(getSupportCipherSuiteBytes({}));
+        // 在 9.1 节中规定了必须支持的加密套件
+        out->append(getSupportCipherSuiteBytes({
+            CipherSuite::TLS_AES_128_GCM_SHA256,
+            CipherSuite::TLS_AES_256_GCM_SHA384,
+            CipherSuite::TLS_CHACHA20_POLY1305_SHA256,
+            CipherSuite::TLS_AES_128_CCM_SHA256,
+            CipherSuite::TLS_AES_128_CCM_8_SHA256,
+            CipherSuite::TLS_RSA_WITH_AES_256_CBC_SHA256
+            }));
 
         // compression_methods
         out->append(getSupportCompressionMethods());
 
         // extensions
-        // nothing
+        out->append(getSupportExtensions());
     }
 
-    stringu8 getTimestampFromUInt32() {
+    stringu8 TLS::getTimestampFromUInt32() {
         auto ts = std::chrono::steady_clock::now().time_since_epoch();
         auto timestamp = std::chrono::duration_cast<std::chrono::seconds>(ts).count();
         DCHECK(timestamp <= std::numeric_limits<uint32_t>::max());
@@ -99,7 +137,7 @@ namespace tls {
         return getUInt32Bytes(ts_uint32);
     }
 
-    stringu8 getRandomBytes(uint32_t size) {
+    stringu8 TLS::getRandomBytes(uint32_t size) {
         std::random_device rd;
         std::default_random_engine en(rd());
         std::uniform_int_distribution<int> user_dist(0, 255);
@@ -111,7 +149,7 @@ namespace tls {
         return ret;
     }
 
-    stringu8 getSupportCipherSuiteBytes(const std::vector<CipherSuite>& suites) {
+    stringu8 TLS::getSupportCipherSuiteBytes(const std::vector<CipherSuite>& suites) {
         stringu8 ret;
         ret.append(getUInt16Bytes(UIntToUInt16(std::max(suites.size() * 2, size_t(2))))); // 16bit
         for (const auto& suite : suites) {
@@ -153,6 +191,12 @@ namespace tls {
             case CipherSuite::TLS_DH_anon_WITH_AES_256_CBC_SHA:    ret.append({ 0x00, 0x3A }); break;
             case CipherSuite::TLS_DH_anon_WITH_AES_128_CBC_SHA256: ret.append({ 0x00, 0x6C }); break;
             case CipherSuite::TLS_DH_anon_WITH_AES_256_CBC_SHA256: ret.append({ 0x00, 0x6D }); break;
+
+            case CipherSuite::TLS_AES_128_GCM_SHA256:              ret.append({ 0x13, 0x01 }); break;
+            case CipherSuite::TLS_AES_256_GCM_SHA384:              ret.append({ 0x13, 0x02 }); break;
+            case CipherSuite::TLS_CHACHA20_POLY1305_SHA256:        ret.append({ 0x13, 0x03 }); break;
+            case CipherSuite::TLS_AES_128_CCM_SHA256:              ret.append({ 0x13, 0x04 }); break;
+            case CipherSuite::TLS_AES_128_CCM_8_SHA256:            ret.append({ 0x13, 0x05 }); break;
             }
         }
 
@@ -163,36 +207,96 @@ namespace tls {
         return ret;
     }
 
-    stringu8 getSupportCompressionMethods() {
+    stringu8 TLS::getSupportCompressionMethods() {
         stringu8 ret;
-        ret.append(getUInt16Bytes(1)); // 8bit
+        // 数组长度
+        ret.push_back(1);
         ret.push_back(0);
 
         return ret;
     }
 
-    stringu8 getUInt16Bytes(uint16_t val) {
+    stringu8 TLS::getSupportExtensions() {
+        // 9.2 节中规定了必须支持的扩展
         stringu8 ret;
-        ret.push_back((val >> 8) & 0xFFFF);
-        ret.push_back(val & 0x00FF);
+        ret.append(getUInt16Bytes(7 + 10 + 8));
+
+        // SupportedVersions
+        ret.append(getUInt16Bytes(uint16_t(ExtensionType::SupportedVersions)));
+        ret.append(getUInt16Bytes(3));
+
+        ret.push_back(2);
+        ret.append({ 3, 4 });
+
+        // SupportedGroups
+        ret.append(getUInt16Bytes(uint16_t(ExtensionType::SupportedGroups)));
+        ret.append(getUInt16Bytes(6));
+
+        ret.append(getUInt16Bytes(4));
+        ret.append(getUInt16Bytes(uint16_t(NamedGroup::X25519)));
+        ret.append(getUInt16Bytes(uint16_t(NamedGroup::SECP256R1)));
+
+        // SignatureAlgorithms
+        ret.append(getUInt16Bytes(uint16_t(ExtensionType::SignatureAlgorithms)));
+        ret.append(getUInt16Bytes(4));
+
+        ret.append(getUInt16Bytes(2));
+        ret.append(getUInt16Bytes(uint16_t(SignatureScheme::RSA_PKCS1_SHA256)));
+
         return ret;
     }
 
-    stringu8 getUInt24Bytes(uint32_t val) {
+    stringu8 TLS::getUInt16Bytes(uint16_t val) {
         stringu8 ret;
-        ret.push_back((val >> 16) & 0x00FFFFFF);
-        ret.push_back((val >> 8) & 0x0000FFFF);
-        ret.push_back(val & 0x000000FF);
+        ret.push_back(val >> 8);
+        ret.push_back(val & 0xFF);
         return ret;
     }
 
-    stringu8 getUInt32Bytes(uint32_t val) {
+    stringu8 TLS::getUInt24Bytes(uint32_t val) {
+        stringu8 ret;
+        ret.push_back((val >> 16) & 0xFF);
+        ret.push_back((val >> 8) & 0xFF);
+        ret.push_back(val & 0xFF);
+        return ret;
+    }
+
+    stringu8 TLS::getUInt32Bytes(uint32_t val) {
         stringu8 ret;
         ret.push_back(val >> 24);
-        ret.push_back((val >> 16) & 0x00FFFFFF);
-        ret.push_back((val >> 8) & 0x0000FFFF);
-        ret.push_back(val & 0x000000FF);
+        ret.push_back((val >> 16) & 0xFF);
+        ret.push_back((val >> 8) & 0xFF);
+        ret.push_back(val & 0xFF);
         return ret;
+    }
+
+    void TLS::testHandshake() {
+        SocketClient client;
+        if (!client.connectByHost("", 443)) {
+            DCHECK(false);
+            return;
+        }
+
+        stringu8 client_hello;
+        constructHandshake(HandshakeType::ClientHello, &client_hello);
+
+        stringu8 fragment;
+        makeFragment(ContentType::Handshake, client_hello, &fragment);
+
+        if (!client.send(string8(fragment.begin(), fragment.end()))) {
+            DCHECK(false);
+            return;
+        }
+
+        string8 resp;
+        if (!client.recv(&resp)) {
+            DCHECK(false);
+            return;
+        }
+
+        parseFragment(stringu8(resp.begin(), resp.end()));
+
+        client.close();
     }
 
 }

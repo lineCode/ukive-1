@@ -261,10 +261,8 @@
     <ClInclude Include="text\tsf_editor.h" />
     <ClInclude Include="text\tsf_manager.h" />
     <ClInclude Include="text\word_breaker.h" />
-    <ClInclude Include="utils\big_integer16.h" />
-    <ClInclude Include="utils\big_integer32.h" />
-    <ClInclude Include="utils\big_integer8.h" />
-    <ClInclude Include="utils\big_integer_converter.h" />
+    <ClInclude Include="utils\big_integer\big_integer.h" />
+    <ClInclude Include="utils\big_integer\int_array.h" />
     <ClInclude Include="utils\com_ptr.h" />
     <ClInclude Include="utils\double.h" />
     <ClInclude Include="utils\dynamic_windows_api.h" />
@@ -407,10 +405,8 @@
     <ClCompile Include="text\tsf_editor.cpp" />
     <ClCompile Include="text\tsf_manager.cpp" />
     <ClCompile Include="text\word_breaker.cpp" />
-    <ClCompile Include="utils\big_integer16.cpp" />
-    <ClCompile Include="utils\big_integer32.cpp" />
-    <ClCompile Include="utils\big_integer8.cpp" />
-    <ClCompile Include="utils\big_integer_converter.cpp" />
+    <ClCompile Include="utils\big_integer\big_integer.cpp" />
+    <ClCompile Include="utils\big_integer\int_array.cpp" />
     <ClCompile Include="utils\double.cpp" />
     <ClCompile Include="utils\dynamic_windows_api.cpp" />
     <ClCompile Include="utils\float.cpp" />

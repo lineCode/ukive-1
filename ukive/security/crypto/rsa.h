@@ -1,11 +1,9 @@
 #ifndef UKIVE_SECURITY_CRYPTO_RSA_H_
 #define UKIVE_SECURITY_CRYPTO_RSA_H_
 
-#include "ukive/utils/big_integer8.h"
-#include "ukive/utils/big_integer16.h"
-#include "ukive/utils/big_integer32.h"
+#include "ukive/utils/big_integer/big_integer.h"
 
-#define BigIntegerClass BigInteger16
+#define BigInteger ukive::BigInteger
 
 
 // 根据 RFC 8017 实现的 RSA 算法。
@@ -18,8 +16,10 @@ namespace crypto {
     public:
         RSA() = default;
 
-        static BigIntegerClass getPrime();
-        static bool isPrime(const BigIntegerClass& bi);
+        void init();
+
+        static BigInteger getPrime();
+        static bool isPrime(const BigInteger& bi);
     };
 
 }

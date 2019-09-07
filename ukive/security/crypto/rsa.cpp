@@ -1,4 +1,4 @@
-#include "ukive/security/crypto/rsa.h"
+﻿#include "ukive/security/crypto/rsa.h"
 
 #include "ukive/log.h"
 
@@ -6,46 +6,46 @@
 namespace ukive {
 namespace crypto {
 
-    BigIntegerClass RSA::getPrime() {
-        auto init = BigIntegerClass::TWO;
-        init.pow(BigIntegerClass::fromU16(1023));
-        if (init.isEven()) {
-            init.add(BigIntegerClass::ONE);
+    void RSA::init() {
+        auto p = getPrime();
+        auto q = getPrime();
+        auto n = p * q;
+        auto fn = p.sub(BigInteger::ONE) * q.sub(BigInteger::ONE);
+
+        // 确定公钥指数 e
+        auto e = BigInteger::fromRandom(BigInteger::TWO, fn - BigInteger::ONE);
+        while (!(e.gcd(fn) == BigInteger::ONE)) {
+            e = BigInteger::fromRandom(BigInteger::TWO, fn - BigInteger::ONE);
         }
+
+        // 确定私钥指数 d
+        auto d = e.invmod(fn);
+
+        p.destroy();
+        q.destroy();
+
+        int M = 2233;
+        auto C = BigInteger::fromU32(M).powMod(e, n);
+        auto M1 = C.powMod(d, n);
 
         int i = 0;
-        while (!isPrime(init)) {
-            init.add(BigIntegerClass::TWO);
-            ++i;
+    }
+
+    BigInteger RSA::getPrime() {
+        auto init = BigInteger::fromRandom(1024);
+        if (!init.isOdd()) {
+            init.add(BigInteger::ONE);
         }
 
-        // Release
-        // Desktop: 1:50 (8), 0:27 (16),
-        // Laptop:  2:31 (8), 0:37 (16),
-
-        // Debug
-        // Desktop: 2:04 (16)
-        LOG(Log::INFO) << "Prime retry: " << i;
+        while (!isPrime(init)) {
+            init.add(BigInteger::TWO);
+        }
         return init;
     }
 
-    bool RSA::isPrime(const BigIntegerClass& bi) {
-        auto result = BigIntegerClass::TWO;
-        auto bi_1 = bi - BigIntegerClass::ONE;
-        auto exp = bi_1;
-
-        while (exp.isEven()) {
-            exp.shr(1);
-            result.powMod(exp, bi);
-            if (result == bi_1) {
-                break;
-            }
-            if (result == BigIntegerClass::ONE) {
-                continue;
-            }
-            return false;
-        }
-        return true;
+    bool RSA::isPrime(const BigInteger& bi) {
+        return bi.isPrime2(BigInteger::TWO) &&
+            bi.isPrime2(BigInteger::fromU32(3));
     }
 
 }

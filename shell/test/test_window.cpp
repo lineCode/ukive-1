@@ -33,6 +33,7 @@
 #include "ukive/system/time_utils.h"
 #include "ukive/net/http_client.h"
 #include "ukive/net/socket.h"
+#include "ukive/net/tls.h"
 
 #include "shell/test/list/test_adapter.h"
 #include "shell/resources/oigka_resources_id.h"
@@ -43,8 +44,6 @@
 #include "ukive/security/crypto/aes.h"
 #include "ukive/security/crypto/rsa.h"
 #include "ukive/system/qpc_service.h"
-#include "ukive/utils/big_integer8.h"
-#include "ukive/utils/big_integer16.h"
 
 
 namespace shell {
@@ -76,13 +75,13 @@ namespace shell {
         //test::TEST_SHA();
         //test::TEST_BIG_INTEGER();
 
-        /*auto prime = ukive::crypto::RSA::getPrime();
-        auto prime_str = prime.toString();*/
+        //ukive::crypto::RSA rsa;
+        //rsa.init();
 
         //ukive::net::initializeSocket();
 
-        //ukive::net::HttpClient client;
-        //client.connect("");
+        //ukive::net::tls::TLS tls_client;
+        //tls_client.testHandshake();
 
         //ukive::net::unInitializeSocket();
     }

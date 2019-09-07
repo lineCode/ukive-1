@@ -366,9 +366,6 @@
     <ClCompile Include="security\crypto\rsa.cpp">
       <Filter>security\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="utils\big_integer_converter.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="security\digest\sha1.cpp">
       <Filter>security\digest</Filter>
     </ClCompile>
@@ -393,17 +390,14 @@
     <ClCompile Include="security\digest\hkdf.cpp">
       <Filter>security\digest</Filter>
     </ClCompile>
-    <ClCompile Include="utils\big_integer8.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\big_integer16.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\big_integer32.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="net\socket.cpp">
       <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer\big_integer.cpp">
+      <Filter>utils\big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer\int_array.cpp">
+      <Filter>utils\big_integer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -817,26 +811,20 @@
     <ClInclude Include="security\crypto\rsa.h">
       <Filter>security\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="utils\big_integer_converter.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="security\digest\sha_private.h">
       <Filter>security\digest</Filter>
     </ClInclude>
     <ClInclude Include="security\digest\sha.h">
       <Filter>security\digest</Filter>
     </ClInclude>
-    <ClInclude Include="utils\big_integer8.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\big_integer16.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\big_integer32.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="net\socket.h">
       <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer\big_integer.h">
+      <Filter>utils\big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer\int_array.h">
+      <Filter>utils\big_integer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -920,6 +908,9 @@
     </Filter>
     <Filter Include="security\crypto">
       <UniqueIdentifier>{7bf90690-59e2-4a8b-9948-afe6fc44071f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\big_integer">
+      <UniqueIdentifier>{c8eb10ae-79fa-40b4-b963-aa0c12d18fdf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
