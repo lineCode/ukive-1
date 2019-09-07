@@ -270,7 +270,6 @@
     <ClInclude Include="utils\dynamic_windows_api.h" />
     <ClInclude Include="utils\executable.h" />
     <ClInclude Include="utils\float.h" />
-    <ClInclude Include="utils\hresult_utils.h" />
     <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />

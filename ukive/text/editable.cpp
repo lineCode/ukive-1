@@ -16,24 +16,23 @@ namespace ukive {
     Editable::~Editable() {
     }
 
-
-    // The possible text changes include insert, delete, and replace.
-    // For example, if you replace the first "t" of "text" with "T", acpStart =0, acpOldEnd =1, and acpNewEnd =1.
-    // If you delete the last "t", acpStart =3, acpOldEnd =4, and acpNewEnd =3.
-    // If an "a" is inserted between "e" and "x", acpStart =2, acpOldEnd =2, and acpNewEnd =3.
+    // 对文本的操作包括插入、删除和替换。
+    // 举例来说，如果你将 "text" 中的第一个 "t" 替换为 "T"，acpStart=0, acpOldEnd=1, and acpNewEnd=1.
+    // 如果你删除最后一个 "t"，acpStart=3, acpOldEnd=4, and acpNewEnd=3.
+    // 如果将 "a" 放在 "e" 和 "x" 之间，acpStart=2, acpOldEnd=2, and acpNewEnd=3.
     void Editable::notifyTextChanged(
-        uint32_t start, uint32_t oldEnd, uint32_t newEnd, Reason r)
+        uint32_t start, uint32_t old_end, uint32_t new_end, Reason r)
     {
         for (auto span : spans_) {
             uint32_t spanStart = span->getStart();
             uint32_t spanEnd = span->getEnd();
 
-            if (spanStart >= start && spanStart < oldEnd) {
+            if (spanStart >= start && spanStart < old_end) {
             }
         }
 
         for (auto watcher : watchers_) {
-            watcher->onTextChanged(this, start, oldEnd, newEnd, r);
+            watcher->onTextChanged(this, start, old_end, new_end, r);
         }
     }
 
@@ -47,13 +46,13 @@ namespace ukive {
     }
 
     void Editable::notifyEditWatcher(
-        int start, int oldEnd, int newEnd,
-        uint32_t ns, uint32_t ne,
-        uint32_t os, uint32_t oe, Reason r)
+        int text_start, int old_text_end, int new_text_end,
+        uint32_t new_sel_start, uint32_t new_sel_end,
+        uint32_t old_sel_start, uint32_t old_sel_end, Reason r)
     {
         for (auto watcher : watchers_) {
-            watcher->onTextChanged(this, start, oldEnd, newEnd, r);
-            watcher->onSelectionChanged(ns, ne, os, oe, r);
+            watcher->onTextChanged(this, text_start, old_text_end, new_text_end, r);
+            watcher->onSelectionChanged(new_sel_start, new_sel_end, old_sel_start, old_sel_end, r);
         }
     }
 
@@ -65,11 +64,9 @@ namespace ukive {
         }
     }
 
-
     uint32_t Editable::length() const {
         return text_.length();
     }
-
 
     void Editable::append(const string16& text, Reason r) {
         insert(text, text_.length(), r);
@@ -95,29 +92,28 @@ namespace ukive {
 
     void Editable::clear(Reason r) {
         if (!text_.empty()) {
-            uint32_t oldStart = sel_beg_;
-            uint32_t oldEnd = sel_end_;
-            uint32_t oldLength = text_.length();
+            auto old_start = sel_beg_;
+            auto old_end = sel_end_;
+            auto old_length = text_.length();
 
             text_.clear();
 
             sel_beg_ = 0;
             sel_end_ = 0;
 
-            if (oldStart != 0 || oldEnd != 0) {
+            if (old_start != 0 || old_end != 0) {
                 notifyEditWatcher(
-                    0, oldLength, 0,
+                    0, old_length, 0,
                     sel_beg_, sel_end_,
-                    oldStart, oldEnd, r);
+                    old_start, old_end, r);
             } else {
-                notifyTextChanged(0, oldLength, 0, r);
+                notifyTextChanged(0, old_length, 0, r);
             }
         }
     }
 
-
     void Editable::replace(const string16& find, const string16& replacement, Reason r) {
-        size_t first = text_.find(find);
+        auto first = text_.find(find);
         if (first != string16::npos) {
             text_.replace(first, find.length(), replacement);
             notifyTextChanged(first, first + 1, first + replacement.length() - find.length() + 1, r);
@@ -125,31 +121,30 @@ namespace ukive {
     }
 
     void Editable::replaceAll(const string16& find, const string16& replacement, Reason r) {
-        size_t first = text_.find(find);
+        auto first = text_.find(find);
         while (first != string16::npos) {
             text_.replace(first, find.length(), replacement);
             first = text_.find(find, first + replacement.length());
         }
     }
 
-
     void Editable::insert(const string16& text, Reason r) {
-        uint32_t oldStart = sel_beg_;
-        uint32_t oldEnd = sel_end_;
+        auto old_start = sel_beg_;
+        auto old_end = sel_end_;
 
-        if (oldStart == oldEnd) {
-            if (text_.length() < oldEnd) {
+        if (old_start == old_end) {
+            if (text_.length() < old_end) {
                 DCHECK(false);
                 text_.insert(text_.length(), text);
             } else {
-                text_.insert(oldEnd, text);
+                text_.insert(old_end, text);
             }
             sel_beg_ += text.length();
             sel_end_ += text.length();
 
             notifyEditWatcher(
-                sel_beg_, sel_beg_, sel_beg_ + text.length(),
-                sel_beg_, sel_end_, oldStart, oldEnd, r);
+                old_start, old_start, old_start + text.length(),
+                sel_beg_, sel_end_, old_start, old_end, r);
         }
     }
 
@@ -158,18 +153,18 @@ namespace ukive {
     }
 
     void Editable::replace(const string16& text, Reason r) {
-        uint32_t oldStart = sel_beg_;
-        uint32_t oldEnd = sel_end_;
+        auto old_start = sel_beg_;
+        auto old_end = sel_end_;
 
-        bool hasSelection = oldStart != oldEnd;
+        bool has_selection = old_start != old_end;
 
-        if (hasSelection) {
-            text_.replace(oldStart, oldEnd - oldStart, text);
-            sel_beg_ = sel_end_ = oldStart + text.length();
+        if (has_selection) {
+            text_.replace(old_start, old_end - old_start, text);
+            sel_beg_ = sel_end_ = old_start + text.length();
 
             notifyEditWatcher(
-                oldStart, oldStart + 1, oldStart + text.length() - (oldEnd - oldStart) + 1,
-                sel_beg_, sel_end_, oldStart, oldEnd, r);
+                old_start, old_start + 1, old_start + text.length() - (old_end - old_start) + 1,
+                sel_beg_, sel_end_, old_start, old_end, r);
         }
     }
 
@@ -212,7 +207,6 @@ namespace ukive {
         notifySelectionChanged(start, end, oldSeStart, oldSeEnd, r);
     }
 
-
     uint32_t Editable::getSelectionStart() const {
         return sel_beg_;
     }
@@ -233,7 +227,6 @@ namespace ukive {
         return text_.substr(sel_beg_, sel_end_ - sel_beg_);
     }
 
-
     wchar_t Editable::at(size_t pos) const {
         return text_.at(pos);
     }
@@ -241,7 +234,6 @@ namespace ukive {
     string16 Editable::toString() const {
         return text_;
     }
-
 
     void Editable::addSpan(Span* span, Reason r) {
         spans_.push_back(std::shared_ptr<Span>(span));

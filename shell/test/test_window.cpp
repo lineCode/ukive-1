@@ -69,8 +69,8 @@ namespace shell {
         //animator_.start();
 
         showTitleBar();
-        //inflateGroup();
-        inflateListView();
+        inflateGroup();
+        //inflateListView();
 
         //test::TEST_MD5();
         //test::TEST_SHA();
@@ -79,12 +79,12 @@ namespace shell {
         /*auto prime = ukive::crypto::RSA::getPrime();
         auto prime_str = prime.toString();*/
 
-        ukive::net::initializeSocket();
+        //ukive::net::initializeSocket();
 
-        ukive::net::HttpClient client;
-        client.connect("");
+        //ukive::net::HttpClient client;
+        //client.connect("");
 
-        ukive::net::unInitializeSocket();
+        //ukive::net::unInitializeSocket();
     }
 
     void TestWindow::onDraw(const ukive::Rect& rect) {

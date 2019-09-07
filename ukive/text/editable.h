@@ -84,12 +84,12 @@ namespace ukive {
 
     private:
         void notifyTextChanged(
-            uint32_t start, uint32_t oldEnd, uint32_t newEnd, Reason r);
+            uint32_t start, uint32_t old_end, uint32_t new_end, Reason r);
         void notifySelectionChanged(
             uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe, Reason r);
         void notifyEditWatcher(
-            int start, int oldEnd, int newEnd,
-            uint32_t ns, uint32_t ne, uint32_t os, uint32_t oe, Reason r);
+            int text_start, int old_text_end, int new_text_end,
+            uint32_t new_sel_start, uint32_t new_sel_end, uint32_t old_sel_start, uint32_t old_sel_end, Reason r);
         void notifySpanChanged(
             Span* span, EditWatcher::SpanChange action, Reason r);
 

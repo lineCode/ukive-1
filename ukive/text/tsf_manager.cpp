@@ -1,6 +1,6 @@
 ﻿#include "tsf_manager.h"
 
-#include "ukive/utils/hresult_utils.h"
+#include "ukive/log.h"
 
 
 namespace ukive {
@@ -17,13 +17,21 @@ namespace ukive {
 
 
     HRESULT TsfManager::init() {
-        RH(::CoCreateInstance(
+        HRESULT hr = ::CoCreateInstance(
             CLSID_TF_ThreadMgr,
             nullptr, CLSCTX_INPROC_SERVER,
             __uuidof(ITfThreadMgr),
-            reinterpret_cast<void**>(&thread_mgr_)));
+            reinterpret_cast<void**>(&thread_mgr_));
+        if (FAILED(hr)) {
+            DLOG(Log::ERR) << "Failed to create thread mgr: " << hr;
+            return hr;
+        }
 
-        RH(thread_mgr_->Activate(&client_id_));
+        hr = thread_mgr_->Activate(&client_id_);
+        if (FAILED(hr)) {
+            DLOG(Log::ERR) << "Failed to activate thread mgr: " << hr;
+            return hr;
+        }
 
         return S_OK;
     }
@@ -40,9 +48,8 @@ namespace ukive {
         return thread_mgr_;
     }
 
-
     HRESULT TsfManager::setupCompartmentSinks(ITfCompartment *openMode, ITfCompartment *convMode) {
-        HRESULT hr = E_FAIL;
+        HRESULT hr;
         ComPtr<ITfSource> srcOpenMode;
         ComPtr<ITfSource> srcConvMode;
 
@@ -83,13 +90,11 @@ namespace ukive {
     }
 
     HRESULT TsfManager::releaseCompartmentSinks() {
-        HRESULT hr = E_FAIL;
-
         ComPtr<ITfCompartmentMgr> cm;
         ComPtr<ITfCompartment> openMode;
         ComPtr<ITfCompartment> convMode;
 
-        hr = getCompartments(&cm, &openMode, &convMode);
+        HRESULT hr = getCompartments(&cm, &openMode, &convMode);
 
         ITfSource *srcOpenMode = nullptr;
         if (SUCCEEDED(hr)) {
@@ -117,15 +122,15 @@ namespace ukive {
     HRESULT TsfManager::getCompartments(
         ITfCompartmentMgr **cm, ITfCompartment **openMode, ITfCompartment **convMode)
     {
-        HRESULT hr = E_FAIL;
         ITfCompartmentMgr *_cm = nullptr;
         ITfCompartment *_openMode = nullptr;
         ITfCompartment *_convMode = nullptr;
 
-        if (thread_mgr_ == nullptr)
+        if (!thread_mgr_) {
             return E_FAIL;
+        }
 
-        hr = thread_mgr_->QueryInterface(IID_ITfCompartmentMgr, reinterpret_cast<void**>(&_cm));
+        HRESULT hr = thread_mgr_->QueryInterface(IID_ITfCompartmentMgr, reinterpret_cast<void**>(&_cm));
         if (FAILED(hr))
             return hr;
 
@@ -156,7 +161,9 @@ namespace ukive {
             VariantInit(&valConvMode);
 
             HRESULT hr = openMode->GetValue(&valOpenMode);
+            DCHECK(SUCCEEDED(hr));
             hr = convMode->GetValue(&valConvMode);
+            DCHECK(SUCCEEDED(hr));
 
             valOpenMode.vt = VT_I4;
             valConvMode.vt = VT_I4;
@@ -165,7 +172,9 @@ namespace ukive {
             valConvMode.lVal = 0;
 
             hr = openMode->SetValue(client_id_, &valOpenMode);
+            DCHECK(SUCCEEDED(hr));
             hr = convMode->SetValue(client_id_, &valConvMode);
+            DCHECK(SUCCEEDED(hr));
 
             VariantClear(&valOpenMode);
             VariantClear(&valConvMode);
@@ -247,7 +256,6 @@ namespace ukive {
     }
 
     TsfSink::~TsfSink() {}
-
 
     //切换输入法时响应
     STDMETHODIMP TsfSink::OnActivated(

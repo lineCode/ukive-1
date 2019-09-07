@@ -487,9 +487,6 @@
     <ClInclude Include="graphics\swapchain_resize_notifier.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="utils\hresult_utils.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="animation\scroller.h">
       <Filter>animation</Filter>
     </ClInclude>
