@@ -36,10 +36,10 @@ namespace ukive {
         RectF check_bounds(
             bound.left + total_offset,
             bound.top + (bound.height() - length) / 2.f + hp_offset,
-            length, length);
+            float(length), float(length));
 
         canvas->drawRoundRect(
-            check_bounds, stroke_width, win_->dpToPx(1), Color::Blue400);
+            check_bounds, float(stroke_width), win_->dpToPx(1), Color::Blue400);
 
         if (checked_) {
             auto value = static_cast<float>(anim_.getCurValue());

@@ -16,6 +16,7 @@
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_item.h"
 #include "ukive/resources/dimension_utils.h"
+#include "ukive/utils/stl_utils.h"
 
 #include "oigka/layout_constants.h"
 
@@ -303,7 +304,7 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(start - len, Editable::Reason::USER_INPUT);
+                    base_text_->setSelection(STLCU32(start - len), Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_RIGHT) {
@@ -323,7 +324,7 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(end + len, Editable::Reason::USER_INPUT);
+                    base_text_->setSelection(STLCU32(end + len), Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_UP) {

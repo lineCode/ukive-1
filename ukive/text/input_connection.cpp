@@ -6,6 +6,7 @@
 #include "ukive/text/tsf_manager.h"
 #include "ukive/views/text_view.h"
 #include "ukive/window/window.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -231,7 +232,7 @@ namespace ukive {
     }
 
     long InputConnection::getTextLength() {
-        return text_view_->getText().length();
+        return STLCInt(text_view_->getText().length());
     }
 
     bool InputConnection::getTextPositionAtPoint(const POINT* pt, DWORD dwFlags, long* pacp) {
@@ -276,7 +277,7 @@ namespace ukive {
 
             pChange->acpStart = sel_start;
             pChange->acpOldEnd = sel_end;
-            pChange->acpNewEnd = sel_start + (text.length() - (sel_end - sel_start));
+            pChange->acpNewEnd = sel_start + (STLCInt(text.length()) - (sel_end - sel_start));
             break;
         }
 

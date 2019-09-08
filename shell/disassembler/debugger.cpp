@@ -178,7 +178,7 @@ namespace dpr {
         return true;
     }
 
-    bool Debugger::setProcessMemory(uint32_t addr, uint8_t dat) {
+    bool Debugger::setProcessMemory(intptr_t addr, uint8_t dat) {
         SIZE_T write_byte_count = 0;
         BOOL ret = ::WriteProcessMemory(
             debugged_proc_, reinterpret_cast<LPVOID>(addr), &dat, 1, &write_byte_count);
@@ -188,7 +188,7 @@ namespace dpr {
         return true;
     }
 
-    bool Debugger::getProcessMemory(uint32_t addr, uint8_t* dat) {
+    bool Debugger::getProcessMemory(intptr_t addr, uint8_t* dat) {
         SIZE_T read_byte_count = 0;
         BOOL ret = ::ReadProcessMemory(
             debugged_proc_, reinterpret_cast<LPCVOID>(addr), dat, 1, &read_byte_count);
@@ -198,7 +198,7 @@ namespace dpr {
         return true;
     }
 
-    bool Debugger::setBreakpoint(uint32_t addr) {
+    bool Debugger::setBreakpoint(intptr_t addr) {
         for (const auto& bp : breakpoints_) {
             if (bp.addr == addr) {
                 return false;
@@ -221,7 +221,7 @@ namespace dpr {
         return true;
     }
 
-    bool Debugger::clearBreakpoint(uint32_t addr) {
+    bool Debugger::clearBreakpoint(intptr_t addr) {
         auto it = breakpoints_.begin();
         for (; it != breakpoints_.end(); ++it) {
             if (it->addr == addr) {
@@ -241,7 +241,7 @@ namespace dpr {
         return true;
     }
 
-    bool Debugger::hasBreakpoint(uint32_t addr) {
+    bool Debugger::hasBreakpoint(intptr_t addr) {
         for (const auto& bp : breakpoints_) {
             if (bp.addr == addr) {
                 return true;
@@ -267,7 +267,11 @@ namespace dpr {
         if (!getRegisterInfo(tid, &c)) {
             return false;
         }
+#ifdef _WIN64
+        c.Rip -= 1;
+#else
         c.Eip -= 1;
+#endif
         if (!setRegisterInfo(tid, &c)) {
             return false;
         }
@@ -282,7 +286,7 @@ namespace dpr {
             LOG(Log::ERR) << "Cannot parse file: " << image_file_name_;
         }
 
-        image_base_addr_ = reinterpret_cast<uint32_t>(info.lpBaseOfImage);
+        image_base_addr_ = reinterpret_cast<intptr_t>(info.lpBaseOfImage);
         setBreakpoint(pe_file_.getEpVirtualAddr() + image_base_addr_);
     }
 
@@ -295,7 +299,7 @@ namespace dpr {
     }
 
     void Debugger::onException(const EXCEPTION_DEBUG_INFO& info, DWORD pid, DWORD tid) {
-        auto addr = reinterpret_cast<uint32_t>(info.ExceptionRecord.ExceptionAddress);
+        auto addr = reinterpret_cast<intptr_t>(info.ExceptionRecord.ExceptionAddress);
 
         switch (info.ExceptionRecord.ExceptionCode) {
         case EXCEPTION_BREAKPOINT:
@@ -389,7 +393,7 @@ namespace dpr {
         LOG(Log::INFO) << "Debugger::onRIPEvent " << info.dwType << " " << info.dwError;
     }
 
-    void Debugger::onBreakpoint(DWORD tid, uint32_t addr) {
+    void Debugger::onBreakpoint(DWORD tid, intptr_t addr) {
         DebuggerBridge::DebugInfo dbg_info;
         dbg_info.img_base_addr = image_base_addr_;
         dbg_info.bp_addr = addr;
@@ -412,7 +416,7 @@ namespace dpr {
         }
     }
 
-    void Debugger::onSingleStep(DWORD tid, uint32_t addr) {
+    void Debugger::onSingleStep(DWORD tid, intptr_t addr) {
         DebuggerBridge::DebugInfo dbg_info;
         dbg_info.img_base_addr = image_base_addr_;
         dbg_info.bp_addr = addr;

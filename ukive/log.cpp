@@ -8,6 +8,7 @@
 
 #include "ukive/application.h"
 #include "ukive/files/file.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -77,7 +78,7 @@ namespace ukive {
         }
         if (log_params_.target & CONSOLE) {
             if (console_output_handle_ != INVALID_HANDLE_VALUE) {
-                ::WriteConsoleW(console_output_handle_, msg.data(), msg.length(), nullptr, nullptr);
+                ::WriteConsoleW(console_output_handle_, msg.data(), STLCU32(msg.length()), nullptr, nullptr);
             }
         }
         if (log_params_.target & STANDARD) {

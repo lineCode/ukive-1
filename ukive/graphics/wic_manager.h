@@ -66,7 +66,7 @@ namespace ukive {
         ComPtr<IWICBitmap> createBitmap(UINT width, UINT height, BYTE* bgra_buf);
 
         WICBitmaps decodeFile(const string16& file_name);
-        WICBitmaps decodeMemory(const BYTE* buffer, size_t size);
+        WICBitmaps decodeMemory(const BYTE* buffer, DWORD size);
 
         bool saveToPngFile(UINT width, UINT height, BYTE* bgra_buf, const string16& name);
 

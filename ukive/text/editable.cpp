@@ -65,17 +65,17 @@ namespace ukive {
     }
 
     uint32_t Editable::length() const {
-        return text_.length();
+        return STLCU32(text_.length());
     }
 
     void Editable::append(const string16& text, Reason r) {
-        insert(text, text_.length(), r);
+        insert(text, STLCU32(text_.length()), r);
     }
 
     void Editable::insert(const string16& text, uint32_t position, Reason r) {
         if (!text.empty()) {
             text_.insert(position, text);
-            notifyTextChanged(position, position, position + text.length(), r);
+            notifyTextChanged(position, position, position + STLCU32(text.length()), r);
         }
     }
 
@@ -87,14 +87,14 @@ namespace ukive {
 
     void Editable::replace(const string16& text, uint32_t start, uint32_t length, Reason r) {
         text_.replace(start, length, text);
-        notifyTextChanged(start, start + 1, start + text.length() - length + 1, r);
+        notifyTextChanged(start, start + 1, start + STLCU32(text.length()) - length + 1, r);
     }
 
     void Editable::clear(Reason r) {
         if (!text_.empty()) {
             auto old_start = sel_beg_;
             auto old_end = sel_end_;
-            auto old_length = text_.length();
+            auto old_length = STLCInt(text_.length());
 
             text_.clear();
 
@@ -116,7 +116,8 @@ namespace ukive {
         auto first = text_.find(find);
         if (first != string16::npos) {
             text_.replace(first, find.length(), replacement);
-            notifyTextChanged(first, first + 1, first + replacement.length() - find.length() + 1, r);
+            notifyTextChanged(
+                STLCU32(first), STLCU32(first + 1), STLCU32(first + replacement.length() - find.length() + 1), r);
         }
     }
 
@@ -139,11 +140,11 @@ namespace ukive {
             } else {
                 text_.insert(old_end, text);
             }
-            sel_beg_ += text.length();
-            sel_end_ += text.length();
+            sel_beg_ += STLCU32(text.length());
+            sel_end_ += STLCU32(text.length());
 
             notifyEditWatcher(
-                old_start, old_start, old_start + text.length(),
+                old_start, old_start, old_start + STLCU32(text.length()),
                 sel_beg_, sel_end_, old_start, old_end, r);
         }
     }
@@ -160,10 +161,10 @@ namespace ukive {
 
         if (has_selection) {
             text_.replace(old_start, old_end - old_start, text);
-            sel_beg_ = sel_end_ = old_start + text.length();
+            sel_beg_ = sel_end_ = old_start + STLCU32(text.length());
 
             notifyEditWatcher(
-                old_start, old_start + 1, old_start + text.length() - (old_end - old_start) + 1,
+                old_start, old_start + 1, old_start + STLCU32(text.length()) - (old_end - old_start) + 1,
                 sel_beg_, sel_end_, old_start, old_end, r);
         }
     }
@@ -187,10 +188,10 @@ namespace ukive {
 
     void Editable::setSelectionForceNotify(uint32_t start, uint32_t end, Reason r) {
         if (start < 0) start = 0;
-        if (start > text_.length()) start = text_.length();
+        if (start > text_.length()) start = STLCU32(text_.length());
 
         if (end < 0) end = 0;
-        if (end > text_.length()) end = text_.length();
+        if (end > text_.length()) end = STLCU32(text_.length());
 
         if (start > end) {
             auto tmp = start;

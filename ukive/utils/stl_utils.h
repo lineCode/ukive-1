@@ -28,6 +28,12 @@ namespace ukive {
         return static_cast<int>(count);
     }
 
+    template <typename R>
+    int STLCU32(R count) {
+        DCHECK(static_cast<R>((std::numeric_limits<uint32_t>::max)()) >= count);
+        return static_cast<uint32_t>(count);
+    }
+
 }
 
 #endif  // UKIVE_UTILS_STL_UTILS_H_

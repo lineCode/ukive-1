@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include "ukive/application.h"
-#include "ukive/graphics/bitmap_factory.h"
 #include "ukive/text/text_renderer.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/renderer.h"
@@ -11,6 +10,7 @@
 #include "ukive/graphics/point.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/log.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -498,7 +498,7 @@ namespace ukive {
 
         solid_brush_->SetColor(d2d_color);
         render_target_->DrawTextW(
-            text.c_str(), text.length(), textFormat, d2d_layout_rect, solid_brush_.get());
+            text.c_str(), STLCU32(text.length()), textFormat, d2d_layout_rect, solid_brush_.get());
     }
 
     void Canvas::drawTextLayout(

@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "ukive/utils/stl_utils.h"
+
 
 static const uint8_t SBox[16][16] = {
      // 0     1     2     3     4     5     6     7     8     9     a     b     c     d     e     f
@@ -60,7 +62,7 @@ namespace crypto {
     }
 
     void AES::encrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key) {
-        uint32_t Nr = getNr(key.length() / 4, Nb);
+        uint32_t Nr = getNr(STLCU32(key.length()) / 4, Nb);
 
         std::vector<uint32_t> key_exp;
         key_exp.resize(Nb * (Nr + 1));
@@ -71,7 +73,7 @@ namespace crypto {
     }
 
     void AES::decrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key) {
-        uint32_t Nr = getNr(key.length() / 4, Nb);
+        uint32_t Nr = getNr(STLCU32(key.length()) / 4, Nb);
 
         std::vector<uint32_t> key_exp;
         key_exp.resize(Nb * (Nr + 1));
@@ -273,7 +275,7 @@ namespace crypto {
     }
 
     void AES::keyExpansion(const stringu8& key, std::vector<uint32_t>* out) {
-        uint32_t Nk = key.length() / 4;
+        uint32_t Nk = STLCU32(key.length()) / 4;
         uint32_t Nr = getNr(Nk, Nb);
 
         uint32_t i = 0;

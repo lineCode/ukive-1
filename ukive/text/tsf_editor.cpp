@@ -6,6 +6,7 @@
 
 #include "ukive/log.h"
 #include "ukive/text/input_connection.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -280,10 +281,10 @@ namespace ukive {
         } else {
             std::wstring reqText = input_conn_->getText(acpStart, acpEnd, cchPlainReq);
             reqText._Copy_s(pchPlain, cchPlainReq, reqText.length());
-            *pcchPlainRet = reqText.length();
+            *pcchPlainRet = STLCU32(reqText.length());
 
             if (acpEnd == -1) {
-                *pacpNext = reqText.length();
+                *pacpNext = STLCInt(reqText.length());
             } else {
                 *pacpNext = acpEnd;
             }
@@ -336,7 +337,7 @@ namespace ukive {
 
         pChange->acpStart = acpStart;
         pChange->acpOldEnd = acpEnd;
-        pChange->acpNewEnd = acpEnd + newText.length() - (acpEnd - acpStart);
+        pChange->acpNewEnd = acpEnd + STLCInt(newText.length()) - (acpEnd - acpStart);
 
         DLOG(Log::INFO) << "SetText(" << dwFlags << ", "
             << newText << ", "

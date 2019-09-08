@@ -67,7 +67,7 @@ namespace ukive {
         return ProcessDecoder(decoder);
     }
 
-    WICBitmaps WICManager::decodeMemory(const BYTE* buffer, size_t size) {
+    WICBitmaps WICManager::decodeMemory(const BYTE* buffer, DWORD size) {
         if (!wic_factory_) {
             return {};
         }

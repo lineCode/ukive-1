@@ -19,10 +19,10 @@ namespace dpr {
     public:
         struct DebugInfo {
             // Virtual Address
-            uint32_t img_base_addr;
-            uint32_t bp_addr;
+            intptr_t img_base_addr;
+            intptr_t bp_addr;
 
-            uint32_t sec_base_addr;
+            intptr_t sec_base_addr;
             uint32_t sec_size;
 
             DWORD tid;
@@ -52,7 +52,7 @@ namespace dpr {
 
     private:
         struct Breakpoint {
-            uint32_t addr;
+            intptr_t addr;
             uint8_t opcode;
         };
 
@@ -64,11 +64,11 @@ namespace dpr {
         void run(const string16& name);
         bool setRegisterInfo(DWORD tid, const CONTEXT* c);
         bool getRegisterInfo(DWORD tid, CONTEXT* c);
-        bool setProcessMemory(uint32_t addr, uint8_t dat);
-        bool getProcessMemory(uint32_t addr, uint8_t* dat);
-        bool setBreakpoint(uint32_t addr);
-        bool clearBreakpoint(uint32_t addr);
-        bool hasBreakpoint(uint32_t addr);
+        bool setProcessMemory(intptr_t addr, uint8_t dat);
+        bool getProcessMemory(intptr_t addr, uint8_t* dat);
+        bool setBreakpoint(intptr_t addr);
+        bool clearBreakpoint(intptr_t addr);
+        bool hasBreakpoint(intptr_t addr);
 
         bool setTFFlag(DWORD tid);
         bool backwardEIP(DWORD tid);
@@ -83,14 +83,14 @@ namespace dpr {
         void onOutputDebugString(const OUTPUT_DEBUG_STRING_INFO& info);
         void onRIPEvent(const RIP_INFO& info);
 
-        void onBreakpoint(DWORD tid, uint32_t addr);
-        void onSingleStep(DWORD tid, uint32_t addr);
+        void onBreakpoint(DWORD tid, intptr_t addr);
+        void onSingleStep(DWORD tid, intptr_t addr);
 
         HANDLE debugged_proc_;
         DWORD continue_status_;
         bool is_first_breakpoint_;
         string16 image_file_name_;
-        uint32_t image_base_addr_;
+        intptr_t image_base_addr_;
 
         PEFile pe_file_;
         ukive::Cycler cycler_;

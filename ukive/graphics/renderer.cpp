@@ -4,6 +4,7 @@
 #include "ukive/graphics/swapchain_resize_notifier.h"
 #include "ukive/log.h"
 #include "ukive/window/window.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -425,7 +426,7 @@ namespace ukive {
 
         ComPtr<IDWriteTextLayout> layout;
         HRESULT hr = dwrite_factory->CreateTextLayout(
-            text.c_str(), text.length(), format, max_width, max_height, &layout);
+            text.c_str(), STLCU32(text.length()), format, max_width, max_height, &layout);
         if (FAILED(hr)) {
             LOG(Log::WARNING) << "Failed to create text layout: " << hr;
             return {};
