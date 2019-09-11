@@ -11,6 +11,13 @@ namespace ukive {
     class InputEvent;
     class Drawable;
 
+    class OnInnerWindowEventListener {
+    public:
+        virtual ~OnInnerWindowEventListener() = default;
+
+        virtual void onRequestDismissByTouchOutside() = 0;
+    };
+
     class InnerWindow {
     public:
         class InnerDecorView : public FrameLayout {
@@ -36,6 +43,7 @@ namespace ukive {
         void setOutsideTouchable(bool touchable);
         void setDismissByTouchOutside(bool enable);
         void setContentView(View* contentView);
+        void setEventListener(OnInnerWindowEventListener* l);
 
         int getWidth();
         int getHeight();
@@ -68,6 +76,7 @@ namespace ukive {
         Window* parent_;
         View* content_view_;
         InnerDecorView* decor_view_;
+        OnInnerWindowEventListener* listener_ = nullptr;
         bool is_showing_;
     };
 

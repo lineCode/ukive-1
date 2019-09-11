@@ -3,8 +3,6 @@
 #include <functional>
 #include <fstream>
 
-#include <dwmapi.h>
-
 #include "ukive/application.h"
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
@@ -26,6 +24,7 @@
 #include "ukive/utils/weak_bind.h"
 #include "ukive/views/list/grid_list_layouter.h"
 #include "ukive/views/list/linear_list_layouter.h"
+#include "ukive/views/spinner_view/spinner_view.h"
 #include "ukive/utils/xml/xml_parser.h"
 #include "ukive/utils/xml/xml_writer.h"
 #include "ukive/files/file.h"
@@ -49,10 +48,7 @@
 namespace shell {
 
     TestWindow::TestWindow()
-        : Window(),
-          dwm_button_(nullptr),
-          image_view_(nullptr),
-          check_box_(nullptr) {}
+        : Window() {}
 
     TestWindow::~TestWindow() {
     }
@@ -147,6 +143,11 @@ namespace shell {
 
         check_box_ = static_cast<ukive::CheckBox*>(findViewById(Res::Id::cb_anim_test));
         check_box_->setChecked(true);
+
+        spinner_view_ = static_cast<ukive::SpinnerView*>(findViewById(Res::Id::sv_test));
+        spinner_view_->addItem(L"Test01");
+        spinner_view_->addItem(L"Test02");
+        spinner_view_->addItem(L"Test03");
 
         auto textView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_test_txt));
         textView->setText(L"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii这是一个示例程序，\n\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。");

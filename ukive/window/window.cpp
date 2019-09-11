@@ -797,6 +797,7 @@ namespace ukive {
         }
 
         if (e->isKeyboardEvent()) {
+            // debug view
             if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
                 bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
                 bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);

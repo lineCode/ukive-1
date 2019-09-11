@@ -24,6 +24,12 @@
             text="测试用"
             layout_margin="12dp" />
 
+        <SpinnerView
+            id="@+id/sv_test"
+            layout_width="fit_content"
+            layout_height="fit_content"
+            layout_margin="12dp" />
+
         <TextView
             id="@+id/tv_test_txt"
             layout_width="match_parent"

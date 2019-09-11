@@ -208,6 +208,15 @@ namespace ukive {
         return target;
     }
 
+    ListAdapter::ViewHolder* Column::findHolderFromView(View* v) const {
+        for (const auto& holder : holders_) {
+            if (holder->item_view == v) {
+                return holder;
+            }
+        }
+        return nullptr;
+    }
+
     bool Column::isTopFilled(int dy) const {
         if (!holders_.empty()) {
             if (holders_.front()->getMgdTop() + dy <= top_) {
@@ -350,6 +359,16 @@ namespace ukive {
             }
         }
         return result;
+    }
+
+    ListAdapter::ViewHolder* ColumnCollection::findHolderFromView(View* v) const {
+        for (const auto& c : columns_) {
+            auto holder = c.findHolderFromView(v);
+            if (holder) {
+                return holder;
+            }
+        }
+        return nullptr;
     }
 
     bool ColumnCollection::isTopFilled(int dy) const {

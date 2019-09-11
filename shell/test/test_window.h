@@ -10,6 +10,7 @@ namespace ukive {
     class Button;
     class ImageView;
     class CheckBox;
+    class SpinnerView;
 }
 
 namespace shell {
@@ -34,9 +35,10 @@ namespace shell {
 
         ukive::Animator animator_;
 
-        ukive::Button* dwm_button_;
-        ukive::ImageView* image_view_;
-        ukive::CheckBox* check_box_;
+        ukive::Button* dwm_button_ = nullptr;
+        ukive::ImageView* image_view_ = nullptr;
+        ukive::CheckBox* check_box_ = nullptr;
+        ukive::SpinnerView* spinner_view_ = nullptr;
     };
 
 }

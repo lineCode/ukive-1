@@ -91,6 +91,7 @@ namespace ukive {
         void setIsInputEventAtLast(bool is_last);
         void setPressed(bool pressed);
         void setCurrentCursor(Cursor cursor);
+        void setClickable(bool clickable);
         void setFocusable(bool focusable);
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
@@ -144,6 +145,8 @@ namespace ukive {
         Window* getWindow() const;
         Drawable* getBackground() const;
         Drawable* getForeground() const;
+        Drawable* getReleasedBackground();
+        Drawable* getReleasedForeground();
 
         // bounds relative to parent.
         Rect getBounds() const;
@@ -162,6 +165,7 @@ namespace ukive {
         bool isInputEventAtLast() const;
         bool isPressed() const;
         bool hasFocus() const;
+        bool isClickable() const;
         bool isFocusable() const;
         bool isLayouted() const;
         bool isLocalPointerInThis(InputEvent* e) const;
@@ -289,6 +293,7 @@ namespace ukive {
         bool is_attached_to_window_;
         bool is_input_event_at_last_;
         bool is_pressed_;
+        bool is_clickable_ = false;
         bool is_focusable_;
         bool is_receive_outside_input_event_;
         bool is_mouse_down_;

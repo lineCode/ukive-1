@@ -83,6 +83,7 @@ namespace ukive {
 
     private:
         std::vector<View*> views_;
+        bool is_intercepted_ = false;
     };
 
 }

@@ -295,7 +295,20 @@ namespace ukive {
 
         e->offsetInputPos(-getLeft() + getScrollX(), -getTop() + getScrollY());
 
-        if (onInterceptInputEvent(e)) {
+        if (is_intercepted_ || onInterceptInputEvent(e)) {
+            if (e->getEvent() == InputEvent::EVM_DOWN ||
+                e->getEvent() == InputEvent::EVT_DOWN)
+            {
+                is_intercepted_ = true;
+            }
+
+            if (e->isNoActiveEvent() ||
+                e->getEvent() == InputEvent::EVM_UP ||
+                e->getEvent() == InputEvent::EVT_UP)
+            {
+                is_intercepted_ = false;
+            }
+
             intercepted = true;
             consumed = dispatchInputEventToThis(e);
             if (e->getEvent() == InputEvent::EVT_DOWN) {
@@ -372,6 +385,17 @@ namespace ukive {
         } else if (e->isKeyboardEvent()) {
             consumed = dispatchKeyboardEvent(e);
         } else {
+            // ViewGroup 拦截事件后如果获得了鼠标焦点，则
+            // 鼠标事件将走到这里而不是 dispatchPointerEvent()，
+            // 所以需要在这里进行拦截变量的重置
+            if (is_intercepted_ &&
+                (e->isNoActiveEvent() ||
+                e->getEvent() == InputEvent::EVM_UP ||
+                e->getEvent() == InputEvent::EVT_UP))
+            {
+                is_intercepted_ = false;
+            }
+
             consumed = View::dispatchInputEvent(e);
         }
 

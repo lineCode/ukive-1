@@ -316,4 +316,8 @@ namespace ukive {
         return { prev_total_height, next_total_height };
     }
 
+    ListAdapter::ViewHolder* LinearListLayouter::findViewHolderFromView(View* v) {
+        return column_.findHolderFromView(v);
+    }
+
 }

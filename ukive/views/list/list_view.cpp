@@ -41,6 +41,26 @@ namespace ukive {
         }
     }
 
+    bool ListView::onInterceptInputEvent(InputEvent* e) {
+        switch (e->getEvent()) {
+        case InputEvent::EVM_DOWN:
+            if (scroll_bar_->onMousePressed({ e->getX(), e->getY() })) {
+                return true;
+            }
+            break;
+
+        case InputEvent::EVM_MOVE:
+            if (scroll_bar_->isInScrollBar({ e->getX(), e->getY() })) {
+                return true;
+            }
+            break;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
     bool ListView::onInputEvent(InputEvent* e) {
         bool result = false;
 
@@ -54,6 +74,7 @@ namespace ukive {
             offsetChildViewTopAndBottom(resDy);
             recordCurPositionAndOffset();
             updateOverlayScrollBar();
+            result = true;
             break;
         }
 
@@ -89,6 +110,15 @@ namespace ukive {
     void ListView::onDrawOverChildren(Canvas* canvas) {
         ViewGroup::onDrawOverChildren(canvas);
         scroll_bar_->onDraw(canvas);
+    }
+
+    void ListView::onClick(View* v) {
+        if (selected_listener_) {
+            auto holder = layouter_->findViewHolderFromView(v);
+            if (holder) {
+                selected_listener_->onItemSelected(holder);
+            }
+        }
     }
 
     void ListView::setAdapter(ListAdapter* adapter) {
@@ -128,6 +158,10 @@ namespace ukive {
         }
     }
 
+    void ListView::setItemSelectedListener(ListItemSelectedListener* l) {
+        selected_listener_ = l;
+    }
+
     void ListView::setChildRecycledListener(ListItemRecycledListener* l) {
         recycled_listener_ = l;
     }
@@ -161,6 +195,7 @@ namespace ukive {
         new_holder->item_id = item_id;
         new_holder->adapter_position = adapter_pos;
         adapter_->onBindViewHolder(new_holder, adapter_pos);
+        new_holder->item_view->setOnClickListener(this);
         return new_holder;
     }
 

@@ -26,7 +26,7 @@ namespace ukive {
         float hp_offset = 0.f;
         float total_offset = 0.f;
         int length = int(std::ceil(win_->dpToPx(16)));
-        int stroke_width = int(win_->dpToPx(2.5f));
+        int stroke_width = int(win_->dpToPx(2.f));
         if (stroke_width % 2) {
             hp_offset = 0.5f;
         }
@@ -52,8 +52,12 @@ namespace ukive {
             auto vec1 = line1e - line1s;
             auto vec2 = line2e - line2s;
 
-            canvas->drawLine(line1s, line1s + vec1 * (std::min(value, 0.5f) * 2), std::floor(win_->dpToPx(3)), Color::Blue800);
-            canvas->drawLine(line2s, line2s + vec2 * (std::max(value - 0.5f, 0.f) * 2), std::floor(win_->dpToPx(3)), Color::Blue800);
+            canvas->drawLine(
+                line1s, line1s + vec1 * (std::min(value, 0.5f) * 2),
+                std::floor(win_->dpToPx(2.5f)), Color::Blue800);
+            canvas->drawLine(
+                line2s, line2s + vec2 * (std::max(value - 0.5f, 0.f) * 2),
+                std::floor(win_->dpToPx(2.5f)), Color::Blue800);
         }
 
         if (anim_.isRunning()) {

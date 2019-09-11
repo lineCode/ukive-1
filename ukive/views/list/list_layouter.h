@@ -30,6 +30,7 @@ namespace ukive {
 
         virtual void recordCurPositionAndOffset(ListView* parent) = 0;
         virtual std::pair<int, int> computeTotalHeight(ListView* parent, ListAdapter* adapter) = 0;
+        virtual ListAdapter::ViewHolder* findViewHolderFromView(View* v) = 0;
     };
 
 }

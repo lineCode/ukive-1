@@ -44,6 +44,13 @@ namespace ukive {
         tint_color_ = tint;
     }
 
+    void RippleDrawable::setDrawMaskEnabled(bool enabled) {
+        if (is_draw_mask_ != enabled) {
+            is_draw_mask_ = enabled;
+            invalidate();
+        }
+    }
+
     void RippleDrawable::draw(Canvas *canvas) {
         hover_animator_.update();
         leave_animator_.update();
@@ -68,16 +75,20 @@ namespace ukive {
             }
 
             if (ripple_animator_.isRunning()) {
-                Color rippleColor = Color::ofRGB(0, (1 - ripple_animator_.getCurValue())*0.1f);
+                auto w = bound.width();
+                auto h = bound.height();
+                auto r = std::sqrt(w * w + h * h);
+
+                Color ripple_color = Color::ofRGB(0, (1 - ripple_animator_.getCurValue()) * 0.1f);
                 content_off_->fillCircle(
                     start_x_, start_y_,
-                    ripple_animator_.getCurValue() * 100, rippleColor);
+                    ripple_animator_.getCurValue() * r, ripple_color);
             }
             content_off_->endDraw();
-            auto contentBitmap = content_off_->extractBitmap();
+            auto content_bmp = content_off_->extractBitmap();
 
             if (drawable_list_.empty()) {
-                canvas->drawBitmap(contentBitmap.get());
+                canvas->drawBitmap(content_bmp.get());
             } else {
                 // 绘制 mask，以该 mask 确定背景形状以及 ripple 的扩散边界。
                 mask_off_->beginDraw();
@@ -85,15 +96,19 @@ namespace ukive {
                 mask_off_->setOpacity(canvas->getOpacity());
                 LayerDrawable::draw(mask_off_.get());
                 mask_off_->endDraw();
-                auto maskBitmap = mask_off_->extractBitmap();
+                auto mask_bmp = mask_off_->extractBitmap();
 
-                canvas->drawBitmap(maskBitmap.get());
+                if (is_draw_mask_) {
+                    canvas->drawBitmap(mask_bmp.get());
+                }
                 canvas->fillOpacityMask(
                     bound.width(), bound.height(),
-                    maskBitmap.get(), contentBitmap.get());
+                    mask_bmp.get(), content_bmp.get());
             }
         } else {
-            LayerDrawable::draw(canvas);
+            if (is_draw_mask_) {
+                LayerDrawable::draw(canvas);
+            }
         }
 
         if (hover_animator_.isRunning() ||

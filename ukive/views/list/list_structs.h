@@ -39,6 +39,7 @@ namespace ukive {
         ListAdapter::ViewHolder* getLastVisible() const;
         ListAdapter::ViewHolder* getHolderByPos(int adapter_pos) const;
         ListAdapter::ViewHolder* findAndInsertHolder(int start_index, int item_id);
+        ListAdapter::ViewHolder* findHolderFromView(View* v) const;
 
         bool isTopFilled(int dy) const;
         bool isBottomFilled(int dy) const;
@@ -66,6 +67,7 @@ namespace ukive {
         ListAdapter::ViewHolder* getHolderByPos(int adapter_pos) const;
         ListAdapter::ViewHolder* getTopmost() const;
         ListAdapter::ViewHolder* getBottomost() const;
+        ListAdapter::ViewHolder* findHolderFromView(View* v) const;
 
         bool isTopFilled(int dy) const;
         bool isBottomFilled(int dy) const;

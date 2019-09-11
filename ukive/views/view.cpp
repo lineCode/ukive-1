@@ -271,7 +271,11 @@ namespace ukive {
 
     void View::setIsInputEventAtLast(bool is_last) {
         is_input_event_at_last_ = is_last;
-        window_->setLastInputView(is_last ? this : nullptr);
+        if (is_last) {
+            window_->setLastInputView(this);
+        } else if (!is_last && window_->getLastInputView() == this) {
+            window_->setLastInputView(nullptr);
+        }
     }
 
     void View::setPressed(bool pressed) {
@@ -286,6 +290,10 @@ namespace ukive {
 
     void View::setCurrentCursor(Cursor cursor) {
         window_->setCurrentCursor(cursor);
+    }
+
+    void View::setClickable(bool clickable) {
+        is_clickable_ = clickable;
     }
 
     void View::setFocusable(bool focusable) {
@@ -501,6 +509,14 @@ namespace ukive {
         return fg_drawable_.get();
     }
 
+    Drawable* View::getReleasedBackground() {
+        return bg_drawable_.release();
+    }
+
+    Drawable* View::getReleasedForeground() {
+        return fg_drawable_.release();
+    }
+
     Rect View::getBounds() const {
         return bounds_;
     }
@@ -561,6 +577,10 @@ namespace ukive {
 
     bool View::hasFocus() const {
         return has_focus_;
+    }
+
+    bool View::isClickable() const {
+        return is_clickable_;
     }
 
     bool View::isFocusable() const {
@@ -980,7 +1000,7 @@ namespace ukive {
             if (should_refresh) {
                 invalidate();
             }
-            return consumed;
+            return true;
 
         case InputEvent::EV_LEAVE_VIEW:
             if (e->isMouseEvent()) {
@@ -1072,7 +1092,7 @@ namespace ukive {
         }
 
         case InputEvent::EV_CANCEL:
-            if (e->isMouseEvent()) {
+            if (e->isMouseEvent() && is_mouse_down_) {
                 window_->releaseMouse();
                 is_mouse_down_ = false;
             }
@@ -1264,7 +1284,7 @@ namespace ukive {
     }
 
     bool View::onInputEvent(InputEvent* e) {
-        return false;
+        return is_clickable_;
     }
 
     void View::onMeasure(int width, int height, int width_mode, int height_mode) {

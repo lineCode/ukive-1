@@ -168,9 +168,6 @@
     <ClCompile Include="views\seek_bar.cpp">
       <Filter>views</Filter>
     </ClCompile>
-    <ClCompile Include="views\spinner_view.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="views\switch_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
@@ -399,6 +396,12 @@
     <ClCompile Include="utils\big_integer\int_array.cpp">
       <Filter>utils\big_integer</Filter>
     </ClCompile>
+    <ClCompile Include="views\spinner_view\spinner_view.cpp">
+      <Filter>views\spinner_view</Filter>
+    </ClCompile>
+    <ClCompile Include="views\spinner_view\spinner_list_adapter.cpp">
+      <Filter>views\spinner_view</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -602,9 +605,6 @@
       <Filter>views</Filter>
     </ClInclude>
     <ClInclude Include="views\seek_value_changed_listener.h">
-      <Filter>views</Filter>
-    </ClInclude>
-    <ClInclude Include="views\spinner_view.h">
       <Filter>views</Filter>
     </ClInclude>
     <ClInclude Include="views\switch_view.h">
@@ -826,6 +826,12 @@
     <ClInclude Include="utils\big_integer\int_array.h">
       <Filter>utils\big_integer</Filter>
     </ClInclude>
+    <ClInclude Include="views\spinner_view\spinner_view.h">
+      <Filter>views\spinner_view</Filter>
+    </ClInclude>
+    <ClInclude Include="views\spinner_view\spinner_list_adapter.h">
+      <Filter>views\spinner_view</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -911,6 +917,9 @@
     </Filter>
     <Filter Include="utils\big_integer">
       <UniqueIdentifier>{c8eb10ae-79fa-40b4-b963-aa0c12d18fdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views\spinner_view">
+      <UniqueIdentifier>{8857160c-cdd7-460a-be7a-661d14015527}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

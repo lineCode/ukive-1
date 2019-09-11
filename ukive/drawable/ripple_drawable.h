@@ -19,6 +19,7 @@ namespace ukive {
         ~RippleDrawable();
 
         void setTintColor(Color tint);
+        void setDrawMaskEnabled(bool enabled);
 
         void draw(Canvas* canvas) override;
 
@@ -34,6 +35,7 @@ namespace ukive {
     private:
         double alpha_;
         Color tint_color_;
+        bool is_draw_mask_ = true;
 
         Animator up_animator_;
         Animator down_animator_;

@@ -256,6 +256,10 @@ namespace ukive {
         return { prev_total_height, next_total_height };
     }
 
+    ListAdapter::ViewHolder* GridListLayouter::findViewHolderFromView(View* v) {
+        return columns_.findHolderFromView(v);
+    }
+
     void GridListLayouter::recordCurPositionAndOffset(ListView* parent) {
         auto holder = columns_[0].getFirstVisible();
         if (holder) {

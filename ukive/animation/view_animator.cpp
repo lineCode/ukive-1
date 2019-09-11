@@ -96,13 +96,13 @@ namespace ukive {
     {
         director_.addAnimator(VIEW_ANIM_RECT_REVEAL_R_X);
         director_.setInitValue(VIEW_ANIM_RECT_REVEAL_R_X, start_hori_radius);
-        director_.setDuration(VIEW_ANIM_RECT_REVEAL_R_X, 100);
+        director_.setDuration(VIEW_ANIM_RECT_REVEAL_R_X, duration_);
         director_.setInterpolator(VIEW_ANIM_RECT_REVEAL_R_X, new LinearInterpolator(end_hori_radius));
 
         director_.addAnimator(VIEW_ANIM_RECT_REVEAL_R_Y);
         director_.addAnimator(VIEW_ANIM_RECT_REVEAL_R_Y);
         director_.setInitValue(VIEW_ANIM_RECT_REVEAL_R_Y, start_vert_radius);
-        director_.setDuration(VIEW_ANIM_RECT_REVEAL_R_Y, 200);
+        director_.setDuration(VIEW_ANIM_RECT_REVEAL_R_Y, duration_);
         director_.setInterpolator(VIEW_ANIM_RECT_REVEAL_R_Y, new LinearInterpolator(end_vert_radius));
 
         owner_view_->setHasReveal(true);
@@ -120,7 +120,7 @@ namespace ukive {
     {
         director_.addAnimator(VIEW_ANIM_CIRCLE_REVEAL_R);
         director_.setInitValue(VIEW_ANIM_CIRCLE_REVEAL_R, start_radius);
-        director_.setDuration(VIEW_ANIM_CIRCLE_REVEAL_R, 150);
+        director_.setDuration(VIEW_ANIM_CIRCLE_REVEAL_R, duration_);
         director_.setInterpolator(VIEW_ANIM_CIRCLE_REVEAL_R, new LinearInterpolator(end_radius));
 
         owner_view_->setHasReveal(true);

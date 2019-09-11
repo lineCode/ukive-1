@@ -192,7 +192,6 @@ namespace ukive {
         dispatchInputEvent(&e);
     }
 
-
     bool ScrollView::onInputEvent(InputEvent* e) {
         bool consumed = ViewGroup::onInputEvent(e);
 

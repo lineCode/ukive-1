@@ -30,6 +30,8 @@ namespace ukive {
         bool onMousePressed(const Point& p);
         bool onMouseDragged(const Point& p);
 
+        bool isInScrollBar(const Point& p) const;
+
     private:
         void moveScroller(int distance_y);
 

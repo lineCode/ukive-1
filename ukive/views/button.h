@@ -25,6 +25,24 @@ namespace ukive {
         RippleDrawable* ripple_background_;
     };
 
+
+    class DropdownButton : public View {
+    public:
+        explicit DropdownButton(Window* w);
+
+        void onMeasure(int width, int height, int width_mode, int height_mode) override;
+        void onDraw(Canvas* canvas) override;
+        bool onInputEvent(InputEvent* e) override;
+
+    private:
+        void initButton();
+
+        int tri_length_ = 0;
+        int tri_height_ = 0;
+        int button_size_ = 0;
+        ComPtr<ID2D1PathGeometry> tri_geo_;
+    };
+
 }
 
 #endif  // UKIVE_VIEWS_BUTTON_H_

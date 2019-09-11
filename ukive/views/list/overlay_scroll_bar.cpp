@@ -111,6 +111,10 @@ namespace ukive {
         return true;
     }
 
+    bool OverlayScrollBar::isInScrollBar(const Point& p) const {
+        return scrollbar_bounds_.hit(p);
+    }
+
     void OverlayScrollBar::moveScroller(int distance_y) {
         int view_height = view_bounds_.height();
 

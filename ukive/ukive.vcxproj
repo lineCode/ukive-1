@@ -309,7 +309,8 @@
     <ClInclude Include="views\scroll_view.h" />
     <ClInclude Include="views\seek_bar.h" />
     <ClInclude Include="views\seek_value_changed_listener.h" />
-    <ClInclude Include="views\spinner_view.h" />
+    <ClInclude Include="views\spinner_view\spinner_list_adapter.h" />
+    <ClInclude Include="views\spinner_view\spinner_view.h" />
     <ClInclude Include="views\switch_view.h" />
     <ClInclude Include="views\text_view.h" />
     <ClInclude Include="views\title_bar\title_bar.h" />
@@ -447,7 +448,8 @@
     <ClCompile Include="views\list\view_holder_recycler.cpp" />
     <ClCompile Include="views\scroll_view.cpp" />
     <ClCompile Include="views\seek_bar.cpp" />
-    <ClCompile Include="views\spinner_view.cpp" />
+    <ClCompile Include="views\spinner_view\spinner_list_adapter.cpp" />
+    <ClCompile Include="views\spinner_view\spinner_view.cpp" />
     <ClCompile Include="views\switch_view.cpp" />
     <ClCompile Include="views\text_view.cpp" />
     <ClCompile Include="views\title_bar\title_bar.cpp" />
