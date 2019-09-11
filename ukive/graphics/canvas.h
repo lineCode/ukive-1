@@ -92,6 +92,7 @@ namespace ukive {
         void drawOval(float cx, float cy, float rx, float ry, float stroke_width, const Color& color);
         void fillOval(float cx, float cy, float rx, float ry, const Color& color);
 
+        void fillGeometry(ID2D1Geometry* geo, const Color& color);
         void fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush);
 
         void drawBitmap(Bitmap* bitmap);

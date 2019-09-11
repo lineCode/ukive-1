@@ -246,7 +246,7 @@ namespace ukive {
 
         class ClickPerformer : public Executable {
         public:
-            ClickPerformer(View* v)
+            explicit ClickPerformer(View* v)
                 :view_(v) {}
             void run() override {
                 view_->performClick();

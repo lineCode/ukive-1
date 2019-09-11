@@ -419,6 +419,12 @@ namespace ukive {
             D2D1::Ellipse(D2D1::Point2F(cx, cy), rx, ry), solid_brush_.get());
     }
 
+    void Canvas::fillGeometry(ID2D1Geometry* geo, const Color& color) {
+        D2D1_COLOR_F _color{
+            color.r, color.g, color.b, color.a, };
+        solid_brush_->SetColor(_color);
+        render_target_->FillGeometry(geo, solid_brush_.get());
+    }
 
     void Canvas::fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush) {
         render_target_->FillGeometry(geo, brush);

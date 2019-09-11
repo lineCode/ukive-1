@@ -1049,11 +1049,13 @@ namespace ukive {
 
             if (fg_drawable_) {
                 fg_drawable_->setHotspot(e->getX(), e->getY());
-                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh |= fg_drawable_->setState(Drawable::STATE_NONE);
             }
             if (bg_drawable_) {
                 bg_drawable_->setHotspot(e->getX(), e->getY());
-                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh |= bg_drawable_->setState(Drawable::STATE_NONE);
             }
 
             if (isLocalPointerInThis(e)) {
