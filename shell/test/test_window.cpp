@@ -148,30 +148,30 @@ namespace shell {
         deviceDesc.append(L"Device: ").append(adapterDesc.Description)
             .append(L"\n").append(L"Monitor: ").append(outputDesc.DeviceName);
 
-        auto deviceTextView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_dev_text_params));
+        auto deviceTextView = findViewById<ukive::TextView>(Res::Id::tv_dev_text_params);
         deviceTextView->setText(deviceDesc);
 
-        check_box_ = static_cast<ukive::CheckBox*>(findViewById(Res::Id::cb_anim_test));
+        check_box_ = findViewById<ukive::CheckBox>(Res::Id::cb_anim_test);
         check_box_->setChecked(true);
 
-        spinner_view_ = static_cast<ukive::SpinnerView*>(findViewById(Res::Id::sv_test));
+        spinner_view_ = findViewById<ukive::SpinnerView>(Res::Id::sv_test);
         spinner_view_->addItem(L"Test01");
         spinner_view_->addItem(L"Test02");
         spinner_view_->addItem(L"Test03");
 
-        auto textView = static_cast<ukive::TextView*>(findViewById(Res::Id::tv_test_txt));
+        auto textView = findViewById<ukive::TextView>(Res::Id::tv_test_txt);
         textView->setText(L"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii这是一个示例程序，\n\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。\n这是一个示例程序，\n在这里可以显示文本。");
         textView->setBackground(new ukive::ColorDrawable(ukive::Color::White));
 
         ukive::UnderlineSpan* span = new ukive::UnderlineSpan(3, 5);
         textView->getEditable()->addSpan(span, ukive::Editable::Reason::API);
 
-        image_view_ = static_cast<ukive::ImageView*>(findViewById(Res::Id::iv_test_img));
+        image_view_ = findViewById<ukive::ImageView>(Res::Id::iv_test_img);
         std::wstring imgFileName = ukive::Application::getExecFileName(true);
         auto bitmap = ukive::BitmapFactory::decodeFile(this, ukive::File(imgFileName, L"freshpaint.png").getPath());
         image_view_->setImageBitmap(bitmap);
 
-        test_button_ = static_cast<ukive::Button*>(findViewById(Res::Id::bt_test_button));
+        test_button_ = findViewById<ukive::Button>(Res::Id::bt_test_button);
         test_button_->setOnClickListener(this);
     }
 
@@ -179,7 +179,7 @@ namespace shell {
         setContentView(Res::Layout::test_window_list_layout_xml);
 
         // Buttons
-        dwm_button_ = static_cast<ukive::Button*>(findViewById(Res::Id::bt_dwm_button));
+        dwm_button_ = findViewById<ukive::Button>(Res::Id::bt_dwm_button);
         dwm_button_->setOnClickListener(this);
 
         // ListView
@@ -188,7 +188,7 @@ namespace shell {
             adapter->AddItem(0, L"test", L"test test");
         }
 
-        auto list_view = static_cast<ukive::ListView*>(findViewById(Res::Id::lv_test_list));
+        auto list_view = findViewById<ukive::ListView>(Res::Id::lv_test_list);
         list_view->setLayouter(new ukive::GridListLayouter());
         list_view->setAdapter(adapter);
     }

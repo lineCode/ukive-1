@@ -62,6 +62,18 @@
     <Filter Include="cyroneno\pipeline">
       <UniqueIdentifier>{56095ada-0813-4191-afea-5417d242e336}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cyroneno\text">
+      <UniqueIdentifier>{92cb94c4-671b-400a-9b75-b734a61abfc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cyroneno\text\opentype">
+      <UniqueIdentifier>{ea8dfd21-1f35-47f6-bcf2-75cade15e65a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cyroneno\text\opentype\tables">
+      <UniqueIdentifier>{03aff1b1-1191-46b5-9897-cf7bd3fa42fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cyroneno\text\opentype\tt_instruction">
+      <UniqueIdentifier>{e0d75f04-7935-4652-bd1f-a0c15b75c6a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -198,6 +210,36 @@
     </ClCompile>
     <ClCompile Include="cyroneno\pipeline\pipeline.cpp">
       <Filter>cyroneno\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\opentype_font.cpp">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\opentype_rasterizer.cpp">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\opentype_tables.cpp">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tables\cmap.cpp">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tables\glyf.cpp">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tables\head.cpp">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tables\loca.cpp">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tables\maxp.cpp">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.cpp">
+      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\text\opentype\tables\cvt.cpp">
+      <Filter>cyroneno\text\opentype\tables</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -339,6 +381,45 @@
     <ClInclude Include="cyroneno\pipeline\pipeline.h">
       <Filter>cyroneno\pipeline</Filter>
     </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\opentype_common.h">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\opentype_font.h">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\opentype_rasterizer.h">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\opentype_tables.h">
+      <Filter>cyroneno\text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tables\cmap.h">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tables\glyf.h">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tables\head.h">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tables\loca.h">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tables\maxp.h">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\graphics_state.h">
+      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.h">
+      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\opcode_map.h">
+      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\text\opentype\tables\cvt.h">
+      <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\shell.ico">
@@ -381,6 +462,9 @@
       <Filter>resources\layout</Filter>
     </Xml>
     <Xml Include="resources\layout\test_window_list_layout.xml">
+      <Filter>resources\layout</Filter>
+    </Xml>
+    <Xml Include="resources\layout\cyroneno_layout.xml">
       <Filter>resources\layout</Filter>
     </Xml>
   </ItemGroup>

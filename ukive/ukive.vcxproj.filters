@@ -408,6 +408,9 @@
     <ClCompile Include="utils\json\json_structs.cpp">
       <Filter>utils\json</Filter>
     </ClCompile>
+    <ClCompile Include="utils\convert.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -843,6 +846,9 @@
     </ClInclude>
     <ClInclude Include="utils\json\json_structs.h">
       <Filter>utils\json</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\convert.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@
 
 namespace ukive {
     class Bitmap;
+    class ImageView;
 }
 
 namespace shell {
@@ -17,9 +18,9 @@ namespace shell {
         CyronenoWindow();
 
         void onCreate() override;
-        void onDrawCanvas(ukive::Canvas* canvas) override;
 
     private:
+        ukive::ImageView* img_view_ = nullptr;
         std::shared_ptr<ukive::Bitmap> bmp_;
     };
 

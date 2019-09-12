@@ -128,6 +128,11 @@ namespace ukive {
 
         View* findViewById(int id) const;
 
+        template <typename T>
+        T* findViewById(int id) const {
+            return static_cast<T*>(findViewById(id));
+        }
+
         ContextMenu* startContextMenu(
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);

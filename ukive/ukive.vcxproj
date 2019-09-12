@@ -266,6 +266,7 @@
     <ClInclude Include="utils\big_integer\big_integer.h" />
     <ClInclude Include="utils\big_integer\int_array.h" />
     <ClInclude Include="utils\com_ptr.h" />
+    <ClInclude Include="utils\convert.h" />
     <ClInclude Include="utils\double.h" />
     <ClInclude Include="utils\dynamic_windows_api.h" />
     <ClInclude Include="utils\executable.h" />
@@ -412,6 +413,7 @@
     <ClCompile Include="text\word_breaker.cpp" />
     <ClCompile Include="utils\big_integer\big_integer.cpp" />
     <ClCompile Include="utils\big_integer\int_array.cpp" />
+    <ClCompile Include="utils\convert.cpp" />
     <ClCompile Include="utils\double.cpp" />
     <ClCompile Include="utils\dynamic_windows_api.cpp" />
     <ClCompile Include="utils\float.cpp" />

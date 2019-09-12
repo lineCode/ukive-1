@@ -212,6 +212,16 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\opentype_font.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\opentype_rasterizer.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\opentype_tables.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\cmap.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\cvt.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\glyf.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\head.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\loca.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\maxp.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.cpp" />
     <ClCompile Include="direct3d\assist_configure.cpp" />
     <ClCompile Include="direct3d\camera.cpp" />
     <ClCompile Include="direct3d\graph_creator.cpp" />
@@ -281,6 +291,19 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="cyroneno\ray_tracer_structs.h" />
     <ClInclude Include="cyroneno\scene.h" />
     <ClInclude Include="cyroneno\surface.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_common.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_font.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_rasterizer.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_tables.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\cmap.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\cvt.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\glyf.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\head.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\loca.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\maxp.h" />
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\graphics_state.h" />
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\opcode_map.h" />
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.h" />
     <ClInclude Include="cyroneno\vector.h" />
     <ClInclude Include="direct3d\assist_configure.h" />
     <ClInclude Include="direct3d\camera.h" />
@@ -373,6 +396,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="resources\layout\cyroneno_layout.xml" />
     <Xml Include="resources\layout\test_window_group_layout.xml" />
     <Xml Include="resources\layout\test_window_list_layout.xml" />
   </ItemGroup>

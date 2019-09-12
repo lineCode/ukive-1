@@ -8,6 +8,7 @@
 
 namespace cyro {
 
+    // 一般图像数据。坐标原点在左下角
     class Image {
     public:
         Image(int width, int height);
@@ -20,6 +21,7 @@ namespace cyro {
     };
 
 
+    // PNG 图像数据。坐标原点在左下角
     class ImagePng {
     public:
         ImagePng(int width, int height);

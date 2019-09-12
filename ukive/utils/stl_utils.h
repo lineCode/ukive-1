@@ -17,7 +17,7 @@ namespace ukive {
     }
 
     template <typename R>
-    auto STLCST(const R& obj, int count) -> typename R::size_type {
+    auto STLCST(const R&, int count) -> typename R::size_type {
         DCHECK(count >= 0);
         return static_cast<typename R::size_type>(count);
     }
