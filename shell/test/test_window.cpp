@@ -33,18 +33,20 @@
 #include "ukive/net/http_client.h"
 #include "ukive/net/socket.h"
 #include "ukive/net/tls.h"
+#include "ukive/security/crypto/ecdp.h"
 
 #include "shell/test/list/test_adapter.h"
 #include "shell/resources/oigka_resources_id.h"
 #include "shell/test/security/digest_unit_test.h"
 #include "shell/test/utils/big_integer_unit_test.h"
 #include "shell/test/utils/json_unit_test.h"
+#include "shell/test/security/crypto_unit_test.h"
 
 #include "ukive/security/digest/md5.h"
 #include "ukive/security/crypto/aes.h"
 #include "ukive/security/crypto/rsa.h"
+#include "ukive/security/crypto/aead.hpp"
 #include "ukive/system/qpc_service.h"
-#include "ukive/utils/dynamic_windows_api.h"
 
 
 namespace shell {
@@ -75,18 +77,20 @@ namespace shell {
         //test::TEST_SHA();
         //test::TEST_BIG_INTEGER();
         //test::TEST_JSON();
+        //test::TEST_ECDP_X25519();
+        //test::TEST_ECDP_X448();
+        //test::TEST_AES();
+        //test::TEST_AEAD_AES_GCM();
 
         //ukive::crypto::RSA rsa;
         //rsa.init();
 
-        //ukive::net::initializeSocket();
+        /*ukive::net::initializeSocket();
 
-        //ukive::net::tls::TLS tls_client;
-        //tls_client.testHandshake();
+        ukive::net::tls::TLS tls_client;
+        tls_client.testHandshake();
 
-        //ukive::net::unInitializeSocket();
-
-        
+        ukive::net::unInitializeSocket();*/
     }
 
     void TestWindow::onDraw(const ukive::Rect& rect) {

@@ -235,9 +235,13 @@
     <ClInclude Include="net\http_client.h" />
     <ClInclude Include="net\socket.h" />
     <ClInclude Include="net\tls.h" />
+    <ClInclude Include="net\tls_common.hpp" />
+    <ClInclude Include="net\tls_record_layer.hpp" />
     <ClInclude Include="resources\dimension_utils.h" />
     <ClInclude Include="resources\layout_instantiator.h" />
+    <ClInclude Include="security\crypto\aead.hpp" />
     <ClInclude Include="security\crypto\aes.h" />
+    <ClInclude Include="security\crypto\ecdp.h" />
     <ClInclude Include="security\crypto\rsa.h" />
     <ClInclude Include="security\digest\md5.h" />
     <ClInclude Include="security\digest\sha.h" />
@@ -264,6 +268,7 @@
     <ClInclude Include="text\tsf_manager.h" />
     <ClInclude Include="text\word_breaker.h" />
     <ClInclude Include="utils\big_integer\big_integer.h" />
+    <ClInclude Include="utils\big_integer\byte_string.hpp" />
     <ClInclude Include="utils\big_integer\int_array.h" />
     <ClInclude Include="utils\com_ptr.h" />
     <ClInclude Include="utils\convert.h" />
@@ -378,9 +383,13 @@
     <ClCompile Include="net\http_client.cpp" />
     <ClCompile Include="net\socket.cpp" />
     <ClCompile Include="net\tls.cpp" />
+    <ClCompile Include="net\tls_common.cpp" />
+    <ClCompile Include="net\tls_record_layer.cpp" />
     <ClCompile Include="resources\dimension_utils.cpp" />
     <ClCompile Include="resources\layout_instantiator.cpp" />
+    <ClCompile Include="security\crypto\aead.cpp" />
     <ClCompile Include="security\crypto\aes.cpp" />
+    <ClCompile Include="security\crypto\ecdp.cpp" />
     <ClCompile Include="security\crypto\rsa.cpp" />
     <ClCompile Include="security\digest\hkdf.cpp" />
     <ClCompile Include="security\digest\hmac.cpp" />
@@ -412,6 +421,7 @@
     <ClCompile Include="text\tsf_manager.cpp" />
     <ClCompile Include="text\word_breaker.cpp" />
     <ClCompile Include="utils\big_integer\big_integer.cpp" />
+    <ClCompile Include="utils\big_integer\byte_string.cpp" />
     <ClCompile Include="utils\big_integer\int_array.cpp" />
     <ClCompile Include="utils\convert.cpp" />
     <ClCompile Include="utils\double.cpp" />

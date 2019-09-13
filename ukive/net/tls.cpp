@@ -5,76 +5,90 @@
 
 #include "ukive/utils/stl_utils.h"
 #include "ukive/net/socket.h"
+#include "ukive/utils/big_integer/big_integer.h"
+#include "ukive/security/crypto/ecdp.h"
 
-
-namespace {
-
-    template <typename T>
-    uint16_t UIntToUInt16(T val) {
-        static_assert(std::is_unsigned<T>::value, "T must be unsigned");
-        DCHECK(static_cast<T>(std::numeric_limits<uint16_t>::max()) >= val);
-        return static_cast<uint16_t>(val);
-    }
-
-    template <typename T>
-    uint32_t UIntToUInt24(T val) {
-        static_assert(std::is_unsigned<T>::value, "T must be unsigned");
-        DCHECK(static_cast<T>(std::pow(2U, 24U) - 1U) >= val);
-        return static_cast<uint32_t>(val);
-    }
-
-    template <typename E>
-    std::underlying_type_t<E> enum_cast(E e) {
-        return static_cast<std::underlying_type_t<E>>(e);
-    }
-
-}
 
 namespace ukive {
 namespace net {
 namespace tls {
 
-    void TLS::makeFragment(ContentType type, const stringu8& plain_text, stringu8* out) {
-        DCHECK(out && plain_text.size() <= std::pow(2U, 14U));
+    TLS::TLS() {}
 
-        // type
-        out->push_back(enum_cast(type));
+    TLS::~TLS() {}
 
-        // version
-        out->push_back(3); // major
-        out->push_back(3); // minor
-
-        // length
-        out->append(getUInt16Bytes(UIntToUInt16(plain_text.size())));  // 16bit
-        out->append(plain_text);
-    }
-
-    void TLS::parseFragment(const stringu8& raw) {
-        DCHECK(raw.size() >= 5);
-
-        auto type = ContentType(raw[0]);
-        auto major = raw[1];
-        auto minor = raw[2];
-        uint16_t length = (raw[3] << 8) | raw[4];
-
-        switch (type) {
+    void TLS::parseFragment(const TLSRecordLayer::TLSPlaintext& text) {
+        switch (text.type) {
         case ContentType::Alert:
         {
-            if (raw.size() - 5 < 2 || length != 2) {
+            if (text.fragment.length() < 2) {
                 DCHECK(false);
                 return;
             }
 
-            auto level = AlertLevel(raw[5]);
-            auto descp = AlertDescription(raw[6]);
+            auto level = AlertLevel(text.fragment[0]);
+            auto descp = AlertDescription(text.fragment[1]);
+            break;
+        }
 
-            int i = 0;
+        case ContentType::Handshake:
+        {
+            if (text.fragment.length() < 4) {
+                DCHECK(false);
+                return;
+            }
+
+            auto hs_type = HandshakeType(text.fragment[0]);
+            auto hs_length = (uint32_t(text.fragment[1]) << 16) | (uint32_t(text.fragment[2]) << 8) | text.fragment[3];
+            stringu8 content = text.fragment.substr(4, hs_length);
+            switch (hs_type) {
+            case HandshakeType::ServerHello:
+                parseServerHello(content);
+                break;
+
+            default:
+                break;
+            }
+
+            break;
+        }
+
+        case ContentType::ChangeCipherSpec:
+            // Do nothing
+            break;
+
+        case ContentType::ApplicationData:
+        {
             break;
         }
 
         default:
             break;
         }
+    }
+
+    void TLS::parseServerHello(const stringu8& content) {
+        ProtocolVersion ver;
+        ver.major = content[0];
+        ver.minor = content[1];
+
+        stringu8 random = content.substr(2, 32);
+        uint8_t length8 = content[34];
+        stringu8 legacy_session_id_echo = content.substr(35, length8);
+        uint8_t cs0 = content[35 + length8];
+        uint8_t cs1 = content[35 + length8 + 1];
+        uint8_t legacy_compression_method = content[35 + length8 + 2];
+        uint16_t length16 = (uint16_t(content[35 + length8 + 3]) << 8) | content[35 + length8 + 4];
+
+        stringu8 hello_req_rand({ 0xCF, 0x21, 0xAD, 0x74, 0xE5, 0x9A, 0x61, 0x11, 0xBE, 0x1D, 0x8C, 0x02, 0x1E, 0x65, 0xB8, 0x91,
+            0xC2, 0xA2, 0x11, 0x16, 0x7A, 0xBB, 0x8C, 0x5E, 0x07, 0x9E, 0x09, 0xE2, 0xC8, 0xA8, 0x33, 0x9C });
+
+        if (random == hello_req_rand) {
+            DCHECK(false);
+            return;
+        }
+
+
     }
 
     void TLS::constructHandshake(HandshakeType type, stringu8* out) {
@@ -125,7 +139,9 @@ namespace tls {
         out->append(getSupportCompressionMethods());
 
         // extensions
-        out->append(getSupportExtensions());
+        auto exts_data = getSupportExtensions();
+        out->append(getUInt16Bytes(UIntToUInt16(exts_data.size())));
+        out->append(exts_data);
     }
 
     stringu8 TLS::getTimestampFromUInt32() {
@@ -219,60 +235,143 @@ namespace tls {
     stringu8 TLS::getSupportExtensions() {
         // 9.2 节中规定了必须支持的扩展
         stringu8 ret;
-        ret.append(getUInt16Bytes(7 + 10 + 8));
+        std::vector<Extension> exts;
+
+        // ServerName
+        {
+            string8 name_str = host_;
+
+            Extension sn;
+            sn.type = ExtensionType::ServerName;
+
+            ServerName name;
+            name.type = NameType::HostName;
+            name.host_name.append(name_str.begin(), name_str.end());
+
+            sn.data.append(getUInt16Bytes(1 + 2 + UIntToUInt16(name.host_name.size())));
+            sn.data.push_back(uint8_t(name.type));
+            sn.data.append(getUInt16Bytes(UIntToUInt16(name.host_name.size())));
+            sn.data.append(name.host_name);
+
+            exts.push_back(sn);
+        }
 
         // SupportedVersions
-        ret.append(getUInt16Bytes(uint16_t(ExtensionType::SupportedVersions)));
-        ret.append(getUInt16Bytes(3));
-
-        ret.push_back(2);
-        ret.append({ 3, 4 });
+        Extension sv;
+        sv.type = ExtensionType::SupportedVersions;
+        sv.data.push_back(2);
+        sv.data.append({ 3, 4 });
+        exts.push_back(sv);
 
         // SupportedGroups
-        ret.append(getUInt16Bytes(uint16_t(ExtensionType::SupportedGroups)));
-        ret.append(getUInt16Bytes(6));
-
-        ret.append(getUInt16Bytes(4));
-        ret.append(getUInt16Bytes(uint16_t(NamedGroup::X25519)));
-        ret.append(getUInt16Bytes(uint16_t(NamedGroup::SECP256R1)));
+        Extension sg;
+        sg.type = ExtensionType::SupportedGroups;
+        sg.data.append(getUInt16Bytes(2 * 3));
+        sg.data.append(getUInt16Bytes(uint16_t(NamedGroup::X25519)));
+        sg.data.append(getUInt16Bytes(uint16_t(NamedGroup::SECP384R1)));
+        sg.data.append(getUInt16Bytes(uint16_t(NamedGroup::SECP256R1)));
+        exts.push_back(sg);
 
         // SignatureAlgorithms
-        ret.append(getUInt16Bytes(uint16_t(ExtensionType::SignatureAlgorithms)));
-        ret.append(getUInt16Bytes(4));
+        Extension sa;
+        sa.type = ExtensionType::SignatureAlgorithms;
+        sa.data.append(getUInt16Bytes(4));
+        sa.data.append(getUInt16Bytes(uint16_t(SignatureScheme::ECDSA_SECP256R1_SHA256)));
+        sa.data.append(getUInt16Bytes(uint16_t(SignatureScheme::RSA_PKCS1_SHA256)));
+        exts.push_back(sa);
 
-        ret.append(getUInt16Bytes(2));
-        ret.append(getUInt16Bytes(uint16_t(SignatureScheme::RSA_PKCS1_SHA256)));
+        // KeyShare
+        Extension ks;
+        ks.type = ExtensionType::KeyShare;
 
-        return ret;
-    }
+        KeyShareClientHello key_share;
 
-    stringu8 TLS::getUInt16Bytes(uint16_t val) {
-        stringu8 ret;
-        ret.push_back(val >> 8);
-        ret.push_back(val & 0xFF);
-        return ret;
-    }
+        {
+            auto k = BigInteger::fromRandom(32 * 8);
+            k.setBit(255, 0);
+            k.setBit(254, 1);
+            k.setBit(2, 0);
+            k.setBit(1, 0);
+            k.setBit(0, 0);
 
-    stringu8 TLS::getUInt24Bytes(uint32_t val) {
-        stringu8 ret;
-        ret.push_back((val >> 16) & 0xFF);
-        ret.push_back((val >> 8) & 0xFF);
-        ret.push_back(val & 0xFF);
-        return ret;
-    }
+            uint32_t A;
+            uint8_t cofactor, Up;
+            BigInteger p, order, Vp, result;
+            crypto::ECDP::curve25519(&p, &A, &order, &cofactor, &Up, &Vp);
+            crypto::ECDP::X25519(p, k, BigInteger::fromU32(Up), &result);
 
-    stringu8 TLS::getUInt32Bytes(uint32_t val) {
-        stringu8 ret;
-        ret.push_back(val >> 24);
-        ret.push_back((val >> 16) & 0xFF);
-        ret.push_back((val >> 8) & 0xFF);
-        ret.push_back(val & 0xFF);
+            auto r = result.getBytesLE();
+            if (r.size() < 32) {
+                r.insert(r.end(), 32 - r.size(), 0);
+            }
+
+            KeyShareEntry entry_x25519;
+            entry_x25519.group = NamedGroup::X25519;
+            entry_x25519.key_exchange.append(r);
+            key_share.client_shares.push_back(std::move(entry_x25519));
+        }
+
+        uint8_t h;
+        BigInteger a, b, S, p, Gx, Gy, n;
+        {
+            crypto::ECDP::secp384r1(&p, &a, &b, &S, &Gx, &Gy, &n, &h);
+            auto d = BigInteger::fromRandom(BigInteger::ONE, n - 1);
+            crypto::ECDP::mulPoint(p, a, d, &Gx, &Gy);
+            crypto::ECDP::verifyPoint(p, a, b, Gx, Gy);
+
+            ECDHEParams p_secp384;
+            p_secp384.X = Gx.getBytesBE();
+            p_secp384.Y = Gy.getBytesBE();
+
+            KeyShareEntry entry_s384;
+            entry_s384.group = NamedGroup::SECP384R1;
+            entry_s384.key_exchange = p_secp384.toBytes();
+            key_share.client_shares.push_back(std::move(entry_s384));
+        }
+
+        {
+            crypto::ECDP::secp256r1(&p, &a, &b, &S, &Gx, &Gy, &n, &h);
+            auto d = BigInteger::fromRandom(BigInteger::ONE, n - 1);
+            crypto::ECDP::mulPoint(p, a, d, &Gx, &Gy);
+            crypto::ECDP::verifyPoint(p, a, b, Gx, Gy);
+
+            ECDHEParams p_secp256;
+            p_secp256.X = Gx.getBytesBE();
+            p_secp256.Y = Gy.getBytesBE();
+
+            KeyShareEntry entry_s256;
+            entry_s256.group = NamedGroup::SECP256R1;
+            entry_s256.key_exchange = p_secp256.toBytes();
+            key_share.client_shares.push_back(std::move(entry_s256));
+        }
+
+        uint16_t entries_length = 0;
+        for (const auto& entry : key_share.client_shares) {
+            entries_length += 2 + 2 + UIntToUInt16(entry.key_exchange.size());
+        }
+        ks.data.append(getUInt16Bytes(entries_length));
+
+        for (const auto& entry : key_share.client_shares) {
+            ks.data.append(getUInt16Bytes(uint16_t(entry.group)));
+            ks.data.append(getUInt16Bytes(UIntToUInt16(entry.key_exchange.size())));
+            ks.data.append(entry.key_exchange);
+        }
+        exts.push_back(ks);
+
+        // Extension 统计
+        for (const auto& ext : exts) {
+            ret.append(getUInt16Bytes(uint16_t(ext.type)));
+            ret.append(getUInt16Bytes(UIntToUInt16(ext.data.size())));
+            ret.append(ext.data);
+        }
+
         return ret;
     }
 
     void TLS::testHandshake() {
-        SocketClient client;
-        if (!client.connectByHost("", 443)) {
+        host_ = "tls13.crypto.mozilla.org";
+
+        if (!record_layer_.connect(host_)) {
             DCHECK(false);
             return;
         }
@@ -280,23 +379,32 @@ namespace tls {
         stringu8 client_hello;
         constructHandshake(HandshakeType::ClientHello, &client_hello);
 
-        stringu8 fragment;
-        makeFragment(ContentType::Handshake, client_hello, &fragment);
+        TLSRecordLayer::TLSPlaintext text;
+        text.type = ContentType::Handshake;
+        text.version.major = 3;
+        text.version.minor = 1;
+        text.length = uint16_t(client_hello.length());
+        text.fragment = client_hello;
 
-        if (!client.send(string8(fragment.begin(), fragment.end()))) {
+        if (!record_layer_.sendFragment(text)) {
             DCHECK(false);
             return;
         }
 
-        string8 resp;
-        if (!client.recv(&resp)) {
+        TLSRecordLayer::TLSPlaintext out;
+        if (!record_layer_.recvFragment(&out)) {
             DCHECK(false);
             return;
         }
+        parseFragment(out);
 
-        parseFragment(stringu8(resp.begin(), resp.end()));
+        if (!record_layer_.recvFragment(&out)) {
+            DCHECK(false);
+            return;
+        }
+        parseFragment(out);
 
-        client.close();
+        record_layer_.disconnect();
     }
 
 }

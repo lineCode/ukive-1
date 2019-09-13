@@ -61,7 +61,7 @@ namespace crypto {
         decrypt(cipher, plain, key);
     }
 
-    void AES::encrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key) {
+    void AES::encrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key) {
         uint32_t Nr = getNr(STLCU32(key.length()) / 4, Nb);
 
         std::vector<uint32_t> key_exp;
@@ -72,7 +72,7 @@ namespace crypto {
         encrypt(in, out, key_exp, Nr);
     }
 
-    void AES::decrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key) {
+    void AES::decrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key) {
         uint32_t Nr = getNr(STLCU32(key.length()) / 4, Nb);
 
         std::vector<uint32_t> key_exp;
@@ -83,7 +83,7 @@ namespace crypto {
         decrypt(in, out, key_exp, Nr);
     }
 
-    void AES::encrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr) {
+    void AES::encrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr) {
         Context context;
         for (int i = 0; i < Nb; ++i) {
             context.state[i] = in[i * 4];
@@ -113,7 +113,7 @@ namespace crypto {
         }
     }
 
-    void AES::decrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr) {
+    void AES::decrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr) {
         Context context;
         for (int i = 0; i < Nb; ++i) {
             context.state[i] = in[i * 4];

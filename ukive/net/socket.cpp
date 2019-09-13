@@ -146,7 +146,39 @@ namespace net {
         return true;
     }
 
-    bool SocketClient::recv(std::string* buf) {
+    bool SocketClient::recv(int length, std::string* buf) {
+        if (length <= 0) {
+            return true;
+        }
+        if (socket_ == INVALID_SOCKET) {
+            LOG(Log::ERR) << "Invalid socket.";
+            return false;
+        }
+
+        int bytes_revd;
+        char recv_buf[512];
+        std::string response;
+
+        do {
+            int cur_length = (length >= 512) ? 512 : length;
+
+            bytes_revd = ::recv(socket_, recv_buf, cur_length, 0);
+            if (bytes_revd > 0) {
+                response.append(recv_buf, bytes_revd);
+                length -= bytes_revd;
+            } else if (bytes_revd == 0) {
+                LOG(Log::INFO) << "Connection closed";
+            } else {
+                LOG(Log::ERR) << "Failed to recv: " << WSAGetLastError();
+                return false;
+            }
+        } while (bytes_revd > 0 && length > 0);
+
+        *buf = std::move(response);
+        return true;
+    }
+
+    bool SocketClient::recvAll(std::string* buf) {
         if (socket_ == INVALID_SOCKET) {
             LOG(Log::ERR) << "Invalid socket.";
             return false;
@@ -187,6 +219,39 @@ namespace net {
             closesocket(socket_);
             socket_ = INVALID_SOCKET;
         }
+    }
+
+    bool SocketClient::wait(WaitType type, int timeout_sec) {
+        if (type == WaitType::SEND) {
+            FD_SET wset;
+            FD_ZERO(&wset);
+            FD_SET(socket_, &wset);
+            timeval timeout = { timeout_sec, 0 };
+            int ret = ::select(socket_ + 1, nullptr, &wset, nullptr, timeout_sec == -1 ? nullptr : &timeout);
+            if (ret == SOCKET_ERROR) {
+                LOG(Log::ERR) << "Failed to select: " << WSAGetLastError();
+                return false;
+            }
+
+            if (FD_ISSET(socket_, &wset)) {
+                return true;
+            }
+        } else if (type == WaitType::RECV) {
+            FD_SET rset;
+            FD_ZERO(&rset);
+            FD_SET(socket_, &rset);
+            timeval timeout = { timeout_sec, 0 };
+            int ret = ::select(socket_ + 1, &rset, nullptr, nullptr, timeout_sec == -1 ? nullptr : &timeout);
+            if (ret == SOCKET_ERROR) {
+                LOG(Log::ERR) << "Failed to select: " << WSAGetLastError();
+                return false;
+            }
+
+            if (FD_ISSET(socket_, &rset)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

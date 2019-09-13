@@ -3,8 +3,6 @@
 
 #include "ukive/utils/big_integer/big_integer.h"
 
-#define BigInteger ukive::BigInteger
-
 
 // 根据 RFC 8017 实现的 RSA 算法。
 // https://tools.ietf.org/html/rfc8017

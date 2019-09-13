@@ -4,6 +4,7 @@
 #include <random>
 
 #include "ukive/log.h"
+#include "ukive/utils/stl_utils.h"
 
 #define MP_WARRAY  65536
 
@@ -125,7 +126,76 @@ namespace ukive {
         return result;
     }
 
+    BigInteger BigInteger::fromString(const string8& str, int radix) {
+        BigInteger tmp;
+        readFromStringItl(str, radix, &tmp.int_);
+        return tmp;
+    }
+
+    BigInteger BigInteger::fromBytesBE(const stringu8& bytes) {
+        stringu8 tmp(bytes);
+        std::reverse(tmp.begin(), tmp.end());
+        return fromBytesLE(tmp);
+    }
+
+    BigInteger BigInteger::fromBytesLE(const stringu8& bytes) {
+        int byte_cnt = STLCInt(bytes.size());
+        int total_bits = byte_cnt * 8;
+        int total_base = (total_bits + kBaseBitCount - 1) / kBaseBitCount;
+
+        BigInteger r;
+        auto& tint = r.int_;
+        tint.grow(total_base);
+        tint.used_ = total_base;
+
+        int rem = 0;
+        int idx = 0;
+        for (int i = 0; i < total_base; ++i) {
+            if (rem > 0) {
+                if (rem >= int(kBaseBitCount)) {
+                    tint.buf_[i] |= bytes[idx] >> (8 - rem);
+                    rem -= kBaseBitCount;
+                    continue;
+                }
+                tint.buf_[i] |= bytes[idx] >> (8 - rem);
+                ++idx;
+            }
+
+            int j;
+            for (j = 0; j < (int(kBaseBitCount) - rem) / 8; ++j, ++idx) {
+                if (idx >= byte_cnt) {
+                    tint.shrink();
+                    return r;
+                }
+                tint.buf_[i] |= Digit(bytes[idx]) << (j * 8 + rem);
+            }
+
+            int cur_rem = (kBaseBitCount - rem) % 8;
+            if (cur_rem > 0) {
+                if (idx >= byte_cnt) {
+                    tint.shrink();
+                    return r;
+                }
+                tint.buf_[i] |= Digit(bytes[idx] & ((1 << cur_rem) - 1)) << (j * 8 + rem);
+                rem = 8 - cur_rem;
+            } else {
+                rem = 0;
+            }
+        }
+
+        tint.shrink();
+        return r;
+    }
+
     BigInteger::BigInteger() {
+    }
+
+    void BigInteger::zero() {
+        int_.zero();
+    }
+
+    void BigInteger::swap(BigInteger& rhs) {
+        int_.swap(&rhs.int_);
     }
 
     void BigInteger::destroy() {
@@ -172,6 +242,21 @@ namespace ukive {
         int_.shrink();
     }
 
+    void BigInteger::setBit(uint32_t idx, uint8_t val) {
+        auto pos = idx / kBaseBitCount;
+        auto off = idx % kBaseBitCount;
+        if (int(pos) >= int_.used_) {
+            int_.grow(pos + 1);
+            int_.used_ = pos + 1;
+        }
+        if (val & 1) {
+            int_.buf_[pos] |= Digit(1) << off;
+        } else {
+            int_.buf_[pos] &= ~(Digit(1) << off);
+            int_.shrink();
+        }
+    }
+
     BigInteger& BigInteger::add(const BigInteger& rhs) {
         addItl(int_, rhs.int_, &int_);
         return *this;
@@ -194,6 +279,34 @@ namespace ukive {
 
     BigInteger& BigInteger::mod(const BigInteger& rhs) {
         modItl(int_, rhs.int_, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::modP(const BigInteger& rhs) {
+        modItl(int_, rhs.int_, &int_);
+        if (int_.is_minus_) {
+            addItl(int_, rhs.int_, &int_);
+        }
+        return *this;
+    }
+
+    BigInteger& BigInteger::add(Digit b) {
+        adddItl(int_, b, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::sub(Digit b) {
+        subdItl(int_, b, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::mul(Digit b) {
+        muldItl(int_, b, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::div(Digit b) {
+        divdItl(int_, b, &int_, nullptr);
         return *this;
     }
 
@@ -266,6 +379,26 @@ namespace ukive {
         return *this;
     }
 
+    BigInteger& BigInteger::root(Digit b) {
+        rootdItl(int_, b, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::inc(uint32_t b) {
+        incItl(b, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::and(const BigInteger& rhs) {
+        andItl(int_, rhs.int_, &int_);
+        return *this;
+    }
+
+    BigInteger& BigInteger::xor(const BigInteger& rhs) {
+        xorItl(int_, rhs.int_, &int_);
+        return *this;
+    }
+
     BigInteger BigInteger::gcd(const BigInteger& rhs) const {
         BigInteger tmp;
         gcdItl(int_, rhs.int_, &tmp.int_);
@@ -280,7 +413,9 @@ namespace ukive {
 
     BigInteger BigInteger::invmod(const BigInteger& rhs) const {
         BigInteger tmp;
-        invmodItl(int_, rhs.int_, &tmp.int_);
+        if (!invmodItl(int_, rhs.int_, &tmp.int_)) {
+            CHECK(false);
+        }
         return tmp;
     }
 
@@ -315,6 +450,42 @@ namespace ukive {
     BigInteger BigInteger::operator%(const BigInteger& rhs) const {
         BigInteger tmp(*this);
         tmp.mod(rhs);
+        return tmp;
+    }
+
+    BigInteger BigInteger::operator&(const BigInteger& rhs) const {
+        BigInteger tmp(*this);
+        tmp.and(rhs);
+        return tmp;
+    }
+
+    BigInteger BigInteger::operator^(const BigInteger& rhs) const {
+        BigInteger tmp(*this);
+        tmp.xor(rhs);
+        return tmp;
+    }
+
+    BigInteger BigInteger::operator+(Digit b) const {
+        BigInteger tmp(*this);
+        tmp.add(b);
+        return tmp;
+    }
+
+    BigInteger BigInteger::operator-(Digit b) const {
+        BigInteger tmp(*this);
+        tmp.sub(b);
+        return tmp;
+    }
+
+    BigInteger BigInteger::operator*(Digit b) const {
+        BigInteger tmp(*this);
+        tmp.mul(b);
+        return tmp;
+    }
+
+    BigInteger BigInteger::operator/(Digit b) const {
+        BigInteger tmp(*this);
+        tmp.div(b);
         return tmp;
     }
 
@@ -361,8 +532,97 @@ namespace ukive {
         return result;
     }
 
-    bool BigInteger::toString(int radix, string8* str) const {
-        return toStringItl(int_, radix, str);
+    void BigInteger::toString(int radix, string8* str) const {
+        toStringItl(int_, radix, str);
+    }
+
+    int BigInteger::getBitCount() const {
+        return getBitCountItl(int_);
+    }
+
+    int BigInteger::getByteCount() const {
+        return (getBitCountItl(int_) + 7) / 8;
+    }
+
+    uint8_t BigInteger::getBit(uint32_t idx) const {
+        auto pos = idx / kBaseBitCount;
+        auto off = idx % kBaseBitCount;
+        return (int_.buf_[pos] >> off) & 0x1;
+    }
+
+    stringu8 BigInteger::getBytesBE() const {
+        auto be = getBytesLE();
+        std::reverse(be.begin(), be.end());
+        return be;
+    }
+
+    stringu8 BigInteger::getBytesLE() const {
+        int rem = 0;
+        uint8_t tmp = 0;
+        stringu8 result;
+        for (int i = 0; i < int_.used_; ++i) {
+            if (rem > 0) {
+                if (rem >= int(kBaseBitCount)) {
+                    tmp |= (int_.buf_[i] & kBaseMask) << (8 - rem);
+                    rem -= kBaseBitCount;
+                    continue;
+                }
+                tmp |= (int_.buf_[i] & ((Digit(1) << rem) - 1)) << (8 - rem);
+                result.push_back(tmp);
+            }
+
+            int j;
+            for (j = 0; j < (int(kBaseBitCount) - rem) / 8; ++j) {
+                tmp = (int_.buf_[i] >> (j * 8 + rem)) & 0xFF;
+                result.push_back(tmp);
+            }
+
+            int cur_rem = (kBaseBitCount - rem) % 8;
+            if (cur_rem > 0) {
+                tmp = 0;
+                tmp |= (int_.buf_[i] >> (j * 8 + rem)) & ((Digit(1) << cur_rem) - 1);
+                rem = 8 - cur_rem;
+            } else {
+                rem = 0;
+            }
+        }
+
+        while (!result.empty() && result.back() == 0) {
+            result.pop_back();
+        }
+
+        return result;
+    }
+
+    BigInteger BigInteger::getBitsMSB(uint32_t idx, uint32_t count) const {
+        BigInteger out(*this);
+
+        auto total = getBitCount();
+        int skip_bit_cnt = idx * count;
+
+        int skip_base_cnt = out.int_.used_ - (total - skip_bit_cnt + kBaseBitCount - 1) / kBaseBitCount;
+        int rem_off = (total - skip_bit_cnt) % kBaseBitCount;
+        for (int i = 0; i < skip_base_cnt; ++i) {
+            int cur = out.int_.used_ - 1 - i;
+            if (cur < 0) {
+                return out;
+            }
+            out.int_.buf_[cur] = 0;
+        }
+
+        if (rem_off > 0) {
+            int cur = out.int_.used_ - 1 - skip_base_cnt;
+            if (cur < 0) {
+                return out;
+            }
+            auto tmp = out.int_.buf_[cur];
+            tmp &= (Digit(1) << rem_off) - 1;
+            out.int_.buf_[cur] = tmp;
+        }
+
+        out.int_.shrink();
+        out.div2exp(MP_MAX(total - count - skip_bit_cnt, 0));
+        return out;
     }
 
     bool BigInteger::isOdd() const {
@@ -373,8 +633,12 @@ namespace ukive {
         return int_.isZero();
     }
 
+    bool BigInteger::isMinus() const {
+        return int_.isMinus();
+    }
+
     bool BigInteger::isBeyondInt64() const {
-        int bit_count = getBitCount(int_);
+        int bit_count = getBitCountItl(int_);
         if (bit_count < 64) {
             return false;
         }
@@ -394,7 +658,7 @@ namespace ukive {
     }
 
     bool BigInteger::isBeyondUInt64() const {
-        if (getBitCount(int_) > 64) {
+        if (getBitCountItl(int_) > 64) {
             return true;
         }
         return false;
@@ -452,13 +716,13 @@ namespace ukive {
         return true;
     }
 
-    void BigInteger::setDigit(IntArray* a, Digit d) {
+    void BigInteger::setDigitItl(IntArray* a, Digit d) {
         a->zero();
         a->buf_[0] = d & kBaseMask;
         a->used_ = (a->buf_[0] != 0) ? 1 : 0;
     }
 
-    int BigInteger::getBitCount(const IntArray& a) {
+    int BigInteger::getBitCountItl(const IntArray& a) {
         int count = 0;
         if (a.used_ > 1) {
             count = (a.used_ - 1) * kBaseBitCount;
@@ -734,12 +998,14 @@ namespace ukive {
     }
 
     void BigInteger::lowExptmod(
-        const IntArray& g, const IntArray& x, const IntArray& p, IntArray* y)
+        const IntArray& g, const IntArray& x, const IntArray& p, IntArray* y, int red_mode)
     {
         IntArray M[TAB_SIZE];
+        using reduceMethod = void(*)(IntArray*, const IntArray&, const IntArray&);
+        reduceMethod redux;
 
         int win_size;
-        int i = getBitCount(x);
+        int i = getBitCountItl(x);
         if (i <= 7) {
             win_size = 2;
         } else if (i <= 36) {
@@ -757,23 +1023,28 @@ namespace ukive {
         }
 
         IntArray mu;
-        reduceSetup(p, &mu);
-
+        if (red_mode == 0) {
+            reduceSetup(p, &mu);
+            redux = reduce;
+        } else {
+            reduce2klSetup(p, &mu);
+            redux = reduce2kl;
+        }
         modItl(g, p, &M[1]);
 
         M[1 << (win_size - 1)] = M[1];
         for (i = 0; i < win_size - 1; ++i) {
             sqrItl(M[1 << (win_size - 1)], &M[1 << (win_size - 1)]);
+            redux(&M[1 << (win_size - 1)], p, mu);
         }
 
-        reduce(&M[1 << (win_size - 1)], p, mu);
         for (i = (1 << (win_size - 1)) + 1; i < (1 << win_size); ++i) {
             mulItl(M[i - 1], M[1], &M[i]);
-            reduce(&M[i], p, mu);
+            redux(&M[i], p, mu);
         }
 
         IntArray res;
-        setDigit(&res, 1);
+        setDigitItl(&res, 1);
 
         int mode = 0;
         int bitcnt = 1;
@@ -801,7 +1072,7 @@ namespace ukive {
 
             if (mode == 1 && _y == 0) {
                 sqrItl(res, &res);
-                reduce(&res, p, mu);
+                redux(&res, p, mu);
                 continue;
             }
 
@@ -812,11 +1083,11 @@ namespace ukive {
             if (bitcpy == win_size) {
                 for (i = 0; i < win_size; ++i) {
                     sqrItl(res, &res);
-                    reduce(&res, p, mu);
+                    redux(&res, p, mu);
                 }
 
                 mulItl(res, M[bitbuf], &res);
-                reduce(&res, p, mu);
+                redux(&res, p, mu);
 
                 bitcpy = 0;
                 bitbuf = 0;
@@ -827,12 +1098,12 @@ namespace ukive {
         if (mode == 2 && bitcpy > 0) {
             for (i = 0; i < bitcpy; ++i) {
                 sqrItl(res, &res);
-                reduce(&res, p, mu);
+                redux(&res, p, mu);
 
                 bitbuf <<= 1;
                 if (bitbuf & (1 << win_size)) {
                     mulItl(res, M[1], &res);
-                    reduce(&res, p, mu);
+                    redux(&res, p, mu);
                 }
             }
         }
@@ -841,11 +1112,11 @@ namespace ukive {
     }
 
     void BigInteger::montgomeryCalNorm(IntArray* a, const IntArray& b) {
-        int bits = getBitCount(b) % kBaseBitCount;
+        int bits = getBitCountItl(b) % kBaseBitCount;
         if (b.used_ > 1) {
             zweiExptItl((b.used_ - 1)*kBaseBitCount + bits - 1, a);
         } else {
-            setDigit(a, 1);
+            setDigitItl(a, 1);
             bits = 1;
         }
 
@@ -858,12 +1129,14 @@ namespace ukive {
     }
 
     void BigInteger::lowFastExptmod(
-        const IntArray& g, const IntArray& x, const IntArray& p, IntArray* y)
+        const IntArray& g, const IntArray& x, const IntArray& p, IntArray* y, int red_mode)
     {
         IntArray M[TAB_SIZE];
+        using reduceMethod = void(*)(IntArray*, const IntArray&, Digit);
+        reduceMethod redux;
 
         int win_size;
-        int i = getBitCount(x);
+        int i = getBitCountItl(x);
         if (i <= 7) {
             win_size = 2;
         } else if (i <= 36) {
@@ -881,24 +1154,38 @@ namespace ukive {
         }
 
         Digit mp;
-        montgomerySetup(p, &mp);
+        if (red_mode == 0) {
+            montgomerySetup(p, &mp);
+            redux = montgomeryReduce;
+        } else if (red_mode == 1) {
+            drSetup(p, &mp);
+            redux = drReduce;
+        } else {
+            reduce2kSetup(p, &mp);
+            redux = reduce2k;
+        }
 
         IntArray res;
-        montgomeryCalNorm(&res, p);
+        if (red_mode == 0) {
+            montgomeryCalNorm(&res, p);
 
-        IntArray tmp;
-        mulItl(g, res, &tmp);
-        modItl(tmp, p, &M[1]);
+            IntArray tmp;
+            mulItl(g, res, &tmp);
+            modItl(tmp, p, &M[1]);
+        } else {
+            setDigitItl(&res, 1);
+            modItl(g, p, &M[1]);
+        }
 
         M[1 << (win_size - 1)] = M[1];
         for (i = 0; i < win_size - 1; ++i) {
             sqrItl(M[1 << (win_size - 1)], &M[1 << (win_size - 1)]);
-            montgomeryReduce(&M[1 << (win_size - 1)], p, mp);
+            redux(&M[1 << (win_size - 1)], p, mp);
         }
 
         for (i = (1 << (win_size - 1)) + 1; i < (1 << win_size); ++i) {
             mulItl(M[i - 1], M[1], &M[i]);
-            montgomeryReduce(&M[i], p, mp);
+            redux(&M[i], p, mp);
         }
 
         int mode = 0;
@@ -927,7 +1214,7 @@ namespace ukive {
 
             if (mode == 1 && _y == 0) {
                 sqrItl(res, &res);
-                montgomeryReduce(&res, p, mp);
+                redux(&res, p, mp);
                 continue;
             }
 
@@ -938,11 +1225,11 @@ namespace ukive {
             if (bitcpy == win_size) {
                 for (i = 0; i < win_size; ++i) {
                     sqrItl(res, &res);
-                    montgomeryReduce(&res, p, mp);
+                    redux(&res, p, mp);
                 }
 
                 mulItl(res, M[bitbuf], &res);
-                montgomeryReduce(&res, p, mp);
+                redux(&res, p, mp);
 
                 bitcpy = 0;
                 bitbuf = 0;
@@ -953,17 +1240,19 @@ namespace ukive {
         if (mode == 2 && bitcpy > 0) {
             for (i = 0; i < bitcpy; ++i) {
                 sqrItl(res, &res);
-                montgomeryReduce(&res, p, mp);
+                redux(&res, p, mp);
 
                 bitbuf <<= 1;
                 if (bitbuf & (1 << win_size)) {
                     mulItl(res, M[1], &res);
-                    montgomeryReduce(&res, p, mp);
+                    redux(&res, p, mp);
                 }
             }
         }
 
-        montgomeryReduce(&res, p, mp);
+        if (red_mode == 0) {
+            redux(&res, p, mp);
+        }
 
         *y = std::move(res);
     }
@@ -1334,7 +1623,7 @@ namespace ukive {
         }
 
         if (exp >= kBaseBitCount) {
-            shlItl(exp / kBaseBitCount, result);
+            shrItl(exp / kBaseBitCount, result);
         }
 
         Digit k = exp % kBaseBitCount;
@@ -1408,7 +1697,7 @@ namespace ukive {
     void BigInteger::exptdItl(const IntArray& a, Digit b, IntArray* result) {
         IntArray g(a);
 
-        setDigit(result, 1);
+        setDigitItl(result, 1);
         for (int i = 0; i<int(kBaseBitCount); ++i) {
             sqrItl(*result, result);
             if ((b & Digit(Digit(1) << (kBaseBitCount - 1))) != 0) {
@@ -1434,16 +1723,35 @@ namespace ukive {
             return;
         }
         if (x.is_minus_) {
-            // TODO:
-            CHECK(false);
+            IntArray tmpG;
+            if (!invmodItl(g, p, &tmpG)) {
+                CHECK(false);
+                return;
+            }
+
+            IntArray tmpX(x);
+            tmpX.abs();
+
+            exptmodItl(tmpG, tmpX, p, y);
             return;
         }
 
-        if (p.isOdd()) {
-            return lowFastExptmod(g, x, p, y);
+        if (reduceIs2kl(p)) {
+            lowExptmod(g, x, p, y, 1);
+            return;
         }
 
-        return lowExptmod(g, x, p, y);
+        int mode = drIsModulus(p) ? 1 : 0;
+        if (mode == 0) {
+            mode = reduceIs2k(p) ? 2 : 0;
+        }
+
+        if (p.isOdd() || mode != 0) {
+            lowFastExptmod(g, x, p, y, mode);
+            return;
+        }
+
+        lowExptmod(g, x, p, y, 0);
     }
 
     void BigInteger::divItl(
@@ -1473,7 +1781,7 @@ namespace ukive {
         bool neg = a.is_minus_ != b.is_minus_;
         x.is_minus_ = y.is_minus_ = false;
 
-        int norm = getBitCount(y) % kBaseBitCount;
+        int norm = getBitCountItl(y) % kBaseBitCount;
         if (norm < int(kBaseBitCount - 1)) {
             norm = kBaseBitCount - 1 - norm;
             mul2dItl(x, norm, &x);
@@ -1572,24 +1880,119 @@ namespace ukive {
     }
 
     void BigInteger::adddItl(const IntArray& a, Digit b, IntArray* c) {
-        // TODO:
-        IntArray t;
-        setDigit(&t, b);
-        addItl(a, t, c);
+        if (c->alloc_ < a.used_ + 1) {
+            c->grow(a.used_ + 1);
+        }
+
+        if (a.is_minus_ && (a.used_ > 1 || a.buf_[0] >= b)) {
+            const_cast<IntArray&>(a).is_minus_ = false;
+            subdItl(a, b, c);
+            const_cast<IntArray&>(a).is_minus_ = c->is_minus_ = true;
+            c->shrink();
+            return;
+        }
+
+        int i;
+        auto old_used = c->used_;
+
+        if (!a.is_minus_) {
+            Digit mu = b;
+            for (i = 0; i < a.used_; ++i) {
+                c->buf_[i] = a.buf_[i] + mu;
+                mu = c->buf_[i] >> kBaseBitCount;
+                c->buf_[i] &= kBaseMask;
+            }
+
+            c->buf_[i] = mu;
+            ++i;
+            c->used_ = a.used_ + 1;
+        } else {
+            c->used_ = 1;
+            if (a.used_ == 1) {
+                c->buf_[0] = b - a.buf_[0];
+            } else {
+                c->buf_[0] = b;
+            }
+            i = 1;
+        }
+
+        while (i < old_used) {
+            c->buf_[i] = 0;
+            ++i;
+        }
+        c->is_minus_ = false;
+        c->shrink();
     }
 
     void BigInteger::subdItl(const IntArray& a, Digit b, IntArray* c) {
-        // TODO:
-        IntArray t;
-        setDigit(&t, b);
-        subItl(a, t, c);
+        if (c->alloc_ < a.used_ + 1) {
+            c->grow(a.used_ + 1);
+        }
+
+        if (a.is_minus_) {
+            const_cast<IntArray&>(a).is_minus_ = false;
+            adddItl(a, b, c);
+            const_cast<IntArray&>(a).is_minus_ = c->is_minus_ = true;
+            c->shrink();
+            return;
+        }
+
+        int i;
+        auto old_used = c->used_;
+
+        if (a.used_ > 1 || a.buf_[0] >= b) {
+            Digit over = b;
+            for (i = 0; i < a.used_; ++i) {
+                c->buf_[i] = a.buf_[i] - over;
+                over = c->buf_[i] >> (kDigitBitCount - 1);
+                c->buf_[i] &= kBaseMask;
+            }
+            c->used_ = a.used_;
+            c->is_minus_ = false;
+        } else {
+            c->used_ = 1;
+            c->is_minus_ = true;
+            if (a.used_ == 1) {
+                c->buf_[0] = b - a.buf_[0];
+            } else {
+                c->buf_[0] = b;
+            }
+            i = 1;
+        }
+
+        while (i < old_used) {
+            c->buf_[i] = 0;
+            ++i;
+        }
+        c->shrink();
     }
 
     void BigInteger::muldItl(const IntArray& a, Digit b, IntArray* c) {
-        // TODO:
-        IntArray t;
-        setDigit(&t, b);
-        mulItl(a, t, c);
+        if (c->alloc_ < a.used_ + 1) {
+            c->grow(a.used_ + 1);
+        }
+
+        auto old_used = c->used_;
+        c->is_minus_ = a.is_minus_;
+
+        int i;
+        Digit u = 0;
+        for (i = 0; i < a.used_; ++i) {
+            auto r = Word(u) + Word(a.buf_[i]) * b;
+            c->buf_[i] = r & kBaseMask;
+            u = r >> kBaseBitCount;
+        }
+
+        c->buf_[i] = u;
+        ++i;
+
+        while (i < old_used) {
+            c->buf_[i] = 0;
+            ++i;
+        }
+
+        c->used_ = a.used_ + 1;
+        c->shrink();
     }
 
     void BigInteger::div3Itl(const IntArray& a, IntArray* b, Digit* c) {
@@ -1598,25 +2001,68 @@ namespace ukive {
     }
 
     void BigInteger::divdItl(const IntArray& a, Digit b, IntArray* c, Digit* d) {
-        // TODO:
-        IntArray t;
-        IntArray r;
-        setDigit(&t, b);
-        divItl(a, t, c, &r);
+        if (b == 0) {
+            CHECK(false);
+            return;
+        }
 
-        *d = r.buf_[0];
+        if (b == 1 || a.isZero()) {
+            if (d) {
+                *d = 0;
+            }
+            if (c) {
+                *c = a;
+            }
+            return;
+        }
+
+        int i;
+        if (isPowOf2(b, &i)) {
+            if (d) {
+                *d = a.buf_[0] & ((Digit(1) << i) - 1);
+            }
+            if (c) {
+                div2dItl(a, i, c, nullptr);
+            }
+            return;
+        }
+
+        Word w = 0;
+        IntArray q(a.used_);
+        q.used_ = a.used_;
+        q.is_minus_ = a.is_minus_;
+        for (i = a.used_ - 1; i >= 0; --i) {
+            Digit t;
+            w = (w << kBaseBitCount) | Word(a.buf_[i]);
+            if (w >= b) {
+                t = w / b;
+                w -= Word(t)*b;
+            } else {
+                t = 0;
+            }
+            q.buf_[i] = t;
+        }
+
+        if (d) {
+            *d = w;
+        }
+        if (c) {
+            q.shrink();
+            *c = std::move(q);
+        }
     }
 
-    bool BigInteger::rootdItl(IntArray& a, Digit b, IntArray* c) {
+    void BigInteger::rootdItl(IntArray& a, Digit b, IntArray* c) {
         if ((b & 1) == 0 && a.is_minus_) {
-            return false;
+            CHECK(false);
+            return;
         }
 
         IntArray t1, t2, t3;
         bool neg = a.is_minus_;
         a.is_minus_ = false;
 
-        setDigit(&t2, 2);
+        setDigitItl(&t2, 2);
         do {
             t1 = t2;
             exptdItl(t1, b - 1, &t3);
@@ -1639,8 +2085,62 @@ namespace ukive {
         a.is_minus_ = neg;
         *c = std::move(t1);
         c->is_minus_ = neg;
+    }
 
-        return true;
+    void BigInteger::andItl(const IntArray& l, const IntArray& r, IntArray* result) {
+        int i, min;
+        if (l.used_ > r.used_) {
+            min = r.used_;
+        } else {
+            min = l.used_;
+        }
+
+        if (result->used_ < min) {
+            result->grow(min);
+        }
+        int old_used = result->used_;
+        result->used_ = min;
+
+        for (i = 0; i < min; ++i) {
+            result->buf_[i] = l.buf_[i] & r.buf_[i];
+        }
+
+        for (; i < old_used; ++i) {
+            result->buf_[i] = 0;
+        }
+        result->shrink();
+    }
+
+    void BigInteger::xorItl(const IntArray& l, const IntArray& r, IntArray* result) {
+        int i, min, max;
+        const IntArray* x;
+        if (l.used_ > r.used_) {
+            min = r.used_;
+            max = l.used_;
+            x = &l;
+        } else {
+            min = l.used_;
+            max = r.used_;
+            x = &r;
+        }
+
+        if (result->used_ < max) {
+            result->grow(max);
+        }
+        int old_used = result->used_;
+        result->used_ = max;
+
+        for (i = 0; i < min; ++i) {
+            result->buf_[i] = l.buf_[i] ^ r.buf_[i];
+        }
+        for (; i < max; ++i) {
+            result->buf_[i] = x->buf_[i] ^ 0U;
+        }
+
+        for (; i < old_used; ++i) {
+            result->buf_[i] = 0;
+        }
+        result->shrink();
     }
 
     void BigInteger::reduce(IntArray* x, const IntArray& m, const IntArray& mu) {
@@ -1673,7 +2173,7 @@ namespace ukive {
         subItl(*x, q, x);
 
         if (x->is_minus_) {
-            setDigit(&q, 1);
+            setDigitItl(&q, 1);
             shlItl(um + 1, &q);
             addItl(*x, q, x);
         }
@@ -1792,6 +2292,153 @@ namespace ukive {
         *rho = ((Word(1) << kBaseBitCount) - x) & kBaseMask;
     }
 
+    void BigInteger::drReduce(IntArray* x, const IntArray& n, Digit k) {
+        int m = n.used_;
+        if (x->alloc_ < m * 2) {
+            x->grow(m * 2);
+        }
+
+        for (;;) {
+            Digit mu = 0;
+            for (int i = 0; i < m; ++i) {
+                Word r = Word(x->buf_[m + i]) * k + x->buf_[i] + mu;
+                x->buf_[i] = r & kBaseMask;
+                mu = r >> kBaseBitCount;
+            }
+
+            x->buf_[m] = mu;
+
+            for (int i = m + 1; i < x->used_; ++i) {
+                x->buf_[i] = 0;
+            }
+
+            x->shrink();
+
+            if (cmpUnsItl(*x, n) >= 0) {
+                lowSub(*x, n, x);
+            } else {
+                break;
+            }
+        }
+    }
+
+    void BigInteger::drSetup(const IntArray& n, Digit* k) {
+        *k = kBase - n.buf_[0];
+    }
+
+    bool BigInteger::drIsModulus(const IntArray& n) {
+        if (n.used_ < 2) {
+            return false;
+        }
+
+        for (int i = 1; i < n.used_; ++i) {
+            if (n.buf_[i] != kBaseMask) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void BigInteger::reduce2k(IntArray* a, const IntArray& n, Digit d) {
+        int p = getBitCountItl(n);
+        IntArray q;
+
+        for (;;) {
+            div2dItl(*a, p, &q, a);
+            if (d != 1) {
+                muldItl(q, d, &q);
+            }
+
+            lowAdd(*a, q, a);
+            if (cmpUnsItl(*a, n) >= 0) {
+                lowSub(*a, n, a);
+            } else {
+                break;
+            }
+        }
+    }
+
+    void BigInteger::reduce2kSetup(const IntArray& a, Digit* d) {
+        IntArray tmp;
+
+        int p = getBitCountItl(a);
+        zweiExptItl(p, &tmp);
+
+        lowSub(tmp, a, &tmp);
+        *d = tmp.buf_[0];
+    }
+
+    bool BigInteger::reduceIs2k(const IntArray& a) {
+        if (a.used_ == 0) {
+            return false;
+        }
+        if (a.used_ == 1) {
+            return true;
+        }
+        if (a.used_ > 1) {
+            int j = getBitCountItl(a);
+            Digit k = 1;
+            int l = 1;
+
+            for (int i = kBaseBitCount; i < j; ++i) {
+                if ((a.buf_[l] & k) == 0) {
+                    return false;
+                }
+                k <<= 1;
+                if (k > kBaseMask) {
+                    ++l;
+                    k = 1;
+                }
+            }
+        }
+        return true;
+    }
+
+    void BigInteger::reduce2kl(IntArray* a, const IntArray& n, const IntArray& d) {
+        int p = getBitCountItl(n);
+        IntArray q;
+
+        for (;;) {
+            div2dItl(*a, p, &q, a);
+            mulItl(q, d, &q);
+
+            lowAdd(*a, q, a);
+            if (cmpUnsItl(*a, n) >= 0) {
+                lowSub(*a, n, a);
+            } else {
+                break;
+            }
+        }
+    }
+
+    void BigInteger::reduce2klSetup(const IntArray& a, IntArray* d) {
+        IntArray tmp;
+
+        int p = getBitCountItl(a);
+        zweiExptItl(p, &tmp);
+
+        lowSub(tmp, a, d);
+    }
+
+    bool BigInteger::reduceIs2kl(const IntArray& a) {
+        if (a.used_ == 0) {
+            return false;
+        }
+        if (a.used_ == 1) {
+            return true;
+        }
+        if (a.used_ > 1) {
+            int j = 0;
+            for (int i = 0; i < a.used_; ++i) {
+                if (a.buf_[i] > kBaseMask) {
+                    ++j;
+                }
+            }
+            return j >= a.used_ / 2;
+        }
+        return true;
+    }
+
     bool BigInteger::invmodFast(const IntArray& a, const IntArray& b, IntArray* c) {
         if (!b.isOdd()) {
             return false;
@@ -1806,7 +2453,7 @@ namespace ukive {
         IntArray v(y);
 
         IntArray B, D;
-        setDigit(&D, 1);
+        setDigitItl(&D, 1);
 
         do {
             while (!u.isOdd()) {
@@ -1867,8 +2514,8 @@ namespace ukive {
         IntArray v(y);
 
         IntArray A, B, C, D;
-        setDigit(&A, 1);
-        setDigit(&D, 1);
+        setDigitItl(&A, 1);
+        setDigitItl(&D, 1);
 
         do {
             while (!u.isOdd()) {
@@ -1919,21 +2566,44 @@ namespace ukive {
         return true;
     }
 
-    bool BigInteger::readFromStringItl(const string8& str, int radix, IntArray* a) {
+    void BigInteger::readFromStringItl(const string8& str, int radix, IntArray* a) {
         if (radix < 2 || radix > 64) {
-            return false;
+            CHECK(false);
+            return;
         }
 
-        bool neg = (!str.empty() && str[0] == '-');
         a->zero();
 
-        for (int i = 0; i < int(str.length()) - 1; ++i) {
+        bool neg = false;
+        bool first_d = false;
+        int length = int(str.length());
+
+        for (int i = 0; i < length; ++i) {
+            auto sch = str[i];
+            if (sch == ' ') {
+                continue;
+            }
+
+            if (!first_d) {
+                first_d = true;
+                neg = (sch == '-');
+                if (neg) {
+                    continue;
+                }
+            }
+
             int j;
-            char ch = (radix < 36) ? ::toupper(str[i]) : str[i];
+            bool hit = false;
+            char ch = (radix < 36) ? ::toupper(sch) : sch;
             for (j = 0; j < 64; ++j) {
                 if (ch == kBase64CharMap[j]) {
+                    hit = true;
                     break;
                 }
+            }
+
+            if (!hit) {
+                CHECK(false);
             }
 
             if (j < radix) {
@@ -1945,18 +2615,18 @@ namespace ukive {
         }
 
         if (!a->isZero()) {
-            a->is_minus_ = true;
+            a->is_minus_ = neg;
         }
-        return true;
     }
 
-    bool BigInteger::toStringItl(const IntArray& a, int radix, string8* str) {
+    void BigInteger::toStringItl(const IntArray& a, int radix, string8* str) {
         if (radix < 2 || radix > 64) {
-            return false;
+            CHECK(false);
+            return;
         }
         if (a.isZero()) {
             str->push_back('0');
-            return true;
+            return;
         }
 
         int begin = 0;
@@ -1974,7 +2644,6 @@ namespace ukive {
         }
 
         std::reverse(str->begin() + begin, str->end());
-        return true;
     }
 
     void BigInteger::gcdItl(const IntArray& a, const IntArray& b, IntArray* c) {
@@ -2038,14 +2707,57 @@ namespace ukive {
         c->is_minus_ = false;
     }
 
+    void BigInteger::incItl(uint32_t s, IntArray* a) {
+        if ((a->buf_[0] & 1) == 0) {
+            a->buf_[0] += 1;
+            return;
+        }
+
+        int length = getBitCountItl(*a);
+        s = MP_MIN(length, int(s));
+
+        int b_count = s / kBaseBitCount;
+        int off = s % kBaseBitCount;
+
+        Digit u = 1;
+        for (int i = 0; i < b_count; ++i) {
+            a->buf_[i] += u;
+            u = a->buf_[i] >> kBaseBitCount;
+            a->buf_[i] &= kBaseMask;
+            if (u == 0) {
+                return;
+            }
+        }
+
+        if (off > 0) {
+            Digit mask = (Digit(1) << off) - 1;
+            Digit tmp = a->buf_[b_count] & mask;
+            ++tmp;
+            tmp &= mask;
+            a->buf_[b_count] &= ~mask;
+            a->buf_[b_count] |= tmp;
+        }
+    }
+
     bool BigInteger::invmodItl(const IntArray& a, const IntArray& b, IntArray* c) {
-        if (b.is_minus_ || b.isZero()) {
+        if (b.is_minus_ || b.isZero() || a.isZero()) {
+            CHECK(false);
             return false;
         }
         if (b.isOdd()) {
-            return invmodFast(a, b, c);
+            //return invmodFast(a, b, c);
         }
         return invmodSlow(a, b, c);
+    }
+
+    bool BigInteger::isPowOf2(Digit b, int* p) {
+        for (int i = 0; i < kBaseBitCount; ++i) {
+            if (b == Digit(1) << i) {
+                *p = i;
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -1,6 +1,54 @@
 #include "shell/test/security/crypto_unit_test.h"
 
+#include <algorithm>
+#include <iomanip>
+
+#include "ukive/log.h"
 #include "ukive/security/crypto/aes.h"
+#include "ukive/security/crypto/ecdp.h"
+#include "ukive/security/crypto/aead.hpp"
+
+
+namespace {
+
+    string8 swapHexStrBytes(const string8& in) {
+        string8 out;
+        for (size_t i = 0; i < in.length(); i += 2) {
+            if (i + 1 < in.length()) {
+                out.insert(out.begin(), in[i + 1]);
+            }
+            out.insert(out.begin(), in[i]);
+        }
+        return out;
+    }
+
+    // 获取字符串的字面值字节数组。
+    // 该方法假定输入为大端模式，且输入字符串长度为偶数。
+    stringu8 getStrBytes(const string8& in) {
+        stringu8 out;
+        for (size_t i = 0; i < in.length(); i += 2) {
+            int result;
+            std::istringstream ss(in.substr(i, 2));
+            if (!(ss >> std::hex >> result)) {
+                return {};
+            }
+            out.push_back(result);
+        }
+        return out;
+    }
+
+    // 获取字节数组的字符串字面值。
+    // 该方法将按照输入的字节数组顺序输出字符串。
+    string8 getBytesStr(const stringu8& in) {
+        string8 out;
+        std::ostringstream ss;
+        for (size_t i = 0; i < in.length(); ++i) {
+            ss << std::hex << std::setw(2) << std::setfill('0') << int(in[i]);
+        }
+        return ss.str();
+    }
+
+}
 
 
 namespace shell {
@@ -18,11 +66,224 @@ namespace test {
         uint8_t plain[4 * ukive::crypto::AES::Nb];
         ukive::crypto::AES::decrypt(cipher, plain, key);
 
+        for (int i = 0; i < 16; ++i) {
+            DCHECK(plain[i] == input[i]);
+        }
+
         return 0;
     }
 
     int TEST_RSA() {
         return 0;
+    }
+
+    void TEST_ECDP_X25519() {
+        auto k = ukive::BigInteger::fromString(swapHexStrBytes(
+            "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4"), 16);
+
+        k.setBit(255, 0);
+        k.setBit(254, 1);
+        k.setBit(2, 0);
+        k.setBit(1, 0);
+        k.setBit(0, 0);
+
+        auto u = ukive::BigInteger::fromString(swapHexStrBytes(
+            "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c"), 16);
+        u.setBit(255, 0);
+
+        uint32_t A;
+        uint8_t cofactor, Up;
+        ukive::BigInteger p, order, Vp, result;
+        ukive::crypto::ECDP::curve25519(&p, &A, &order, &cofactor, &Up, &Vp);
+
+        ukive::crypto::ECDP::X25519(p, k, u, &result);
+
+        string8 out;
+        result.toString(16, &out);
+        std::transform(out.begin(), out.end(), out.begin(), ::tolower);
+
+        DCHECK(swapHexStrBytes("c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552") == out);
+    }
+
+    void TEST_ECDP_X448() {
+        auto k = ukive::BigInteger::fromString(swapHexStrBytes(
+            "3d262fddf9ec8e88495266fea19a34d28882acef045104d0d1aae121"
+            "700a779c984c24f8cdd78fbff44943eba368f54b29259a4f1c600ad3"), 16);
+
+        k.setBit(447, 1);
+        k.setBit(1, 0);
+        k.setBit(0, 0);
+
+        auto u = ukive::BigInteger::fromString(swapHexStrBytes(
+            "06fce640fa3487bfda5f6cf2d5263f8aad88334cbd07437f020f08f9"
+            "814dc031ddbdc38c19c6da2583fa5429db94ada18aa7a7fb4ef8a086"), 16);
+
+        uint32_t A;
+        uint8_t cofactor, Up;
+        ukive::BigInteger p, order, Vp, result;
+        ukive::crypto::ECDP::curve448(&p, &A, &order, &cofactor, &Up, &Vp);
+
+        ukive::crypto::ECDP::X448(p, k, u, &result);
+
+        string8 out;
+        result.toString(16, &out);
+        std::transform(out.begin(), out.end(), out.begin(), ::tolower);
+
+        DCHECK(swapHexStrBytes("ce3e4ff95a60dc6697da1db1d85e6afbdf79b50a2412d7546d5f239f"
+            "e14fbaadeb445fc66a01b0779d98223961111e21766282f73dd96b6f") == out);
+    }
+
+    void TEST_AEAD_AES_GCM() {
+        {
+            // 128
+            stringu8 K = getStrBytes("1672c3537afa82004c6b8a46f6f0d026");
+            stringu8 IV = getStrBytes("05");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, {}, {}, 128 / 8, &C, &T);
+            DCHECK(getBytesStr(T) == "8e2ad721f9455f74d8b53d3141f27e8e");
+
+            stringu8 P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, {}, {}, 128 / 8, T, &P));
+        }
+
+        {
+            // 128
+            stringu8 K = getStrBytes("11754cd72aec309bf52f7687212e8957");
+            stringu8 IV = getStrBytes("3c819d9a9bed087615030b65");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, {}, {}, 128 / 8, &C, &T);
+            DCHECK(getBytesStr(T) == "250327c674aaf477aef2675748cf6971");
+
+            stringu8 P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, {}, {}, 128 / 8, T, &P));
+        }
+
+        {
+            // 128
+            stringu8 K = getStrBytes("919134056cdababe692a2fdd0ee0c30f");
+            stringu8 IV = getStrBytes("a952082329230002c3261f1b");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, {}, {}, 32 / 8, &C, &T);
+            DCHECK(getBytesStr(T) == "01eaee77");
+
+            stringu8 P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, {}, {}, 32 / 8, T, &P));
+        }
+
+        {
+            // 128
+            stringu8 K = getStrBytes("77be63708971c4e240d1cb79e8d77feb");
+            stringu8 IV = getStrBytes("e0e00f19fed7ba0136a797f3");
+            stringu8 A = getStrBytes("7a43ec1d9c0a5a78a0b16533a6213cab");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, {}, A, 128 / 8, &C, &T);
+            DCHECK(getBytesStr(T) == "209fcc8d3675ed938e9c7166709dd946");
+
+            stringu8 P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, {}, A, 128 / 8, T, &P));
+        }
+
+        {
+            // 128
+            stringu8 K = getStrBytes("7fddb57453c241d03efbed3ac44e371c");
+            stringu8 IV = getStrBytes("ee283a3fc75575e33efd4887");
+            stringu8 P = getStrBytes("d5de42b461646c255c87bd2962d3b9a2");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, P, {}, 128 / 8, &C, &T);
+            DCHECK(getBytesStr(C) == "2ccda4a5415cb91e135c2a0f78c9b2fd");
+            DCHECK(getBytesStr(T) == "b36d1df9b9d5e596f83e8b7f52971cb3");
+
+            stringu8 _P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, C, {}, 128 / 8, T, &_P));
+            DCHECK(_P == P);
+        }
+
+        {
+            // 128
+            stringu8 K = getStrBytes("f006f4956684f328f893a59fae41998a");
+            stringu8 IV = getStrBytes("ab50a8b652b4fd4b792244b98ab1641810dea5a52797b4a63c52f4"
+                "1b9351c6ba6ba2d4fb9d70f774ce00d162cdd8b1c8a142c234fde075d609ed8b5b79de5ce7c9"
+                "c4cf4c6258f6ea1543b8ef3e72dc1789c5aeb7aaf3a2a5400bd6b1ecdf19aa4da528c171aa43"
+                "5824d985a0c76707a6be0c6402bf9122186a56a50fb7a3828e");
+            stringu8 P = getStrBytes("f4d0de42ce1268e0421134dde7");
+            stringu8 A = getStrBytes("c5962f9fdfdb9cce9a49fae4d6d328ad100acbadefc1774d83e2441"
+                "9a66f5856ac4f023ca84faa9ee73df6c73cbbf8e60622333e2238bdd235baf5bc9bc1d304f98"
+                "b2f9a8176e03ac2d6c75f32e5e19ace32d9b3eb132ae9786c");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, P, A, 120 / 8, &C, &T);
+            DCHECK(getBytesStr(C) == "a9585fbd04deab91dc70563e2c");
+            DCHECK(getBytesStr(T) == "c77dbf78cecc6bbb1881950a3a6c3d");
+
+            stringu8 _P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, C, A, 120 / 8, T, &_P));
+            DCHECK(_P == P);
+        }
+
+        {
+            // 192
+            stringu8 K = getStrBytes("aa740abfadcda779220d3b406c5d7ec09a77fe9d94104539");
+            stringu8 IV = getStrBytes("ab2265b4c168955561f04315");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, {}, {}, 128 / 8, &C, &T);
+            DCHECK(getBytesStr(T) == "f149e2b5f0adaa9842ca5f45b768a8fc");
+
+            stringu8 P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, {}, {}, 128 / 8, T, &P));
+        }
+
+        {
+            // 192
+            stringu8 K = getStrBytes("4ef6d69f2859df52f3bd89536ae4678a6c8a66dcd2de0297");
+            stringu8 IV = getStrBytes("9ef13db6492bd861f8d413b6fa128f50c712845f5fd8f237c11e6b"
+                "195658b7bc6ff8554b51e8c686a1f57bd51aa0e0db2dda6e336881dbc918a9a322577356f2ba"
+                "3fcc9d8378b252980c44eda96b6bdb59b279ebb6a805937289e8e15c58d83e3eca25dcd639aa"
+                "b485d59e446ca9eedec60ecf25e956ce8c75bc1c425175dd43");
+            stringu8 P = getStrBytes("e331dffcc7aac724e6272c8a00f1fade12711eada6ef880abb952c8db3bc7b0d");
+            stringu8 A = getStrBytes("5b2710cb83de39632a10ff86262ee75ce2fa10a18a14d3cb9774ab3"
+                "adc585bb316e95c77daa30ab94f54883161fa95ba4f7914a847b4c3f6555192b8593ca7e9f80"
+                "6354689a7cc73123c58292c5e08824bc8e69713e3a4ef53cd");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, P, A, 104 / 8, &C, &T);
+            DCHECK(getBytesStr(C) == "f2ddf592fe3789008d022557c6436acb471700de1fc5a8dd8fa4c315a2ae8e4c");
+            DCHECK(getBytesStr(T) == "eb67fb25cc6eabccea2fe4f150");
+
+            stringu8 _P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, C, A, 104 / 8, T, &_P));
+        }
+
+        {
+            // 256
+            stringu8 K = getStrBytes("b52c505a37d78eda5dd34f20c22540ea1b58963cf8e5bf8ffa85f9f2492505b4");
+            stringu8 IV = getStrBytes("516c33929df5a3284ff463d7");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, {}, {}, 128 / 8, &C, &T);
+            DCHECK(getBytesStr(T) == "bdc1ac884d332457a1d2664f168c76f0");
+
+            stringu8 P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, {}, {}, 128 / 8, T, &P));
+        }
+
+        {
+            // 256
+            stringu8 K = getStrBytes("a554516e925009dd856f192213e5376bd072078aeb5d3af971b68cc57f8aa0be");
+            stringu8 IV = getStrBytes("26eb2f8c2a9fe5ce6af93be63cf3e670c5f0208933127327ec4869"
+                "3e2ee37e92a0af1c688102fd7b4bb62be1ddd5ba0b8a6ed47137987af768f007857edb2a7465"
+                "ac0ca7a729846966a46d732445c4524d8ccd18233e25e4ea70cfb31b03d2a564f0948247058e"
+                "2ac3f963b816315f183efd80c7117e93b4f8592b4901eb6aa5");
+            stringu8 P = getStrBytes("948ac5bf639d55b4d9e46a8846c697e7d1b9456b9c3f77c891d5aca"
+                "323f18ae78ff8736b8178f91d7fce4041495f616289db79");
+            stringu8 A = getStrBytes("7d2f9b880afbad746bf58c81e31a8e8f88999eb0c6c630ec35db43f"
+                "1e0952fc7d9bc86154832afd154bc49ffe5e67a1d144b89b7e74a36fdeac8e95b8d9c3b220ef"
+                "71f38611edc32ac7d9c01a9bb3ec48bc1aaf1dd79921759b6");
+            stringu8 C, T;
+            ukive::crypto::GCM::GCM_AE(K, IV, P, A, 32 / 8, &C, &T);
+            DCHECK(getBytesStr(C) == "c366146de8b58d3cce004c62a60b24bca3814d3d11ded76bb9f7d47"
+                "c41191b7e3a7444700bd93fefdf54252cb7cf6041038ca8");
+            DCHECK(getBytesStr(T) == "5016d92a");
+
+            stringu8 _P;
+            DCHECK(ukive::crypto::GCM::GCM_AD(K, IV, C, A, 32 / 8, T, &_P));
+        }
     }
 
 }

@@ -20,11 +20,11 @@ namespace crypto {
 
         static void test();
 
-        static void encrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key);
-        static void decrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key);
+        static void encrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key);
+        static void decrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const stringu8& key);
 
-        static void encrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr);
-        static void decrypt(uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr);
+        static void encrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr);
+        static void decrypt(const uint8_t in[4 * Nb], uint8_t out[4 * Nb], const std::vector<uint32_t>& w, uint32_t Nr);
 
     private:
         struct Context {

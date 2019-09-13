@@ -17,12 +17,20 @@ namespace net {
         bool connect(const std::string& ip, unsigned short port);
         bool connectByHost(const std::string& host, unsigned short port);
         bool send(const std::string& buf);
-        bool recv(std::string* buf);
+        bool recv(int length, std::string* buf);
+        bool recvAll(std::string* buf);
 
         bool shutdownSend();
         void close();
 
     private:
+        enum class WaitType {
+            SEND,
+            RECV,
+        };
+
+        bool wait(WaitType type, int timeout_sec = -1);
+
         SOCKET socket_;
     };
 

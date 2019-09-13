@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "ukive/net/tls_common.hpp"
 #include "ukive/utils/string_utils.h"
+#include "ukive/net/tls_record_layer.hpp"
 
 
 // 根据 RFC 8446 实现的 TLS 1.3 客户端
@@ -14,13 +16,6 @@
 namespace ukive {
 namespace net {
 namespace tls {
-
-    enum class ContentType : uint8_t {
-        ChangeCipherSpec = 20,
-        Alert = 21,
-        Handshake = 22,
-        ApplicationData = 23,
-    };
 
     enum class AlertLevel : uint8_t {
         Warning = 1,
@@ -63,16 +58,17 @@ namespace tls {
     };
 
     enum class HandshakeType : uint8_t {
-        HelloRequest = 0,
         ClientHello = 1,
         ServerHello = 2,
+        NewSessionTicket = 4,
+        EndOfEarlyData = 5,
+        EncryptedExtensions = 8,
         Certificate = 11,
-        ServerKeyExchange = 12,
         CertificateRequest = 13,
-        ServerHelloDone = 14,
         CertificateVerify = 15,
-        ClientKeyExchange = 16,
         Finished = 20,
+        KeyUpdate = 24,
+        MessageHash = 254
     };
 
     enum class CipherSuite {
@@ -121,6 +117,15 @@ namespace tls {
         TLS_CHACHA20_POLY1305_SHA256,
         TLS_AES_128_CCM_SHA256,
         TLS_AES_128_CCM_8_SHA256,
+    };
+
+    enum class NameType : uint8_t {
+        HostName = 0,
+    };
+
+    struct ServerName {
+        NameType type;
+        stringu8 host_name;
     };
 
     enum class NamedGroup : uint16_t {
@@ -205,35 +210,51 @@ namespace tls {
         KeyShare = 51,
     };
 
-    struct ProtocolVersion {
-        uint8_t major;
-        uint8_t minor;
+    struct Extension {
+        ExtensionType type;
+        // 长度 0~2^16-1
+        // 具体定义和 type 有关
+        stringu8 data;
     };
 
-    struct TLSPlaintext {
-        ContentType type;
-        ProtocolVersion version;
-        uint16_t length;
-        stringu8 fragment;
+    struct ECDHEParams {
+        uint8_t legacy_form = 4;
+        // 固定长度
+        stringu8 X;
+        // 固定长度
+        stringu8 Y;
+
+        stringu8 toBytes() const {
+            stringu8 r;
+            r.push_back(legacy_form);
+            r.append(X).append(Y);
+            return r;
+        }
     };
 
-    struct TLSCompressed {
-        ContentType type;
-        ProtocolVersion version;
-        uint16_t length;
-        stringu8 fragment;
+    struct KeyShareEntry {
+        NamedGroup group;
+        // 长度 1~2^16-1
+        // 具体定义和 group 有关
+        stringu8 key_exchange;
+    };
+
+    struct KeyShareClientHello {
+        // 长度 0~2^16-1
+        std::vector<KeyShareEntry> client_shares;
     };
 
 
     class TLS {
     public:
-        TLS() = default;
+        TLS();
+        ~TLS();
 
         void testHandshake();
 
     private:
-        void makeFragment(ContentType type, const stringu8& plain_text, stringu8* out);
-        void parseFragment(const stringu8& raw);
+        void parseFragment(const TLSRecordLayer::TLSPlaintext& text);
+        void parseServerHello(const stringu8& content);
 
         void constructHandshake(HandshakeType type, stringu8* out);
 
@@ -245,9 +266,8 @@ namespace tls {
         stringu8 getSupportCompressionMethods();
         stringu8 getSupportExtensions();
 
-        stringu8 getUInt16Bytes(uint16_t val);
-        stringu8 getUInt24Bytes(uint32_t val);
-        stringu8 getUInt32Bytes(uint32_t val);
+        string8 host_;
+        TLSRecordLayer record_layer_;
     };
 
 

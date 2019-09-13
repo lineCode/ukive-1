@@ -396,6 +396,9 @@
     <ClCompile Include="utils\big_integer\int_array.cpp">
       <Filter>utils\big_integer</Filter>
     </ClCompile>
+    <ClCompile Include="security\crypto\ecdp.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="views\spinner_view\spinner_view.cpp">
       <Filter>views\spinner_view</Filter>
     </ClCompile>
@@ -410,6 +413,18 @@
     </ClCompile>
     <ClCompile Include="utils\convert.cpp">
       <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="net\tls_record_layer.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\tls_common.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\aead.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer\byte_string.cpp">
+      <Filter>utils\big_integer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -835,6 +850,9 @@
     <ClInclude Include="utils\big_integer\int_array.h">
       <Filter>utils\big_integer</Filter>
     </ClInclude>
+    <ClInclude Include="security\crypto\ecdp.h">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="views\spinner_view\spinner_view.h">
       <Filter>views\spinner_view</Filter>
     </ClInclude>
@@ -849,6 +867,18 @@
     </ClInclude>
     <ClInclude Include="utils\convert.h">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="net\tls_record_layer.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\tls_common.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\aead.hpp">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer\byte_string.hpp">
+      <Filter>utils\big_integer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

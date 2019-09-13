@@ -34,11 +34,11 @@ namespace crypto {
     BigInteger RSA::getPrime() {
         auto init = BigInteger::fromRandom(1024);
         if (!init.isOdd()) {
-            init.add(BigInteger::ONE);
+            init.add(1);
         }
 
         while (!isPrime(init)) {
-            init.add(BigInteger::TWO);
+            init.add(2);
         }
         return init;
     }

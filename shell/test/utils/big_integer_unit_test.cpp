@@ -4,112 +4,157 @@
 #include "ukive/utils/big_integer/big_integer.h"
 #include "ukive/utils/string_utils.h"
 
-#define BigInteger ukive::BigInteger
-
 
 namespace {
 
+    using Digit = ukive::IntArray::Digit;
+
     bool testToInt64(int64_t left) {
-        auto test = BigInteger::from64(left);
+        auto test = ukive::BigInteger::from64(left);
         return test.toInt64() == left;
     }
 
     bool testAdd(int64_t left, int64_t right) {
-        auto test = BigInteger::from64(left);
-        test.add(BigInteger::from64(right));
+        auto test = ukive::BigInteger::from64(left);
+        test.add(ukive::BigInteger::from64(right));
         return test.toInt64() == left + right;
     }
 
     bool testSub(int64_t left, int64_t right) {
-        auto test = BigInteger::from64(left);
-        test.sub(BigInteger::from64(right));
+        auto test = ukive::BigInteger::from64(left);
+        test.sub(ukive::BigInteger::from64(right));
         return test.toInt64() == left - right;
     }
 
     bool testMul(int32_t left, int32_t right) {
-        auto test = BigInteger::from32(left);
-        test.mul(BigInteger::from32(right));
+        auto test = ukive::BigInteger::from32(left);
+        test.mul(ukive::BigInteger::from32(right));
         return test.toInt64() == int64_t(left) * int64_t(right);
     }
 
     bool testDiv(int64_t left, int64_t right) {
-        auto test = BigInteger::from64(left);
-        test.div(BigInteger::from64(right));
+        auto test = ukive::BigInteger::from64(left);
+        test.div(ukive::BigInteger::from64(right));
+        return test.toInt64() == left / right;
+    }
+
+    bool testAdds(int64_t left, Digit right) {
+        auto test = ukive::BigInteger::from64(left);
+        test.add(right);
+        return test.toInt64() == left + right;
+    }
+
+    bool testSubs(int64_t left, Digit right) {
+        auto test = ukive::BigInteger::from64(left);
+        test.sub(right);
+        return test.toInt64() == left - right;
+    }
+
+    bool testMuls(int32_t left, Digit right) {
+        auto test = ukive::BigInteger::from32(left);
+        test.mul(right);
+        return test.toInt64() == int64_t(left) * int64_t(right);
+    }
+
+    bool testDivs(int64_t left, Digit right) {
+        auto test = ukive::BigInteger::from64(left);
+        test.div(right);
         return test.toInt64() == left / right;
     }
 
     bool testDivOverflow() {
-        auto test = BigInteger::from64(INT64_MIN);
-        test.div(BigInteger::from32(-1));
+        auto test = ukive::BigInteger::from64(INT64_MIN);
+        test.div(ukive::BigInteger::from32(-1));
         return test.isBeyondInt64();
     }
 
     bool testMod(int64_t left, int64_t right) {
-        auto test = BigInteger::from64(left);
-        test.mod(BigInteger::from64(right));
+        auto test = ukive::BigInteger::from64(left);
+        test.mod(ukive::BigInteger::from64(right));
         return test.toInt64() == left % right;
     }
 
-    bool testPow(int64_t left, int64_t exp) {
-        auto test = BigInteger::from64(left);
-        test.pow(BigInteger::from64(exp));
+    /*bool testPow(int64_t left, int64_t exp) {
+        auto test = ukive::BigInteger::from64(left);
+        test.pow(ukive::BigInteger::from64(exp));
+        return test.toInt64() == int64_t(std::pow(left, exp));
+    }*/
+
+    bool testPow(int64_t left, Digit exp) {
+        auto test = ukive::BigInteger::from64(left);
+        test.pow(exp);
         return test.toInt64() == int64_t(std::pow(left, exp));
     }
 
     bool testPowMod(int64_t left, int64_t exp, int64_t rem) {
-        auto test = BigInteger::from64(left);
-        test.powMod(BigInteger::from64(exp), BigInteger::from64(rem));
+        auto test = ukive::BigInteger::from64(left);
+        test.powMod(ukive::BigInteger::from64(exp), ukive::BigInteger::from64(rem));
         return test.toInt64() == int64_t(std::pow(left, exp)) % rem;
     }
 
+    bool testRoot(int64_t base, uint32_t b) {
+        auto test = ukive::BigInteger::from64(base);
+        test.root(b);
+        return test.toInt64() == int64_t(std::sqrt(base));
+    }
+
     bool testAbs(int64_t left) {
-        auto test = BigInteger::from64(left);
+        auto test = ukive::BigInteger::from64(left);
         test.abs();
         return test.toInt64() == std::abs(left);
     }
 
     bool testInv(int64_t left) {
-        auto test = BigInteger::from64(left);
+        auto test = ukive::BigInteger::from64(left);
         test.inv();
         return test.toInt64() == -left;
     }
 
     bool testShl(int64_t left, uint32_t off) {
-        auto test = BigInteger::from64(left);
+        auto test = ukive::BigInteger::from64(left);
         test.shl(off);
         return test.toInt64() == left << off;
     }
 
     bool testShr(int64_t left, uint32_t off) {
-        auto test = BigInteger::from64(left);
+        auto test = ukive::BigInteger::from64(left);
         test.shr(off);
         return test.toInt64() == left >> off;
     }
 
     bool testBeyondInt64() {
-        auto test = BigInteger::from64(INT64_MAX);
+        auto test = ukive::BigInteger::from64(INT64_MAX);
         if (test.isBeyondInt64()) return false;
 
-        test.add(BigInteger::ONE);
+        test.add(ukive::BigInteger::ONE);
         if (!test.isBeyondInt64()) return false;
 
-        test = BigInteger::from64(INT64_MIN);
+        test = ukive::BigInteger::from64(INT64_MIN);
         if (test.isBeyondInt64()) return false;
 
-        test.add(BigInteger::from32(-1));
+        test.add(ukive::BigInteger::from32(-1));
         return test.isBeyondInt64();
     }
 
     bool testToString(int64_t left) {
         std::string result;
-        auto test = BigInteger::from64(left);
-        return test.toString(10, &result) && result == std::to_string(left);
+        auto test = ukive::BigInteger::from64(left);
+        test.toString(10, &result);
+        return result == std::to_string(left);
     }
 
     bool testToStringHex(int64_t left) {
         std::string result;
-        auto test = BigInteger::from64(left);
-        return test.toString(16, &result) && result == ukive::toString8Hex(left);
+        auto test = ukive::BigInteger::from64(left);
+        test.toString(16, &result);
+        return result == ukive::toString8Hex(left);
+    }
+
+    bool testFromStringHex(const string8& str) {
+        std::string result;
+        auto test = ukive::BigInteger::fromString(str, 16);
+        test.toString(16, &result);
+        return result == str;
     }
 
 }
@@ -150,6 +195,20 @@ namespace test {
         DCHECK(testAdd(5649856, 345346536));
         DCHECK(testAdd(-5649856, 345346536));
 
+        // Adds
+        DCHECK(testAdds(0, 0));
+        DCHECK(testAdds(0, 1));
+        DCHECK(testAdds(1, 1));
+        DCHECK(testAdds(-1, 0));
+        DCHECK(testAdds(-1, 1));
+        DCHECK(testAdds(127, 1));
+        DCHECK(testAdds(-1, 128));
+        DCHECK(testAdds(128, 0));
+        DCHECK(testAdds(128, 128));
+        DCHECK(testAdds(-128, 128));
+        DCHECK(testAdds(5649856, 345346536));
+        DCHECK(testAdds(-5649856, 345346536));
+
         // Sub
         DCHECK(testSub(0, 0));
         DCHECK(testSub(0, 1));
@@ -165,6 +224,17 @@ namespace test {
         DCHECK(testSub(128, -129));
         DCHECK(testSub(3458386, 345609497));
         DCHECK(testSub(11134583866, 345609497));
+
+        // Subs
+        DCHECK(testSubs(0, 0));
+        DCHECK(testSubs(0, 1));
+        DCHECK(testSubs(1, 0));
+        DCHECK(testSubs(1, 1));
+        DCHECK(testSubs(-1, 1));
+        DCHECK(testSubs(-128, 1));
+        DCHECK(testSubs(128, 127));
+        DCHECK(testSubs(3458386, 345609497));
+        DCHECK(testSubs(11134583866, 345609497));
 
         // Mul
         DCHECK(testMul(0, 0));
@@ -186,6 +256,21 @@ namespace test {
         DCHECK(testMul(-4568456, 234234));
         DCHECK(testMul(4568456, -234234));
         DCHECK(testMul(-4568456, -234234));
+
+        // Muls
+        DCHECK(testMuls(0, 0));
+        DCHECK(testMuls(1, 0));
+        DCHECK(testMuls(-1, 0));
+        DCHECK(testMuls(0, 1));
+        DCHECK(testMuls(1, 1));
+        DCHECK(testMuls(-1, 1));
+        DCHECK(testMuls(16, 16));
+        DCHECK(testMuls(16, 16));
+        DCHECK(testMuls(64, 2));
+        DCHECK(testMuls(32768, 2));
+        DCHECK(testMuls(65536, 65535));
+        DCHECK(testMuls(4568456, 234234));
+        DCHECK(testMuls(-4568456, 234234));
 
         // Div
         DCHECK(testDivOverflow());
@@ -235,6 +320,46 @@ namespace test {
         DCHECK(testDiv(94856794756944, 94856794756945));
         DCHECK(testDiv(94856794756945 / 2, 94856794756945));
         DCHECK(testDiv(119025, 346));
+
+        // Divs
+        DCHECK(testDivs(0, 1));
+        DCHECK(testDivs(1, 1));
+        DCHECK(testDivs(0, 2));
+        DCHECK(testDivs(1, 2));
+        DCHECK(testDivs(2, 2));
+        DCHECK(testDivs(-2, 2));
+        DCHECK(testDivs(128, 2));
+        DCHECK(testDivs(256, 2));
+        DCHECK(testDivs(256, 3));
+        DCHECK(testDivs(1024, 2));
+        DCHECK(testDivs(65536, 2));
+        DCHECK(testDivs(65537, 2));
+        DCHECK(testDivs(65539, 2));
+        DCHECK(testDivs(65535, 65536));
+        DCHECK(testDivs(65536, 65535));
+        DCHECK(testDivs(65536, 65537));
+        DCHECK(testDivs(65537, 65536));
+        DCHECK(testDivs(1048612, 2));
+        DCHECK(testDivs(int64_t(INT32_MAX) + 1, 2));
+        DCHECK(testDivs(int64_t(INT32_MAX) + 1, 255));
+        DCHECK(testDivs(int64_t(INT32_MAX) + 347, 2));
+        DCHECK(testDivs(int64_t(INT32_MAX) + 346459, 2));
+        DCHECK(testDivs(99000000, 9900));
+        DCHECK(testDivs(-99000000, 9900));
+        DCHECK(testDivs(1, 345885486));
+        DCHECK(testDivs(5484984645, 345885486));
+        DCHECK(testDivs(-5484984645, 345885486));
+        DCHECK(testDivs(4534444444, 453));
+        DCHECK(testDivs(INT32_MIN, 2));
+        DCHECK(testDivs(INT32_MAX, 2));
+        DCHECK(testDivs(int64_t(INT32_MAX) + 1, 3));
+        DCHECK(testDivs(int64_t(INT32_MAX) + 1, INT32_MAX - 1));
+        DCHECK(testDivs(int64_t(INT32_MAX), 2));
+        DCHECK(testDivs(94856794756945, 1));
+        DCHECK(testDivs(94856794756945, 948567947));
+        DCHECK(testDivs(94856794756944, 948567947));
+        DCHECK(testDivs(94856794756945 / 2, 948567947));
+        DCHECK(testDivs(119025, 346));
 
         // Abs
         DCHECK(testAbs(0));
@@ -292,7 +417,7 @@ namespace test {
         DCHECK(testMod(int64_t(INT32_MAX), 2));
 
         // Pow
-        /*DCHECK(testPow(0, 1));
+        DCHECK(testPow(0, 1));
         DCHECK(testPow(1, 1));
         DCHECK(testPow(0, 10));
         DCHECK(testPow(1, 10));
@@ -316,7 +441,7 @@ namespace test {
         DCHECK(testPow(2, 20));
         DCHECK(testPow(2, 31));
         DCHECK(testPow(2, 32));
-        DCHECK(testPow(2, 62));*/
+        DCHECK(testPow(2, 62));
 
         // Pow and Mod
         DCHECK(testPowMod(0, 1, 1));
@@ -347,6 +472,11 @@ namespace test {
         DCHECK(testPowMod(345, 5, 344));
         DCHECK(testPowMod(3450, 2, 3451));
         DCHECK(testPowMod(3451, 2, 3452));
+
+        // Sqrt
+        DCHECK(testRoot(4, 2));
+        DCHECK(testRoot(9, 2));
+        DCHECK(testRoot(456897, 2));
 
         // Shl
         /*DCHECK(testShl(0, 0));
@@ -411,10 +541,19 @@ namespace test {
         //DCHECK(testToStringHex(INT64_MIN));
         DCHECK(testToStringHex(INT64_MAX));
 
-        /*auto i = BigInteger::ONE;
-        for (auto z = BigInteger::TWO; z.compare(BigInteger::fromU64(99999)) != 0;) {
+        // From string hex
+        DCHECK(testFromStringHex("0"));
+        DCHECK(testFromStringHex("FFF"));
+        DCHECK(testFromStringHex("FFFFFFFF"));
+        DCHECK(testFromStringHex("FFFEFFFF"));
+        DCHECK(testFromStringHex("8FFEFFFF"));
+        DCHECK(testFromStringHex("349876536"));
+        DCHECK(testFromStringHex("456FFFFFFFF"));
+
+        /*auto i = ukive::BigInteger::ONE;
+        for (auto z = ukive::BigInteger::TWO; z.compare(ukive::BigInteger::fromU64(99999)) != 0;) {
             i.mul(z);
-            z.add(BigInteger::ONE);
+            z.add(ukive::BigInteger::ONE);
         }*/
 
         /*string8 out;
@@ -423,15 +562,15 @@ namespace test {
         }*/
 
         {
-            auto init = BigInteger::TWO;
+            auto init = ukive::BigInteger::TWO;
             init.pow(1023);
             if (!init.isOdd()) {
-                init.add(BigInteger::ONE);
+                init.add(1);
             }
 
             int i = 0;
-            while (!init.isPrime2(BigInteger::TWO)) {
-                init.add(BigInteger::TWO);
+            while (!init.isPrime2(ukive::BigInteger::TWO)) {
+                init.add(2);
                 ++i;
             }
 

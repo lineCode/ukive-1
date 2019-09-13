@@ -35,7 +35,7 @@ namespace net {
         client.shutdownSend();
 
         std::string response;
-        if (!client.recv(&response)) {
+        if (!client.recvAll(&response)) {
             return false;
         }
 
