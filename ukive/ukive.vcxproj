@@ -270,6 +270,8 @@
     <ClInclude Include="utils\dynamic_windows_api.h" />
     <ClInclude Include="utils\executable.h" />
     <ClInclude Include="utils\float.h" />
+    <ClInclude Include="utils\json\json_parser.h" />
+    <ClInclude Include="utils\json\json_structs.h" />
     <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />
@@ -413,6 +415,8 @@
     <ClCompile Include="utils\double.cpp" />
     <ClCompile Include="utils\dynamic_windows_api.cpp" />
     <ClCompile Include="utils\float.cpp" />
+    <ClCompile Include="utils\json\json_parser.cpp" />
+    <ClCompile Include="utils\json\json_structs.cpp" />
     <ClCompile Include="utils\number.cpp" />
     <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />

@@ -38,6 +38,7 @@
 #include "shell/resources/oigka_resources_id.h"
 #include "shell/test/security/digest_unit_test.h"
 #include "shell/test/utils/big_integer_unit_test.h"
+#include "shell/test/utils/json_unit_test.h"
 
 #include "ukive/security/digest/md5.h"
 #include "ukive/security/crypto/aes.h"
@@ -70,6 +71,7 @@ namespace shell {
         //test::TEST_MD5();
         //test::TEST_SHA();
         //test::TEST_BIG_INTEGER();
+        //test::TEST_JSON();
 
         //ukive::crypto::RSA rsa;
         //rsa.init();

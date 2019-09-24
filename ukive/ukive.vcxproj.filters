@@ -402,6 +402,12 @@
     <ClCompile Include="views\spinner_view\spinner_list_adapter.cpp">
       <Filter>views\spinner_view</Filter>
     </ClCompile>
+    <ClCompile Include="utils\json\json_parser.cpp">
+      <Filter>utils\json</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\json\json_structs.cpp">
+      <Filter>utils\json</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -832,6 +838,12 @@
     <ClInclude Include="views\spinner_view\spinner_list_adapter.h">
       <Filter>views\spinner_view</Filter>
     </ClInclude>
+    <ClInclude Include="utils\json\json_parser.h">
+      <Filter>utils\json</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\json\json_structs.h">
+      <Filter>utils\json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -920,6 +932,9 @@
     </Filter>
     <Filter Include="views\spinner_view">
       <UniqueIdentifier>{8857160c-cdd7-460a-be7a-661d14015527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\json">
+      <UniqueIdentifier>{460d5ff5-9da8-45d3-8837-7f404b54ad13}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

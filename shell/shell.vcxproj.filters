@@ -151,6 +151,9 @@
     <ClCompile Include="test\utils\big_integer_unit_test.cpp">
       <Filter>test\utils</Filter>
     </ClCompile>
+    <ClCompile Include="test\utils\json_unit_test.cpp">
+      <Filter>test\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resources\resource.h">
@@ -244,6 +247,9 @@
       <Filter>test\security</Filter>
     </ClInclude>
     <ClInclude Include="test\utils\big_integer_unit_test.h">
+      <Filter>test\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="test\utils\json_unit_test.h">
       <Filter>test\utils</Filter>
     </ClInclude>
   </ItemGroup>

@@ -247,6 +247,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="test\test_window.cpp" />
     <ClCompile Include="test\text\text_window.cpp" />
     <ClCompile Include="test\utils\big_integer_unit_test.cpp" />
+    <ClCompile Include="test\utils\json_unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="application.manifest">
@@ -285,6 +286,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="test\test_window.h" />
     <ClInclude Include="test\text\text_window.h" />
     <ClInclude Include="test\utils\big_integer_unit_test.h" />
+    <ClInclude Include="test\utils\json_unit_test.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\shell.ico" />
