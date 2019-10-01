@@ -4,15 +4,15 @@
 #include <cstdint>
 
 
-/**
- * 根据 RFC6234 实现的 SHA 相关算法
- * https://tools.ietf.org/html/rfc6234
- *
- * 代码主体来自上方链接，仅做细微修改。
- */
-
 namespace ukive {
 namespace digest {
+
+    /**
+     * 根据 RFC6234 实现的 SHA 相关算法
+     * https://tools.ietf.org/html/rfc6234
+     *
+     * 代码主体来自上方链接，仅做细微修改。
+     */
 
     enum class SHAVersion {
         SHA1, SHA224, SHA256, SHA384, SHA512

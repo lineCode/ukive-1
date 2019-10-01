@@ -18,8 +18,11 @@ namespace ukive {
         : FrameLayout(w, attrs),
           title_tv_(nullptr)
     {
+        auto color = Color::Blue800;
+        color.a = 0.5f;
+
         setElevation(w->dpToPx(4));
-        setBackground(new ColorDrawable(Color::Blue400));
+        setBackground(new ColorDrawable(color));
         w->addStatusChangedListener(this);
         initViews();
     }

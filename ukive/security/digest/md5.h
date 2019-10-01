@@ -6,11 +6,6 @@
 #include "ukive/utils/string_utils.h"
 
 
-/**
- * 根据 RFC1321 实现的 MD5 算法
- * https://tools.ietf.org/html/rfc1321
- */
-
 namespace ukive {
 namespace digest {
 
@@ -21,6 +16,11 @@ namespace digest {
         md5BadParam         // passed a bad parameter
     };
 
+    
+    /**
+     * 根据 RFC1321 实现的 MD5 算法
+     * https://tools.ietf.org/html/rfc1321
+     */
     class MD5 {
     public:
         static string8 cal(const string8& str);

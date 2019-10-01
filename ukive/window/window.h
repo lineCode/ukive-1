@@ -65,6 +65,7 @@ namespace ukive {
         void setContentView(View* content);
         void setBackgroundColor(Color color);
         void setTranslucent(bool translucent);
+        void setBlurBehindEnabled(bool enabled);
         void setStartupWindow(bool enable);
         void setFrameType(FrameType type);
         void setLastInputView(View* v);
@@ -85,6 +86,7 @@ namespace ukive {
         HWND getHandle() const;
         FrameType getFrameType() const;
         View* getLastInputView() const;
+        View* getContentView() const;
         TitleBar* getTitleBar() const;
 
         bool isShowing() const;

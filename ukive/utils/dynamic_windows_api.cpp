@@ -2,6 +2,7 @@
 
 
 namespace ukive {
+namespace win {
 
     HRESULT STDAPICALLTYPE UDGetDpiForMonitor(
         HMONITOR hmonitor, MONITOR_DPI_TYPE dpiType, UINT* dpiX, UINT* dpiY)
@@ -37,4 +38,15 @@ namespace ukive {
         return 0;
     }
 
+    BOOL WINAPI UDSetWindowCompositionAttribute(HWND hwnd, WINDOWCOMPOSITIONATTRIBDATA* data) {
+        using SetWindowCompositionAttributePtr = UINT(WINAPI*)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
+        auto func = reinterpret_cast<SetWindowCompositionAttributePtr>(
+            ::GetProcAddress(::LoadLibraryW(L"User32.dll"), "SetWindowCompositionAttribute"));
+        if (func) {
+            return func(hwnd, data);
+        }
+        return 0;
+    }
+
+}
 }

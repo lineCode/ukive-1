@@ -63,6 +63,7 @@ int APIENTRY wWinMain(
     test_window->setHeight(ukive::Application::dpToPx(600));
     test_window->setFrameType(ukive::Window::FRAME_CUSTOM);
     test_window->setTranslucent(false);
+    test_window->setBlurBehindEnabled(true);
     test_window->center();
     test_window->show();
 

@@ -134,6 +134,10 @@ namespace ukive {
         impl_->setTranslucent(translucent);
     }
 
+    void Window::setBlurBehindEnabled(bool enabled) {
+        impl_->setBlurBehindEnabled(enabled);
+    }
+
     void Window::setStartupWindow(bool enable) {
         is_startup_window_ = enable;
     }
@@ -208,6 +212,10 @@ namespace ukive {
 
     View* Window::getLastInputView() const {
         return last_input_view_;
+    }
+
+    View* Window::getContentView() const {
+        return root_layout_->getContentView();
     }
 
     TitleBar* Window::getTitleBar() const {

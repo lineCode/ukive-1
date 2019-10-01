@@ -250,7 +250,7 @@ namespace ukive {
             HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
 
             UINT dpi_x = 96, dpi_y = 96;
-            HRESULT hr = UDGetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
+            HRESULT hr = win::UDGetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
             if (SUCCEEDED(hr)) {
                 return dpi_x;
             }

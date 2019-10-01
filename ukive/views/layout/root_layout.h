@@ -32,6 +32,7 @@ namespace ukive {
 
         bool isTitleBarShowing() const;
         TitleBar* getTitleBar() const;
+        View* getContentView() const;
         DebugView* getDebugView() const;
 
         void setContent(int id);

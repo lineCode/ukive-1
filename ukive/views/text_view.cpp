@@ -1436,17 +1436,10 @@ namespace ukive {
     }
 
     void TextView::onGetContentPosition(int* x, int* y) {
-        int left = 0;
-        int top = 0;
-        View* parent = this;
-        while (parent) {
-            left += parent->getLeft() - parent->getScrollX();
-            top += parent->getTop() - parent->getScrollY();
-            parent = parent->getParent();
-        }
+        auto bounds = getBoundsInWindow();
 
-        *x = left + prev_x_ + 1;
-        *y = top + prev_y_ + 1;
+        *x = bounds.left + prev_x_ + 1;
+        *y = bounds.top + prev_y_ + 1;
     }
 
 }

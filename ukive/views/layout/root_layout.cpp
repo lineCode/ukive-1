@@ -148,6 +148,10 @@ namespace ukive {
         return title_bar_;
     }
 
+    View* RootLayout::getContentView() const {
+        return content_view_;
+    }
+
     DebugView* RootLayout::getDebugView() const {
         return debug_view_;
     }

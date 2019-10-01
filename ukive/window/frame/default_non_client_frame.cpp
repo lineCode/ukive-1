@@ -30,7 +30,7 @@ namespace ukive {
             rect->left = 0;
             rect->right = 0;
             rect->top = 0;
-            rect->bottom = (window_->isMaximum() ? 0 : 1);
+            rect->bottom = 0;
         }
     }
 

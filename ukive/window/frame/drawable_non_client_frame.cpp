@@ -2,10 +2,12 @@
 
 #include <dwmapi.h>
 #include <Windowsx.h>
+#include <VersionHelpers.h>
 
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/log.h"
+#include "ukive/utils/win10_version.h"
 
 
 namespace ukive {
@@ -47,7 +49,7 @@ namespace ukive {
     void DrawableNonClientFrame::getClientInsets(RECT* rect) {
         DCHECK(rect);
         if (window_->isTranslucent()) {
-            int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+            int border_thickness = getBorderThickness();
             rect->left = border_thickness;
             rect->right = border_thickness;
             rect->top = border_thickness;
@@ -56,14 +58,21 @@ namespace ukive {
             rect->left = 0;
             rect->right = 0;
             rect->top = 0;
-            rect->bottom = (window_->isMaximum() ? 0 : 1);
+            // 用于抵消 onNcCalSize() 中的扩展。详见 onNcCalSize() 中的注释。
+            static bool is_win10_1703_or_above = win::isWin10Ver1703OrGreater();
+            if (is_win10_1703_or_above) {
+                rect->bottom = (window_->isMaximum() ? 0 : 1);
+            } else {
+                rect->bottom = 0;
+            }
+
         }
     }
 
     void DrawableNonClientFrame::getClientOffset(POINT* offset) {
         DCHECK(offset);
         if (window_->isTranslucent() && window_->isMaximum()) {
-            int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+            int border_thickness = getBorderThickness();
             offset->x = border_thickness;
             offset->y = border_thickness;
         } else {
@@ -138,16 +147,16 @@ namespace ukive {
     LRESULT DrawableNonClientFrame::onNcCalSize(WPARAM wParam, LPARAM lParam, bool* handled) {
         *handled = true;
         if (wParam == TRUE) {
-            // 直接移除整个非客户区。
             auto ncp = reinterpret_cast<NCCALCSIZE_PARAMS*>(lParam);
             if (window_->isTranslucent()) {
+                // 半透明窗口，一切都需要自绘，因此直接移除整个非客户区。
                 ncp->rgrc[0].left += 0;
                 ncp->rgrc[0].top += 0;
                 ncp->rgrc[0].right -= 0;
                 ncp->rgrc[0].bottom -= 0;
             } else {
                 if (window_->isMaximum()) {
-                    int border_thickness = GetSystemMetrics(SM_CXSIZEFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+                    int border_thickness = getBorderThickness();
                     ncp->rgrc[0].left += border_thickness;
                     ncp->rgrc[0].top += border_thickness;
                     ncp->rgrc[0].right -= border_thickness;
@@ -156,7 +165,13 @@ namespace ukive {
                     ncp->rgrc[0].left += 0;
                     ncp->rgrc[0].top += 0;
                     ncp->rgrc[0].right -= 0;
-                    ncp->rgrc[0].bottom -= -1;
+                    // 如果完全移除原生边框，则在调整窗口大小时，自绘边界会跳动，
+                    // 因此让客户区在底部向外扩展 1 个像素，这样似乎可以保留边框，而且该扩展不可见。
+                    // 在 Windows 10 1703 之前的系统上，无需扩展，扩展反而会有绘制问题（模糊）。
+                    // 在 Windows 10 1703 及以上系统上，客户区会向外扩展 1 像素，注意在绘制时不要绘制这行扩展。
+                    // 这里的扩展与 DwmExtendFrameIntoClientArea() 的设置无关，不会与其抵消。
+                    static bool is_win10_1703_or_above = win::isWin10Ver1703OrGreater();
+                    ncp->rgrc[0].bottom -= is_win10_1703_or_above ? -1 : 0;
                 }
             }
         }
@@ -188,9 +203,32 @@ namespace ukive {
         return FALSE;
     }
 
+    LRESULT DrawableNonClientFrame::onActivateAfterDwm() {
+        if (!window_->isTranslucent()) {
+            // 让移除了标准边框的窗口能够显示原生阴影。
+            // 在 Windows 7 上，该方法将会在窗口底部缩进一个像素，这一像素的横线具有毛玻璃效果；
+            // 在 Windows 8 及以上系统，该方法将会在窗口底部缩进一个像素，这一像素是灰色的。
+            // 这一像素是可以被覆盖的，如果覆盖的颜色完全不透明的话。
+            MARGINS margins = { 0,0,0,1 };
+            ::DwmExtendFrameIntoClientArea(window_->getHandle(), &margins);
+        }
+
+        return 0;
+    }
+
     LRESULT DrawableNonClientFrame::onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) {
         *handled = true;
         return TRUE;
+    }
+
+    int DrawableNonClientFrame::getBorderThickness() const {
+        int border_thickness;
+        if (window_->isPopup()) {
+            border_thickness = 0;
+        } else {
+            border_thickness = ::GetSystemMetrics(SM_CXSIZEFRAME) + ::GetSystemMetrics(SM_CXPADDEDBORDER);
+        }
+        return border_thickness;
     }
 
 }

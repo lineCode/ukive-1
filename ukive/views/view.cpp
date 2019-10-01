@@ -527,7 +527,9 @@ namespace ukive {
         auto parent = parent_;
         while (parent) {
             auto p_bounds = parent->getBounds();
-            bounds.offset(p_bounds.left, p_bounds.top);
+            bounds.offset(
+                p_bounds.left - parent->getScrollX(),
+                p_bounds.top - parent->getScrollY());
             parent = parent->getParent();
         }
 

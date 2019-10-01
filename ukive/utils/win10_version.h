@@ -6,8 +6,9 @@
 
 
 namespace ukive {
+namespace win {
 
-    bool isWin10Ver(int build, BYTE condition);
+    bool isWin10Ver(DWORD build, BYTE condition);
 
     // Windows 10 14393 or greater
     bool isWin10Ver1607OrGreater();
@@ -24,6 +25,7 @@ namespace ukive {
     // Windows 10 17763 or greater
     bool isWin10Ver1809OrGreater();
 
+}
 }
 
 #endif  // UKIVE_UTILS_WIN10_VERSION_H_

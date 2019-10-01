@@ -44,6 +44,7 @@
 #include "ukive/security/crypto/aes.h"
 #include "ukive/security/crypto/rsa.h"
 #include "ukive/system/qpc_service.h"
+#include "ukive/utils/dynamic_windows_api.h"
 
 
 namespace shell {
@@ -56,6 +57,8 @@ namespace shell {
 
     void TestWindow::onCreate() {
         Window::onCreate();
+
+        setBackgroundColor(ukive::Color::Transparent);
 
         animator_.setListener(this);
         animator_.setDuration(5 * 1000);
@@ -82,6 +85,8 @@ namespace shell {
         //tls_client.testHandshake();
 
         //ukive::net::unInitializeSocket();
+
+        
     }
 
     void TestWindow::onDraw(const ukive::Rect& rect) {
@@ -118,6 +123,7 @@ namespace shell {
             }
 
             ::DwmIsCompositionEnabled(&new_aero);*/
+        } else if (test_button_ == v) {
         }
     }
 
@@ -128,6 +134,8 @@ namespace shell {
 
     void TestWindow::inflateGroup() {
         setContentView(Res::Layout::test_window_group_layout_xml);
+
+        getContentView()->setBackground(new ukive::ColorDrawable(ukive::Color::White));
 
         DXGI_OUTPUT_DESC outputDesc;
         DXGI_ADAPTER_DESC adapterDesc;
@@ -162,6 +170,9 @@ namespace shell {
         std::wstring imgFileName = ukive::Application::getExecFileName(true);
         auto bitmap = ukive::BitmapFactory::decodeFile(this, ukive::File(imgFileName, L"freshpaint.png").getPath());
         image_view_->setImageBitmap(bitmap);
+
+        test_button_ = static_cast<ukive::Button*>(findViewById(Res::Id::bt_test_button));
+        test_button_->setOnClickListener(this);
     }
 
     void TestWindow::inflateListView() {

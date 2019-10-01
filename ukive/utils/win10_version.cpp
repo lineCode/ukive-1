@@ -8,8 +8,9 @@
 
 
 namespace ukive {
+namespace win {
 
-    bool isWin10Ver(int build, BYTE condition) {
+    bool isWin10Ver(DWORD build, BYTE condition) {
         OSVERSIONINFOEXW osi;
         osi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXW);
         osi.dwBuildNumber = build;
@@ -60,4 +61,5 @@ namespace ukive {
         return isWin10Ver(WIN10_1809_BUILD, VER_GREATER_EQUAL);
     }
 
+}
 }

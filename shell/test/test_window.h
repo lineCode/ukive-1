@@ -35,6 +35,7 @@ namespace shell {
 
         ukive::Animator animator_;
 
+        ukive::Button* test_button_ = nullptr;
         ukive::Button* dwm_button_ = nullptr;
         ukive::ImageView* image_view_ = nullptr;
         ukive::CheckBox* check_box_ = nullptr;

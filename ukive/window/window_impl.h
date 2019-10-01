@@ -58,6 +58,7 @@ namespace ukive {
         void setBounds(int x, int y, int width, int height);
         void setCurrentCursor(Cursor cursor);
         void setTranslucent(bool translucent);
+        void setBlurBehindEnabled(bool enabled);
 
         string16 getTitle() const;
         int getX() const;
@@ -77,6 +78,7 @@ namespace ukive {
         bool isTranslucent() const;
         bool isMinimum() const;
         bool isMaximum() const;
+        bool isPopup() const;
 
         void setMouseCaptureRaw();
         void releaseMouseCaptureRaw();
@@ -214,6 +216,9 @@ namespace ukive {
         void onStyleChanged(bool normal, bool ext, const STYLESTRUCT* ss);
         bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
+        void EnableBlurBehindOnWin7();
+        void EnableBlurBehindOnWin10();
+
         Window* delegate_;
         std::unique_ptr<NonClientFrame> non_client_frame_;
 
@@ -231,6 +236,7 @@ namespace ukive {
         bool is_translucent_;
         bool is_enable_mouse_track_;
         bool is_first_nccalc_;
+        bool is_blur_behind_enabled_ = false;
 
         TouchInputCache ti_cache_;
         std::map<DWORD, TOUCHINPUT> prev_ti_;
