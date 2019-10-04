@@ -40,8 +40,8 @@ namespace shell {
         continue_btn_->setOnClickListener(this);
         continue_btn_->setText(L"Continue");
         auto con_btn_lp = Rlp::Builder(Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .start(layout->getId(), Rlp::START, dpToPx(8))
-            .top(layout->getId(), Rlp::TOP, dpToPx(8)).build();
+            .start(layout->getId(), Rlp::START, dpToPxX(8))
+            .top(layout->getId(), Rlp::TOP, dpToPxX(8)).build();
         layout->addView(continue_btn_, con_btn_lp);
 
         op_list_view_ = new ukive::ListView(this);
@@ -50,10 +50,10 @@ namespace shell {
         op_list_view_->setAdapter(op_list_adapter_);
 
         auto olv_lp = Rlp::Builder(Rlp::MATCH_PARENT, Rlp::MATCH_PARENT)
-            .start(layout->getId(), Rlp::START, dpToPx(8))
-            .end(layout->getId(), Rlp::END, dpToPx(8))
-            .top(continue_btn_->getId(), Rlp::BOTTOM, dpToPx(8))
-            .bottom(layout->getId(), Rlp::BOTTOM, dpToPx(8)).build();
+            .start(layout->getId(), Rlp::START, dpToPxX(8))
+            .end(layout->getId(), Rlp::END, dpToPxX(8))
+            .top(continue_btn_->getId(), Rlp::BOTTOM, dpToPxX(8))
+            .bottom(layout->getId(), Rlp::BOTTOM, dpToPxX(8)).build();
         layout->addView(op_list_view_, olv_lp);
 
         showTitleBar();

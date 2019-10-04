@@ -59,7 +59,7 @@ namespace shell {
         ce_button_->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
         ce_button_->setElevation(1);
 
-        auto ce_button_lp = Rlp::Builder(dpToPx(100), dpToPx(50))
+        auto ce_button_lp = Rlp::Builder(dpToPxX(100), dpToPxX(50))
             .start(layout->getId()).top(layout->getId())
             .end(layout->getId()).bottom(layout->getId()).build();
         layout->addView(ce_button_, ce_button_lp);

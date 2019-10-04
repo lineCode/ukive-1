@@ -43,10 +43,12 @@ namespace ukive {
 
         static int getViewID();
 
-        static int getPrimaryDpi();
+        static void getPrimaryDpi(int* dpi_x, int* dpi_y);
 
-        static float dpToPx(float dp);
-        static float pxToDp(int px);
+        static float dpToPxX(float dp);
+        static float dpToPxY(float dp);
+        static float pxToDpX(int px);
+        static float pxToDpY(int px);
 
         static bool isAeroEnabled();
 

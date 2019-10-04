@@ -20,8 +20,8 @@ namespace ukive {
           callback_(callback),
           weak_ref_nest_(this)
     {
-        menu_width_ = int(window->dpToPx(92));
-        menu_item_height_ = int(window->dpToPx(36));
+        menu_width_ = int(window->dpToPxX(92));
+        menu_item_height_ = int(window->dpToPxX(36));
 
         menu_ = new MenuImpl(window);
         menu_->setCallback(this);

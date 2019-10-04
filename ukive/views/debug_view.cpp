@@ -12,7 +12,7 @@ namespace ukive {
 
     DebugView::DebugView(Window* w, AttrsRef attrs)
         : View(w, attrs),
-          strip_width_(w->dpToPx(4)),
+          strip_width_(w->dpToPxX(4)),
           screen_width_(Application::getScreenWidth()),
           mode_(Mode::RENDER) {
     }
@@ -24,7 +24,7 @@ namespace ukive {
         int height = getContentBounds().height();
 
         int cur_x = width;
-        int base_height = getWindow()->dpToPx(64);
+        int base_height = getWindow()->dpToPxX(64);
         float base_time = 0.f;
         if (mode_ == Mode::LAYOUT) {
             base_time = 4;
@@ -46,7 +46,7 @@ namespace ukive {
         }
 
         canvas->fillRect(
-            RectF(0, std::round(height - base_height), width, std::round(getWindow()->dpToPx(2))),
+            RectF(0, std::round(height - base_height), width, std::round(getWindow()->dpToPxX(2))),
             Color::Red400);
     }
 

@@ -32,7 +32,7 @@ namespace ukive {
 
     void Button::initButton() {
         shape_drawable_ = new ShapeDrawable(ShapeDrawable::ROUND_RECT);
-        shape_drawable_->setRadius(getWindow()->dpToPx(2.f));
+        shape_drawable_->setRadius(getWindow()->dpToPxX(2.f));
         shape_drawable_->setSolidEnable(true);
         shape_drawable_->setSolidColor(Color::White);
 
@@ -40,12 +40,12 @@ namespace ukive {
         ripple_background_->addDrawable(shape_drawable_);
 
         setPadding(
-            getWindow()->dpToPx(24),
-            getWindow()->dpToPx(6),
-            getWindow()->dpToPx(24),
-            getWindow()->dpToPx(6));
+            getWindow()->dpToPxX(24),
+            getWindow()->dpToPxX(6),
+            getWindow()->dpToPxX(24),
+            getWindow()->dpToPxX(6));
         setBackground(ripple_background_);
-        setElevation(getWindow()->dpToPx(2.0f));
+        setElevation(getWindow()->dpToPxX(2.0f));
     }
 
     void Button::setButtonColor(Color color) {
@@ -87,9 +87,9 @@ namespace ukive {
         ripple_background->addDrawable(shape_drawable);
         setBackground(ripple_background);
 
-        tri_length_ = getWindow()->dpToPx(10);
-        tri_height_ = getWindow()->dpToPx(6);
-        button_size_ = getWindow()->dpToPx(28);
+        tri_length_ = getWindow()->dpToPxX(10);
+        tri_height_ = getWindow()->dpToPxX(6);
+        button_size_ = getWindow()->dpToPxX(28);
 
         // 设为偶数
         if (tri_length_ & 1) {

@@ -11,7 +11,7 @@ namespace ukive {
         if (endWith(dm, L"dp", false)) {
             float val = 0;
             if (stringToNumber(dm.substr(0, dm.length() - 2), &val)) {
-                *out = w->dpToPx(val);
+                *out = w->dpToPxX(val);
                 return true;
             }
         } else if (endWith(dm, L"px", false)) {

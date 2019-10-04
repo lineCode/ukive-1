@@ -31,17 +31,17 @@ namespace ukive {
         is_pointer_left_key_available_ = false;
         listener_ = nullptr;
 
-        track_height_ = getWindow()->dpToPx(2);
+        track_height_ = getWindow()->dpToPxX(2);
         if (track_height_ % 2 != 0) {
             ++track_height_;
         }
 
-        thumb_min_diameter_ = getWindow()->dpToPx(10);
+        thumb_min_diameter_ = getWindow()->dpToPxX(10);
         if (thumb_min_diameter_ % 2 != 0) {
             ++thumb_min_diameter_;
         }
 
-        thumb_max_diameter_ = getWindow()->dpToPx(14);
+        thumb_max_diameter_ = getWindow()->dpToPxX(14);
         if (thumb_max_diameter_ % 2 != 0) {
             ++thumb_max_diameter_;
         }

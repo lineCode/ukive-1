@@ -21,8 +21,8 @@ namespace ukive {
           callback_(callback),
           weak_ref_nest_(this)
     {
-        menu_width_ = window->dpToPx(92);
-        menu_item_height_ = window->dpToPx(36);
+        menu_width_ = window->dpToPxX(92);
+        menu_item_height_ = window->dpToPxX(36);
 
         menu_impl_ = new MenuImpl(window);
         menu_impl_->setCallback(this);
@@ -35,7 +35,7 @@ namespace ukive {
         shapeDrawable->setSolidColor(Color::White);
 
         inner_window_ = std::make_shared<InnerWindow>(window);
-        inner_window_->setElevation(window->dpToPx(2.f));
+        inner_window_->setElevation(window->dpToPxX(2.f));
         inner_window_->setContentView(menu_impl_);
         inner_window_->setOutsideTouchable(true);
         inner_window_->setBackground(shapeDrawable);

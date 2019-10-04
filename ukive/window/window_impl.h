@@ -69,7 +69,7 @@ namespace ukive {
         int getClientOffY() const;
         int getClientWidth() const;
         int getClientHeight() const;
-        int getDpi() const;
+        void getDpi(int* dpi_x, int* dpi_y) const;
         HWND getHandle() const;
         Cursor getCurrentCursor() const;
 
@@ -86,8 +86,10 @@ namespace ukive {
         void setMouseTrack();
         bool isMouseTrackEnabled();
 
-        float dpToPx(float dp);
-        float pxToDp(float px);
+        float dpToPxX(float dp);
+        float dpToPxY(float dp);
+        float pxToDpX(float px);
+        float pxToDpY(float px);
 
         void setWindowStyle(int style, bool ex, bool enabled);
         void sendFrameChanged();
@@ -194,8 +196,6 @@ namespace ukive {
         LRESULT onDwmCompositionChanged(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onWindowPosChanged(WPARAM wParam, LPARAM lParam, bool* handled);
 
-        void onPreCreate(
-            ClassInfo* info, int* win_style, int* win_ex_style);
         void onCreate();
         void onShow(bool show);
         void onActivate(int param);

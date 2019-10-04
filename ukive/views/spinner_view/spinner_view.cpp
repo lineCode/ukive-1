@@ -62,15 +62,15 @@ namespace ukive {
         shapeDrawable->setSolidColor(Color::White);
 
         inner_window_ = std::make_shared<InnerWindow>(getWindow());
-        inner_window_->setElevation(getWindow()->dpToPx(2.f));
+        inner_window_->setElevation(getWindow()->dpToPxX(2.f));
         inner_window_->setContentView(list_view_);
         inner_window_->setOutsideTouchable(false);
         inner_window_->setDismissByTouchOutside(true);
         inner_window_->setBackground(shapeDrawable);
-        inner_window_->setHeight(getWindow()->dpToPx(100));
+        inner_window_->setHeight(getWindow()->dpToPxX(100));
         inner_window_->setEventListener(this);
 
-        min_dropdown_width_ = getWindow()->dpToPx(100);
+        min_dropdown_width_ = getWindow()->dpToPxX(100);
     }
 
     void SpinnerView::addItem(const string16& title) {

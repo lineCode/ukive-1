@@ -49,21 +49,10 @@ namespace {
 namespace shell {
 
     LodWindow::LodWindow()
-        :Window() {
-
-        mPrevTime = 0;
-        mFrameCounter = 0;
-        mFramePreSecond = 0;
-    }
+        : Window() {}
 
     LodWindow::~LodWindow() {
         terrain_scene_->setRenderListener(nullptr);
-    }
-
-
-    void LodWindow::onPreCreate(
-        ukive::ClassInfo* info,
-        int* win_style, int* win_ex_style) {
     }
 
     void LodWindow::onCreate() {
@@ -84,11 +73,11 @@ namespace shell {
         ukive::LinearLayoutParams *d3dViewLp = new ukive::LinearLayoutParams(
             0, ukive::LayoutParams::MATCH_PARENT);
         d3dViewLp->left_margin = d3dViewLp->top_margin
-            = d3dViewLp->right_margin = d3dViewLp->bottom_margin = dpToPx(8);
+            = d3dViewLp->right_margin = d3dViewLp->bottom_margin = dpToPxX(8);
         d3dViewLp->weight = 2;
         lodView->setLayoutParams(d3dViewLp);
         lodView->setBackground(new ukive::ColorDrawable(ukive::Color::White));
-        lodView->setElevation(dpToPx(2));
+        lodView->setElevation(dpToPxX(2));
 
         lod_view_ = lodView;
 
@@ -127,8 +116,8 @@ namespace shell {
 
         auto c1LabelLp = Rlp::Builder(
             Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPx(8))
-            .top(ID_RIGHT_RESTRAIN, Rlp::TOP, dpToPx(12)).build();
+            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPxX(8))
+            .top(ID_RIGHT_RESTRAIN, Rlp::TOP, dpToPxX(12)).build();
 
         rightLayout->addView(c1Label, c1LabelLp);
 
@@ -141,9 +130,9 @@ namespace shell {
 
         auto c1SeekBarLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
-            .start(ID_C1_LABEL, Rlp::END, dpToPx(4))
+            .start(ID_C1_LABEL, Rlp::END, dpToPxX(4))
             .top(ID_C1_LABEL)
-            .end(ID_C1_VALUE, Rlp::START, dpToPx(4))
+            .end(ID_C1_VALUE, Rlp::START, dpToPxX(4))
             .bottom(ID_C1_LABEL).build();
 
         rightLayout->addView(c1_seekbar_, c1SeekBarLp);
@@ -157,9 +146,9 @@ namespace shell {
         c1_value_tv_->setTextSize(13);
 
         auto c1ValueLp = Rlp::Builder(
-            dpToPx(36), Rlp::FIT_CONTENT)
+            dpToPxX(36), Rlp::FIT_CONTENT)
             .top(ID_C1_LABEL)
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8))
             .bottom(ID_C1_LABEL).build();
 
         rightLayout->addView(c1_value_tv_, c1ValueLp);
@@ -175,8 +164,8 @@ namespace shell {
 
         auto c2LabelLp = Rlp::Builder(
             Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPx(8))
-            .top(ID_C1_LABEL, Rlp::BOTTOM, dpToPx(8)).build();
+            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPxX(8))
+            .top(ID_C1_LABEL, Rlp::BOTTOM, dpToPxX(8)).build();
 
         rightLayout->addView(c2Label, c2LabelLp);
 
@@ -189,9 +178,9 @@ namespace shell {
 
         auto c2SeekBarLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
-            .start(ID_C2_LABEL, Rlp::END, dpToPx(4))
+            .start(ID_C2_LABEL, Rlp::END, dpToPxX(4))
             .top(ID_C2_LABEL)
-            .end(ID_C2_VALUE, Rlp::START, dpToPx(4))
+            .end(ID_C2_VALUE, Rlp::START, dpToPxX(4))
             .bottom(ID_C2_LABEL).build();
 
         rightLayout->addView(c2_seekbar_, c2SeekBarLp);
@@ -205,9 +194,9 @@ namespace shell {
         c2_value_tv_->setTextSize(13);
 
         auto c2ValueLp = Rlp::Builder(
-            dpToPx(36), Rlp::FIT_CONTENT)
+            dpToPxX(36), Rlp::FIT_CONTENT)
             .top(ID_C2_LABEL)
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8))
             .bottom(ID_C2_LABEL).build();
 
         rightLayout->addView(c2_value_tv_, c2ValueLp);
@@ -223,8 +212,8 @@ namespace shell {
 
         auto splitLabelLp = Rlp::Builder(
             Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPx(8))
-            .top(ID_C2_LABEL, Rlp::BOTTOM, dpToPx(16)).build();
+            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPxX(8))
+            .top(ID_C2_LABEL, Rlp::BOTTOM, dpToPxX(16)).build();
 
         rightLayout->addView(splitLabel, splitLabelLp);
 
@@ -239,7 +228,7 @@ namespace shell {
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
             .start(ID_C2_SEEKBAR)
             .top(ID_SPLIT_LABEL)
-            .end(ID_SPLIT_VALUE, Rlp::START, dpToPx(4))
+            .end(ID_SPLIT_VALUE, Rlp::START, dpToPxX(4))
             .bottom(ID_SPLIT_LABEL).build();
 
         rightLayout->addView(split_seekbar_, splitSeekBarLp);
@@ -253,8 +242,8 @@ namespace shell {
         split_value_tv_->setTextSize(13);
 
         auto splitValueLp = Rlp::Builder(
-            dpToPx(36), Rlp::FIT_CONTENT)
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
+            dpToPxX(36), Rlp::FIT_CONTENT)
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8))
             .top(ID_SPLIT_LABEL)
             .bottom(ID_SPLIT_LABEL).build();
 
@@ -270,8 +259,8 @@ namespace shell {
 
         auto submitBTLp = Rlp::Builder(
             Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
-            .top(ID_SPLIT_LABEL, Rlp::BOTTOM, dpToPx(16)).build();
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8))
+            .top(ID_SPLIT_LABEL, Rlp::BOTTOM, dpToPxX(16)).build();
 
         rightLayout->addView(submitBT, submitBTLp);
 
@@ -287,8 +276,8 @@ namespace shell {
 
         auto vsyncBTLp = Rlp::Builder(
             Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8))
-            .top(ID_SUBMIT_BUTTON, Rlp::BOTTOM, dpToPx(8)).build();
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8))
+            .top(ID_SUBMIT_BUTTON, Rlp::BOTTOM, dpToPxX(8)).build();
 
         rightLayout->addView(vsyncBT, vsyncBTLp);
 
@@ -303,9 +292,9 @@ namespace shell {
 
         auto renderInfoTVLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
-            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPx(8))
-            .top(ID_VSYNC_BUTTON, Rlp::BOTTOM, dpToPx(16))
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8)).build();
+            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPxX(8))
+            .top(ID_VSYNC_BUTTON, Rlp::BOTTOM, dpToPxX(16))
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8)).build();
 
         rightLayout->addView(render_info_, renderInfoTVLp);
 
@@ -322,13 +311,13 @@ namespace shell {
         \n►按住Ctrl键和鼠标左键拖动可移动摄像机");
         helperTV->setTextSize(14);
         helperTV->setBackground(new ukive::EditTextDrawable(this));
-        helperTV->setPadding(dpToPx(4), dpToPx(4), dpToPx(4), dpToPx(4));
+        helperTV->setPadding(dpToPxX(4), dpToPxX(4), dpToPxX(4), dpToPxX(4));
 
         auto helperTVLp = Rlp::Builder(
             Rlp::MATCH_PARENT, Rlp::FIT_CONTENT)
-            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPx(8))
-            .top(ID_LOD_INFO, Rlp::BOTTOM, dpToPx(24))
-            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPx(8)).build();
+            .start(ID_RIGHT_RESTRAIN, Rlp::START, dpToPxX(8))
+            .top(ID_LOD_INFO, Rlp::BOTTOM, dpToPxX(24))
+            .end(ID_RIGHT_RESTRAIN, Rlp::END, dpToPxX(8)).build();
 
         rightLayout->addView(helperTV, helperTVLp);
     }

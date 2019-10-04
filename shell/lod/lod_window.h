@@ -26,10 +26,6 @@ namespace shell {
         LodWindow();
         ~LodWindow();
 
-        void onPreCreate(
-            ukive::ClassInfo* info,
-            int* win_style, int* win_ex_style) override;
-
         void onCreate() override;
 
         void onClick(ukive::View* widget) override;
@@ -42,20 +38,20 @@ namespace shell {
     private:
         void inflateCtlLayout(ukive::RestraintLayout* rightLayout);
 
-        int mFrameCounter;
-        int mFramePreSecond;
-        ULONG64 mPrevTime;
+        int mFrameCounter = 0;
+        int mFramePreSecond = 0;
+        ULONG64 mPrevTime = 0;
 
-        ukive::SeekBar* c1_seekbar_;
-        ukive::SeekBar* c2_seekbar_;
-        ukive::SeekBar* split_seekbar_;
-        ukive::TextView* c1_value_tv_;
-        ukive::TextView* c2_value_tv_;
-        ukive::TextView* split_value_tv_;
-        ukive::TextView* render_info_;
-        ukive::Direct3DView* lod_view_;
+        ukive::SeekBar* c1_seekbar_ = nullptr;
+        ukive::SeekBar* c2_seekbar_ = nullptr;
+        ukive::SeekBar* split_seekbar_ = nullptr;
+        ukive::TextView* c1_value_tv_ = nullptr;
+        ukive::TextView* c2_value_tv_ = nullptr;
+        ukive::TextView* split_value_tv_ = nullptr;
+        ukive::TextView* render_info_ = nullptr;
+        ukive::Direct3DView* lod_view_ = nullptr;
 
-        TerrainScene* terrain_scene_;
+        TerrainScene* terrain_scene_ = nullptr;
     };
 
 }

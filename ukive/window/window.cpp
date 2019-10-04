@@ -222,6 +222,10 @@ namespace ukive {
         return root_layout_->getTitleBar();
     }
 
+    void Window::getDpi(int* dpi_x, int* dpi_y) const {
+        impl_->getDpi(dpi_x, dpi_y);
+    }
+
     bool Window::isShowing() const {
         return impl_->isShowing();
     }
@@ -533,15 +537,20 @@ namespace ukive {
         return action_mode;
     }
 
-    float Window::dpToPx(float dp) {
-        return impl_->dpToPx(dp);
+    float Window::dpToPxX(float dp) {
+        return impl_->dpToPxX(dp);
     }
 
-    float Window::pxToDp(float px) {
-        return impl_->pxToDp(px);
+    float Window::dpToPxY(float dp) {
+        return impl_->dpToPxY(dp);
     }
 
-    void Window::onPreCreate(ClassInfo* info, int* win_style, int* win_ex_style) {
+    float Window::pxToDpX(float px) {
+        return impl_->pxToDpX(px);
+    }
+
+    float Window::pxToDpY(float px) {
+        return impl_->pxToDpY(px);
     }
 
     void Window::onCreate() {

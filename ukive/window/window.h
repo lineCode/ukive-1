@@ -88,6 +88,7 @@ namespace ukive {
         View* getLastInputView() const;
         View* getContentView() const;
         TitleBar* getTitleBar() const;
+        void getDpi(int* dpi_x, int* dpi_y) const;
 
         bool isShowing() const;
         bool isTranslucent() const;
@@ -137,12 +138,11 @@ namespace ukive {
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);
 
-        float dpToPx(float dp);
-        float pxToDp(float px);
+        float dpToPxX(float dp);
+        float dpToPxY(float dp);
+        float pxToDpX(float px);
+        float pxToDpY(float px);
 
-        virtual void onPreCreate(
-            ClassInfo* info,
-            int* win_style, int* win_ex_style);
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);

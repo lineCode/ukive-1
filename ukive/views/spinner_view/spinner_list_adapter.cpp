@@ -16,7 +16,7 @@ namespace ukive {
         auto w = parent->getWindow();
 
         auto title_tv = new TextView(w);
-        title_tv->setPadding(w->dpToPx(16), w->dpToPx(8), w->dpToPx(16), w->dpToPx(8));
+        title_tv->setPadding(w->dpToPxX(16), w->dpToPxX(8), w->dpToPxX(16), w->dpToPxX(8));
         title_tv->setClickable(true);
         title_tv->setBackground(new RippleDrawable());
         auto title_lp = new LayoutParams(LayoutParams::MATCH_PARENT, LayoutParams::FIT_CONTENT);

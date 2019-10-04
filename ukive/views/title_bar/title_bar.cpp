@@ -21,7 +21,7 @@ namespace ukive {
         auto color = Color::Blue800;
         color.a = 0.5f;
 
-        setElevation(w->dpToPx(4));
+        setElevation(w->dpToPxX(4));
         setBackground(new ColorDrawable(color));
         w->addStatusChangedListener(this);
         initViews();
@@ -44,12 +44,12 @@ namespace ukive {
         title_tv_->setTextColor(Color::White);
         title_tv_->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
         auto title_tv_lp = Rlp::Builder()
-            .start(root_layout->getId(), Rlp::START, getWindow()->dpToPx(12))
+            .start(root_layout->getId(), Rlp::START, getWindow()->dpToPxX(12))
             .top(root_layout->getId(), Rlp::TOP)
             .bottom(root_layout->getId(), Rlp::BOTTOM).build();
         root_layout->addView(title_tv_, title_tv_lp);
 
-        int btn_padding = getWindow()->dpToPx(8);
+        int btn_padding = getWindow()->dpToPxX(8);
 
         close_btn_ = new Button(getWindow());
         close_btn_->setText(L"");
@@ -58,7 +58,7 @@ namespace ukive {
         close_btn_->setButtonColor(Color::Red500);
         close_btn_->setButtonShape(ShapeDrawable::OVAL);
         auto close_btn_lp = Rlp::Builder()
-            .end(root_layout->getId(), Rlp::END, getWindow()->dpToPx(8))
+            .end(root_layout->getId(), Rlp::END, getWindow()->dpToPxX(8))
             .top(root_layout->getId(), Rlp::TOP)
             .bottom(root_layout->getId(), Rlp::BOTTOM).build();
         root_layout->addView(close_btn_, close_btn_lp);
@@ -70,7 +70,7 @@ namespace ukive {
         max_btn_->setButtonColor(Color::Yellow500);
         max_btn_->setButtonShape(ShapeDrawable::OVAL);
         auto max_btn_lp = Rlp::Builder()
-            .end(close_btn_->getId(), Rlp::START, getWindow()->dpToPx(8))
+            .end(close_btn_->getId(), Rlp::START, getWindow()->dpToPxX(8))
             .top(root_layout->getId(), Rlp::TOP)
             .bottom(root_layout->getId(), Rlp::BOTTOM).build();
         root_layout->addView(max_btn_, max_btn_lp);
@@ -82,7 +82,7 @@ namespace ukive {
         min_btn_->setButtonColor(Color::Green500);
         min_btn_->setButtonShape(ShapeDrawable::OVAL);
         auto min_btn_lp = Rlp::Builder()
-            .end(max_btn_->getId(), Rlp::START, getWindow()->dpToPx(8))
+            .end(max_btn_->getId(), Rlp::START, getWindow()->dpToPxX(8))
             .top(root_layout->getId(), Rlp::TOP)
             .bottom(root_layout->getId(), Rlp::BOTTOM).build();
         root_layout->addView(min_btn_, min_btn_lp);

@@ -21,8 +21,8 @@ namespace ukive {
     {
         scroll_bar_ = std::make_unique<OverlayScrollBar>();
         scroll_bar_->registerScrollHandler(std::bind(&ListView::onScrollBarChanged, this, std::placeholders::_1));
-        scroll_bar_->setScrollBarWidth(w->dpToPx(8));
-        scroll_bar_->setScrollBarMinWidth(w->dpToPx(16));
+        scroll_bar_->setScrollBarWidth(w->dpToPxX(8));
+        scroll_bar_->setScrollBarMinWidth(w->dpToPxX(16));
 
         recycler_ = std::make_unique<ViewHolderRecycler>(this);
     }

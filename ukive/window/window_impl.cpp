@@ -71,7 +71,7 @@ namespace ukive {
             win_ex_style |= WS_EX_LAYERED;
         }
 
-        onPreCreate(&info, &win_style, &win_ex_style);
+        //onPreCreate(&info, &win_style, &win_ex_style);
 
         ATOM atom = WindowClassManager::getInstance()->retrieveWindowClass(info);
         HWND hWnd = ::CreateWindowEx(
@@ -296,25 +296,26 @@ namespace ukive {
         return std::max(height, 0);
     }
 
-    int WindowImpl::getDpi() const {
+    void WindowImpl::getDpi(int* dpi_x, int* dpi_y) const {
         if (!::IsWindow(hWnd_)) {
-            return 96;
+            Application::getPrimaryDpi(dpi_x, dpi_y);
+            return;
         }
 
         static bool is_win10_1607_or_above = win::isWin10Ver1607OrGreater();
         if (is_win10_1607_or_above) {
-            int dpi_x = STLCInt(win::UDGetDpiForWindow(hWnd_));
-            if (dpi_x > 0) {
-                return dpi_x;
+            int dpi = STLCInt(win::UDGetDpiForWindow(hWnd_));
+            if (dpi > 0) {
+                *dpi_x = dpi;
+                *dpi_y = dpi;
+                return;
             }
         }
 
         HDC dc = ::GetDC(hWnd_);
-        int dpi_x = ::GetDeviceCaps(dc, LOGPIXELSX);
-        //int dpi_y = ::GetDeviceCaps(screen, LOGPIXELSY);
+        *dpi_x = ::GetDeviceCaps(dc, LOGPIXELSX);
+        *dpi_y = ::GetDeviceCaps(dc, LOGPIXELSY);
         ::ReleaseDC(hWnd_, dc);
-
-        return dpi_x;
     }
 
     HWND WindowImpl::getHandle() const {
@@ -480,16 +481,28 @@ namespace ukive {
         return is_enable_mouse_track_;
     }
 
-    float WindowImpl::dpToPx(float dp) {
-        return getDpi() / 96.f * dp;
+    float WindowImpl::dpToPxX(float dp) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return dpi_x / 96.f * dp;
     }
 
-    float WindowImpl::pxToDp(float px) {
-        return px / (getDpi() / 96.f);
+    float WindowImpl::dpToPxY(float dp) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return dpi_y / 96.f * dp;
     }
 
-    void WindowImpl::onPreCreate(ClassInfo* info, int* win_style, int* win_ex_style) {
-        delegate_->onPreCreate(info, win_style, win_ex_style);
+    float WindowImpl::pxToDpX(float px) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return px / (dpi_x / 96.f);
+    }
+
+    float WindowImpl::pxToDpY(float px) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return px / (dpi_y / 96.f);
     }
 
     void WindowImpl::onCreate() {

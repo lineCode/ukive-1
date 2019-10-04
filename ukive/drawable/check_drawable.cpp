@@ -25,8 +25,8 @@ namespace ukive {
 
         float hp_offset = 0.f;
         float total_offset = 0.f;
-        int length = int(std::ceil(win_->dpToPx(16)));
-        int stroke_width = int(win_->dpToPx(2.f));
+        int length = int(std::ceil(win_->dpToPxX(16)));
+        int stroke_width = int(win_->dpToPxX(2.f));
         if (stroke_width % 2) {
             hp_offset = 0.5f;
         }
@@ -39,7 +39,7 @@ namespace ukive {
             float(length), float(length));
 
         canvas->drawRoundRect(
-            check_bounds, float(stroke_width), win_->dpToPx(1), Color::Blue400);
+            check_bounds, float(stroke_width), win_->dpToPxX(1), Color::Blue400);
 
         if (checked_) {
             auto value = static_cast<float>(anim_.getCurValue());
@@ -54,10 +54,10 @@ namespace ukive {
 
             canvas->drawLine(
                 line1s, line1s + vec1 * (std::min(value, 0.5f) * 2),
-                std::floor(win_->dpToPx(2.5f)), Color::Blue800);
+                std::floor(win_->dpToPxX(2.5f)), Color::Blue800);
             canvas->drawLine(
                 line2s, line2s + vec2 * (std::max(value - 0.5f, 0.f) * 2),
-                std::floor(win_->dpToPx(2.5f)), Color::Blue800);
+                std::floor(win_->dpToPxX(2.5f)), Color::Blue800);
         }
 
         if (anim_.isRunning()) {

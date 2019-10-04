@@ -1,6 +1,7 @@
 #include "shell/cyroneno/cyroneno_window.h"
 
 #include <algorithm>
+#include <random>
 
 #include "ukive/application.h"
 #include "ukive/graphics/canvas.h"
@@ -26,6 +27,7 @@ namespace {
         RAY_TRACER,
         OBJ_RASTERIZER,
         TEXT_RASTERIZER,
+        OTHER,
     };
 
     constexpr auto IMAGE_WIDTH = 800;
@@ -96,12 +98,14 @@ namespace shell {
                     return;
                 }
 
-                int dpi = 144;
-                int font_size = 128;
-                float scale = (font_size * dpi) / (96.f * head.unit_per_em);
+                int dpi_x, dpi_y;
+                getDpi(&dpi_x, &dpi_y);
 
-                int width = std::ceil((glyph.glyph_header.max_x - glyph.glyph_header.min_x) * scale);
-                int height = std::ceil((glyph.glyph_header.max_y - glyph.glyph_header.min_y) * scale);
+                int font_size = 128;
+                float scale = (font_size * dpi_x) / (96.f * head.unit_per_em);
+
+                int width = std::ceil((glyph.glyph_header.max_x - glyph.glyph_header.min_x + 1) * scale);
+                int height = std::ceil((glyph.glyph_header.max_y - glyph.glyph_header.min_y + 1) * scale);
 
                 int off_x = 0 - glyph.glyph_header.min_x;
                 int off_y = 0 - glyph.glyph_header.min_y;
@@ -113,6 +117,27 @@ namespace shell {
                 auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_.data());
                 bmp_ = ukive::BitmapFactory::create(this, width, height, img_data_ptr);
             }
+        } else {
+            cyro::ImagePng image(100, 100, cyro::ColorBGRAInt(0, 0, 0, 0));
+
+            std::random_device rd;
+            std::default_random_engine en(rd());
+            std::uniform_int_distribution<int> user_dist(64, 255);
+            std::normal_distribution<float> norm_dist;
+
+            for (int h = 0; h < 100; ++h) {
+                for (int w = 0; w < 100; ++w) {
+                    int alpha = user_dist(en);
+                    //int alpha = norm_dist(en) * 255;
+                    image.setColor(w, h, cyro::ColorBGRAInt(0, 0, 0, alpha));
+                }
+            }
+            auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_.data());
+            bmp_ = ukive::BitmapFactory::create(this, 100, 100, img_data_ptr);
+
+            // Save to file
+            ukive::Application::getWICManager()->saveToPngFile(
+                100, 100, img_data_ptr, L"test.png");
         }
 
         img_view_->setImageBitmap(bmp_);

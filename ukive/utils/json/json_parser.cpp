@@ -1,5 +1,7 @@
 #include "ukive/utils/json/json_parser.h"
 
+#include "ukive/utils/unicode.h"
+
 #define ADV_CUR(adv)  \
     cur += (adv);     \
     if (cur >= json_str.length()) return false;
@@ -334,8 +336,10 @@ namespace ukive {
                         ch = json_str[cur];
                         if (!isHexDigit(ch)) return false;
                         code |= uint32_t(getHexVal(ch)) << (uint32_t(1) << ((3 - i) * 8));
-                        // TODO: code
                     }
+                    string8 tmp;
+                    Unicode::UTF32ToUTF8({ code }, &tmp);
+                    str.append(tmp);
                     break;
                 }
                 default: return false;

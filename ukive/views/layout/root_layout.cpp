@@ -57,7 +57,7 @@ namespace ukive {
     }
 
     void RootLayout::showTitleBar() {
-        int title_bar_height = getWindow()->dpToPx(kTitleBarHeight);
+        int title_bar_height = getWindow()->dpToPxX(kTitleBarHeight);
         if (!title_bar_) {
             if (content_view_) {
                 content_view_->getLayoutParams()->top_margin = title_bar_height;
@@ -175,7 +175,7 @@ namespace ukive {
         auto lp = new LayoutParams(
             LayoutParams::MATCH_PARENT, LayoutParams::MATCH_PARENT);
         if (title_bar_ && title_bar_->getVisibility() != View::VANISHED) {
-            lp->top_margin = getWindow()->dpToPx(kTitleBarHeight);
+            lp->top_margin = getWindow()->dpToPxX(kTitleBarHeight);
         }
 
         content_layout_->addView(0, content, lp);

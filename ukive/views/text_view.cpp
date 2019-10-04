@@ -64,7 +64,7 @@ namespace ukive {
     }
 
     void TextView::initTextView() {
-        text_size_ = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
+        text_size_ = static_cast<int>(std::round(getWindow()->dpToPxX(15.f)));
         is_auto_wrap_ = true;
         is_plkey_down_ = false;
         is_prkey_down_ = false;
@@ -871,7 +871,7 @@ namespace ukive {
     }
 
     void TextView::setTextSize(int size) {
-        size = int(std::round(getWindow()->dpToPx(size)));
+        size = int(std::round(getWindow()->dpToPxX(size)));
         if (size == text_size_) {
             return;
         }

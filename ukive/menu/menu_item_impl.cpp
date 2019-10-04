@@ -19,7 +19,7 @@ namespace ukive {
         setTextSize(13);
         setIsEditable(false);
         setIsSelectable(false);
-        setPadding(getWindow()->dpToPx(16), 0, getWindow()->dpToPx(16), 0);
+        setPadding(getWindow()->dpToPxX(16), 0, getWindow()->dpToPxX(16), 0);
         // TODO: ¶ÀÁ¢ÓÚ Direct2D
         setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         autoWrap(false);

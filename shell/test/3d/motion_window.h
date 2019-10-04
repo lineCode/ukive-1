@@ -15,9 +15,6 @@ namespace shell {
         MotionWindow() = default;
         ~MotionWindow() = default;
 
-        void onPreCreate(
-            ukive::ClassInfo* info,
-            int* win_style, int* win_ex_style) override;
         void onCreate() override;
     };
 
