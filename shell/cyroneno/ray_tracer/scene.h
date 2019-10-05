@@ -1,5 +1,5 @@
-#ifndef CYRONENO_SCENE_H_
-#define CYRONENO_SCENE_H_
+#ifndef CYRONENO_RAY_TRACER_SCENE_H_
+#define CYRONENO_RAY_TRACER_SCENE_H_
 
 #include <memory>
 #include <vector>
@@ -27,4 +27,4 @@ namespace cyro {
 
 }
 
-#endif  // CYRONENO_SCENE_H_
+#endif  // CYRONENO_RAY_TRACER_SCENE_H_

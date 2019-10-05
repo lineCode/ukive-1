@@ -212,6 +212,17 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\bezier_cubic_rz.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\bezier_quad_rz.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\circle_rz.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\common.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\line_rz.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\point_rz.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\rasterizer.cpp" />
+    <ClCompile Include="cyroneno\rasterizer\triangle_rz.cpp" />
+    <ClCompile Include="cyroneno\ray_tracer\ray_tracer.cpp" />
+    <ClCompile Include="cyroneno\ray_tracer\scene.cpp" />
+    <ClCompile Include="cyroneno\ray_tracer\surface.cpp" />
     <ClCompile Include="cyroneno\text\opentype\opentype_font.cpp" />
     <ClCompile Include="cyroneno\text\opentype\opentype_rasterizer.cpp" />
     <ClCompile Include="cyroneno\text\opentype\opentype_tables.cpp" />
@@ -246,11 +257,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="cyroneno\image.cpp" />
     <ClCompile Include="cyroneno\matrix.cpp" />
     <ClCompile Include="cyroneno\pipeline\pipeline.cpp" />
-    <ClCompile Include="cyroneno\pipeline\rasterizer.cpp" />
     <ClCompile Include="cyroneno\point.cpp" />
-    <ClCompile Include="cyroneno\ray_tracer.cpp" />
-    <ClCompile Include="cyroneno\scene.cpp" />
-    <ClCompile Include="cyroneno\surface.cpp" />
     <ClCompile Include="cyroneno\vector.cpp" />
     <ClCompile Include="lod\lod_window.cpp" />
     <ClCompile Include="lod\qtree_node.cpp" />
@@ -258,8 +265,6 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="lod\terrain_scene.cpp" />
     <ClCompile Include="lod\lod_generator.cpp" />
     <ClCompile Include="test\3d\motion_window.cpp" />
-    <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp" />
-    <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
     <ClCompile Include="test\emulator\emulator_view.cpp" />
     <ClCompile Include="test\emulator\emulator_window.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
@@ -284,12 +289,19 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="cyroneno\image.h" />
     <ClInclude Include="cyroneno\matrix.h" />
     <ClInclude Include="cyroneno\pipeline\pipeline.h" />
-    <ClInclude Include="cyroneno\pipeline\rasterizer.h" />
     <ClInclude Include="cyroneno\point.h" />
-    <ClInclude Include="cyroneno\ray_tracer.h" />
-    <ClInclude Include="cyroneno\ray_tracer_structs.h" />
-    <ClInclude Include="cyroneno\scene.h" />
-    <ClInclude Include="cyroneno\surface.h" />
+    <ClInclude Include="cyroneno\rasterizer\bezier_cubic_rz.h" />
+    <ClInclude Include="cyroneno\rasterizer\bezier_quad_rz.h" />
+    <ClInclude Include="cyroneno\rasterizer\circle_rz.h" />
+    <ClInclude Include="cyroneno\rasterizer\common.h" />
+    <ClInclude Include="cyroneno\rasterizer\line_rz.h" />
+    <ClInclude Include="cyroneno\rasterizer\point_rz.h" />
+    <ClInclude Include="cyroneno\rasterizer\rasterizer.h" />
+    <ClInclude Include="cyroneno\rasterizer\triangle_rz.h" />
+    <ClInclude Include="cyroneno\ray_tracer\ray_tracer.h" />
+    <ClInclude Include="cyroneno\ray_tracer\ray_tracer_structs.h" />
+    <ClInclude Include="cyroneno\ray_tracer\scene.h" />
+    <ClInclude Include="cyroneno\ray_tracer\surface.h" />
     <ClInclude Include="cyroneno\text\opentype\opentype_common.h" />
     <ClInclude Include="cyroneno\text\opentype\opentype_font.h" />
     <ClInclude Include="cyroneno\text\opentype\opentype_rasterizer.h" />
@@ -323,8 +335,6 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="lod\lod_generator.h" />
     <ClInclude Include="resources\resource.h" />
     <ClInclude Include="test\3d\motion_window.h" />
-    <ClInclude Include="test\bitmap_research\bitmap_dump_view.h" />
-    <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
     <ClInclude Include="test\emulator\emulator_view.h" />
     <ClInclude Include="test\emulator\emulator_window.h" />
     <ClInclude Include="test\list\test_adapter.h" />

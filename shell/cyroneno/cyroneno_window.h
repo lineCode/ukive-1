@@ -11,6 +11,10 @@ namespace ukive {
     class ImageView;
 }
 
+namespace cyro {
+    class Rasterizer;
+}
+
 namespace shell {
 
     class CyronenoWindow : public ukive::Window {
@@ -20,6 +24,11 @@ namespace shell {
         void onCreate() override;
 
     private:
+        void TEST_LINES(cyro::Rasterizer& rz);
+        void TEST_ELLIPSES(cyro::Rasterizer& rz);
+        void TEST_QUAD_BEZIERS(cyro::Rasterizer& rz);
+        void TEST_CUBIC_BEZIERS(cyro::Rasterizer& rz);
+
         ukive::ImageView* img_view_ = nullptr;
         std::shared_ptr<ukive::Bitmap> bmp_;
     };

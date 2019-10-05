@@ -1,7 +1,7 @@
 #ifndef CYRONENO_TEXT_OPENTYPE_OPENTYPE_RASTERIZER_H_
 #define CYRONENO_TEXT_OPENTYPE_OPENTYPE_RASTERIZER_H_
 
-#include "../../pipeline/rasterizer.h"
+#include "../../rasterizer/rasterizer.h"
 #include "opentype_font.h"
 
 /**
@@ -15,9 +15,11 @@ namespace otf {
     public:
         OpenTypeRasterizer(int image_width, int image_height);
 
-        void drawGlyph(const OpenTypeFont::GlyphInfo& glyph, int off_x, int off_y, float scale);
+        void drawGlyph(
+            const OpenTypeFont::GlyphInfo& glyph,
+            int off_x, int off_y, float scale, const Color& c);
 
-        ImagePng getOutput() const;
+        const ImagePng* getOutput() const;
 
     private:
         Rasterizer rasterizer_;

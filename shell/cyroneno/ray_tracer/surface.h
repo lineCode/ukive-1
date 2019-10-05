@@ -1,10 +1,10 @@
-#ifndef CYRONENO_SURFACE_H_
-#define CYRONENO_SURFACE_H_
+#ifndef CYRONENO_RAY_TRACER_SURFACE_H_
+#define CYRONENO_RAY_TRACER_SURFACE_H_
 
 #include <vector>
 
-#include "box.h"
-#include "color.h"
+#include "../box.h"
+#include "../color.h"
 #include "ray_tracer_structs.h"
 
 
@@ -72,4 +72,4 @@ namespace cyro {
 
 }
 
-#endif  // CYRONENO_SURFACE_H_
+#endif  // CYRONENO_RAY_TRACER_SURFACE_H_

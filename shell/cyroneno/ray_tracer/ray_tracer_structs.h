@@ -1,9 +1,9 @@
-#ifndef CYRONENO_RAY_TRACER_STRUCTS_H_
-#define CYRONENO_RAY_TRACER_STRUCTS_H_
+#ifndef CYRONENO_RAY_TRACER_RAY_TRACER_STRUCTS_H_
+#define CYRONENO_RAY_TRACER_RAY_TRACER_STRUCTS_H_
 
-#include "color.h"
-#include "point.h"
-#include "vector.h"
+#include "../color.h"
+#include "../point.h"
+#include "../vector.h"
 
 
 namespace cyro {
@@ -33,4 +33,4 @@ namespace cyro {
 
 }
 
-#endif  // CYRONENO_RAY_TRACER_STRUCTS_H_
+#endif  // CYRONENO_RAY_TRACER_RAY_TRACER_STRUCTS_H_

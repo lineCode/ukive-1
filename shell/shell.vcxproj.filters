@@ -29,9 +29,6 @@
     <Filter Include="test\list">
       <UniqueIdentifier>{6fac98bf-1c33-4738-85f6-95d1af0587b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="test\bitmap_research">
-      <UniqueIdentifier>{e7a193cc-b2d1-4016-8d7a-3523627dd8ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test\emulator">
       <UniqueIdentifier>{a8ecb2be-23d0-45b0-bca9-34a710e22936}</UniqueIdentifier>
     </Filter>
@@ -71,6 +68,12 @@
     <Filter Include="cyroneno\text\opentype\tt_instruction">
       <UniqueIdentifier>{e0d75f04-7935-4652-bd1f-a0c15b75c6a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cyroneno\ray_tracer">
+      <UniqueIdentifier>{16ebf311-80e8-4583-a178-01c92c100ded}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cyroneno\rasterizer">
+      <UniqueIdentifier>{e19963d7-3136-4f32-ab64-0529fd51eaf7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp">
@@ -105,12 +108,6 @@
     </ClCompile>
     <ClCompile Include="test\list\test_adapter.cpp">
       <Filter>test\list</Filter>
-    </ClCompile>
-    <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp">
-      <Filter>test\bitmap_research</Filter>
-    </ClCompile>
-    <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp">
-      <Filter>test\bitmap_research</Filter>
     </ClCompile>
     <ClCompile Include="test\emulator\emulator_view.cpp">
       <Filter>test\emulator</Filter>
@@ -187,20 +184,8 @@
     <ClCompile Include="cyroneno\equations.cpp">
       <Filter>cyroneno</Filter>
     </ClCompile>
-    <ClCompile Include="cyroneno\surface.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
     <ClCompile Include="cyroneno\box.cpp">
       <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\ray_tracer.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\scene.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\pipeline\rasterizer.cpp">
-      <Filter>cyroneno\pipeline</Filter>
     </ClCompile>
     <ClCompile Include="cyroneno\pipeline\pipeline.cpp">
       <Filter>cyroneno\pipeline</Filter>
@@ -234,6 +219,39 @@
     </ClCompile>
     <ClCompile Include="cyroneno\text\opentype\tables\cvt.cpp">
       <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\ray_tracer\ray_tracer.cpp">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\ray_tracer\scene.cpp">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\ray_tracer\surface.cpp">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\rasterizer.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\common.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\point_rz.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\line_rz.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\circle_rz.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\triangle_rz.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\bezier_quad_rz.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="cyroneno\rasterizer\bezier_cubic_rz.cpp">
+      <Filter>cyroneno\rasterizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -269,12 +287,6 @@
     </ClInclude>
     <ClInclude Include="test\list\test_adapter.h">
       <Filter>test\list</Filter>
-    </ClInclude>
-    <ClInclude Include="test\bitmap_research\bitmap_dump_view.h">
-      <Filter>test\bitmap_research</Filter>
-    </ClInclude>
-    <ClInclude Include="test\bitmap_research\bitmap_research_window.h">
-      <Filter>test\bitmap_research</Filter>
     </ClInclude>
     <ClInclude Include="test\emulator\emulator_view.h">
       <Filter>test\emulator</Filter>
@@ -351,23 +363,8 @@
     <ClInclude Include="cyroneno\equations.h">
       <Filter>cyroneno</Filter>
     </ClInclude>
-    <ClInclude Include="cyroneno\surface.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
     <ClInclude Include="cyroneno\box.h">
       <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\ray_tracer.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\scene.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\ray_tracer_structs.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\pipeline\rasterizer.h">
-      <Filter>cyroneno\pipeline</Filter>
     </ClInclude>
     <ClInclude Include="cyroneno\pipeline\pipeline.h">
       <Filter>cyroneno\pipeline</Filter>
@@ -410,6 +407,42 @@
     </ClInclude>
     <ClInclude Include="cyroneno\text\opentype\tables\cvt.h">
       <Filter>cyroneno\text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\ray_tracer\ray_tracer.h">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\ray_tracer\ray_tracer_structs.h">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\ray_tracer\scene.h">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\ray_tracer\surface.h">
+      <Filter>cyroneno\ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\rasterizer.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\common.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\point_rz.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\line_rz.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\circle_rz.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\triangle_rz.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\bezier_quad_rz.h">
+      <Filter>cyroneno\rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="cyroneno\rasterizer\bezier_cubic_rz.h">
+      <Filter>cyroneno\rasterizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

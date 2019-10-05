@@ -1,8 +1,8 @@
-#ifndef CYRONENO_RAY_TRACER_H_
-#define CYRONENO_RAY_TRACER_H_
+#ifndef CYRONENO_RAY_TRACER_RAY_TRACER_H_
+#define CYRONENO_RAY_TRACER_RAY_TRACER_H_
 
-#include "color.h"
-#include "image.h"
+#include "../color.h"
+#include "../image.h"
 #include "ray_tracer_structs.h"
 #include "scene.h"
 
@@ -26,4 +26,4 @@ namespace cyro {
 
 }
 
-#endif  // CYRONENO_RAY_TRACER_H_
+#endif  // CYRONENO_RAY_TRACER_RAY_TRACER_H_

@@ -7,7 +7,7 @@
 #include "../image.h"
 #include "../point.h"
 #include "../equations.h"
-#include "rasterizer.h"
+#include "../rasterizer/rasterizer.h"
 
 
 namespace cyro {
@@ -48,7 +48,7 @@ namespace cyro {
         void constructCube();
         void constructSphere();
 
-        ImagePng getOutput() const;
+        const ImagePng* getOutput() const;
 
     private:
         enum Flags {

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "equations.h"
+#include "../equations.h"
 
 
 namespace cyro {

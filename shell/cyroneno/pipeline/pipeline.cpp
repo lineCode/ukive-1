@@ -102,7 +102,7 @@ namespace cyro {
         polygons_.push_back(sphere);
     }
 
-    ImagePng Pipeline::getOutput() const {
+    const ImagePng* Pipeline::getOutput() const {
         return rasterizer_.getOutput();
     }
 
