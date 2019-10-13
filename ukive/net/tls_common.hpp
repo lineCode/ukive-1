@@ -45,6 +45,7 @@ namespace tls {
     stringu8 getUInt16Bytes(uint16_t val);
     stringu8 getUInt24Bytes(uint32_t val);
     stringu8 getUInt32Bytes(uint32_t val);
+    stringu8 getUInt64Bytes(uint64_t val);
 
 }
 }

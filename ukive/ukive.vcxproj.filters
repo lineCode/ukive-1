@@ -377,6 +377,9 @@
     <ClCompile Include="system\win10_version.cpp">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="security\cert\x509.cpp">
+      <Filter>security\cert</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -770,6 +773,9 @@
     <ClInclude Include="system\com_ptr.hpp">
       <Filter>system</Filter>
     </ClInclude>
+    <ClInclude Include="security\cert\x509.h">
+      <Filter>security\cert</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -846,6 +852,9 @@
     </Filter>
     <Filter Include="views\spinner_view">
       <UniqueIdentifier>{8857160c-cdd7-460a-be7a-661d14015527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security\cert">
+      <UniqueIdentifier>{b79e4820-9ee2-4cf7-aec2-21b017c2ee7b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

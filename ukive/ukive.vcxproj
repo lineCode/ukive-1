@@ -236,6 +236,7 @@
     <ClInclude Include="net\tls_record_layer.hpp" />
     <ClInclude Include="resources\dimension_utils.h" />
     <ClInclude Include="resources\layout_instantiator.h" />
+    <ClInclude Include="security\cert\x509.h" />
     <ClInclude Include="security\crypto\aead.hpp" />
     <ClInclude Include="security\crypto\aes.h" />
     <ClInclude Include="security\crypto\ecdp.h" />
@@ -364,6 +365,7 @@
     <ClCompile Include="net\tls_record_layer.cpp" />
     <ClCompile Include="resources\dimension_utils.cpp" />
     <ClCompile Include="resources\layout_instantiator.cpp" />
+    <ClCompile Include="security\cert\x509.cpp" />
     <ClCompile Include="security\crypto\aead.cpp" />
     <ClCompile Include="security\crypto\aes.cpp" />
     <ClCompile Include="security\crypto\ecdp.cpp" />

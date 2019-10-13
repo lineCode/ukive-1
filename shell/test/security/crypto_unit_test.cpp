@@ -79,7 +79,7 @@ namespace test {
 
     void TEST_ECDP_X25519() {
         auto k = utl::BigInteger::fromString(swapHexStrBytes(
-            "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4"), 16);
+            "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"), 16);
 
         k.setBit(255, 0);
         k.setBit(254, 1);
@@ -88,7 +88,7 @@ namespace test {
         k.setBit(0, 0);
 
         auto u = utl::BigInteger::fromString(swapHexStrBytes(
-            "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c"), 16);
+            "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"), 16);
         u.setBit(255, 0);
 
         uint32_t A;
@@ -102,7 +102,7 @@ namespace test {
         result.toString(16, &out);
         std::transform(out.begin(), out.end(), out.begin(), ::tolower);
 
-        DCHECK(swapHexStrBytes("c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552") == out);
+        DCHECK(swapHexStrBytes("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742") == out);
     }
 
     void TEST_ECDP_X448() {

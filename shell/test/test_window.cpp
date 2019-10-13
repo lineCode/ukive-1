@@ -51,6 +51,7 @@
 #include "ukive/security/crypto/rsa.h"
 #include "ukive/security/crypto/aead.hpp"
 #include "ukive/system/qpc_service.h"
+#include "ukive/security/digest/sha.h"
 
 
 namespace shell {
