@@ -52,6 +52,7 @@
 #include "ukive/security/crypto/aead.hpp"
 #include "ukive/system/qpc_service.h"
 #include "ukive/security/digest/sha.h"
+#include "ukive/security/cert/x509.h"
 
 
 namespace shell {
@@ -77,6 +78,21 @@ namespace shell {
         showTitleBar();
         inflateGroup();
         //inflateListView();
+
+        /*std::ifstream file(L"D:\\X509-0.cert", std::ios::in | std::ios::binary);
+        if (file) {
+            auto pos = file.tellg();
+            file.seekg(0, std::ios::end);
+            auto size = file.tellg() - pos;
+            file.seekg(0, std::ios::beg);
+
+            std::unique_ptr<char[]> data_ptr(new char[size]);
+            file.read(data_ptr.get(), size);
+
+            std::string data(data_ptr.get(), size);
+            ukive::cert::X509 x509;
+            x509.parse(data);
+        }*/
 
         //test::TEST_MD5();
         //test::TEST_SHA();

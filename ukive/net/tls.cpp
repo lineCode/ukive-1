@@ -2,9 +2,9 @@
 
 #include <chrono>
 #include <random>
+#include <fstream>
 
 #include "utils/stl_utils.h"
-#include "utils/big_integer/big_integer.h"
 
 #include "ukive/net/socket.h"
 #include "ukive/security/crypto/ecdp.h"
@@ -43,8 +43,8 @@ namespace tls {
                 }
 
                 auto hs_type = HandshakeType(text.fragment[idx++]);
-                auto hs_length = (uint32_t(text.fragment[idx++]) << 16) 
-                    | (uint32_t(text.fragment[idx++]) << 8) 
+                auto hs_length = (uint32_t(text.fragment[idx++]) << 16)
+                    | (uint32_t(text.fragment[idx++]) << 8)
                     | text.fragment[idx++];
                 stringu8 content = text.fragment.substr(idx, hs_length);
                 idx += hs_length;
@@ -183,8 +183,8 @@ namespace tls {
                 entry.key_exchange = ext.data.substr(4, length);
                 DCHECK(entry.group == NamedGroup::X25519);
 
-                BigInteger share_K;
-                auto U = BigInteger::fromBytesLE(entry.key_exchange);
+                utl::BigInteger share_K;
+                auto U = utl::BigInteger::fromBytesLE(entry.key_exchange);
                 U.setBit(255, 0);
                 crypto::ECDP::X25519(x25519_P_, x25519_K_, U, &share_K);
 
@@ -244,9 +244,24 @@ namespace tls {
                 ext.type = ExtensionType((uint16_t(data[j++]) << 8) | data[j++]);
                 uint16_t len = (uint16_t(data[j++]) << 8) | data[j++];
                 ext.data = data.substr(j, len);
+
+                entry.exts.push_back(ext);
             }
             i += e_len;
+
+            cert_info.certs.push_back(entry);
         }
+
+        // TEST
+        /*i = 0;
+        for (const auto& cert : cert_info.certs) {
+            std::string file_name = "D:\\X509-";
+            file_name.append(std::to_string(i)).append(".cert");
+            std::ofstream file(file_name, std::ios::out | std::ios::binary);
+            file.write(reinterpret_cast<const char*>(cert.cert_data.data()), cert.cert_data.size());
+            file.flush();
+            ++i;
+        }*/
     }
 
     void TLS::constructHandshake(HandshakeType type, stringu8* out) {

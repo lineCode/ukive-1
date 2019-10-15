@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "utils/string_utils.h"
+#include "utils/big_integer/big_integer.h"
 
 #include "ukive/net/tls_common.hpp"
 #include "ukive/net/tls_record_layer.hpp"
-#include "ukive/utils/big_integer/big_integer.h"
 
 
 // 根据 RFC 8446 实现的 TLS 1.3 客户端
@@ -305,8 +305,8 @@ namespace tls {
         stringu8 client_hello_data_;
         stringu8 server_hello_data_;
         KeyShareClientHello key_share_;
-        BigInteger x25519_K_;
-        BigInteger x25519_P_;
+        utl::BigInteger x25519_K_;
+        utl::BigInteger x25519_P_;
         stringu8 share_K_;
         CipherSuite selected_cs_;
     };

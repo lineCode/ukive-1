@@ -1,7 +1,8 @@
 #include "ukive/net/tls_record_layer.hpp"
 
+#include "utils/big_integer/byte_string.h"
+
 #include "ukive/security/crypto/aead.hpp"
-#include "ukive/utils/big_integer/byte_string.hpp"
 
 
 namespace ukive {
@@ -81,7 +82,7 @@ namespace tls {
             padded_seq_num.append(getUInt64Bytes(sequence_num_r_));
 
             stringu8 nonce;
-            ByteString::xor(padded_seq_num, sw_iv_, &nonce);
+            utl::ByteString::exor(padded_seq_num, sw_iv_, &nonce);
 
             if (!crypto::GCM::GCM_AD(sw_key_, nonce, C, A, 16, tag, &result)) {
                 return false;

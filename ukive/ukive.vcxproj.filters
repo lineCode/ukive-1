@@ -380,6 +380,9 @@
     <ClCompile Include="security\cert\x509.cpp">
       <Filter>security\cert</Filter>
     </ClCompile>
+    <ClCompile Include="security\cert\asn1_reader.cpp">
+      <Filter>security\cert</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -774,6 +777,9 @@
       <Filter>system</Filter>
     </ClInclude>
     <ClInclude Include="security\cert\x509.h">
+      <Filter>security\cert</Filter>
+    </ClInclude>
+    <ClInclude Include="security\cert\asn1_reader.h">
       <Filter>security\cert</Filter>
     </ClInclude>
   </ItemGroup>
