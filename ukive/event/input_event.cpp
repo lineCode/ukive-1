@@ -403,7 +403,7 @@ namespace ukive {
         } else if (isTouchEvent()) {
             switch (e->getEvent()) {
             case EVT_DOWN:
-                DCHECK(touch_pos_.find(e->getCurTouchId()) == touch_pos_.end());
+                //DCHECK(touch_pos_.find(e->getCurTouchId()) == touch_pos_.end());
                 touch_pos_[e->getCurTouchId()] = { e->getX(), e->getY(), e->getRawX(), e->getRawY() };
                 event_type_ = touch_pos_.size() > 1 ? EVT_MULTI_DOWN : EVT_DOWN;
                 cur_touch_id_ = e->getCurTouchId();

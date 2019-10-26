@@ -330,15 +330,27 @@ namespace ukive {
                 case 't': str.push_back('\t'); break;
                 case 'u':
                 {
-                    uint32_t code = 0;
-                    for (int i = 0; i < 4; ++i) {
-                        ADV_CUR(1);
-                        ch = json_str[cur];
-                        if (!isHexDigit(ch)) return false;
-                        code |= uint32_t(getHexVal(ch)) << (uint32_t(1) << ((3 - i) * 8));
-                    }
+                    uint16_t code = 0;
+
+                    // To UTF-16 LE
+                    ADV_CUR(1); ch = json_str[cur];
+                    if (!isHexDigit(ch)) return false;
+                    code |= uint16_t(getHexVal(ch)) << 4;
+
+                    ADV_CUR(1); ch = json_str[cur];
+                    if (!isHexDigit(ch)) return false;
+                    code |= uint16_t(getHexVal(ch));
+
+                    ADV_CUR(1); ch = json_str[cur];
+                    if (!isHexDigit(ch)) return false;
+                    code |= uint16_t(getHexVal(ch)) << 12;
+
+                    ADV_CUR(1); ch = json_str[cur];
+                    if (!isHexDigit(ch)) return false;
+                    code |= uint16_t(getHexVal(ch)) << 8;
+
                     string8 tmp;
-                    Unicode::UTF32ToUTF8({ code }, &tmp);
+                    Unicode::UTF16ToUTF8({ code }, &tmp);
                     str.append(tmp);
                     break;
                 }

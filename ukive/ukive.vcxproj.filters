@@ -426,6 +426,9 @@
     <ClCompile Include="utils\big_integer\byte_string.cpp">
       <Filter>utils\big_integer</Filter>
     </ClCompile>
+    <ClCompile Include="event\velocity_calculator.cpp">
+      <Filter>event</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -879,6 +882,9 @@
     </ClInclude>
     <ClInclude Include="utils\big_integer\byte_string.hpp">
       <Filter>utils\big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="event\velocity_calculator.h">
+      <Filter>event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

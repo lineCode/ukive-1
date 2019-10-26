@@ -1,9 +1,10 @@
 #ifndef UKIVE_VIEWS_LIST_LIST_VIEW_H_
 #define UKIVE_VIEWS_LIST_LIST_VIEW_H_
 
-#include <list>
 #include <memory>
 
+#include "ukive/animation/scroller.h"
+#include "ukive/event/velocity_calculator.h"
 #include "ukive/views/layout/view_group.h"
 #include "ukive/views/list/list_adapter.h"
 #include "ukive/views/click_listener.h"
@@ -44,6 +45,7 @@ namespace ukive {
         bool onInputEvent(InputEvent* e) override;
         void onDraw(Canvas* canvas) override;
         void onDrawOverChildren(Canvas* canvas) override;
+        void onComputeScroll() override;
 
         void setAdapter(ListAdapter* adapter);
         void setLayouter(ListLayouter* layouter);
@@ -57,6 +59,7 @@ namespace ukive {
         void onClick(View* v) override;
 
     private:
+        bool processVerticalScroll(int dy);
         int determineVerticalScroll(int dy);
         void offsetChildViewTopAndBottom(int dy);
         ListAdapter::ViewHolder* makeNewBindViewHolder(int adapter_pos, int view_index);
@@ -94,7 +97,16 @@ namespace ukive {
         bool initial_layouted_;
         bool force_layout_ = false;
 
-        bool point_down_ = false;
+        bool is_mouse_down_ = false;
+
+        int prev_touch_x_ = 0;
+        int prev_touch_y_ = 0;
+        int start_touch_x_ = 0;
+        int start_touch_y_ = 0;
+        bool is_touch_down_ = false;
+
+        Scroller scroller_;
+        VelocityCalculator velocity_calculator_;
 
         std::unique_ptr<ListAdapter> adapter_;
         std::unique_ptr<ListLayouter> layouter_;

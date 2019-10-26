@@ -110,6 +110,9 @@ namespace ukive {
         void captureMouse(View* v);
         void releaseMouse(bool all = false);
 
+        void captureTouch(View* v);
+        void releaseTouch(bool all = false);
+
         // 当一个 View 获取到焦点时，应调用此方法。
         void captureKeyboard(View* v);
         // 当一个 View 放弃焦点时，应调用此方法。
@@ -117,6 +120,8 @@ namespace ukive {
 
         View* getMouseHolder() const;
         int getMouseHolderRef() const;
+        View* getTouchHolder() const;
+        int getTouchHolderRef() const;
         View* getKeyboardHolder() const;
 
         void invalidate();
@@ -186,10 +191,12 @@ namespace ukive {
         RootLayout* root_layout_;
 
         View* mouse_holder_;
+        View* touch_holder_;
         View* focus_holder_;
         View* focus_holder_backup_;
         View* last_input_view_;
         int mouse_holder_ref_;
+        int touch_holder_ref_;
 
         std::unique_ptr<ContextMenu> context_menu_;
         std::unique_ptr<TextActionMode> text_action_mode_;

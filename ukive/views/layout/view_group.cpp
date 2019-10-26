@@ -273,6 +273,10 @@ namespace ukive {
         return nullptr;
     }
 
+    void ViewGroup::invalidateInterceptStatus() {
+        is_intercepted_ = false;
+    }
+
     void ViewGroup::dispatchDraw(Canvas* canvas) {
         drawChildren(canvas);
     }
@@ -293,20 +297,28 @@ namespace ukive {
         bool consumed = false;
         bool intercepted = false;
 
-        e->offsetInputPos(-getLeft() + getScrollX(), -getTop() + getScrollY());
+        e->offsetInputPos(-getLeft(), -getTop());
 
         if (is_intercepted_ || onInterceptInputEvent(e)) {
             if (e->getEvent() == InputEvent::EVM_DOWN ||
                 e->getEvent() == InputEvent::EVT_DOWN)
             {
                 is_intercepted_ = true;
-            }
-
-            if (e->isNoActiveEvent() ||
+            } else if (e->isNoActiveEvent() ||
                 e->getEvent() == InputEvent::EVM_UP ||
                 e->getEvent() == InputEvent::EVT_UP)
             {
                 is_intercepted_ = false;
+            } else if (!is_intercepted_) {
+                // 如果第一次拦截时的事件是触摸事件，
+                // 并且不是按下事件的话，将当前消息转为按下事件
+                if (e->isTouchEvent()) {
+                    auto saved = e->getEvent();
+                    e->setEvent(InputEvent::EVT_DOWN);
+                    consumed = dispatchInputEventToThis(e);
+                    e->setEvent(saved);
+                }
+                is_intercepted_ = true;
             }
 
             intercepted = true;
@@ -332,6 +344,7 @@ namespace ukive {
 
             int mx = e->getX();
             int my = e->getY();
+            e->offsetInputPos(getScrollX(), getScrollY());
 
             if (child->isParentPointerInThis(e) &&
                 e->getEvent() != InputEvent::EV_CANCEL)
@@ -363,8 +376,10 @@ namespace ukive {
             e->setY(my);
         }
 
-        if (!intercepted && !consumed) {
-            consumed = dispatchInputEventToThis(e);
+        if (!consumed) {
+            if (!e->isTouchEvent() && !intercepted) {
+                consumed = dispatchInputEventToThis(e);
+            }
         }
 
         return consumed;

@@ -29,10 +29,12 @@ namespace ukive {
           labour_cycler_(nullptr),
           root_layout_(nullptr),
           mouse_holder_(nullptr),
+          touch_holder_(nullptr),
           focus_holder_(nullptr),
           focus_holder_backup_(nullptr),
           last_input_view_(nullptr),
           mouse_holder_ref_(0),
+          touch_holder_ref_(0),
           background_color_(Color::White),
           is_startup_window_(false),
           min_width_(0),
@@ -286,16 +288,14 @@ namespace ukive {
     }
 
     void Window::captureMouse(View* v) {
-        if (!v) {
+        if (!v || touch_holder_ref_) {
             return;
         }
 
         // 当已存在有捕获鼠标的 View 时，若此次调用该方法的 View
         // 与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
-        if (mouse_holder_ref_ != 0 &&
-            v != mouse_holder_)
-        {
-            LOG(Log::ERR) << "abnormal capture mouse!!";
+        if (mouse_holder_ref_ && v != mouse_holder_) {
+            DCHECK(false) << "abnormal capture mouse!!";
             return;
         }
 
@@ -326,6 +326,45 @@ namespace ukive {
         }
     }
 
+    void Window::captureTouch(View* v) {
+        if (!v || mouse_holder_ref_) {
+            return;
+        }
+
+        // 当已存在有捕获触摸的 View 时，若此次调用该方法的 View
+        // 与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
+        if (touch_holder_ref_ && v != touch_holder_) {
+            DCHECK(false) << "abnormal capture touch!!";
+            return;
+        }
+
+        ++touch_holder_ref_;
+
+        // 该 View 第一次捕获触摸。
+        if (touch_holder_ref_ == 1) {
+            impl_->setMouseCaptureRaw();
+            touch_holder_ = v;
+        }
+    }
+
+    void Window::releaseTouch(bool all) {
+        if (touch_holder_ref_ == 0) {
+            return;
+        }
+
+        if (all) {
+            touch_holder_ref_ = 0;
+        } else {
+            --touch_holder_ref_;
+        }
+
+        // 鼠标将被释放。
+        if (touch_holder_ref_ == 0) {
+            impl_->releaseMouseCaptureRaw();
+            touch_holder_ = nullptr;
+        }
+    }
+
     void Window::captureKeyboard(View* v) {
         focus_holder_ = v;
     }
@@ -340,6 +379,14 @@ namespace ukive {
 
     int Window::getMouseHolderRef() const {
         return mouse_holder_ref_;
+    }
+
+    View* Window::getTouchHolder() const {
+        return touch_holder_;
+    }
+
+    int Window::getTouchHolderRef() const {
+        return touch_holder_ref_;
     }
 
     View* Window::getKeyboardHolder() const {
@@ -810,6 +857,30 @@ namespace ukive {
         }
 
         if (e->isTouchEvent()) {
+            // 若有之前捕获过触摸的 View 存在，则直接将所有触摸事件
+            // 直接发送至该 View。
+            if (touch_holder_ &&
+                touch_holder_->getVisibility() == View::VISIBLE &&
+                touch_holder_->isEnabled())
+            {
+                // 进行坐标变换，将目标 View 左上角映射为(0, 0)。
+                int total_left = 0;
+                int total_top = 0;
+                auto parent = touch_holder_->getParent();
+                while (parent) {
+                    total_left += (parent->getLeft() - parent->getScrollX());
+                    total_top += (parent->getTop() - parent->getScrollY());
+
+                    parent = parent->getParent();
+                }
+
+                e->setX(e->getX() - total_left);
+                e->setY(e->getY() - total_top);
+                e->setIsNoDispatch(true);
+
+                return touch_holder_->dispatchInputEvent(e);
+            }
+
             return root_layout_->dispatchInputEvent(e);
         }
 

@@ -582,7 +582,7 @@ namespace ukive {
             bool has_down_up = false;
             auto& input = inputs[i];
             if (input.dwFlags & TOUCHEVENTF_DOWN) {
-                DLOG(Log::INFO) << "TOUCH DOWN";
+                //DLOG(Log::INFO) << "TOUCH DOWN";
 
                 DCHECK(!has_down_up);
                 DCHECK(prev_ti_.find(input.dwID) == prev_ti_.end());
@@ -591,7 +591,7 @@ namespace ukive {
                 ev.setCurTouchId(STLCInt(input.dwID));
                 prev_ti_[input.dwID] = input;
             } else if (input.dwFlags & TOUCHEVENTF_UP) {
-                DLOG(Log::INFO) << "TOUCH UP";
+                //DLOG(Log::INFO) << "TOUCH UP";
 
                 DCHECK(!has_down_up);
                 auto it = prev_ti_.find(input.dwID);

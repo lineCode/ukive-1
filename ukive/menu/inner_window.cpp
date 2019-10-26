@@ -1,4 +1,4 @@
-#include "inner_window.h"
+﻿#include "inner_window.h"
 
 #include "ukive/event/input_event.h"
 #include "ukive/views/layout/root_layout.h"
@@ -184,7 +184,19 @@ namespace ukive {
     InnerWindow::InnerDecorView::~InnerDecorView() {
     }
 
+    bool InnerWindow::InnerDecorView::dispatchInputEvent(InputEvent* e) {
+        // InnerWindow 模拟一个独立的窗口，未消费的事件不应该继续传递。
+        bool result = FrameLayout::dispatchInputEvent(e);
+        if (e->getEvent() == InputEvent::EVM_WHEEL) {
+            result = true;
+        }
+        return result;
+    }
+
     bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent* e) {
+        if (e->isOutside()) {
+            return !inner_window_->outside_touchable_;
+        }
         return false;
     }
 
@@ -204,7 +216,8 @@ namespace ukive {
             return true;
         }
 
-        return !inner_window_->outside_touchable_;
+        invalidateInterceptStatus();
+        return false;
     }
 
 }

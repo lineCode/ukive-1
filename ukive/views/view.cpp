@@ -204,6 +204,7 @@ namespace ukive {
         if (visibility_ != VISIBLE) {
             discardFocus();
             discardMouseCapture();
+            discardTouchCapture();
             discardPendingOperations();
         }
 
@@ -222,6 +223,7 @@ namespace ukive {
         if (!is_enabled_) {
             discardFocus();
             discardMouseCapture();
+            discardTouchCapture();
             discardPendingOperations();
         }
 
@@ -306,6 +308,14 @@ namespace ukive {
         if (!focusable) {
             discardFocus();
         }
+    }
+
+    void View::setTouchCapturable(bool capturable) {
+        if (is_touch_capturable_ == capturable) {
+            return;
+        }
+
+        is_touch_capturable_ = capturable;
     }
 
     void View::setElevation(float elevation) {
@@ -589,6 +599,10 @@ namespace ukive {
         return is_focusable_;
     }
 
+    bool View::isTouchCapturable() const {
+        return is_touch_capturable_;
+    }
+
     bool View::isLayouted() const {
         return flags_ & Flags::BOUNDS_SET;
     }
@@ -654,6 +668,7 @@ namespace ukive {
         if (animator_) {
             animator_->onPreViewDraw();
         }
+        onComputeScroll();
 
         // 应用动画变量
         canvas->save();
@@ -949,6 +964,9 @@ namespace ukive {
                 if (is_focusable_) {
                     requestFocus();
                 }
+                if (is_touch_capturable_) {
+                    window_->captureTouch(this);
+                }
 
                 setPressed(true);
                 if (fg_drawable_) {
@@ -990,7 +1008,7 @@ namespace ukive {
             return consumed;
 
         case InputEvent::EVT_MOVE:
-            return true;
+            return consumed;
 
         case InputEvent::EVM_SCROLL_ENTER:
             if (fg_drawable_) {
@@ -1002,7 +1020,7 @@ namespace ukive {
             if (should_refresh) {
                 invalidate();
             }
-            return true;
+            return consumed;
 
         case InputEvent::EV_LEAVE_VIEW:
             if (e->isMouseEvent()) {
@@ -1068,6 +1086,10 @@ namespace ukive {
             is_touch_down_ = false;
             bool pressed = isPressed();
             setPressed(false);
+
+            if (window_->getTouchHolder() == this) {
+                window_->releaseTouch();
+            }
 
             if (fg_drawable_) {
                 fg_drawable_->setHotspot(e->getX(), e->getY());
@@ -1238,6 +1260,12 @@ namespace ukive {
         }
     }
 
+    void View::discardTouchCapture() {
+        if (window_->getTouchHolder() == this) {
+            window_->releaseTouch(true);
+        }
+    }
+
     void View::discardPendingOperations() {
         window_->getCycler()->removeCallbacks(click_performer_);
         dispatchDiscardPendingOperations();
@@ -1279,6 +1307,12 @@ namespace ukive {
         if (animator_) {
             animator_->cancel();
         }
+
+        discardFocus();
+        discardMouseCapture();
+        discardTouchCapture();
+        discardPendingOperations();
+        updateDrawableState();
     }
 
     bool View::isViewGroup() const {

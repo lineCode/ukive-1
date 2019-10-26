@@ -17,7 +17,10 @@ namespace ukive {
           mouse_x_cache_(0),
           mouse_y_cache_(0),
           saved_pointer_type_(InputEvent::PT_NONE),
-          scroller_(nullptr) {}
+          scroller_(w)
+    {
+        setTouchCapturable(true);
+    }
 
     bool ScrollView::canScroll() {
         View* child = getChildAt(0);
@@ -46,7 +49,7 @@ namespace ukive {
         return 0;
     }
 
-    void ScrollView::processVerticalScroll(int dy) {
+    bool ScrollView::processVerticalScroll(int dy) {
         int final_dy = 0;
         if (dy > 0) {
             int scroll_y = getScrollY();
@@ -61,7 +64,9 @@ namespace ukive {
 
         if (final_dy != 0) {
             scrollBy(0, final_dy);
+            return true;
         }
+        return false;
     }
 
 
@@ -180,28 +185,78 @@ namespace ukive {
     }
 
     void ScrollView::onScrollChanged(
-        int scrollX, int scrollY, int oldScrollX, int oldScrollY)
+        int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y)
     {
-        ViewGroup::onScrollChanged(scrollX, scrollY, oldScrollX, oldScrollY);
+        ViewGroup::onScrollChanged(scroll_x, scroll_y, old_scroll_x, old_scroll_y);
 
-        InputEvent e;
-        e.setEvent(InputEvent::EVM_SCROLL_ENTER);
-        e.setPointerType(saved_pointer_type_);
-        e.setX(mouse_x_cache_ + getLeft() - getScrollX() - (oldScrollX - scrollX));
-        e.setY(mouse_y_cache_ + getTop() - getScrollY() - (oldScrollY - scrollY));
-        dispatchInputEvent(&e);
+        if (saved_pointer_type_ == InputEvent::PT_MOUSE) {
+            InputEvent e;
+            e.setEvent(InputEvent::EVM_SCROLL_ENTER);
+            e.setPointerType(saved_pointer_type_);
+            e.setX(mouse_x_cache_ + getLeft());
+            e.setY(mouse_y_cache_ + getTop());
+            dispatchInputEvent(&e);
+        }
     }
 
     bool ScrollView::onInputEvent(InputEvent* e) {
         bool consumed = ViewGroup::onInputEvent(e);
+        velocity_calculator_.onInputEvent(e);
 
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
             mouse_x_cache_ = e->getX();
             mouse_y_cache_ = e->getY();
             saved_pointer_type_ = e->getPointerType();
-            processVerticalScroll(30 * e->getMouseWheel());
+            //processVerticalScroll(30 * e->getMouseWheel());
             consumed |= true;
+
+            scroller_.inertia(
+                getScrollX(), getScrollY(),
+                0, 800 * e->getMouseWheel());
+            invalidate();
+            break;
+
+        case InputEvent::EVT_DOWN:
+            prev_touch_x_ = start_touch_x_ = e->getX();
+            prev_touch_y_ = start_touch_y_ = e->getY();
+            is_touch_down_ = true;
+            consumed |= true;
+            break;
+
+        case InputEvent::EVT_UP:
+            is_touch_down_ = false;
+            consumed |= true;
+
+            /*DLOG(Log::INFO) << "EVT_UP | vx=" << velocity_calculator_.getVelocityX()
+                << " vy=" << velocity_calculator_.getVelocityY();*/
+
+            scroller_.inertia(
+                getScrollX(), getScrollY(),
+                velocity_calculator_.getVelocityX(),
+                velocity_calculator_.getVelocityY());
+            invalidate();
+            break;
+
+        case InputEvent::EV_CANCEL:
+        case InputEvent::EV_LEAVE_VIEW:
+            is_touch_down_ = false;
+            break;
+
+        case InputEvent::EVT_MOVE:
+            if (is_touch_down_) {
+                int dx = e->getX() - prev_touch_x_;
+                int dy = e->getY() - prev_touch_y_;
+                mouse_x_cache_ = e->getX();
+                mouse_y_cache_ = e->getY();
+                saved_pointer_type_ = e->getPointerType();
+                processVerticalScroll(dy);
+                consumed |= true;
+
+                prev_touch_x_ = e->getX();
+                prev_touch_y_ = e->getY();
+            }
+            break;
 
         default:
             break;
@@ -211,7 +266,43 @@ namespace ukive {
     }
 
     bool ScrollView::onInterceptInputEvent(InputEvent* e) {
+        switch (e->getEvent()) {
+        case InputEvent::EVT_DOWN:
+            start_touch_x_ = e->getX();
+            start_touch_y_ = e->getY();
+            is_touch_down_ = true;
+            break;
+
+        case InputEvent::EVT_UP:
+        case InputEvent::EV_CANCEL:
+        case InputEvent::EV_LEAVE_VIEW:
+            is_touch_down_ = false;
+            break;
+
+        case InputEvent::EVT_MOVE:
+            if (is_touch_down_) {
+                int dx = e->getX() - start_touch_x_;
+                int dy = e->getY() - start_touch_y_;
+                if (dx * dx + dy * dy > 12 * 12) {
+                    start_touch_x_ = e->getX();
+                    start_touch_y_ = e->getY();
+                    return true;
+                }
+            }
+            break;
+
+        default:
+            break;
+        }
+
         return false;
+    }
+
+    void ScrollView::onComputeScroll() {
+        if (scroller_.compute()) {
+            processVerticalScroll(scroller_.getDeltaY());
+            invalidate();
+        }
     }
 
 }

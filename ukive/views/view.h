@@ -93,6 +93,7 @@ namespace ukive {
         void setCurrentCursor(Cursor cursor);
         void setClickable(bool clickable);
         void setFocusable(bool focusable);
+        void setTouchCapturable(bool capturable);
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
         void setMinimumWidth(int width);
@@ -167,6 +168,7 @@ namespace ukive {
         bool hasFocus() const;
         bool isClickable() const;
         bool isFocusable() const;
+        bool isTouchCapturable() const;
         bool isLayouted() const;
         bool isLocalPointerInThis(InputEvent* e) const;
         bool isParentPointerInThis(InputEvent* e) const;
@@ -187,6 +189,7 @@ namespace ukive {
         void requestFocus();
         void discardFocus();
         void discardMouseCapture();
+        void discardTouchCapture();
         void discardPendingOperations();
 
         virtual View* findViewById(int id) const;
@@ -230,6 +233,7 @@ namespace ukive {
 
         virtual bool onCheckIsTextEditor();
         virtual InputConnection* onCreateInputConnection();
+        virtual void onComputeScroll() {}
 
         virtual void onSizeChanged(int width, int height, int old_width, int old_height) {}
         virtual void onVisibilityChanged(int visibility) {}
@@ -295,6 +299,7 @@ namespace ukive {
         bool is_pressed_;
         bool is_clickable_ = false;
         bool is_focusable_;
+        bool is_touch_capturable_ = false;
         bool is_receive_outside_input_event_;
         bool is_mouse_down_;
         bool is_touch_down_;
