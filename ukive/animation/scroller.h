@@ -53,6 +53,8 @@ namespace ukive {
         uint64_t prev_time_ = 0;
         float cur_velocity_x_ = 0;
         float cur_velocity_y_ = 0;
+        float init_dec_x_ = 0;
+        float init_dec_y_ = 0;
         float decelerate_x_ = 0;
         float decelerate_y_ = 0;
     };

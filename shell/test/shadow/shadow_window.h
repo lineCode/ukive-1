@@ -21,7 +21,7 @@ namespace shell {
         ShadowWindow();
 
         void onCreate() override;
-        void onDrawCanvas(ukive::Canvas* canvas) override;
+        void onPreDrawCanvas(ukive::Canvas* canvas) override;
         void onDestroy() override;
         bool onInputEvent(ukive::InputEvent* e) override;
 

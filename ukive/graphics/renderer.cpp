@@ -58,11 +58,8 @@ namespace ukive {
         return hr;
     }
 
-    bool Renderer::render(const Color& bg_color, std::function<void()> callback) {
+    bool Renderer::render(std::function<void()> callback) {
         d2d_rt_->BeginDraw();
-        D2D1_COLOR_F color = {
-            bg_color.r, bg_color.g, bg_color.b, bg_color.a };
-        d2d_rt_->Clear(color);
 
         callback();
 
@@ -88,7 +85,6 @@ namespace ukive {
     void Renderer::close() {
         releaseRenderResource();
     }
-
 
     void Renderer::createHardwareBRT() {
         D3D11_TEXTURE2D_DESC tex_desc = { 0 };

@@ -36,7 +36,7 @@ namespace shell {
 
         void onSceneCreate(ukive::Direct3DView* d3d_view) override;
         void onSceneResize(int width, int height) override;
-        void onSceneInput(ukive::InputEvent* e) override;
+        bool onSceneInput(ukive::InputEvent* e) override;
         void onSceneRender() override;
         void onSceneDestroy() override;
 

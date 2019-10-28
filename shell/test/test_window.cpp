@@ -97,10 +97,6 @@ namespace shell {
         animator_.update();
 
         Window::onDraw(rect);
-
-        if (animator_.isRunning()) {
-            invalidate();
-        }
     }
 
     void TestWindow::onDestroy() {
@@ -133,7 +129,7 @@ namespace shell {
 
     void TestWindow::onAnimationProgress(ukive::Animator* animator) {
         image_view_->setX(animator->getCurValue());
-        //invalidate();
+        image_view_->invalidate();
     }
 
     void TestWindow::inflateGroup() {

@@ -208,12 +208,11 @@ namespace ukive {
             mouse_x_cache_ = e->getX();
             mouse_y_cache_ = e->getY();
             saved_pointer_type_ = e->getPointerType();
-            //processVerticalScroll(30 * e->getMouseWheel());
             consumed |= true;
 
             scroller_.inertia(
                 getScrollX(), getScrollY(),
-                0, 800 * e->getMouseWheel());
+                0, 500 * e->getMouseWheel());
             invalidate();
             break;
 

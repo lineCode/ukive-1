@@ -58,6 +58,8 @@ namespace shell {
     void LodWindow::onCreate() {
         Window::onCreate();
 
+        showTitleBar();
+
         //root layout.
         ukive::LinearLayout *rootLayout = new ukive::LinearLayout(this);
         rootLayout->setOrientation(ukive::LinearLayout::HORIZONTAL);

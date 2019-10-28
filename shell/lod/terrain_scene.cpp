@@ -221,8 +221,8 @@ namespace shell {
     }
 
 
-    void TerrainScene::onSceneInput(ukive::InputEvent *e) {
-        Scene::onSceneInput(e);
+    bool TerrainScene::onSceneInput(ukive::InputEvent *e) {
+        bool result = Scene::onSceneInput(e);
 
         switch (e->getEvent()) {
         case ukive::InputEvent::EVM_DOWN:
@@ -230,6 +230,7 @@ namespace shell {
                 mIsMouseLeftKeyPressed = true;
                 mPrevX = e->getX();
                 mPrevY = e->getY();
+                result = true;
             }
             break;
 
@@ -299,6 +300,8 @@ namespace shell {
         default:
             break;
         }
+
+        return result;
     }
 
     void TerrainScene::onSceneRender() {

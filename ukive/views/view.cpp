@@ -782,7 +782,7 @@ namespace ukive {
         canvas->translate(padding_.left, padding_.top);
 
         // ²Ã¼ô
-        canvas->pushClip(RectF(0, 0,
+        canvas->pushClip(Rect(0, 0,
             measured_width_ - padding_.width(),
             measured_height_ - padding_.height()));
         canvas->translate(-scroll_x_, -scroll_y_);
@@ -1143,8 +1143,8 @@ namespace ukive {
     }
 
     void View::measure(int width, int height, int width_mode, int height_mode) {
-        if (flags_ & Flags::MEASURED_SIZE_SET) {
-            bool is_force_layout = (flags_ & Flags::FORCE_LAYOUT);
+        if (flags_ & MEASURED_SIZE_SET) {
+            bool is_force_layout = (flags_ & FORCE_LAYOUT);
             bool is_exactly_mode = (width_mode == EXACTLY && height_mode == EXACTLY);
             bool is_spec_not_change =
                 (width == old_pm_width_ && height == old_pm_height_
@@ -1155,15 +1155,15 @@ namespace ukive {
             }
         }
 
-        flags_ &= ~Flags::MEASURED_SIZE_SET;
+        flags_ &= ~MEASURED_SIZE_SET;
 
         onMeasure(width, height, width_mode, height_mode);
 
-        if (!(flags_ & Flags::MEASURED_SIZE_SET)) {
+        if (!(flags_ & MEASURED_SIZE_SET)) {
             LOG(Log::FATAL) << "You must invoke setMeasuredSize() in onMeasure()!";
         }
 
-        flags_ |= Flags::NEED_LAYOUT;
+        flags_ |= NEED_LAYOUT;
 
         old_pm_width_ = width;
         old_pm_height_ = height;
@@ -1192,14 +1192,14 @@ namespace ukive {
             invalidate();
         }
 
-        if (changed || (flags_ & Flags::NEED_LAYOUT)) {
+        if (changed || (flags_ & NEED_LAYOUT)) {
             onLayout(changed, size_changed,
                 left, top, right, bottom);
         }
 
-        flags_ |= Flags::BOUNDS_SET;
-        flags_ &= ~Flags::FORCE_LAYOUT;
-        flags_ &= ~Flags::NEED_LAYOUT;
+        flags_ |= BOUNDS_SET;
+        flags_ &= ~FORCE_LAYOUT;
+        flags_ &= ~NEED_LAYOUT;
     }
 
     void View::invalidate() {
@@ -1211,15 +1211,31 @@ namespace ukive {
     }
 
     void View::invalidate(int left, int top, int right, int bottom) {
-        flags_ |= Flags::INVALIDATED;
+        flags_ |= INVALIDATED;
 
-        // TODO: we only need to refresh dirty region.
-        // add to queue
-        getWindow()->invalidate();
+        if (parent_) {
+            int extend = 0;
+            if (shadow_effect_) {
+                extend = shadow_effect_->getRadius();
+                if (extend) {
+                    ++extend;
+                }
+            }
+
+            int off_x = parent_->getLeft() + mTranslateX - parent_->getScrollX();
+            int off_y = parent_->getTop() + mTranslateY - parent_->getScrollY();
+
+            int p_left = left - extend + off_x;
+            int p_top = top - extend + off_y;
+            int p_right = right + extend + off_x;
+            int p_bottom = bottom + extend + off_y;
+
+            parent_->invalidate(p_left, p_top, p_right, p_bottom);
+        }
     }
 
     void View::requestLayout() {
-        flags_ |= Flags::FORCE_LAYOUT;
+        flags_ |= FORCE_LAYOUT;
 
         if (parent_) {
             parent_->requestLayout();

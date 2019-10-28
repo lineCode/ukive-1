@@ -10,6 +10,12 @@
 namespace ukive {
 
     Scroller::Scroller(Window *w) {
+        int dpi_x, dpi_y;
+        w->getDpi(&dpi_x, &dpi_y);
+
+        float mu = 0.02f;
+        init_dec_x_ = mu * (9.78f * 100 / 2.54f * dpi_x);
+        init_dec_y_ = mu * (9.78f * 100 / 2.54f * dpi_y);
     }
 
     Scroller::~Scroller() {
@@ -45,12 +51,12 @@ namespace ukive {
         }
 
         float mu = 0.05f;
-        decelerate_x_ = mu * (9.78f * 100 / 2.54f * 144);
+        decelerate_x_ = init_dec_x_;
         if (velocity_x >= 0) {
             decelerate_x_ *= -1;
         }
 
-        decelerate_y_ = mu * (9.78f * 100 / 2.54f * 144);
+        decelerate_y_ = init_dec_y_;
         if (velocity_y >= 0) {
             decelerate_y_ *= -1;
         }

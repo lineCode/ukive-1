@@ -107,12 +107,12 @@ namespace ukive {
         impl_->setBounds(x, y, width, height);
     }
 
-    void Window::setMinWidth(int minWidth) {
-        min_width_ = minWidth;
+    void Window::setMinWidth(int min_width) {
+        min_width_ = min_width;
     }
 
-    void Window::setMinHeight(int minHeight) {
-        min_height_ = minHeight;
+    void Window::setMinHeight(int min_height) {
+        min_height_ = min_height;
     }
 
     void Window::setCurrentCursor(Cursor cursor) {
@@ -394,11 +394,18 @@ namespace ukive {
     }
 
     void Window::invalidate() {
+        next_dirty_region_.set(0, 0, getClientWidth(), getClientWidth());
+
         labour_cycler_->removeMessages(SCHEDULE_RENDER);
         labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
     }
 
-    void Window::invalidate(int left, int top, int right, int bottom) {}
+    void Window::invalidate(int left, int top, int right, int bottom) {
+        next_dirty_region_.join(Rect(left, top, right - left, bottom - top));
+
+        labour_cycler_->removeMessages(SCHEDULE_RENDER);
+        labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
+    }
 
     void Window::requestLayout() {
         labour_cycler_->removeMessages(SCHEDULE_LAYOUT);
@@ -495,8 +502,9 @@ namespace ukive {
             qpc_service.start();
         }
 
-        Rect rect(0, 0, getClientWidth(), getClientHeight());
-        onDraw(rect);
+        dirty_region_ = next_dirty_region_;
+        next_dirty_region_.set(0, 0, 0, 0);
+        onDraw(dirty_region_);
 
         if (enable_qpc) {
             auto duration = qpc_service.stop();
@@ -509,10 +517,21 @@ namespace ukive {
             return;
         }
 
+        QPCService qpc_service;
+        auto debug_view = root_layout_->getDebugView();
+        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::RENDER);
+        if (enable_qpc) {
+            qpc_service.start();
+        }
+
         Rect rect(left, top, right - left, bottom - top);
         onDraw(rect);
-    }
 
+        if (enable_qpc) {
+            auto duration = qpc_service.stop();
+            debug_view->addDuration(duration);
+        }
+    }
 
     View* Window::findViewById(int id) const {
         return root_layout_->findViewById(id);
@@ -675,28 +694,49 @@ namespace ukive {
     }
 
     void Window::onDraw(const Rect& rect) {
-        if (impl_->isCreated()) {
-            bool ret = renderer_->render(
-                background_color_, [this]() {
+        if (!impl_->isCreated() || rect.empty()) {
+            return;
+        }
 
-                if (canvas_) {
-                    onDrawCanvas(canvas_);
+        bool ret = renderer_->render([this, &rect]()
+        {
+            if (canvas_) {
+                bool only_update_dr = true;
 
-                    if (root_layout_->isLayouted() &&
-                        root_layout_->getVisibility() == View::VISIBLE &&
-                        root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
-                    {
-                        canvas_->save();
-                        canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
-                        root_layout_->draw(canvas_);
-                        canvas_->restore();
-                    }
+                if (only_update_dr) {
+                    canvas_->pushClip(rect);
                 }
-            });
 
-            if (!ret) {
-                LOG(Log::FATAL) << "Failed to render.";
+                canvas_->clear(background_color_);
+
+                onPreDrawCanvas(canvas_);
+
+                if (root_layout_->isLayouted() &&
+                    root_layout_->getVisibility() == View::VISIBLE &&
+                    root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
+                {
+                    canvas_->save();
+                    canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
+                    root_layout_->draw(canvas_);
+                    canvas_->restore();
+                }
+
+                if (!only_update_dr) {
+                    Color color = Color::Pink300;
+                    color.a = 0.4f;
+                    canvas_->fillRect(RectF(rect.left, rect.top, rect.width(), rect.height()), color);
+                }
+
+                onPostDrawCanvas(canvas_);
+
+                if (only_update_dr) {
+                    canvas_->popClip();
+                }
             }
+        });
+
+        if (!ret) {
+            LOG(Log::FATAL) << "Failed to render.";
         }
     }
 
@@ -705,8 +745,8 @@ namespace ukive {
 
     void Window::onResize(
         int param, int width, int height,
-        int client_width, int client_height) {
-
+        int client_width, int client_height)
+    {
         HRESULT hr = renderer_->resize();
         if (FAILED(hr)) {
             LOG(Log::ERR) << "Resize DirectX Renderer failed.";
@@ -730,7 +770,7 @@ namespace ukive {
         }
 
         performLayout();
-        performRefresh();
+        //performRefresh();
     }
 
     bool Window::onMoving(Rect* rect) {
@@ -919,9 +959,6 @@ namespace ukive {
 
     bool Window::onDataCopy(unsigned int id, unsigned int size, void* data) {
         return false;
-    }
-
-    void Window::onDrawCanvas(Canvas* canvas) {
     }
 
     void Window::onPreSwapChainResize() {

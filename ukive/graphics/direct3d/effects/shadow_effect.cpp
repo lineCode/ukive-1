@@ -243,6 +243,10 @@ namespace ukive {
         setSize(view_width_ + radius_ * 2, view_height_ + radius_ * 2);
     }
 
+    int ShadowEffect::getRadius() const {
+        return radius_;
+    }
+
     ComPtr<ID2D1Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));

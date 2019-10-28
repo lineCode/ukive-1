@@ -181,8 +181,8 @@ namespace ukive {
         void measure(int width, int height, int width_mode, int height_mode);
         void layout(int left, int top, int right, int bottom);
 
-        virtual void invalidate();
-        virtual void invalidate(const Rect &rect);
+        void invalidate();
+        void invalidate(const Rect &rect);
         virtual void invalidate(int left, int top, int right, int bottom);
         virtual void requestLayout();
 
@@ -269,6 +269,8 @@ namespace ukive {
         bool processInputEvent(InputEvent* e);
 
         int id_;
+
+        // 相对于父 View 的位置
         Rect bounds_;
         Rect padding_;
         Outline outline_;

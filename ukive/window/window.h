@@ -169,7 +169,8 @@ namespace ukive {
         virtual void onDpiChanged(int dpi_x, int dpi_y);
         virtual bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
-        virtual void onDrawCanvas(Canvas* canvas);
+        virtual void onPreDrawCanvas(Canvas* canvas) {}
+        virtual void onPostDrawCanvas(Canvas* canvas) {}
 
     protected:
         void onPreSwapChainResize() override;
@@ -206,6 +207,9 @@ namespace ukive {
         bool is_startup_window_;
         int min_width_, min_height_;
         FrameType frame_type_;
+
+        Rect dirty_region_;
+        Rect next_dirty_region_;
     };
 
 }

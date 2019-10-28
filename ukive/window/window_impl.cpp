@@ -226,7 +226,7 @@ namespace ukive {
     void WindowImpl::setBlurBehindEnabled(bool enabled) {
         if (is_blur_behind_enabled_ != enabled) {
             is_blur_behind_enabled_ = enabled;
-            
+
             if (::IsWindow(hWnd_)) {
                 ::SendMessageW(
                     hWnd_, WM_ACTIVATE, MAKEWORD(WA_INACTIVE, ::IsIconic(hWnd_)), LPARAM(hWnd_));
@@ -274,6 +274,9 @@ namespace ukive {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
         int width = rect.right - rect.left;
+        if (width == 0) {
+            return 0;
+        }
 
         non_client_frame_->getClientInsets(&rect);
         width -= (rect.left + rect.right);
@@ -289,6 +292,9 @@ namespace ukive {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
         int height = rect.bottom - rect.top;
+        if (height == 0) {
+            return 0;
+        }
 
         non_client_frame_->getClientInsets(&rect);
         height -= (rect.top + rect.bottom);
@@ -525,7 +531,7 @@ namespace ukive {
         delegate_->onKillFocus();
     }
 
-    void WindowImpl::onDraw(const Rect &rect) {
+    void WindowImpl::onDraw(const Rect& rect) {
         delegate_->onDraw(rect);
     }
 
@@ -701,7 +707,19 @@ namespace ukive {
     }
 
     LRESULT WindowImpl::onPaint(WPARAM wParam, LPARAM lParam, bool* handled) {
-        onDraw({});
+        if (::GetUpdateRect(hWnd_, nullptr, FALSE) == 0) {
+            return 0;
+        }
+
+        PAINTSTRUCT ps;
+        HDC hdc = ::BeginPaint(hWnd_, &ps);
+
+        onDraw(Rect(
+            ps.rcPaint.left, ps.rcPaint.top,
+            ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top));
+
+        ::EndPaint(hWnd_, &ps);
+        *handled = true;
         return 0;
     }
 

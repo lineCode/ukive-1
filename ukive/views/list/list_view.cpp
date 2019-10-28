@@ -96,9 +96,7 @@ namespace ukive {
         case InputEvent::EVM_WHEEL:
         {
             result = true;
-            scroller_.inertia(
-                0, 0,
-                0, 800 * e->getMouseWheel());
+            scroller_.inertia(0, 0, 0, 500 * e->getMouseWheel());
             invalidate();
             break;
         }

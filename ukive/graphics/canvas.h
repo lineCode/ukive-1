@@ -13,6 +13,7 @@
 namespace ukive {
 
     class View;
+    class Rect;
     class RectF;
     class PointF;
     class Bitmap;
@@ -35,8 +36,8 @@ namespace ukive {
         void beginDraw();
         void endDraw();
 
+        void pushClip(const Rect& rect);
         void popClip();
-        void pushClip(const RectF& rect);
 
         void pushLayer(ID2D1Geometry* clipGeometry);
         void pushLayer(const RectF& content_bound, ID2D1Geometry* clipGeometry);
@@ -62,6 +63,7 @@ namespace ukive {
         void fillOpacityMask(
             float width, float height,
             Bitmap* mask, Bitmap* content);
+        void fillBitmapRepeat(const RectF& rect, Bitmap* content);
 
         void drawLine(
             const PointF& start, const PointF& end, const Color& color);

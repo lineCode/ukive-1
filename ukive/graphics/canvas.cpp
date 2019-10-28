@@ -86,14 +86,14 @@ namespace ukive {
         }
     }
 
-    void Canvas::popClip() {
-        render_target_->PopAxisAlignedClip();
-    }
-
-    void Canvas::pushClip(const RectF& rect) {
-        D2D1_RECT_F d2d_rect { rect.left, rect.top, rect.right, rect.bottom };
+    void Canvas::pushClip(const Rect& rect) {
+        D2D1_RECT_F d2d_rect { float(rect.left), float(rect.top), float(rect.right), float(rect.bottom) };
         render_target_->PushAxisAlignedClip(
             d2d_rect, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+    }
+
+    void Canvas::popClip() {
+        render_target_->PopAxisAlignedClip();
     }
 
     void Canvas::pushLayer(ID2D1Geometry* clipGeometry) {
@@ -256,6 +256,8 @@ namespace ukive {
         Bitmap* mask, Bitmap* content)
     {
         bitmap_brush_->SetBitmap(content->getNative().get());
+        bitmap_brush_->SetExtendModeX(D2D1_EXTEND_MODE_CLAMP);
+        bitmap_brush_->SetExtendModeY(D2D1_EXTEND_MODE_CLAMP);
 
         D2D1_RECT_F rect = D2D1::RectF(0, 0, width, height);
 
@@ -264,6 +266,15 @@ namespace ukive {
         render_target_->FillOpacityMask(
             mask->getNative().get(), bitmap_brush_.get(), D2D1_OPACITY_MASK_CONTENT_GRAPHICS, rect, rect);
         render_target_->SetAntialiasMode(mode);
+    }
+
+    void Canvas::fillBitmapRepeat(const RectF& rect, Bitmap* content) {
+        bitmap_brush_->SetBitmap(content->getNative().get());
+        bitmap_brush_->SetExtendModeX(D2D1_EXTEND_MODE_WRAP);
+        bitmap_brush_->SetExtendModeY(D2D1_EXTEND_MODE_WRAP);
+
+        D2D1_RECT_F d2d_rect = D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom);
+        render_target_->FillRectangle(d2d_rect, bitmap_brush_.get());
     }
 
     void Canvas::drawLine(

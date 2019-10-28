@@ -21,6 +21,7 @@ namespace ukive {
         void setRadius(int radius);
         void setContent(ID3D11Texture2D* texture);
 
+        int getRadius() const;
         ComPtr<ID2D1Bitmap> getOutput(ID2D1RenderTarget* rt);
 
     private:

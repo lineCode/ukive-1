@@ -23,7 +23,7 @@ namespace ukive {
 
         HRESULT init(Window* window);
         HRESULT resize();
-        bool render(const Color& bg_color, std::function<void()> callback);
+        bool render(std::function<void()> callback);
         void close();
 
         void addSwapChainResizeNotifier(SwapChainResizeNotifier* notifier);

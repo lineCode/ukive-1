@@ -12,7 +12,7 @@ namespace ukive {
         virtual ~Scene() = default;
 
         virtual void onSceneCreate(Direct3DView* d3d_view) {}
-        virtual void onSceneInput(InputEvent* e) {}
+        virtual bool onSceneInput(InputEvent* e) { return false; }
         virtual void onSceneResize(int width, int height) {}
         virtual void onSceneRender() {}
         virtual void onSceneDestroy() {}

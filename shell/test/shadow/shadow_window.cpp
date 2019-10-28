@@ -57,7 +57,7 @@ namespace shell {
         ce_button_->setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         ce_button_->setTextSize(12);
         ce_button_->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
-        ce_button_->setElevation(1);
+        ce_button_->setElevation(18);
 
         auto ce_button_lp = Rlp::Builder(dpToPxX(100), dpToPxX(50))
             .start(layout->getId()).top(layout->getId())
@@ -71,10 +71,10 @@ namespace shell {
         //animator_.start();
     }
 
-    void ShadowWindow::onDrawCanvas(ukive::Canvas* canvas) {
+    void ShadowWindow::onPreDrawCanvas(ukive::Canvas* canvas) {
         animator_.update();
 
-        Window::onDrawCanvas(canvas);
+        Window::onPreDrawCanvas(canvas);
 
         canvas->save();
         canvas->translate(-RADIUS, -RADIUS);
@@ -86,10 +86,6 @@ namespace shell {
 
         ukive::Bitmap c_bmp(content_bmp_);
         canvas->drawBitmap(100, 10, &c_bmp);
-
-        if (animator_.isRunning()) {
-            invalidate();
-        }
     }
 
     void ShadowWindow::onDestroy() {
@@ -110,6 +106,7 @@ namespace shell {
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
         shadow_bmp_ = d3d_effect_->getOutput(getRenderer()->getRenderTarget().get());
+        invalidate();
     }
 
 }

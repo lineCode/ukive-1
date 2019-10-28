@@ -307,8 +307,9 @@ namespace ukive {
     }
 
     bool Direct3DView::onInputEvent(InputEvent* e) {
-        scene_->onSceneInput(e);
-        return View::onInputEvent(e);
+        bool result = View::onInputEvent(e);
+        result |= scene_->onSceneInput(e);
+        return result;
     }
 
     void Direct3DView::onSizeChanged(

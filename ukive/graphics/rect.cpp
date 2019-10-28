@@ -90,10 +90,17 @@ namespace ukive {
     }
 
     void Rect::join(const Rect& rhs) {
-        left = std::min(left, rhs.left);
-        top = std::min(top, rhs.top);
-        right = std::max(right, rhs.right);
-        bottom = std::max(bottom, rhs.bottom);
+        if (empty()) {
+            left = rhs.left;
+            top = rhs.top;
+            right = rhs.right;
+            bottom = rhs.bottom;
+        } else {
+            left = std::min(left, rhs.left);
+            top = std::min(top, rhs.top);
+            right = std::max(right, rhs.right);
+            bottom = std::max(bottom, rhs.bottom);
+        }
     }
 
     void Rect::same(const Rect& rhs) {
