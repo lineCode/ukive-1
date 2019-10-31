@@ -986,7 +986,7 @@ namespace ukive {
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_WHEEL);
             ev.setPointerType(InputEvent::PT_MOUSE);
-            ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+            ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));
 
             ::POINT pt;
             pt.x = GET_X_LPARAM(lParam);

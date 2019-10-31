@@ -96,8 +96,16 @@ namespace ukive {
         case InputEvent::EVM_WHEEL:
         {
             result = true;
-            scroller_.inertia(0, 0, 0, 500 * e->getMouseWheel());
-            invalidate();
+            if (std::abs(e->getMouseWheel()) % WHEEL_DELTA) {
+                scroller_.finish();
+                scroller_.inertia(
+                    0, 0, 0, getWindow()->dpToPxY(20 * e->getMouseWheel()), true);
+                invalidate();
+            } else {
+                scroller_.inertia(
+                    0, 0, 0, getWindow()->dpToPxY(2 * e->getMouseWheel()), true);
+                invalidate();
+            }
             break;
         }
 

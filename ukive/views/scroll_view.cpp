@@ -5,6 +5,7 @@
 #include "ukive/event/input_event.h"
 #include "ukive/log.h"
 #include "ukive/views/layout/layout_params.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
@@ -210,10 +211,18 @@ namespace ukive {
             saved_pointer_type_ = e->getPointerType();
             consumed |= true;
 
-            scroller_.inertia(
-                getScrollX(), getScrollY(),
-                0, 500 * e->getMouseWheel());
-            invalidate();
+            if (std::abs(e->getMouseWheel()) % WHEEL_DELTA) {
+                scroller_.finish();
+                scroller_.inertia(
+                    getScrollX(), getScrollY(),
+                    0, getWindow()->dpToPxY(20 * e->getMouseWheel()), true);
+                invalidate();
+            } else {
+                scroller_.inertia(
+                    getScrollX(), getScrollY(),
+                    0, getWindow()->dpToPxY(2 * e->getMouseWheel()), true);
+                invalidate();
+            }
             break;
 
         case InputEvent::EVT_DOWN:
