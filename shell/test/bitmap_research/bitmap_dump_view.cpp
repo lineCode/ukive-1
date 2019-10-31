@@ -5,7 +5,6 @@
 #include "ukive/graphics/canvas.h"
 #include "ukive/event/input_event.h"
 #include "ukive/window/window.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/graphics/rect.h"
 
 
@@ -44,7 +43,7 @@ namespace shell {
         scale_factor_ = 1.f;
         cell_width_ = kCellWidth;
 
-        text_format_ = ukive::Renderer::createTextFormat(
+        text_format_ = ukive::Canvas::createTextFormat(
             L"Consolas", 15, L"en-US");
         text_format_->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
         text_format_->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);

@@ -9,7 +9,6 @@
 #include "ukive/views/click_listener.h"
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/window/window.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/application.h"
 #include "ukive/message/cycler.h"
 #include "ukive/graphics/point.h"

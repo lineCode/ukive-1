@@ -4,7 +4,6 @@
 
 #include "ukive/log.h"
 #include "ukive/application.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
@@ -141,7 +140,7 @@ namespace ukive {
 
         auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
         auto d3d_dc = Application::getGraphicDeviceManager()->getD3DDeviceContext();
-        auto d2d_rt = getWindow()->getRenderer()->getRenderTarget();
+        auto d2d_rt = getWindow()->getCanvas()->getRT();
 
         // RTT
         D3D11_TEXTURE2D_DESC rtt_tex2d_desc;

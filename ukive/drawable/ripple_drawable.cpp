@@ -2,7 +2,6 @@
 
 #include "ukive/graphics/canvas.h"
 #include "ukive/window/window.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/animation/interpolator.h"
 
 #define DOWN_UP_SEC      200

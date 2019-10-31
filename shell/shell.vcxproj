@@ -262,7 +262,6 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
     <ClCompile Include="test\emulator\emulator_view.cpp" />
     <ClCompile Include="test\emulator\emulator_window.cpp" />
-    <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
     <ClCompile Include="test\security\crypto_unit_test.cpp" />
     <ClCompile Include="test\security\digest_unit_test.cpp" />
@@ -328,7 +327,6 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
     <ClInclude Include="test\emulator\emulator_view.h" />
     <ClInclude Include="test\emulator\emulator_window.h" />
-    <ClInclude Include="test\frame\custom_non_client_frame.h" />
     <ClInclude Include="test\list\test_adapter.h" />
     <ClInclude Include="test\security\crypto_unit_test.h" />
     <ClInclude Include="test\security\digest_unit_test.h" />

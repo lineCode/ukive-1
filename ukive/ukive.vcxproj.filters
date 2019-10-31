@@ -51,9 +51,6 @@
     <ClCompile Include="graphics\bitmap_factory.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\renderer.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="message\cycler.cpp">
       <Filter>message</Filter>
     </ClCompile>
@@ -487,9 +484,6 @@
     <ClInclude Include="graphics\bitmap_factory.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\renderer.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="message\cycler.h">
       <Filter>message</Filter>
     </ClInclude>
@@ -506,9 +500,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="graphics\device_lost_notifier.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics\swapchain_resize_notifier.h">
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="animation\scroller.h">

@@ -9,9 +9,6 @@
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/drawable/shape_drawable.h"
 #include "ukive/drawable/color_drawable.h"
-#include "ukive/drawable/layer_drawable.h"
-#include "ukive/drawable/bitmap_drawable.h"
-#include "ukive/graphics/bitmap_factory.h"
 
 
 namespace ukive {
@@ -24,33 +21,10 @@ namespace ukive {
           title_tv_(nullptr)
     {
         auto color = Color::Blue800;
-        color.a = 0.5f;
-
-        std::vector<uint32_t> img_colors;
-
-        std::random_device rd;
-        std::default_random_engine en(rd());
-        std::uniform_int_distribution<int> user_dist(192, 224);
-        std::normal_distribution<float> norm_dist;
-
-        for (int h = 0; h < 100; ++h) {
-            for (int width = 0; width < 100; ++width) {
-                int alpha = user_dist(en);
-                //int alpha = 160 + norm_dist(en) * 32;
-                img_colors.push_back((uint32_t(alpha) << 24) | 0x7F7F7F);
-            }
-        }
-        auto img_data_ptr = reinterpret_cast<unsigned char*>(img_colors.data());
-        auto bmp = ukive::BitmapFactory::create(w, 100, 100, img_data_ptr);
-
-        auto bmp_drawable = new BitmapDrawable(bmp);
-        bmp_drawable->setExtendMode(BitmapDrawable::Wrap);
-        auto layer_drawable = new LayerDrawable();
-        layer_drawable->addDrawable(bmp_drawable);
-        layer_drawable->addDrawable(new ColorDrawable(color));
+        color.a = 0.7f;
 
         setElevation(w->dpToPxX(4));
-        setBackground(layer_drawable);
+        setBackground(new ColorDrawable(color));
         w->addStatusChangedListener(this);
         initViews();
     }

@@ -213,11 +213,9 @@
     <ClInclude Include="graphics\paint.h" />
     <ClInclude Include="graphics\point.h" />
     <ClInclude Include="graphics\rect.h" />
-    <ClInclude Include="graphics\renderer.h" />
     <ClInclude Include="graphics\rendering_command_list.h" />
     <ClInclude Include="graphics\render_node\render_node.h" />
     <ClInclude Include="graphics\render_node\render_tree.h" />
-    <ClInclude Include="graphics\swapchain_resize_notifier.h" />
     <ClInclude Include="graphics\vector2.h" />
     <ClInclude Include="graphics\wic_manager.h" />
     <ClInclude Include="log.h" />
@@ -367,7 +365,6 @@
     <ClCompile Include="graphics\paint.cpp" />
     <ClCompile Include="graphics\point.cpp" />
     <ClCompile Include="graphics\rect.cpp" />
-    <ClCompile Include="graphics\renderer.cpp" />
     <ClCompile Include="graphics\rendering_command_list.cpp" />
     <ClCompile Include="graphics\render_node\render_node.cpp" />
     <ClCompile Include="graphics\render_node\render_tree.cpp" />

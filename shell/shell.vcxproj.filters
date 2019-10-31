@@ -23,9 +23,6 @@
     <Filter Include="test\animation">
       <UniqueIdentifier>{cb9511fa-00b8-4a63-ba1c-edcd44564039}</UniqueIdentifier>
     </Filter>
-    <Filter Include="test\frame">
-      <UniqueIdentifier>{81606cc2-d6ba-443f-bc80-f6bd46587920}</UniqueIdentifier>
-    </Filter>
     <Filter Include="hlsl">
       <UniqueIdentifier>{f3064276-b2e5-4abd-817d-690205a3563d}</UniqueIdentifier>
     </Filter>
@@ -84,9 +81,6 @@
     </ClCompile>
     <ClCompile Include="direct3d\model_configure.cpp">
       <Filter>direct3d</Filter>
-    </ClCompile>
-    <ClCompile Include="test\frame\custom_non_client_frame.cpp">
-      <Filter>test\frame</Filter>
     </ClCompile>
     <ClCompile Include="lod\lod_window.cpp">
       <Filter>lod</Filter>
@@ -251,9 +245,6 @@
     </ClInclude>
     <ClInclude Include="direct3d\model_configure.h">
       <Filter>direct3d</Filter>
-    </ClInclude>
-    <ClInclude Include="test\frame\custom_non_client_frame.h">
-      <Filter>test\frame</Filter>
     </ClInclude>
     <ClInclude Include="lod\lod_window.h">
       <Filter>lod</Filter>

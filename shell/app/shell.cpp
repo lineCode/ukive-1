@@ -52,14 +52,14 @@ int APIENTRY wWinMain(
     //lod_window->center();
     //lod_window->show();
 
-    auto shadow_window = std::make_shared<shell::ShadowWindow>();
+    /*auto shadow_window = std::make_shared<shell::ShadowWindow>();
     shadow_window->setTitle(L"Test");
     shadow_window->setWidth(ukive::Application::dpToPxX(600));
     shadow_window->setHeight(ukive::Application::dpToPxY(400));
     shadow_window->center();
-    shadow_window->show();
+    shadow_window->show();*/
 
-    /*auto test_window = std::make_shared<shell::TestWindow>();
+    auto test_window = std::make_shared<shell::TestWindow>();
     test_window->setTitle(L"Test");
     test_window->setWidth(ukive::Application::dpToPxX(600));
     test_window->setHeight(ukive::Application::dpToPxY(600));
@@ -67,7 +67,7 @@ int APIENTRY wWinMain(
     test_window->setTranslucent(false);
     test_window->setBlurBehindEnabled(true);
     test_window->center();
-    test_window->show();*/
+    test_window->show();
 
     //auto thr_dimen_window = std::make_shared<shell::MotionWindow>();
     //thr_dimen_window->setTitle(L"3D Motion");

@@ -11,7 +11,6 @@
 #include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
 #include "ukive/views/view.h"
-#include "ukive/graphics/swapchain_resize_notifier.h"
 
 
 namespace ukive {
@@ -19,7 +18,6 @@ namespace ukive {
     class Rect;
     class Cycler;
     class Canvas;
-    class Renderer;
     class InputEvent;
     class WindowImpl;
     class TitleBar;
@@ -29,10 +27,9 @@ namespace ukive {
     class TextActionMode;
     class TextActionModeCallback;
     class OnWindowStatusChangedListener;
-    struct ClassInfo;
 
 
-    class Window : public SwapChainResizeNotifier, public CyclerListener {
+    class Window : public CyclerListener {
     public:
         enum FrameType {
             FRAME_NATIVE,
@@ -82,7 +79,7 @@ namespace ukive {
         RootLayout* getRootLayout() const;
         Color getBackgroundColor() const;
         Cycler* getCycler() const;
-        Renderer* getRenderer() const;
+        Canvas* getCanvas() const;
         HWND getHandle() const;
         FrameType getFrameType() const;
         View* getLastInputView() const;
@@ -130,7 +127,6 @@ namespace ukive {
 
         void performLayout();
         void performRefresh();
-        void performRefresh(int left, int top, int right, int bottom);
 
         View* findViewById(int id) const;
 
@@ -173,8 +169,6 @@ namespace ukive {
         virtual void onPostDrawCanvas(Canvas* canvas) {}
 
     protected:
-        void onPreSwapChainResize() override;
-        void onPostSwapChainResize() override;
         void onHandleMessage(Message* msg) override;
 
     private:
@@ -186,8 +180,6 @@ namespace ukive {
         std::unique_ptr<WindowImpl> impl_;
 
         Canvas* canvas_;
-        Renderer* renderer_;
-
         Cycler* labour_cycler_;
         RootLayout* root_layout_;
 

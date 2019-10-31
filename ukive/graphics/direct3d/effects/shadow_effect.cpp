@@ -3,7 +3,6 @@
 #include "ukive/application.h"
 #include "ukive/log.h"
 #include "ukive/graphics/direct3d/space.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
@@ -139,10 +138,11 @@ namespace ukive {
     void ShadowEffect::draw(Canvas* c) {
         draw();
         auto shadow_bmp = getOutput(c->getRT());
+        Bitmap bmp(shadow_bmp);
 
         c->save();
         c->translate(-std::floor(elevation_ * 2), -std::floor(elevation_ * 2));
-        c->drawBitmap(c->getOpacity(), &Bitmap(shadow_bmp));
+        c->drawBitmap(c->getOpacity(), &bmp);
         c->restore();
     }
 
@@ -268,7 +268,7 @@ namespace ukive {
         ComPtr<ID3D11RenderTargetView>& rtv,
         ComPtr<ID3D11ShaderResourceView>& srv)
     {
-        tex = Renderer::createTexture2D(width_, height_);
+        tex = Canvas::createTexture2D(width_, height_, false);
         auto device = Application::getGraphicDeviceManager()->getD3DDevice();
 
         srv.reset();

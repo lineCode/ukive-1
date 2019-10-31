@@ -11,7 +11,6 @@
 #include "ukive/window/window.h"
 #include "ukive/text/span/span.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/text/text_drawing_effect.h"
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_item.h"
@@ -371,7 +370,7 @@ namespace ukive {
 
     void TextView::makeNewTextFormat() {
         text_format_.reset();
-        text_format_ = ukive::Renderer::createTextFormat(
+        text_format_ = Canvas::createTextFormat(
             font_family_name_,
             text_size_,
             L"en-US");
@@ -384,7 +383,7 @@ namespace ukive {
         range.startPosition = 0;
         range.length = base_text_->length();
 
-        text_layout_ = ukive::Renderer::createTextLayout(
+        text_layout_ = Canvas::createTextLayout(
             base_text_->toString(),
             text_format_.get(),
             maxWidth,

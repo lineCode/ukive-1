@@ -14,7 +14,6 @@
 #include "ukive/message/message.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/system/qpc_service.h"
 #include "ukive/views/debug_view.h"
 #include "ukive/window/window_listener.h"
@@ -25,7 +24,6 @@ namespace ukive {
     Window::Window()
         : impl_(std::make_unique<WindowImpl>(this)),
           canvas_(nullptr),
-          renderer_(nullptr),
           labour_cycler_(nullptr),
           root_layout_(nullptr),
           mouse_holder_(nullptr),
@@ -200,8 +198,8 @@ namespace ukive {
         return labour_cycler_;
     }
 
-    Renderer* Window::getRenderer() const {
-        return renderer_;
+    Canvas* Window::getCanvas() const {
+        return canvas_;
     }
 
     HWND Window::getHandle() const {
@@ -512,27 +510,6 @@ namespace ukive {
         }
     }
 
-    void Window::performRefresh(int left, int top, int right, int bottom) {
-        if (!impl_->isCreated()) {
-            return;
-        }
-
-        QPCService qpc_service;
-        auto debug_view = root_layout_->getDebugView();
-        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::RENDER);
-        if (enable_qpc) {
-            qpc_service.start();
-        }
-
-        Rect rect(left, top, right - left, bottom - top);
-        onDraw(rect);
-
-        if (enable_qpc) {
-            auto duration = qpc_service.stop();
-            debug_view->addDuration(duration);
-        }
-    }
-
     View* Window::findViewById(int id) const {
         return root_layout_->findViewById(id);
     }
@@ -630,16 +607,7 @@ namespace ukive {
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
 
-        renderer_ = new Renderer();
-        HRESULT hr = renderer_->init(this);
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to init renderer: " << hr;
-            return;
-        }
-
-        renderer_->addSwapChainResizeNotifier(this);
-
-        canvas_ = new Canvas(renderer_->getRenderTarget());
+        canvas_ = new Canvas(this, true);
 
         root_layout_->onAttachedToWindow();
     }
@@ -698,45 +666,41 @@ namespace ukive {
             return;
         }
 
-        bool ret = renderer_->render([this, &rect]()
-        {
-            if (canvas_) {
-                bool only_update_dr = true;
+        if (canvas_) {
+            bool only_update_dr = true;
 
-                if (only_update_dr) {
-                    canvas_->pushClip(rect);
-                }
+            canvas_->beginDraw();
 
-                canvas_->clear(background_color_);
-
-                onPreDrawCanvas(canvas_);
-
-                if (root_layout_->isLayouted() &&
-                    root_layout_->getVisibility() == View::VISIBLE &&
-                    root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
-                {
-                    canvas_->save();
-                    canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
-                    root_layout_->draw(canvas_);
-                    canvas_->restore();
-                }
-
-                if (!only_update_dr) {
-                    Color color = Color::Pink300;
-                    color.a = 0.4f;
-                    canvas_->fillRect(RectF(rect.left, rect.top, rect.width(), rect.height()), color);
-                }
-
-                onPostDrawCanvas(canvas_);
-
-                if (only_update_dr) {
-                    canvas_->popClip();
-                }
+            if (only_update_dr) {
+                canvas_->pushClip(rect);
             }
-        });
 
-        if (!ret) {
-            LOG(Log::FATAL) << "Failed to render.";
+            canvas_->clear(background_color_);
+
+            onPreDrawCanvas(canvas_);
+
+            if (root_layout_->isLayouted() &&
+                root_layout_->getVisibility() == View::VISIBLE &&
+                root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
+            {
+                canvas_->save();
+                canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
+                root_layout_->draw(canvas_);
+                canvas_->restore();
+            }
+
+            if (!only_update_dr) {
+                Color color = Color::Pink300;
+                color.a = 0.4f;
+                canvas_->fillRect(RectF(rect.left, rect.top, rect.width(), rect.height()), color);
+            }
+
+            onPostDrawCanvas(canvas_);
+
+            if (only_update_dr) {
+                canvas_->popClip();
+            }
+            canvas_->endDraw();
         }
     }
 
@@ -747,9 +711,8 @@ namespace ukive {
         int param, int width, int height,
         int client_width, int client_height)
     {
-        HRESULT hr = renderer_->resize();
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Resize DirectX Renderer failed.";
+        if (!canvas_->resize()) {
+            LOG(Log::ERR) << "Resize canvas failed.";
             return;
         }
 
@@ -770,7 +733,7 @@ namespace ukive {
         }
 
         performLayout();
-        //performRefresh();
+        performRefresh();
     }
 
     bool Window::onMoving(Rect* rect) {
@@ -845,10 +808,6 @@ namespace ukive {
         delete canvas_;
         canvas_ = nullptr;
 
-        renderer_->removeSwapChainResizeNotifier(this);
-        renderer_->close();
-        delete renderer_;
-        renderer_ = nullptr;
         delete labour_cycler_;
 
         WindowManager::getInstance()->removeWindow(this);
@@ -926,7 +885,7 @@ namespace ukive {
 
         if (e->isKeyboardEvent()) {
             // debug view
-            if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
+            /*if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
                 bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
                 bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);
                 if (isCtrlKeyPressed && isShiftKeyPressed) {
@@ -937,7 +896,7 @@ namespace ukive {
                         debug_view->toggleMode();
                     }
                 }
-            }
+            }*/
 
             if (focus_holder_) {
                 return focus_holder_->dispatchInputEvent(e);
@@ -959,14 +918,6 @@ namespace ukive {
 
     bool Window::onDataCopy(unsigned int id, unsigned int size, void* data) {
         return false;
-    }
-
-    void Window::onPreSwapChainResize() {
-        delete canvas_;
-    }
-
-    void Window::onPostSwapChainResize() {
-        canvas_ = new Canvas(renderer_->getRenderTarget());
     }
 
     void Window::onHandleMessage(Message* msg) {

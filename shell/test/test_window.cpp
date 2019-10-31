@@ -124,6 +124,7 @@ namespace shell {
 
             ::DwmIsCompositionEnabled(&new_aero);*/
         } else if (test_button_ == v) {
+            int grt = 0;
         }
     }
 

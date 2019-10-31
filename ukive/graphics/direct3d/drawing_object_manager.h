@@ -9,8 +9,6 @@
 
 namespace ukive {
 
-    class Renderer;
-
     class DrawingObjectManager {
     public:
         struct DrawingObject {
@@ -29,7 +27,6 @@ namespace ukive {
             unsigned int materialIndex;
         };
 
-    public:
         DrawingObjectManager();
         ~DrawingObjectManager();
 

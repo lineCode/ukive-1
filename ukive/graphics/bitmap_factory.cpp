@@ -4,14 +4,14 @@
 #include "ukive/graphics/wic_manager.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/window/window.h"
-#include "ukive/graphics/renderer.h"
+#include "ukive/graphics/canvas.h"
 #include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
 
     std::shared_ptr<Bitmap> BitmapFactory::create(Window* win, unsigned int width, unsigned int height) {
-        auto d2d_rt = win->getRenderer()->getRenderTarget();
+        auto d2d_rt = win->getCanvas()->getRT();
 
         auto prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
@@ -28,7 +28,7 @@ namespace ukive {
     std::shared_ptr<Bitmap> BitmapFactory::create(
         Window *win, unsigned int width, unsigned int height, const void* data)
     {
-        auto d2d_rt = win->getRenderer()->getRenderTarget();
+        auto d2d_rt = win->getCanvas()->getRT();
 
         auto prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
@@ -44,7 +44,7 @@ namespace ukive {
 
     std::shared_ptr<Bitmap> BitmapFactory::decodeFile(Window* win, const string16& file_name) {
         auto wic_manager = Application::getWICManager();
-        auto d2d_rt = win->getRenderer()->getRenderTarget();
+        auto d2d_rt = win->getCanvas()->getRT();
 
         auto bitmaps = wic_manager->decodeFile(file_name);
         if (!bitmaps.empty()) {

@@ -4,7 +4,6 @@
 #include "ukive/application.h"
 #include "ukive/graphics/color.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
@@ -42,7 +41,7 @@ namespace shell {
 
         d3d_effect_->draw();
 
-        shadow_bmp_ = d3d_effect_->getOutput(getRenderer()->getRenderTarget().get());
+        shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
 
         using Rlp = ukive::RestraintLayoutParams;
 
@@ -105,7 +104,7 @@ namespace shell {
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
-        shadow_bmp_ = d3d_effect_->getOutput(getRenderer()->getRenderTarget().get());
+        shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
         invalidate();
     }
 

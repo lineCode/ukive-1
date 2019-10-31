@@ -9,6 +9,8 @@ namespace ukive {
 
     class Geometry {
     public:
+        virtual ~Geometry() = default;
+
         enum class Type {
             LINE,
             RECT,
