@@ -7,7 +7,6 @@
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/log.h"
-#include "ukive/utils/win10_version.h"
 
 
 namespace ukive {
@@ -58,14 +57,7 @@ namespace ukive {
             rect->left = 0;
             rect->right = 0;
             rect->top = 0;
-            // 用于抵消 onNcCalSize() 中的扩展。详见 onNcCalSize() 中的注释。
-            static bool is_win10_1703_or_above = win::isWin10Ver1703OrGreater();
-            if (is_win10_1703_or_above) {
-                rect->bottom = (window_->isMaximum() ? 0 : 1);
-            } else {
-                rect->bottom = 0;
-            }
-
+            rect->bottom = window_->isMaximum() ? 0 : (Application::isAeroEnabled() ? 1 : 0);
         }
     }
 
@@ -166,12 +158,9 @@ namespace ukive {
                     ncp->rgrc[0].top += 0;
                     ncp->rgrc[0].right -= 0;
                     // 如果完全移除原生边框，则在调整窗口大小时，自绘边界会跳动，
+                    // 而且在 Windows 7 上将看不到模糊效果。
                     // 因此让客户区在底部向外扩展 1 个像素，这样似乎可以保留边框，而且该扩展不可见。
-                    // 在 Windows 10 1703 之前的系统上，无需扩展，扩展反而会有绘制问题（模糊）。
-                    // 在 Windows 10 1703 及以上系统上，客户区会向外扩展 1 像素，注意在绘制时不要绘制这行扩展。
-                    // 这里的扩展与 DwmExtendFrameIntoClientArea() 的设置无关，不会与其抵消。
-                    static bool is_win10_1703_or_above = win::isWin10Ver1703OrGreater();
-                    ncp->rgrc[0].bottom -= is_win10_1703_or_above ? -1 : 0;
+                    ncp->rgrc[0].bottom -= Application::isAeroEnabled() ? -1 : 0;
                 }
             }
         }
@@ -217,7 +206,7 @@ namespace ukive {
     }
 
     LRESULT DrawableNonClientFrame::onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) {
-        *handled = true;
+        *handled = false;
         return TRUE;
     }
 

@@ -63,9 +63,7 @@ namespace shell {
         bool onMoving(ukive::Rect* rect) override;
         bool onResizing(int edge, ukive::Rect* rect) override;
         void onMove(int x, int y) override;
-        void onResize(
-            int param, int width, int height,
-            int clientWidth, int clientHeight) override;
+        void onResize(int param, int width, int height) override;
 
     private:
         ukive::View* inflateToolbar(ukive::View* parent);

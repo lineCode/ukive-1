@@ -91,9 +91,8 @@ namespace shell {
         Window::onMove(x, y);
     }
 
-    void TextWindow::onResize(
-        int param, int width, int height, int clientWidth, int clientHeight) {
-        Window::onResize(param, width, height, clientWidth, clientHeight);
+    void TextWindow::onResize(int param, int width, int height) {
+        Window::onResize(param, width, height);
     }
 
 

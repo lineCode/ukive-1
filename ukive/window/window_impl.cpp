@@ -266,7 +266,7 @@ namespace ukive {
         return p.y;
     }
 
-    int WindowImpl::getClientWidth() const {
+    int WindowImpl::getClientWidth(bool total) const {
         if (!::IsWindow(hWnd_)) {
             return 0;
         }
@@ -278,13 +278,15 @@ namespace ukive {
             return 0;
         }
 
-        non_client_frame_->getClientInsets(&rect);
-        width -= (rect.left + rect.right);
+        if (!total) {
+            non_client_frame_->getClientInsets(&rect);
+            width -= (rect.left + rect.right);
+        }
 
         return std::max(width, 0);
     }
 
-    int WindowImpl::getClientHeight() const {
+    int WindowImpl::getClientHeight(bool total) const {
         if (!::IsWindow(hWnd_)) {
             return 0;
         }
@@ -296,8 +298,10 @@ namespace ukive {
             return 0;
         }
 
-        non_client_frame_->getClientInsets(&rect);
-        height -= (rect.top + rect.bottom);
+        if (!total) {
+            non_client_frame_->getClientInsets(&rect);
+            height -= (rect.top + rect.bottom);
+        }
 
         return std::max(height, 0);
     }
@@ -544,20 +548,13 @@ namespace ukive {
         delegate_->onMove(x, y);
     }
 
-    void WindowImpl::onResize(
-        int param, int width, int height,
-        int client_width, int client_height)
-    {
-        if (client_width <= 0 || client_height <= 0) {
-            return;
-        }
-
+    void WindowImpl::onResize(int param, int width, int height) {
         prev_width_ = width_;
         prev_height_ = height_;
         width_ = width;
         height_ = height;
 
-        delegate_->onResize(param, width, height, client_width, client_height);
+        delegate_->onResize(param, width, height);
     }
 
     bool WindowImpl::onMoving(Rect* rect) {
@@ -1166,15 +1163,11 @@ namespace ukive {
 
         RECT w_rect;
         ::GetWindowRect(hWnd_, &w_rect);
-        RECT c_rect;
-        ::GetClientRect(hWnd_, &c_rect);
 
         int width_px = w_rect.right - w_rect.left;
         int height_px = w_rect.bottom - w_rect.top;
-        int client_width_px = c_rect.right - c_rect.left;
-        int client_height_px = c_rect.bottom - c_rect.top;
 
-        onResize(wParam, width_px, height_px, client_width_px, client_height_px);
+        onResize(wParam, width_px, height_px);
         auto nc_result = non_client_frame_->onSize(wParam, lParam, handled);
         if (*handled) {
             return nc_result;

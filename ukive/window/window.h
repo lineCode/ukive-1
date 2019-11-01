@@ -73,8 +73,8 @@ namespace ukive {
         int getHeight() const;
         int getMinWidth() const;
         int getMinHeight() const;
-        int getClientWidth() const;
-        int getClientHeight() const;
+        int getClientWidth(bool total = false) const;
+        int getClientHeight(bool total = false) const;
         string16 getTitle() const;
         RootLayout* getRootLayout() const;
         Color getBackgroundColor() const;
@@ -153,9 +153,7 @@ namespace ukive {
         virtual void onSetIcon();
         virtual void onDraw(const Rect& rect);
         virtual void onMove(int x, int y);
-        virtual void onResize(
-            int param, int width, int height,
-            int client_width, int client_height);
+        virtual void onResize(int param, int width, int height);
         virtual bool onMoving(Rect* rect);
         virtual bool onResizing(int edge, Rect* rect);
         virtual bool onClose();

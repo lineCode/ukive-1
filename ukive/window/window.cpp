@@ -174,12 +174,12 @@ namespace ukive {
         return min_height_;
     }
 
-    int Window::getClientWidth() const {
-        return impl_->getClientWidth();
+    int Window::getClientWidth(bool total) const {
+        return impl_->getClientWidth(total);
     }
 
-    int Window::getClientHeight() const {
-        return impl_->getClientHeight();
+    int Window::getClientHeight(bool total) const {
+        return impl_->getClientHeight(total);
     }
 
     string16 Window::getTitle() const {
@@ -392,7 +392,7 @@ namespace ukive {
     }
 
     void Window::invalidate() {
-        next_dirty_region_.set(0, 0, getClientWidth(), getClientWidth());
+        next_dirty_region_.set(0, 0, getClientWidth(), getClientHeight());
 
         labour_cycler_->removeMessages(SCHEDULE_RENDER);
         labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
@@ -707,10 +707,7 @@ namespace ukive {
     void Window::onMove(int x, int y) {
     }
 
-    void Window::onResize(
-        int param, int width, int height,
-        int client_width, int client_height)
-    {
+    void Window::onResize(int param, int width, int height) {
         if (!canvas_->resize()) {
             LOG(Log::ERR) << "Resize canvas failed.";
             return;

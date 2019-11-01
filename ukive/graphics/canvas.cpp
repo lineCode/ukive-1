@@ -10,6 +10,7 @@
 #include "ukive/graphics/bitmap.h"
 #include "ukive/log.h"
 #include "ukive/utils/stl_utils.h"
+#include "ukive/utils/win10_version.h"
 
 
 namespace ukive {
@@ -181,17 +182,20 @@ namespace ukive {
     }
 
     bool Canvas::resizeSwapchainBRT() {
-        if (owner_window_->getClientWidth() <= 0 ||
-            owner_window_->getClientHeight() <= 0)
-        {
-            return true;
-        }
-
         releaseResources();
 
         rt_.reset();
 
-        HRESULT hr = swapchain_->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+        // 在某些系统上，需要传入完整大小
+        static bool need_total = win::isWin10Ver1703OrGreater();
+
+        int width = owner_window_->getClientWidth(need_total);
+        int height = owner_window_->getClientHeight(need_total);
+        if (width <= 0 || height <= 0) {
+            return true;
+        }
+
+        HRESULT hr = swapchain_->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
         if (FAILED(hr)) {
             LOG(Log::FATAL) << "Failed to resize swap chain: " << hr;
             return false;
