@@ -1,10 +1,9 @@
-#include "text_action_mode.h"
+#include "ukive/text/text_action_mode.h"
 
 #include <memory>
 
 #include "ukive/menu/menu_impl.h"
 #include "ukive/drawable/shape_drawable.h"
-#include "ukive/animation/animator.h"
 #include "ukive/graphics/color.h"
 #include "ukive/text/text_action_mode_callback.h"
 #include "ukive/animation/view_animator.h"
@@ -22,8 +21,8 @@ namespace ukive {
           callback_(callback),
           weak_ref_nest_(this)
     {
-        menu_width_ = window->dpToPx(92);
-        menu_item_height_ = window->dpToPx(36);
+        menu_width_ = window->dpToPxX(92);
+        menu_item_height_ = window->dpToPxX(36);
 
         menu_impl_ = new MenuImpl(window);
         menu_impl_->setCallback(this);
@@ -36,7 +35,7 @@ namespace ukive {
         shapeDrawable->setSolidColor(Color::White);
 
         inner_window_ = std::make_shared<InnerWindow>(window);
-        inner_window_->setElevation(window->dpToPx(2.f));
+        inner_window_->setElevation(window->dpToPxX(2.f));
         inner_window_->setContentView(menu_impl_);
         inner_window_->setOutsideTouchable(true);
         inner_window_->setBackground(shapeDrawable);
@@ -99,12 +98,19 @@ namespace ukive {
 
         menu_impl_->setEnabled(false);
         callback_->onDestroyActionMode(this);
-        window_->notifyTextActionModeClose();
 
         // 异步关闭TextActionMode菜单，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
-        window_->getCycler()->post(
-            weakref_bind(&TextActionMode::closeAsync, weak_ref_nest_.getRef()));
+        std::weak_ptr<InnerWindow> ptr = inner_window_;
+        inner_window_->getDecorView()->animate()->
+            setDuration(100)->alpha(0.f)->setFinishedHandler(
+                [ptr](AnimationDirector* director)
+        {
+            auto window = ptr.lock();
+            if (window) {
+                window->dismiss();
+            }
+        })->start();
     }
 
 
@@ -122,33 +128,8 @@ namespace ukive {
         }
 
         inner_window_->show(x, y);
-
-        ViewAnimator::createCirculeReveal(
-            inner_window_->getDecorView(), center_x, center_y, 0, 150)->start();
-    }
-
-    void TextActionMode::closeAsync() {
-        class DismissAnimListener
-            : public Animator::OnAnimatorListener {
-        public:
-            DismissAnimListener(std::shared_ptr<InnerWindow> w)
-                :window_(w) {
-            }
-            void onAnimationStart(Animator* animator) {}
-            void onAnimationEnd(Animator* animator) {
-                window_->dismiss();
-            }
-            void onAnimationCancel(Animator* animator) {
-                window_->dismiss();
-            }
-        private:
-            std::shared_ptr<InnerWindow> window_;
-        }*animListener = new DismissAnimListener(inner_window_);
-
         inner_window_->getDecorView()->animate()->
-            setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
-
-        delete this;
+            circleReveal(center_x, center_y, 0, 150)->start();
     }
 
 }

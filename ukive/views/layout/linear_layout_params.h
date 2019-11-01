@@ -6,15 +6,13 @@
 
 namespace ukive {
 
-    class LinearLayoutParams : public LayoutParams
-    {
-    public:
-        int weight;
-
+    class LinearLayoutParams : public LayoutParams {
     public:
         LinearLayoutParams(int width, int height);
-        LinearLayoutParams(const LayoutParams &lp);
+        explicit LinearLayoutParams(const LayoutParams &lp);
         virtual ~LinearLayoutParams();
+
+        int weight;
     };
 
 }

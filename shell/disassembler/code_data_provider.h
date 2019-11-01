@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "shell/disassembler/intel_instruction_params.h"
@@ -37,7 +38,7 @@ namespace dpr {
 
     class DynamicCodeDataProvider : public CodeDataProvider {
     public:
-        DynamicCodeDataProvider(uint32_t base, HANDLE process);
+        DynamicCodeDataProvider(intptr_t base, HANDLE process);
 
         uint8_t get8(uint32_t off) const override;
         uint16_t get16(uint32_t off) const override;
@@ -45,7 +46,7 @@ namespace dpr {
         uint64_t get64(uint64_t off) const override;
 
     private:
-        uint32_t base_;
+        intptr_t base_;
         HANDLE process_;
     };
 

@@ -23,7 +23,7 @@
     <ProjectGuid>{6BD2E39A-DDD8-420C-ABFE-5729BDB8D1D4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>oigka</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

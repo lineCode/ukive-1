@@ -1,7 +1,5 @@
 ﻿#include "application.h"
 
-#include <algorithm>
-
 #include <dwmapi.h>
 #include <ShellScalingAPI.h>
 #include <VersionHelpers.h>
@@ -10,13 +8,11 @@
 #include "ukive/log.h"
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
-#include "ukive/animation/animation_manager.h"
 #include "ukive/text/word_breaker.h"
 #include "ukive/utils/stl_utils.h"
 #include "ukive/utils/dynamic_windows_api.h"
 #include "ukive/files/file.h"
 #include "ukive/resources/layout_instantiator.h"
-
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -56,7 +52,6 @@ namespace ukive {
         instance_ = this;
     }
 
-
     Application::~Application() {
         cleanApplication();
 
@@ -75,11 +70,6 @@ namespace ukive {
 
         LayoutInstantiator::init();
 
-        hr = AnimationManager::initGlobal();
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Failed to initialize anim library";
-        }
-
         graphic_device_manager_.reset(new GraphicDeviceManager());
         graphic_device_manager_->init();
 
@@ -94,7 +84,6 @@ namespace ukive {
 
     void Application::cleanApplication() {
         Message::close();
-        AnimationManager::closeGlobal();
         WordBreaker::closeGlobal();
 
         tsf_manager_->close();
@@ -255,32 +244,49 @@ namespace ukive {
         return view_uid_;
     }
 
-    int Application::getPrimaryDpi() {
-        if (::IsWindows8Point1OrGreater()) {
+    void Application::getPrimaryDpi(int* dpi_x, int* dpi_y) {
+        static bool is_win8_1_or_above = ::IsWindows8Point1OrGreater();
+        if (is_win8_1_or_above) {
             POINT pt = { 0, 0 };
             HMONITOR monitor = ::MonitorFromPoint(pt, MONITOR_DEFAULTTOPRIMARY);
 
-            UINT dpi_x = 96, dpi_y = 96;
-            HRESULT hr = UDGetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpi_x, &dpi_y);
+            UINT _dpi_x = 96, _dpi_y = 96;
+            HRESULT hr = win::UDGetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &_dpi_x, &_dpi_y);
             if (SUCCEEDED(hr)) {
-                return dpi_x;
+                *dpi_x = _dpi_x;
+                *dpi_y = _dpi_y;
+                return;
             }
         }
 
         HDC screen = ::GetDC(nullptr);
-        int dpiX = ::GetDeviceCaps(screen, LOGPIXELSX);
-        //int dpiY = ::GetDeviceCaps(screen, LOGPIXELSY);
+        *dpi_x = ::GetDeviceCaps(screen, LOGPIXELSX);
+        *dpi_y = ::GetDeviceCaps(screen, LOGPIXELSY);
         ::ReleaseDC(nullptr, screen);
-
-        return dpiX;
     }
 
-    float Application::dpToPx(float dp) {
-        return getPrimaryDpi() / 96.f * dp;
+    float Application::dpToPxX(float dp) {
+        int dpi_x, dpi_y;
+        getPrimaryDpi(&dpi_x, &dpi_y);
+        return dpi_x / 96.f * dp;
     }
 
-    float Application::pxToDp(int px) {
-        return px / (getPrimaryDpi() / 96.f);
+    float Application::dpToPxY(float dp) {
+        int dpi_x, dpi_y;
+        getPrimaryDpi(&dpi_x, &dpi_y);
+        return dpi_y / 96.f * dp;
+    }
+
+    float Application::pxToDpX(int px) {
+        int dpi_x, dpi_y;
+        getPrimaryDpi(&dpi_x, &dpi_y);
+        return px / (dpi_x / 96.f);
+    }
+
+    float Application::pxToDpY(int px) {
+        int dpi_x, dpi_y;
+        getPrimaryDpi(&dpi_x, &dpi_y);
+        return px / (dpi_y / 96.f);
     }
 
     bool Application::isAeroEnabled() {
@@ -296,7 +302,6 @@ namespace ukive {
     GraphicDeviceManager* Application::getGraphicDeviceManager() {
         return instance_->graphic_device_manager_.get();
     }
-
 
     int Application::getScreenWidth(){
         return ::GetSystemMetrics(SM_CXSCREEN);

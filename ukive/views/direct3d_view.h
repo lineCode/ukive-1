@@ -2,7 +2,6 @@
 #define UKIVE_VIEWS_DIRECT3D_VIEW_H_
 
 #include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/graphics/swapchain_resize_notifier.h"
 #include "ukive/views/view.h"
 
 

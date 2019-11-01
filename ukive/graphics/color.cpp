@@ -7,20 +7,19 @@
 namespace ukive {
 
     Color::Color()
-        :r(0.f), g(0.f), b(0.f), a(0.f) {}
+        : a(0.f), r(0.f), g(0.f), b(0.f) {}
 
     Color::Color(const Color& color)
-        :r(color.r), g(color.g), b(color.b), a(color.a) {}
+        : a(color.a), r(color.r), g(color.g), b(color.b) {}
 
     Color::Color(float r, float g, float b, float a)
-        :r(r), g(g), b(b), a(a) {}
+        : a(a), r(r), g(g), b(b) {}
 
     Color& Color::operator=(const Color& rhs) {
         r = rhs.r;
         g = rhs.g;
         b = rhs.b;
         a = rhs.a;
-
         return *this;
     }
 
@@ -37,17 +36,19 @@ namespace ukive {
             int b = Number::parseInt(color.substr(5, 2), 16);
 
             return Color::ofInt(r, g, b);
-        } else if (color.length() == 9) {
+        }
+
+        if (color.length() == 9) {
             int a = Number::parseInt(color.substr(1, 2), 16);
             int r = Number::parseInt(color.substr(3, 2), 16);
             int g = Number::parseInt(color.substr(5, 2), 16);
             int b = Number::parseInt(color.substr(7, 2), 16);
 
             return Color::ofInt(r, g, b, a);
-        } else {
-            LOG(Log::ERR) << "Unknown color: " << color;
-            return Color::Red500;
         }
+
+        LOG(Log::ERR) << "Unknown color: " << color;
+        return Color::Red500;
     }
 
     Color Color::ofInt(int r, int g, int b, int a) {

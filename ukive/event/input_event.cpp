@@ -220,6 +220,12 @@ namespace ukive {
     }
 
     void InputEvent::offsetInputPos(int dx, int dy) {
+        if (event_type_ == EV_CANCEL ||
+            event_type_ == EV_LEAVE_VIEW)
+        {
+            return;
+        }
+
         if (isMouseEvent()) {
             mouse_pos_.x += dx;
             mouse_pos_.y += dy;
@@ -360,22 +366,26 @@ namespace ukive {
     }
 
     bool InputEvent::isMouseEvent() const {
-        DCHECK(pointer_type_ != PT_NONE);
+        DCHECK(isNoActiveEvent() || pointer_type_ != PT_NONE);
         return pointer_type_ == PT_MOUSE;
     }
 
     bool InputEvent::isTouchEvent() const {
-        DCHECK(pointer_type_ != PT_NONE);
+        DCHECK(isNoActiveEvent() || pointer_type_ != PT_NONE);
         return pointer_type_ == PT_TOUCH;
     }
 
     bool InputEvent::isKeyboardEvent() const {
-        DCHECK(pointer_type_ != PT_NONE);
+        DCHECK(isNoActiveEvent() || pointer_type_ != PT_NONE);
         return pointer_type_ == PT_KEYBOARD;
     }
 
     bool InputEvent::isNoDispatch() const {
         return is_no_dispatch_;
+    }
+
+    bool InputEvent::isNoActiveEvent() const {
+        return event_type_ == EV_CANCEL || event_type_ == EV_LEAVE_VIEW;
     }
 
     bool InputEvent::isOutside() const {
@@ -393,7 +403,7 @@ namespace ukive {
         } else if (isTouchEvent()) {
             switch (e->getEvent()) {
             case EVT_DOWN:
-                DCHECK(touch_pos_.find(e->getCurTouchId()) == touch_pos_.end());
+                //DCHECK(touch_pos_.find(e->getCurTouchId()) == touch_pos_.end());
                 touch_pos_[e->getCurTouchId()] = { e->getX(), e->getY(), e->getRawX(), e->getRawY() };
                 event_type_ = touch_pos_.size() > 1 ? EVT_MULTI_DOWN : EVT_DOWN;
                 cur_touch_id_ = e->getCurTouchId();

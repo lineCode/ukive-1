@@ -4,19 +4,23 @@
 #include "ukive/application.h"
 #include "ukive/graphics/color.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/button.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/graphics/direct3d/effects/shadow_effect.h"
+#include "ukive/animation/interpolator.h"
 
 #define RADIUS 4
 #define BACKGROUND_SIZE 100
 
 
 namespace shell {
+
+    ShadowWindow::ShadowWindow()
+        : ce_button_(nullptr),
+          d3d_effect_(nullptr) {}
 
     void ShadowWindow::onCreate() {
         Window::onCreate();
@@ -37,7 +41,7 @@ namespace shell {
 
         d3d_effect_->draw();
 
-        shadow_bmp_ = d3d_effect_->getOutput(getRenderer()->getRenderTarget().get());
+        shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
 
         using Rlp = ukive::RestraintLayoutParams;
 
@@ -52,21 +56,24 @@ namespace shell {
         ce_button_->setParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
         ce_button_->setTextSize(12);
         ce_button_->setTextWeight(DWRITE_FONT_WEIGHT_BOLD);
-        ce_button_->setElevation(1);
+        ce_button_->setElevation(18);
 
-        auto ce_button_lp = Rlp::Builder(dpToPx(100), dpToPx(50))
+        auto ce_button_lp = Rlp::Builder(dpToPxX(100), dpToPxX(50))
             .start(layout->getId()).top(layout->getId())
             .end(layout->getId()).bottom(layout->getId()).build();
         layout->addView(ce_button_, ce_button_lp);
 
-        animator_ = new ukive::Animator(getAnimationManager());
-        animator_->addVariable(0, RADIUS, 0, 1000);
-        animator_->setOnValueChangedListener(0, this);
-        //animator_->startTransition(0, ukive::Transition::linearTransition(4, 256));
+        animator_.setInitValue(RADIUS);
+        animator_.setListener(this);
+        animator_.setDuration(4000);
+        animator_.setInterpolator(new ukive::LinearInterpolator(256));
+        //animator_.start();
     }
 
-    void ShadowWindow::onDrawCanvas(ukive::Canvas* canvas) {
-        Window::onDrawCanvas(canvas);
+    void ShadowWindow::onPreDrawCanvas(ukive::Canvas* canvas) {
+        animator_.update();
+
+        Window::onPreDrawCanvas(canvas);
 
         canvas->save();
         canvas->translate(-RADIUS, -RADIUS);
@@ -81,36 +88,24 @@ namespace shell {
     }
 
     void ShadowWindow::onDestroy() {
-        Window::onDestroy();
+        animator_.stop();
 
-        animator_->stop();
-        delete animator_;
+        Window::onDestroy();
     }
 
     bool ShadowWindow::onInputEvent(ukive::InputEvent* e) {
         return Window::onInputEvent(e);
     }
 
-    void ShadowWindow::onValueChanged(
-        unsigned int varIndex,
-        IUIAnimationStoryboard* storyboard,
-        IUIAnimationVariable* variable,
-        double newValue, double previousValue) {
-    }
-
-    void ShadowWindow::onIntegerValueChanged(
-        unsigned int varIndex,
-        IUIAnimationStoryboard* storyboard,
-        IUIAnimationVariable* variable,
-        int newValue, int previousValue) {
-
-        d3d_effect_->setRadius(newValue);
+    void ShadowWindow::onAnimationProgress(ukive::Animator* animator) {
+        d3d_effect_->setRadius(animator->getCurValue());
         d3d_effect_->draw();
 
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
-        shadow_bmp_ = d3d_effect_->getOutput(getRenderer()->getRenderTarget().get());
+        shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
+        invalidate();
     }
 
 }

@@ -55,15 +55,46 @@
 namespace ukive {
 
     bool Unicode::UTF8ToUTF16(const string8& src, string16* dst) {
+        return UTF8ToOthers(src, dst, nullptr);
+    }
+
+    bool Unicode::UTF8ToUTF32(const string8& src, std::u32string* dst) {
+        return UTF8ToOthers(src, nullptr, dst);
+    }
+
+    bool Unicode::UTF16ToUTF8(const string16& src, string8* dst) {
+        return UTF16ToOthers(src, dst, nullptr);
+    }
+
+    bool Unicode::UTF16ToUTF32(const string16& src, std::u32string* dst) {
+        return UTF16ToOthers(src, nullptr, dst);
+    }
+
+    void Unicode::UTF32ToUTF8(const std::u32string& src, string8* dst) {
+        for (const auto& u32 : src) {
+            dst->append(SVToUTF8(u32));
+        }
+    }
+
+    void Unicode::UTF32ToUTF16(const std::u32string& src, string16* dst) {
+        for (const auto& u32 : src) {
+            dst->append(SVToUTF16(u32));
+        }
+    }
+
+    bool Unicode::UTF8ToOthers(const string8& src, string16* dst16, std::u32string* dst32) {
         if (src.empty()) {
-            *dst = string16();
+            if (dst16) { *dst16 = string16(); }
+            if (dst32) { *dst32 = std::u32string(); }
             return true;
         }
 
         string16::size_type index = 0;
         auto src_length = src.length();
         uint32_t scalar_value;
+
         string16 utf16_string;
+        std::u32string utf32_string;
 
         while (index < src_length) {
             GET_BYTE(1);
@@ -122,23 +153,28 @@ namespace ukive {
                 index += 4;
             ELSE_RET_FALSE
 
-            utf16_string += SVToUTF16(scalar_value);
+            if (dst16) { utf16_string += SVToUTF16(scalar_value); }
+            if (dst32) { utf32_string.push_back(scalar_value); }
         }
 
-        *dst = utf16_string;
+        if (dst16) { *dst16 = std::move(utf16_string); }
+        if (dst32) { *dst32 = std::move(utf32_string); }
         return true;
     }
 
-    bool Unicode::UTF16ToUTF8(const string16& src, string8* dst) {
+    bool Unicode::UTF16ToOthers(const string16& src, string8* dst8, std::u32string* dst32) {
         if (src.empty()) {
-            *dst = string8();
+            if (dst8) { *dst8 = string8(); }
+            if (dst32) { *dst32 = std::u32string(); }
             return true;
         }
 
         string8::size_type index = 0;
         auto src_length = src.length();
         uint32_t scalar_value;
+
         string8 utf8_string;
+        std::u32string utf32_string;
 
         while (index < src_length) {
             GET_WORD(1);
@@ -155,13 +191,14 @@ namespace ukive {
                 index += 2;
             END_IF
 
-            utf8_string += SVToUTF8(scalar_value);
+            if (dst8) { utf8_string += SVToUTF8(scalar_value); }
+            if (dst32) { utf32_string.push_back(scalar_value); }
         }
 
-        *dst = utf8_string;
+        if (dst8) { *dst8 = std::move(utf8_string); }
+        if (dst32) { *dst32 = std::move(utf32_string); }
         return true;
     }
-
 
     string8 Unicode::SVToUTF8(uint32_t sv) {
         string8 result;

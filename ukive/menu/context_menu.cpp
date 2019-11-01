@@ -20,8 +20,8 @@ namespace ukive {
           callback_(callback),
           weak_ref_nest_(this)
     {
-        menu_width_ = window->dpToPx(92);
-        menu_item_height_ = window->dpToPx(36);
+        menu_width_ = int(window->dpToPxX(92));
+        menu_item_height_ = int(window->dpToPxX(36));
 
         menu_ = new MenuImpl(window);
         menu_->setCallback(this);
@@ -38,7 +38,6 @@ namespace ukive {
 
     ContextMenu::~ContextMenu() {}
 
-
     void ContextMenu::onCreateMenu(Menu* menu) {}
 
     void ContextMenu::onPrepareMenu(Menu* menu) {}
@@ -47,11 +46,9 @@ namespace ukive {
         return callback_->onContextMenuItemClicked(this, item);
     }
 
-
     Menu* ContextMenu::getMenu() {
         return menu_;
     }
-
 
     void ContextMenu::invalidateMenu() {
         if (is_finished_) return;
@@ -76,12 +73,19 @@ namespace ukive {
 
         is_finished_ = true;
         callback_->onDestroyContextMenu(this);
-        window_->notifyContextMenuClose();
 
         // 异步关闭 ContextMenu，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
-        window_->getCycler()->post(
-            weakref_bind(&ContextMenu::closeAsync, weak_ref_nest_.getRef()));
+        std::weak_ptr<InnerWindow> ptr = inner_window_;
+        inner_window_->getDecorView()->animate()->
+            setDuration(100)->alpha(0.f)->setFinishedHandler(
+                [ptr](AnimationDirector* director)
+        {
+            auto window = ptr.lock();
+            if (window) {
+                window->dismiss();
+            }
+        })->start();
     }
 
     void ContextMenu::showAsync(int x, int y) {
@@ -89,30 +93,6 @@ namespace ukive {
 
         //ViewAnimator::createCirculeReveal(
         //inner_window_->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
-    }
-
-    void ContextMenu::closeAsync() {
-        class DismissAnimListener
-            : public Animator::OnAnimatorListener {
-        public:
-            DismissAnimListener(std::shared_ptr<InnerWindow> w) {
-                window_ = w;
-            }
-            void onAnimationStart(Animator* animator) {}
-            void onAnimationEnd(Animator* animator) {
-                window_->dismiss();
-            }
-            void onAnimationCancel(Animator* animator) {
-                window_->dismiss();
-            }
-        private:
-            std::shared_ptr<InnerWindow> window_;
-        }*animListener = new DismissAnimListener(inner_window_);
-
-        inner_window_->getDecorView()->animate()->
-            setDuration(0.1)->alpha(0.f)->setListener(animListener)->start();
-
-        delete this;
     }
 
 }

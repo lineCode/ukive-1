@@ -102,6 +102,7 @@ namespace ukive {
         bool isTouchEvent() const;
         bool isKeyboardEvent() const;
         bool isNoDispatch() const;
+        bool isNoActiveEvent() const;
 
         /**
          * 当鼠标事件发生于 View 外部时，该方法返回 true。

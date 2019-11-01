@@ -68,7 +68,7 @@ namespace ukive {
     }
 
     int ViewHolderRecycler::getRecycledCount(int item_id) {
-        return recycled_holders_[item_id].size();
+        return STLCInt(recycled_holders_[item_id].size());
     }
 
     void ViewHolderRecycler::clear() {

@@ -20,8 +20,8 @@ namespace ukive {
         if (w->isTranslucent() ||
             w->getFrameType() == Window::FRAME_CUSTOM)
         {
-            nc_padding_.set(w->dpToPx(0), w->dpToPx(0), 0, 0);
-            sh_padding_.set(w->dpToPx(4), w->dpToPx(4), 0, 0);
+            nc_padding_.set(w->dpToPxX(0), w->dpToPxX(0), 0, 0);
+            sh_padding_.set(w->dpToPxX(4), w->dpToPxX(4), 0, 0);
         }
     }
 

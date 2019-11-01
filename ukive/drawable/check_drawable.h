@@ -2,7 +2,6 @@
 #define UKIVE_DRAWABLE_CHECK_DRAWABLE_H_
 
 #include "ukive/drawable/drawable.h"
-
 #include "ukive/animation/animator.h"
 
 
@@ -24,7 +23,7 @@ namespace ukive {
         Window* win_;
 
         bool checked_;
-        std::unique_ptr<Animator> anim_;
+        Animator anim_;
     };
 
 }

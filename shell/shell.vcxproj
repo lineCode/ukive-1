@@ -23,7 +23,7 @@
     <ProjectGuid>{58F52DDE-C924-4F42-8DF1-E9E7AE93B9D5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>shell</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -115,6 +115,9 @@
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -139,6 +142,9 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -169,6 +175,9 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -197,9 +206,22 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <Command>xcopy "$(ProjectDir)resources\altitude.raw" "$(OutDir)" /Y
 xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>$(SolutionDir)oigka.exe "$(ProjectDir)resources" "$(OutputPath)"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\opentype_font.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\opentype_rasterizer.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\opentype_tables.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\cmap.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\cvt.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\glyf.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\head.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\loca.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tables\maxp.cpp" />
+    <ClCompile Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.cpp" />
     <ClCompile Include="direct3d\assist_configure.cpp" />
     <ClCompile Include="direct3d\camera.cpp" />
     <ClCompile Include="direct3d\graph_creator.cpp" />
@@ -217,6 +239,19 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="disassembler\pe_file.cpp" />
+    <ClCompile Include="cyroneno\box.cpp" />
+    <ClCompile Include="cyroneno\color.cpp" />
+    <ClCompile Include="cyroneno\cyroneno_window.cpp" />
+    <ClCompile Include="cyroneno\equations.cpp" />
+    <ClCompile Include="cyroneno\image.cpp" />
+    <ClCompile Include="cyroneno\matrix.cpp" />
+    <ClCompile Include="cyroneno\pipeline\pipeline.cpp" />
+    <ClCompile Include="cyroneno\pipeline\rasterizer.cpp" />
+    <ClCompile Include="cyroneno\point.cpp" />
+    <ClCompile Include="cyroneno\ray_tracer.cpp" />
+    <ClCompile Include="cyroneno\scene.cpp" />
+    <ClCompile Include="cyroneno\surface.cpp" />
+    <ClCompile Include="cyroneno\vector.cpp" />
     <ClCompile Include="lod\lod_window.cpp" />
     <ClCompile Include="lod\qtree_node.cpp" />
     <ClCompile Include="lod\terrain_configure.cpp" />
@@ -227,11 +262,14 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp" />
     <ClCompile Include="test\emulator\emulator_view.cpp" />
     <ClCompile Include="test\emulator\emulator_window.cpp" />
-    <ClCompile Include="test\frame\custom_non_client_frame.cpp" />
     <ClCompile Include="test\list\test_adapter.cpp" />
+    <ClCompile Include="test\security\crypto_unit_test.cpp" />
+    <ClCompile Include="test\security\digest_unit_test.cpp" />
     <ClCompile Include="test\shadow\shadow_window.cpp" />
     <ClCompile Include="test\test_window.cpp" />
     <ClCompile Include="test\text\text_window.cpp" />
+    <ClCompile Include="test\utils\big_integer_unit_test.cpp" />
+    <ClCompile Include="test\utils\json_unit_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="application.manifest">
@@ -239,6 +277,33 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </Manifest>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cyroneno\box.h" />
+    <ClInclude Include="cyroneno\color.h" />
+    <ClInclude Include="cyroneno\cyroneno_window.h" />
+    <ClInclude Include="cyroneno\equations.h" />
+    <ClInclude Include="cyroneno\image.h" />
+    <ClInclude Include="cyroneno\matrix.h" />
+    <ClInclude Include="cyroneno\pipeline\pipeline.h" />
+    <ClInclude Include="cyroneno\pipeline\rasterizer.h" />
+    <ClInclude Include="cyroneno\point.h" />
+    <ClInclude Include="cyroneno\ray_tracer.h" />
+    <ClInclude Include="cyroneno\ray_tracer_structs.h" />
+    <ClInclude Include="cyroneno\scene.h" />
+    <ClInclude Include="cyroneno\surface.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_common.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_font.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_rasterizer.h" />
+    <ClInclude Include="cyroneno\text\opentype\opentype_tables.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\cmap.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\cvt.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\glyf.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\head.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\loca.h" />
+    <ClInclude Include="cyroneno\text\opentype\tables\maxp.h" />
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\graphics_state.h" />
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\opcode_map.h" />
+    <ClInclude Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.h" />
+    <ClInclude Include="cyroneno\vector.h" />
     <ClInclude Include="direct3d\assist_configure.h" />
     <ClInclude Include="direct3d\camera.h" />
     <ClInclude Include="direct3d\graph_creator.h" />
@@ -262,11 +327,14 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     <ClInclude Include="test\bitmap_research\bitmap_research_window.h" />
     <ClInclude Include="test\emulator\emulator_view.h" />
     <ClInclude Include="test\emulator\emulator_window.h" />
-    <ClInclude Include="test\frame\custom_non_client_frame.h" />
     <ClInclude Include="test\list\test_adapter.h" />
+    <ClInclude Include="test\security\crypto_unit_test.h" />
+    <ClInclude Include="test\security\digest_unit_test.h" />
     <ClInclude Include="test\shadow\shadow_window.h" />
     <ClInclude Include="test\test_window.h" />
     <ClInclude Include="test\text\text_window.h" />
+    <ClInclude Include="test\utils\big_integer_unit_test.h" />
+    <ClInclude Include="test\utils\json_unit_test.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\shell.ico" />
@@ -326,6 +394,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="resources\layout\cyroneno_layout.xml" />
     <Xml Include="resources\layout\test_window_group_layout.xml" />
     <Xml Include="resources\layout\test_window_list_layout.xml" />
   </ItemGroup>

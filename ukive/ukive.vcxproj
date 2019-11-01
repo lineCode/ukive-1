@@ -23,7 +23,7 @@
     <ProjectGuid>{6C135376-870C-4C39-B198-2FFC8E947FFD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ukive</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -122,6 +122,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -165,6 +166,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -177,17 +179,11 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="animation\animation_manager.h" />
-    <ClInclude Include="animation\animation_manager_event_handler.h" />
-    <ClInclude Include="animation\animation_timer_handler.h" />
-    <ClInclude Include="animation\animation_variable_change_handler.h" />
+    <ClInclude Include="animation\animation_director.h" />
     <ClInclude Include="animation\animator.h" />
-    <ClInclude Include="animation\animator2.h" />
-    <ClInclude Include="animation\animator_state_handler.h" />
     <ClInclude Include="animation\interpolator.h" />
     <ClInclude Include="animation\scroller.h" />
     <ClInclude Include="animation\timer.h" />
-    <ClInclude Include="animation\transition.h" />
     <ClInclude Include="animation\view_animator.h" />
     <ClInclude Include="application.h" />
     <ClInclude Include="drawable\bitmap_drawable.h" />
@@ -199,6 +195,7 @@
     <ClInclude Include="drawable\ripple_drawable.h" />
     <ClInclude Include="drawable\shape_drawable.h" />
     <ClInclude Include="event\input_event.h" />
+    <ClInclude Include="event\velocity_calculator.h" />
     <ClInclude Include="files\file.h" />
     <ClInclude Include="graphics\bitmap.h" />
     <ClInclude Include="graphics\bitmap_factory.h" />
@@ -216,11 +213,9 @@
     <ClInclude Include="graphics\paint.h" />
     <ClInclude Include="graphics\point.h" />
     <ClInclude Include="graphics\rect.h" />
-    <ClInclude Include="graphics\renderer.h" />
     <ClInclude Include="graphics\rendering_command_list.h" />
     <ClInclude Include="graphics\render_node\render_node.h" />
     <ClInclude Include="graphics\render_node\render_tree.h" />
-    <ClInclude Include="graphics\swapchain_resize_notifier.h" />
     <ClInclude Include="graphics\vector2.h" />
     <ClInclude Include="graphics\wic_manager.h" />
     <ClInclude Include="log.h" />
@@ -236,8 +231,20 @@
     <ClInclude Include="message\message.h" />
     <ClInclude Include="message\message_looper.h" />
     <ClInclude Include="message\message_queue.h" />
+    <ClInclude Include="net\http_client.h" />
+    <ClInclude Include="net\socket.h" />
+    <ClInclude Include="net\tls.h" />
+    <ClInclude Include="net\tls_common.hpp" />
+    <ClInclude Include="net\tls_record_layer.hpp" />
     <ClInclude Include="resources\dimension_utils.h" />
     <ClInclude Include="resources\layout_instantiator.h" />
+    <ClInclude Include="security\crypto\aead.hpp" />
+    <ClInclude Include="security\crypto\aes.h" />
+    <ClInclude Include="security\crypto\ecdp.h" />
+    <ClInclude Include="security\crypto\rsa.h" />
+    <ClInclude Include="security\digest\md5.h" />
+    <ClInclude Include="security\digest\sha.h" />
+    <ClInclude Include="security\digest\sha_private.h" />
     <ClInclude Include="system\clipboard_manager.h" />
     <ClInclude Include="system\qpc_service.h" />
     <ClInclude Include="system\reg_manager.h" />
@@ -259,12 +266,17 @@
     <ClInclude Include="text\tsf_editor.h" />
     <ClInclude Include="text\tsf_manager.h" />
     <ClInclude Include="text\word_breaker.h" />
+    <ClInclude Include="utils\big_integer\big_integer.h" />
+    <ClInclude Include="utils\big_integer\byte_string.hpp" />
+    <ClInclude Include="utils\big_integer\int_array.h" />
     <ClInclude Include="utils\com_ptr.h" />
+    <ClInclude Include="utils\convert.h" />
     <ClInclude Include="utils\double.h" />
     <ClInclude Include="utils\dynamic_windows_api.h" />
     <ClInclude Include="utils\executable.h" />
     <ClInclude Include="utils\float.h" />
-    <ClInclude Include="utils\hresult_utils.h" />
+    <ClInclude Include="utils\json\json_parser.h" />
+    <ClInclude Include="utils\json\json_structs.h" />
     <ClInclude Include="utils\number.h" />
     <ClInclude Include="utils\stl_utils.h" />
     <ClInclude Include="utils\string_utils.h" />
@@ -304,7 +316,8 @@
     <ClInclude Include="views\scroll_view.h" />
     <ClInclude Include="views\seek_bar.h" />
     <ClInclude Include="views\seek_value_changed_listener.h" />
-    <ClInclude Include="views\spinner_view.h" />
+    <ClInclude Include="views\spinner_view\spinner_list_adapter.h" />
+    <ClInclude Include="views\spinner_view\spinner_view.h" />
     <ClInclude Include="views\switch_view.h" />
     <ClInclude Include="views\text_view.h" />
     <ClInclude Include="views\title_bar\title_bar.h" />
@@ -319,17 +332,11 @@
     <ClInclude Include="window\window_manager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="animation\animation_manager.cpp" />
-    <ClCompile Include="animation\animation_manager_event_handler.cpp" />
-    <ClCompile Include="animation\animation_timer_handler.cpp" />
-    <ClCompile Include="animation\animation_variable_change_handler.cpp" />
+    <ClCompile Include="animation\animation_director.cpp" />
     <ClCompile Include="animation\animator.cpp" />
-    <ClCompile Include="animation\animator2.cpp" />
-    <ClCompile Include="animation\animator_state_handler.cpp" />
     <ClCompile Include="animation\interpolator.cpp" />
     <ClCompile Include="animation\scroller.cpp" />
     <ClCompile Include="animation\timer.cpp" />
-    <ClCompile Include="animation\transition.cpp" />
     <ClCompile Include="animation\view_animator.cpp" />
     <ClCompile Include="application.cpp" />
     <ClCompile Include="drawable\bitmap_drawable.cpp" />
@@ -341,6 +348,7 @@
     <ClCompile Include="drawable\ripple_drawable.cpp" />
     <ClCompile Include="drawable\shape_drawable.cpp" />
     <ClCompile Include="event\input_event.cpp" />
+    <ClCompile Include="event\velocity_calculator.cpp" />
     <ClCompile Include="files\file.cpp" />
     <ClCompile Include="graphics\bitmap.cpp" />
     <ClCompile Include="graphics\bitmap_factory.cpp" />
@@ -357,7 +365,6 @@
     <ClCompile Include="graphics\paint.cpp" />
     <ClCompile Include="graphics\point.cpp" />
     <ClCompile Include="graphics\rect.cpp" />
-    <ClCompile Include="graphics\renderer.cpp" />
     <ClCompile Include="graphics\rendering_command_list.cpp" />
     <ClCompile Include="graphics\render_node\render_node.cpp" />
     <ClCompile Include="graphics\render_node\render_tree.cpp" />
@@ -372,8 +379,26 @@
     <ClCompile Include="message\message.cpp" />
     <ClCompile Include="message\message_looper.cpp" />
     <ClCompile Include="message\message_queue.cpp" />
+    <ClCompile Include="net\http_client.cpp" />
+    <ClCompile Include="net\socket.cpp" />
+    <ClCompile Include="net\tls.cpp" />
+    <ClCompile Include="net\tls_common.cpp" />
+    <ClCompile Include="net\tls_record_layer.cpp" />
     <ClCompile Include="resources\dimension_utils.cpp" />
     <ClCompile Include="resources\layout_instantiator.cpp" />
+    <ClCompile Include="security\crypto\aead.cpp" />
+    <ClCompile Include="security\crypto\aes.cpp" />
+    <ClCompile Include="security\crypto\ecdp.cpp" />
+    <ClCompile Include="security\crypto\rsa.cpp" />
+    <ClCompile Include="security\digest\hkdf.cpp" />
+    <ClCompile Include="security\digest\hmac.cpp" />
+    <ClCompile Include="security\digest\md5.cpp" />
+    <ClCompile Include="security\digest\sha1.cpp" />
+    <ClCompile Include="security\digest\sha224.cpp" />
+    <ClCompile Include="security\digest\sha256.cpp" />
+    <ClCompile Include="security\digest\sha384.cpp" />
+    <ClCompile Include="security\digest\sha512.cpp" />
+    <ClCompile Include="security\digest\usha.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
     <ClCompile Include="system\qpc_service.cpp" />
     <ClCompile Include="system\reg_manager.cpp" />
@@ -394,9 +419,15 @@
     <ClCompile Include="text\tsf_editor.cpp" />
     <ClCompile Include="text\tsf_manager.cpp" />
     <ClCompile Include="text\word_breaker.cpp" />
+    <ClCompile Include="utils\big_integer\big_integer.cpp" />
+    <ClCompile Include="utils\big_integer\byte_string.cpp" />
+    <ClCompile Include="utils\big_integer\int_array.cpp" />
+    <ClCompile Include="utils\convert.cpp" />
     <ClCompile Include="utils\double.cpp" />
     <ClCompile Include="utils\dynamic_windows_api.cpp" />
     <ClCompile Include="utils\float.cpp" />
+    <ClCompile Include="utils\json\json_parser.cpp" />
+    <ClCompile Include="utils\json\json_structs.cpp" />
     <ClCompile Include="utils\number.cpp" />
     <ClCompile Include="utils\stl_utils.cpp" />
     <ClCompile Include="utils\string_utils.cpp" />
@@ -432,7 +463,8 @@
     <ClCompile Include="views\list\view_holder_recycler.cpp" />
     <ClCompile Include="views\scroll_view.cpp" />
     <ClCompile Include="views\seek_bar.cpp" />
-    <ClCompile Include="views\spinner_view.cpp" />
+    <ClCompile Include="views\spinner_view\spinner_list_adapter.cpp" />
+    <ClCompile Include="views\spinner_view\spinner_view.cpp" />
     <ClCompile Include="views\switch_view.cpp" />
     <ClCompile Include="views\text_view.cpp" />
     <ClCompile Include="views\title_bar\title_bar.cpp" />

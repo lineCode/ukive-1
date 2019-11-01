@@ -1,6 +1,7 @@
 #ifndef UKIVE_WINDOW_WINDOW_IMPL_H_
 #define UKIVE_WINDOW_WINDOW_IMPL_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <windowsx.h>
 #include <tpcshrd.h>
@@ -57,6 +58,7 @@ namespace ukive {
         void setBounds(int x, int y, int width, int height);
         void setCurrentCursor(Cursor cursor);
         void setTranslucent(bool translucent);
+        void setBlurBehindEnabled(bool enabled);
 
         string16 getTitle() const;
         int getX() const;
@@ -67,7 +69,7 @@ namespace ukive {
         int getClientOffY() const;
         int getClientWidth() const;
         int getClientHeight() const;
-        int getDpi() const;
+        void getDpi(int* dpi_x, int* dpi_y) const;
         HWND getHandle() const;
         Cursor getCurrentCursor() const;
 
@@ -76,6 +78,7 @@ namespace ukive {
         bool isTranslucent() const;
         bool isMinimum() const;
         bool isMaximum() const;
+        bool isPopup() const;
 
         void setMouseCaptureRaw();
         void releaseMouseCaptureRaw();
@@ -83,8 +86,10 @@ namespace ukive {
         void setMouseTrack();
         bool isMouseTrackEnabled();
 
-        float dpToPx(float dp);
-        float pxToDp(float px);
+        float dpToPxX(float dp);
+        float dpToPxY(float dp);
+        float pxToDpX(float px);
+        float pxToDpY(float px);
 
         void setWindowStyle(int style, bool ex, bool enabled);
         void sendFrameChanged();
@@ -191,8 +196,6 @@ namespace ukive {
         LRESULT onDwmCompositionChanged(WPARAM wParam, LPARAM lParam, bool* handled);
         LRESULT onWindowPosChanged(WPARAM wParam, LPARAM lParam, bool* handled);
 
-        void onPreCreate(
-            ClassInfo* info, int* win_style, int* win_ex_style);
         void onCreate();
         void onShow(bool show);
         void onActivate(int param);
@@ -213,6 +216,9 @@ namespace ukive {
         void onStyleChanged(bool normal, bool ext, const STYLESTRUCT* ss);
         bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
+        void EnableBlurBehindOnWin7();
+        void EnableBlurBehindOnWin10();
+
         Window* delegate_;
         std::unique_ptr<NonClientFrame> non_client_frame_;
 
@@ -230,6 +236,7 @@ namespace ukive {
         bool is_translucent_;
         bool is_enable_mouse_track_;
         bool is_first_nccalc_;
+        bool is_blur_behind_enabled_ = false;
 
         TouchInputCache ti_cache_;
         std::map<DWORD, TOUCHINPUT> prev_ti_;

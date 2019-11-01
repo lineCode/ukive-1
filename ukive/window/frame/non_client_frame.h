@@ -1,6 +1,7 @@
 #ifndef UKIVE_WINDOW_FRAME_NON_CLIENT_FRAME_H_
 #define UKIVE_WINDOW_FRAME_NON_CLIENT_FRAME_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 
@@ -32,6 +33,7 @@ namespace ukive {
         virtual LRESULT onNcLButtonDown(WPARAM wParam, LPARAM lParam, bool* handled) = 0;
         virtual LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) = 0;
         virtual LRESULT onDwmCompositionChanged(bool* handled) = 0;
+        virtual LRESULT onActivateAfterDwm() = 0;
         virtual LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) = 0;
     };
 

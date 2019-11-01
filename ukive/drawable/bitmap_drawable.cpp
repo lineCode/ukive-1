@@ -8,15 +8,23 @@
 namespace ukive {
 
     BitmapDrawable::BitmapDrawable(std::shared_ptr<Bitmap> bitmap)
-        :bitmap_(bitmap), opacity_(1.f) {}
+        : bitmap_(bitmap) {}
 
 
     void BitmapDrawable::setOpacity(float opt) {
         opacity_ = opt;
     }
 
+    void BitmapDrawable::setExtendMode(ExtendMode mode) {
+        mode_ = mode;
+    }
+
     void BitmapDrawable::draw(Canvas* canvas) {
-        canvas->drawBitmap(getBounds().toRectF(), opacity_, bitmap_.get());
+        if (mode_ == Wrap) {
+            canvas->fillBitmapRepeat(getBounds().toRectF(), bitmap_.get());
+        } else {
+            canvas->drawBitmap(getBounds().toRectF(), opacity_, bitmap_.get());
+        }
     }
 
     float BitmapDrawable::getOpacity() const {

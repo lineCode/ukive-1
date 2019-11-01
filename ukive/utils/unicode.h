@@ -9,9 +9,16 @@ namespace ukive {
     class Unicode {
     public:
         static bool UTF8ToUTF16(const string8& src, string16* dst);
+        static bool UTF8ToUTF32(const string8& src, std::u32string* dst);
         static bool UTF16ToUTF8(const string16& src, string8* dst);
+        static bool UTF16ToUTF32(const string16& src, std::u32string* dst);
+        static void UTF32ToUTF8(const std::u32string& src, string8* dst);
+        static void UTF32ToUTF16(const std::u32string& src, string16* dst);
 
     private:
+        static bool UTF8ToOthers(const string8& src, string16* dst16, std::u32string* dst32);
+        static bool UTF16ToOthers(const string16& src, string8* dst8, std::u32string* dst32);
+
         static string8 SVToUTF8(uint32_t sv);
         static string16 SVToUTF16(uint32_t sv);
 

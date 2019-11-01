@@ -4,9 +4,7 @@
 
 #include "ukive/log.h"
 #include "ukive/application.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/window/window.h"
-#include "ukive/utils/hresult_utils.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/graphics/direct3d/scene.h"
@@ -142,7 +140,7 @@ namespace ukive {
 
         auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
         auto d3d_dc = Application::getGraphicDeviceManager()->getD3DDeviceContext();
-        auto d2d_rt = getWindow()->getRenderer()->getRenderTarget();
+        auto d2d_rt = getWindow()->getCanvas()->getRT();
 
         // RTT
         D3D11_TEXTURE2D_DESC rtt_tex2d_desc;
@@ -210,7 +208,7 @@ namespace ukive {
         db_tex2d_desc.SampleDesc.Quality = 0;
         db_tex2d_desc.MiscFlags = 0;
 
-        hr = d3d_device->CreateTexture2D(&db_tex2d_desc, 0, &depth_stencil_buffer_);
+        hr = d3d_device->CreateTexture2D(&db_tex2d_desc, nullptr, &depth_stencil_buffer_);
         if (FAILED(hr)) {
             DCHECK(false);
             LOG(Log::WARNING) << "Failed to create 2d texture: " << hr;
@@ -248,12 +246,11 @@ namespace ukive {
         shader_resource_view_.reset();
     }
 
-
     void Direct3DView::onMeasure(
-        int width, int height, int width_spec, int height_spec) {
-
-        int final_width = 0;
-        int final_height = 0;
+        int width, int height, int width_spec, int height_spec)
+    {
+        int final_width;
+        int final_height;
 
         switch (width_spec) {
         case FIT:
@@ -261,6 +258,7 @@ namespace ukive {
             final_width = std::max(width, getMinimumWidth());
             break;
         case UNKNOWN:
+        default:
             final_width = std::max(0, getMinimumWidth());
             break;
         }
@@ -271,6 +269,7 @@ namespace ukive {
             final_height = std::max(height, getMinimumHeight());
             break;
         case UNKNOWN:
+        default:
             final_height = std::max(0, getMinimumHeight());
             break;
         }
@@ -307,8 +306,9 @@ namespace ukive {
     }
 
     bool Direct3DView::onInputEvent(InputEvent* e) {
-        scene_->onSceneInput(e);
-        return View::onInputEvent(e);
+        bool result = View::onInputEvent(e);
+        result |= scene_->onSceneInput(e);
+        return result;
     }
 
     void Direct3DView::onSizeChanged(

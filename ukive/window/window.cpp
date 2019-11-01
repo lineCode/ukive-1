@@ -1,4 +1,4 @@
-#include "window.h"
+#include "ukive/window/window.h"
 
 #include "ukive/log.h"
 #include "ukive/application.h"
@@ -14,7 +14,6 @@
 #include "ukive/message/message.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/system/qpc_service.h"
 #include "ukive/views/debug_view.h"
 #include "ukive/window/window_listener.h"
@@ -25,19 +24,15 @@ namespace ukive {
     Window::Window()
         : impl_(std::make_unique<WindowImpl>(this)),
           canvas_(nullptr),
-          renderer_(nullptr),
           labour_cycler_(nullptr),
           root_layout_(nullptr),
           mouse_holder_(nullptr),
+          touch_holder_(nullptr),
           focus_holder_(nullptr),
           focus_holder_backup_(nullptr),
           last_input_view_(nullptr),
           mouse_holder_ref_(0),
-          context_menu_(nullptr),
-          text_action_mode_(nullptr),
-          anim_mgr_(nullptr),
-          mAnimStateChangedListener(nullptr),
-          mAnimTimerEventListener(nullptr),
+          touch_holder_ref_(0),
           background_color_(Color::White),
           is_startup_window_(false),
           min_width_(0),
@@ -110,12 +105,12 @@ namespace ukive {
         impl_->setBounds(x, y, width, height);
     }
 
-    void Window::setMinWidth(int minWidth) {
-        min_width_ = minWidth;
+    void Window::setMinWidth(int min_width) {
+        min_width_ = min_width;
     }
 
-    void Window::setMinHeight(int minHeight) {
-        min_height_ = minHeight;
+    void Window::setMinHeight(int min_height) {
+        min_height_ = min_height;
     }
 
     void Window::setCurrentCursor(Cursor cursor) {
@@ -137,6 +132,10 @@ namespace ukive {
 
     void Window::setTranslucent(bool translucent) {
         impl_->setTranslucent(translucent);
+    }
+
+    void Window::setBlurBehindEnabled(bool enabled) {
+        impl_->setBlurBehindEnabled(enabled);
     }
 
     void Window::setStartupWindow(bool enable) {
@@ -199,16 +198,12 @@ namespace ukive {
         return labour_cycler_;
     }
 
-    Renderer* Window::getRenderer() const {
-        return renderer_;
+    Canvas* Window::getCanvas() const {
+        return canvas_;
     }
 
     HWND Window::getHandle() const {
         return impl_->getHandle();
-    }
-
-    AnimationManager* Window::getAnimationManager() const {
-        return anim_mgr_;
     }
 
     Window::FrameType Window::getFrameType() const {
@@ -219,8 +214,16 @@ namespace ukive {
         return last_input_view_;
     }
 
+    View* Window::getContentView() const {
+        return root_layout_->getContentView();
+    }
+
     TitleBar* Window::getTitleBar() const {
         return root_layout_->getTitleBar();
+    }
+
+    void Window::getDpi(int* dpi_x, int* dpi_y) const {
+        impl_->getDpi(dpi_x, dpi_y);
     }
 
     bool Window::isShowing() const {
@@ -283,16 +286,14 @@ namespace ukive {
     }
 
     void Window::captureMouse(View* v) {
-        if (!v) {
+        if (!v || touch_holder_ref_) {
             return;
         }
 
         // 当已存在有捕获鼠标的 View 时，若此次调用该方法的 View
         // 与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
-        if (mouse_holder_ref_ != 0 &&
-            v != mouse_holder_)
-        {
-            LOG(Log::ERR) << "abnormal capture mouse!!";
+        if (mouse_holder_ref_ && v != mouse_holder_) {
+            DCHECK(false) << "abnormal capture mouse!!";
             return;
         }
 
@@ -323,6 +324,45 @@ namespace ukive {
         }
     }
 
+    void Window::captureTouch(View* v) {
+        if (!v || mouse_holder_ref_) {
+            return;
+        }
+
+        // 当已存在有捕获触摸的 View 时，若此次调用该方法的 View
+        // 与之前不同，此次调用将被忽略。在使用中应避免此种情况产生。
+        if (touch_holder_ref_ && v != touch_holder_) {
+            DCHECK(false) << "abnormal capture touch!!";
+            return;
+        }
+
+        ++touch_holder_ref_;
+
+        // 该 View 第一次捕获触摸。
+        if (touch_holder_ref_ == 1) {
+            impl_->setMouseCaptureRaw();
+            touch_holder_ = v;
+        }
+    }
+
+    void Window::releaseTouch(bool all) {
+        if (touch_holder_ref_ == 0) {
+            return;
+        }
+
+        if (all) {
+            touch_holder_ref_ = 0;
+        } else {
+            --touch_holder_ref_;
+        }
+
+        // 鼠标将被释放。
+        if (touch_holder_ref_ == 0) {
+            impl_->releaseMouseCaptureRaw();
+            touch_holder_ = nullptr;
+        }
+    }
+
     void Window::captureKeyboard(View* v) {
         focus_holder_ = v;
     }
@@ -339,16 +379,31 @@ namespace ukive {
         return mouse_holder_ref_;
     }
 
+    View* Window::getTouchHolder() const {
+        return touch_holder_;
+    }
+
+    int Window::getTouchHolderRef() const {
+        return touch_holder_ref_;
+    }
+
     View* Window::getKeyboardHolder() const {
         return focus_holder_;
     }
 
     void Window::invalidate() {
+        next_dirty_region_.set(0, 0, getClientWidth(), getClientWidth());
+
         labour_cycler_->removeMessages(SCHEDULE_RENDER);
         labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
     }
 
-    void Window::invalidate(int left, int top, int right, int bottom) {}
+    void Window::invalidate(int left, int top, int right, int bottom) {
+        next_dirty_region_.join(Rect(left, top, right - left, bottom - top));
+
+        labour_cycler_->removeMessages(SCHEDULE_RENDER);
+        labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
+    }
 
     void Window::requestLayout() {
         labour_cycler_->removeMessages(SCHEDULE_LAYOUT);
@@ -445,24 +500,15 @@ namespace ukive {
             qpc_service.start();
         }
 
-        Rect rect(0, 0, getClientWidth(), getClientHeight());
-        onDraw(rect);
+        dirty_region_ = next_dirty_region_;
+        next_dirty_region_.set(0, 0, 0, 0);
+        onDraw(dirty_region_);
 
         if (enable_qpc) {
             auto duration = qpc_service.stop();
             debug_view->addDuration(duration);
         }
     }
-
-    void Window::performRefresh(int left, int top, int right, int bottom) {
-        if (!impl_->isCreated()) {
-            return;
-        }
-
-        Rect rect(left, top, right - left, bottom - top);
-        onDraw(rect);
-    }
-
 
     View* Window::findViewById(int id) const {
         return root_layout_->findViewById(id);
@@ -487,7 +533,7 @@ namespace ukive {
             return nullptr;
         }
 
-        context_menu_ = context_menu;
+        context_menu_.reset(context_menu);
 
         Rect rect = anchor->getBoundsInWindow();
 
@@ -512,10 +558,6 @@ namespace ukive {
         return context_menu;
     }
 
-    void Window::notifyContextMenuClose() {
-        context_menu_ = nullptr;
-    }
-
     TextActionMode* Window::startTextActionMode(TextActionModeCallback* callback) {
         auto action_mode = new TextActionMode(this, callback);
         if (!callback->onCreateActionMode(
@@ -532,25 +574,26 @@ namespace ukive {
             return nullptr;
         }
 
-        text_action_mode_ = action_mode;
+        text_action_mode_.reset(action_mode);
         text_action_mode_->show();
 
         return action_mode;
     }
 
-    void Window::notifyTextActionModeClose() {
-        text_action_mode_ = nullptr;
+    float Window::dpToPxX(float dp) {
+        return impl_->dpToPxX(dp);
     }
 
-    float Window::dpToPx(float dp) {
-        return impl_->dpToPx(dp);
+    float Window::dpToPxY(float dp) {
+        return impl_->dpToPxY(dp);
     }
 
-    float Window::pxToDp(float px) {
-        return impl_->pxToDp(px);
+    float Window::pxToDpX(float px) {
+        return impl_->pxToDpX(px);
     }
 
-    void Window::onPreCreate(ClassInfo* info, int* win_style, int* win_ex_style) {
+    float Window::pxToDpY(float px) {
+        return impl_->pxToDpY(px);
     }
 
     void Window::onCreate() {
@@ -564,30 +607,7 @@ namespace ukive {
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
 
-        anim_mgr_ = new AnimationManager();
-        HRESULT hr = anim_mgr_->init();
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to init animation manager: " << hr;
-            return;
-        }
-
-        mAnimStateChangedListener = new AnimStateChangedListener(this);
-        anim_mgr_->setOnStateChangedListener(mAnimStateChangedListener);
-
-        //anim_mgr_->connectTimer(true);
-        //mAnimTimerEventListener = new AnimTimerEventListener(this);
-        //anim_mgr_->setTimerEventListener(mAnimTimerEventListener);
-
-        renderer_ = new Renderer();
-        hr = renderer_->init(this);
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to init renderer: " << hr;
-            return;
-        }
-
-        renderer_->addSwapChainResizeNotifier(this);
-
-        canvas_ = new Canvas(renderer_->getRenderTarget());
+        canvas_ = new Canvas(this, true);
 
         root_layout_->onAttachedToWindow();
     }
@@ -642,36 +662,45 @@ namespace ukive {
     }
 
     void Window::onDraw(const Rect& rect) {
-        if (impl_->isCreated())
-        {
-            getAnimationManager()->update();
+        if (!impl_->isCreated() || rect.empty()) {
+            return;
+        }
 
-            bool ret = renderer_->render(
-                background_color_, [this]() {
+        if (canvas_) {
+            bool only_update_dr = true;
 
-                if (canvas_) {
-                    onDrawCanvas(canvas_);
+            canvas_->beginDraw();
 
-                    if (root_layout_->isLayouted() &&
-                        root_layout_->getVisibility() == View::VISIBLE &&
-                        root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
-                    {
-                        canvas_->save();
-                        canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
-                        root_layout_->draw(canvas_);
-                        canvas_->restore();
-                    }
-                }
-            });
-
-            if (!ret) {
-                LOG(Log::FATAL) << "Failed to render.";
-                return;
+            if (only_update_dr) {
+                canvas_->pushClip(rect);
             }
 
-            if (getAnimationManager()->isBusy()) {
-                invalidate();
+            canvas_->clear(background_color_);
+
+            onPreDrawCanvas(canvas_);
+
+            if (root_layout_->isLayouted() &&
+                root_layout_->getVisibility() == View::VISIBLE &&
+                root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
+            {
+                canvas_->save();
+                canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
+                root_layout_->draw(canvas_);
+                canvas_->restore();
             }
+
+            if (!only_update_dr) {
+                Color color = Color::Pink300;
+                color.a = 0.4f;
+                canvas_->fillRect(RectF(rect.left, rect.top, rect.width(), rect.height()), color);
+            }
+
+            onPostDrawCanvas(canvas_);
+
+            if (only_update_dr) {
+                canvas_->popClip();
+            }
+            canvas_->endDraw();
         }
     }
 
@@ -680,11 +709,10 @@ namespace ukive {
 
     void Window::onResize(
         int param, int width, int height,
-        int client_width, int client_height) {
-
-        HRESULT hr = renderer_->resize();
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Resize DirectX Renderer failed.";
+        int client_width, int client_height)
+    {
+        if (!canvas_->resize()) {
+            LOG(Log::ERR) << "Resize canvas failed.";
             return;
         }
 
@@ -772,29 +800,14 @@ namespace ukive {
     }
 
     void Window::onDestroy() {
-        if (context_menu_) {
-            context_menu_->close();
-        }
-        if (text_action_mode_) {
-            text_action_mode_->close();
-        }
+        context_menu_.reset();
+        text_action_mode_.reset();
 
         delete root_layout_;
 
         delete canvas_;
         canvas_ = nullptr;
 
-        renderer_->removeSwapChainResizeNotifier(this);
-        renderer_->close();
-        delete renderer_;
-        renderer_ = nullptr;
-
-        delete mAnimTimerEventListener;
-        delete mAnimStateChangedListener;
-
-        anim_mgr_->setOnStateChangedListener(nullptr);
-        anim_mgr_->close();
-        delete anim_mgr_;
         delete labour_cycler_;
 
         WindowManager::getInstance()->removeWindow(this);
@@ -843,11 +856,36 @@ namespace ukive {
         }
 
         if (e->isTouchEvent()) {
+            // 若有之前捕获过触摸的 View 存在，则直接将所有触摸事件
+            // 直接发送至该 View。
+            if (touch_holder_ &&
+                touch_holder_->getVisibility() == View::VISIBLE &&
+                touch_holder_->isEnabled())
+            {
+                // 进行坐标变换，将目标 View 左上角映射为(0, 0)。
+                int total_left = 0;
+                int total_top = 0;
+                auto parent = touch_holder_->getParent();
+                while (parent) {
+                    total_left += (parent->getLeft() - parent->getScrollX());
+                    total_top += (parent->getTop() - parent->getScrollY());
+
+                    parent = parent->getParent();
+                }
+
+                e->setX(e->getX() - total_left);
+                e->setY(e->getY() - total_top);
+                e->setIsNoDispatch(true);
+
+                return touch_holder_->dispatchInputEvent(e);
+            }
+
             return root_layout_->dispatchInputEvent(e);
         }
 
         if (e->isKeyboardEvent()) {
-            if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
+            // debug view
+            /*if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
                 bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
                 bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);
                 if (isCtrlKeyPressed && isShiftKeyPressed) {
@@ -858,7 +896,7 @@ namespace ukive {
                         debug_view->toggleMode();
                     }
                 }
-            }
+            }*/
 
             if (focus_holder_) {
                 return focus_holder_->dispatchInputEvent(e);
@@ -882,17 +920,6 @@ namespace ukive {
         return false;
     }
 
-    void Window::onDrawCanvas(Canvas* canvas) {
-    }
-
-    void Window::onPreSwapChainResize() {
-        delete canvas_;
-    }
-
-    void Window::onPostSwapChainResize() {
-        canvas_ = new Canvas(renderer_->getRenderTarget());
-    }
-
     void Window::onHandleMessage(Message* msg) {
         switch (msg->what) {
         case SCHEDULE_RENDER:
@@ -904,28 +931,6 @@ namespace ukive {
         default:
             break;
         }
-    }
-
-    void Window::AnimStateChangedListener::onStateChanged(
-        UI_ANIMATION_MANAGER_STATUS newStatus,
-        UI_ANIMATION_MANAGER_STATUS previousStatus)
-    {
-        if (newStatus == UI_ANIMATION_MANAGER_BUSY &&
-            previousStatus == UI_ANIMATION_MANAGER_IDLE)
-        {
-            win_->invalidate();
-        }
-    }
-
-
-    void Window::AnimTimerEventListener::onPreUpdate() {
-    }
-
-    void Window::AnimTimerEventListener::onPostUpdate() {
-        window_->invalidate();
-    }
-
-    void Window::AnimTimerEventListener::onRenderingTooSlow(unsigned int fps) {
     }
 
 }

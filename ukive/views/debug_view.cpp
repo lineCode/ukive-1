@@ -12,9 +12,9 @@ namespace ukive {
 
     DebugView::DebugView(Window* w, AttrsRef attrs)
         : View(w, attrs),
-          strip_width_(w->dpToPx(4)),
+          strip_width_(w->dpToPxX(4)),
           screen_width_(Application::getScreenWidth()),
-          mode_(Mode::RENDER) {
+          mode_(RENDER) {
     }
 
     void DebugView::onDraw(Canvas* canvas) {
@@ -24,9 +24,9 @@ namespace ukive {
         int height = getContentBounds().height();
 
         int cur_x = width;
-        int base_height = getWindow()->dpToPx(64);
+        int base_height = getWindow()->dpToPxX(64);
         float base_time = 0.f;
-        if (mode_ == Mode::LAYOUT) {
+        if (mode_ == LAYOUT) {
             base_time = 4;
         } else {
             base_time = 100.f / 6.f;
@@ -36,7 +36,7 @@ namespace ukive {
             int y = height - it->duration / base_time * base_height;
             canvas->fillRect(
                 RectF(cur_x - strip_width_, y, strip_width_, height - y),
-                mode_ == Mode::RENDER ? Color::Orange400 : Color::Pink200);
+                mode_ == RENDER ? Color::Orange400 : Color::Pink200);
 
             cur_x -= strip_width_;
             if (width - cur_x > screen_width_) {
@@ -46,15 +46,15 @@ namespace ukive {
         }
 
         canvas->fillRect(
-            RectF(0, std::round(height - base_height), width, std::round(getWindow()->dpToPx(2))),
+            RectF(0, std::round(height - base_height), width, std::round(getWindow()->dpToPxX(2))),
             Color::Red400);
     }
 
     void DebugView::toggleMode() {
-        if (mode_ == Mode::RENDER) {
-            mode_ = Mode::LAYOUT;
-        } else if (mode_ == Mode::LAYOUT) {
-            mode_ = Mode::RENDER;
+        if (mode_ == RENDER) {
+            mode_ = LAYOUT;
+        } else if (mode_ == LAYOUT) {
+            mode_ = RENDER;
         }
 
         durations_.clear();

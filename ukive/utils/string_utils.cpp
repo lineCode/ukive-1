@@ -2,9 +2,11 @@
 
 #include <algorithm>
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/utils/unicode.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -29,7 +31,7 @@ namespace ukive {
 
     string16 ANSIToUTF16(const string8& str) {
         int req_length = ::MultiByteToWideChar(
-            CP_ACP, MB_PRECOMPOSED, str.data(), str.length(), nullptr, 0);
+            CP_ACP, MB_PRECOMPOSED, str.data(), STLCInt(str.length()), nullptr, 0);
         if (req_length <= 0) {
             return {};
         }
@@ -38,7 +40,7 @@ namespace ukive {
 
         req_length = ::MultiByteToWideChar(
             CP_ACP, MB_PRECOMPOSED,
-            str.data(), str.length(), w_buffer.get(), req_length);
+            str.data(), STLCInt(str.length()), w_buffer.get(), req_length);
         if (req_length <= 0) {
             return {};
         }
@@ -263,7 +265,7 @@ namespace ukive {
         const string8& match,
         bool case_sensitive)
     {
-        int off = base.length();
+        auto off = base.length();
         for (string8::size_type i = match.length(); i > 0; --i) {
             if (off == 0) return false;
             if (!isEqual(base[off - 1], match[i - 1], case_sensitive)) return false;
@@ -277,7 +279,7 @@ namespace ukive {
         const string16& match,
         bool case_sensitive)
     {
-        int off = base.length();
+        auto off = base.length();
         for (string16::size_type i = match.length(); i > 0; --i) {
             if (off == 0) return false;
             if (!isEqual(base[off - 1], match[i - 1], case_sensitive)) return false;

@@ -57,7 +57,7 @@ namespace ukive {
     }
 
     void RootLayout::showTitleBar() {
-        int title_bar_height = getWindow()->dpToPx(kTitleBarHeight);
+        int title_bar_height = getWindow()->dpToPxX(kTitleBarHeight);
         if (!title_bar_) {
             if (content_view_) {
                 content_view_->getLayoutParams()->top_margin = title_bar_height;
@@ -148,6 +148,10 @@ namespace ukive {
         return title_bar_;
     }
 
+    View* RootLayout::getContentView() const {
+        return content_view_;
+    }
+
     DebugView* RootLayout::getDebugView() const {
         return debug_view_;
     }
@@ -171,12 +175,22 @@ namespace ukive {
         auto lp = new LayoutParams(
             LayoutParams::MATCH_PARENT, LayoutParams::MATCH_PARENT);
         if (title_bar_ && title_bar_->getVisibility() != View::VANISHED) {
-            lp->top_margin = getWindow()->dpToPx(kTitleBarHeight);
+            lp->top_margin = getWindow()->dpToPxX(kTitleBarHeight);
         }
 
         content_layout_->addView(0, content, lp);
     }
 
+    void RootLayout::invalidate(int left, int top, int right, int bottom) {
+        NonClientLayout::invalidate(left, top, right, bottom);
+
+        int p_left = left + getLeft();
+        int p_top = top + getTop();
+        int p_right = right + getLeft();
+        int p_bottom = bottom + getTop();
+
+        getWindow()->invalidate(p_left, p_top, p_right, p_bottom);
+    }
 
     void RootLayout::requestLayout() {
         NonClientLayout::requestLayout();

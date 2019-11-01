@@ -71,7 +71,7 @@ namespace ukive {
             win_ex_style |= WS_EX_LAYERED;
         }
 
-        onPreCreate(&info, &win_style, &win_ex_style);
+        //onPreCreate(&info, &win_style, &win_ex_style);
 
         ATOM atom = WindowClassManager::getInstance()->retrieveWindowClass(info);
         HWND hWnd = ::CreateWindowEx(
@@ -223,6 +223,17 @@ namespace ukive {
         is_translucent_ = translucent;
     }
 
+    void WindowImpl::setBlurBehindEnabled(bool enabled) {
+        if (is_blur_behind_enabled_ != enabled) {
+            is_blur_behind_enabled_ = enabled;
+
+            if (::IsWindow(hWnd_)) {
+                ::SendMessageW(
+                    hWnd_, WM_ACTIVATE, MAKEWORD(WA_INACTIVE, ::IsIconic(hWnd_)), LPARAM(hWnd_));
+            }
+        }
+    }
+
     string16 WindowImpl::getTitle() const {
         return title_;
     }
@@ -263,6 +274,9 @@ namespace ukive {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
         int width = rect.right - rect.left;
+        if (width == 0) {
+            return 0;
+        }
 
         non_client_frame_->getClientInsets(&rect);
         width -= (rect.left + rect.right);
@@ -278,6 +292,9 @@ namespace ukive {
         RECT rect;
         ::GetClientRect(hWnd_, &rect);
         int height = rect.bottom - rect.top;
+        if (height == 0) {
+            return 0;
+        }
 
         non_client_frame_->getClientInsets(&rect);
         height -= (rect.top + rect.bottom);
@@ -285,24 +302,26 @@ namespace ukive {
         return std::max(height, 0);
     }
 
-    int WindowImpl::getDpi() const {
+    void WindowImpl::getDpi(int* dpi_x, int* dpi_y) const {
         if (!::IsWindow(hWnd_)) {
-            return 96;
+            Application::getPrimaryDpi(dpi_x, dpi_y);
+            return;
         }
 
-        if (isWin10Ver1607OrGreater()) {
-            int dpi_x = STLCInt(UDGetDpiForWindow(hWnd_));
-            if (dpi_x > 0) {
-                return dpi_x;
+        static bool is_win10_1607_or_above = win::isWin10Ver1607OrGreater();
+        if (is_win10_1607_or_above) {
+            int dpi = STLCInt(win::UDGetDpiForWindow(hWnd_));
+            if (dpi > 0) {
+                *dpi_x = dpi;
+                *dpi_y = dpi;
+                return;
             }
         }
 
         HDC dc = ::GetDC(hWnd_);
-        int dpi_x = ::GetDeviceCaps(dc, LOGPIXELSX);
-        //int dpi_y = ::GetDeviceCaps(screen, LOGPIXELSY);
+        *dpi_x = ::GetDeviceCaps(dc, LOGPIXELSX);
+        *dpi_y = ::GetDeviceCaps(dc, LOGPIXELSY);
         ::ReleaseDC(hWnd_, dc);
-
-        return dpi_x;
     }
 
     HWND WindowImpl::getHandle() const {
@@ -327,17 +346,28 @@ namespace ukive {
 
     bool WindowImpl::isMinimum() const {
         if (::IsWindow(hWnd_)) {
-            return ::IsIconic(hWnd_) == TRUE;
+            return ::IsIconic(hWnd_) != 0;
         }
 
+        DCHECK(false);
         return false;
     }
 
     bool WindowImpl::isMaximum() const {
         if (::IsWindow(hWnd_)) {
-            return ::IsZoomed(hWnd_) == TRUE;
+            return ::IsZoomed(hWnd_) != 0;
         }
 
+        DCHECK(false);
+        return false;
+    }
+
+    bool WindowImpl::isPopup() const {
+        if (::IsWindow(hWnd_)) {
+            return ::GetWindowLongPtr(hWnd_, GWL_STYLE) & WS_POPUP;
+        }
+
+        DCHECK(false);
         return false;
     }
 
@@ -383,6 +413,10 @@ namespace ukive {
     }
 
     void WindowImpl::sendFrameChanged() {
+        if (!::IsWindow(hWnd_)) {
+            return;
+        }
+
         ::SetWindowPos(hWnd_, nullptr, 0, 0, 0, 0,
             SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOCOPYBITS |
             SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOREPOSITION |
@@ -424,9 +458,9 @@ namespace ukive {
     void WindowImpl::disableTouchFeedback(HWND hWnd) {
         if (::IsWindows8OrGreater()) {
             BOOL enabled = FALSE;
-            UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_TAP, 0, sizeof(BOOL), &enabled);
-            UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &enabled);
-            UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &enabled);
+            win::UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_TAP, 0, sizeof(BOOL), &enabled);
+            win::UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_PRESSANDHOLD, 0, sizeof(BOOL), &enabled);
+            win::UDSetWindowFeedbackSetting(hWnd, FEEDBACK_TOUCH_RIGHTTAP, 0, sizeof(BOOL), &enabled);
         }
     }
 
@@ -453,16 +487,28 @@ namespace ukive {
         return is_enable_mouse_track_;
     }
 
-    float WindowImpl::dpToPx(float dp) {
-        return getDpi() / 96.f * dp;
+    float WindowImpl::dpToPxX(float dp) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return dpi_x / 96.f * dp;
     }
 
-    float WindowImpl::pxToDp(float px) {
-        return px / (getDpi() / 96.f);
+    float WindowImpl::dpToPxY(float dp) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return dpi_y / 96.f * dp;
     }
 
-    void WindowImpl::onPreCreate(ClassInfo* info, int* win_style, int* win_ex_style) {
-        delegate_->onPreCreate(info, win_style, win_ex_style);
+    float WindowImpl::pxToDpX(float px) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return px / (dpi_x / 96.f);
+    }
+
+    float WindowImpl::pxToDpY(float px) {
+        int dpi_x, dpi_y;
+        getDpi(&dpi_x, &dpi_y);
+        return px / (dpi_y / 96.f);
     }
 
     void WindowImpl::onCreate() {
@@ -485,7 +531,7 @@ namespace ukive {
         delegate_->onKillFocus();
     }
 
-    void WindowImpl::onDraw(const Rect &rect) {
+    void WindowImpl::onDraw(const Rect& rect) {
         delegate_->onDraw(rect);
     }
 
@@ -542,7 +588,7 @@ namespace ukive {
             bool has_down_up = false;
             auto& input = inputs[i];
             if (input.dwFlags & TOUCHEVENTF_DOWN) {
-                DLOG(Log::INFO) << "TOUCH DOWN";
+                //DLOG(Log::INFO) << "TOUCH DOWN";
 
                 DCHECK(!has_down_up);
                 DCHECK(prev_ti_.find(input.dwID) == prev_ti_.end());
@@ -551,7 +597,7 @@ namespace ukive {
                 ev.setCurTouchId(STLCInt(input.dwID));
                 prev_ti_[input.dwID] = input;
             } else if (input.dwFlags & TOUCHEVENTF_UP) {
-                DLOG(Log::INFO) << "TOUCH UP";
+                //DLOG(Log::INFO) << "TOUCH UP";
 
                 DCHECK(!has_down_up);
                 auto it = prev_ti_.find(input.dwID);
@@ -661,7 +707,19 @@ namespace ukive {
     }
 
     LRESULT WindowImpl::onPaint(WPARAM wParam, LPARAM lParam, bool* handled) {
-        onDraw({});
+        if (::GetUpdateRect(hWnd_, nullptr, FALSE) == 0) {
+            return 0;
+        }
+
+        PAINTSTRUCT ps;
+        HDC hdc = ::BeginPaint(hWnd_, &ps);
+
+        onDraw(Rect(
+            ps.rcPaint.left, ps.rcPaint.top,
+            ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top));
+
+        ::EndPaint(hWnd_, &ps);
+        *handled = true;
         return 0;
     }
 
@@ -1237,7 +1295,7 @@ namespace ukive {
     }
 
     LRESULT WindowImpl::onDwmCompositionChanged(WPARAM wParam, LPARAM lParam, bool* handled) {
-        if ((is_translucent_ && (GetWindowLongPtr(hWnd_, GWL_STYLE) & WS_CAPTION))) {
+        if (is_translucent_ && (GetWindowLongPtr(hWnd_, GWL_STYLE) & WS_CAPTION)) {
             setWindowRectShape();
         }
 
@@ -1260,9 +1318,7 @@ namespace ukive {
         HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, bool* pfCallDWP)
     {
         LRESULT ret = 0;
-        bool call_dwp = true;
-
-        call_dwp = !::DwmDefWindowProc(hWnd, message, wParam, lParam, &ret);
+        bool call_dwp = !::DwmDefWindowProc(hWnd, message, wParam, lParam, &ret);
 
         if (message == WM_CREATE) {
             RECT rcClient;
@@ -1280,8 +1336,18 @@ namespace ukive {
         }
 
         if (message == WM_ACTIVATE) {
-            MARGINS margins = { 0,0,0,1 };
-            ::DwmExtendFrameIntoClientArea(hWnd, &margins);
+            non_client_frame_->onActivateAfterDwm();
+
+            if (is_blur_behind_enabled_) {
+                static bool is_win8_or_greater = IsWindows8OrGreater();
+                static bool is_win10_or_greater = IsWindows10OrGreater();
+                if (is_win10_or_greater) {
+                    EnableBlurBehindOnWin10();
+                } else if (!is_win8_or_greater) {
+                    EnableBlurBehindOnWin7();
+                }
+            }
+
             call_dwp = true;
             ret = 0;
         }
@@ -1329,7 +1395,7 @@ namespace ukive {
 
         if (window) {
             bool call_dwp = true;
-            if (!window->isTranslucent() && Application::isAeroEnabled()) {
+            if (Application::isAeroEnabled()) {
                 LRESULT lRet = window->processDWMProc(hWnd, uMsg, wParam, lParam, &call_dwp);
                 if (!call_dwp) {
                     return lRet;
@@ -1346,6 +1412,37 @@ namespace ukive {
         }
 
         return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+    }
+
+    void WindowImpl::EnableBlurBehindOnWin7() {
+        // Create and populate the Blur Behind structure
+        DWM_BLURBEHIND bb = { 0 };
+
+        // Enable Blur Behind and apply to the entire client area
+        bb.dwFlags = DWM_BB_ENABLE;
+        bb.fEnable = true;
+        bb.hRgnBlur = nullptr;
+
+        // Apply Blur Behind
+        HRESULT hr = DwmEnableBlurBehindWindow(hWnd_, &bb);
+        DCHECK(SUCCEEDED(hr));
+    }
+
+    void WindowImpl::EnableBlurBehindOnWin10() {
+        win::ACCENT_POLICY accent;
+        accent.AccentState = win::ACCENT_ENABLE_BLURBEHIND;
+        accent.AccentFlags = 0;
+        accent.AnimationId = 0;
+        // AABBGGRR
+        accent.GradientColor = 0;
+
+        win::WINDOWCOMPOSITIONATTRIBDATA data;
+        data.Attrib = win::WCA_ACCENT_POLICY;
+        data.pvData = &accent;
+        data.cbData = sizeof(accent);
+
+        BOOL result = win::UDSetWindowCompositionAttribute(hWnd_, &data);
+        DCHECK(result != 0);
     }
 
 }

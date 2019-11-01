@@ -2,7 +2,6 @@
 
 #include "ukive/graphics/canvas.h"
 #include "ukive/window/window.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/animation/interpolator.h"
 
 #define DOWN_UP_SEC      200
@@ -44,6 +43,13 @@ namespace ukive {
         tint_color_ = tint;
     }
 
+    void RippleDrawable::setDrawMaskEnabled(bool enabled) {
+        if (is_draw_mask_ != enabled) {
+            is_draw_mask_ = enabled;
+            invalidate();
+        }
+    }
+
     void RippleDrawable::draw(Canvas *canvas) {
         hover_animator_.update();
         leave_animator_.update();
@@ -52,49 +58,63 @@ namespace ukive {
         ripple_animator_.update();
 
         auto bound = getBounds();
-        Color color(0.f, 0.f, 0.f, alpha_);
+        Color color(0.f, 0.f, 0.f, float(alpha_));
 
-        // 绘制底色、alpha 和 ripple。
-        content_off_->beginDraw();
-        content_off_->clear();
-        content_off_->setOpacity(canvas->getOpacity());
-        content_off_->fillRect(bound.toRectF(), tint_color_);
-        content_off_->fillRect(bound.toRectF(), color);
+        bool has_content = tint_color_.a > 0.f || color.a > 0.f || ripple_animator_.isRunning();
+        if (has_content) {
+            // 绘制底色、alpha 和 ripple。
+            content_off_->beginDraw();
+            content_off_->clear();
+            content_off_->setOpacity(canvas->getOpacity());
+            if (tint_color_.a > 0.f) {
+                content_off_->fillRect(bound.toRectF(), tint_color_);
+            }
+            if (color.a > 0.f) {
+                content_off_->fillRect(bound.toRectF(), color);
+            }
 
-        if ((getState() == STATE_HOVERED && getPrevState() == STATE_PRESSED) ||
-            (getState() == STATE_NONE && getPrevState() == STATE_HOVERED))
-        {
-            Color rippleColor = Color::ofRGB(0, (1 - ripple_animator_.getCurValue())*0.1f);
+            if (ripple_animator_.isRunning()) {
+                auto w = bound.width();
+                auto h = bound.height();
+                auto r = std::sqrt(w * w + h * h);
 
-            content_off_->fillCircle(
-                start_x_, start_y_,
-                ripple_animator_.getCurValue() * 100, rippleColor);
-        }
-        content_off_->endDraw();
-        auto contentBitmap = content_off_->extractBitmap();
+                Color ripple_color = Color::ofRGB(0, (1 - ripple_animator_.getCurValue()) * 0.1f);
+                content_off_->fillCircle(
+                    start_x_, start_y_,
+                    ripple_animator_.getCurValue() * r, ripple_color);
+            }
+            content_off_->endDraw();
+            auto content_bmp = content_off_->extractBitmap();
 
-        if (drawable_list_.empty()) {
-            canvas->drawBitmap(contentBitmap.get());
+            if (drawable_list_.empty()) {
+                canvas->drawBitmap(content_bmp.get());
+            } else {
+                // 绘制 mask，以该 mask 确定背景形状以及 ripple 的扩散边界。
+                mask_off_->beginDraw();
+                mask_off_->clear();
+                mask_off_->setOpacity(canvas->getOpacity());
+                LayerDrawable::draw(mask_off_.get());
+                mask_off_->endDraw();
+                auto mask_bmp = mask_off_->extractBitmap();
+
+                if (is_draw_mask_) {
+                    canvas->drawBitmap(mask_bmp.get());
+                }
+                canvas->fillOpacityMask(
+                    bound.width(), bound.height(),
+                    mask_bmp.get(), content_bmp.get());
+            }
         } else {
-            // 绘制 mask，以该 mask 确定背景形状以及 ripple 的扩散边界。
-            mask_off_->beginDraw();
-            mask_off_->clear();
-            mask_off_->setOpacity(canvas->getOpacity());
-            LayerDrawable::draw(mask_off_.get());
-            mask_off_->endDraw();
-            auto maskBitmap = mask_off_->extractBitmap();
-
-            canvas->drawBitmap(maskBitmap.get());
-            canvas->fillOpacityMask(
-                bound.width(), bound.height(),
-                maskBitmap.get(), contentBitmap.get());
+            if (is_draw_mask_) {
+                LayerDrawable::draw(canvas);
+            }
         }
 
-        if (!hover_animator_.isFinished() ||
-            !leave_animator_.isFinished() ||
-            !down_animator_.isFinished() ||
-            !up_animator_.isFinished() ||
-            !ripple_animator_.isFinished())
+        if (hover_animator_.isRunning() ||
+            leave_animator_.isRunning() ||
+            down_animator_.isRunning() ||
+            up_animator_.isRunning() ||
+            ripple_animator_.isRunning())
         {
             invalidate();
         }
@@ -202,7 +222,7 @@ namespace ukive {
         return 1.0f;
     }
 
-    void RippleDrawable::onAnimationProgress(Animator2* animator) {
+    void RippleDrawable::onAnimationProgress(Animator* animator) {
         alpha_ = animator->getCurValue();
     }
 

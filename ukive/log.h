@@ -61,6 +61,7 @@ namespace ukive {
             CONSOLE = 1 << 0,
             FILE =    1 << 1,
             DBG_STR = 1 << 2,
+            STANDARD = 1 << 3,
         };
 
         struct Params {

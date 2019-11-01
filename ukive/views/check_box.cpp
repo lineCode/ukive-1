@@ -13,7 +13,7 @@ namespace ukive {
         : TextView(w, attrs),
           checked_(false)
     {
-        setPadding(w->dpToPx(24), w->dpToPx(8), w->dpToPx(8), w->dpToPx(8));
+        setPadding(w->dpToPxX(24), w->dpToPxX(8), w->dpToPxX(8), w->dpToPxX(8));
         setBackground(new CheckDrawable(w));
     }
 
@@ -22,6 +22,7 @@ namespace ukive {
             return;
         }
         checked_ = checked;
+        // TODO:
         static_cast<CheckDrawable*>(getBackground())->setChecked(checked);
         invalidate();
     }

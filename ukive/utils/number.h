@@ -1,9 +1,6 @@
 #ifndef UKIVE_UTILS_NUMBER_H_
 #define UKIVE_UTILS_NUMBER_H_
 
-#include <limits>
-#include <cstdint>
-
 #include "ukive/utils/string_utils.h"
 
 

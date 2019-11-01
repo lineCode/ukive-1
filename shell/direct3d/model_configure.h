@@ -1,8 +1,6 @@
 ﻿#ifndef SHELL_DIRECT3D_MODEL_CONFIGURE_H_
 #define SHELL_DIRECT3D_MODEL_CONFIGURE_H_
 
-#include <Windows.h>
-
 #include "ukive/utils/com_ptr.h"
 #include "ukive/graphics/graphic_device_manager.h"
 

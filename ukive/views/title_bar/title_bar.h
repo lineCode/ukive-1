@@ -32,7 +32,6 @@ namespace ukive {
 
     private:
         void initViews();
-        Drawable* getTitleButtonBackground() const;
 
         TextView* title_tv_;
         Button* min_btn_;

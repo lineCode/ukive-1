@@ -13,21 +13,23 @@
 namespace ukive {
 
     class View;
+    class Rect;
     class RectF;
     class PointF;
     class Bitmap;
     class Window;
-    class Renderer;
     class TextRenderer;
 
     class Canvas {
     public:
         Canvas(int width, int height);
-        explicit Canvas(ComPtr<ID2D1RenderTarget> rt);
+        Canvas(Window* w, bool hw_acc);
         ~Canvas();
 
         void setOpacity(float opacity);
         float getOpacity();
+
+        bool resize();
 
         void clear();
         void clear(const Color& color);
@@ -35,8 +37,8 @@ namespace ukive {
         void beginDraw();
         void endDraw();
 
+        void pushClip(const Rect& rect);
         void popClip();
-        void pushClip(const RectF& rect);
 
         void pushLayer(ID2D1Geometry* clipGeometry);
         void pushLayer(const RectF& content_bound, ID2D1Geometry* clipGeometry);
@@ -47,6 +49,7 @@ namespace ukive {
 
         //临时方法。
         ID2D1RenderTarget* getRT();
+
         ComPtr<ID3D11Texture2D> getTexture();
         std::shared_ptr<Bitmap> extractBitmap();
 
@@ -62,6 +65,7 @@ namespace ukive {
         void fillOpacityMask(
             float width, float height,
             Bitmap* mask, Bitmap* content);
+        void fillBitmapRepeat(const RectF& rect, Bitmap* content);
 
         void drawLine(
             const PointF& start, const PointF& end, const Color& color);
@@ -92,6 +96,7 @@ namespace ukive {
         void drawOval(float cx, float cy, float rx, float ry, float stroke_width, const Color& color);
         void fillOval(float cx, float cy, float rx, float ry, const Color& color);
 
+        void fillGeometry(ID2D1Geometry* geo, const Color& color);
         void fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush);
 
         void drawBitmap(Bitmap* bitmap);
@@ -112,8 +117,34 @@ namespace ukive {
             float x, float y,
             IDWriteTextLayout* textLayout, const Color& color);
 
+        static ComPtr<ID2D1RenderTarget> createWICRenderTarget(IWICBitmap* wic_bitmap);
+        static ComPtr<ID2D1DCRenderTarget> createDCRenderTarget();
+
+        static ComPtr<ID3D11Texture2D> createTexture2D(int width, int height, bool gdi_compat);
+        static ComPtr<ID2D1RenderTarget> createDXGIRenderTarget(IDXGISurface* surface, bool gdi_compat);
+
+        static ComPtr<IDWriteTextFormat> createTextFormat(
+            const string16& font_family_name,
+            float font_size, const string16& locale_name);
+        static ComPtr<IDWriteTextLayout> createTextLayout(
+            const string16& text, IDWriteTextFormat* format,
+            float max_width, float max_height);
+
     private:
-        void initCanvas(ComPtr<ID2D1RenderTarget> rt);
+        void initCanvas();
+
+        ComPtr<ID2D1RenderTarget> createHardwareBRT();
+        ComPtr<ID2D1RenderTarget> createSoftwareBRT();
+        ComPtr<ID2D1RenderTarget> createSwapchainBRT();
+
+        bool resizeHardwareBRT();
+        bool resizeSoftwareBRT();
+        bool resizeSwapchainBRT();
+
+        bool drawLayered();
+        bool drawSwapchain();
+
+        void releaseResources();
 
         int layer_counter_;
         bool is_texture_target_;
@@ -123,7 +154,7 @@ namespace ukive {
         ComPtr<TextRenderer> text_renderer_;
 
         ComPtr<ID2D1Layer> layer_;
-        ComPtr<ID2D1RenderTarget> render_target_;
+        ComPtr<ID2D1RenderTarget> rt_;
         ComPtr<ID2D1SolidColorBrush> solid_brush_;
         ComPtr<ID2D1BitmapBrush> bitmap_brush_;
 
@@ -131,6 +162,11 @@ namespace ukive {
 
         std::stack<float> opacity_stack_;
         std::stack<ComPtr<ID2D1DrawingStateBlock>> drawing_state_stack_;
+
+        bool is_layered_ = false;
+        bool is_hardware_acc_ = false;
+        Window* owner_window_ = nullptr;
+        ComPtr<IDXGISwapChain> swapchain_;
     };
 
 }

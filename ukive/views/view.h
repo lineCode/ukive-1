@@ -50,6 +50,11 @@ namespace ukive {
             UNKNOWN
         };
 
+        enum Outline {
+            OUTLINE_RECT,
+            OUTLINE_OVAL,
+        };
+
         explicit View(Window* w);
         View(Window* w, AttrsRef attrs);
         virtual ~View();
@@ -86,12 +91,15 @@ namespace ukive {
         void setIsInputEventAtLast(bool is_last);
         void setPressed(bool pressed);
         void setCurrentCursor(Cursor cursor);
+        void setClickable(bool clickable);
         void setFocusable(bool focusable);
+        void setTouchCapturable(bool capturable);
         void setElevation(float elevation);
         void setReceiveOutsideInputEvent(bool receive);
         void setMinimumWidth(int width);
         void setMinimumHeight(int height);
         void setOnClickListener(OnClickListener* l);
+        void setOutline(Outline outline);
 
         // Invoked by framework.
         void setParent(View* parent);
@@ -122,6 +130,7 @@ namespace ukive {
         int getMeasuredHeight() const;
         float getElevation() const;
         int getVisibility() const;
+        int getOutline() const;
 
         int getMinimumWidth() const;
         int getMinimumHeight() const;
@@ -137,6 +146,8 @@ namespace ukive {
         Window* getWindow() const;
         Drawable* getBackground() const;
         Drawable* getForeground() const;
+        Drawable* getReleasedBackground();
+        Drawable* getReleasedForeground();
 
         // bounds relative to parent.
         Rect getBounds() const;
@@ -155,7 +166,9 @@ namespace ukive {
         bool isInputEventAtLast() const;
         bool isPressed() const;
         bool hasFocus() const;
+        bool isClickable() const;
         bool isFocusable() const;
+        bool isTouchCapturable() const;
         bool isLayouted() const;
         bool isLocalPointerInThis(InputEvent* e) const;
         bool isParentPointerInThis(InputEvent* e) const;
@@ -168,14 +181,15 @@ namespace ukive {
         void measure(int width, int height, int width_mode, int height_mode);
         void layout(int left, int top, int right, int bottom);
 
-        virtual void invalidate();
-        virtual void invalidate(const Rect &rect);
+        void invalidate();
+        void invalidate(const Rect &rect);
         virtual void invalidate(int left, int top, int right, int bottom);
         virtual void requestLayout();
 
         void requestFocus();
         void discardFocus();
         void discardMouseCapture();
+        void discardTouchCapture();
         void discardPendingOperations();
 
         virtual View* findViewById(int id) const;
@@ -219,6 +233,7 @@ namespace ukive {
 
         virtual bool onCheckIsTextEditor();
         virtual InputConnection* onCreateInputConnection();
+        virtual void onComputeScroll() {}
 
         virtual void onSizeChanged(int width, int height, int old_width, int old_height) {}
         virtual void onVisibilityChanged(int visibility) {}
@@ -239,7 +254,7 @@ namespace ukive {
 
         class ClickPerformer : public Executable {
         public:
-            ClickPerformer(View* v)
+            explicit ClickPerformer(View* v)
                 :view_(v) {}
             void run() override {
                 view_->performClick();
@@ -254,8 +269,11 @@ namespace ukive {
         bool processInputEvent(InputEvent* e);
 
         int id_;
+
+        // 相对于父 View 的位置
         Rect bounds_;
         Rect padding_;
+        Outline outline_;
 
         uint32_t flags_;
 
@@ -281,7 +299,9 @@ namespace ukive {
         bool is_attached_to_window_;
         bool is_input_event_at_last_;
         bool is_pressed_;
+        bool is_clickable_ = false;
         bool is_focusable_;
+        bool is_touch_capturable_ = false;
         bool is_receive_outside_input_event_;
         bool is_mouse_down_;
         bool is_touch_down_;

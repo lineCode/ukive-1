@@ -1,6 +1,7 @@
 #ifndef UKIVE_WINDOW_FRAME_DEFAULT_NON_CLIENT_FRAME_H_
 #define UKIVE_WINDOW_FRAME_DEFAULT_NON_CLIENT_FRAME_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/window/frame/non_client_frame.h"
@@ -32,10 +33,11 @@ namespace ukive {
         LRESULT onNcLButtonDown(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onNcLButtonUp(WPARAM wParam, LPARAM lParam, bool* handled) override;
         LRESULT onDwmCompositionChanged(bool* handled) override;
+        LRESULT onActivateAfterDwm() override { return 0; }
         LRESULT onInterceptDrawClassic(WPARAM wParam, LPARAM lParam, bool* handled) override;
 
     private:
-        WindowImpl* window_;
+        WindowImpl* window_ = nullptr;
     };
 
 }

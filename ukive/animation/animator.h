@@ -1,124 +1,80 @@
-﻿#ifndef UKIVE_ANIMATION_ANIMATOR_H_
+#ifndef UKIVE_ANIMATION_ANIMATOR_H_
 #define UKIVE_ANIMATION_ANIMATOR_H_
 
-#include <map>
+#include <memory>
 
-#include "ukive/animation/transition.h"
-#include "ukive/utils/com_ptr.h"
+#include "ukive/animation/timer.h"
 
 
 namespace ukive {
 
-    class AnimationManager;
-    class AnimatorStateHandler;
+    class Animator;
+    class Interpolator;
+
+    class AnimationListener {
+    public:
+        virtual ~AnimationListener() = default;
+
+        virtual void onAnimationStarted(Animator* animator) {}
+        virtual void onAnimationProgress(Animator* animator) {}
+        virtual void onAnimationStopped(Animator* animator) {}
+        virtual void onAnimationFinished(Animator* animator) {}
+        virtual void onAnimationReset(Animator* animator) {}
+    };
 
     class Animator {
     public:
-        class OnValueChangedListener {
-        public:
-            virtual ~OnValueChangedListener() = default;
-
-            virtual void onValueChanged(
-                unsigned int varIndex,
-                IUIAnimationStoryboard* storyboard,
-                IUIAnimationVariable* variable,
-                double newValue, double previousValue) {}
-            virtual void onIntegerValueChanged(
-                unsigned int varIndex,
-                IUIAnimationStoryboard* storyboard,
-                IUIAnimationVariable* variable,
-                int newValue, int previousValue) {}
-        };
-
-        class OnAnimatorListener {
-        public:
-            virtual ~OnAnimatorListener() = default;
-
-            virtual void onAnimationStart(Animator* animator) {}
-            virtual void onAnimationEnd(Animator* animator) {}
-            virtual void onAnimationCancel(Animator* animator) {}
-        };
-
-    public:
-        Animator(AnimationManager* mgr);
+        explicit Animator(bool timer_driven = false);
         ~Animator();
 
-        /// <summary>
-        /// 执行定义在Storyboard上的动画。
-        /// 如果该Storyboard之前已经执行动画，则调用无效。
-        /// 此时需要先调用reset()方法重新创建Storyboard。
-        /// 若要执行简单的单变量动画，请使用startTransition()方法。
-        /// </summary>
         void start();
-
-        /// <summary>
-        /// 立即停止Storyboard动画。
-        /// 若当前没有动画，则调用无效。
-        /// 动画停止后，动画值将保留。
-        /// </summary>
         void stop();
-
-        /// <summary>
-        /// 在指定时间内播放完Storyboard动画。
-        /// 若当前没有动画，则调用无效。
-        /// </summary>
-        void finish(double second);
-
-        /// <summary>
-        /// 创建一个新的Storyboard实例。
-        /// 旧的Storyboard实例将被删除，之前添加的变量也将被删除。
-        /// 若当前的Storyboard从没执行，则调用无效。
-        /// 若当前的Storyboard正在动画，则动画将停止。
-        /// </summary>
+        void finish();
         void reset();
+        void update();
 
-        /// <summary>
-        /// 开始一个Transition动画。
-        /// 该动画是独立的，无法取消，只能等待动画结束。
-        /// 适用于简单的单变量，且无需额外控制的动画。
-        /// </summary>
-        void startTransition(unsigned int varIndex, std::shared_ptr<Transition> transition);
+        void setId(int id);
+        void setFps(int fps);
+        void setRepeat(bool repeat);
+        void setDuration(uint64_t duration);
+        void setInterpolator(Interpolator* ipr);
+        void setListener(AnimationListener* listener);
+        void setInitValue(double init_val);
 
-        void setOnStateChangedListener(OnAnimatorListener* l);
-        void setOnValueChangedListener(
-            unsigned int varIndex, OnValueChangedListener* l);
+        bool isRepeat() const;
+        bool isRunning() const;
+        bool isFinished() const;
 
-        double getValue(unsigned int varIndex);
-        int getIntValue(unsigned int varIndex);
-
-        double getPrevValue(unsigned int varIndex);
-        int getPrevIntValue(unsigned int varIndex);
-
-        double getFinalValue(unsigned int varIndex);
-        int getFinalIntValue(unsigned int varIndex);
-
-        double getElapsedTime();
-
-        bool addVariable(
-            unsigned int varIndex, double initValue,
-            double lower, double upper);
-        bool addTransition(
-            unsigned int varIndex, std::shared_ptr<Transition> transition);
-        bool addTransition(
-            unsigned int varIndex, std::shared_ptr<Transition> transition,
-            UI_ANIMATION_KEYFRAME key);
-        bool addTransition(
-            unsigned int varIndex, std::shared_ptr<Transition> transition,
-            UI_ANIMATION_KEYFRAME startKey, UI_ANIMATION_KEYFRAME endKey);
-        bool addKey(
-            UI_ANIMATION_KEYFRAME existed, double offset, UI_ANIMATION_KEYFRAME* newKey);
-        bool addKey(
-            std::shared_ptr<Transition> transition, UI_ANIMATION_KEYFRAME* newKey);
-
-        bool hasVariable(unsigned int varIndex);
-        bool removeVariable(unsigned int varIndex);
+        int getId() const;
+        int getFps() const;
+        uint64_t getDuration() const;
+        double getCurValue() const;
+        double getInitValue() const;
+        Interpolator* getInterpolator() const;
 
     private:
-        AnimationManager* anim_mgr_;
-        ComPtr<IUIAnimationStoryboard> story_board_;
-        AnimatorStateHandler* animator_state_listener_;
+        static uint64_t upTimeMillis();
 
-        std::map<unsigned int, ComPtr<IUIAnimationVariable>> vars_;
+        void restart();
+        void AnimationProgress();
+
+        int id_;
+        int fps_;
+        double cur_val_;
+        double init_val_;
+        uint64_t duration_;
+        uint64_t elapsed_duration_;
+        uint64_t start_time_;
+
+        bool is_repeat_;
+        bool is_started_;
+        bool is_running_;
+        bool is_finished_;
+        bool is_timer_driven_;
+
+        Timer timer_;
+        AnimationListener* listener_;
+        std::unique_ptr<Interpolator> interpolator_;
     };
 
 }

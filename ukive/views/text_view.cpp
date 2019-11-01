@@ -11,11 +11,11 @@
 #include "ukive/window/window.h"
 #include "ukive/text/span/span.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/text/text_drawing_effect.h"
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_item.h"
 #include "ukive/resources/dimension_utils.h"
+#include "ukive/utils/stl_utils.h"
 
 #include "oigka/layout_constants.h"
 
@@ -62,9 +62,8 @@ namespace ukive {
         delete text_key_listener_;
     }
 
-
     void TextView::initTextView() {
-        text_size_ = static_cast<int>(std::round(getWindow()->dpToPx(15.f)));
+        text_size_ = static_cast<int>(std::round(getWindow()->dpToPxX(15.f)));
         is_auto_wrap_ = true;
         is_plkey_down_ = false;
         is_prkey_down_ = false;
@@ -92,12 +91,11 @@ namespace ukive {
         makeNewTextFormat();
         makeNewTextLayout(0.f, 0.f, false);
 
-        base_text_->setSelection(0);
+        base_text_->setSelection(0, Editable::Reason::API);
         locateTextBlink(0);
 
         setFocusable(is_editable_ | is_selectable_);
     }
-
 
     int TextView::computeVerticalScrollRange() {
         int textHeight = std::ceil(getTextHeight());
@@ -112,7 +110,6 @@ namespace ukive {
 
         return std::max(0, textWidth - contentWidth);
     }
-
 
     void TextView::computeTextOffsetAtViewTop() {
         BOOL isInside;
@@ -163,7 +160,6 @@ namespace ukive {
 
         return final_x - getScrollX();
     }
-
 
     void TextView::scrollToFit(bool considerSelection) {
         bool scrolled = false;
@@ -225,7 +221,6 @@ namespace ukive {
         }
     }
 
-
     float TextView::getTextWidth() const {
         DWRITE_TEXT_METRICS metrics;
         text_layout_->GetMetrics(&metrics);
@@ -239,8 +234,8 @@ namespace ukive {
     }
 
     bool TextView::getLineInfo(
-        uint32_t position, uint32_t* line, float* height, uint32_t* count) {
-
+        uint32_t position, uint32_t* line, float* height, uint32_t* count)
+    {
         uint32_t lineCount;
         HRESULT hr = text_layout_->GetLineMetrics(nullptr, 0, &lineCount);
         if (hr == E_NOT_SUFFICIENT_BUFFER && lineCount > 0) {
@@ -290,7 +285,7 @@ namespace ukive {
             uint32_t start = base_text_->getSelectionStart();
 
             if (base_text_->hasSelection()) {
-                base_text_->setSelection(start);
+                base_text_->setSelection(start, Editable::Reason::USER_INPUT);
             } else {
                 if (start > 0) {
                     size_t len = 1;
@@ -303,14 +298,14 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(start - len);
+                    base_text_->setSelection(STLCU32(start - len), Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_RIGHT) {
             uint32_t end = base_text_->getSelectionEnd();
 
             if (base_text_->hasSelection()) {
-                base_text_->setSelection(end);
+                base_text_->setSelection(end, Editable::Reason::USER_INPUT);
             } else {
                 if (end < base_text_->length()) {
                     size_t len = 1;
@@ -323,7 +318,7 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(end + len);
+                    base_text_->setSelection(STLCU32(end + len), Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_UP) {
@@ -347,7 +342,7 @@ namespace ukive {
                 &isTrailing, &isInside, &pointMetrics);
 
             base_text_->setSelection(
-                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0));
+                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0), Editable::Reason::USER_INPUT);
         } else if (keyCode == VK_DOWN) {
             uint32_t start;
             if (hasSelection() && (last_sel_ == base_text_->getSelectionStart()
@@ -369,14 +364,13 @@ namespace ukive {
                 &isTrailing, &isInside, &pointMetrics);
 
             base_text_->setSelection(
-                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0));
+                pointMetrics.textPosition + (isTrailing == TRUE ? 1 : 0), Editable::Reason::USER_INPUT);
         }
     }
 
-
     void TextView::makeNewTextFormat() {
         text_format_.reset();
-        text_format_ = ukive::Renderer::createTextFormat(
+        text_format_ = Canvas::createTextFormat(
             font_family_name_,
             text_size_,
             L"en-US");
@@ -389,7 +383,7 @@ namespace ukive {
         range.startPosition = 0;
         range.length = base_text_->length();
 
-        text_layout_ = ukive::Renderer::createTextLayout(
+        text_layout_ = Canvas::createTextLayout(
             base_text_->toString(),
             text_format_.get(),
             maxWidth,
@@ -408,7 +402,6 @@ namespace ukive {
         text_layout_->SetFontStyle(text_style_, range);
         text_layout_->SetFontWeight(text_weight_, range);
     }
-
 
     void TextView::locateTextBlink(int position) {
         DWRITE_HIT_TEST_METRICS hitMetrics;
@@ -429,7 +422,6 @@ namespace ukive {
         locateTextBlink(hitPosition);
     }
 
-
     void TextView::onBeginProcess() {
         ++process_ref_;
     }
@@ -437,7 +429,6 @@ namespace ukive {
     void TextView::onEndProcess() {
         --process_ref_;
     }
-
 
     void TextView::onAttachedToWindow() {
         View::onAttachedToWindow();
@@ -460,7 +451,7 @@ namespace ukive {
             }
 
             text_blink_->hide();
-            base_text_->setSelection(base_text_->getSelectionStart());
+            base_text_->setSelection(base_text_->getSelectionStart(), Editable::Reason::USER_INPUT);
             invalidate();
         }
     }
@@ -487,7 +478,6 @@ namespace ukive {
 
         computeTextOffsetAtViewTop();
     }
-
 
     void TextView::onDraw(Canvas* canvas) {
         if (is_selectable_) {
@@ -597,7 +587,8 @@ namespace ukive {
 
     void TextView::onLayout(
         bool changed, bool sizeChanged,
-        int left, int top, int right, int bottom) {
+        int left, int top, int right, int bottom)
+    {
         if (text_action_mode_ && changed) {
             text_action_mode_->invalidatePosition();
         }
@@ -675,7 +666,7 @@ namespace ukive {
                         e->getX() - getPaddingLeft() + getScrollX(),
                         e->getY() - getPaddingTop() + getScrollY());
 
-                    base_text_->setSelection(first_sel_);
+                    base_text_->setSelection(first_sel_, Editable::Reason::USER_INPUT);
                 }
             }
             return true;
@@ -726,7 +717,7 @@ namespace ukive {
             first_sel_ = getHitTextPosition(
                 e->getX() - getPaddingLeft() + getScrollX(),
                 e->getY() - getPaddingTop() + getScrollY());
-            base_text_->setSelection(first_sel_);
+            base_text_->setSelection(first_sel_, Editable::Reason::USER_INPUT);
             return true;
         }
 
@@ -746,7 +737,7 @@ namespace ukive {
                     end = tmp;
                 }
 
-                base_text_->setSelection(start, end);
+                base_text_->setSelection(start, end, Editable::Reason::USER_INPUT);
             } else {
                 if (is_selectable_
                     && (isHitText(
@@ -861,7 +852,6 @@ namespace ukive {
         }
     }
 
-
     bool TextView::isAutoWrap() const {
         return is_auto_wrap_;
     }
@@ -874,14 +864,13 @@ namespace ukive {
         return is_selectable_;
     }
 
-
     void TextView::setText(const string16& text) {
-        base_text_->replace(text, 0, base_text_->length());
-        base_text_->setSelection(0);
+        base_text_->replace(text, 0, base_text_->length(), Editable::Reason::API);
+        base_text_->setSelection(0, Editable::Reason::API);
     }
 
     void TextView::setTextSize(int size) {
-        size = int(std::round(getWindow()->dpToPx(size)));
+        size = int(std::round(getWindow()->dpToPxX(size)));
         if (size == text_size_) {
             return;
         }
@@ -1003,11 +992,11 @@ namespace ukive {
 
 
     void TextView::setSelection(unsigned int position) {
-        base_text_->setSelection(position);
+        base_text_->setSelection(position, Editable::Reason::API);
     }
 
     void TextView::setSelection(unsigned int start, unsigned int end) {
-        base_text_->setSelection(start, end);
+        base_text_->setSelection(start, end, Editable::Reason::API);
     }
 
     void TextView::drawSelection(unsigned int start, unsigned int end) {
@@ -1042,9 +1031,9 @@ namespace ukive {
             uint32_t tLength = hitTextMetrics[i].length;
 
             //一行中只有\n或\r\n时，添加一个一定宽度的Selection。
-            if ((tLength == 1 && base_text_->at(tPos) == L'\n')
-                || (tLength == 2 && base_text_->at(tPos) == L'\r'
-                    && base_text_->at(tPos + 1) == L'\n')) {
+            if ((tLength == 1 && base_text_->at(tPos) == L'\n') ||
+                (tLength == 2 && base_text_->at(tPos) == L'\r' && base_text_->at(tPos + 1) == L'\n'))
+            {
                 extraWidth = text_size_;
             }
             //一行中句尾有\n或\r\n时，句尾添加一个一定宽度的Selection。
@@ -1083,7 +1072,6 @@ namespace ukive {
     bool TextView::hasSelection() const {
         return base_text_->hasSelection();
     }
-
 
     uint32_t TextView::getHitTextPosition(float textX, float textY) const {
         BOOL isInside;
@@ -1205,19 +1193,17 @@ namespace ukive {
         return bound;
     }
 
-
-    void TextView::computeVisibleRegion(RectF* visibleRegon) {
-        visibleRegon->left = 0.f + getScrollX();
-        visibleRegon->top = 0.f + getScrollY();
-        visibleRegon->right = visibleRegon->left + text_layout_->GetMaxWidth();
-        visibleRegon->bottom = visibleRegon->top + text_layout_->GetMaxHeight();
+    void TextView::computeVisibleRegion(RectF* region) {
+        region->left = 0.f + getScrollX();
+        region->top = 0.f + getScrollY();
+        region->right = region->left + text_layout_->GetMaxWidth();
+        region->bottom = region->top + text_layout_->GetMaxHeight();
     }
-
 
     void TextView::onTextChanged(
         Editable* editable,
-        int start, int oldEnd, int newEnd) {
-
+        int start, int oldEnd, int newEnd, Editable::Reason r)
+    {
         float maxWidth = text_layout_->GetMaxWidth();
         float maxHeight = text_layout_->GetMaxHeight();
 
@@ -1234,7 +1220,7 @@ namespace ukive {
 
     void TextView::onSelectionChanged(
         unsigned int ns, unsigned int ne,
-        unsigned int os, unsigned int oe) {
+        unsigned int os, unsigned int oe, Editable::Reason r) {
 
         if (ns == ne) {
             if (os != oe) {
@@ -1265,7 +1251,7 @@ namespace ukive {
         scrollToFit(true);
     }
 
-    void TextView::onSpanChanged(Span* span, SpanChange action) {
+    void TextView::onSpanChanged(Span* span, SpanChange action, Editable::Reason r) {
         DWRITE_TEXT_RANGE range;
         range.startPosition = span->getStart();
         range.length = span->getEnd() - span->getStart();
@@ -1307,7 +1293,6 @@ namespace ukive {
         }
     }
 
-
     bool TextView::canCut() const {
         return is_editable_ && base_text_->hasSelection();
     }
@@ -1339,7 +1324,7 @@ namespace ukive {
 
     void TextView::performCut() {
         ClipboardManager::saveToClipboard(getSelection());
-        base_text_->replace(L"");
+        base_text_->replace(L"", Editable::Reason::USER_INPUT);
 
         if (text_action_mode_) {
             text_action_mode_->close();
@@ -1355,11 +1340,11 @@ namespace ukive {
     }
 
     void TextView::performPaste() {
-        std::wstring content = ClipboardManager::getFromClipboard();
+        auto content = ClipboardManager::getFromClipboard();
         if (hasSelection()) {
-            base_text_->replace(content);
+            base_text_->replace(content, Editable::Reason::USER_INPUT);
         } else {
-            base_text_->insert(content);
+            base_text_->insert(content, Editable::Reason::USER_INPUT);
         }
 
         if (text_action_mode_) {
@@ -1371,7 +1356,6 @@ namespace ukive {
         setSelection(0, base_text_->length());
         text_action_mode_->invalidateMenu();
     }
-
 
     bool TextView::onCreateActionMode(TextActionMode* mode, Menu* menu) {
         if (this->canCopy())
@@ -1451,17 +1435,10 @@ namespace ukive {
     }
 
     void TextView::onGetContentPosition(int* x, int* y) {
-        int left = 0;
-        int top = 0;
-        View* parent = this;
-        while (parent) {
-            left += parent->getLeft() - parent->getScrollX();
-            top += parent->getTop() - parent->getScrollY();
-            parent = parent->getParent();
-        }
+        auto bounds = getBoundsInWindow();
 
-        *x = left + prev_x_ + 1;
-        *y = top + prev_y_ + 1;
+        *x = bounds.left + prev_x_ + 1;
+        *y = bounds.top + prev_y_ + 1;
     }
 
 }

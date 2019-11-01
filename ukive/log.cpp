@@ -1,11 +1,14 @@
-#include "log.h"
+#include "ukive/log.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include <fstream>
+#include <iostream>
 
 #include "ukive/application.h"
 #include "ukive/files/file.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -47,9 +50,9 @@ namespace ukive {
     }
 
     Log::Log(const wchar_t* file_name, int line_number, Severity level)
-        :level_(level),
-        line_number_(line_number),
-        file_name_(file_name) {
+        : level_(level),
+          line_number_(line_number),
+          file_name_(file_name) {
     }
 
     Log::~Log() {
@@ -75,8 +78,11 @@ namespace ukive {
         }
         if (log_params_.target & CONSOLE) {
             if (console_output_handle_ != INVALID_HANDLE_VALUE) {
-                ::WriteConsoleW(console_output_handle_, msg.data(), msg.length(), nullptr, nullptr);
+                ::WriteConsoleW(console_output_handle_, msg.data(), STLCU32(msg.length()), nullptr, nullptr);
             }
+        }
+        if (log_params_.target & STANDARD) {
+            std::wcout << msg;
         }
 
         switch (level_) {

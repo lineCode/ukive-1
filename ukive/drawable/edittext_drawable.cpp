@@ -11,7 +11,7 @@ namespace ukive {
         owner_win_(win),
         panel_line_color_(Color::Grey400) {
 
-        panel_line_width_ = std::ceil(win->dpToPx(1.5f));
+        panel_line_width_ = int(std::ceil(win->dpToPxX(1.5f)));
     }
 
     EditTextDrawable::~EditTextDrawable() {}

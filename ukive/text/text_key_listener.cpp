@@ -1,5 +1,6 @@
 ﻿#include "text_key_listener.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "ukive/system/clipboard_manager.h"
@@ -148,6 +149,7 @@ namespace ukive {
         case VK_SHIFT: return true;
         case VK_CONTROL: return true;
         case VK_CAPITAL: return true;
+        default:break;
         }
 
         return false;
@@ -155,7 +157,7 @@ namespace ukive {
 
     void TextKeyListener::backspace(Editable* editable) {
         if (editable->hasSelection()) {
-            editable->remove();
+            editable->remove(Editable::Reason::USER_INPUT);
         } else {
             if (editable->getSelectionStart() > 0) {
                 uint32_t len = 1;
@@ -168,17 +170,17 @@ namespace ukive {
                     }
                 }
 
-                editable->remove(editable->getSelectionStart() - len, len);
-                editable->setSelection(editable->getSelectionStart() - len);
+                editable->remove(editable->getSelectionStart() - len, len, Editable::Reason::USER_INPUT);
+                editable->setSelection(editable->getSelectionStart() - len, Editable::Reason::USER_INPUT);
             }
         }
     }
 
     void TextKeyListener::newline(Editable* editable) {
         if (editable->hasSelection()) {
-            editable->replace(L"\n");
+            editable->replace(L"\n", Editable::Reason::USER_INPUT);
         } else {
-            editable->insert(L"\n");
+            editable->insert(L"\n", Editable::Reason::USER_INPUT);
         }
     }
 
@@ -205,7 +207,7 @@ namespace ukive {
             switch (keyCode) {
             case 0x41:  //a: select all.
                 if (canSelect) {
-                    editable->setSelection(0, editable->length());
+                    editable->setSelection(0, editable->length(), Editable::Reason::USER_INPUT);
                 }
                 break;
 
@@ -215,7 +217,7 @@ namespace ukive {
             case 0x58:  //x: cut.
                 if (editable->hasSelection()) {
                     ClipboardManager::saveToClipboard(editable->getSelection());
-                    editable->remove();
+                    editable->remove(Editable::Reason::USER_INPUT);
                 }
                 break;
 
@@ -229,9 +231,9 @@ namespace ukive {
                 std::wstring content = ClipboardManager::getFromClipboard();
                 if (!content.empty()) {
                     if (editable->hasSelection()) {
-                        editable->replace(content);
+                        editable->replace(content, Editable::Reason::USER_INPUT);
                     } else {
-                        editable->insert(content);
+                        editable->insert(content, Editable::Reason::USER_INPUT);
                     }
                 }
                 break;
@@ -248,17 +250,17 @@ namespace ukive {
         //数字
         if (isNumber(keyCode)) {
             if (hasSelection) {
-                editable->replace(number(keyCode));
+                editable->replace(number(keyCode), Editable::Reason::USER_INPUT);
             } else {
-                editable->insert(number(keyCode));
+                editable->insert(number(keyCode), Editable::Reason::USER_INPUT);
             }
         }
         //小键盘
         else if (isNumpad(keyCode)) {
             if (hasSelection) {
-                editable->replace(numpad(keyCode));
+                editable->replace(numpad(keyCode), Editable::Reason::USER_INPUT);
             } else {
-                editable->insert(numpad(keyCode));
+                editable->insert(numpad(keyCode), Editable::Reason::USER_INPUT);
             }
         }
         //英文字母
@@ -268,26 +270,26 @@ namespace ukive {
 
             if (hasSelection) {
                 editable->replace(
-                    alphabet(keyCode, isCapsLocked^isShiftPressed));
+                    alphabet(keyCode, isCapsLocked^isShiftPressed), Editable::Reason::USER_INPUT);
             } else {
                 editable->insert(
-                    alphabet(keyCode, isCapsLocked^isShiftPressed));
+                    alphabet(keyCode, isCapsLocked^isShiftPressed), Editable::Reason::USER_INPUT);
             }
         } else {
             switch (keyCode) {
             case VK_SPACE:
                 if (hasSelection) {
-                    editable->replace(L"\040");
+                    editable->replace(L"\040", Editable::Reason::USER_INPUT);
                 } else {
-                    editable->insert(L"\040");
+                    editable->insert(L"\040", Editable::Reason::USER_INPUT);
                 }
                 break;
 
             case VK_TAB:
                 if (hasSelection) {
-                    editable->replace(L"\t");
+                    editable->replace(L"\t", Editable::Reason::USER_INPUT);
                 } else {
-                    editable->insert(L"\t");
+                    editable->insert(L"\t", Editable::Reason::USER_INPUT);
                 }
                 break;
 
@@ -303,9 +305,9 @@ namespace ukive {
                 std::wstring text = symbol(keyCode);
                 if (!text.empty()) {
                     if (hasSelection) {
-                        editable->replace(text);
+                        editable->replace(text, Editable::Reason::USER_INPUT);
                     } else {
-                        editable->insert(text);
+                        editable->insert(text, Editable::Reason::USER_INPUT);
                     }
                 }
             }

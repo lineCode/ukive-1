@@ -1,6 +1,7 @@
 #ifndef UKIVE_WINDOW_WINDOW_H_
 #define UKIVE_WINDOW_WINDOW_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include <memory>
@@ -9,9 +10,7 @@
 #include "ukive/message/cycler.h"
 #include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
-#include "ukive/animation/animation_manager.h"
 #include "ukive/views/view.h"
-#include "ukive/graphics/swapchain_resize_notifier.h"
 
 
 namespace ukive {
@@ -19,21 +18,18 @@ namespace ukive {
     class Rect;
     class Cycler;
     class Canvas;
-    class Renderer;
     class InputEvent;
     class WindowImpl;
     class TitleBar;
     class RootLayout;
-    class AnimationManager;
     class ContextMenu;
     class ContextMenuCallback;
     class TextActionMode;
     class TextActionModeCallback;
     class OnWindowStatusChangedListener;
-    struct ClassInfo;
 
 
-    class Window : public SwapChainResizeNotifier, public CyclerListener {
+    class Window : public CyclerListener {
     public:
         enum FrameType {
             FRAME_NATIVE,
@@ -66,6 +62,7 @@ namespace ukive {
         void setContentView(View* content);
         void setBackgroundColor(Color color);
         void setTranslucent(bool translucent);
+        void setBlurBehindEnabled(bool enabled);
         void setStartupWindow(bool enable);
         void setFrameType(FrameType type);
         void setLastInputView(View* v);
@@ -82,12 +79,13 @@ namespace ukive {
         RootLayout* getRootLayout() const;
         Color getBackgroundColor() const;
         Cycler* getCycler() const;
-        Renderer* getRenderer() const;
+        Canvas* getCanvas() const;
         HWND getHandle() const;
-        AnimationManager* getAnimationManager() const;
         FrameType getFrameType() const;
         View* getLastInputView() const;
+        View* getContentView() const;
         TitleBar* getTitleBar() const;
+        void getDpi(int* dpi_x, int* dpi_y) const;
 
         bool isShowing() const;
         bool isTranslucent() const;
@@ -109,6 +107,9 @@ namespace ukive {
         void captureMouse(View* v);
         void releaseMouse(bool all = false);
 
+        void captureTouch(View* v);
+        void releaseTouch(bool all = false);
+
         // 当一个 View 获取到焦点时，应调用此方法。
         void captureKeyboard(View* v);
         // 当一个 View 放弃焦点时，应调用此方法。
@@ -116,6 +117,8 @@ namespace ukive {
 
         View* getMouseHolder() const;
         int getMouseHolderRef() const;
+        View* getTouchHolder() const;
+        int getTouchHolderRef() const;
         View* getKeyboardHolder() const;
 
         void invalidate();
@@ -124,22 +127,23 @@ namespace ukive {
 
         void performLayout();
         void performRefresh();
-        void performRefresh(int left, int top, int right, int bottom);
 
         View* findViewById(int id) const;
 
+        template <typename T>
+        T* findViewById(int id) const {
+            return static_cast<T*>(findViewById(id));
+        }
+
         ContextMenu* startContextMenu(
             ContextMenuCallback* callback, View* anchor, View::Gravity gravity);
-        void notifyContextMenuClose();
         TextActionMode* startTextActionMode(TextActionModeCallback* callback);
-        void notifyTextActionModeClose();
 
-        float dpToPx(float dp);
-        float pxToDp(float px);
+        float dpToPxX(float dp);
+        float dpToPxY(float dp);
+        float pxToDpX(float px);
+        float pxToDpY(float px);
 
-        virtual void onPreCreate(
-            ClassInfo* info,
-            int* win_style, int* win_ex_style);
         virtual void onCreate();
         virtual void onShow(bool show);
         virtual void onActivate(int param);
@@ -161,11 +165,10 @@ namespace ukive {
         virtual void onDpiChanged(int dpi_x, int dpi_y);
         virtual bool onDataCopy(unsigned int id, unsigned int size, void* data);
 
-        virtual void onDrawCanvas(Canvas* canvas);
+        virtual void onPreDrawCanvas(Canvas* canvas) {}
+        virtual void onPostDrawCanvas(Canvas* canvas) {}
 
     protected:
-        void onPreSwapChainResize() override;
-        void onPostSwapChainResize() override;
         void onHandleMessage(Message* msg) override;
 
     private:
@@ -174,62 +177,31 @@ namespace ukive {
             SCHEDULE_LAYOUT = 1,
         };
 
-        class AnimStateChangedListener
-            : public AnimationManager::OnStateChangedListener {
-        public:
-            AnimStateChangedListener(Window* window)
-                :win_(window) {}
-
-            void onStateChanged(
-                UI_ANIMATION_MANAGER_STATUS newStatus,
-                UI_ANIMATION_MANAGER_STATUS previousStatus) override;
-        private:
-            Window* win_;
-        };
-
-        class AnimTimerEventListener
-            : public AnimationManager::OnTimerEventListener {
-        public:
-            AnimTimerEventListener(Window* window)
-                :window_(window) {}
-
-            void onPreUpdate() override;
-            void onPostUpdate() override;
-            void onRenderingTooSlow(unsigned int fps) override;
-
-        private:
-            Window* window_;
-        };
-
-
         std::unique_ptr<WindowImpl> impl_;
 
         Canvas* canvas_;
-        Renderer* renderer_;
-
         Cycler* labour_cycler_;
         RootLayout* root_layout_;
 
         View* mouse_holder_;
+        View* touch_holder_;
         View* focus_holder_;
         View* focus_holder_backup_;
         View* last_input_view_;
         int mouse_holder_ref_;
+        int touch_holder_ref_;
 
-        ContextMenu* context_menu_;
-        TextActionMode* text_action_mode_;
-
-        AnimationManager* anim_mgr_;
-        AnimationManager::OnStateChangedListener* mStateChangedListener;
-        AnimStateChangedListener* mAnimStateChangedListener;
-        AnimTimerEventListener* mAnimTimerEventListener;
-
+        std::unique_ptr<ContextMenu> context_menu_;
+        std::unique_ptr<TextActionMode> text_action_mode_;
         std::vector<OnWindowStatusChangedListener*> status_changed_listeners_;
 
         Color background_color_;
         bool is_startup_window_;
         int min_width_, min_height_;
         FrameType frame_type_;
+
+        Rect dirty_region_;
+        Rect next_dirty_region_;
     };
 
 }

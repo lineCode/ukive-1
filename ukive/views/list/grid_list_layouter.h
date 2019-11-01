@@ -27,6 +27,7 @@ namespace ukive {
 
         void recordCurPositionAndOffset(ListView* parent) override;
         std::pair<int, int> computeTotalHeight(ListView* parent, ListAdapter* adapter) override;
+        ListAdapter::ViewHolder* findViewHolderFromView(View* v) override;
 
     private:
         int col_count_;

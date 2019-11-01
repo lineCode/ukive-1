@@ -1,4 +1,4 @@
-#include "inner_window.h"
+﻿#include "inner_window.h"
 
 #include "ukive/event/input_event.h"
 #include "ukive/views/layout/root_layout.h"
@@ -9,26 +9,26 @@
 namespace ukive {
 
     InnerWindow::InnerWindow(Window* wnd)
-        :parent_(wnd),
-        elevation_(0.f),
-        is_showing_(false),
-        outside_touchable_(false),
-        dismiss_by_touch_outside_(false)
+        : width_(LayoutParams::FIT_CONTENT),
+          height_(LayoutParams::FIT_CONTENT),
+          elevation_(0.f),
+          outside_touchable_(false),
+          dismiss_by_touch_outside_(false),
+          background_drawable_(nullptr),
+          parent_(wnd),
+          content_view_(nullptr),
+          decor_view_(nullptr),
+          is_showing_(false)
     {
-        decor_view_ = nullptr;
-        content_view_ = nullptr;
-
-        background_drawable_ = nullptr;
-        width_ = LayoutParams::FIT_CONTENT;
-        height_ = LayoutParams::FIT_CONTENT;
     }
 
     InnerWindow::~InnerWindow() {
         if (decor_view_ && !is_showing_) {
             delete decor_view_;
+        } else {
+            dismiss();
         }
     }
-
 
     void InnerWindow::createDecorView() {
         decor_view_ = new InnerDecorView(this);
@@ -39,7 +39,6 @@ namespace ukive {
         decor_view_->setBackground(background_drawable_);
         decor_view_->setReceiveOutsideInputEvent(!outside_touchable_);
     }
-
 
     void InnerWindow::setWidth(int width) {
         width_ = width;
@@ -71,13 +70,16 @@ namespace ukive {
     }
 
     void InnerWindow::setContentView(View* contentView) {
-        if (contentView == nullptr) {
-            throw std::invalid_argument("setContentView: null param");
+        if (!contentView) {
+            return;
         }
 
         content_view_ = contentView;
     }
 
+    void InnerWindow::setEventListener(OnInnerWindowEventListener* l) {
+        listener_ = l;
+    }
 
     int InnerWindow::getWidth() {
         return width_;
@@ -119,20 +121,20 @@ namespace ukive {
         return is_showing_;
     }
 
-
     void InnerWindow::show(int x, int y) {
         if (!content_view_ || is_showing_) {
             return;
         }
 
         if (decor_view_) {
+            decor_view_->removeAllViews(false);
+            background_drawable_ = decor_view_->getReleasedBackground();
             delete decor_view_;
         }
 
         createDecorView();
 
-        RootLayoutParams* baselp
-            = new RootLayoutParams(width_, height_);
+        auto baselp = new RootLayoutParams(width_, height_);
         baselp->left_margin = x;
         baselp->top_margin = y;
 
@@ -158,8 +160,7 @@ namespace ukive {
             return;
         }
 
-        RootLayoutParams* baselp
-            = (RootLayoutParams*)decor_view_->getLayoutParams();
+        auto baselp = static_cast<RootLayoutParams*>(decor_view_->getLayoutParams());
         baselp->left_margin = x;
         baselp->top_margin = y;
 
@@ -176,31 +177,46 @@ namespace ukive {
         is_showing_ = false;
     }
 
-
     InnerWindow::InnerDecorView::InnerDecorView(InnerWindow* inner)
-        :FrameLayout(inner->getParent()),
-        inner_window_(inner) {}
+        : FrameLayout(inner->getParent()),
+          inner_window_(inner) {}
 
     InnerWindow::InnerDecorView::~InnerDecorView() {
     }
 
+    bool InnerWindow::InnerDecorView::dispatchInputEvent(InputEvent* e) {
+        // InnerWindow 模拟一个独立的窗口，未消费的事件不应该继续传递。
+        bool result = FrameLayout::dispatchInputEvent(e);
+        if (e->getEvent() == InputEvent::EVM_WHEEL) {
+            result = true;
+        }
+        return result;
+    }
 
     bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent* e) {
+        if (e->isOutside()) {
+            return !inner_window_->outside_touchable_;
+        }
         return false;
     }
 
     bool InnerWindow::InnerDecorView::onInputEvent(InputEvent* e) {
         if (e->isOutside()) {
-            if (e->getEvent() == InputEvent::EVM_DOWN
-                || e->getEvent() == InputEvent::EVM_UP)
+            if (e->getEvent() == InputEvent::EVM_DOWN ||
+                e->getEvent() == InputEvent::EVM_UP ||
+                e->getEvent() == InputEvent::EVT_DOWN ||
+                e->getEvent() == InputEvent::EVT_UP)
             {
                 if (inner_window_->dismiss_by_touch_outside_) {
-                    inner_window_->dismiss();
+                    if (inner_window_->listener_) {
+                        inner_window_->listener_->onRequestDismissByTouchOutside();
+                    }
                 }
             }
             return true;
         }
 
+        invalidateInterceptStatus();
         return false;
     }
 

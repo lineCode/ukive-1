@@ -27,7 +27,7 @@ namespace dpr {
 
 
     // DynamicCodeDataProvider
-    DynamicCodeDataProvider::DynamicCodeDataProvider(uint32_t base, HANDLE process)
+    DynamicCodeDataProvider::DynamicCodeDataProvider(intptr_t base, HANDLE process)
         : base_(base),
           process_(process) {
     }

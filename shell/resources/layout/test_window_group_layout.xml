@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     layout_width="match_parent"
-    layout_height="match_parent">
+    layout_height="match_parent" >
 
     <LinearLayout
         layout_width="match_parent"
@@ -16,6 +16,19 @@
             is_selectable="false"
             is_editable="false"
             padding="6dp" />
+
+        <CheckBox
+            id="@+id/cb_anim_test"
+            layout_width="fit_content"
+            layout_height="fit_content"
+            text="测试用"
+            layout_margin="12dp" />
+
+        <SpinnerView
+            id="@+id/sv_test"
+            layout_width="fit_content"
+            layout_height="fit_content"
+            layout_margin="12dp" />
 
         <TextView
             id="@+id/tv_test_txt"

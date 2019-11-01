@@ -48,7 +48,7 @@ namespace shell {
         op_text_view->setId(ID_OPCODE_TEXT);
         op_text_view->setFontFamilyName(L"Consolas");
         auto op_tv_lp = Rlp::Builder(Rlp::FIT_CONTENT, Rlp::FIT_CONTENT)
-            .start(op_addr_view->getId(), Rlp::END, parent->getWindow()->dpToPx(16))
+            .start(op_addr_view->getId(), Rlp::END, parent->getWindow()->dpToPxX(16))
             .top(layout->getId()).bottom(layout->getId()).build();
         layout->addView(op_text_view, op_tv_lp);
 

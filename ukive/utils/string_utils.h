@@ -8,8 +8,9 @@
 
 namespace ukive {
 
-    typedef std::string string8;
-    typedef std::wstring string16;
+    using string8 =  std::string;
+    using string16 = std::wstring;
+    using stringu8 = std::basic_string<uint8_t, std::char_traits<uint8_t>, std::allocator<uint8_t>>;
 
     string8 UTF16ToUTF8(const string16& str);
     string16 UTF8ToUTF16(const string8& str);
@@ -108,6 +109,7 @@ namespace ukive {
 
 using string8 = ukive::string8;
 using string16 = ukive::string16;
+using stringu8 = ukive::stringu8;
 
 
 #endif  // UKIVE_UTILS_STRING_UTILS_H_

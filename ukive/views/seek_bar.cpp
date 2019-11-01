@@ -5,9 +5,9 @@
 #include "ukive/application.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/color.h"
+#include "ukive/animation/interpolator.h"
 
 
 namespace ukive {
@@ -22,8 +22,6 @@ namespace ukive {
     }
 
     SeekBar::~SeekBar() {
-        delete thumb_in_animator_;
-        delete thumb_out_animator_;
     }
 
     void SeekBar::initSeekBar()
@@ -33,25 +31,30 @@ namespace ukive {
         is_pointer_left_key_available_ = false;
         listener_ = nullptr;
 
-        thumb_in_animator_ = new Animator(getWindow()->getAnimationManager());
-        thumb_out_animator_ = new Animator(getWindow()->getAnimationManager());
-
-        track_height_ = getWindow()->dpToPx(2);
+        track_height_ = getWindow()->dpToPxX(2);
         if (track_height_ % 2 != 0) {
             ++track_height_;
         }
 
-        thumb_min_diameter_ = getWindow()->dpToPx(10);
+        thumb_min_diameter_ = getWindow()->dpToPxX(10);
         if (thumb_min_diameter_ % 2 != 0) {
             ++thumb_min_diameter_;
         }
 
-        thumb_max_diameter_ = getWindow()->dpToPx(14);
+        thumb_max_diameter_ = getWindow()->dpToPxX(14);
         if (thumb_max_diameter_ % 2 != 0) {
             ++thumb_max_diameter_;
         }
 
         thumb_cur_diameter_ = thumb_min_diameter_;
+
+        thumb_in_animator_.setListener(this);
+        thumb_in_animator_.setDuration(100);
+        thumb_in_animator_.setInterpolator(new LinearInterpolator(thumb_max_diameter_));
+
+        thumb_out_animator_.setListener(this);
+        thumb_out_animator_.setDuration(100);
+        thumb_out_animator_.setInterpolator(new LinearInterpolator(thumb_min_diameter_));
     }
 
     void SeekBar::setMaximum(float maximum) {
@@ -131,34 +134,25 @@ namespace ukive {
 
     void SeekBar::startZoomInAnimation() {
         if (thumb_cur_diameter_ < thumb_max_diameter_) {
-            thumb_in_animator_->stop();
-            thumb_out_animator_->stop();
+            thumb_in_animator_.reset();
+            thumb_out_animator_.stop();
 
-            thumb_in_animator_->addVariable(0,
-                thumb_cur_diameter_,
-                thumb_min_diameter_,
-                thumb_max_diameter_);
-            thumb_in_animator_->setOnValueChangedListener(0, this);
-            thumb_in_animator_->startTransition(
-                0, Transition::linearTransition(0.1, thumb_max_diameter_));
+            thumb_in_animator_.setInitValue(thumb_cur_diameter_);
+            thumb_in_animator_.start();
+            invalidate();
         }
     }
 
     void SeekBar::startZoomOutAnimation() {
         if (thumb_cur_diameter_ > thumb_min_diameter_) {
-            thumb_in_animator_->stop();
-            thumb_out_animator_->stop();
+            thumb_in_animator_.stop();
+            thumb_out_animator_.reset();
 
-            thumb_out_animator_->addVariable(0,
-                thumb_cur_diameter_,
-                thumb_min_diameter_,
-                thumb_max_diameter_);
-            thumb_out_animator_->setOnValueChangedListener(0, this);
-            thumb_out_animator_->startTransition(
-                0, Transition::linearTransition(0.1, thumb_min_diameter_));
+            thumb_out_animator_.setInitValue(thumb_cur_diameter_);
+            thumb_out_animator_.start();
+            invalidate();
         }
     }
-
 
     void SeekBar::onMeasure(
         int width, int height, int width_mode, int height_mode)
@@ -204,6 +198,9 @@ namespace ukive {
     }
 
     void SeekBar::onDraw(Canvas* canvas) {
+        thumb_in_animator_.update();
+        thumb_out_animator_.update();
+
         float left = thumb_max_diameter_ / 2.f;
         float top = (thumb_max_diameter_ - track_height_) / 2.f;
         float trackWidth = getWidth() - thumb_max_diameter_ - getPaddingLeft() - getPaddingRight();
@@ -220,6 +217,10 @@ namespace ukive {
         }
 
         canvas->fillCircle(center_x, center_y, thumb_cur_diameter_ / 2.f, Color::Blue400);
+
+        if (thumb_in_animator_.isRunning() || thumb_out_animator_.isRunning()) {
+            invalidate();
+        }
     }
 
     bool SeekBar::onInputEvent(InputEvent* e) {
@@ -311,22 +312,8 @@ namespace ukive {
         return true;
     }
 
-
-    void SeekBar::onValueChanged(
-        unsigned int varIndex,
-        IUIAnimationStoryboard *storyboard,
-        IUIAnimationVariable *variable,
-        double newValue, double previousValue)
-    {
-        thumb_cur_diameter_ = newValue;
-    }
-
-    void SeekBar::onIntegerValueChanged(
-        unsigned int varIndex,
-        IUIAnimationStoryboard *storyboard,
-        IUIAnimationVariable *variable,
-        int newValue, int previousValue)
-    {
+    void SeekBar::onAnimationProgress(Animator* animator) {
+        thumb_cur_diameter_ = animator->getCurValue();
     }
 
 }

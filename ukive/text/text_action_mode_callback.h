@@ -16,6 +16,8 @@ namespace ukive {
         virtual bool onPrepareActionMode(TextActionMode* mode, Menu* menu) = 0;
         virtual bool onActionItemClicked(TextActionMode* mode, MenuItem* item) = 0;
         virtual void onDestroyActionMode(TextActionMode* mode) = 0;
+
+        // 获取相对于当前窗口的坐标
         virtual void onGetContentPosition(int* x, int* y) = 0;
     };
 

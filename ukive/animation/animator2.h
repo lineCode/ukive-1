@@ -8,24 +8,24 @@
 
 namespace ukive {
 
-    class Animator2;
+    class Animator;
     class Interpolator;
 
     class AnimationListener {
     public:
         virtual ~AnimationListener() = default;
 
-        virtual void onAnimationStarted(Animator2* animator) {}
-        virtual void onAnimationProgress(Animator2* animator) {}
-        virtual void onAnimationStopped(Animator2* animator) {}
-        virtual void onAnimationFinished(Animator2* animator) {}
-        virtual void onAnimationReset(Animator2* animator) {}
+        virtual void onAnimationStarted(Animator* animator) {}
+        virtual void onAnimationProgress(Animator* animator) {}
+        virtual void onAnimationStopped(Animator* animator) {}
+        virtual void onAnimationFinished(Animator* animator) {}
+        virtual void onAnimationReset(Animator* animator) {}
     };
 
-    class Animator2 {
+    class Animator {
     public:
-        explicit Animator2(bool timer_driven = false);
-        ~Animator2();
+        explicit Animator(bool timer_driven = false);
+        ~Animator();
 
         void start();
         void stop();
@@ -33,6 +33,7 @@ namespace ukive {
         void reset();
         void update();
 
+        void setId(int id);
         void setFps(int fps);
         void setRepeat(bool repeat);
         void setDuration(uint64_t duration);
@@ -44,18 +45,20 @@ namespace ukive {
         bool isRunning() const;
         bool isFinished() const;
 
+        int getId() const;
         int getFps() const;
         uint64_t getDuration() const;
         double getCurValue() const;
         double getInitValue() const;
         Interpolator* getInterpolator() const;
 
+    private:
         static uint64_t upTimeMillis();
 
-    private:
         void restart();
         void AnimationProgress();
 
+        int id_;
         int fps_;
         double cur_val_;
         double init_val_;

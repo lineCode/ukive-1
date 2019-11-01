@@ -1,7 +1,7 @@
 #ifndef UKIVE_DRAWABLE_RIPPLE_DRAWABLE_H_
 #define UKIVE_DRAWABLE_RIPPLE_DRAWABLE_H_
 
-#include "ukive/animation/animator2.h"
+#include "ukive/animation/animator.h"
 #include "ukive/drawable/layer_drawable.h"
 #include "ukive/graphics/color.h"
 
@@ -19,13 +19,14 @@ namespace ukive {
         ~RippleDrawable();
 
         void setTintColor(Color tint);
+        void setDrawMaskEnabled(bool enabled);
 
         void draw(Canvas* canvas) override;
 
         float getOpacity() override;
 
         // AnimationListener
-        void onAnimationProgress(Animator2* animator) override;
+        void onAnimationProgress(Animator* animator) override;
 
     protected:
         void onBoundChanged(const Rect& new_bound) override;
@@ -34,12 +35,13 @@ namespace ukive {
     private:
         double alpha_;
         Color tint_color_;
+        bool is_draw_mask_ = true;
 
-        Animator2 up_animator_;
-        Animator2 down_animator_;
-        Animator2 hover_animator_;
-        Animator2 leave_animator_;
-        Animator2 ripple_animator_;
+        Animator up_animator_;
+        Animator down_animator_;
+        Animator hover_animator_;
+        Animator leave_animator_;
+        Animator ripple_animator_;
 
         std::unique_ptr<Canvas> mask_off_;
         std::unique_ptr<Canvas> content_off_;

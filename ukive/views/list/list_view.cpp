@@ -17,17 +17,25 @@ namespace ukive {
 
     ListView::ListView(Window* w, AttrsRef attrs)
         : ViewGroup(w, attrs),
-          initial_layouted_(false)
+          initial_layouted_(false),
+          scroller_(w)
     {
         scroll_bar_ = std::make_unique<OverlayScrollBar>();
+        scroll_bar_->registerScrollHandler(std::bind(&ListView::onScrollBarChanged, this, std::placeholders::_1));
+        scroll_bar_->setScrollBarWidth(w->dpToPxX(8));
+        scroll_bar_->setScrollBarMinWidth(w->dpToPxX(16));
+
         recycler_ = std::make_unique<ViewHolderRecycler>(this);
+
+        setTouchCapturable(true);
     }
 
     void ListView::onLayout(
         bool changed, bool size_changed,
         int left, int top, int right, int bottom)
     {
-        if (!initial_layouted_ || size_changed) {
+        if (!initial_layouted_ || size_changed || force_layout_) {
+            force_layout_ = false;
             recordCurPositionAndOffset();
             layoutAtPosition(true);
 
@@ -36,25 +44,125 @@ namespace ukive {
         }
     }
 
+    bool ListView::onInterceptInputEvent(InputEvent* e) {
+        switch (e->getEvent()) {
+        case InputEvent::EVM_DOWN:
+            if (scroll_bar_->onMousePressed({ e->getX(), e->getY() })) {
+                return true;
+            }
+            break;
+
+        case InputEvent::EVM_MOVE:
+            if (scroll_bar_->isInScrollBar({ e->getX(), e->getY() })) {
+                return true;
+            }
+            break;
+
+        case InputEvent::EVT_DOWN:
+            start_touch_x_ = e->getX();
+            start_touch_y_ = e->getY();
+            is_touch_down_ = true;
+            break;
+
+        case InputEvent::EVT_UP:
+        case InputEvent::EV_CANCEL:
+        case InputEvent::EV_LEAVE_VIEW:
+            is_touch_down_ = false;
+            break;
+
+        case InputEvent::EVT_MOVE:
+            if (is_touch_down_) {
+                int dx = e->getX() - start_touch_x_;
+                int dy = e->getY() - start_touch_y_;
+                if (dx * dx + dy * dy > 12 * 12) {
+                    start_touch_x_ = e->getX();
+                    start_touch_y_ = e->getY();
+                    return true;
+                }
+            }
+            break;
+
+        default:
+            break;
+        }
+        return false;
+    }
+
     bool ListView::onInputEvent(InputEvent* e) {
+        bool result = ViewGroup::onInputEvent(e);
+        velocity_calculator_.onInputEvent(e);
+
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
         {
-            int resDy = determineVerticalScroll(e->getMouseWheel() * 40);
-            if (resDy == 0) {
-                break;
-            }
-            offsetChildViewTopAndBottom(resDy);
-            recordCurPositionAndOffset();
-            updateOverlayScrollBar();
+            result = true;
+            scroller_.inertia(0, 0, 0, 500 * e->getMouseWheel());
+            invalidate();
             break;
         }
+
+        case InputEvent::EVM_DOWN:
+            result = is_mouse_down_ = scroll_bar_->onMousePressed({ e->getX(), e->getY() });
+            invalidate();
+            break;
+
+        case InputEvent::EVM_MOVE:
+            if (is_mouse_down_) {
+                result = true;
+                scroll_bar_->onMouseDragged({ e->getX(), e->getY() });
+                invalidate();
+            } else {
+                invalidateInterceptStatus();
+            }
+            break;
+
+        case InputEvent::EVM_UP:
+            is_mouse_down_ = false;
+            break;
+
+        case InputEvent::EVT_DOWN:
+            prev_touch_x_ = start_touch_x_ = e->getX();
+            prev_touch_y_ = start_touch_y_ = e->getY();
+            is_touch_down_ = true;
+            result = true;
+            break;
+
+        case InputEvent::EVT_UP:
+            is_touch_down_ = false;
+            result = true;
+
+            /*DLOG(Log::INFO) << "EVT_UP | vx=" << velocity_calculator_.getVelocityX()
+                << " vy=" << velocity_calculator_.getVelocityY();*/
+
+            scroller_.inertia(
+                0, 0,
+                velocity_calculator_.getVelocityX(),
+                velocity_calculator_.getVelocityY());
+            invalidate();
+            break;
+
+        case InputEvent::EV_CANCEL:
+        case InputEvent::EV_LEAVE_VIEW:
+            is_touch_down_ = false;
+            break;
+
+        case InputEvent::EVT_MOVE:
+            if (is_touch_down_) {
+                int dx = e->getX() - prev_touch_x_;
+                int dy = e->getY() - prev_touch_y_;
+                processVerticalScroll(dy);
+                result = true;
+
+                prev_touch_x_ = e->getX();
+                prev_touch_y_ = e->getY();
+            }
+            break;
 
         default:
             break;
         }
 
-        return ViewGroup::onInputEvent(e);
+        return result;
     }
 
     void ListView::onDraw(Canvas* canvas) {
@@ -64,6 +172,22 @@ namespace ukive {
     void ListView::onDrawOverChildren(Canvas* canvas) {
         ViewGroup::onDrawOverChildren(canvas);
         scroll_bar_->onDraw(canvas);
+    }
+
+    void ListView::onComputeScroll() {
+        if (scroller_.compute()) {
+            processVerticalScroll(scroller_.getDeltaY());
+            invalidate();
+        }
+    }
+
+    void ListView::onClick(View* v) {
+        if (selected_listener_) {
+            auto holder = layouter_->findViewHolderFromView(v);
+            if (holder) {
+                selected_listener_->onItemSelected(holder);
+            }
+        }
     }
 
     void ListView::setAdapter(ListAdapter* adapter) {
@@ -103,6 +227,25 @@ namespace ukive {
         }
     }
 
+    void ListView::setItemSelectedListener(ListItemSelectedListener* l) {
+        selected_listener_ = l;
+    }
+
+    void ListView::setChildRecycledListener(ListItemRecycledListener* l) {
+        recycled_listener_ = l;
+    }
+
+    bool ListView::processVerticalScroll(int dy) {
+        int res_dy = determineVerticalScroll(dy);
+        if (res_dy == 0) {
+            return false;
+        }
+        offsetChildViewTopAndBottom(res_dy);
+        recordCurPositionAndOffset();
+        updateOverlayScrollBar();
+        return true;
+    }
+
     int ListView::determineVerticalScroll(int dy) {
         if (dy > 0) {  // 向上滚动，当前页面内容下沉
             dy = fillTopChildViews(dy);
@@ -132,10 +275,14 @@ namespace ukive {
         new_holder->item_id = item_id;
         new_holder->adapter_position = adapter_pos;
         adapter_->onBindViewHolder(new_holder, adapter_pos);
+        new_holder->item_view->setOnClickListener(this);
         return new_holder;
     }
 
     void ListView::recycleViewHolder(ListAdapter::ViewHolder* holder) {
+        if (recycled_listener_) {
+            recycled_listener_->onChildRecycled(holder);
+        }
         recycler_->recycleFromParent(holder);
     }
 
@@ -291,12 +438,14 @@ namespace ukive {
     }
 
     void ListView::onScrollBarChanged(int dy) {
-        int final_dy = determineVerticalScroll(dy);
+        auto height_pair = layouter_->computeTotalHeight(this, adapter_.get());
+        int final_dy = determineVerticalScroll(height_pair.first - dy);
         if (final_dy == 0) {
             return;
         }
 
         offsetChildViewTopAndBottom(final_dy);
+        recordCurPositionAndOffset();
         invalidate();
     }
 
@@ -317,7 +466,9 @@ namespace ukive {
     void ListView::onDataSetChanged() {
         recordCurPositionAndOffset();
         directScrollToPosition(0, 0, true);
+        requestLayout();
         invalidate();
+        force_layout_ = true;
     }
 
     void ListView::onItemRangeInserted(int start_pos, int length) {

@@ -1,27 +1,28 @@
 #ifndef UKIVE_ANIMATION_VIEW_ANIMATOR_H_
 #define UKIVE_ANIMATION_VIEW_ANIMATOR_H_
 
-#include "ukive/animation/animator.h"
-#include "ukive/animation/transition.h"
+#include "ukive/animation/animation_director.h"
 
 
 namespace ukive {
 
     class View;
 
-    class ViewAnimator : public Animator::OnValueChangedListener {
+    class ViewAnimator : public AnimationDirectorListener {
     public:
-        ViewAnimator(View* v);
-        ~ViewAnimator();
-
-        enum {
+        enum RevealShape {
             REVEAL_RECT = 0,
             REVEAL_CIRCULE = 1,
         };
 
+        using FinishedHandler = std::function<void(AnimationDirector*)>;
+
+        explicit ViewAnimator(View* v);
+        ~ViewAnimator();
+
         void start();
         void cancel();
-        ViewAnimator* setDuration(double duration);
+        ViewAnimator* setDuration(uint64_t duration);
 
         ViewAnimator* x(double x);
         ViewAnimator* y(double y);
@@ -30,29 +31,28 @@ namespace ukive {
         ViewAnimator* scaleY(double value);
         ViewAnimator* translateX(double value);
         ViewAnimator* translateY(double value);
+        ViewAnimator* rectReveal(
+            double center_x, double center_y,
+            double start_hori_radius, double end_hori_radius,
+            double start_vert_radius, double end_vert_radius);
+        ViewAnimator* circleReveal(
+            double center_x, double center_y, double start_radius, double end_radius);
 
-        ViewAnimator* setListener(Animator::OnAnimatorListener* l);
+        ViewAnimator* setListener(AnimationDirectorListener* l);
+        ViewAnimator* setFinishedHandler(const FinishedHandler& h);
 
-        static Animator* createRectReveal(
-            View* v, double centerX, double centerY,
-            double startWidthRadius, double endWidthRadius,
-            double startHeightRadius, double endHeightRadius);
-        static Animator* createCirculeReveal(
-            View* v, double centerX, double centerY, double startRadius, double endRadius);
+        void onPreViewDraw();
+        void onPostViewDraw();
 
-        void onValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            double newValue, double previousValue) override;
-        void onIntegerValueChanged(
-            unsigned int varIndex,
-            IUIAnimationStoryboard* storyboard,
-            IUIAnimationVariable* variable,
-            int newValue, int previousValue) override;
+        // AnimationDirectorListener
+        void onDirectorStarted(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorProgress(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorStopped(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorFinished(AnimationDirector* director, const Animator* animator) override;
+        void onDirectorReset(AnimationDirector* director, const Animator* animator) override;
 
     private:
-        enum {
+        enum ViewAnimId {
             VIEW_ANIM_X = 1,
             VIEW_ANIM_Y,
             VIEW_ANIM_ALPHA,
@@ -60,12 +60,17 @@ namespace ukive {
             VIEW_ANIM_SCALE_Y,
             VIEW_ANIM_TRANSLATE_X,
             VIEW_ANIM_TRANSLATE_Y,
-            VIEW_ANIM_REVEAL,
+            VIEW_ANIM_RECT_REVEAL_R_X,
+            VIEW_ANIM_RECT_REVEAL_R_Y,
+            VIEW_ANIM_CIRCLE_REVEAL_R,
         };
 
-        double duration_;
+        uint64_t duration_;
         View* owner_view_;
-        std::unique_ptr<Animator> animator_;
+        AnimationDirector director_;
+
+        FinishedHandler finished_handler_;
+        AnimationDirectorListener* listener_;
     };
 
 }

@@ -16,7 +16,7 @@
 #include "ukive/views/image_view.h"
 #include "ukive/views/scroll_view.h"
 #include "ukive/views/seek_bar.h"
-#include "ukive/views/spinner_view.h"
+#include "ukive/views/spinner_view/spinner_view.h"
 #include "ukive/views/switch_view.h"
 #include "ukive/views/list/list_view.h"
 #include "ukive/views/layout/frame_layout.h"

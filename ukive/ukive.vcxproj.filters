@@ -51,9 +51,6 @@
     <ClCompile Include="graphics\bitmap_factory.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\renderer.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="message\cycler.cpp">
       <Filter>message</Filter>
     </ClCompile>
@@ -66,28 +63,7 @@
     <ClCompile Include="message\message_queue.cpp">
       <Filter>message</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animation_manager.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animation_manager_event_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animation_timer_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animation_variable_change_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animator.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\animator_state_handler.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
     <ClCompile Include="animation\scroller.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
-    <ClCompile Include="animation\transition.cpp">
       <Filter>animation</Filter>
     </ClCompile>
     <ClCompile Include="animation\view_animator.cpp">
@@ -187,9 +163,6 @@
       <Filter>views</Filter>
     </ClCompile>
     <ClCompile Include="views\seek_bar.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
-    <ClCompile Include="views\spinner_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
     <ClCompile Include="views\switch_view.cpp">
@@ -363,11 +336,95 @@
     <ClCompile Include="animation\timer.cpp">
       <Filter>animation</Filter>
     </ClCompile>
-    <ClCompile Include="animation\animator2.cpp">
-      <Filter>animation</Filter>
-    </ClCompile>
     <ClCompile Include="animation\interpolator.cpp">
       <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animation_director.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="animation\animator.cpp">
+      <Filter>animation</Filter>
+    </ClCompile>
+    <ClCompile Include="net\http_client.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\tls.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\md5.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\aes.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\rsa.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha1.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha224.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha256.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha384.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\sha512.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\usha.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\hmac.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="security\digest\hkdf.cpp">
+      <Filter>security\digest</Filter>
+    </ClCompile>
+    <ClCompile Include="net\socket.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer\big_integer.cpp">
+      <Filter>utils\big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer\int_array.cpp">
+      <Filter>utils\big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\ecdp.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="views\spinner_view\spinner_view.cpp">
+      <Filter>views\spinner_view</Filter>
+    </ClCompile>
+    <ClCompile Include="views\spinner_view\spinner_list_adapter.cpp">
+      <Filter>views\spinner_view</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\json\json_parser.cpp">
+      <Filter>utils\json</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\json\json_structs.cpp">
+      <Filter>utils\json</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\convert.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
+    <ClCompile Include="net\tls_record_layer.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="net\tls_common.cpp">
+      <Filter>net</Filter>
+    </ClCompile>
+    <ClCompile Include="security\crypto\aead.cpp">
+      <Filter>security\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\big_integer\byte_string.cpp">
+      <Filter>utils\big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="event\velocity_calculator.cpp">
+      <Filter>event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -427,9 +484,6 @@
     <ClInclude Include="graphics\bitmap_factory.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\renderer.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="message\cycler.h">
       <Filter>message</Filter>
     </ClInclude>
@@ -448,34 +502,7 @@
     <ClInclude Include="graphics\device_lost_notifier.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\swapchain_resize_notifier.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\hresult_utils.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_manager.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_manager_event_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_timer_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animation_variable_change_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animator.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\animator_state_handler.h">
-      <Filter>animation</Filter>
-    </ClInclude>
     <ClInclude Include="animation\scroller.h">
-      <Filter>animation</Filter>
-    </ClInclude>
-    <ClInclude Include="animation\transition.h">
       <Filter>animation</Filter>
     </ClInclude>
     <ClInclude Include="animation\view_animator.h">
@@ -596,9 +623,6 @@
       <Filter>views</Filter>
     </ClInclude>
     <ClInclude Include="views\seek_value_changed_listener.h">
-      <Filter>views</Filter>
-    </ClInclude>
-    <ClInclude Include="views\spinner_view.h">
       <Filter>views</Filter>
     </ClInclude>
     <ClInclude Include="views\switch_view.h">
@@ -781,11 +805,77 @@
     <ClInclude Include="animation\timer.h">
       <Filter>animation</Filter>
     </ClInclude>
-    <ClInclude Include="animation\animator2.h">
-      <Filter>animation</Filter>
-    </ClInclude>
     <ClInclude Include="animation\interpolator.h">
       <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animation_director.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="animation\animator.h">
+      <Filter>animation</Filter>
+    </ClInclude>
+    <ClInclude Include="net\http_client.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\tls.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="security\digest\md5.h">
+      <Filter>security\digest</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\aes.h">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\rsa.h">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="security\digest\sha_private.h">
+      <Filter>security\digest</Filter>
+    </ClInclude>
+    <ClInclude Include="security\digest\sha.h">
+      <Filter>security\digest</Filter>
+    </ClInclude>
+    <ClInclude Include="net\socket.h">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer\big_integer.h">
+      <Filter>utils\big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer\int_array.h">
+      <Filter>utils\big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\ecdp.h">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="views\spinner_view\spinner_view.h">
+      <Filter>views\spinner_view</Filter>
+    </ClInclude>
+    <ClInclude Include="views\spinner_view\spinner_list_adapter.h">
+      <Filter>views\spinner_view</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\json\json_parser.h">
+      <Filter>utils\json</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\json\json_structs.h">
+      <Filter>utils\json</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\convert.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="net\tls_record_layer.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="net\tls_common.hpp">
+      <Filter>net</Filter>
+    </ClInclude>
+    <ClInclude Include="security\crypto\aead.hpp">
+      <Filter>security\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\big_integer\byte_string.hpp">
+      <Filter>utils\big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="event\velocity_calculator.h">
+      <Filter>event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -857,6 +947,27 @@
     </Filter>
     <Filter Include="resources">
       <UniqueIdentifier>{74a72a50-3993-40f9-bdd2-940dc88aa351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="net">
+      <UniqueIdentifier>{a2ecb333-c529-43a7-932f-8774464dfdca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security">
+      <UniqueIdentifier>{ce349be7-ace0-4eea-b5ff-25f7838f23c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security\digest">
+      <UniqueIdentifier>{5eea4fcf-5d95-4399-bcb3-26f5a87b9e79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="security\crypto">
+      <UniqueIdentifier>{7bf90690-59e2-4a8b-9948-afe6fc44071f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\big_integer">
+      <UniqueIdentifier>{c8eb10ae-79fa-40b4-b963-aa0c12d18fdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views\spinner_view">
+      <UniqueIdentifier>{8857160c-cdd7-460a-be7a-661d14015527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils\json">
+      <UniqueIdentifier>{460d5ff5-9da8-45d3-8837-7f404b54ad13}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

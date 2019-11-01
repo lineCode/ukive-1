@@ -32,11 +32,13 @@ namespace ukive {
 
         bool isTitleBarShowing() const;
         TitleBar* getTitleBar() const;
+        View* getContentView() const;
         DebugView* getDebugView() const;
 
         void setContent(int id);
         void setContent(View* content);
 
+        void invalidate(int left, int top, int right, int bottom) override;
         void requestLayout() override;
         View* findViewById(int id) const override;
         HitPoint onNCHitTest(int x, int y) override;

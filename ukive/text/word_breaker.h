@@ -1,6 +1,7 @@
 #ifndef UKIVE_TEXT_WORD_BREAKER_H_
 #define UKIVE_TEXT_WORD_BREAKER_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <CiError.h>
 #include <indexsrv.h>

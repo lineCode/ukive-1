@@ -4,9 +4,9 @@
 #include "ukive/application.h"
 #include "ukive/text/tsf_editor.h"
 #include "ukive/text/tsf_manager.h"
-#include "ukive/utils/hresult_utils.h"
 #include "ukive/views/text_view.h"
 #include "ukive/window/window.h"
+#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -22,7 +22,6 @@ namespace ukive {
     InputConnection::~InputConnection() {
     }
 
-
     HRESULT InputConnection::initialization() {
         if (is_initialized_) {
             return S_OK;
@@ -33,14 +32,27 @@ namespace ukive {
         tsf_editor_ = new TsfEditor(0xbeef);
         tsf_editor_->setInputConnection(this);
 
-        RH(tsfMgr->getThreadManager()->CreateDocumentMgr(&doc_mgr_));
+        HRESULT hr = tsfMgr->getThreadManager()->CreateDocumentMgr(&doc_mgr_);
+        if (FAILED(hr)) {
+            DLOG(Log::ERR) << "Create doc mgr failed: " << hr;
+            return hr;
+        }
 
-        RH(doc_mgr_->CreateContext(tsfMgr->getClientId(), 0,
+        hr = doc_mgr_->CreateContext(
+            tsfMgr->getClientId(), 0,
             static_cast<ITextStoreACP*>(tsf_editor_),
-            &editor_context_, &editor_cookie_));
+            &editor_context_, &editor_cookie_);
+        if (FAILED(hr)) {
+            DLOG(Log::ERR) << "Create context failed: " << hr;
+            return hr;
+        }
 
-        RH(editor_context_->QueryInterface(
-            IID_ITfContextOwnerCompositionServices, reinterpret_cast<void**>(&comp_service_)));
+        hr = editor_context_->QueryInterface(
+            IID_ITfContextOwnerCompositionServices, reinterpret_cast<void**>(&comp_service_));
+        if (FAILED(hr)) {
+            DLOG(Log::ERR) << "Create composition service failed: " << hr;
+            return hr;
+        }
 
         is_initialized_ = true;
 
@@ -54,7 +66,7 @@ namespace ukive {
 
         HRESULT hr = doc_mgr_->Push(editor_context_.get());
         if (FAILED(hr)) {
-            DLOG(Log::ERR) << "pushEditor() failed.";
+            DLOG(Log::ERR) << "pushEditor() failed: " << hr;
             return;
         }
 
@@ -68,7 +80,7 @@ namespace ukive {
 
         HRESULT hr = doc_mgr_->Pop(TF_POPF_ALL);
         if (FAILED(hr)) {
-            DLOG(Log::ERR) << "popEditor() failed.";
+            DLOG(Log::ERR) << "popEditor() failed: " << hr;
             return;
         }
 
@@ -81,10 +93,9 @@ namespace ukive {
         }
 
         auto mgr = Application::getTsfManager();
-
         HRESULT hr = mgr->getThreadManager()->SetFocus(doc_mgr_.get());
         if (FAILED(hr)) {
-            DLOG(Log::ERR) << "mount() failed.";
+            DLOG(Log::ERR) << "mount() failed: " << hr;
             return false;
         }
 
@@ -96,11 +107,10 @@ namespace ukive {
             return false;
         }
 
-        TsfManager* tsfMgr = Application::getTsfManager();
-
+        auto tsfMgr = Application::getTsfManager();
         HRESULT hr = tsfMgr->getThreadManager()->SetFocus(nullptr);
         if (FAILED(hr)) {
-            DLOG(Log::ERR) << "unmount() failed.";
+            DLOG(Log::ERR) << "unmount() failed: " << hr;
             return false;
         }
 
@@ -114,13 +124,12 @@ namespace ukive {
 
         HRESULT hr = comp_service_->TerminateComposition(nullptr);
         if (FAILED(hr)) {
-            DLOG(Log::ERR) << "terminateComposition() failed.";
+            DLOG(Log::ERR) << "terminateComposition() failed: " << hr;
             return false;
         }
 
         return true;
     }
-
 
     void InputConnection::notifyStatusChanged(DWORD flags) {
         tsf_editor_->notifyStatusChanged(flags);
@@ -138,7 +147,6 @@ namespace ukive {
         tsf_editor_->notifyTextSelectionChanged();
     }
 
-
     void InputConnection::onBeginProcess() {
         text_view_->onBeginProcess();
     }
@@ -153,16 +161,16 @@ namespace ukive {
 
     void InputConnection::determineInsert(
         long start, long end, unsigned long repLength,
-        long* resStart, long* resEnd) {
-
+        long* resStart, long* resEnd)
+    {
         *resStart = start;
         *resEnd = end;
     }
 
     bool InputConnection::getSelection(
         unsigned long startIndex, unsigned long maxCount,
-        TS_SELECTION_ACP* selections, unsigned long* fetchedCount) {
-
+        TS_SELECTION_ACP* selections, unsigned long* fetchedCount)
+    {
         if (startIndex != TF_DEFAULT_SELECTION || maxCount != 1) {
             return false;
         }
@@ -189,9 +197,9 @@ namespace ukive {
         int selEnd = selections[0].acpEnd;
 
         if (selStart == selEnd) {
-            text_view_->getEditable()->setSelectionForceNotify(selStart);
+            text_view_->getEditable()->setSelectionForceNotify(selStart, Editable::Reason::USER_INPUT);
         } else {
-            text_view_->getEditable()->setSelectionForceNotify(selStart, selEnd);
+            text_view_->getEditable()->setSelectionForceNotify(selStart, selEnd, Editable::Reason::USER_INPUT);
         }
 
         return true;
@@ -217,14 +225,14 @@ namespace ukive {
 
     void InputConnection::setText(long start, long end, std::wstring newText) {
         if (start == end) {
-            text_view_->getEditable()->insert(newText, start);
+            text_view_->getEditable()->insert(newText, start, Editable::Reason::USER_INPUT);
         } else {
-            text_view_->getEditable()->replace(newText, start, end - start);
+            text_view_->getEditable()->replace(newText, start, end - start, Editable::Reason::USER_INPUT);
         }
     }
 
     long InputConnection::getTextLength() {
-        return text_view_->getText().length();
+        return STLCInt(text_view_->getText().length());
     }
 
     bool InputConnection::getTextPositionAtPoint(const POINT* pt, DWORD dwFlags, long* pacp) {
@@ -269,7 +277,7 @@ namespace ukive {
 
             pChange->acpStart = sel_start;
             pChange->acpOldEnd = sel_end;
-            pChange->acpNewEnd = sel_start + (text.length() - (sel_end - sel_start));
+            pChange->acpNewEnd = sel_start + (STLCInt(text.length()) - (sel_end - sel_start));
             break;
         }
 

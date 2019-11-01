@@ -12,10 +12,16 @@ namespace ukive {
 
     class BitmapDrawable : public Drawable {
     public:
-        BitmapDrawable(std::shared_ptr<Bitmap> bitmap);
+        enum ExtendMode {
+            Clamp,
+            Wrap,
+        };
+
+        explicit BitmapDrawable(std::shared_ptr<Bitmap> bitmap);
         ~BitmapDrawable() = default;
 
         void setOpacity(float opt);
+        void setExtendMode(ExtendMode mode);
 
         void draw(Canvas* canvas) override;
 
@@ -27,7 +33,8 @@ namespace ukive {
         std::shared_ptr<Bitmap> getBitmap() const;
 
     private:
-        float opacity_;
+        float opacity_ = 1.f;
+        ExtendMode mode_ = Clamp;
         std::shared_ptr<Bitmap> bitmap_;
     };
 

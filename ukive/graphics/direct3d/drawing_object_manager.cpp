@@ -1,7 +1,6 @@
 ﻿#include "drawing_object_manager.h"
 
 #include "ukive/graphics/direct3d/space.h"
-#include "ukive/utils/hresult_utils.h"
 #include "ukive/utils/stl_utils.h"
 #include "ukive/log.h"
 
@@ -15,13 +14,13 @@ namespace ukive {
         STLDeleteElements(&drawing_objs_);
     }
 
-
     void DrawingObjectManager::add(
         void* vertices, int* indices,
-        unsigned int structSize, unsigned int vertexCount, unsigned int indexCount, int tag) {
-
+        unsigned int structSize, unsigned int vertexCount, unsigned int indexCount, int tag)
+    {
         if (!vertices || !indices
-            || vertexCount == 0 || indexCount == 0) {
+            || vertexCount == 0 || indexCount == 0)
+        {
             LOG(Log::ERR) << "Invalid params.";
             return;
         }
@@ -55,7 +54,6 @@ namespace ukive {
                 return obj;
             }
         }
-
         return nullptr;
     }
 
@@ -63,7 +61,8 @@ namespace ukive {
         size_t index = 0;
 
         for (auto it = drawing_objs_.begin();
-            it != drawing_objs_.end(); ++it, ++index) {
+            it != drawing_objs_.end(); ++it, ++index)
+        {
             if (pos == index) {
                 return *it;
             }
@@ -100,7 +99,8 @@ namespace ukive {
         size_t index = 0;
 
         for (auto it = drawing_objs_.begin();
-            it != drawing_objs_.end(); ++it, ++index) {
+            it != drawing_objs_.end(); ++it, ++index)
+        {
             if (pos == index) {
                 drawing_objs_.erase(it);
                 return;

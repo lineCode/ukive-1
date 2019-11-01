@@ -67,6 +67,13 @@ namespace ukive {
             int* child_size, int* child_size_mode);
 
     protected:
+        // 重置 ViewGroup 记录的事件拦截状态。
+        // 从 onInterceptInputEvent() 返回 true 开始到 XXX_UP 消息结束，
+        // 所有的事件会被拦截，对于触摸操作来说没有问题，但对鼠标操作来讲，鼠标即使
+        // 不按下，也可以有 MOVE 和 WHEEL 操作，对于这些操作拦截之后会没有办法取消
+        // 拦截状态，因此设置该方法来手动重置状态。
+        void invalidateInterceptStatus();
+
         void dispatchDraw(Canvas* canvas) override;
         void dispatchDiscardFocus() override;
         void dispatchDiscardPendingOperations() override;
@@ -83,6 +90,7 @@ namespace ukive {
 
     private:
         std::vector<View*> views_;
+        bool is_intercepted_ = false;
     };
 
 }

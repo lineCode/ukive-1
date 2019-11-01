@@ -9,7 +9,6 @@
 #include "ukive/views/click_listener.h"
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/window/window.h"
-#include "ukive/graphics/renderer.h"
 #include "ukive/application.h"
 #include "ukive/message/cycler.h"
 #include "ukive/graphics/point.h"
@@ -26,6 +25,7 @@ namespace ukive {
 
     View::View(Window* w, AttrsRef attrs)
         : id_(Application::getViewID()),
+          outline_(OUTLINE_RECT),
           flags_(0),
           scroll_x_(0),
           scroll_y_(0),
@@ -203,6 +203,7 @@ namespace ukive {
         if (visibility_ != VISIBLE) {
             discardFocus();
             discardMouseCapture();
+            discardTouchCapture();
             discardPendingOperations();
         }
 
@@ -221,6 +222,7 @@ namespace ukive {
         if (!is_enabled_) {
             discardFocus();
             discardMouseCapture();
+            discardTouchCapture();
             discardPendingOperations();
         }
 
@@ -270,7 +272,11 @@ namespace ukive {
 
     void View::setIsInputEventAtLast(bool is_last) {
         is_input_event_at_last_ = is_last;
-        window_->setLastInputView(is_last ? this : nullptr);
+        if (is_last) {
+            window_->setLastInputView(this);
+        } else if (!is_last && window_->getLastInputView() == this) {
+            window_->setLastInputView(nullptr);
+        }
     }
 
     void View::setPressed(bool pressed) {
@@ -287,6 +293,10 @@ namespace ukive {
         window_->setCurrentCursor(cursor);
     }
 
+    void View::setClickable(bool clickable) {
+        is_clickable_ = clickable;
+    }
+
     void View::setFocusable(bool focusable) {
         if (is_focusable_ == focusable) {
             return;
@@ -297,6 +307,14 @@ namespace ukive {
         if (!focusable) {
             discardFocus();
         }
+    }
+
+    void View::setTouchCapturable(bool capturable) {
+        if (is_touch_capturable_ == capturable) {
+            return;
+        }
+
+        is_touch_capturable_ = capturable;
     }
 
     void View::setElevation(float elevation) {
@@ -354,6 +372,14 @@ namespace ukive {
 
     void View::setOnClickListener(OnClickListener* l) {
         click_listener_ = l;
+    }
+
+    void View::setOutline(Outline outline) {
+        if (outline == outline_) {
+            return;
+        }
+
+        outline_ = outline;
     }
 
     int View::getId() const {
@@ -452,6 +478,9 @@ namespace ukive {
         return visibility_;
     }
 
+    int View::getOutline() const {
+        return outline_;
+    }
 
     int View::getPaddingLeft() const {
         return padding_.left;
@@ -489,6 +518,14 @@ namespace ukive {
         return fg_drawable_.get();
     }
 
+    Drawable* View::getReleasedBackground() {
+        return bg_drawable_.release();
+    }
+
+    Drawable* View::getReleasedForeground() {
+        return fg_drawable_.release();
+    }
+
     Rect View::getBounds() const {
         return bounds_;
     }
@@ -499,7 +536,9 @@ namespace ukive {
         auto parent = parent_;
         while (parent) {
             auto p_bounds = parent->getBounds();
-            bounds.offset(p_bounds.left, p_bounds.top);
+            bounds.offset(
+                p_bounds.left - parent->getScrollX(),
+                p_bounds.top - parent->getScrollY());
             parent = parent->getParent();
         }
 
@@ -551,8 +590,16 @@ namespace ukive {
         return has_focus_;
     }
 
+    bool View::isClickable() const {
+        return is_clickable_;
+    }
+
     bool View::isFocusable() const {
         return is_focusable_;
+    }
+
+    bool View::isTouchCapturable() const {
+        return is_touch_capturable_;
     }
 
     bool View::isLayouted() const {
@@ -560,12 +607,35 @@ namespace ukive {
     }
 
     bool View::isLocalPointerInThis(InputEvent* e) const {
-        return (e->getX() >= 0 && e->getX() < getWidth()
-            && e->getY() >= 0 && e->getY() < getHeight());
+        switch (outline_) {
+        case OUTLINE_OVAL:
+        {
+            float a = getWidth() / 2.f;
+            float b = getHeight() / 2.f;
+            return std::pow(e->getX() / a - 1, 2) + std::pow(e->getY() / b - 1, 2) <= 1;
+        }
+
+        case OUTLINE_RECT:
+        default:
+            return (e->getX() >= 0 && e->getX() < getWidth()
+                && e->getY() >= 0 && e->getY() < getHeight());
+        }
     }
 
     bool View::isParentPointerInThis(InputEvent* e) const {
-        return bounds_.hit(e->getX(), e->getY());
+        switch (outline_) {
+        case OUTLINE_OVAL:
+        {
+            float a = getWidth() / 2.f;
+            float b = getHeight() / 2.f;
+            return std::pow((e->getX() - bounds_.left) / a - 1, 2)
+                + std::pow((e->getY() - bounds_.top) / b - 1, 2) <= 1;
+        }
+
+        case OUTLINE_RECT:
+        default:
+            return bounds_.hit(e->getX(), e->getY());
+        }
     }
 
     bool View::isReceiveOutsideInputEvent() const {
@@ -594,6 +664,11 @@ namespace ukive {
     }
 
     void View::draw(Canvas* canvas) {
+        if (animator_) {
+            animator_->onPreViewDraw();
+        }
+        onComputeScroll();
+
         // 应用动画变量
         canvas->save();
         canvas->setOpacity(mAlpha*canvas->getOpacity());
@@ -706,7 +781,7 @@ namespace ukive {
         canvas->translate(padding_.left, padding_.top);
 
         // 裁剪
-        canvas->pushClip(RectF(0, 0,
+        canvas->pushClip(Rect(0, 0,
             measured_width_ - padding_.width(),
             measured_height_ - padding_.height()));
         canvas->translate(-scroll_x_, -scroll_y_);
@@ -729,6 +804,10 @@ namespace ukive {
         }
 
         canvas->restore();
+
+        if (animator_) {
+            animator_->onPostViewDraw();
+        }
     }
 
     bool View::needDrawBackground() {
@@ -884,6 +963,9 @@ namespace ukive {
                 if (is_focusable_) {
                     requestFocus();
                 }
+                if (is_touch_capturable_) {
+                    window_->captureTouch(this);
+                }
 
                 setPressed(true);
                 if (fg_drawable_) {
@@ -925,7 +1007,7 @@ namespace ukive {
             return consumed;
 
         case InputEvent::EVT_MOVE:
-            return true;
+            return consumed;
 
         case InputEvent::EVM_SCROLL_ENTER:
             if (fg_drawable_) {
@@ -1004,13 +1086,19 @@ namespace ukive {
             bool pressed = isPressed();
             setPressed(false);
 
+            if (window_->getTouchHolder() == this) {
+                window_->releaseTouch();
+            }
+
             if (fg_drawable_) {
                 fg_drawable_->setHotspot(e->getX(), e->getY());
-                should_refresh = fg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = fg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh |= fg_drawable_->setState(Drawable::STATE_NONE);
             }
             if (bg_drawable_) {
                 bg_drawable_->setHotspot(e->getX(), e->getY());
-                should_refresh = bg_drawable_->setState(Drawable::STATE_NONE);
+                should_refresh = bg_drawable_->setState(Drawable::STATE_HOVERED);
+                should_refresh |= bg_drawable_->setState(Drawable::STATE_NONE);
             }
 
             if (isLocalPointerInThis(e)) {
@@ -1027,7 +1115,7 @@ namespace ukive {
         }
 
         case InputEvent::EV_CANCEL:
-            if (e->isMouseEvent()) {
+            if (e->isMouseEvent() && is_mouse_down_) {
                 window_->releaseMouse();
                 is_mouse_down_ = false;
             }
@@ -1054,8 +1142,8 @@ namespace ukive {
     }
 
     void View::measure(int width, int height, int width_mode, int height_mode) {
-        if (flags_ & Flags::MEASURED_SIZE_SET) {
-            bool is_force_layout = (flags_ & Flags::FORCE_LAYOUT);
+        if (flags_ & MEASURED_SIZE_SET) {
+            bool is_force_layout = (flags_ & FORCE_LAYOUT);
             bool is_exactly_mode = (width_mode == EXACTLY && height_mode == EXACTLY);
             bool is_spec_not_change =
                 (width == old_pm_width_ && height == old_pm_height_
@@ -1066,15 +1154,15 @@ namespace ukive {
             }
         }
 
-        flags_ &= ~Flags::MEASURED_SIZE_SET;
+        flags_ &= ~MEASURED_SIZE_SET;
 
         onMeasure(width, height, width_mode, height_mode);
 
-        if (!(flags_ & Flags::MEASURED_SIZE_SET)) {
+        if (!(flags_ & MEASURED_SIZE_SET)) {
             LOG(Log::FATAL) << "You must invoke setMeasuredSize() in onMeasure()!";
         }
 
-        flags_ |= Flags::NEED_LAYOUT;
+        flags_ |= NEED_LAYOUT;
 
         old_pm_width_ = width;
         old_pm_height_ = height;
@@ -1103,14 +1191,14 @@ namespace ukive {
             invalidate();
         }
 
-        if (changed || (flags_ & Flags::NEED_LAYOUT)) {
+        if (changed || (flags_ & NEED_LAYOUT)) {
             onLayout(changed, size_changed,
                 left, top, right, bottom);
         }
 
-        flags_ |= Flags::BOUNDS_SET;
-        flags_ &= ~Flags::FORCE_LAYOUT;
-        flags_ &= ~Flags::NEED_LAYOUT;
+        flags_ |= BOUNDS_SET;
+        flags_ &= ~FORCE_LAYOUT;
+        flags_ &= ~NEED_LAYOUT;
     }
 
     void View::invalidate() {
@@ -1122,15 +1210,31 @@ namespace ukive {
     }
 
     void View::invalidate(int left, int top, int right, int bottom) {
-        flags_ |= Flags::INVALIDATED;
+        flags_ |= INVALIDATED;
 
-        // TODO: we only need to refresh dirty region.
-        // add to queue
-        getWindow()->invalidate();
+        if (parent_) {
+            int extend = 0;
+            if (shadow_effect_) {
+                extend = shadow_effect_->getRadius();
+                if (extend) {
+                    ++extend;
+                }
+            }
+
+            int off_x = parent_->getLeft() + mTranslateX - parent_->getScrollX();
+            int off_y = parent_->getTop() + mTranslateY - parent_->getScrollY();
+
+            int p_left = left - extend + off_x;
+            int p_top = top - extend + off_y;
+            int p_right = right + extend + off_x;
+            int p_bottom = bottom + extend + off_y;
+
+            parent_->invalidate(p_left, p_top, p_right, p_bottom);
+        }
     }
 
     void View::requestLayout() {
-        flags_ |= Flags::FORCE_LAYOUT;
+        flags_ |= FORCE_LAYOUT;
 
         if (parent_) {
             parent_->requestLayout();
@@ -1171,6 +1275,12 @@ namespace ukive {
         }
     }
 
+    void View::discardTouchCapture() {
+        if (window_->getTouchHolder() == this) {
+            window_->releaseTouch(true);
+        }
+    }
+
     void View::discardPendingOperations() {
         window_->getCycler()->removeCallbacks(click_performer_);
         dispatchDiscardPendingOperations();
@@ -1206,12 +1316,18 @@ namespace ukive {
         is_attached_to_window_ = false;
 
         if (input_connection_) {
-            input_connection_->popEditor();
+            input_connection_->unmount();
         }
 
         if (animator_) {
             animator_->cancel();
         }
+
+        discardFocus();
+        discardMouseCapture();
+        discardTouchCapture();
+        discardPendingOperations();
+        updateDrawableState();
     }
 
     bool View::isViewGroup() const {
@@ -1219,7 +1335,7 @@ namespace ukive {
     }
 
     bool View::onInputEvent(InputEvent* e) {
-        return false;
+        return is_clickable_;
     }
 
     void View::onMeasure(int width, int height, int width_mode, int height_mode) {

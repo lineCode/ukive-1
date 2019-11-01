@@ -9,10 +9,10 @@
 namespace ukive {
 
     MenuImpl::MenuImpl(Window* w)
-        :LinearLayout(w),
-        callback_(nullptr),
-        item_height_(LayoutParams::FIT_CONTENT) {
-        initMenu();
+        : LinearLayout(w),
+          item_height_(LayoutParams::FIT_CONTENT),
+          callback_(nullptr) {
+          initMenu();
     }
 
 
@@ -31,17 +31,17 @@ namespace ukive {
     }
 
     MenuItem* MenuImpl::addItem(int id, int order, string16 title) {
-        MenuItem* item = new MenuItemImpl(getWindow(), id, order);
+        auto item = new MenuItemImpl(getWindow(), id, order);
         item->setItemTitle(title);
 
-        View* view = dynamic_cast<View*>(item);
+        View* view = item;
         view->setBackground(new RippleDrawable());
         view->setOnClickListener(this);
 
         int insertedIndex = getChildCount();
         for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
-            MenuItem* childItem = dynamic_cast<MenuItem*>(child);
+            MenuItem* childItem = static_cast<MenuItemImpl*>(child);
             if (childItem->getItemOrder() > order) {
                 insertedIndex = i;
                 break;
@@ -59,7 +59,7 @@ namespace ukive {
 
         for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
-            auto item = dynamic_cast<MenuItem*>(child);
+            auto item = static_cast<MenuItemImpl*>(child);
             if (item && item->getItemId() == id) {
                 removeView(child);
 
@@ -74,7 +74,7 @@ namespace ukive {
     bool MenuImpl::hasItem(int id) {
         for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
-            MenuItem* item = dynamic_cast<MenuItem*>(child);
+            MenuItem* item = static_cast<MenuItemImpl*>(child);
             if (item && item->getItemId() == id) {
                 return true;
             }
@@ -86,7 +86,7 @@ namespace ukive {
     MenuItem* MenuImpl::findItem(int id) {
         for (int i = 0; i < getChildCount(); ++i) {
             View* child = getChildAt(i);
-            MenuItem* item = dynamic_cast<MenuItem*>(child);
+            MenuItem* item = static_cast<MenuItemImpl*>(child);
             if (item && item->getItemId() == id) {
                 return item;
             }
@@ -100,7 +100,7 @@ namespace ukive {
     }
 
     void MenuImpl::onClick(View* v) {
-        callback_->onMenuItemClicked(this, dynamic_cast<MenuItem*>(v));
+        callback_->onMenuItemClicked(this, static_cast<MenuItemImpl*>(v));
     }
 
 }

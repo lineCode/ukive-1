@@ -54,7 +54,8 @@ namespace ukive {
     }
 
     void Space::setConstantBuffers(
-        UINT startSlot, UINT NumBuffers, ID3D11Buffer* const* ppConstantBuffers) {
+        UINT startSlot, UINT NumBuffers, ID3D11Buffer* const* ppConstantBuffers)
+    {
         auto gdm = Application::getGraphicDeviceManager();
         gdm->getD3DDeviceContext()->VSSetConstantBuffers(
             startSlot, NumBuffers, ppConstantBuffers);

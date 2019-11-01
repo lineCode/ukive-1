@@ -64,22 +64,22 @@ namespace ukive {
         int hori_margin = child_lp->left_margin + child_lp->right_margin;
         int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
-        int childWidth;
-        int childWidthSpec;
-        int childHeight;
-        int childHeightSpec;
+        int child_width;
+        int child_width_mode;
+        int child_height;
+        int child_height_mode;
 
         getChildMeasure(
             parent_w, parent_wm,
             hori_margin + hori_padding,
-            child_lp->width, &childWidth, &childWidthSpec);
+            child_lp->width, &child_width, &child_width_mode);
 
         getChildMeasure(
             parent_h, parent_hm,
             vert_margin + vert_padding,
-            child_lp->height, &childHeight, &childHeightSpec);
+            child_lp->height, &child_height, &child_height_mode);
 
-        child->measure(childWidth, childHeight, childWidthSpec, childHeightSpec);
+        child->measure(child_width, child_height, child_width_mode, child_height_mode);
     }
 
     void LinearLayout::measureWeightedChildren(
@@ -96,32 +96,32 @@ namespace ukive {
                 int hori_margin = child_lp->left_margin + child_lp->right_margin;
                 int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
-                int childWidth;
-                int childWidthSpec;
-                int childHeight;
-                int childHeightSpec;
+                int child_width;
+                int child_width_mode;
+                int child_height;
+                int child_height_mode;
 
                 getChildMeasure(
                     parent_w, parent_wm,
                     hori_margin + hori_padding,
-                    child_lp->width, &childWidth, &childWidthSpec);
+                    child_lp->width, &child_width, &child_width_mode);
 
                 getChildMeasure(
                     parent_h, parent_hm,
                     vert_margin + vert_padding,
-                    child_lp->height, &childHeight, &childHeightSpec);
+                    child_lp->height, &child_height, &child_height_mode);
 
                 if (orientation_ == VERTICAL) {
-                    childHeight = std::round((child_lp->weight / static_cast<float>(total_weight))*parent_h);
-                    childHeight = std::max(0, childHeight - vert_margin);
+                    child_height = std::round((child_lp->weight / static_cast<float>(total_weight))*parent_h);
+                    child_height = std::max(0, child_height - vert_margin);
                 } else if (orientation_ == HORIZONTAL) {
-                    childWidth = std::round((child_lp->weight / static_cast<float>(total_weight))*parent_w);
-                    childWidth = std::max(0, childWidth - hori_margin);
+                    child_width = std::round((child_lp->weight / static_cast<float>(total_weight))*parent_w);
+                    child_width = std::max(0, child_width - hori_margin);
                 }
 
                 child->measure(
-                    childWidth, childHeight,
-                    childWidthSpec, childHeightSpec);
+                    child_width, child_height,
+                    child_width_mode, child_height_mode);
             }
         }
     }
@@ -159,22 +159,22 @@ namespace ukive {
                 int hori_margin = child_lp->left_margin + child_lp->right_margin;
                 int vert_margin = child_lp->top_margin + child_lp->bottom_margin;
 
-                int childWidth;
-                int childWidthSpec;
-                int childHeight;
-                int childHeightSpec;
+                int child_width;
+                int child_width_mode;
+                int child_height;
+                int child_height_mode;
 
                 getChildMeasure(
                     parent_w, parent_wm,
                     hori_margin + hori_padding,
-                    child_lp->width, &childWidth, &childWidthSpec);
+                    child_lp->width, &child_width, &child_width_mode);
 
                 getChildMeasure(
                     parent_h, parent_hm,
                     vert_margin + vert_padding,
-                    child_lp->height, &childHeight, &childHeightSpec);
+                    child_lp->height, &child_height, &child_height_mode);
 
-                child->measure(childWidth, childHeight, childWidthSpec, childHeightSpec);
+                child->measure(child_width, child_height, child_width_mode, child_height_mode);
                 cur_size += (orientation_ == VERTICAL) ?
                     child->getMeasuredHeight() + vert_margin : child->getMeasuredWidth() + hori_margin;
             }
@@ -202,7 +202,7 @@ namespace ukive {
                 auto lp = static_cast<LinearLayoutParams*>(child->getLayoutParams());
                 total_weight += lp->weight;
                 if (lp->weight <= 0) {
-                    fill_mode = ((orientation_ == VERTICAL) ?
+                    fill_mode |= ((orientation_ == VERTICAL) ?
                         lp->height == LayoutParams::MATCH_PARENT : lp->width == LayoutParams::MATCH_PARENT);
                 }
             }

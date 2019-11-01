@@ -1,4 +1,4 @@
-#include "ukive/animation/animator2.h"
+#include "ukive/animation/Animator.h"
 
 #include "ukive/animation/interpolator.h"
 #include "ukive/system/time_utils.h"
@@ -6,8 +6,9 @@
 
 namespace ukive {
 
-    Animator2::Animator2(bool timer_driven)
-        : fps_(60),
+    Animator::Animator(bool timer_driven)
+        : id_(0),
+          fps_(60),
           cur_val_(0),
           init_val_(0),
           duration_(250),
@@ -23,14 +24,14 @@ namespace ukive {
     {
         if (is_timer_driven_) {
             timer_.setRepeat(true);
-            timer_.setRunner(std::bind(&Animator2::AnimationProgress, this));
+            timer_.setRunner(std::bind(&Animator::AnimationProgress, this));
             timer_.setDuration(1000 / fps_);
         }
     }
 
-    Animator2::~Animator2() {}
+    Animator::~Animator() {}
 
-    void Animator2::start() {
+    void Animator::start() {
         if (is_running_ || is_finished_) {
             return;
         }
@@ -54,7 +55,7 @@ namespace ukive {
         }
     }
 
-    void Animator2::stop() {
+    void Animator::stop() {
         if (is_running_) {
             if (is_timer_driven_) {
                 timer_.stop();
@@ -69,7 +70,7 @@ namespace ukive {
         }
     }
 
-    void Animator2::finish() {
+    void Animator::finish() {
         if (is_started_) {
             if (is_timer_driven_) {
                 timer_.stop();
@@ -85,7 +86,7 @@ namespace ukive {
         }
     }
 
-    void Animator2::reset() {
+    void Animator::reset() {
         if (is_started_) {
             if (is_timer_driven_) {
                 timer_.stop();
@@ -103,7 +104,7 @@ namespace ukive {
         }
     }
 
-    void Animator2::update() {
+    void Animator::update() {
         if (!is_running_) {
             return;
         }
@@ -126,13 +127,17 @@ namespace ukive {
         }
     }
 
-    void Animator2::restart() {
+    void Animator::restart() {
         cur_val_ = init_val_;
         elapsed_duration_ = 0;
         start_time_ = upTimeMillis();
     }
 
-    void Animator2::setFps(int fps) {
+    void Animator::setId(int id) {
+        id_ = id;
+    }
+
+    void Animator::setFps(int fps) {
         if (fps <= 0) {
             return;
         }
@@ -143,67 +148,71 @@ namespace ukive {
         }
     }
 
-    void Animator2::setRepeat(bool repeat) {
+    void Animator::setRepeat(bool repeat) {
         is_repeat_ = repeat;
     }
 
-    void Animator2::setDuration(uint64_t duration) {
+    void Animator::setDuration(uint64_t duration) {
         duration_ = duration;
     }
 
-    void Animator2::setInterpolator(Interpolator* ipr) {
+    void Animator::setInterpolator(Interpolator* ipr) {
         if (!ipr || interpolator_.get() == ipr) {
             return;
         }
         interpolator_.reset(ipr);
     }
 
-    void Animator2::setListener(AnimationListener* listener) {
+    void Animator::setListener(AnimationListener* listener) {
         listener_ = listener;
     }
 
-    void Animator2::setInitValue(double init_val) {
+    void Animator::setInitValue(double init_val) {
         init_val_ = init_val;
     }
 
-    bool Animator2::isRepeat() const {
+    bool Animator::isRepeat() const {
         return is_repeat_;
     }
 
-    bool Animator2::isRunning() const {
+    bool Animator::isRunning() const {
         return is_running_;
     }
 
-    bool Animator2::isFinished() const {
+    bool Animator::isFinished() const {
         return is_finished_;
     }
 
-    int Animator2::getFps() const {
+    int Animator::getId() const {
+        return id_;
+    }
+
+    int Animator::getFps() const {
         return fps_;
     }
 
-    uint64_t Animator2::getDuration() const {
+    uint64_t Animator::getDuration() const {
         return duration_;
     }
 
-    double Animator2::getCurValue() const {
+    double Animator::getCurValue() const {
         return is_started_ ? cur_val_ : init_val_;
     }
 
-    double Animator2::getInitValue() const {
+    double Animator::getInitValue() const {
         return init_val_;
     }
 
-    Interpolator* Animator2::getInterpolator() const {
+    Interpolator* Animator::getInterpolator() const {
         return interpolator_.get();
     }
 
-    void Animator2::AnimationProgress() {
+    void Animator::AnimationProgress() {
         update();
     }
 
     // static
-    uint64_t Animator2::upTimeMillis() {
+    uint64_t Animator::upTimeMillis() {
         return TimeUtils::upTimeMillisPrecise();
     }
 

@@ -5,28 +5,23 @@
 #include "ukive/graphics/canvas.h"
 
 
-namespace {
-    const int kScrollBarWidth = 8;
-    const int kScrollBarMinHeight = 16;
-}
-
 namespace ukive {
 
     OverlayScrollBar::OverlayScrollBar()
         : content_height_(0),
-          distance_y_prev_(0),
-          dragging_deviation_(0.f) {
+          scrollbar_width_(0),
+          scrollbar_min_width_(0) {
     }
 
     OverlayScrollBar::~OverlayScrollBar() {}
 
-
     void OverlayScrollBar::update(int content_height, float percent) {
         content_height_ = content_height;
 
-        if (content_height_ <= 0
-            || view_bounds_.empty()
-            || view_bounds_.empty()) {
+        if (content_height_ <= 0 ||
+            view_bounds_.empty() ||
+            view_bounds_.empty())
+        {
             return;
         }
 
@@ -39,8 +34,8 @@ namespace ukive {
         float scale = view_height / static_cast<float>(content_height_);
 
         int thumb_width = scrollbar_bounds_.width();
-        int thumb_height = std::max(static_cast<int>(view_height * scale), kScrollBarMinHeight);
-        int thumb_y = percent * (view_height - thumb_height);
+        int thumb_height = std::max(static_cast<int>(view_height * scale), scrollbar_min_width_);
+        int thumb_y = scrollbar_bounds_.top + percent * (view_height - thumb_height);
 
         thumb_bounds_ = Rect(
             view_bounds_.right - thumb_width,
@@ -55,29 +50,38 @@ namespace ukive {
     void OverlayScrollBar::setBounds(int x, int y, int width, int height) {
         view_bounds_.set(x, y, width, height);
         scrollbar_bounds_.set(
-            x + width - kScrollBarWidth, y, kScrollBarWidth, height);
+            x + width - scrollbar_width_, y, scrollbar_width_, height);
     }
 
     void OverlayScrollBar::setBounds(const Rect& bounds) {
         view_bounds_ = bounds;
         scrollbar_bounds_.set(
-            bounds.right - kScrollBarWidth,
+            bounds.right - scrollbar_width_,
             bounds.top,
-            kScrollBarWidth, bounds.height());
+            scrollbar_width_, bounds.height());
     }
 
+    void OverlayScrollBar::setScrollBarWidth(int width) {
+        if (width > 0) {
+            scrollbar_width_ = width;
+        }
+    }
+
+    void OverlayScrollBar::setScrollBarMinWidth(int min_width) {
+        if (min_width > 0) {
+            scrollbar_min_width_ = min_width;
+        }
+    }
 
     void OverlayScrollBar::onDraw(Canvas* canvas) {
         if (!thumb_bounds_.empty()) {
-            canvas->fillRect(std::move(thumb_bounds_.toRectF()), Color::Black);
+            canvas->fillRect(std::move(thumb_bounds_.toRectF()), Color::Grey400);
         }
     }
 
     bool OverlayScrollBar::onMousePressed(const Point& p) {
         if (scrollbar_bounds_.hit(p)) {
             thumb_bounds_start_ = thumb_bounds_;
-            distance_y_prev_ = 0;
-            dragging_deviation_ = 0.f;
 
             if (thumb_bounds_.hit(p)) {
                 dragging_start_ = p;
@@ -99,43 +103,33 @@ namespace ukive {
         return false;
     }
 
-    void OverlayScrollBar::onMouseMoved(const Point& p) {}
-
     bool OverlayScrollBar::onMouseDragged(const Point& p) {
         int distance_y = p.y - dragging_start_.y;
-        moveScroller(distance_y);
+        if (distance_y != 0) {
+            moveScroller(distance_y);
+        }
         return true;
+    }
+
+    bool OverlayScrollBar::isInScrollBar(const Point& p) const {
+        return scrollbar_bounds_.hit(p);
     }
 
     void OverlayScrollBar::moveScroller(int distance_y) {
         int view_height = view_bounds_.height();
 
-        distance_y = std::max(0 - thumb_bounds_start_.top, distance_y);
-        distance_y = std::min(view_height - thumb_bounds_start_.height() - thumb_bounds_start_.top, distance_y);
+        int thumb_y = std::max(0 - thumb_bounds_start_.top, distance_y);
+        thumb_y = std::min(view_height - thumb_bounds_start_.height() - thumb_bounds_start_.top, thumb_y);
 
         thumb_bounds_ = thumb_bounds_start_;
-        thumb_bounds_.offset(0, distance_y);
+        thumb_bounds_.offset(0, thumb_y);
 
-        float scale = static_cast<float>(content_height_ - view_height)
-            / (view_height - thumb_bounds_.height());
-
-        float view_dy_float = (distance_y_prev_ - distance_y) * scale;
-        int view_dy = view_dy_float;
-
-        dragging_deviation_ += (view_dy_float - view_dy);
-        int correction = dragging_deviation_;
-        dragging_deviation_ -= correction;
-
-        if ((distance_y < 0 && thumb_bounds_.top == 0)
-            || (distance_y > 0 && thumb_bounds_.top == view_height - thumb_bounds_start_.height())) {
-            correction += ((distance_y < 0) ? 1 : -1);
-        }
+        float scale = thumb_bounds_.top / static_cast<float>(view_height - thumb_bounds_.height());
+        int to_y = (content_height_ - view_height) * scale;
 
         if (scroll_handler_) {
-            scroll_handler_(view_dy + correction);
+            scroll_handler_(to_y);
         }
-
-        distance_y_prev_ = distance_y;
     }
 
 }

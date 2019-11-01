@@ -17,7 +17,7 @@ namespace ukive {
         color_(Color::Black) {
 
         blink_cycler_ = new Cycler();
-        thickness_ = v->getWindow()->dpToPx(2);
+        thickness_ = v->getWindow()->dpToPxX(2);
     }
 
     TextBlink::~TextBlink() {
