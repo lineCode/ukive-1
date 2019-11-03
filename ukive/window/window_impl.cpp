@@ -52,7 +52,9 @@ namespace ukive {
           is_showing_(false),
           is_translucent_(false),
           is_enable_mouse_track_(true),
-          is_first_nccalc_(true) {
+          is_first_nccalc_(true)
+    {
+        DCHECK(delegate_);
     }
 
     WindowImpl::~WindowImpl() {}
@@ -61,7 +63,15 @@ namespace ukive {
     void WindowImpl::init() {
         ClassInfo info;
         info.style = kDefaultClassStyle;
-        info.icon = info.icon_small = ::LoadIcon(nullptr, IDI_WINLOGO);
+
+        string16 icon_name, small_icon_name;
+        if (delegate_->onGetWindowIconName(&icon_name, &small_icon_name)) {
+            info.icon = ::LoadIcon(nullptr, icon_name.c_str());
+            info.icon_small = ::LoadIcon(nullptr, small_icon_name.c_str());
+        } else {
+            info.icon = info.icon_small = ::LoadIcon(nullptr, IDI_WINLOGO);
+        }
+
         info.cursor = ::LoadCursor(nullptr, IDC_ARROW);
 
         int win_style = kDefaultWindowStyle;

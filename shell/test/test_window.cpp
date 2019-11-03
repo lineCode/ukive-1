@@ -41,6 +41,7 @@
 #include "shell/test/utils/big_integer_unit_test.h"
 #include "shell/test/utils/json_unit_test.h"
 #include "shell/test/security/crypto_unit_test.h"
+#include "shell/resources/resource.h"
 
 #include "ukive/security/digest/md5.h"
 #include "ukive/security/crypto/aes.h"
@@ -103,6 +104,12 @@ namespace shell {
         Window::onDestroy();
 
         animator_.stop();
+    }
+
+    bool TestWindow::onGetWindowIconName(string16* icon_name, string16* small_icon_name) const {
+        *icon_name = IDI_SHELL;
+        *small_icon_name = IDI_SMALL;
+        return true;
     }
 
     void TestWindow::onClick(ukive::View* v) {

@@ -917,6 +917,10 @@ namespace ukive {
         return false;
     }
 
+    bool Window::onGetWindowIconName(string16* icon_name, string16* small_icon_name) const {
+        return false;
+    }
+
     void Window::onHandleMessage(Message* msg) {
         switch (msg->what) {
         case SCHEDULE_RENDER:

@@ -166,6 +166,8 @@ namespace ukive {
         virtual void onPreDrawCanvas(Canvas* canvas) {}
         virtual void onPostDrawCanvas(Canvas* canvas) {}
 
+        virtual bool onGetWindowIconName(string16* icon_name, string16* small_icon_name) const;
+
     protected:
         void onHandleMessage(Message* msg) override;
 
