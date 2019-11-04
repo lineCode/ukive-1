@@ -112,6 +112,8 @@ namespace ukive {
         bool isOutside() const;
 
         void combineTouchEvent(InputEvent* e);
+        bool hasTouchEvent(InputEvent* e) const;
+
         void clearTouchUp();
         void clearTouch();
 

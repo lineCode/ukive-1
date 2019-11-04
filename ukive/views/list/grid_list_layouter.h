@@ -11,25 +11,29 @@ namespace ukive {
     public:
         GridListLayouter();
 
-        int onLayoutAtPosition(
-            ListView* parent, ListAdapter* adapter, bool cur) override;
-        int onScrollToPosition(
-            ListView* parent, ListAdapter* adapter, int pos, int offset, bool cur) override;
-        int onSmoothScrollToPosition(
-            ListView* parent, ListAdapter* adapter, int pos, int offset) override;
+        int onLayoutAtPosition(bool cur) override;
+        int onScrollToPosition(int pos, int offset, bool cur) override;
+        int onSmoothScrollToPosition(int pos, int offset) override;
 
-        int onFillTopChildren(ListView* parent, ListAdapter* adapter, int dy) override;
-        int onFillBottomChildren(ListView* parent, ListAdapter* adapter, int dy) override;
-        int onFillLeftChildren(ListView* parent, ListAdapter* adapter, int dx) override;
-        int onFillRightChildren(ListView* parent, ListAdapter* adapter, int dx) override;
+        int onFillTopChildren(int dy) override;
+        int onFillBottomChildren(int dy) override;
+        int onFillLeftChildren(int dx) override;
+        int onFillRightChildren(int dx) override;
 
         void onClear() override;
 
-        void recordCurPositionAndOffset(ListView* parent) override;
-        std::pair<int, int> computeTotalHeight(ListView* parent, ListAdapter* adapter) override;
+        void recordCurPositionAndOffset() override;
+        void computeTotalHeight(int* prev, int* next) override;
         ListAdapter::ViewHolder* findViewHolderFromView(View* v) override;
 
+        bool canScroll(Direction dir) const override;
+
     private:
+        bool canScrollToTop() const;
+        bool canScrollToBottom() const;
+        bool canScrollToLeft() const;
+        bool canScrollToRight() const;
+
         int col_count_;
         ColumnCollection columns_;
 

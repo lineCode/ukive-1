@@ -110,7 +110,7 @@ namespace shell {
         font->setTextSize(13);
         font->setPadding(16, 8, 16, 8);
         font->setBackground(new ukive::RippleDrawable());
-        //font->setOnClickListener(new FontItemClickListener(this));
+        font->setOnClickListener(new FontItemClickListener(this));
         font->setFocusable(true);
 
         ukive::LinearLayoutParams *fontParams
@@ -124,7 +124,7 @@ namespace shell {
         format->setTextSize(13);
         format->setPadding(16, 8, 16, 8);
         format->setBackground(new ukive::RippleDrawable());
-        //format->setOnClickListener(new FormatItemClickListener(this));
+        format->setOnClickListener(new FormatItemClickListener(this));
         format->setFocusable(true);
 
         ukive::LinearLayoutParams *formatParams

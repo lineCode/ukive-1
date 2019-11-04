@@ -2,7 +2,6 @@
 
 #include <queue>
 
-#include "ukive/event/input_event.h"
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/log.h"
@@ -299,34 +298,35 @@ namespace ukive {
 
         e->offsetInputPos(-getLeft(), -getTop());
 
+        bool is_first_intercepted = !is_intercepted_;
         if (is_intercepted_ || onInterceptInputEvent(e)) {
-            if (e->getEvent() == InputEvent::EVM_DOWN ||
-                e->getEvent() == InputEvent::EVT_DOWN)
+            if (e->getEvent() == InputEvent::EVT_UP &&
+                !cur_ev_->hasTouchEvent(e))
             {
-                is_intercepted_ = true;
-            } else if (e->isNoActiveEvent() ||
-                e->getEvent() == InputEvent::EVM_UP ||
-                e->getEvent() == InputEvent::EVT_UP)
-            {
-                is_intercepted_ = false;
-            } else if (!is_intercepted_) {
-                // 如果第一次拦截时的事件是触摸事件，
-                // 并且不是按下事件的话，将当前消息转为按下事件
-                if (e->isTouchEvent()) {
-                    auto saved = e->getEvent();
-                    e->setEvent(InputEvent::EVT_DOWN);
-                    consumed = dispatchInputEventToThis(e);
-                    e->setEvent(saved);
-                }
-                is_intercepted_ = true;
+                return true;
             }
+
+            prepareInterceptingStatus(e);
 
             intercepted = true;
             consumed = dispatchInputEventToThis(e);
-            if (e->getEvent() == InputEvent::EVT_DOWN) {
-                return consumed;
+            if (is_first_intercepted) {
+                if (consumed) {
+                    if (e->getEvent() == InputEvent::EVT_DOWN) {
+                        return true;
+                    }
+                    e->setEvent(InputEvent::EV_CANCEL);
+                } else {
+                    intercepted = false;
+                    is_intercepted_ = false;
+                }
+            } else {
+                if (is_intercepted_) {
+                    return consumed;
+                }
             }
-            e->setEvent(InputEvent::EV_CANCEL);
+
+            updateInterceptingStatus(e);
         }
 
         // 从 View 列表的尾部开始遍历。因为最近添加的 View 在列表尾部，
@@ -400,15 +400,19 @@ namespace ukive {
         } else if (e->isKeyboardEvent()) {
             consumed = dispatchKeyboardEvent(e);
         } else {
+            if ((e->getEvent() == InputEvent::EVT_MOVE ||
+                e->getEvent() == InputEvent::EVT_UP) &&
+                !cur_ev_->hasTouchEvent(e))
+            {
+                return true;
+            }
+
             // ViewGroup 拦截事件后如果获得了鼠标焦点，则
             // 鼠标事件将走到这里而不是 dispatchPointerEvent()，
             // 所以需要在这里进行拦截变量的重置
-            if (is_intercepted_ &&
-                (e->isNoActiveEvent() ||
-                e->getEvent() == InputEvent::EVM_UP ||
-                e->getEvent() == InputEvent::EVT_UP))
-            {
-                is_intercepted_ = false;
+            if (is_intercepted_) {
+                prepareInterceptingStatus(e);
+                updateInterceptingStatus(e);
             }
 
             consumed = View::dispatchInputEvent(e);
@@ -435,6 +439,39 @@ namespace ukive {
 
     bool ViewGroup::onInterceptInputEvent(InputEvent* e) {
         return false;
+    }
+
+    void ViewGroup::prepareInterceptingStatus(InputEvent* e) {
+        if (e->getEvent() != InputEvent::EVM_DOWN &&
+            e->getEvent() != InputEvent::EVT_DOWN &&
+            e->getEvent() != InputEvent::EVM_UP &&
+            e->getEvent() != InputEvent::EVT_UP &&
+            !e->isNoActiveEvent())
+        {
+            // 如果拦截时的事件是触摸事件，
+            // 并且不是按下事件的话，将当前消息转为按下事件
+            if (e->isTouchEvent() && !cur_ev_->hasTouchEvent(e)) {
+                auto saved = e->getEvent();
+                e->setEvent(InputEvent::EVT_DOWN);
+                dispatchInputEventToThis(e);
+                e->setEvent(saved);
+            }
+        }
+    }
+
+    void ViewGroup::updateInterceptingStatus(InputEvent* e) {
+        if (e->getEvent() == InputEvent::EVM_DOWN ||
+            e->getEvent() == InputEvent::EVT_DOWN)
+        {
+            is_intercepted_ = true;
+        } else if (e->isNoActiveEvent() ||
+            e->getEvent() == InputEvent::EVM_UP ||
+            e->getEvent() == InputEvent::EVT_UP)
+        {
+            is_intercepted_ = false;
+        } else {
+            is_intercepted_ = true;
+        }
     }
 
     void ViewGroup::drawChild(Canvas* canvas, View* child) {

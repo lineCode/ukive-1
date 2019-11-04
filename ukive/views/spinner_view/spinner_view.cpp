@@ -207,6 +207,7 @@ namespace ukive {
             weakref_bind(&SpinnerView::showAsync, weak_ref_nest_.getRef(), x, y, width));
     }
 
+
     void SpinnerView::close() {
         if (is_finished_) {
             return;
@@ -215,12 +216,13 @@ namespace ukive {
         is_finished_ = true;
 
         list_view_->setEnabled(false);
+        inner_window_->markDismissing();
 
         // 异步关闭TextActionMode菜单，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
         std::weak_ptr<InnerWindow> ptr = inner_window_;
         inner_window_->getDecorView()->animate()->
-            setDuration(50)->alpha(0.f)->setFinishedHandler(
+            setDuration(100)->alpha(0.f)->setFinishedHandler(
                 [ptr](AnimationDirector* director)
         {
             auto window = ptr.lock();
@@ -240,6 +242,8 @@ namespace ukive {
         }
 
         int height = inner_window_->getHeight();
+
+        inner_window_->dismiss();
 
         inner_window_->setWidth(width);
         inner_window_->show(x, y);

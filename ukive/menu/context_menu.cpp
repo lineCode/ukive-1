@@ -30,10 +30,11 @@ namespace ukive {
         inner_window_ = std::make_shared<InnerWindow>(window);
         inner_window_->setElevation(1.5f);
         inner_window_->setContentView(menu_);
-        inner_window_->setOutsideTouchable(true);
+        inner_window_->setOutsideTouchable(false);
         inner_window_->setDismissByTouchOutside(true);
         inner_window_->setBackground(new ColorDrawable(Color::White));
         inner_window_->setWidth(menu_width_);
+        inner_window_->setEventListener(this);
     }
 
     ContextMenu::~ContextMenu() {}
@@ -73,6 +74,7 @@ namespace ukive {
 
         is_finished_ = true;
         callback_->onDestroyContextMenu(this);
+        inner_window_->markDismissing();
 
         // 异步关闭 ContextMenu，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
@@ -89,10 +91,15 @@ namespace ukive {
     }
 
     void ContextMenu::showAsync(int x, int y) {
+        inner_window_->dismiss();
         inner_window_->show(x, y);
 
         //ViewAnimator::createCirculeReveal(
         //inner_window_->getDecorView(), cCenterX, cCenterY, 0, 150)->start();
+    }
+
+    void ContextMenu::onRequestDismissByTouchOutside() {
+        close();
     }
 
 }

@@ -197,7 +197,7 @@ namespace shell {
         }
 
         auto list_view = findViewById<ukive::ListView>(Res::Id::lv_test_list);
-        list_view->setLayouter(new ukive::GridListLayouter());
+        list_view->setLayouter(new ukive::LinearListLayouter());
         list_view->setAdapter(adapter);
     }
 

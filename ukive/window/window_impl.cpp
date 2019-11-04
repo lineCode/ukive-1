@@ -16,6 +16,7 @@
 #include "ukive/utils/stl_utils.h"
 #include "ukive/utils/win10_version.h"
 #include "ukive/utils/dynamic_windows_api.h"
+#include "ukive/system/time_utils.h"
 
 #define MI_WP_SIGNATURE  0xFF515700
 #define SIGNATURE_MASK   0xFFFFFF00
@@ -633,6 +634,11 @@ namespace ukive {
                 POINT pt = { tx, ty };
                 ::ScreenToClient(hWnd_, &pt);
 
+                if (/*(input.dwFlags & TOUCHEVENTF_PRIMARY) &&*/ (input.dwFlags & TOUCHEVENTF_UP)) {
+                    is_prev_touched_ = true;
+                    prev_touch_time_ = TimeUtils::upTimeMillis();
+                }
+
                 ev.setRawX(pt.x);
                 ev.setRawY(pt.y);
                 ev.setX(pt.x);
@@ -959,7 +965,25 @@ namespace ukive {
             if (p_type != InputEvent::PT_MOUSE &&
                 p_type != InputEvent::PT_PEN)
             {
+                prev_touch_x_ = GET_X_LPARAM(lParam);
+                prev_touch_y_ = GET_Y_LPARAM(lParam);
                 return 0;
+            }
+
+            // 有时，在某些具有触屏的设备上启动程序时，以及接收到 WM_TOUCH 后，
+            // Windows 会随机触发 WM_MOUSEMOVE 或 WM_LBUTTONUP 事件，而这些
+            // 事件会被 GetMessageExtraInfo() 判定为鼠标事件（尽管这些事件是由操作触屏引发的）。
+            // 以下网址中包含有相关讨论和解决方法：
+            // https://social.msdn.microsoft.com/Forums/en-US/1b7217bb-1e60-4e00-83c9-193c7f88c249
+            if (is_prev_touched_) {
+                if (TimeUtils::upTimeMillis() - prev_touch_time_ <= 1000) {
+                    if (GET_X_LPARAM(lParam) == prev_touch_x_ && GET_Y_LPARAM(lParam) == prev_touch_y_) {
+                        is_prev_touched_ = false;
+                        return 0;
+                    }
+                } else {
+                    is_prev_touched_ = false;
+                }
             }
 
             nc_result = non_client_frame_->onMouseMove(wParam, lParam, handled);
@@ -1371,7 +1395,7 @@ namespace ukive {
         if (uMsg == WM_NCCREATE) {
             //::EnableNonClientDpiScaling(hWnd);
             disableTouchFeedback(hWnd);
-            if (::RegisterTouchWindow(hWnd, TWF_WANTPALM) == 0) {
+            if (::RegisterTouchWindow(hWnd, TWF_FINETOUCH) == 0) {
                 LOG(Log::WARNING) << "Failed to register touch window: " << GetLastError();
             }
 

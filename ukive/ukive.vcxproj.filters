@@ -426,6 +426,9 @@
     <ClCompile Include="event\velocity_calculator.cpp">
       <Filter>event</Filter>
     </ClCompile>
+    <ClCompile Include="views\list\list_layouter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />

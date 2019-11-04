@@ -217,6 +217,20 @@ namespace ukive {
         return nullptr;
     }
 
+    bool Column::atTop() const {
+        if (holders_.empty() || holders_.front()->getMgdTop() == top_) {
+            return true;
+        }
+        return false;
+    }
+
+    bool Column::atBottom() const {
+        if (holders_.empty() || holders_.back()->getMgdBottom() == bottom_) {
+            return true;
+        }
+        return false;
+    }
+
     bool Column::isTopFilled(int dy) const {
         if (!holders_.empty()) {
             if (holders_.front()->getMgdTop() + dy <= top_) {
@@ -369,6 +383,24 @@ namespace ukive {
             }
         }
         return nullptr;
+    }
+
+    bool ColumnCollection::isAllAtTop() const {
+        for (const auto& c : columns_) {
+            if (!c.atTop()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool ColumnCollection::isAllAtBottom() const {
+        for (const auto& c : columns_) {
+            if (!c.atBottom()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     bool ColumnCollection::isTopFilled(int dy) const {

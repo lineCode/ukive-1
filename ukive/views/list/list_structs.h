@@ -41,6 +41,8 @@ namespace ukive {
         ListAdapter::ViewHolder* findAndInsertHolder(int start_index, int item_id);
         ListAdapter::ViewHolder* findHolderFromView(View* v) const;
 
+        bool atTop() const;
+        bool atBottom() const;
         bool isTopFilled(int dy) const;
         bool isBottomFilled(int dy) const;
 
@@ -69,8 +71,11 @@ namespace ukive {
         ListAdapter::ViewHolder* getBottomost() const;
         ListAdapter::ViewHolder* findHolderFromView(View* v) const;
 
+        bool isAllAtTop() const;
+        bool isAllAtBottom() const;
         bool isTopFilled(int dy) const;
         bool isBottomFilled(int dy) const;
+
         bool isAllAtCeil(int item_count) const;
         bool isAllAtFloor(int item_count) const;
 

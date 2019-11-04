@@ -238,6 +238,12 @@ namespace ukive {
 
         TouchInputCache ti_cache_;
         std::map<DWORD, TOUCHINPUT> prev_ti_;
+
+        int prev_touch_x_ = 0;
+        int prev_touch_y_ = 0;
+        bool is_prev_touched_ = false;
+        uint64_t prev_touch_time_ = 0;
+
     };
 
 }

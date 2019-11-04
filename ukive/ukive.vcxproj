@@ -457,6 +457,7 @@
     <ClCompile Include="views\list\grid_list_layouter.cpp" />
     <ClCompile Include="views\list\linear_list_layouter.cpp" />
     <ClCompile Include="views\list\list_adapter.cpp" />
+    <ClCompile Include="views\list\list_layouter.cpp" />
     <ClCompile Include="views\list\list_structs.cpp" />
     <ClCompile Include="views\list\list_view.cpp" />
     <ClCompile Include="views\list\overlay_scroll_bar.cpp" />

@@ -36,9 +36,10 @@ namespace ukive {
         void onComputeScroll() override;
 
     private:
-        bool canScroll();
-        int computeScrollRange();
-        int computeScrollExtend();
+        bool canScroll() const;
+        bool canScroll(bool top) const;
+        int computeScrollRange() const;
+        int computeScrollExtend() const;
 
         bool processVerticalScroll(int dy);
 

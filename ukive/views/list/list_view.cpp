@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "ukive/log.h"
 #include "ukive/event/input_event.h"
 #include "ukive/window/window.h"
 #include "ukive/views/list/view_holder_recycler.h"
@@ -90,20 +91,27 @@ namespace ukive {
 
     bool ListView::onInputEvent(InputEvent* e) {
         bool result = ViewGroup::onInputEvent(e);
-        velocity_calculator_.onInputEvent(e);
+        if (e->isTouchEvent()) {
+            velocity_calculator_.onInputEvent(e);
+        }
 
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
         {
+            int wheel = e->getMouseWheel();
+            if (wheel == 0 || !layouter_->canScroll(wheel > 0 ? ListLayouter::TOP : ListLayouter::BOTTOM)) {
+                break;
+            }
+
             result = true;
-            if (std::abs(e->getMouseWheel()) % WHEEL_DELTA) {
+            if (std::abs(wheel) % WHEEL_DELTA) {
                 scroller_.finish();
                 scroller_.inertia(
-                    0, 0, 0, getWindow()->dpToPxY(20 * e->getMouseWheel()), true);
+                    0, 0, 0, getWindow()->dpToPxY(20 * wheel), true);
                 invalidate();
             } else {
                 scroller_.inertia(
-                    0, 0, 0, getWindow()->dpToPxY(2 * e->getMouseWheel()), true);
+                    0, 0, 0, getWindow()->dpToPxY(2 * wheel), true);
                 invalidate();
             }
             break;
@@ -119,6 +127,8 @@ namespace ukive {
                 result = true;
                 scroll_bar_->onMouseDragged({ e->getX(), e->getY() });
                 invalidate();
+            } else if (scroll_bar_->isInScrollBar({ e->getX(), e->getY() })) {
+                result = true;
             } else {
                 invalidateInterceptStatus();
             }
@@ -136,7 +146,13 @@ namespace ukive {
             break;
 
         case InputEvent::EVT_UP:
+        {
             is_touch_down_ = false;
+
+            float vy = velocity_calculator_.getVelocityY();
+            if (vy == 0 || !layouter_->canScroll(vy > 0 ? ListLayouter::TOP : ListLayouter::BOTTOM)) {
+                break;
+            }
             result = true;
 
             /*DLOG(Log::INFO) << "EVT_UP | vx=" << velocity_calculator_.getVelocityX()
@@ -144,10 +160,10 @@ namespace ukive {
 
             scroller_.inertia(
                 0, 0,
-                velocity_calculator_.getVelocityX(),
-                velocity_calculator_.getVelocityY());
+                velocity_calculator_.getVelocityX(), vy);
             invalidate();
             break;
+        }
 
         case InputEvent::EV_CANCEL:
         case InputEvent::EV_LEAVE_VIEW:
@@ -184,7 +200,16 @@ namespace ukive {
 
     void ListView::onComputeScroll() {
         if (scroller_.compute()) {
-            processVerticalScroll(scroller_.getDeltaY());
+            auto dy = scroller_.getDeltaY();
+            if (dy == 0) {
+                return;
+            }
+
+            if (!processVerticalScroll(dy)) {
+                if (!layouter_->canScroll(dy > 0 ? ListLayouter::TOP : ListLayouter::BOTTOM)) {
+                    scroller_.finish();
+                }
+            }
             invalidate();
         }
     }
@@ -211,6 +236,7 @@ namespace ukive {
         }
 
         if (layouter_) {
+            layouter_->bind(this, adapter);
             layouter_->onClear();
         }
 
@@ -225,6 +251,9 @@ namespace ukive {
 
     void ListView::setLayouter(ListLayouter* layouter) {
         layouter_.reset(layouter);
+        if (layouter_) {
+            layouter_->bind(this, adapter_.get());
+        }
     }
 
     void ListView::scrollToPosition(int position, int offset, bool smooth) {
@@ -348,13 +377,14 @@ namespace ukive {
     }
 
     void ListView::updateOverlayScrollBar() {
-        if (!adapter_ || !layouter_) {
+        if (!layouter_) {
             return;
         }
 
-        auto height_pair = layouter_->computeTotalHeight(this, adapter_.get());
-        int total_height = height_pair.first + height_pair.second;
-        int prev_total_height = height_pair.first;
+        int prev, next;
+        layouter_->computeTotalHeight(&prev, &next);
+        int total_height = prev + next;
+        int prev_total_height = prev;
 
         float percent = static_cast<float>(prev_total_height) / (total_height - getHeight());
         percent = std::max(0.f, percent);
@@ -365,26 +395,26 @@ namespace ukive {
 
     void ListView::recordCurPositionAndOffset() {
         if (layouter_) {
-            layouter_->recordCurPositionAndOffset(this);
+            layouter_->recordCurPositionAndOffset();
         }
     }
 
     int ListView::fillTopChildViews(int dy) {
-        if (!adapter_ || !layouter_) {
+        if (!layouter_) {
             return 0;
         }
-        return layouter_->onFillTopChildren(this, adapter_.get(), dy);
+        return layouter_->onFillTopChildren(dy);
     }
 
     int ListView::fillBottomChildViews(int dy) {
-        if (!adapter_ || !layouter_) {
+        if (!layouter_) {
             return 0;
         }
-        return layouter_->onFillBottomChildren(this, adapter_.get(), dy);
+        return layouter_->onFillBottomChildren(dy);
     }
 
     void ListView::layoutAtPosition(bool cur) {
-        if (!adapter_ || !layouter_) {
+        if (!layouter_) {
             return;
         }
 
@@ -396,7 +426,7 @@ namespace ukive {
         initial_layouted_ = true;
         // scroll_animator_->Stop();
 
-        int diff = layouter_->onLayoutAtPosition(this, adapter_.get(), cur);
+        int diff = layouter_->onLayoutAtPosition(cur);
         if (diff > 0) {
             diff = determineVerticalScroll(diff);
             if (diff != 0) {
@@ -406,7 +436,7 @@ namespace ukive {
     }
 
     void ListView::directScrollToPosition(int pos, int offset, bool cur) {
-        if (!adapter_ || !layouter_) {
+        if (!layouter_) {
             return;
         }
         auto bounds = getContentBounds();
@@ -416,7 +446,7 @@ namespace ukive {
 
         // scroll_animator_->Stop();
 
-        int diff = layouter_->onScrollToPosition(this, adapter_.get(), pos, offset, cur);
+        int diff = layouter_->onScrollToPosition(pos, offset, cur);
         if (diff != 0) {
             diff = fillTopChildViews(diff);
             if (diff != 0) {
@@ -426,7 +456,7 @@ namespace ukive {
     }
 
     void ListView::smoothScrollToPosition(int pos, int offset) {
-        if (!adapter_ || !layouter_) {
+        if (!layouter_) {
             return;
         }
         auto content_bound = getContentBounds();
@@ -438,7 +468,7 @@ namespace ukive {
 
         recordCurPositionAndOffset();
 
-        int total_height = layouter_->onSmoothScrollToPosition(this, adapter_.get(), pos, offset);
+        int total_height = layouter_->onSmoothScrollToPosition(pos, offset);
         if (total_height != 0) {
             // scroll_animator_->Stop();
             // scroll_animator_->StartUniform(0, -total_height, 0, 500);
@@ -446,8 +476,9 @@ namespace ukive {
     }
 
     void ListView::onScrollBarChanged(int dy) {
-        auto height_pair = layouter_->computeTotalHeight(this, adapter_.get());
-        int final_dy = determineVerticalScroll(height_pair.first - dy);
+        int prev, next;
+        layouter_->computeTotalHeight(&prev, &next);
+        int final_dy = determineVerticalScroll(prev - dy);
         if (final_dy == 0) {
             return;
         }

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ukive/views/view.h"
+#include "ukive/event/input_event.h"
 
 
 namespace ukive {
@@ -89,6 +90,9 @@ namespace ukive {
         int getWrappedHeight();
 
     private:
+        void prepareInterceptingStatus(InputEvent* e);
+        void updateInterceptingStatus(InputEvent* e);
+
         std::vector<View*> views_;
         bool is_intercepted_ = false;
     };

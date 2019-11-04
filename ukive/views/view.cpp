@@ -917,6 +917,13 @@ namespace ukive {
             }
         }
 
+        if ((e->getEvent() == InputEvent::EVT_MOVE ||
+            e->getEvent() == InputEvent::EVT_UP) &&
+            !cur_ev_->hasTouchEvent(e))
+        {
+            return true;
+        }
+
         InputEvent* ev;
         if (e->isTouchEvent()) {
             cur_ev_->combineTouchEvent(e);
@@ -926,6 +933,7 @@ namespace ukive {
         }
 
         bool consumed = onInputEvent(ev);
+
         if (e->isTouchEvent()) {
             cur_ev_->clearTouchUp();
         }
@@ -1177,6 +1185,8 @@ namespace ukive {
 
         bool changed = bounds_ != new_bounds;
         if (changed) {
+            Rect old_bounds(bounds_);
+
             int width = new_bounds.width();
             int height = new_bounds.height();
             int old_width = bounds_.width();
@@ -1188,7 +1198,9 @@ namespace ukive {
                 onSizeChanged(width, height, old_width, old_height);
             }
 
-            invalidate();
+            // 将新老 bounds 合并刷新
+            old_bounds.join(new_bounds);
+            invalidate(old_bounds);
         }
 
         if (changed || (flags_ & NEED_LAYOUT)) {
