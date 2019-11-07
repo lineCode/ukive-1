@@ -10,10 +10,13 @@ namespace ukive {
     class Button;
     class ImageView;
     class CheckBox;
+    class ListView;
     class SpinnerView;
 }
 
 namespace shell {
+
+    class TestAdapter;
 
     class TestWindow :
         public ukive::Window,
@@ -46,6 +49,8 @@ namespace shell {
         ukive::ImageView* image_view_ = nullptr;
         ukive::CheckBox* check_box_ = nullptr;
         ukive::SpinnerView* spinner_view_ = nullptr;
+        ukive::ListView* list_view_ = nullptr;
+        TestAdapter* adapter_ = nullptr;
     };
 
 }

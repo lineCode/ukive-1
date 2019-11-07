@@ -398,8 +398,8 @@ namespace ukive {
         labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);
     }
 
-    void Window::invalidate(int left, int top, int right, int bottom) {
-        next_dirty_region_.join(Rect(left, top, right - left, bottom - top));
+    void Window::invalidate(const Rect& rect) {
+        next_dirty_region_.join(rect);
 
         labour_cycler_->removeMessages(SCHEDULE_RENDER);
         labour_cycler_->sendEmptyMessage(SCHEDULE_RENDER);

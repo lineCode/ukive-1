@@ -37,7 +37,18 @@ namespace ukive {
         explicit ListView(Window* w);
         ListView(Window* w, AttrsRef attrs);
 
+        void setAdapter(ListAdapter* adapter);
+        void setLayouter(ListLayouter* layouter);
+        void scrollToPosition(int pos, int offset, bool smooth);
+
+        void setItemSelectedListener(ListItemSelectedListener* l);
+        void setChildRecycledListener(ListItemRecycledListener* l);
+
+    protected:
         // ViewGroup
+        void onMeasure(
+            int width, int height,
+            int width_mode, int height_mode) override;
         void onLayout(
             bool changed, bool size_changed,
             int left, int top, int right, int bottom) override;
@@ -47,31 +58,38 @@ namespace ukive {
         void onDrawOverChildren(Canvas* canvas) override;
         void onComputeScroll() override;
 
-        void setAdapter(ListAdapter* adapter);
-        void setLayouter(ListLayouter* layouter);
-        void scrollToPosition(int pos, int offset, bool smooth);
+        // View
+        void requestLayout() override;
 
-        void setItemSelectedListener(ListItemSelectedListener* l);
-        void setChildRecycledListener(ListItemRecycledListener* l);
-
-    protected:
         // OnClickListener
         void onClick(View* v) override;
 
     private:
+        using ViewHolder = ListAdapter::ViewHolder;
+
+        struct SizeCache {
+            bool available = false;
+            int width = 0;
+            int height = 0;
+        };
+
+        void freezeLayout();
+        void unfreezeLayout();
+        void resetSizeCache();
+
         bool processVerticalScroll(int dy);
         int determineVerticalScroll(int dy);
         void offsetChildViewTopAndBottom(int dy);
-        ListAdapter::ViewHolder* makeNewBindViewHolder(int adapter_pos, int view_index);
-        void recycleViewHolder(ListAdapter::ViewHolder* holder);
 
-        int findViewIndexFromStart(ListAdapter::ViewHolder* holder) const;
-        int findViewIndexFromEnd(ListAdapter::ViewHolder* holder) const;
+        bool getCachedSize(int pos, int* width, int* height);
+        ViewHolder* makeNewBindViewHolder(int adapter_pos, int view_index);
+        void recycleViewHolder(ViewHolder* holder);
 
-        int measureViewHolder(
-            ListAdapter::ViewHolder* holder, int width);
-        void layoutViewHolder(
-            ListAdapter::ViewHolder* holder, int left, int top, int width, int height);
+        int findViewIndexFromStart(ViewHolder* holder) const;
+        int findViewIndexFromEnd(ViewHolder* holder) const;
+
+        int measureViewHolder(ViewHolder* holder, int width);
+        void layoutViewHolder(ViewHolder* holder, int left, int top, int width, int height);
 
         void updateOverlayScrollBar();
         void recordCurPositionAndOffset();
@@ -85,9 +103,6 @@ namespace ukive {
 
         void onScrollBarChanged(int dy);
 
-        // ListScrollDelegate:
-        //void OnScroll(float dx, float dy) OVERRIDE;
-
         // ListDataSetListener:
         void onDataSetChanged() override;
         void onItemRangeInserted(int start_pos, int length) override;
@@ -95,7 +110,6 @@ namespace ukive {
         void onItemRangeRemoved(int start_pos, int length) override;
 
         bool initial_layouted_;
-        bool force_layout_ = false;
 
         bool is_mouse_down_ = false;
 
@@ -116,6 +130,10 @@ namespace ukive {
         ListItemRecycledListener* recycled_listener_ = nullptr;
         ListItemSelectedListener* selected_listener_ = nullptr;
 
+        bool is_frozen_layout_ = false;
+        std::vector<SizeCache> size_cache_;
+
+        friend class FlowListLayouter;
         friend class GridListLayouter;
         friend class LinearListLayouter;
     };

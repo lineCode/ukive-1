@@ -31,14 +31,29 @@ namespace ukive {
         setTouchCapturable(true);
     }
 
+    void ListView::onMeasure(
+        int width, int height, int width_mode, int height_mode)
+    {
+        width = std::max(width, getMinimumWidth());
+        height = std::max(height, getMinimumHeight());
+
+        scroller_.finish();
+        resetSizeCache();
+
+        if (layouter_) {
+            layouter_->onMeasureAtPosition(true, width, height);
+        }
+
+        setMeasuredSize(width, height);
+    }
+
     void ListView::onLayout(
         bool changed, bool size_changed,
         int left, int top, int right, int bottom)
     {
-        if (!initial_layouted_ || size_changed || force_layout_) {
-            force_layout_ = false;
-            recordCurPositionAndOffset();
+        if (/*!initial_layouted_ ||*/ size_changed) {
             layoutAtPosition(true);
+            recordCurPositionAndOffset();
 
             scroll_bar_->setBounds(Rect(0, 0, getMeasuredWidth(), getMeasuredHeight()));
             updateOverlayScrollBar();
@@ -108,12 +123,11 @@ namespace ukive {
                 scroller_.finish();
                 scroller_.inertia(
                     0, 0, 0, getWindow()->dpToPxY(20 * wheel), true);
-                invalidate();
             } else {
                 scroller_.inertia(
                     0, 0, 0, getWindow()->dpToPxY(2 * wheel), true);
-                invalidate();
             }
+            invalidate();
             break;
         }
 
@@ -200,6 +214,7 @@ namespace ukive {
 
     void ListView::onComputeScroll() {
         if (scroller_.compute()) {
+            invalidate();
             auto dy = scroller_.getDeltaY();
             if (dy == 0) {
                 return;
@@ -210,8 +225,14 @@ namespace ukive {
                     scroller_.finish();
                 }
             }
-            invalidate();
         }
+    }
+
+    void ListView::requestLayout() {
+        if (is_frozen_layout_) {
+            return;
+        }
+        ViewGroup::requestLayout();
     }
 
     void ListView::onClick(View* v) {
@@ -232,6 +253,7 @@ namespace ukive {
             recycler_->clear();
             removeAllViews();
 
+            size_cache_.clear();
             adapter_->setListener(nullptr);
         }
 
@@ -243,6 +265,7 @@ namespace ukive {
         if (adapter) {
             adapter_.reset(adapter);
             adapter_->setListener(this);
+            size_cache_.resize(adapter_->getItemCount());
             layoutAtPosition(false);
         }
 
@@ -270,6 +293,21 @@ namespace ukive {
 
     void ListView::setChildRecycledListener(ListItemRecycledListener* l) {
         recycled_listener_ = l;
+    }
+
+    void ListView::freezeLayout() {
+        is_frozen_layout_ = true;
+    }
+
+    void ListView::unfreezeLayout() {
+        is_frozen_layout_ = false;
+    }
+
+    void ListView::resetSizeCache() {
+        auto count = size_cache_.size();
+        for (size_t i = 0; i < count; ++i) {
+            size_cache_[i] = {};
+        }
     }
 
     bool ListView::processVerticalScroll(int dy) {
@@ -301,7 +339,17 @@ namespace ukive {
         }
     }
 
-    ListAdapter::ViewHolder* ListView::makeNewBindViewHolder(int adapter_pos, int view_index) {
+    bool ListView::getCachedSize(int pos, int* width, int* height) {
+        const auto& cache = size_cache_[pos];
+        if (!cache.available) {
+            return false;
+        }
+        *width = cache.width;
+        *height = cache.height;
+        return true;
+    }
+
+    ListView::ViewHolder* ListView::makeNewBindViewHolder(int adapter_pos, int view_index) {
         int item_id = adapter_->getItemId(adapter_pos);
         auto new_holder = recycler_->reuse(item_id, view_index);
         if (!new_holder) {
@@ -316,14 +364,14 @@ namespace ukive {
         return new_holder;
     }
 
-    void ListView::recycleViewHolder(ListAdapter::ViewHolder* holder) {
+    void ListView::recycleViewHolder(ViewHolder* holder) {
         if (recycled_listener_) {
             recycled_listener_->onChildRecycled(holder);
         }
         recycler_->recycleFromParent(holder);
     }
 
-    int ListView::findViewIndexFromStart(ListAdapter::ViewHolder* holder) const {
+    int ListView::findViewIndexFromStart(ViewHolder* holder) const {
         for (int i = 0; i < getChildCount(); ++i) {
             if (getChildAt(i) == holder->item_view) {
                 return i;
@@ -332,7 +380,7 @@ namespace ukive {
         return -1;
     }
 
-    int ListView::findViewIndexFromEnd(ListAdapter::ViewHolder* holder) const {
+    int ListView::findViewIndexFromEnd(ViewHolder* holder) const {
         for (int i = getChildCount() - 1; i >= 0; --i) {
             if (getChildAt(i) == holder->item_view) {
                 return i;
@@ -341,33 +389,30 @@ namespace ukive {
         return -1;
     }
 
-    int ListView::measureViewHolder(ListAdapter::ViewHolder* holder, int width) {
+    int ListView::measureViewHolder(ViewHolder* holder, int width) {
         auto child_lp = holder->item_view->getLayoutParams();
         int child_height;
         int child_height_mode;
         getChildMeasure(
-            0, View::UNKNOWN, 0,
+            0, UNKNOWN, 0,
             child_lp->height, &child_height, &child_height_mode);
 
-        int width_margin = child_lp->left_margin +
-            child_lp->right_margin +
-            holder->ex_margins.left +
-            holder->ex_margins.right;
-
-        int height_margin = child_lp->top_margin +
-            child_lp->bottom_margin +
-            holder->ex_margins.top +
-            holder->ex_margins.bottom;
+        int width_margin = holder->getHoriMargins();
+        int height_margin = holder->getVertMargins();
 
         width = std::max(width - width_margin, 0);
 
-        holder->item_view->measure(width, child_height, View::EXACTLY, child_height_mode);
-        return holder->item_view->getMeasuredHeight() + height_margin;
+        holder->item_view->measure(width, child_height, EXACTLY, child_height_mode);
+
+        int t_width = holder->item_view->getMeasuredWidth() + width_margin;
+        int t_height = holder->item_view->getMeasuredHeight() + height_margin;
+
+        size_cache_[holder->adapter_position] = { true, t_width, t_height };
+
+        return t_height;
     }
 
-    void ListView::layoutViewHolder(
-        ListAdapter::ViewHolder* holder, int left, int top, int width, int height)
-    {
+    void ListView::layoutViewHolder(ViewHolder* holder, int left, int top, int width, int height) {
         auto child_lp = holder->item_view->getLayoutParams();
         holder->item_view->layout(
             left + child_lp->left_margin + holder->ex_margins.left,
@@ -384,9 +429,8 @@ namespace ukive {
         int prev, next;
         layouter_->computeTotalHeight(&prev, &next);
         int total_height = prev + next;
-        int prev_total_height = prev;
 
-        float percent = static_cast<float>(prev_total_height) / (total_height - getHeight());
+        float percent = static_cast<float>(prev) / (total_height - getHeight());
         percent = std::max(0.f, percent);
         percent = std::min(1.f, percent);
 
@@ -418,13 +462,13 @@ namespace ukive {
             return;
         }
 
-        auto content_bound = getContentBounds();
-        if (content_bound.empty()) {
+        auto bounds = getContentBounds();
+        if (bounds.empty()) {
             return;
         }
 
         initial_layouted_ = true;
-        // scroll_animator_->Stop();
+        scroller_.finish();
 
         int diff = layouter_->onLayoutAtPosition(cur);
         if (diff > 0) {
@@ -444,7 +488,7 @@ namespace ukive {
             return;
         }
 
-        // scroll_animator_->Stop();
+        scroller_.finish();
 
         int diff = layouter_->onScrollToPosition(pos, offset, cur);
         if (diff != 0) {
@@ -453,25 +497,26 @@ namespace ukive {
                 offsetChildViewTopAndBottom(diff);
             }
         }
+
+        recordCurPositionAndOffset();
+        updateOverlayScrollBar();
     }
 
     void ListView::smoothScrollToPosition(int pos, int offset) {
         if (!layouter_) {
             return;
         }
-        auto content_bound = getContentBounds();
-        if (content_bound.empty()) {
+        auto bounds = getContentBounds();
+        if (bounds.empty()) {
             return;
         }
 
-        // scroll_animator_->Stop();
-
-        recordCurPositionAndOffset();
-
         int total_height = layouter_->onSmoothScrollToPosition(pos, offset);
         if (total_height != 0) {
-            // scroll_animator_->Stop();
-            // scroll_animator_->StartUniform(0, -total_height, 0, 500);
+            scroller_.finish();
+            recordCurPositionAndOffset();
+
+            scroller_.startScroll(0, 0, 0, -total_height, 500);
         }
     }
 
@@ -488,26 +533,13 @@ namespace ukive {
         invalidate();
     }
 
-    //////////////////////////////////////////////////////////////////
-    // ScrollDelegate implementation:
-
-    /*void ListView::OnScroll(float dx, float dy) {
-        int resDy = determineVerticalScroll(static_cast<int>(dy));
-        if (resDy == 0)
-            return;
-        offsetChildViewTopAndBottom(resDy);
-        invalidate();
-    }*/
-
-    //////////////////////////////////////////////////////////////////
-    // ListDataSetListener implementation:
-
     void ListView::onDataSetChanged() {
+        resetSizeCache();
+        size_cache_.resize(adapter_->getItemCount());
+
         recordCurPositionAndOffset();
         directScrollToPosition(0, 0, true);
-        requestLayout();
         invalidate();
-        force_layout_ = true;
     }
 
     void ListView::onItemRangeInserted(int start_pos, int length) {

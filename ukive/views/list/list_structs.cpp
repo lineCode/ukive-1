@@ -142,26 +142,24 @@ namespace ukive {
     }
 
     ListAdapter::ViewHolder* Column::getHolder(int index) const {
-        if (index >= 0 &&
-            static_cast<decltype(holders_)::size_type>(index) < holders_.size())
-        {
+        if (index >= 0 && index < STLCInt(holders_.size())) {
             return holders_[index];
         }
         return nullptr;
     }
 
-    ListAdapter::ViewHolder* Column::getFirstVisible() const {
+    ListAdapter::ViewHolder* Column::getFirstVisible(int dy) const {
         for (auto it = holders_.cbegin(); it != holders_.cend(); ++it) {
-            if ((*it)->getMgdBottom() > top_) {
+            if ((*it)->getMgdBottom() + dy > top_) {
                 return *it;
             }
         }
         return nullptr;
     }
 
-    ListAdapter::ViewHolder* Column::getLastVisible() const {
+    ListAdapter::ViewHolder* Column::getLastVisible(int dy) const {
         for (auto it = holders_.crbegin(); it != holders_.crend(); ++it) {
-            if ((*it)->getMgdTop() < bottom_) {
+            if ((*it)->getMgdTop() + dy < bottom_) {
                 return *it;
             }
         }
@@ -181,9 +179,7 @@ namespace ukive {
     }
 
     ListAdapter::ViewHolder* Column::findAndInsertHolder(int start_index, int item_id) {
-        if (start_index < 0 ||
-            static_cast<decltype(holders_)::size_type>(start_index) >= holders_.size())
-        {
+        if (start_index < 0 || start_index >= STLCInt(holders_.size())) {
             return nullptr;
         }
 
@@ -299,6 +295,24 @@ namespace ukive {
         return final_dy;
     }
 
+    ListAdapter::ViewHolder* ColumnCollection::getFirst() const {
+        return columns_[0].getFront();
+    }
+
+    ListAdapter::ViewHolder* ColumnCollection::getLast() const {
+        int count = columns_[0].getHolderCount();
+        if (count <= 0) {
+            return nullptr;
+        }
+        for (int i = col_count_ - 1; i >= 0; --i) {
+            auto holder = columns_[i].getHolder(count - 1);
+            if (holder) {
+                return holder;
+            }
+        }
+        return nullptr;
+    }
+
     ListAdapter::ViewHolder* ColumnCollection::getTopStart() const {
         int index = 0;
         int max_adapter_pos = 0;
@@ -322,7 +336,7 @@ namespace ukive {
     }
 
     ListAdapter::ViewHolder* ColumnCollection::getBottomStart() const {
-        int index = 3;
+        int index = col_count_ - 1;
         int min_adapter_pos = 0;
         ListAdapter::ViewHolder* start_holder = nullptr;
         for (auto it = columns_.crbegin(); it != columns_.crend(); ++it) {
@@ -354,6 +368,10 @@ namespace ukive {
         ListAdapter::ViewHolder* result = nullptr;
         for (const auto& c : columns_) {
             auto front = c.getFront();
+            if (!front) {
+                continue;
+            }
+
             if (!result || front->getMgdTop() < top) {
                 top = front->getMgdTop();
                 result = front;
@@ -367,6 +385,10 @@ namespace ukive {
         ListAdapter::ViewHolder* result = nullptr;
         for (const auto& c : columns_) {
             auto rear = c.getRear();
+            if (!rear) {
+                continue;
+            }
+
             if (!result || rear->getMgdBottom() > bottom) {
                 bottom = rear->getMgdBottom();
                 result = rear;
@@ -419,6 +441,34 @@ namespace ukive {
             }
         }
         return true;
+    }
+
+    bool ColumnCollection::isTopFilled2(int dy) const {
+        bool fill = false;
+        int count = columns_[0].getHolderCount();
+        for (const auto& c : columns_) {
+            if (!fill && c.isTopFilled(dy)) {
+                fill = true;
+            }
+            if (c.getHolderCount() != count) {
+                return false;
+            }
+        }
+        return fill;
+    }
+
+    bool ColumnCollection::isBottomFilled2(int dy) const {
+        bool fill = false;
+        int count = columns_[0].getHolderCount();
+        for (const auto& c : columns_) {
+            if (!fill && c.isBottomFilled(dy)) {
+                fill = true;
+            }
+            if (c.getHolderCount() != count) {
+                return false;
+            }
+        }
+        return fill;
     }
 
     bool ColumnCollection::isAllAtCeil(int item_count) const {

@@ -38,7 +38,7 @@ namespace ukive {
         void setContent(int id);
         void setContent(View* content);
 
-        void invalidate(int left, int top, int right, int bottom) override;
+        void invalidate(const Rect& rect) override;
         void requestLayout() override;
         View* findViewById(int id) const override;
         HitPoint onNCHitTest(int x, int y) override;

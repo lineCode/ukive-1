@@ -132,11 +132,11 @@ namespace ukive {
         return true;
     }
 
-    void ViewGroup::addView(View* v, LayoutParams* params) {
-        addView(STLCInt(views_.size()), v, params);
+    void ViewGroup::addView(View* v, LayoutParams* params, bool req_layout) {
+        addView(STLCInt(views_.size()), v, params, req_layout);
     }
 
-    void ViewGroup::addView(int index, View* v, LayoutParams* params) {
+    void ViewGroup::addView(int index, View* v, LayoutParams* params, bool req_layout) {
         if (!v) {
             DCHECK(false) << "You cannot add a null View to ViewGroup.";
             return;
@@ -183,11 +183,13 @@ namespace ukive {
             v->onAttachedToWindow();
         }
 
-        requestLayout();
+        if (req_layout) {
+            requestLayout();
+        }
         invalidate();
     }
 
-    void ViewGroup::removeView(View* v, bool del) {
+    void ViewGroup::removeView(View* v, bool del, bool req_layout) {
         if (!v) {
             DLOG(Log::WARNING) << "You cannot remove a null view from ViewGroup.";
             return;
@@ -209,14 +211,16 @@ namespace ukive {
                     delete v;
                 }
 
-                requestLayout();
+                if (req_layout) {
+                    requestLayout();
+                }
                 invalidate();
                 return;
             }
         }
     }
 
-    void ViewGroup::removeAllViews(bool del) {
+    void ViewGroup::removeAllViews(bool del, bool req_layout) {
         if (!views_.empty()) {
             for (auto child : views_) {
                 child->discardFocus();
@@ -232,7 +236,9 @@ namespace ukive {
             }
 
             views_.clear();
-            requestLayout();
+            if (req_layout) {
+                requestLayout();
+            }
             invalidate();
         }
     }

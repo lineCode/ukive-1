@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "ukive/log.h"
 #include "ukive/views/list/list_view.h"
 #include "ukive/views/list/view_holder_recycler.h"
 
@@ -13,10 +14,52 @@ namespace ukive {
           cur_offset_in_position_(0) {
     }
 
+    void LinearListLayouter::onMeasureAtPosition(bool cur, int width, int height) {
+        if (!isAvailable()) {
+            return;
+        }
+
+        parent_->freezeLayout();
+
+        int index = 0;
+        int total_height = 0;
+        int item_count = adapter_->getItemCount();
+
+        int pos = cur ? cur_position_ : 0;
+        int offset = cur ? cur_offset_in_position_ : 0;
+
+        for (int i = pos; i < item_count; ++i, ++index) {
+            if (total_height >= height + offset) {
+                break;
+            }
+
+            auto holder = column_.findAndInsertHolder(index, adapter_->getItemId(i));
+            if (!holder) {
+                holder = parent_->makeNewBindViewHolder(i, index);
+                column_.addHolder(holder, index);
+            } else {
+                holder->adapter_position = i;
+                adapter_->onBindViewHolder(holder, i);
+            }
+
+            int cur_height = parent_->measureViewHolder(holder, width);
+            total_height += cur_height;
+        }
+
+        for (int i = index; i < column_.getHolderCount(); ++i) {
+            parent_->recycleViewHolder(column_.getHolder(i));
+        }
+        column_.removeHolders(index);
+
+        parent_->unfreezeLayout();
+    }
+
     int LinearListLayouter::onLayoutAtPosition(bool cur) {
         if (!isAvailable()) {
             return 0;
         }
+
+        parent_->freezeLayout();
 
         int index = 0;
         int total_height = 0;
@@ -33,16 +76,10 @@ namespace ukive {
                 break;
             }
 
-            auto holder = column_.findAndInsertHolder(index, adapter_->getItemId(i));
-            if (!holder) {
-                holder = parent_->makeNewBindViewHolder(i, index);
-                column_.addHolder(holder, index);
-            } else {
-                holder->adapter_position = i;
-                adapter_->onBindViewHolder(holder, i);
-            }
+            auto holder = column_.getHolder(index);
+            DCHECK(holder);
 
-            int height = parent_->measureViewHolder(holder, bounds.width());
+            int height = holder->item_view->getMeasuredHeight() + holder->getVertMargins();
             parent_->layoutViewHolder(
                 holder,
                 bounds.left,  bounds.top + total_height - offset,
@@ -50,10 +87,7 @@ namespace ukive {
             total_height += height;
         }
 
-        for (int i = index; i < column_.getHolderCount(); ++i) {
-            parent_->recycleViewHolder(column_.getHolder(i));
-        }
-        column_.removeHolders(index);
+        parent_->unfreezeLayout();
 
         // 防止列表大小变化时项目超出滑动范围。
         auto last_holder = column_.getLastVisible();
@@ -94,6 +128,8 @@ namespace ukive {
         int diff = 0;
         bool full_child_reached = false;
 
+        parent_->freezeLayout();
+
         for (int i = pos; i < item_count; ++i, ++index) {
             auto holder = column_.findAndInsertHolder(index, adapter_->getItemId(i));
             if (!holder || holder->item_id != adapter_->getItemId(i)) {
@@ -123,6 +159,8 @@ namespace ukive {
             parent_->recycleViewHolder(column_.getHolder(i));
         }
         column_.removeHolders(index);
+
+        parent_->unfreezeLayout();
 
         if (!full_child_reached && item_count > 0 && diff > 0) {
             return diff;
@@ -157,6 +195,8 @@ namespace ukive {
 
         int total_height = 0;
         bool full_child_reached = false;
+
+        parent_->freezeLayout();
 
         for (; (front ? (i <= terminate_pos) : (i >= terminate_pos)); (front ? ++i : --i), ++index) {
             auto holder = column_.findAndInsertHolder(index, adapter_->getItemId(i));
@@ -199,6 +239,8 @@ namespace ukive {
             total_height += height;
         }
 
+        parent_->unfreezeLayout();
+
         return -total_height;
     }
 
@@ -211,6 +253,8 @@ namespace ukive {
         if (!top_holder) {
             return 0;
         }
+
+        parent_->freezeLayout();
 
         auto bounds = parent_->getContentBounds();
         auto cur_adapter_position = top_holder->adapter_position;
@@ -238,6 +282,7 @@ namespace ukive {
             column_.removeHolders(index);
         }
 
+        parent_->unfreezeLayout();
         return dy;
     }
 
@@ -250,6 +295,8 @@ namespace ukive {
         if (!bottom_holder) {
             return 0;
         }
+
+        parent_->freezeLayout();
 
         auto bounds = parent_->getContentBounds();
         auto cur_adapter_position = bottom_holder->adapter_position;
@@ -276,6 +323,7 @@ namespace ukive {
             column_.removeHolders(0, index - 0);
         }
 
+        parent_->unfreezeLayout();
         return dy;
     }
 

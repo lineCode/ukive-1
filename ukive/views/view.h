@@ -182,8 +182,7 @@ namespace ukive {
         void layout(int left, int top, int right, int bottom);
 
         void invalidate();
-        void invalidate(const Rect &rect);
-        virtual void invalidate(int left, int top, int right, int bottom);
+        virtual void invalidate(const Rect &rect);
         virtual void requestLayout();
 
         void requestFocus();

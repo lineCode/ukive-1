@@ -11,6 +11,7 @@ namespace ukive {
     public:
         LinearListLayouter();
 
+        void onMeasureAtPosition(bool cur, int width, int height) override;
         int onLayoutAtPosition(bool cur) override;
         int onScrollToPosition(int pos, int offset, bool cur) override;
         int onSmoothScrollToPosition(int pos, int offset) override;

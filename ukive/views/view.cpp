@@ -24,7 +24,8 @@ namespace ukive {
         : View(w, {}) {}
 
     View::View(Window* w, AttrsRef attrs)
-        : id_(Application::getViewID()),
+        : cur_ev_(std::make_unique<InputEvent>()),
+          id_(Application::getViewID()),
           outline_(OUTLINE_RECT),
           flags_(0),
           scroll_x_(0),
@@ -63,7 +64,6 @@ namespace ukive {
           mRevealCenterY(0.0),
           mRevealWidthRadius(0.0),
           mRevealHeightRadius(0.0),
-          cur_ev_(std::make_unique<InputEvent>()),
           parent_(nullptr),
           click_listener_(nullptr),
           click_performer_(new ClickPerformer(this)),
@@ -1218,10 +1218,6 @@ namespace ukive {
     }
 
     void View::invalidate(const Rect& rect) {
-        invalidate(rect.left, rect.top, rect.right, rect.bottom);
-    }
-
-    void View::invalidate(int left, int top, int right, int bottom) {
         flags_ |= INVALIDATED;
 
         if (parent_) {
@@ -1236,12 +1232,11 @@ namespace ukive {
             int off_x = parent_->getLeft() + mTranslateX - parent_->getScrollX();
             int off_y = parent_->getTop() + mTranslateY - parent_->getScrollY();
 
-            int p_left = left - extend + off_x;
-            int p_top = top - extend + off_y;
-            int p_right = right + extend + off_x;
-            int p_bottom = bottom + extend + off_y;
+            Rect p_rect(rect);
+            p_rect.insets(-extend, -extend, -extend, -extend);
+            p_rect.offset(off_x, off_y);
 
-            parent_->invalidate(p_left, p_top, p_right, p_bottom);
+            parent_->invalidate(p_rect);
         }
     }
 
@@ -1314,7 +1309,6 @@ namespace ukive {
     void View::dispatchWindowDpiChanged(int dpi_x, int dpi_y) {
         onWindowDpiChanged(dpi_x, dpi_y);
     }
-
 
     void View::onAttachedToWindow() {
         is_attached_to_window_ = true;

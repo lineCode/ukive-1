@@ -122,7 +122,7 @@ namespace ukive {
         View* getKeyboardHolder() const;
 
         void invalidate();
-        void invalidate(int left, int top, int right, int bottom);
+        void invalidate(const Rect& rect);
         void requestLayout();
 
         void performLayout();

@@ -305,6 +305,7 @@
     <ClInclude Include="views\layout\restraint_layout.h" />
     <ClInclude Include="views\layout\restraint_layout_params.h" />
     <ClInclude Include="views\layout\view_group.h" />
+    <ClInclude Include="views\list\flow_list_layouter.h" />
     <ClInclude Include="views\list\grid_list_layouter.h" />
     <ClInclude Include="views\list\linear_list_layouter.h" />
     <ClInclude Include="views\list\list_adapter.h" />
@@ -454,6 +455,7 @@
     <ClCompile Include="views\layout\restraint_layout.cpp" />
     <ClCompile Include="views\layout\restraint_layout_params.cpp" />
     <ClCompile Include="views\layout\view_group.cpp" />
+    <ClCompile Include="views\list\flow_list_layouter.cpp" />
     <ClCompile Include="views\list\grid_list_layouter.cpp" />
     <ClCompile Include="views\list\linear_list_layouter.cpp" />
     <ClCompile Include="views\list\list_adapter.cpp" />

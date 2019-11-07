@@ -40,16 +40,22 @@ namespace ukive {
     }
 
     int ListAdapter::ViewHolder::getMgdWidth() const {
-        return item_view->getWidth() +
-            item_view->getLayoutParams()->left_margin +
+        return item_view->getWidth() + getHoriMargins();
+    }
+
+    int ListAdapter::ViewHolder::getMgdHeight() const {
+        return item_view->getHeight() + getVertMargins();
+    }
+
+    int ListAdapter::ViewHolder::getHoriMargins() const {
+        return item_view->getLayoutParams()->left_margin +
             item_view->getLayoutParams()->right_margin +
             ex_margins.left +
             ex_margins.right;
     }
 
-    int ListAdapter::ViewHolder::getMgdHeight() const {
-        return item_view->getHeight() +
-            item_view->getLayoutParams()->top_margin +
+    int ListAdapter::ViewHolder::getVertMargins() const {
+        return item_view->getLayoutParams()->top_margin +
             item_view->getLayoutParams()->bottom_margin +
             ex_margins.top +
             ex_margins.bottom;

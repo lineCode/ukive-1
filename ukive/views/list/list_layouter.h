@@ -28,6 +28,7 @@ namespace ukive {
 
         void bind(ListView* parent, ListAdapter* adapter);
 
+        virtual void onMeasureAtPosition(bool cur, int width, int height) = 0;
         virtual int onLayoutAtPosition(bool cur) = 0;
         virtual int onScrollToPosition(int pos, int offset, bool cur) = 0;
         virtual int onSmoothScrollToPosition(int pos, int offset) = 0;
