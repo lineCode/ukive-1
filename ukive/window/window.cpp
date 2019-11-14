@@ -202,10 +202,6 @@ namespace ukive {
         return canvas_;
     }
 
-    HWND Window::getHandle() const {
-        return impl_->getHandle();
-    }
-
     Window::FrameType Window::getFrameType() const {
         return frame_type_;
     }
@@ -224,6 +220,10 @@ namespace ukive {
 
     void Window::getDpi(int* dpi_x, int* dpi_y) const {
         impl_->getDpi(dpi_x, dpi_y);
+    }
+
+    WindowImpl* Window::getImpl() const {
+        return impl_.get();
     }
 
     bool Window::isShowing() const {

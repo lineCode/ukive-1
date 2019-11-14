@@ -233,7 +233,7 @@ namespace ukive {
             }
             consumed = true;
 
-            if (std::abs(wheel) % WHEEL_DELTA) {
+            if (!e->isWheel()) {
                 scroller_.finish();
                 scroller_.inertia(
                     getScrollX(), getScrollY(),

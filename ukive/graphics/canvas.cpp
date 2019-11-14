@@ -5,6 +5,7 @@
 #include "ukive/application.h"
 #include "ukive/text/text_renderer.h"
 #include "ukive/window/window.h"
+#include "ukive/window/window_impl.h"
 #include "ukive/graphics/rect.h"
 #include "ukive/graphics/point.h"
 #include "ukive/graphics/bitmap.h"
@@ -127,7 +128,7 @@ namespace ukive {
         swapChainDesc.SampleDesc.Quality = 0;
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.BufferCount = 2;
-        swapChainDesc.OutputWindow = owner_window_->getHandle();
+        swapChainDesc.OutputWindow = owner_window_->getImpl()->getHandle();
         swapChainDesc.Windowed = TRUE;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
@@ -230,12 +231,14 @@ namespace ukive {
         }
 
         RECT wr;
-        ::GetWindowRect(owner_window_->getHandle(), &wr);
+        ::GetWindowRect(owner_window_->getImpl()->getHandle(), &wr);
         POINT zero = { 0, 0 };
         SIZE size = { wr.right - wr.left, wr.bottom - wr.top };
         POINT position = { wr.left, wr.top };
         BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-        BOOL ret = ::UpdateLayeredWindow(owner_window_->getHandle(), nullptr, &position, &size, hdc, &zero,
+        BOOL ret = ::UpdateLayeredWindow(
+            owner_window_->getImpl()->getHandle(),
+            nullptr, &position, &size, hdc, &zero,
             RGB(0xFF, 0xFF, 0xFF), &blend, ULW_ALPHA);
         if (ret == 0) {
             LOG(Log::ERR) << "Failed to update layered window: " << ::GetLastError();

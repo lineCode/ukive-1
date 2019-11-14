@@ -107,8 +107,9 @@ namespace ukive {
         DCHECK(false);
     }
 
-    void InputEvent::setMouseWheel(int wheel) {
+    void InputEvent::setMouseWheel(int wheel, bool is_wheel) {
         mouse_wheel_ = wheel;
+        is_wheel_ = is_wheel;
     }
 
     void InputEvent::setMouseKey(int key) {
@@ -363,6 +364,10 @@ namespace ukive {
 
     int InputEvent::getCurTouchId() const {
         return cur_touch_id_;
+    }
+
+    bool InputEvent::isWheel() const {
+        return is_wheel_;
     }
 
     bool InputEvent::isMouseEvent() const {

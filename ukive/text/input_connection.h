@@ -9,13 +9,14 @@
 
 namespace ukive {
 
+    class Window;
     class TextView;
     class TsfEditor;
     class TsfManager;
 
     class InputConnection {
     public:
-        InputConnection(TextView* textView);
+        explicit InputConnection(TextView* textView);
         ~InputConnection();
 
         HRESULT initialization();
@@ -58,7 +59,7 @@ namespace ukive {
             DWORD dwFlags, std::wstring text,
             LONG* pacpStart, LONG* pacpEnd, TS_TEXTCHANGE* pChange);
 
-        HWND getWindowHandle() const;
+        Window* getWindow() const;
 
     private:
         TextView* text_view_;

@@ -119,7 +119,7 @@ namespace ukive {
             }
 
             result = true;
-            if (std::abs(wheel) % WHEEL_DELTA) {
+            if (!e->isWheel()) {
                 scroller_.finish();
                 scroller_.inertia(
                     0, 0, 0, getWindow()->dpToPxY(20 * wheel), true);

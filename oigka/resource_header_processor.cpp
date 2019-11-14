@@ -34,7 +34,7 @@ namespace oigka {
             LOG(Log::ERR) << "Failed to make dir: " << out_file.getParentPath();
             return false;
         }
-        auto name_macro = ukive::toASCIIUpperCase(out_file.getName());
+        auto name_macro = ukive::toUpperCase(out_file.getName());
         if (name_macro.empty()) {
             LOG(Log::ERR) << "Invalid out file name: " << out_file.getPath();
             return false;

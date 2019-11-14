@@ -1,9 +1,6 @@
 #ifndef UKIVE_WINDOW_WINDOW_H_
 #define UKIVE_WINDOW_WINDOW_H_
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 #include <memory>
 #include <vector>
 
@@ -80,12 +77,12 @@ namespace ukive {
         Color getBackgroundColor() const;
         Cycler* getCycler() const;
         Canvas* getCanvas() const;
-        HWND getHandle() const;
         FrameType getFrameType() const;
         View* getLastInputView() const;
         View* getContentView() const;
         TitleBar* getTitleBar() const;
         void getDpi(int* dpi_x, int* dpi_y) const;
+        WindowImpl* getImpl() const;
 
         bool isShowing() const;
         bool isTranslucent() const;

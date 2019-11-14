@@ -17,15 +17,15 @@ namespace ukive {
 
     string16 ANSIToUTF16(const string8& str);
 
-    char toASCIILowerCase(char ch);
-    wchar_t toASCIILowerCase(wchar_t ch);
-    string8 toASCIILowerCase(const string8& str);
-    string16 toASCIILowerCase(const string16& str);
+    char toLowerCase(char ch);
+    wchar_t toLowerCase(wchar_t ch);
+    string8 toLowerCase(const string8& str);
+    string16 toLowerCase(const string16& str);
 
-    char toASCIIUpperCase(char ch);
-    wchar_t toASCIIUpperCase(wchar_t ch);
-    string8 toASCIIUpperCase(const string8& str);
-    string16 toASCIIUpperCase(const string16& str);
+    char toUpperCase(char ch);
+    wchar_t toUpperCase(wchar_t ch);
+    string8 toUpperCase(const string8& str);
+    string16 toUpperCase(const string16& str);
 
     string8 trimString(const string8& str, bool all);
     string16 trimString(const string16& str, bool all);
@@ -67,6 +67,9 @@ namespace ukive {
     bool isEqual(const string8& str1, const string8& str2, bool case_sensitive = true);
     bool isEqual(const string16& str1, const string16& str2, bool case_sensitive = true);
 
+    string8 stringPrintf(const char* format, ...);
+    string16 stringPrintf(const wchar_t* format, ...);
+
     template <typename T>
     string8 toString8Hex(T i) {
         std::ostringstream ss;
@@ -98,6 +101,30 @@ namespace ukive {
         T result;
         std::wistringstream ss(text);
         if (!(ss >> result)) {
+            return false;
+        }
+
+        *out = result;
+        return true;
+    }
+
+    template <typename T>
+    bool hexStringToNumber(const string8& text, T* out) {
+        T result;
+        std::istringstream ss(text);
+        if (!(ss >> std::hex >> result)) {
+            return false;
+        }
+
+        *out = result;
+        return true;
+    }
+
+    template <typename T>
+    bool hexStringToNumber(const string16& text, T* out) {
+        T result;
+        std::wistringstream ss(text);
+        if (!(ss >> std::hex >> result)) {
             return false;
         }
 

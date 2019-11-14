@@ -6,6 +6,8 @@
 
 #include "ukive/log.h"
 #include "ukive/text/input_connection.h"
+#include "ukive/window/window.h"
+#include "ukive/window/window_impl.h"
 #include "ukive/utils/stl_utils.h"
 
 
@@ -499,7 +501,7 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetWnd(TsViewCookie vcView, HWND* phwnd) {
-        *phwnd = input_conn_->getWindowHandle();
+        *phwnd = input_conn_->getWindow()->getImpl()->getHandle();
 
         //DLOG(Log::INFO) << "GetWnd(" << vcView << ", " << *phwnd << ")";
 

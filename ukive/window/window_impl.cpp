@@ -1014,10 +1014,13 @@ namespace ukive {
                 return 0;
             }
 
+            int wheel = GET_WHEEL_DELTA_WPARAM(wParam);
+            bool is_wheel = (std::abs(wheel) % WHEEL_DELTA) == 0;
+
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_WHEEL);
             ev.setPointerType(InputEvent::PT_MOUSE);
-            ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));
+            ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam), is_wheel);
 
             ::POINT pt;
             pt.x = GET_X_LPARAM(lParam);
