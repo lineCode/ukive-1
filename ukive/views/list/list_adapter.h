@@ -39,6 +39,9 @@ namespace ukive {
 
             int getMgdWidth() const;
             int getMgdHeight() const;
+
+            int getHoriMargins() const;
+            int getVertMargins() const;
         };
 
         ListAdapter();

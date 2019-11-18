@@ -182,8 +182,7 @@ namespace ukive {
         void layout(int left, int top, int right, int bottom);
 
         void invalidate();
-        void invalidate(const Rect &rect);
-        virtual void invalidate(int left, int top, int right, int bottom);
+        virtual void invalidate(const Rect &rect);
         virtual void requestLayout();
 
         void requestFocus();
@@ -217,6 +216,7 @@ namespace ukive {
         void onDrawableInvalidate(Drawable* d) override;
 
         bool dispatchInputEventToThis(InputEvent* e);
+
         virtual void dispatchDraw(Canvas* canvas) {}
         virtual void dispatchDiscardFocus() {}
         virtual void dispatchDiscardPendingOperations() {}
@@ -242,6 +242,8 @@ namespace ukive {
         virtual void onWindowDpiChanged(int dpi_x, int dpi_y) {}
         virtual void onScrollChanged(
             int scroll_x, int scroll_y, int old_scroll_x, int old_scroll_y) {}
+
+        std::unique_ptr<InputEvent> cur_ev_;
 
     private:
         enum Flags : uint32_t {
@@ -330,7 +332,6 @@ namespace ukive {
         std::unique_ptr<ViewAnimator> animator_;
         std::unique_ptr<ShadowEffect> shadow_effect_;
         std::unique_ptr<LayoutParams> layout_params_;
-        std::unique_ptr<InputEvent> cur_ev_;
 
         View* parent_;
         OnClickListener* click_listener_;

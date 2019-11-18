@@ -1,11 +1,11 @@
 #include "shell/disassembler/opcode_map.h"
 
 #define OPCODE_N64_64(i64, o64)  {                                   \
-    if (cpu_mode == CPUMode::_64Bit) return OpcodeDesc::ofNor(o64);  \
+    if (env.cpu_mode == CPUMode::_64Bit) return OpcodeDesc::ofNor(o64);  \
     return OpcodeDesc::ofNor(i64); }
 
 #define OPCODE_N64_64P(i64, o64p)  {                                  \
-    if (cpu_mode == CPUMode::_64Bit) return OpcodeDesc::ofPfx(o64p);  \
+    if (env.cpu_mode == CPUMode::_64Bit) return OpcodeDesc::ofPfx(o64p);  \
     return OpcodeDesc::ofNor(i64); }
 
 #define OPCODE_RXX_NOR(rxx, nor)  {                      \
@@ -36,40 +36,40 @@
 #define OPCODE_MAND_VDQ_BY_VEXW(m, d, q)  OPCODE_MAND_HANDLER(m) { OPCODE_VDQ_BY_VEXW(d, q) } OPCODE_MAND_HANDLER_END
 
 // 1 byte opcode
-#define OPCODE_1_MAP_HANDLER(row, col)        op_1_map[row][col] = [](CPUMode cpu_mode, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
+#define OPCODE_1_MAP_HANDLER(row, col)        op_1_map[row][col] = [](const Env& env, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
 #define OPCODE_1_MAP_ESC(row, col)            OPCODE_1_MAP_HANDLER(row, col) { return OpcodeDesc::ofEsc(); }
 #define OPCODE_1_MAP_PFX(row, col, pfx)       OPCODE_1_MAP_HANDLER(row, col) { return OpcodeDesc::ofPfx(pfx); }
 #define OPCODE_1_MAP_EXT(row, col, grp, til)  OPCODE_1_MAP_HANDLER(row, col) { return OpcodeDesc::ofExt(grp, til); }
 #define OPCODE_1_MAP_NOR(row, col, mne)       OPCODE_1_MAP_HANDLER(row, col) { return OpcodeDesc::ofNor(mne); }
 
 // 2 byte opcode
-#define OPCODE_2_MAP_HANDLER(row, col)        op_2_map[row][col] = [](CPUMode cpu_mode, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
+#define OPCODE_2_MAP_HANDLER(row, col)        op_2_map[row][col] = [](const Env& env, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
 #define OPCODE_2_MAP_ESC(row, col)            OPCODE_MAP_2_HANDLER(row, col) { return OpcodeDesc::ofEsc(); }
 #define OPCODE_2_MAP_PFX(row, col, pfx)       OPCODE_MAP_2_HANDLER(row, col) { return OpcodeDesc::ofPfx(pfx); }
 #define OPCODE_2_MAP_EXT(row, col, grp, til)  OPCODE_MAP_2_HANDLER(row, col) { return OpcodeDesc::ofExt(grp, til); }
 #define OPCODE_2_MAP_NOR(row, col, mne)       OPCODE_MAP_2_HANDLER(row, col) { return OpcodeDesc::ofNor(mne); }
 
 // 3 byte opcode (38H)
-#define OPCODE_38H_MAP_HANDLER(row, col)        op_38H_map[row][col] = [](CPUMode cpu_mode, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
+#define OPCODE_38H_MAP_HANDLER(row, col)        op_38H_map[row][col] = [](const Env& env, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
 #define OPCODE_38H_MAP_EXT(row, col, grp, til)  OPCODE_38H_MAP_HANDLER(row, col) { return OpcodeDesc::ofExt(grp, til); }
 #define OPCODE_38H_MAP_NOR(row, col, mne)       OPCODE_38H_MAP_HANDLER(row, col) { return OpcodeDesc::ofNor(mne); }
 
 // 3 byte opcode (3AH)
-#define OPCODE_3AH_MAP_HANDLER(row, col)        op_3AH_map[row][col] = [](CPUMode cpu_mode, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
+#define OPCODE_3AH_MAP_HANDLER(row, col)        op_3AH_map[row][col] = [](const Env& env, const Prefix& pfx, const SelConfig& sel_cfg)->OpcodeDesc
 #define OPCODE_3AH_MAP_EXT(row, col, grp, til)  OPCODE_3AH_MAP_HANDLER(row, col) { return OpcodeDesc::ofExt(grp, til); }
 #define OPCODE_3AH_MAP_NOR(row, col, mne)       OPCODE_3AH_MAP_HANDLER(row, col) { return OpcodeDesc::ofNor(mne); }
 
 // extension opcode
 #define OPCODE_EXTENSIONS_HANDLER(grp)  \
-    ext_op_map[grp] = [](CPUMode cpu_mode, const Prefix& pfx, uint8_t modrm, uint8_t opcode, const SelConfig& sel_cfg)->OpcodeDesc
+    ext_op_map[grp] = [](const Env& env, const Prefix& pfx, uint8_t modrm, uint8_t opcode, const SelConfig& sel_cfg)->OpcodeDesc
 
 // ModRM
-#define MODRM_MEM_MAP_HANDLER(mod, rm)   modrm_mem_map[mod][rm] = [](CPUMode cpu_mode)->ModRMMemMode
-#define MODRM_REG_MAP_HANDLER(reg)       modrm_reg_map[reg] = [](CPUMode cpu_mode)->ModRMRegMode
+#define MODRM_MEM_MAP_HANDLER(mod, rm)   modrm_mem_map[mod][rm] = [](const Env& env)->ModRMMemMode
+#define MODRM_REG_MAP_HANDLER(reg)       modrm_reg_map[reg] = [](const Env& env)->ModRMRegMode
 
 // SIB
-#define SIB_SCALE_MAP_HANDLER(ss, idx)   sib_scale_map[ss][idx] = [](CPUMode cpu_mode)->SIBScaleMode
-#define SIB_BASE_MAP_HANDLER(base)       sib_base_map[base] = [](CPUMode cpu_mode, uint8_t modrm)->SIBBaseMode
+#define SIB_SCALE_MAP_HANDLER(ss, idx)   sib_scale_map[ss][idx] = [](const Env& env)->SIBScaleMode
+#define SIB_BASE_MAP_HANDLER(base)       sib_base_map[base] = [](const Env& env, uint8_t modrm)->SIBBaseMode
 
 
 namespace dpr {
@@ -189,13 +189,13 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0x5, 0xF) OPCODE_RXX_NOR("POP[d64]  r15", "POP[d64]  rDI");
 
         OPCODE_1_MAP_HANDLER(0x6, 0x0) {
-            auto op_size = selectOperandSize(true, pfx);
+            auto op_size = selectOperandSize(env.d, pfx);
             if (op_size == 2) return OpcodeDesc::ofNor("PUSHA[i64]");
             if (op_size == 4) return OpcodeDesc::ofNor("PUSHAD[i64]");
             RET_UND;
         };
         OPCODE_1_MAP_HANDLER(0x6, 0x1) {
-            auto op_size = selectOperandSize(true, pfx);
+            auto op_size = selectOperandSize(env.d, pfx);
             if (op_size == 2) return OpcodeDesc::ofNor("POPA[i64]");
             if (op_size == 4) return OpcodeDesc::ofNor("POPAD[i64]");
             RET_UND;
@@ -217,10 +217,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0x6, 0xD) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("INS Yz, DX");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("INSW");
             if (op_size == 4) return OpcodeDesc::ofNor("INSD");
@@ -233,10 +233,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0x6, 0xF) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("OUTS DX, Xz");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("OUTSW");
             if (op_size == 4) return OpcodeDesc::ofNor("OUTSD");
@@ -343,10 +343,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0x9, 0x7) OPCODE_RXX_NOR("XCHG rAX, r15", "XCHG rAX, rDI");
         OPCODE_1_MAP_HANDLER(0x9, 0x8) {
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("CBW");
             if (op_size == 4) return OpcodeDesc::ofNor("CWDE");
@@ -355,10 +355,10 @@ namespace dpr {
         };
         OPCODE_1_MAP_HANDLER(0x9, 0x9) {
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("CWD");
             if (op_size == 4) return OpcodeDesc::ofNor("CDQ");
@@ -372,10 +372,10 @@ namespace dpr {
         };
         OPCODE_1_MAP_HANDLER(0x9, 0xC) {
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("d64", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("PUSHF[d64] Fv");
             if (op_size == 4) return OpcodeDesc::ofNor("PUSHFD[d64] Fv");
@@ -384,10 +384,10 @@ namespace dpr {
         };
         OPCODE_1_MAP_HANDLER(0x9, 0xD) {
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("d64", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("POPF[d64] Fv");
             if (op_size == 4) return OpcodeDesc::ofNor("POPFD[d64] Fv");
@@ -408,10 +408,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0xA, 0x5) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("MOVS Yv, Xv");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("MOVSW");
             if (op_size == 4) return OpcodeDesc::ofNor("MOVSD");
@@ -425,10 +425,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0xA, 0x7) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("CMPS Xv, Yv");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("CMPSW");
             if (op_size == 4) return OpcodeDesc::ofNor("CMPSD");
@@ -443,10 +443,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0xA, 0xB) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("STOS Yv, rAX");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("STOSW");
             if (op_size == 4) return OpcodeDesc::ofNor("STOSD");
@@ -460,10 +460,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0xA, 0xD) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("LODS rAX, Xv");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("LODSW");
             if (op_size == 4) return OpcodeDesc::ofNor("LODSD");
@@ -477,10 +477,10 @@ namespace dpr {
         OPCODE_1_MAP_HANDLER(0xA, 0xF) {
             if (sel_cfg.use_explicit) return OpcodeDesc::ofNor("SCAS rAX, Yv");
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("SCASW");
             if (op_size == 4) return OpcodeDesc::ofNor("SCASD");
@@ -513,7 +513,7 @@ namespace dpr {
         OPCODE_1_MAP_NOR(0xC, 0x5, "LDS[i64] Gz, Mp");
         OPCODE_1_MAP_EXT(0xC, 0x6, 0x11, "");
         OPCODE_1_MAP_EXT(0xC, 0x7, 0x11, "");
-        OPCODE_1_MAP_NOR(0xC, 0x8, "ENTER Iw,  Ib");
+        OPCODE_1_MAP_NOR(0xC, 0x8, "ENTER Iw, Ib");
         OPCODE_1_MAP_NOR(0xC, 0x9, "LEAVE[d64]");
         OPCODE_1_MAP_NOR(0xC, 0xA, "RET(F) Iw");
         OPCODE_1_MAP_NOR(0xC, 0xB, "RET(F)");
@@ -522,10 +522,10 @@ namespace dpr {
         OPCODE_1_MAP_NOR(0xC, 0xE, "INTO[i64]");
         OPCODE_1_MAP_HANDLER(0xC, 0xF) {
             uint32_t op_size;
-            if (cpu_mode == CPUMode::_64Bit) {
+            if (env.cpu_mode == CPUMode::_64Bit) {
                 op_size = selectOperandSize64("", pfx);
             } else {
-                op_size = selectOperandSize(true, pfx);
+                op_size = selectOperandSize(env.d, pfx);
             }
             if (op_size == 2) return OpcodeDesc::ofNor("IRET");
             if (op_size == 4) return OpcodeDesc::ofNor("IRETD");
@@ -582,8 +582,8 @@ namespace dpr {
         OPCODE_1_MAP_PFX(0xF, 0x3, "REP/REPE XRELEASE");
         OPCODE_1_MAP_NOR(0xF, 0x4, "HLT");
         OPCODE_1_MAP_NOR(0xF, 0x5, "CMC");
-        OPCODE_1_MAP_EXT(0xF, 0x6, 0x3, "");
-        OPCODE_1_MAP_EXT(0xF, 0x7, 0x3, "");
+        OPCODE_1_MAP_EXT(0xF, 0x6, 0x3, "Eb");
+        OPCODE_1_MAP_EXT(0xF, 0x7, 0x3, "Ev");
         OPCODE_1_MAP_NOR(0xF, 0x8, "CLC");
         OPCODE_1_MAP_NOR(0xF, 0x9, "STC");
         OPCODE_1_MAP_NOR(0xF, 0xA, "CLI");
@@ -2054,35 +2054,35 @@ namespace dpr {
          */
         // MOD = 00
         MODRM_MEM_MAP_HANDLER(0x0, 0x0) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "SI", 0, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "SI", 0, 0, "DS", false };
             return { "EAX", "", 0, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x1) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "DI", 0, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "DI", 0, 0, "DS", false };
             return { "ECX", "", 0, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x2) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "SI", 0, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "SI", 0, 0, "SS", false };
             return { "EDX", "", 0, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x3) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "DI", 0, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "DI", 0, 0, "SS", false };
             return { "EBX", "", 0, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x4) {
-            if (cpu_mode == CPUMode::_16Bit) return { "SI", "",   0, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "SI", "",   0, 0, "DS", false };
             return { "",    "", 0, 0, "",   true };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x5) {
-            if (cpu_mode == CPUMode::_16Bit) return { "DI", "",   0, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "DI", "",   0, 0, "DS", false };
             return { "",    "", 4, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x6) {
-            if (cpu_mode == CPUMode::_16Bit) return { "",   "",   2, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "",   "",   2, 0, "DS", false };
             return { "ESI", "", 0, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x7) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "",   0, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "",   0, 0, "DS", false };
             return { "EDI", "", 0, 0, "ES", false };
         };
         MODRM_MEM_MAP_HANDLER(0x0, 0x8) {
@@ -2112,35 +2112,35 @@ namespace dpr {
 
         // MOD=01
         MODRM_MEM_MAP_HANDLER(0x1, 0x0) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "SI", 1, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "SI", 1, 0, "DS", false };
             return { "EAX", "", 1, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x1) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "DI", 1, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "DI", 1, 0, "DS", false };
             return { "ECX", "", 1, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x2) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "SI", 1, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "SI", 1, 0, "SS", false };
             return { "EDX", "", 1, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x3) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "DI", 1, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "DI", 1, 0, "SS", false };
             return { "EBX", "", 1, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x4) {
-            if (cpu_mode == CPUMode::_16Bit) return { "SI", "",   1, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "SI", "",   1, 0, "DS", false };
             return { "",    "", 1, 0, "",   true };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x5) {
-            if (cpu_mode == CPUMode::_16Bit) return { "DI", "",   1, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "DI", "",   1, 0, "DS", false };
             return { "EBP", "", 1, 0, "SS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x6) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "",   1, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "",   1, 0, "SS", false };
             return { "ESI", "", 1, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x7) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "",   1, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "",   1, 0, "DS", false };
             return { "EDI", "", 1, 0, "ES", false };
         };
         MODRM_MEM_MAP_HANDLER(0x1, 0x8) {
@@ -2170,35 +2170,35 @@ namespace dpr {
 
         // MOD=10
         MODRM_MEM_MAP_HANDLER(0x2, 0x0) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "SI", 2, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "SI", 2, 0, "DS", false };
             return { "EAX", "", 4, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x1) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "DI", 2, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "DI", 2, 0, "DS", false };
             return { "ECX", "", 4, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x2) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "SI", 2, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "SI", 2, 0, "SS", false };
             return { "EDX", "", 4, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x3) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "DI", 2, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "DI", 2, 0, "SS", false };
             return { "EBX", "", 4, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x4) {
-            if (cpu_mode == CPUMode::_16Bit) return { "SI", "",   2, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "SI", "",   2, 0, "DS", false };
             return { "",    "", 4, 0, "",   true };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x5) {
-            if (cpu_mode == CPUMode::_16Bit) return { "DI", "",   2, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "DI", "",   2, 0, "DS", false };
             return { "EBP", "", 4, 0, "SS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x6) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BP", "",   2, 0, "SS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BP", "",   2, 0, "SS", false };
             return { "ESI", "", 4, 0, "DS", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x7) {
-            if (cpu_mode == CPUMode::_16Bit) return { "BX", "",   2, 0, "DS", false };
+            if (env.cpu_mode == CPUMode::_16Bit) return { "BX", "",   2, 0, "DS", false };
             return { "EDI", "", 4, 0, "ES", false };
         };
         MODRM_MEM_MAP_HANDLER(0x2, 0x8) {

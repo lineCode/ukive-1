@@ -181,15 +181,13 @@ namespace ukive {
         content_layout_->addView(0, content, lp);
     }
 
-    void RootLayout::invalidate(int left, int top, int right, int bottom) {
-        NonClientLayout::invalidate(left, top, right, bottom);
+    void RootLayout::invalidate(const Rect& rect) {
+        NonClientLayout::invalidate(rect);
 
-        int p_left = left + getLeft();
-        int p_top = top + getTop();
-        int p_right = right + getLeft();
-        int p_bottom = bottom + getTop();
+        Rect p_rect(rect);
+        p_rect.offset(getLeft(), getTop());
 
-        getWindow()->invalidate(p_left, p_top, p_right, p_bottom);
+        getWindow()->invalidate(p_rect);
     }
 
     void RootLayout::requestLayout() {

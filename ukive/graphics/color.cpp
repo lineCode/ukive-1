@@ -1,7 +1,7 @@
 ﻿#include "color.h"
 
 #include "ukive/log.h"
-#include "ukive/utils/number.h"
+#include "ukive/utils/string_utils.h"
 
 
 namespace ukive {
@@ -23,32 +23,41 @@ namespace ukive {
         return *this;
     }
 
-
     Color Color::parse(const string16& color) {
         if (color.empty() || color.at(0) != L'#') {
             LOG(Log::ERR) << "Unknown color: " << color;
-            return Color::Red500;
+            return Red500;
         }
 
         if (color.length() == 7) {
-            int r = Number::parseInt(color.substr(1, 2), 16);
-            int g = Number::parseInt(color.substr(3, 2), 16);
-            int b = Number::parseInt(color.substr(5, 2), 16);
+            int r, g, b;
+            if (!hexStringToNumber(color.substr(1, 2), &r) ||
+                !hexStringToNumber(color.substr(3, 2), &g) ||
+                !hexStringToNumber(color.substr(5, 2), &b))
+            {
+                LOG(Log::ERR) << "Unknown color: " << color;
+                return Red500;
+            }
 
-            return Color::ofInt(r, g, b);
+            return ofInt(r, g, b);
         }
 
         if (color.length() == 9) {
-            int a = Number::parseInt(color.substr(1, 2), 16);
-            int r = Number::parseInt(color.substr(3, 2), 16);
-            int g = Number::parseInt(color.substr(5, 2), 16);
-            int b = Number::parseInt(color.substr(7, 2), 16);
+            int a, r, g, b;
+            if (!hexStringToNumber(color.substr(1, 2), &a) ||
+                !hexStringToNumber(color.substr(3, 2), &r) ||
+                !hexStringToNumber(color.substr(5, 2), &g) ||
+                !hexStringToNumber(color.substr(7, 2), &b))
+            {
+                LOG(Log::ERR) << "Unknown color: " << color;
+                return Red500;
+            }
 
-            return Color::ofInt(r, g, b, a);
+            return ofInt(r, g, b, a);
         }
 
         LOG(Log::ERR) << "Unknown color: " << color;
-        return Color::Red500;
+        return Red500;
     }
 
     Color Color::ofInt(int r, int g, int b, int a) {
@@ -71,20 +80,19 @@ namespace ukive {
             ((argb & alpha_mask) >> alpha_shift) / 255.f);
     }
 
-
-    int Color::GetA(unsigned int argb) {
+    int Color::getA(unsigned int argb) {
         return (argb & alpha_mask) >> alpha_shift;
     }
 
-    int Color::GetR(unsigned int argb) {
+    int Color::getR(unsigned int argb) {
         return (argb & red_mask) >> red_shift;
     }
 
-    int Color::GetG(unsigned int argb) {
+    int Color::getG(unsigned int argb) {
         return (argb & green_mask) >> green_shift;
     }
 
-    int Color::GetB(unsigned int argb) {
+    int Color::getB(unsigned int argb) {
         return (argb & blue_mask) >> blue_shift;
     }
 

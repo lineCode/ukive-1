@@ -6,6 +6,8 @@
 
 #include "ukive/log.h"
 #include "ukive/text/input_connection.h"
+#include "ukive/window/window.h"
+#include "ukive/window/window_impl.h"
 #include "ukive/utils/stl_utils.h"
 
 
@@ -216,7 +218,7 @@ namespace ukive {
             acpTestStart, acpTestEnd, cch,
             pacpResultStart, pacpResultEnd);
 
-        DLOG(Log::INFO) << "QueryInsert()";
+        //DLOG(Log::INFO) << "QueryInsert()";
 
         return S_OK;
     }
@@ -235,9 +237,9 @@ namespace ukive {
             return TS_E_NOSELECTION;
         }
 
-        DLOG(Log::INFO) << "GetSelection("
+        /*DLOG(Log::INFO) << "GetSelection("
             << pSelection->acpStart << ", "
-            << pSelection->acpEnd << ")";
+            << pSelection->acpEnd << ")";*/
 
         return S_OK;
     }
@@ -298,10 +300,10 @@ namespace ukive {
             *pcRunInfoRet = 1;
         }
 
-        DLOG(Log::INFO) << "GetText("
+        /*DLOG(Log::INFO) << "GetText("
             << acpStart << ", "
             << acpEnd << ", "
-            << *pacpNext << ")";
+            << *pacpNext << ")";*/
 
         return S_OK;
     }
@@ -339,13 +341,13 @@ namespace ukive {
         pChange->acpOldEnd = acpEnd;
         pChange->acpNewEnd = acpEnd + STLCInt(newText.length()) - (acpEnd - acpStart);
 
-        DLOG(Log::INFO) << "SetText(" << dwFlags << ", "
+        /*DLOG(Log::INFO) << "SetText(" << dwFlags << ", "
             << newText << ", "
             << acpStart << ", "
             << acpEnd << ", "
             << pChange->acpStart << ", "
             << pChange->acpOldEnd << ", "
-            << pChange->acpNewEnd << ")";
+            << pChange->acpNewEnd << ")";*/
 
         return S_OK;
     }
@@ -353,7 +355,7 @@ namespace ukive {
     STDMETHODIMP TsfEditor::GetFormattedText(
         LONG acpStart, LONG acpEnd, IDataObject** ppDataObject)
     {
-        DLOG(Log::INFO) << "GetFormattedText()";
+        //DLOG(Log::INFO) << "GetFormattedText()";
 
         if (!hasReadWriteLock()) {
             return TS_E_NOLOCK;
@@ -365,21 +367,21 @@ namespace ukive {
     STDMETHODIMP TsfEditor::GetEmbedded(
         LONG acpPos, REFGUID rguidService, REFIID riid, IUnknown** ppunk)
     {
-        DLOG(Log::INFO) << "GetEmbedded()";
+        //DLOG(Log::INFO) << "GetEmbedded()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::QueryInsertEmbedded(
         const GUID* pguidService, const FORMATETC* pFormatEtc, BOOL* pfInsertable)
     {
-        DLOG(Log::INFO) << "QueryInsertEmbedded()";
+        //DLOG(Log::INFO) << "QueryInsertEmbedded()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::InsertEmbedded(
         DWORD dwFlags, LONG acpStart, LONG acpEnd, IDataObject* pDataObject, TS_TEXTCHANGE* pChange)
     {
-        DLOG(Log::INFO) << "InsertEmbedded()";
+        //DLOG(Log::INFO) << "InsertEmbedded()";
         return S_OK;
     }
 
@@ -400,14 +402,14 @@ namespace ukive {
     STDMETHODIMP TsfEditor::RequestAttrsAtPosition(
         LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs, DWORD dwFlags)
     {
-        DLOG(Log::INFO) << "RequestAttrsAtPosition()";
+        //DLOG(Log::INFO) << "RequestAttrsAtPosition()";
         return S_OK;
     }
 
     STDMETHODIMP TsfEditor::RequestAttrsTransitioningAtPosition(
         LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID* paFilterAttrs, DWORD dwFlags)
     {
-        DLOG(Log::INFO) << "RequestAttrsTransitioningAtPosition()";
+        //DLOG(Log::INFO) << "RequestAttrsTransitioningAtPosition()";
         return S_OK;
     }
 
@@ -415,7 +417,7 @@ namespace ukive {
         LONG acpStart, LONG acpHalt, ULONG cFilterAttrs,
         const TS_ATTRID* paFilterAttrs, DWORD dwFlags, LONG* pacpNext, BOOL* pfFound, LONG* plFoundOffset)
     {
-        DLOG(Log::INFO) << "FindNextAttrTransition()";
+        //DLOG(Log::INFO) << "FindNextAttrTransition()";
         return S_OK;
     }
 
@@ -430,7 +432,7 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetEndACP(LONG* pacp) {
-        DLOG(Log::INFO) << "GetEndACP()";
+        //DLOG(Log::INFO) << "GetEndACP()";
 
         *pacp = input_conn_->getTextLength();
 
@@ -448,7 +450,7 @@ namespace ukive {
     STDMETHODIMP TsfEditor::GetACPFromPoint(
         TsViewCookie vcView, const POINT* pt, DWORD dwFlags, LONG* pacp)
     {
-        DLOG(Log::INFO) << "GetACPFromPoint()";
+        //DLOG(Log::INFO) << "GetACPFromPoint()";
 
         if (!input_conn_->getTextPositionAtPoint(pt, dwFlags, pacp)) {
             return TS_E_INVALIDPOINT;
@@ -499,7 +501,7 @@ namespace ukive {
     }
 
     STDMETHODIMP TsfEditor::GetWnd(TsViewCookie vcView, HWND* phwnd) {
-        *phwnd = input_conn_->getWindowHandle();
+        *phwnd = input_conn_->getWindow()->getImpl()->getHandle();
 
         //DLOG(Log::INFO) << "GetWnd(" << vcView << ", " << *phwnd << ")";
 
@@ -525,13 +527,13 @@ namespace ukive {
 
         input_conn_->insertTextAtSelection(dwFlags, text, pacpStart, pacpEnd, pChange);
 
-        DLOG(Log::INFO) << "InsertTextAtSelection(" << dwFlags << ", "
+        /*DLOG(Log::INFO) << "InsertTextAtSelection(" << dwFlags << ", "
             << text << ", "
             << *pacpStart << ", "
             << *pacpEnd << ", "
             << pChange->acpStart << ", "
             << pChange->acpOldEnd << ", "
-            << pChange->acpNewEnd << ")";
+            << pChange->acpNewEnd << ")";*/
 
         return S_OK;
     }

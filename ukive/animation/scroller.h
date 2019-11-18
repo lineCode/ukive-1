@@ -13,7 +13,9 @@ namespace ukive {
         explicit Scroller(Window* w);
         ~Scroller();
 
-        void inertia(int start_x, int start_y, float velocity_x, float velocity_y);
+        void inertia(
+            int start_x, int start_y,
+            float velocity_x, float velocity_y, bool continuous = true);
         void startScroll(int start_x, int start_y, int dx, int dy, uint64_t duration);
 
         bool compute();

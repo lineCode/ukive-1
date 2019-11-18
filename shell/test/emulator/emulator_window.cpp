@@ -12,10 +12,8 @@ namespace shell {
         ::ZeroMemory(&mProcInfo, sizeof(PROCESS_INFORMATION));
     }
 
-
     bool EmulatorWindow::command(std::wstring command)
     {
-        BOOL success = FALSE;
         STARTUPINFO startInfo;
 
         //Set the bInheritHandle flag so pipe handles are inherited.
@@ -31,9 +29,9 @@ namespace shell {
         if (!::SetHandleInformation(mChildStdOutRead, HANDLE_FLAG_INHERIT, 0))
             return false;
 
-        wchar_t *cmdline = new wchar_t[command.length() + 1];
+        std::unique_ptr<wchar_t[]> cmdline(new wchar_t[command.length() + 1]);
         cmdline[command.length()] = L'\0';
-        command._Copy_s(cmdline, command.length() + 1, command.length());
+        command._Copy_s(cmdline.get(), command.length() + 1, command.length());
 
         ::ZeroMemory(&startInfo, sizeof(STARTUPINFO));
         startInfo.cb = sizeof(STARTUPINFO);
@@ -42,19 +40,17 @@ namespace shell {
         startInfo.dwFlags |= STARTF_USESTDHANDLES;
         startInfo.wShowWindow = SW_HIDE;
 
-        success = ::CreateProcessW(
+        BOOL success = ::CreateProcessW(
             nullptr,
-            cmdline,     // command line
+            cmdline.get(),    // command line
             nullptr,          // process security attributes
             nullptr,          // primary thread security attributes
             TRUE,             // handles are inherited
             CREATE_NO_WINDOW,     // creation flags
             nullptr,          // use parent's environment
             nullptr,          // use parent's current directory
-            &startInfo,  // STARTUPINFO pointer
-            &mProcInfo);  // receives PROCESS_INFORMATION
-
-        delete cmdline;
+            &startInfo,    // STARTUPINFO pointer
+            &mProcInfo);   // receives PROCESS_INFORMATION
 
         return (success == TRUE) ? true : false;
     }
@@ -83,7 +79,6 @@ namespace shell {
     std::wstring EmulatorWindow::startReading()
     {
         char chBuf[4096];
-        BOOL success = FALSE;
         DWORD numBytesRead = 0;
         DWORD totalBytesAvailable = 0;
         DWORD bytesLeftThisMessage = 0;
@@ -95,7 +90,7 @@ namespace shell {
 
         for (;;)
         {
-            success = ::PeekNamedPipe(
+            BOOL success = ::PeekNamedPipe(
                 mChildStdOutRead, chBuf, 1, &numBytesRead,
                 &totalBytesAvailable, &bytesLeftThisMessage);
             if (!success)
@@ -103,7 +98,7 @@ namespace shell {
 
             if (numBytesRead != 0)
             {
-                success = ::ReadFile(mChildStdOutRead, chBuf, 4095, &numBytesRead, NULL);
+                success = ::ReadFile(mChildStdOutRead, chBuf, 4095, &numBytesRead, nullptr);
                 if (!success)
                     break;
 

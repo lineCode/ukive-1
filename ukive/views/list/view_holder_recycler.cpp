@@ -14,14 +14,14 @@ namespace ukive {
         DCHECK(holder);
 
         holder->recycled = false;
-        parent_->addView(holder->item_view);
+        parent_->addView(holder->item_view, nullptr, false);
     }
 
     void ViewHolderRecycler::addToParent(ListAdapter::ViewHolder* holder, int pos) {
         DCHECK(holder && pos >= 0);
 
         holder->recycled = false;
-        parent_->addView(pos, holder->item_view);
+        parent_->addView(pos, holder->item_view, nullptr, false);
     }
 
     void ViewHolderRecycler::addToRecycler(ListAdapter::ViewHolder* holder) {
@@ -36,7 +36,7 @@ namespace ukive {
 
         holder->recycled = true;
         recycled_holders_[holder->item_id].push_back(holder);
-        parent_->removeView(holder->item_view, false);
+        parent_->removeView(holder->item_view, false, false);
     }
 
     ListAdapter::ViewHolder* ViewHolderRecycler::reuse(int item_id) {

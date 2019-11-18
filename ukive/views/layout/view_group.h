@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ukive/views/view.h"
+#include "ukive/event/input_event.h"
 
 
 namespace ukive {
@@ -30,10 +31,15 @@ namespace ukive {
 
         bool isViewGroup() const override;
 
-        void addView(View* v, LayoutParams* params = nullptr);
-        void addView(int index, View* v, LayoutParams* params = nullptr);
-        void removeView(View* v, bool del = true);
-        void removeAllViews(bool del = true);
+        void addView(View* v, LayoutParams* params = nullptr, bool req_layout = true);
+
+        /**
+         * 往当前 ViewGroup 添加 View。
+         * 添加的 View 将位于 index 之前。
+         */
+        void addView(int index, View* v, LayoutParams* params = nullptr, bool req_layout = true);
+        void removeView(View* v, bool del = true, bool req_layout = true);
+        void removeAllViews(bool del = true, bool req_layout = true);
 
         int getChildCount() const;
         View* getChildById(int id) const;
@@ -89,6 +95,9 @@ namespace ukive {
         int getWrappedHeight();
 
     private:
+        void prepareInterceptingStatus(InputEvent* e);
+        void updateInterceptingStatus(InputEvent* e);
+
         std::vector<View*> views_;
         bool is_intercepted_ = false;
     };

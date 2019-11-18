@@ -40,7 +40,7 @@ namespace shell {
 
         int mFrameCounter = 0;
         int mFramePreSecond = 0;
-        ULONG64 mPrevTime = 0;
+        uint64_t mPrevTime = 0;
 
         ukive::SeekBar* c1_seekbar_ = nullptr;
         ukive::SeekBar* c2_seekbar_ = nullptr;

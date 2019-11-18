@@ -28,10 +28,10 @@ namespace ukive {
         static Color ofRGB(unsigned int rgb, float a = 1.f);
         static Color ofARGB(unsigned int argb);
 
-        static int GetA(unsigned int argb);
-        static int GetR(unsigned int argb);
-        static int GetG(unsigned int argb);
-        static int GetB(unsigned int argb);
+        static int getA(unsigned int argb);
+        static int getR(unsigned int argb);
+        static int getG(unsigned int argb);
+        static int getB(unsigned int argb);
 
         // Color Black.
         const static Color Black;

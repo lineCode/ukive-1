@@ -85,7 +85,9 @@ namespace dpr {
             return false;
         }
 
-        if (coff_header->chrs != (CoffCharacteristics::EXECUTABLE_IMAGE | CoffCharacteristics::_32BIT_MACHINE)) {
+        if ((coff_header->chrs & CoffCharacteristics::EXECUTABLE_IMAGE) != CoffCharacteristics::EXECUTABLE_IMAGE ||
+            (coff_header->chrs & CoffCharacteristics::_32BIT_MACHINE) != CoffCharacteristics::_32BIT_MACHINE)
+        {
             DCHECK(false);
             return false;
         }

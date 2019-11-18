@@ -20,6 +20,9 @@ namespace win {
     BOOL WINAPI UDSetWindowFeedbackSetting(
         HWND hwnd, FEEDBACK_TYPE feedback, DWORD flags, UINT32 size, const VOID* configuration);
 
+    // Windows 8 or later
+    BOOL WINAPI UDGetCurrentInputMessageSource(INPUT_MESSAGE_SOURCE* ims);
+
     // 未文档化的结构体和方法，用于显示模糊效果。
     // 这些结构体和函数从网络收集而来，不保证其正确性。
     typedef enum _WINDOWCOMPOSITIONATTRIB

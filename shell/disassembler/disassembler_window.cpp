@@ -103,7 +103,8 @@ namespace shell {
         csi.provider = new StaticCodeDataProvider(buf);
         csi.cur = ep;
         csi.size = size;
-        csi.cpu_mode = CPUMode::_32Bit;
+        csi.env.cpu_mode = CPUMode::_32Bit;
+        csi.env.d = true;
 
         for (int i = 0; i < 50; ++i) {
             if (parseInstruction(csi, &info)) {
@@ -126,7 +127,8 @@ namespace shell {
         csi.provider = new DynamicCodeDataProvider(dbg_info.sec_base_addr, dbg_info.process);
         csi.cur = dbg_info.bp_addr - dbg_info.sec_base_addr;
         csi.size = dbg_info.sec_size;
-        csi.cpu_mode = CPUMode::_32Bit;
+        csi.env.cpu_mode = CPUMode::_32Bit;
+        csi.env.d = true;
 
         uint32_t offset = 0;
         for (int i = 0; i < 50; ++i) {

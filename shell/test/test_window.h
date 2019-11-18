@@ -10,20 +10,29 @@ namespace ukive {
     class Button;
     class ImageView;
     class CheckBox;
+    class ListView;
     class SpinnerView;
 }
 
 namespace shell {
 
-    class TestWindow : public ukive::Window, public ukive::OnClickListener, public ukive::AnimationListener {
+    class TestAdapter;
+
+    class TestWindow :
+        public ukive::Window,
+        public ukive::OnClickListener,
+        public ukive::AnimationListener {
     public:
         TestWindow();
         ~TestWindow();
 
+        // ukive::Window
         void onCreate() override;
         void onDraw(const ukive::Rect& rect) override;
         void onDestroy() override;
+        bool onGetWindowIconName(string16* icon_name, string16* small_icon_name) const override;
 
+        // ukive::OnClickListener
         void onClick(ukive::View* v) override;
 
         // ukive::AnimationListener
@@ -40,6 +49,8 @@ namespace shell {
         ukive::ImageView* image_view_ = nullptr;
         ukive::CheckBox* check_box_ = nullptr;
         ukive::SpinnerView* spinner_view_ = nullptr;
+        ukive::ListView* list_view_ = nullptr;
+        TestAdapter* adapter_ = nullptr;
     };
 
 }

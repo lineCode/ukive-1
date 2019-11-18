@@ -73,7 +73,7 @@ namespace ukive {
         void setRawY(int raw_y);
         void setRawX(int raw_x, int id);
         void setRawY(int raw_y, int id);
-        void setMouseWheel(int wheel);
+        void setMouseWheel(int wheel, bool is_wheel);
         void setMouseKey(int key);
         void setKeyboardCharKey(int char_key, int ex_msg);
         void setKeyboardVirtualKey(int virtual_key, int ex_msg);
@@ -98,6 +98,7 @@ namespace ukive {
         int getKeyboardVirtualKey() const;
         int getCurTouchId() const;
 
+        bool isWheel() const;
         bool isMouseEvent() const;
         bool isTouchEvent() const;
         bool isKeyboardEvent() const;
@@ -112,6 +113,8 @@ namespace ukive {
         bool isOutside() const;
 
         void combineTouchEvent(InputEvent* e);
+        bool hasTouchEvent(InputEvent* e) const;
+
         void clearTouchUp();
         void clearTouch();
 
@@ -137,6 +140,9 @@ namespace ukive {
 
         bool is_outside_;
         bool is_no_dispatch_;
+
+        // 指定是鼠标滚轮还是触摸板
+        bool is_wheel_ = true;
     };
 
 }

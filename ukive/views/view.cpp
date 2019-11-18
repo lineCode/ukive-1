@@ -24,7 +24,8 @@ namespace ukive {
         : View(w, {}) {}
 
     View::View(Window* w, AttrsRef attrs)
-        : id_(Application::getViewID()),
+        : cur_ev_(std::make_unique<InputEvent>()),
+          id_(Application::getViewID()),
           outline_(OUTLINE_RECT),
           flags_(0),
           scroll_x_(0),
@@ -63,7 +64,6 @@ namespace ukive {
           mRevealCenterY(0.0),
           mRevealWidthRadius(0.0),
           mRevealHeightRadius(0.0),
-          cur_ev_(std::make_unique<InputEvent>()),
           parent_(nullptr),
           click_listener_(nullptr),
           click_performer_(new ClickPerformer(this)),
@@ -917,6 +917,13 @@ namespace ukive {
             }
         }
 
+        if ((e->getEvent() == InputEvent::EVT_MOVE ||
+            e->getEvent() == InputEvent::EVT_UP) &&
+            !cur_ev_->hasTouchEvent(e))
+        {
+            return true;
+        }
+
         InputEvent* ev;
         if (e->isTouchEvent()) {
             cur_ev_->combineTouchEvent(e);
@@ -926,6 +933,7 @@ namespace ukive {
         }
 
         bool consumed = onInputEvent(ev);
+
         if (e->isTouchEvent()) {
             cur_ev_->clearTouchUp();
         }
@@ -1177,6 +1185,8 @@ namespace ukive {
 
         bool changed = bounds_ != new_bounds;
         if (changed) {
+            Rect old_bounds(bounds_);
+
             int width = new_bounds.width();
             int height = new_bounds.height();
             int old_width = bounds_.width();
@@ -1188,7 +1198,9 @@ namespace ukive {
                 onSizeChanged(width, height, old_width, old_height);
             }
 
-            invalidate();
+            // 将新老 bounds 合并刷新
+            old_bounds.join(new_bounds);
+            invalidate(old_bounds);
         }
 
         if (changed || (flags_ & NEED_LAYOUT)) {
@@ -1206,10 +1218,6 @@ namespace ukive {
     }
 
     void View::invalidate(const Rect& rect) {
-        invalidate(rect.left, rect.top, rect.right, rect.bottom);
-    }
-
-    void View::invalidate(int left, int top, int right, int bottom) {
         flags_ |= INVALIDATED;
 
         if (parent_) {
@@ -1224,12 +1232,11 @@ namespace ukive {
             int off_x = parent_->getLeft() + mTranslateX - parent_->getScrollX();
             int off_y = parent_->getTop() + mTranslateY - parent_->getScrollY();
 
-            int p_left = left - extend + off_x;
-            int p_top = top - extend + off_y;
-            int p_right = right + extend + off_x;
-            int p_bottom = bottom + extend + off_y;
+            Rect p_rect(rect);
+            p_rect.insets(-extend, -extend, -extend, -extend);
+            p_rect.offset(off_x, off_y);
 
-            parent_->invalidate(p_left, p_top, p_right, p_bottom);
+            parent_->invalidate(p_rect);
         }
     }
 
@@ -1302,7 +1309,6 @@ namespace ukive {
     void View::dispatchWindowDpiChanged(int dpi_x, int dpi_y) {
         onWindowDpiChanged(dpi_x, dpi_y);
     }
-
 
     void View::onAttachedToWindow() {
         is_attached_to_window_ = true;

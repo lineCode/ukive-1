@@ -5,6 +5,7 @@
 #include "ukive/event/input_event.h"
 #include "ukive/log.h"
 #include "ukive/views/layout/layout_params.h"
+#include "ukive/window/window.h"
 
 
 namespace ukive {
@@ -22,7 +23,7 @@ namespace ukive {
         setTouchCapturable(true);
     }
 
-    bool ScrollView::canScroll() {
+    bool ScrollView::canScroll() const {
         View* child = getChildAt(0);
         if (child && child->getVisibility() != View::VANISHED) {
             if (getMeasuredHeight() < child->getMeasuredHeight()) {
@@ -33,7 +34,22 @@ namespace ukive {
         return false;
     }
 
-    int ScrollView::computeScrollRange() {
+    bool ScrollView::canScroll(bool top) const {
+        int scroll_y = getScrollY();
+        if (top) {
+            if (scroll_y == 0) {
+                return false;
+            }
+        } else {
+            int extend = computeScrollExtend();
+            if (extend <= 0 || scroll_y == extend) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    int ScrollView::computeScrollRange() const {
         View* child = getChildAt(0);
         if (child && child->getVisibility() != View::VANISHED) {
             return child->getMeasuredHeight();
@@ -41,7 +57,7 @@ namespace ukive {
         return 0;
     }
 
-    int ScrollView::computeScrollExtend() {
+    int ScrollView::computeScrollExtend() const {
         View* child = getChildAt(0);
         if (child && child->getVisibility() != View::VANISHED) {
             return (child->getMeasuredHeight() - getMeasuredHeight());
@@ -68,7 +84,6 @@ namespace ukive {
         }
         return false;
     }
-
 
     void ScrollView::onMeasure(int width, int height, int width_mode, int height_mode) {
         int final_width = 0;
@@ -201,20 +216,37 @@ namespace ukive {
 
     bool ScrollView::onInputEvent(InputEvent* e) {
         bool consumed = ViewGroup::onInputEvent(e);
-        velocity_calculator_.onInputEvent(e);
+        if (e->isTouchEvent()) {
+            velocity_calculator_.onInputEvent(e);
+        }
 
         switch (e->getEvent()) {
         case InputEvent::EVM_WHEEL:
+        {
             mouse_x_cache_ = e->getX();
             mouse_y_cache_ = e->getY();
             saved_pointer_type_ = e->getPointerType();
-            consumed |= true;
 
-            scroller_.inertia(
-                getScrollX(), getScrollY(),
-                0, 500 * e->getMouseWheel());
-            invalidate();
+            int wheel = e->getMouseWheel();
+            if (wheel == 0 || !canScroll(wheel > 0)) {
+                break;
+            }
+            consumed = true;
+
+            if (!e->isWheel()) {
+                scroller_.finish();
+                scroller_.inertia(
+                    getScrollX(), getScrollY(),
+                    0, getWindow()->dpToPxY(20 * wheel), true);
+                invalidate();
+            } else {
+                scroller_.inertia(
+                    getScrollX(), getScrollY(),
+                    0, getWindow()->dpToPxY(2 * wheel), true);
+                invalidate();
+            }
             break;
+        }
 
         case InputEvent::EVT_DOWN:
             prev_touch_x_ = start_touch_x_ = e->getX();
@@ -224,18 +256,24 @@ namespace ukive {
             break;
 
         case InputEvent::EVT_UP:
+        {
             is_touch_down_ = false;
-            consumed |= true;
+
+            float vy = velocity_calculator_.getVelocityY();
+            if (vy == 0 || !canScroll(vy > 0)) {
+                break;
+            }
+            consumed = true;
 
             /*DLOG(Log::INFO) << "EVT_UP | vx=" << velocity_calculator_.getVelocityX()
                 << " vy=" << velocity_calculator_.getVelocityY();*/
 
             scroller_.inertia(
                 getScrollX(), getScrollY(),
-                velocity_calculator_.getVelocityX(),
-                velocity_calculator_.getVelocityY());
+                velocity_calculator_.getVelocityX(), vy);
             invalidate();
             break;
+        }
 
         case InputEvent::EV_CANCEL:
         case InputEvent::EV_LEAVE_VIEW:
@@ -299,7 +337,13 @@ namespace ukive {
 
     void ScrollView::onComputeScroll() {
         if (scroller_.compute()) {
-            processVerticalScroll(scroller_.getDeltaY());
+            auto dy = scroller_.getDeltaY();
+
+            if (!processVerticalScroll(dy)) {
+                if (!canScroll(dy > 0)) {
+                    scroller_.finish();
+                }
+            }
             invalidate();
         }
     }

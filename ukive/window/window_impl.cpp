@@ -16,6 +16,7 @@
 #include "ukive/utils/stl_utils.h"
 #include "ukive/utils/win10_version.h"
 #include "ukive/utils/dynamic_windows_api.h"
+#include "ukive/system/time_utils.h"
 
 #define MI_WP_SIGNATURE  0xFF515700
 #define SIGNATURE_MASK   0xFFFFFF00
@@ -52,7 +53,9 @@ namespace ukive {
           is_showing_(false),
           is_translucent_(false),
           is_enable_mouse_track_(true),
-          is_first_nccalc_(true) {
+          is_first_nccalc_(true)
+    {
+        DCHECK(delegate_);
     }
 
     WindowImpl::~WindowImpl() {}
@@ -61,7 +64,15 @@ namespace ukive {
     void WindowImpl::init() {
         ClassInfo info;
         info.style = kDefaultClassStyle;
-        info.icon = info.icon_small = ::LoadIcon(nullptr, IDI_WINLOGO);
+
+        string16 icon_name, small_icon_name;
+        if (delegate_->onGetWindowIconName(&icon_name, &small_icon_name)) {
+            info.icon = ::LoadIcon(nullptr, icon_name.c_str());
+            info.icon_small = ::LoadIcon(nullptr, small_icon_name.c_str());
+        } else {
+            info.icon = info.icon_small = ::LoadIcon(nullptr, IDI_WINLOGO);
+        }
+
         info.cursor = ::LoadCursor(nullptr, IDC_ARROW);
 
         int win_style = kDefaultWindowStyle;
@@ -266,7 +277,7 @@ namespace ukive {
         return p.y;
     }
 
-    int WindowImpl::getClientWidth() const {
+    int WindowImpl::getClientWidth(bool total) const {
         if (!::IsWindow(hWnd_)) {
             return 0;
         }
@@ -278,13 +289,15 @@ namespace ukive {
             return 0;
         }
 
-        non_client_frame_->getClientInsets(&rect);
-        width -= (rect.left + rect.right);
+        if (!total) {
+            non_client_frame_->getClientInsets(&rect);
+            width -= (rect.left + rect.right);
+        }
 
         return std::max(width, 0);
     }
 
-    int WindowImpl::getClientHeight() const {
+    int WindowImpl::getClientHeight(bool total) const {
         if (!::IsWindow(hWnd_)) {
             return 0;
         }
@@ -296,8 +309,10 @@ namespace ukive {
             return 0;
         }
 
-        non_client_frame_->getClientInsets(&rect);
-        height -= (rect.top + rect.bottom);
+        if (!total) {
+            non_client_frame_->getClientInsets(&rect);
+            height -= (rect.top + rect.bottom);
+        }
 
         return std::max(height, 0);
     }
@@ -544,20 +559,13 @@ namespace ukive {
         delegate_->onMove(x, y);
     }
 
-    void WindowImpl::onResize(
-        int param, int width, int height,
-        int client_width, int client_height)
-    {
-        if (client_width <= 0 || client_height <= 0) {
-            return;
-        }
-
+    void WindowImpl::onResize(int param, int width, int height) {
         prev_width_ = width_;
         prev_height_ = height_;
         width_ = width;
         height_ = height;
 
-        delegate_->onResize(param, width, height, client_width, client_height);
+        delegate_->onResize(param, width, height);
     }
 
     bool WindowImpl::onMoving(Rect* rect) {
@@ -625,6 +633,11 @@ namespace ukive {
 
                 POINT pt = { tx, ty };
                 ::ScreenToClient(hWnd_, &pt);
+
+                if (/*(input.dwFlags & TOUCHEVENTF_PRIMARY) &&*/ (input.dwFlags & TOUCHEVENTF_UP)) {
+                    is_prev_touched_ = true;
+                    prev_touch_time_ = TimeUtils::upTimeMillis();
+                }
 
                 ev.setRawX(pt.x);
                 ev.setRawY(pt.y);
@@ -952,7 +965,25 @@ namespace ukive {
             if (p_type != InputEvent::PT_MOUSE &&
                 p_type != InputEvent::PT_PEN)
             {
+                prev_touch_x_ = GET_X_LPARAM(lParam);
+                prev_touch_y_ = GET_Y_LPARAM(lParam);
                 return 0;
+            }
+
+            // 有时，在某些具有触屏的设备上启动程序时，以及接收到 WM_TOUCH 后，
+            // Windows 会随机触发 WM_MOUSEMOVE 或 WM_LBUTTONUP 事件，而这些
+            // 事件会被 GetMessageExtraInfo() 判定为鼠标事件（尽管这些事件是由操作触屏引发的）。
+            // 以下网址中包含有相关讨论和解决方法：
+            // https://social.msdn.microsoft.com/Forums/en-US/1b7217bb-1e60-4e00-83c9-193c7f88c249
+            if (is_prev_touched_) {
+                if (TimeUtils::upTimeMillis() - prev_touch_time_ <= 1000) {
+                    if (GET_X_LPARAM(lParam) == prev_touch_x_ && GET_Y_LPARAM(lParam) == prev_touch_y_) {
+                        is_prev_touched_ = false;
+                        return 0;
+                    }
+                } else {
+                    is_prev_touched_ = false;
+                }
             }
 
             nc_result = non_client_frame_->onMouseMove(wParam, lParam, handled);
@@ -983,10 +1014,13 @@ namespace ukive {
                 return 0;
             }
 
+            int wheel = GET_WHEEL_DELTA_WPARAM(wParam);
+            bool is_wheel = (std::abs(wheel) % WHEEL_DELTA) == 0;
+
             InputEvent ev;
             ev.setEvent(InputEvent::EVM_WHEEL);
             ev.setPointerType(InputEvent::PT_MOUSE);
-            ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+            ev.setMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam), is_wheel);
 
             ::POINT pt;
             pt.x = GET_X_LPARAM(lParam);
@@ -1166,15 +1200,11 @@ namespace ukive {
 
         RECT w_rect;
         ::GetWindowRect(hWnd_, &w_rect);
-        RECT c_rect;
-        ::GetClientRect(hWnd_, &c_rect);
 
         int width_px = w_rect.right - w_rect.left;
         int height_px = w_rect.bottom - w_rect.top;
-        int client_width_px = c_rect.right - c_rect.left;
-        int client_height_px = c_rect.bottom - c_rect.top;
 
-        onResize(wParam, width_px, height_px, client_width_px, client_height_px);
+        onResize(wParam, width_px, height_px);
         auto nc_result = non_client_frame_->onSize(wParam, lParam, handled);
         if (*handled) {
             return nc_result;
@@ -1368,7 +1398,7 @@ namespace ukive {
         if (uMsg == WM_NCCREATE) {
             //::EnableNonClientDpiScaling(hWnd);
             disableTouchFeedback(hWnd);
-            if (::RegisterTouchWindow(hWnd, TWF_WANTPALM) == 0) {
+            if (::RegisterTouchWindow(hWnd, TWF_FINETOUCH) == 0) {
                 LOG(Log::WARNING) << "Failed to register touch window: " << GetLastError();
             }
 

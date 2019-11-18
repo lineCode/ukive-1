@@ -72,10 +72,10 @@ namespace dpr {
     using OpMap = std::unordered_map<uint8_t, T>;
 
     // (cpu_mode, pfx)
-    using OpcodeHandler = std::function<OpcodeDesc(CPUMode, const Prefix&, const SelConfig&)>;
+    using OpcodeHandler = std::function<OpcodeDesc(const Env&, const Prefix&, const SelConfig&)>;
 
     // (pfx, modrm, op)
-    using ExtOpcodeHandler = std::function<OpcodeDesc(CPUMode, const Prefix&, uint8_t, uint8_t, const SelConfig&)>;
+    using ExtOpcodeHandler = std::function<OpcodeDesc(const Env&, const Prefix&, uint8_t, uint8_t, const SelConfig&)>;
 
     extern OpMap<OpMap<OpcodeHandler>> op_1_map;
     extern OpMap<OpMap<OpcodeHandler>> op_2_map;
@@ -90,8 +90,8 @@ namespace dpr {
     using ModMap = std::unordered_map<uint8_t, T>;
 
     // (cpu_mode)
-    using ModRMMemHandler = std::function<ModRMMemMode(CPUMode)>;
-    using ModRMRegHandler = std::function<ModRMRegMode(CPUMode)>;
+    using ModRMMemHandler = std::function<ModRMMemMode(const Env&)>;
+    using ModRMRegHandler = std::function<ModRMRegMode(const Env&)>;
 
     extern ModMap<ModMap<ModRMMemHandler>> modrm_mem_map;
     extern ModMap<ModRMRegHandler> modrm_reg_map;
@@ -103,9 +103,9 @@ namespace dpr {
     using SIBMap = std::unordered_map<uint8_t, T>;
 
     // (cpu_mode)
-    using SIBScaleHandler = std::function<SIBScaleMode(CPUMode)>;
+    using SIBScaleHandler = std::function<SIBScaleMode(const Env&)>;
     // (cpu_mode, modrm)
-    using SIBBaseHandler = std::function<SIBBaseMode(CPUMode, uint8_t)>;
+    using SIBBaseHandler = std::function<SIBBaseMode(const Env&, uint8_t)>;
 
     extern SIBMap<SIBMap<SIBScaleHandler>> sib_scale_map;
     extern SIBMap<SIBBaseHandler> sib_base_map;

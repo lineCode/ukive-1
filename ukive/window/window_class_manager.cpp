@@ -27,7 +27,7 @@ namespace ukive {
         }
     }
 
-    ATOM WindowClassManager::retrieveWindowClass(const ClassInfo &info) {
+    ATOM WindowClassManager::retrieveWindowClass(const ClassInfo& info) {
         for (auto it = class_list_.begin(); it != class_list_.end(); ++it) {
             if (it->info == info) {
                 return it->atom;
@@ -62,8 +62,8 @@ namespace ukive {
         wcex.hIcon = info.icon;
         wcex.hIconSm = info.icon_small;
         wcex.hCursor = info.cursor;
-        wcex.hbrBackground = (HBRUSH)::GetStockObject(BLACK_BRUSH);
-        wcex.lpszMenuName = NULL;
+        wcex.hbrBackground = static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
+        wcex.lpszMenuName = nullptr;
         wcex.lpszClassName = className.c_str();
         wcex.cbSize = sizeof(WNDCLASSEXW);
 

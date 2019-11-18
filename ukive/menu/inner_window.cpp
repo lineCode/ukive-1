@@ -134,6 +134,8 @@ namespace ukive {
 
         createDecorView();
 
+        is_marked_as_dismissing_ = false;
+
         auto baselp = new RootLayoutParams(width_, height_);
         baselp->left_margin = x;
         baselp->top_margin = y;
@@ -151,6 +153,8 @@ namespace ukive {
         }
 
         createDecorView();
+
+        is_marked_as_dismissing_ = false;
 
         Rect rect = anchor->getBoundsInWindow();
     }
@@ -170,6 +174,10 @@ namespace ukive {
     void InnerWindow::update(View* anchor, View::Gravity gravity) {
     }
 
+    void InnerWindow::markDismissing() {
+        is_marked_as_dismissing_ = true;
+    }
+
     void InnerWindow::dismiss() {
         if (decor_view_ && is_showing_) {
             parent_->getRootLayout()->removeShade(decor_view_);
@@ -186,11 +194,13 @@ namespace ukive {
 
     bool InnerWindow::InnerDecorView::dispatchInputEvent(InputEvent* e) {
         // InnerWindow 模拟一个独立的窗口，未消费的事件不应该继续传递。
-        bool result = FrameLayout::dispatchInputEvent(e);
-        if (e->getEvent() == InputEvent::EVM_WHEEL) {
-            result = true;
+        FrameLayout::dispatchInputEvent(e);
+
+        // 对于触摸事件，直接在此消费掉比较自然
+        if (e->isTouchEvent()) {
+            return true;
         }
-        return result;
+        return !inner_window_->is_marked_as_dismissing_;
     }
 
     bool InnerWindow::InnerDecorView::onInterceptInputEvent(InputEvent* e) {
@@ -212,6 +222,7 @@ namespace ukive {
                         inner_window_->listener_->onRequestDismissByTouchOutside();
                     }
                 }
+                return !inner_window_->dismiss_by_touch_outside_;
             }
             return true;
         }

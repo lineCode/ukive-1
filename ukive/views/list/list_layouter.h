@@ -12,25 +12,45 @@ namespace ukive {
 
     class ListLayouter {
     public:
+        enum Direction {
+            TOP = 1 << 0,
+            BOTTOM = 1 << 1,
+            LEFT = 1 << 2,
+            RIGHT = 1 << 3,
+
+            HORIZONTAL = LEFT | RIGHT,
+            VERTICAL = TOP | BOTTOM,
+            ALL = HORIZONTAL | VERTICAL,
+        };
+
+        ListLayouter();
         virtual ~ListLayouter() = default;
 
-        virtual int onLayoutAtPosition(
-            ListView* parent, ListAdapter* adapter, bool cur) = 0;
-        virtual int onScrollToPosition(
-            ListView* parent, ListAdapter* adapter, int pos, int offset, bool cur) = 0;
-        virtual int onSmoothScrollToPosition(
-            ListView* parent, ListAdapter* adapter, int pos, int offset) = 0;
+        void bind(ListView* parent, ListAdapter* adapter);
 
-        virtual int onFillTopChildren(ListView* parent, ListAdapter* adapter, int dy) = 0;
-        virtual int onFillBottomChildren(ListView* parent, ListAdapter* adapter, int dy) = 0;
-        virtual int onFillLeftChildren(ListView* parent, ListAdapter* adapter, int dx) = 0;
-        virtual int onFillRightChildren(ListView* parent, ListAdapter* adapter, int dx) = 0;
+        virtual void onMeasureAtPosition(bool cur, int width, int height) = 0;
+        virtual int onLayoutAtPosition(bool cur) = 0;
+        virtual int onScrollToPosition(int pos, int offset, bool cur) = 0;
+        virtual int onSmoothScrollToPosition(int pos, int offset) = 0;
+
+        virtual int onFillTopChildren(int dy) = 0;
+        virtual int onFillBottomChildren(int dy) = 0;
+        virtual int onFillLeftChildren(int dx) = 0;
+        virtual int onFillRightChildren(int dx) = 0;
 
         virtual void onClear() = 0;
 
-        virtual void recordCurPositionAndOffset(ListView* parent) = 0;
-        virtual std::pair<int, int> computeTotalHeight(ListView* parent, ListAdapter* adapter) = 0;
+        virtual void recordCurPositionAndOffset() = 0;
+        virtual void computeTotalHeight(int* prev, int* next) = 0;
         virtual ListAdapter::ViewHolder* findViewHolderFromView(View* v) = 0;
+
+        virtual bool canScroll(Direction dir) const = 0;
+
+    protected:
+        bool isAvailable() const;
+
+        ListView* parent_ = nullptr;
+        ListAdapter* adapter_ = nullptr;
     };
 
 }

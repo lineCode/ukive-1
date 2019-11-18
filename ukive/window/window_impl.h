@@ -67,8 +67,8 @@ namespace ukive {
         int getHeight() const;
         int getClientOffX() const;
         int getClientOffY() const;
-        int getClientWidth() const;
-        int getClientHeight() const;
+        int getClientWidth(bool total = false) const;
+        int getClientHeight(bool total = false) const;
         void getDpi(int* dpi_x, int* dpi_y) const;
         HWND getHandle() const;
         Cursor getCurrentCursor() const;
@@ -203,9 +203,7 @@ namespace ukive {
         void onKillFocus();
         void onDraw(const Rect& rect);
         void onMove(int x, int y);
-        void onResize(
-            int param, int width, int height,
-            int client_width, int client_height);
+        void onResize(int param, int width, int height);
         bool onMoving(Rect* rect);
         bool onResizing(WPARAM edge, Rect* rect);
         bool onClose();
@@ -240,6 +238,12 @@ namespace ukive {
 
         TouchInputCache ti_cache_;
         std::map<DWORD, TOUCHINPUT> prev_ti_;
+
+        int prev_touch_x_ = 0;
+        int prev_touch_y_ = 0;
+        bool is_prev_touched_ = false;
+        uint64_t prev_touch_time_ = 0;
+
     };
 
 }

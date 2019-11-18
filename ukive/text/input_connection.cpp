@@ -302,8 +302,8 @@ namespace ukive {
         }
     }
 
-    HWND InputConnection::getWindowHandle() const {
-        return text_view_->getWindow()->getHandle();
+    Window* InputConnection::getWindow() const {
+        return text_view_->getWindow();
     }
 
 }

@@ -13,7 +13,6 @@
 #include "ukive/views/text_view.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/drawable/edittext_drawable.h"
-#include "ukive/utils/float.h"
 #include "ukive/views/direct3d_view.h"
 #include "ukive/system/time_utils.h"
 
@@ -327,7 +326,8 @@ namespace shell {
 
     void LodWindow::onClick(ukive::View *v) {
         switch (v->getId()) {
-        case ID_SUBMIT_BUTTON: {
+        case ID_SUBMIT_BUTTON:
+        {
             float c1 = c1_seekbar_->getProgress() + 1.f;
             float c2 = c2_seekbar_->getProgress() + 1.f;
             int splitCount = static_cast<int>(split_seekbar_->getProgress()) + 1;
@@ -339,7 +339,8 @@ namespace shell {
             break;
         }
 
-        case ID_VSYNC_BUTTON: {
+        case ID_VSYNC_BUTTON:
+        {
             ukive::Button *vsyncButton = static_cast<ukive::Button*>(v);
             if (vsyncButton->getText() == L"VSYNC ON") {
                 ukive::Application::setVSync(false);
@@ -352,17 +353,21 @@ namespace shell {
             }
             break;
         }
+        default:
+            break;
         }
     }
 
     void LodWindow::onSeekValueChanged(ukive::SeekBar *seekBar, float value) {
         switch (seekBar->getId()) {
         case ID_C1_SEEKBAR:
-            c1_value_tv_->setText(ukive::Float::toString(1.f + value, 2));
+            c1_value_tv_->setText(ukive::stringPrintf(L"%.2f", 1.f + value));
             break;
 
         case ID_C2_SEEKBAR:
-            c2_value_tv_->setText(ukive::Float::toString(1.f + value, 2));
+            c2_value_tv_->setText(ukive::stringPrintf(L"%.2f", 1.f + value));
+            break;
+        default:
             break;
         }
     }
@@ -372,6 +377,8 @@ namespace shell {
         case ID_SPLIT_SEEKBAR:
             split_value_tv_->setText(std::to_wstring(1 + value));
             break;
+        default:
+            break;
         }
     }
 
@@ -380,7 +387,7 @@ namespace shell {
         if (mPrevTime > 0) {
             ++mFrameCounter;
             if (currentTime - mPrevTime > 500) {
-                mFramePreSecond = (int)(((double)mFrameCounter / (currentTime - mPrevTime)) * 1000);
+                mFramePreSecond = int((double(mFrameCounter) / (currentTime - mPrevTime)) * 1000);
                 mFrameCounter = 0;
                 mPrevTime = currentTime;
 

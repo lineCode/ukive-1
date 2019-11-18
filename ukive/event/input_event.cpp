@@ -107,8 +107,9 @@ namespace ukive {
         DCHECK(false);
     }
 
-    void InputEvent::setMouseWheel(int wheel) {
+    void InputEvent::setMouseWheel(int wheel, bool is_wheel) {
         mouse_wheel_ = wheel;
+        is_wheel_ = is_wheel;
     }
 
     void InputEvent::setMouseKey(int key) {
@@ -365,6 +366,10 @@ namespace ukive {
         return cur_touch_id_;
     }
 
+    bool InputEvent::isWheel() const {
+        return is_wheel_;
+    }
+
     bool InputEvent::isMouseEvent() const {
         DCHECK(isNoActiveEvent() || pointer_type_ != PT_NONE);
         return pointer_type_ == PT_MOUSE;
@@ -403,7 +408,7 @@ namespace ukive {
         } else if (isTouchEvent()) {
             switch (e->getEvent()) {
             case EVT_DOWN:
-                //DCHECK(touch_pos_.find(e->getCurTouchId()) == touch_pos_.end());
+                DCHECK(touch_pos_.find(e->getCurTouchId()) == touch_pos_.end());
                 touch_pos_[e->getCurTouchId()] = { e->getX(), e->getY(), e->getRawX(), e->getRawY() };
                 event_type_ = touch_pos_.size() > 1 ? EVT_MULTI_DOWN : EVT_DOWN;
                 cur_touch_id_ = e->getCurTouchId();
@@ -435,6 +440,22 @@ namespace ukive {
         } else {
             DCHECK(false);
         }
+    }
+
+    bool InputEvent::hasTouchEvent(InputEvent* e) const {
+        if (!e->isTouchEvent()) {
+            DCHECK(false);
+            return false;
+        }
+
+        if (e->getEvent() == EVT_MOVE ||
+            e->getEvent() == EVT_UP)
+        {
+            return touch_pos_.find(e->getCurTouchId()) != touch_pos_.end();
+        }
+
+        DCHECK(false);
+        return false;
     }
 
     void InputEvent::clearTouchUp() {

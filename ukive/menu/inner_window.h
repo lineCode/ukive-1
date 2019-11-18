@@ -43,7 +43,15 @@ namespace ukive {
         void setElevation(float elevation);
         void setBackground(Drawable* drawable);
         void setOutsideTouchable(bool touchable);
+
+        /**
+         * 在点击外围区域时关闭本窗口。
+         * 此选项只有在 setOutsideTouchable() 设置为 false 时有效。
+         * 当 {enable} 设置为 true 时，点击外围区域将触发 onRequestDismissByTouchOutside()
+         * 回调，而且也仅仅是触发该回调，而不做其他事。
+         */
         void setDismissByTouchOutside(bool enable);
+
         void setContentView(View* contentView);
         void setEventListener(OnInnerWindowEventListener* l);
 
@@ -63,6 +71,7 @@ namespace ukive {
         void show(View* anchor, View::Gravity gravity);
         void update(int x, int y);
         void update(View* anchor, View::Gravity gravity);
+        void markDismissing();
         void dismiss();
 
     private:
@@ -80,6 +89,7 @@ namespace ukive {
         InnerDecorView* decor_view_;
         OnInnerWindowEventListener* listener_ = nullptr;
         bool is_showing_;
+        bool is_marked_as_dismissing_ = false;
     };
 
 }

@@ -21,7 +21,10 @@ namespace ukive {
     Scroller::~Scroller() {
     }
 
-    void Scroller::inertia(int start_x, int start_y, float velocity_x, float velocity_y) {
+    void Scroller::inertia(
+        int start_x, int start_y,
+        float velocity_x, float velocity_y, bool continuous)
+    {
         if (velocity_x == 0 && velocity_y == 0) {
             return;
         }
@@ -34,7 +37,7 @@ namespace ukive {
         type_ = INERTIA;
         is_finished_ = false;
 
-        if ((cur_velocity_x_ < 0 && velocity_x > 0) ||
+        if (!continuous || (cur_velocity_x_ < 0 && velocity_x > 0) ||
             (cur_velocity_x_ > 0 && velocity_x < 0))
         {
             cur_velocity_x_ = velocity_x;
@@ -42,7 +45,7 @@ namespace ukive {
             cur_velocity_x_ += velocity_x;
         }
 
-        if ((cur_velocity_y_ < 0 && velocity_y > 0) ||
+        if (!continuous || (cur_velocity_y_ < 0 && velocity_y > 0) ||
             (cur_velocity_y_ > 0 && velocity_y < 0))
         {
             cur_velocity_y_ = velocity_y;
@@ -50,7 +53,6 @@ namespace ukive {
             cur_velocity_y_ += velocity_y;
         }
 
-        float mu = 0.05f;
         decelerate_x_ = init_dec_x_;
         if (velocity_x >= 0) {
             decelerate_x_ *= -1;

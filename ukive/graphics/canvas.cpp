@@ -5,11 +5,13 @@
 #include "ukive/application.h"
 #include "ukive/text/text_renderer.h"
 #include "ukive/window/window.h"
+#include "ukive/window/window_impl.h"
 #include "ukive/graphics/rect.h"
 #include "ukive/graphics/point.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/log.h"
 #include "ukive/utils/stl_utils.h"
+#include "ukive/utils/win10_version.h"
 
 
 namespace ukive {
@@ -126,7 +128,7 @@ namespace ukive {
         swapChainDesc.SampleDesc.Quality = 0;
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.BufferCount = 2;
-        swapChainDesc.OutputWindow = owner_window_->getHandle();
+        swapChainDesc.OutputWindow = owner_window_->getImpl()->getHandle();
         swapChainDesc.Windowed = TRUE;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
@@ -181,17 +183,20 @@ namespace ukive {
     }
 
     bool Canvas::resizeSwapchainBRT() {
-        if (owner_window_->getClientWidth() <= 0 ||
-            owner_window_->getClientHeight() <= 0)
-        {
-            return true;
-        }
-
         releaseResources();
 
         rt_.reset();
 
-        HRESULT hr = swapchain_->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+        // 在某些系统上，需要传入完整大小
+        static bool need_total = win::isWin10Ver1703OrGreater();
+
+        int width = owner_window_->getClientWidth(need_total);
+        int height = owner_window_->getClientHeight(need_total);
+        if (width <= 0 || height <= 0) {
+            return true;
+        }
+
+        HRESULT hr = swapchain_->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
         if (FAILED(hr)) {
             LOG(Log::FATAL) << "Failed to resize swap chain: " << hr;
             return false;
@@ -226,12 +231,14 @@ namespace ukive {
         }
 
         RECT wr;
-        ::GetWindowRect(owner_window_->getHandle(), &wr);
+        ::GetWindowRect(owner_window_->getImpl()->getHandle(), &wr);
         POINT zero = { 0, 0 };
         SIZE size = { wr.right - wr.left, wr.bottom - wr.top };
         POINT position = { wr.left, wr.top };
         BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-        BOOL ret = ::UpdateLayeredWindow(owner_window_->getHandle(), nullptr, &position, &size, hdc, &zero,
+        BOOL ret = ::UpdateLayeredWindow(
+            owner_window_->getImpl()->getHandle(),
+            nullptr, &position, &size, hdc, &zero,
             RGB(0xFF, 0xFF, 0xFF), &blend, ULW_ALPHA);
         if (ret == 0) {
             LOG(Log::ERR) << "Failed to update layered window: " << ::GetLastError();

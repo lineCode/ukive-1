@@ -38,6 +38,16 @@ namespace win {
         return 0;
     }
 
+    BOOL WINAPI UDGetCurrentInputMessageSource(INPUT_MESSAGE_SOURCE* ims) {
+        using GetCurrentInputMessageSourcePtr = BOOL(WINAPI*)(INPUT_MESSAGE_SOURCE*);
+        auto func = reinterpret_cast<GetCurrentInputMessageSourcePtr>(
+            ::GetProcAddress(::LoadLibraryW(L"User32.dll"), "GetCurrentInputMessageSource"));
+        if (func) {
+            return func(ims);
+        }
+        return 0;
+    }
+
     BOOL WINAPI UDSetWindowCompositionAttribute(HWND hwnd, WINDOWCOMPOSITIONATTRIBDATA* data) {
         using SetWindowCompositionAttributePtr = UINT(WINAPI*)(HWND, WINDOWCOMPOSITIONATTRIBDATA*);
         auto func = reinterpret_cast<SetWindowCompositionAttributePtr>(

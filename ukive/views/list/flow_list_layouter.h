@@ -1,5 +1,5 @@
-#ifndef UKIVE_VIEWS_LIST_GRID_LIST_LAYOUTER_H_
-#define UKIVE_VIEWS_LIST_GRID_LIST_LAYOUTER_H_
+#ifndef UKIVE_VIEWS_LIST_FLOW_LIST_LAYOUTER_H_
+#define UKIVE_VIEWS_LIST_FLOW_LIST_LAYOUTER_H_
 
 #include "ukive/views/list/list_layouter.h"
 #include "ukive/views/list/list_structs.h"
@@ -7,9 +7,9 @@
 
 namespace ukive {
 
-    class GridListLayouter : public ListLayouter {
+    class FlowListLayouter : public ListLayouter {
     public:
-        GridListLayouter();
+        FlowListLayouter();
 
         void onMeasureAtPosition(bool cur, int width, int height) override;
         int onLayoutAtPosition(bool cur) override;
@@ -30,6 +30,14 @@ namespace ukive {
         bool canScroll(Direction dir) const override;
 
     private:
+        struct Record {
+            int cur_row = 0;
+            int cur_offset = 0;
+            bool is_null = true;
+        };
+
+        int calPreferredCurPos() const;
+
         bool canScrollToTop() const;
         bool canScrollToBottom() const;
         bool canScrollToLeft() const;
@@ -37,11 +45,9 @@ namespace ukive {
 
         int col_count_;
         ColumnCollection columns_;
-
-        int cur_row_ = 0;
-        int cur_offset_ = 0;
+        std::vector<Record> cur_records_;
     };
 
 }
 
-#endif  // UKIVE_VIEWS_LIST_GRID_LIST_LAYOUTER_H_
+#endif  // UKIVE_VIEWS_LIST_FLOW_LIST_LAYOUTER_H_

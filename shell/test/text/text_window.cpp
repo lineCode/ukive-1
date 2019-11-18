@@ -91,9 +91,8 @@ namespace shell {
         Window::onMove(x, y);
     }
 
-    void TextWindow::onResize(
-        int param, int width, int height, int clientWidth, int clientHeight) {
-        Window::onResize(param, width, height, clientWidth, clientHeight);
+    void TextWindow::onResize(int param, int width, int height) {
+        Window::onResize(param, width, height);
     }
 
 
@@ -111,7 +110,7 @@ namespace shell {
         font->setTextSize(13);
         font->setPadding(16, 8, 16, 8);
         font->setBackground(new ukive::RippleDrawable());
-        //font->setOnClickListener(new FontItemClickListener(this));
+        font->setOnClickListener(new FontItemClickListener(this));
         font->setFocusable(true);
 
         ukive::LinearLayoutParams *fontParams
@@ -125,7 +124,7 @@ namespace shell {
         format->setTextSize(13);
         format->setPadding(16, 8, 16, 8);
         format->setBackground(new ukive::RippleDrawable());
-        //format->setOnClickListener(new FormatItemClickListener(this));
+        format->setOnClickListener(new FormatItemClickListener(this));
         format->setFocusable(true);
 
         ukive::LinearLayoutParams *formatParams

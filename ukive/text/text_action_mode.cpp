@@ -98,6 +98,7 @@ namespace ukive {
 
         menu_impl_->setEnabled(false);
         callback_->onDestroyActionMode(this);
+        inner_window_->markDismissing();
 
         // 异步关闭TextActionMode菜单，以防止在输入事件处理流程中
         // 关闭菜单时出现问题。
@@ -126,6 +127,8 @@ namespace ukive {
             center_y = 0;
             x -= menu_width_;
         }
+
+        inner_window_->dismiss();
 
         inner_window_->show(x, y);
         inner_window_->getDecorView()->animate()->

@@ -23,6 +23,7 @@
 #include "ukive/graphics/color.h"
 #include "ukive/utils/weak_bind.h"
 #include "ukive/views/list/grid_list_layouter.h"
+#include "ukive/views/list/flow_list_layouter.h"
 #include "ukive/views/list/linear_list_layouter.h"
 #include "ukive/views/spinner_view/spinner_view.h"
 #include "ukive/utils/xml/xml_parser.h"
@@ -41,6 +42,7 @@
 #include "shell/test/utils/big_integer_unit_test.h"
 #include "shell/test/utils/json_unit_test.h"
 #include "shell/test/security/crypto_unit_test.h"
+#include "shell/resources/resource.h"
 
 #include "ukive/security/digest/md5.h"
 #include "ukive/security/crypto/aes.h"
@@ -105,13 +107,23 @@ namespace shell {
         animator_.stop();
     }
 
+    bool TestWindow::onGetWindowIconName(string16* icon_name, string16* small_icon_name) const {
+        *icon_name = IDI_SHELL;
+        *small_icon_name = IDI_SMALL;
+        return true;
+    }
+
     void TestWindow::onClick(ukive::View* v) {
         if (v == dwm_button_) {
-            if (isTitleBarShowing()) {
+            if (adapter_) {
+                adapter_->RemoveItem(0);
+            }
+
+            /*if (isTitleBarShowing()) {
                 hideTitleBar();
             } else {
                 showTitleBar();
-            }
+            }*/
 
             /*BOOL enable_aero = true;
             BOOL new_aero = true;
@@ -135,7 +147,6 @@ namespace shell {
 
     void TestWindow::inflateGroup() {
         setContentView(Res::Layout::test_window_group_layout_xml);
-
         getContentView()->setBackground(new ukive::ColorDrawable(ukive::Color::White));
 
         DXGI_OUTPUT_DESC outputDesc;
@@ -178,20 +189,21 @@ namespace shell {
 
     void TestWindow::inflateListView() {
         setContentView(Res::Layout::test_window_list_layout_xml);
+        getContentView()->setBackground(new ukive::ColorDrawable(ukive::Color::White));
 
         // Buttons
         dwm_button_ = findViewById<ukive::Button>(Res::Id::bt_dwm_button);
         dwm_button_->setOnClickListener(this);
 
         // ListView
-        auto adapter = new TestAdapter();
+        adapter_ = new TestAdapter();
         for (int i = 0; i < 36; ++i) {
-            adapter->AddItem(0, L"test", L"test test");
+            adapter_->AddItem(0, L"test", L"test test");
         }
 
         auto list_view = findViewById<ukive::ListView>(Res::Id::lv_test_list);
         list_view->setLayouter(new ukive::GridListLayouter());
-        list_view->setAdapter(adapter);
+        list_view->setAdapter(adapter_);
     }
 
 }

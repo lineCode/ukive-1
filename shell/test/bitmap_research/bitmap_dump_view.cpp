@@ -102,10 +102,10 @@ namespace shell {
 
                     if (shouldShowText()) {
                         std::wstringstream ss;
-                        ss << L"A " << ukive::Color::GetA(color_int) << L"\n"
-                            << L"R " << ukive::Color::GetR(color_int) << L"\n"
-                            << L"G " << ukive::Color::GetG(color_int) << L"\n"
-                            << L"B " << ukive::Color::GetB(color_int);
+                        ss << L"A " << ukive::Color::getA(color_int) << L"\n"
+                            << L"R " << ukive::Color::getR(color_int) << L"\n"
+                            << L"G " << ukive::Color::getG(color_int) << L"\n"
+                            << L"B " << ukive::Color::getB(color_int);
                         canvas->drawText(ss.str(), text_format_.get(), cell_rect, ukive::Color::Black);
                     }
                 }

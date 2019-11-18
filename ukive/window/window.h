@@ -1,9 +1,6 @@
 #ifndef UKIVE_WINDOW_WINDOW_H_
 #define UKIVE_WINDOW_WINDOW_H_
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 #include <memory>
 #include <vector>
 
@@ -73,19 +70,19 @@ namespace ukive {
         int getHeight() const;
         int getMinWidth() const;
         int getMinHeight() const;
-        int getClientWidth() const;
-        int getClientHeight() const;
+        int getClientWidth(bool total = false) const;
+        int getClientHeight(bool total = false) const;
         string16 getTitle() const;
         RootLayout* getRootLayout() const;
         Color getBackgroundColor() const;
         Cycler* getCycler() const;
         Canvas* getCanvas() const;
-        HWND getHandle() const;
         FrameType getFrameType() const;
         View* getLastInputView() const;
         View* getContentView() const;
         TitleBar* getTitleBar() const;
         void getDpi(int* dpi_x, int* dpi_y) const;
+        WindowImpl* getImpl() const;
 
         bool isShowing() const;
         bool isTranslucent() const;
@@ -122,7 +119,7 @@ namespace ukive {
         View* getKeyboardHolder() const;
 
         void invalidate();
-        void invalidate(int left, int top, int right, int bottom);
+        void invalidate(const Rect& rect);
         void requestLayout();
 
         void performLayout();
@@ -153,9 +150,7 @@ namespace ukive {
         virtual void onSetIcon();
         virtual void onDraw(const Rect& rect);
         virtual void onMove(int x, int y);
-        virtual void onResize(
-            int param, int width, int height,
-            int client_width, int client_height);
+        virtual void onResize(int param, int width, int height);
         virtual bool onMoving(Rect* rect);
         virtual bool onResizing(int edge, Rect* rect);
         virtual bool onClose();
@@ -167,6 +162,8 @@ namespace ukive {
 
         virtual void onPreDrawCanvas(Canvas* canvas) {}
         virtual void onPostDrawCanvas(Canvas* canvas) {}
+
+        virtual bool onGetWindowIconName(string16* icon_name, string16* small_icon_name) const;
 
     protected:
         void onHandleMessage(Message* msg) override;

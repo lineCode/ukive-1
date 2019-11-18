@@ -33,15 +33,6 @@
     <ClCompile Include="graphics\color.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="utils\double.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\float.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\number.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\wic_manager.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -426,6 +417,15 @@
     <ClCompile Include="event\velocity_calculator.cpp">
       <Filter>event</Filter>
     </ClCompile>
+    <ClCompile Include="views\list\list_layouter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="views\list\flow_list_layouter.cpp">
+      <Filter>views\list</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\platform_utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -465,15 +465,6 @@
     </ClInclude>
     <ClInclude Include="graphics\color.h">
       <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\double.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\float.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\number.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="graphics\wic_manager.h">
       <Filter>graphics</Filter>
@@ -876,6 +867,12 @@
     </ClInclude>
     <ClInclude Include="event\velocity_calculator.h">
       <Filter>event</Filter>
+    </ClInclude>
+    <ClInclude Include="views\list\flow_list_layouter.h">
+      <Filter>views\list</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\platform_utils.h">
+      <Filter>utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

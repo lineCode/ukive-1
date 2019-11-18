@@ -1,6 +1,7 @@
 #include "ukive/utils/string_utils.h"
 
 #include <algorithm>
+#include <cstdarg>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -48,79 +49,47 @@ namespace ukive {
         return string16(w_buffer.get(), req_length);
     }
 
-    char toASCIILowerCase(char ch) {
-        if (ch >= 0x41 && ch <= 0x5A) {
-            ch += 0x20;
-        }
-        return ch;
+    char toLowerCase(char ch) {
+        return ::tolower(static_cast<unsigned char>(ch));
     }
 
-    wchar_t toASCIILowerCase(wchar_t ch) {
-        if (ch >= 0x41 && ch <= 0x5A) {
-            ch += 0x20;
-        }
-        return ch;
+    wchar_t toLowerCase(wchar_t ch) {
+        return ::towlower(static_cast<wint_t>(ch));
     }
 
-    string8 toASCIILowerCase(const string8& str) {
+    string8 toLowerCase(const string8& str) {
         string8 result;
-        result.reserve(str.size());
-        for (auto ch : str) {
-            if (ch >= 0x41 && ch <= 0x5A) {
-                ch += 0x20;
-            }
-            result.push_back(ch);
-        }
+        result.resize(str.size());
+        std::transform(str.cbegin(), str.cend(), result.begin(), ::tolower);
         return result;
     }
 
-    string16 toASCIILowerCase(const string16& str) {
+    string16 toLowerCase(const string16& str) {
         string16 result;
-        result.reserve(str.size());
-        for (auto ch : str) {
-            if (ch >= 0x41 && ch <= 0x5A) {
-                ch += 0x20;
-            }
-            result.push_back(ch);
-        }
+        result.resize(str.size());
+        std::transform(str.cbegin(), str.cend(), result.begin(), ::towlower);
         return result;
     }
 
-    char toASCIIUpperCase(char ch) {
-        if (ch >= 0x61 && ch <= 0x7A) {
-            ch -= 0x20;
-        }
-        return ch;
+    char toUpperCase(char ch) {
+        return ::toupper(static_cast<unsigned char>(ch));
     }
 
-    wchar_t toASCIIUpperCase(wchar_t ch) {
-        if (ch >= 0x61 && ch <= 0x7A) {
-            ch -= 0x20;
-        }
-        return ch;
+    wchar_t toUpperCase(wchar_t ch) {
+        return ::towupper(static_cast<wint_t>(ch));
     }
 
-    string8 toASCIIUpperCase(const string8& str) {
+    string8 toUpperCase(const string8& str) {
         string8 result;
-        result.reserve(str.size());
-        for (auto ch : str) {
-            if (ch >= 0x61 && ch <= 0x7A) {
-                ch -= 0x20;
-            }
-            result.push_back(ch);
-        }
+        result.resize(str.size());
+        std::transform(str.cbegin(), str.cend(), result.begin(), ::toupper);
         return result;
     }
 
-    string16 toASCIIUpperCase(const string16& str) {
+    string16 toUpperCase(const string16& str) {
         string16 result;
-        result.reserve(str.size());
-        for (auto ch : str) {
-            if (ch >= 0x61 && ch <= 0x7A) {
-                ch -= 0x20;
-            }
-            result.push_back(ch);
-        }
+        result.resize(str.size());
+        std::transform(str.cbegin(), str.cend(), result.begin(), ::towupper);
         return result;
     }
 
@@ -332,22 +301,68 @@ namespace ukive {
 
     bool isEqual(char ch1, char ch2, bool case_sensitive) {
         if (case_sensitive) return ch1 == ch2;
-        return toASCIILowerCase(ch1) == toASCIILowerCase(ch2);
+        return toLowerCase(ch1) == toLowerCase(ch2);
     }
 
     bool isEqual(wchar_t ch1, wchar_t ch2, bool case_sensitive) {
         if (case_sensitive) return ch1 == ch2;
-        return toASCIILowerCase(ch1) == toASCIILowerCase(ch2);
+        return toLowerCase(ch1) == toLowerCase(ch2);
     }
 
     bool isEqual(const string8& str1, const string8& str2, bool case_sensitive) {
         if (case_sensitive) return str1 == str2;
-        return toASCIILowerCase(str1) == toASCIILowerCase(str2);
+        return toLowerCase(str1) == toLowerCase(str2);
     }
 
     bool isEqual(const string16& str1, const string16& str2, bool case_sensitive) {
         if (case_sensitive) return str1 == str2;
-        return toASCIILowerCase(str1) == toASCIILowerCase(str2);
+        return toLowerCase(str1) == toLowerCase(str2);
+    }
+
+    string8 stringPrintf(const char* format, ...) {
+        va_list vars;
+        va_start(vars, format);
+        va_list vars2;
+        va_copy(vars2, vars);
+
+        int ret = vsnprintf(nullptr, 0, format, vars);
+        va_end(vars);
+        if (ret <= 0) {
+            return {};
+        }
+
+        ++ret;
+        std::unique_ptr<char[]> buf(new char[ret]);
+        ret = vsnprintf(buf.get(), ret, format, vars2);
+        va_end(vars2);
+        if (ret <= 0) {
+            return {};
+        }
+
+        return string8(buf.get(), ret - 1);
+    }
+
+    string16 stringPrintf(const wchar_t* format, ...) {
+        va_list vars;
+        va_start(vars, format);
+        va_list vars2;
+        va_copy(vars2, vars);
+
+        int ret = vswprintf(nullptr, 0, format, vars);
+        va_end(vars);
+        if (ret <= 0) {
+            return {};
+        }
+
+        ++ret;
+        std::unique_ptr<wchar_t[]> buf(new wchar_t[ret]);
+        ret = vswprintf(buf.get(), ret, format, vars2);
+        va_end(vars2);
+        if (ret <= 0) {
+            return {};
+        }
+
+        return string16(buf.get(), ret);
     }
 
 }

@@ -16,7 +16,7 @@ namespace ukive {
     class MenuItem;
     class ContextMenuCallback;
 
-    class ContextMenu : public MenuCallback {
+    class ContextMenu : public MenuCallback, public OnInnerWindowEventListener {
     public:
         ContextMenu(Window* window, ContextMenuCallback* callback);
         ~ContextMenu();
@@ -31,6 +31,10 @@ namespace ukive {
 
         void show(int x, int y);
         void close();
+
+    protected:
+        // OnInnerWindowEventListener
+        void onRequestDismissByTouchOutside() override;
 
     private:
         void showAsync(int x, int y);
