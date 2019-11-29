@@ -1,6 +1,7 @@
 #include "ukive/window/window.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/window/window_manager.h"

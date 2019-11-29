@@ -1,6 +1,7 @@
 ﻿#include "message_queue.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/message/cycler.h"
 #include "ukive/message/message.h"
 
@@ -160,7 +161,7 @@ namespace ukive {
         }
     }
 
-    void MessageQueue::remove(Cycler* c, Executable* exec, void* data) {
+    void MessageQueue::remove(Cycler* c, utl::Executable* exec, void* data) {
         if (!c) {
             return;
         }
@@ -224,7 +225,7 @@ namespace ukive {
         return false;
     }
 
-    bool MessageQueue::contains(Cycler* c, Executable* exec, void* data) {
+    bool MessageQueue::contains(Cycler* c, utl::Executable* exec, void* data) {
         if (!c) {
             return false;
         }

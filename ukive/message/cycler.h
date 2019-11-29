@@ -7,9 +7,12 @@
 #include "message_queue.h"
 
 
+namespace utl {
+    class Executable;
+}
+
 namespace ukive {
 
-    class Executable;
     class Message;
     class MessageLooper;
 
@@ -36,16 +39,16 @@ namespace ukive {
 
         void setListener(CyclerListener* l);
 
-        void post(Executable* exec);
-        void postDelayed(Executable* exec, uint64_t delay);
-        void postAtTime(Executable* exec, uint64_t at_time);
+        void post(utl::Executable* exec);
+        void postDelayed(utl::Executable* exec, uint64_t delay);
+        void postAtTime(utl::Executable* exec, uint64_t at_time);
 
         void post(const std::function<void()>& func, int what = -1);
         void postDelayed(const std::function<void()>& func, uint64_t delay, int what = -1);
         void postAtTime(const std::function<void()>& func, uint64_t at_time, int what = -1);
 
-        bool hasCallbacks(Executable* exec);
-        void removeCallbacks(Executable* exec);
+        bool hasCallbacks(utl::Executable* exec);
+        void removeCallbacks(utl::Executable* exec);
 
         void sendMessage(Message* msg);
         void sendMessageDelayed(Message* msg, uint64_t delay);

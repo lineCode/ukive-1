@@ -104,7 +104,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\x86\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ukive.lib;cyroneno.lib;dexar.lib;utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <FxCompile>
@@ -133,7 +133,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\x64\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ukive.lib;cyroneno.lib;dexar.lib;utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)build\x64\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
@@ -164,7 +164,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\x86\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ukive.lib;cyroneno.lib;dexar.lib;utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)build\x86\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
@@ -197,7 +197,7 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\x64\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ukive.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ukive.lib;cyroneno.lib;dexar.lib;utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(SolutionDir)build\x64\$(Configuration)\shaders\%(Filename).cso</ObjectFileOutput>
@@ -212,53 +212,13 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\shell.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\bezier_cubic_rz.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\bezier_quad_rz.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\circle_rz.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\common.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\line_rz.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\point_rz.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\rasterizer.cpp" />
-    <ClCompile Include="cyroneno\rasterizer\triangle_rz.cpp" />
-    <ClCompile Include="cyroneno\ray_tracer\ray_tracer.cpp" />
-    <ClCompile Include="cyroneno\ray_tracer\scene.cpp" />
-    <ClCompile Include="cyroneno\ray_tracer\surface.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\opentype_font.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\opentype_rasterizer.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\opentype_tables.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tables\cmap.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tables\cvt.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tables\glyf.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tables\head.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tables\loca.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tables\maxp.cpp" />
-    <ClCompile Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.cpp" />
     <ClCompile Include="direct3d\assist_configure.cpp" />
     <ClCompile Include="direct3d\camera.cpp" />
     <ClCompile Include="direct3d\graph_creator.cpp" />
     <ClCompile Include="direct3d\model_configure.cpp" />
-    <ClCompile Include="disassembler\code_data_provider.cpp" />
-    <ClCompile Include="disassembler\debugger.cpp" />
     <ClCompile Include="disassembler\disassembler_window.cpp" />
-    <ClCompile Include="disassembler\intel_instructions.cpp" />
-    <ClCompile Include="disassembler\intel_instruction_params.cpp" />
-    <ClCompile Include="disassembler\opcode_list_adapter.cpp" />
-    <ClCompile Include="disassembler\opcode_map.cpp">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="disassembler\pe_file.cpp" />
-    <ClCompile Include="cyroneno\box.cpp" />
-    <ClCompile Include="cyroneno\color.cpp" />
     <ClCompile Include="cyroneno\cyroneno_window.cpp" />
-    <ClCompile Include="cyroneno\equations.cpp" />
-    <ClCompile Include="cyroneno\image.cpp" />
-    <ClCompile Include="cyroneno\matrix.cpp" />
-    <ClCompile Include="cyroneno\pipeline\pipeline.cpp" />
-    <ClCompile Include="cyroneno\point.cpp" />
-    <ClCompile Include="cyroneno\vector.cpp" />
+    <ClCompile Include="disassembler\opcode_list_adapter.cpp" />
     <ClCompile Include="lod\lod_window.cpp" />
     <ClCompile Include="lod\qtree_node.cpp" />
     <ClCompile Include="lod\terrain_configure.cpp" />
@@ -282,52 +242,13 @@ xcopy "$(ProjectDir)resources\freshpaint.png" "$(OutDir)" /Y</Command>
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cyroneno\box.h" />
-    <ClInclude Include="cyroneno\color.h" />
     <ClInclude Include="cyroneno\cyroneno_window.h" />
-    <ClInclude Include="cyroneno\equations.h" />
-    <ClInclude Include="cyroneno\image.h" />
-    <ClInclude Include="cyroneno\matrix.h" />
-    <ClInclude Include="cyroneno\pipeline\pipeline.h" />
-    <ClInclude Include="cyroneno\point.h" />
-    <ClInclude Include="cyroneno\rasterizer\bezier_cubic_rz.h" />
-    <ClInclude Include="cyroneno\rasterizer\bezier_quad_rz.h" />
-    <ClInclude Include="cyroneno\rasterizer\circle_rz.h" />
-    <ClInclude Include="cyroneno\rasterizer\common.h" />
-    <ClInclude Include="cyroneno\rasterizer\line_rz.h" />
-    <ClInclude Include="cyroneno\rasterizer\point_rz.h" />
-    <ClInclude Include="cyroneno\rasterizer\rasterizer.h" />
-    <ClInclude Include="cyroneno\rasterizer\triangle_rz.h" />
-    <ClInclude Include="cyroneno\ray_tracer\ray_tracer.h" />
-    <ClInclude Include="cyroneno\ray_tracer\ray_tracer_structs.h" />
-    <ClInclude Include="cyroneno\ray_tracer\scene.h" />
-    <ClInclude Include="cyroneno\ray_tracer\surface.h" />
-    <ClInclude Include="cyroneno\text\opentype\opentype_common.h" />
-    <ClInclude Include="cyroneno\text\opentype\opentype_font.h" />
-    <ClInclude Include="cyroneno\text\opentype\opentype_rasterizer.h" />
-    <ClInclude Include="cyroneno\text\opentype\opentype_tables.h" />
-    <ClInclude Include="cyroneno\text\opentype\tables\cmap.h" />
-    <ClInclude Include="cyroneno\text\opentype\tables\cvt.h" />
-    <ClInclude Include="cyroneno\text\opentype\tables\glyf.h" />
-    <ClInclude Include="cyroneno\text\opentype\tables\head.h" />
-    <ClInclude Include="cyroneno\text\opentype\tables\loca.h" />
-    <ClInclude Include="cyroneno\text\opentype\tables\maxp.h" />
-    <ClInclude Include="cyroneno\text\opentype\tt_instructions\graphics_state.h" />
-    <ClInclude Include="cyroneno\text\opentype\tt_instructions\opcode_map.h" />
-    <ClInclude Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.h" />
-    <ClInclude Include="cyroneno\vector.h" />
     <ClInclude Include="direct3d\assist_configure.h" />
     <ClInclude Include="direct3d\camera.h" />
     <ClInclude Include="direct3d\graph_creator.h" />
     <ClInclude Include="direct3d\model_configure.h" />
-    <ClInclude Include="disassembler\code_data_provider.h" />
-    <ClInclude Include="disassembler\debugger.h" />
     <ClInclude Include="disassembler\disassembler_window.h" />
-    <ClInclude Include="disassembler\intel_instructions.h" />
-    <ClInclude Include="disassembler\intel_instruction_params.h" />
     <ClInclude Include="disassembler\opcode_list_adapter.h" />
-    <ClInclude Include="disassembler\opcode_map.h" />
-    <ClInclude Include="disassembler\pe_file.h" />
     <ClInclude Include="lod\lod_window.h" />
     <ClInclude Include="lod\qtree_node.h" />
     <ClInclude Include="lod\terrain_configure.h" />

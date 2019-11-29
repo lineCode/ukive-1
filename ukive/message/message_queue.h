@@ -4,11 +4,14 @@
 #include <mutex>
 
 
+namespace utl {
+    class Executable;
+}
+
 namespace ukive {
 
     class Cycler;
     class Message;
-    class Executable;
 
     class MessageQueue {
     public:
@@ -22,9 +25,9 @@ namespace ukive {
         Message* dequeue();
         void remove(Cycler* c, void* data);
         void remove(Cycler* c, int what, void* data);
-        void remove(Cycler* c, Executable* exec, void* data);
+        void remove(Cycler* c, utl::Executable* exec, void* data);
         bool contains(Cycler* c, int what, void* data);
-        bool contains(Cycler* c, Executable* exec, void* data);
+        bool contains(Cycler* c, utl::Executable* exec, void* data);
 
         void addBarrier();
         void removeBarrier();

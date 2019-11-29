@@ -1,6 +1,6 @@
 #include "ukive/graphics/bitmap.h"
 
-#include "ukive/utils/stl_utils.h"
+#include "utils/stl_utils.h"
 
 
 namespace ukive {
@@ -9,11 +9,11 @@ namespace ukive {
         : native_bitmap_(source) {}
 
     int Bitmap::getWidth() const {
-        return STLCInt(native_bitmap_->GetPixelSize().width);
+        return utl::STLCInt(native_bitmap_->GetPixelSize().width);
     }
 
     int Bitmap::getHeight() const {
-        return STLCInt(native_bitmap_->GetPixelSize().height);
+        return utl::STLCInt(native_bitmap_->GetPixelSize().height);
     }
 
     ComPtr<ID2D1Bitmap> Bitmap::getNative() const {

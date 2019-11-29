@@ -4,14 +4,15 @@
 #include <ShellScalingAPI.h>
 #include <VersionHelpers.h>
 
+#include "utils/files/file.h"
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/log.h"
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
 #include "ukive/text/word_breaker.h"
-#include "ukive/utils/stl_utils.h"
-#include "ukive/utils/dynamic_windows_api.h"
-#include "ukive/files/file.h"
+#include "ukive/system/dynamic_windows_api.h"
 #include "ukive/resources/layout_instantiator.h"
 
 #pragma comment(lib, "comctl32.lib")
@@ -180,11 +181,11 @@ namespace ukive {
 
     string16 Application::getCommand(int index) {
         return instance_->command_list_.at(
-            STLCST(instance_->command_list_, index));
+            utl::STLCST(instance_->command_list_, index));
     }
 
     int Application::getCommandCount() {
-        return STLCInt(instance_->command_list_.size());
+        return utl::STLCInt(instance_->command_list_.size());
     }
 
     void Application::setVSync(bool enable){
@@ -197,38 +198,6 @@ namespace ukive {
 
     HMODULE Application::getModuleHandle() {
         return ::GetModuleHandle(nullptr);
-    }
-
-    string16 Application::getExecFileName(bool dir) {
-        WCHAR buffer[MAX_PATH];
-        DWORD result = ::GetModuleFileNameW(nullptr, buffer, MAX_PATH);
-        if (result == 0) {
-            return {};
-        }
-
-        DWORD size = MAX_PATH;
-        std::unique_ptr<WCHAR[]> heap_buff;
-        while (::GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-            size *= 2;
-            heap_buff.reset(new WCHAR[size]);
-            result = ::GetModuleFileNameW(nullptr, heap_buff.get(), size);
-            if (result == 0) {
-                return {};
-            }
-        }
-
-        string16 file_name;
-        if (heap_buff) {
-            file_name = heap_buff.get();
-        } else {
-            file_name = buffer;
-        }
-
-        if (dir) {
-            file_name = File(file_name).getParentPath();
-        }
-
-        return file_name;
     }
 
     WICManager* Application::getWICManager() {

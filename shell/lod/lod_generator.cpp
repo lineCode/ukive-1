@@ -3,9 +3,11 @@
 #include <cmath>
 #include <fstream>
 
+#include "utils/log.h"
+#include "utils/string_utils.h"
+#include "utils/files/file_utils.h"
+
 #include "ukive/application.h"
-#include "ukive/log.h"
-#include "ukive/utils/string_utils.h"
 
 #include "shell/lod/qtree_node.h"
 #include "shell/lod/terrain_configure.h"
@@ -26,17 +28,17 @@ namespace shell {
         flags_ = new char[vertex_count_];
         std::memset(flags_, 0, vertex_count_);
 
-        ukive::string16 altitudeFileName = ukive::Application::getExecFileName(true);
+        string16 altitudeFileName = utl::getExecFileName(true);
         altitudeFileName.append(L"\\altitude.raw");
 
         std::ifstream reader(altitudeFileName, std::ios::binary);
         if (reader.fail()) {
-           LOG(ukive::Log::FATAL) << "LodGenerator-Constructor(): read file failed.";
+           LOG(Log::FATAL) << "LodGenerator-Constructor(): read file failed.";
            return;
         }
         auto cpos = reader.tellg();
         reader.seekg(0, std::ios_base::end);
-        size_t charSize = (size_t)reader.tellg();
+        size_t charSize = reader.tellg();
         reader.seekg(cpos);
 
         altitude_ = new char[charSize];
@@ -47,8 +49,8 @@ namespace shell {
             int row = i / row_vertex_count_;
             int column = i % row_vertex_count_;
 
-            int altitudeRow = (int)((ALTITUDE_MAP_SIZE / (float)row_vertex_count_)*row);
-            int altitudeColumn = (int)((ALTITUDE_MAP_SIZE / (float)row_vertex_count_)*column);
+            int altitudeRow = (ALTITUDE_MAP_SIZE / float(row_vertex_count_))*row;
+            int altitudeColumn = (ALTITUDE_MAP_SIZE / float(row_vertex_count_))*column;
 
             int altitude = altitude_[
                 (ALTITUDE_MAP_SIZE - 1 - altitudeRow) * ALTITUDE_MAP_SIZE + altitudeColumn];

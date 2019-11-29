@@ -1,7 +1,8 @@
 #ifndef UKIVE_RESOURCES_DIMENSION_UTILS_H_
 #define UKIVE_RESOURCES_DIMENSION_UTILS_H_
 
-#include "ukive/utils/string_utils.h"
+#include "utils/string_utils.h"
+
 #include "ukive/window/window.h"
 
 

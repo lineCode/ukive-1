@@ -5,17 +5,18 @@
 #include <dwmapi.h>
 #include <VersionHelpers.h>
 
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/application.h"
-#include "ukive/log.h"
 #include "ukive/window/window.h"
 #include "ukive/window/window_class_manager.h"
 #include "ukive/window/frame/non_client_frame.h"
 #include "ukive/window/frame/default_non_client_frame.h"
 #include "ukive/window/frame/drawable_non_client_frame.h"
 #include "ukive/event/input_event.h"
-#include "ukive/utils/stl_utils.h"
-#include "ukive/utils/win10_version.h"
-#include "ukive/utils/dynamic_windows_api.h"
+#include "ukive/system/win10_version.h"
+#include "ukive/system/dynamic_windows_api.h"
 #include "ukive/system/time_utils.h"
 
 #define MI_WP_SIGNATURE  0xFF515700
@@ -325,7 +326,7 @@ namespace ukive {
 
         static bool is_win10_1607_or_above = win::isWin10Ver1607OrGreater();
         if (is_win10_1607_or_above) {
-            int dpi = STLCInt(win::UDGetDpiForWindow(hWnd_));
+            int dpi = utl::STLCInt(win::UDGetDpiForWindow(hWnd_));
             if (dpi > 0) {
                 *dpi_x = dpi;
                 *dpi_y = dpi;
@@ -602,7 +603,7 @@ namespace ukive {
                 DCHECK(prev_ti_.find(input.dwID) == prev_ti_.end());
                 has_down_up = true;
                 ev.setEvent(InputEvent::EVT_DOWN);
-                ev.setCurTouchId(STLCInt(input.dwID));
+                ev.setCurTouchId(utl::STLCInt(input.dwID));
                 prev_ti_[input.dwID] = input;
             } else if (input.dwFlags & TOUCHEVENTF_UP) {
                 //DLOG(Log::INFO) << "TOUCH UP";
@@ -612,7 +613,7 @@ namespace ukive {
                 DCHECK(it != prev_ti_.end());
                 has_down_up = true;
                 ev.setEvent(InputEvent::EVT_UP);
-                ev.setCurTouchId(STLCInt(input.dwID));
+                ev.setCurTouchId(utl::STLCInt(input.dwID));
                 prev_ti_.erase(it);
             } else if (input.dwFlags & TOUCHEVENTF_MOVE) {
                 if (!has_down_up && !has_move) {
@@ -621,7 +622,7 @@ namespace ukive {
                     if (input.x != it->second.x || input.y != it->second.y) {
                         has_move = true;
                         ev.setEvent(InputEvent::EVT_MOVE);
-                        ev.setCurTouchId(STLCInt(input.dwID));
+                        ev.setCurTouchId(utl::STLCInt(input.dwID));
                     }
                 }
                 prev_ti_[input.dwID] = input;
@@ -1314,7 +1315,7 @@ namespace ukive {
             ti_cache_.cache.get(),
             sizeof(TOUCHINPUT)))
         {
-            *handled = onTouch(ti_cache_.cache.get(), STLCInt(input_count));
+            *handled = onTouch(ti_cache_.cache.get(), utl::STLCInt(input_count));
             ::CloseTouchInputHandle(reinterpret_cast<HTOUCHINPUT>(lParam));
 
             if (*handled) {

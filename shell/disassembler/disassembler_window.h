@@ -1,11 +1,11 @@
-#ifndef DISASSEMBLER_DECOMPILER_WINDOW_H_
-#define DISASSEMBLER_DECOMPILER_WINDOW_H_
+#ifndef SHELL_DISASSEMBLER_DECOMPILER_WINDOW_H_
+#define SHELL_DISASSEMBLER_DECOMPILER_WINDOW_H_
 
 #include "ukive/window/window.h"
 #include "ukive/views/click_listener.h"
 
-#include "pe_file.h"
-#include "debugger.h"
+#include "dexar/pe_file.h"
+#include "dexar/debugger.h"
 
 
 namespace ukive {
@@ -48,4 +48,4 @@ namespace shell {
 
 }
 
-#endif  // DISASSEMBLER_DECOMPILER_WINDOW_H_
+#endif  // SHELL_DISASSEMBLER_DECOMPILER_WINDOW_H_

@@ -2,14 +2,15 @@
 
 #include <sstream>
 
-#include "ukive/log.h"
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/image_view.h"
 #include "ukive/views/text_view.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
-#include "ukive/utils/stl_utils.h"
 
 
 namespace shell {
@@ -76,10 +77,10 @@ namespace shell {
     }
 
     int TestAdapter::getItemCount() {
-        return ukive::STLCInt(data_list_.size());
+        return utl::STLCInt(data_list_.size());
     }
 
-    void TestAdapter::AddItem(int image_res_id, ukive::string16 title, ukive::string16 summary) {
+    void TestAdapter::AddItem(int image_res_id, const string16& title, const string16& summary) {
         BindData* data = new BindData();
         data->image_resource_id = image_res_id;
         data->title = title;
@@ -89,7 +90,7 @@ namespace shell {
         notifyDataChanged();
     }
 
-    void TestAdapter::AddItem(int pos, int image_res_id, ukive::string16 title, ukive::string16 summary) {
+    void TestAdapter::AddItem(int pos, int image_res_id, const string16& title, const string16& summary) {
         BindData* data = new BindData();
         data->image_resource_id = image_res_id;
         data->title = title;
@@ -111,7 +112,7 @@ namespace shell {
         notifyDataChanged();
     }
 
-    void TestAdapter::ModifyItem(int image_res_id, ukive::string16 title, ukive::string16 summary) {
+    void TestAdapter::ModifyItem(int image_res_id, const string16& title, const string16& summary) {
         for (auto it = data_list_.begin();
             it != data_list_.end(); ++it) {
             if ((*it)->title == title) {
@@ -123,7 +124,7 @@ namespace shell {
         notifyDataChanged();
     }
 
-    void TestAdapter::RemoveItem(ukive::string16 title) {
+    void TestAdapter::RemoveItem(const string16& title) {
         for (auto it = data_list_.begin();
             it != data_list_.end();) {
             if ((*it)->title == title) {

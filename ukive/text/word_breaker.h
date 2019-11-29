@@ -9,8 +9,9 @@
 #include <memory>
 #include <vector>
 
-#include "ukive/utils/com_ptr.h"
-#include "ukive/utils/string_utils.h"
+#include "utils/string_utils.h"
+
+#include "ukive/system/com_ptr.hpp"
 
 
 namespace ukive {

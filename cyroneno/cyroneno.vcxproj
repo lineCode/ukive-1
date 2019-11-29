@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="box.cpp" />
+    <ClCompile Include="color.cpp" />
+    <ClCompile Include="equations.cpp" />
+    <ClCompile Include="image.cpp" />
+    <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="pipeline\pipeline.cpp" />
+    <ClCompile Include="rasterizer\bezier_cubic_rz.cpp" />
+    <ClCompile Include="rasterizer\bezier_quad_rz.cpp" />
+    <ClCompile Include="rasterizer\circle_rz.cpp" />
+    <ClCompile Include="rasterizer\common.cpp" />
+    <ClCompile Include="rasterizer\line_rz.cpp" />
+    <ClCompile Include="rasterizer\point_rz.cpp" />
+    <ClCompile Include="rasterizer\rasterizer.cpp" />
+    <ClCompile Include="rasterizer\triangle_rz.cpp" />
+    <ClCompile Include="ray_tracer\ray_tracer.cpp" />
+    <ClCompile Include="ray_tracer\scene.cpp" />
+    <ClCompile Include="ray_tracer\surface.cpp" />
+    <ClCompile Include="text\opentype\opentype_font.cpp" />
+    <ClCompile Include="text\opentype\opentype_rasterizer.cpp" />
+    <ClCompile Include="text\opentype\opentype_tables.cpp" />
+    <ClCompile Include="text\opentype\tables\cmap.cpp" />
+    <ClCompile Include="text\opentype\tables\cvt.cpp" />
+    <ClCompile Include="text\opentype\tables\glyf.cpp" />
+    <ClCompile Include="text\opentype\tables\head.cpp" />
+    <ClCompile Include="text\opentype\tables\loca.cpp" />
+    <ClCompile Include="text\opentype\tables\maxp.cpp" />
+    <ClCompile Include="text\opentype\tt_instructions\tti_interpreter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="box.h" />
+    <ClInclude Include="color.h" />
+    <ClInclude Include="equations.h" />
+    <ClInclude Include="image.h" />
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="pipeline\pipeline.h" />
+    <ClInclude Include="point.hpp" />
+    <ClInclude Include="rasterizer\bezier_cubic_rz.h" />
+    <ClInclude Include="rasterizer\bezier_quad_rz.h" />
+    <ClInclude Include="rasterizer\circle_rz.h" />
+    <ClInclude Include="rasterizer\common.h" />
+    <ClInclude Include="rasterizer\line_rz.h" />
+    <ClInclude Include="rasterizer\point_rz.h" />
+    <ClInclude Include="rasterizer\rasterizer.h" />
+    <ClInclude Include="rasterizer\triangle_rz.h" />
+    <ClInclude Include="ray_tracer\ray_tracer.h" />
+    <ClInclude Include="ray_tracer\ray_tracer_structs.h" />
+    <ClInclude Include="ray_tracer\scene.h" />
+    <ClInclude Include="ray_tracer\surface.h" />
+    <ClInclude Include="text\opentype\opentype_common.h" />
+    <ClInclude Include="text\opentype\opentype_font.h" />
+    <ClInclude Include="text\opentype\opentype_rasterizer.h" />
+    <ClInclude Include="text\opentype\opentype_tables.h" />
+    <ClInclude Include="text\opentype\tables\cmap.h" />
+    <ClInclude Include="text\opentype\tables\cvt.h" />
+    <ClInclude Include="text\opentype\tables\glyf.h" />
+    <ClInclude Include="text\opentype\tables\head.h" />
+    <ClInclude Include="text\opentype\tables\loca.h" />
+    <ClInclude Include="text\opentype\tables\maxp.h" />
+    <ClInclude Include="text\opentype\tt_instructions\graphics_state.h" />
+    <ClInclude Include="text\opentype\tt_instructions\opcode_map.h" />
+    <ClInclude Include="text\opentype\tt_instructions\tti_interpreter.h" />
+    <ClInclude Include="vector.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{6B6483B9-F97E-4053-89E8-8DBB6D686A46}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>cyroneno</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)build\x86\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\x86\$(Configuration)\obj\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)build\x64\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\x64\$(Configuration)\obj\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\x86\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\x86\$(Configuration)\obj\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\x64\$(Configuration)\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\x64\$(Configuration)\obj\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

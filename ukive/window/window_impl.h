@@ -10,9 +10,10 @@
 #include <memory>
 #include <vector>
 
+#include "utils/string_utils.h"
+
 #include "ukive/graphics/cursor.h"
 #include "ukive/graphics/point.h"
-#include "ukive/utils/string_utils.h"
 
 #define WM_NCDRAWCLASSIC1  0xAE
 #define WM_NCDRAWCLASSIC2  0xAF

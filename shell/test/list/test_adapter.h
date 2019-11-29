@@ -3,9 +3,10 @@
 
 #include <vector>
 
+#include "utils/string_utils.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/views/list/list_adapter.h"
-#include "ukive/utils/string_utils.h"
-#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -39,23 +40,23 @@ namespace shell {
     {
     public:
         ~TestAdapter() {
-            ukive::STLDeleteElements(&data_list_);
+            utl::STLDeleteElements(&data_list_);
         }
 
         struct BindData {
             int image_resource_id;
-            ukive::string16 title;
-            ukive::string16 summary;
+            string16 title;
+            string16 summary;
         };
 
         ViewHolder* onCreateViewHolder(ukive::ViewGroup* parent, int position) override;
         void onBindViewHolder(ViewHolder* holder, int position) override;
         int getItemCount() override;
 
-        void AddItem(int image_res_id, ukive::string16 title, ukive::string16 summary);
-        void AddItem(int pos, int image_res_id, ukive::string16 title, ukive::string16 summary);
-        void ModifyItem(int image_res_id, ukive::string16 title, ukive::string16 summary);
-        void RemoveItem(ukive::string16 title);
+        void AddItem(int image_res_id, const string16& title, const string16& summary);
+        void AddItem(int pos, int image_res_id, const string16& title, const string16& summary);
+        void ModifyItem(int image_res_id, const string16& title, const string16& summary);
+        void RemoveItem(const string16& title);
         void RemoveItem(int pos);
 
     private:

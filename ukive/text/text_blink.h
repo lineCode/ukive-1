@@ -1,10 +1,10 @@
 ﻿#ifndef UKIVE_TEXT_TEXT_BLINK_H_
 #define UKIVE_TEXT_TEXT_BLINK_H_
 
-#include "ukive/utils/executable.h"
+#include "utils/executable.h"
+
 #include "ukive/graphics/rect.h"
 #include "ukive/graphics/color.h"
-#include "ukive/graphics/graphic_device_manager.h"
 
 
 namespace ukive {
@@ -13,9 +13,9 @@ namespace ukive {
     class Canvas;
     class Cycler;
 
-    class TextBlink : public Executable {
+    class TextBlink : public utl::Executable {
     public:
-        TextBlink(View* v);
+        explicit TextBlink(View* v);
         ~TextBlink();
 
         void draw(Canvas* canvas);

@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="pipeline">
+      <UniqueIdentifier>{2e72391f-1576-4f81-b70c-541fa152dfce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rasterizer">
+      <UniqueIdentifier>{71c1dc78-eb18-42f1-950c-28aa8efee9c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ray_tracer">
+      <UniqueIdentifier>{b4ec3fba-5ac6-42bb-8ce1-45a8e6b0dde0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text">
+      <UniqueIdentifier>{9f75d3d7-0347-431f-8c30-6e1b6be3a17f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text\opentype">
+      <UniqueIdentifier>{c0938085-64a8-4e4a-8e5c-8c27d0513ee7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text\opentype\tables">
+      <UniqueIdentifier>{95a60352-97bc-4572-9412-d2f96f52a1bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="text\opentype\tt_instructions">
+      <UniqueIdentifier>{b3fbe4a1-ecc7-4573-97cb-a118a457e99b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="box.cpp" />
+    <ClCompile Include="color.cpp" />
+    <ClCompile Include="equations.cpp" />
+    <ClCompile Include="image.cpp" />
+    <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="pipeline\pipeline.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\bezier_cubic_rz.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\bezier_quad_rz.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\circle_rz.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\common.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\line_rz.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\point_rz.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\rasterizer.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="rasterizer\triangle_rz.cpp">
+      <Filter>rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="ray_tracer\ray_tracer.cpp">
+      <Filter>ray_tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="ray_tracer\scene.cpp">
+      <Filter>ray_tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="ray_tracer\surface.cpp">
+      <Filter>ray_tracer</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\opentype_font.cpp">
+      <Filter>text\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\opentype_rasterizer.cpp">
+      <Filter>text\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\opentype_tables.cpp">
+      <Filter>text\opentype</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tables\cmap.cpp">
+      <Filter>text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tables\cvt.cpp">
+      <Filter>text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tables\glyf.cpp">
+      <Filter>text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tables\head.cpp">
+      <Filter>text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tables\loca.cpp">
+      <Filter>text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tables\maxp.cpp">
+      <Filter>text\opentype\tables</Filter>
+    </ClCompile>
+    <ClCompile Include="text\opentype\tt_instructions\tti_interpreter.cpp">
+      <Filter>text\opentype\tt_instructions</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="box.h" />
+    <ClInclude Include="color.h" />
+    <ClInclude Include="equations.h" />
+    <ClInclude Include="image.h" />
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="point.hpp" />
+    <ClInclude Include="vector.hpp" />
+    <ClInclude Include="pipeline\pipeline.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\bezier_cubic_rz.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\bezier_quad_rz.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\circle_rz.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\common.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\line_rz.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\point_rz.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\rasterizer.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="rasterizer\triangle_rz.h">
+      <Filter>rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="ray_tracer\ray_tracer.h">
+      <Filter>ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="ray_tracer\ray_tracer_structs.h">
+      <Filter>ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="ray_tracer\scene.h">
+      <Filter>ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="ray_tracer\surface.h">
+      <Filter>ray_tracer</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\opentype_common.h">
+      <Filter>text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\opentype_font.h">
+      <Filter>text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\opentype_rasterizer.h">
+      <Filter>text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\opentype_tables.h">
+      <Filter>text\opentype</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tables\cmap.h">
+      <Filter>text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tables\cvt.h">
+      <Filter>text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tables\glyf.h">
+      <Filter>text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tables\head.h">
+      <Filter>text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tables\loca.h">
+      <Filter>text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tables\maxp.h">
+      <Filter>text\opentype\tables</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tt_instructions\graphics_state.h">
+      <Filter>text\opentype\tt_instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tt_instructions\opcode_map.h">
+      <Filter>text\opentype\tt_instructions</Filter>
+    </ClInclude>
+    <ClInclude Include="text\opentype\tt_instructions\tti_interpreter.h">
+      <Filter>text\opentype\tt_instructions</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

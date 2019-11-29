@@ -2,8 +2,8 @@
 
 #include <fstream>
 
-#include "ukive/log.h"
-#include "ukive/files/file.h"
+#include "utils/log.h"
+#include "utils/files/file.h"
 
 
 namespace oigka {
@@ -29,21 +29,21 @@ namespace oigka {
             return false;
         }
 
-        ukive::File out_file(path);
+        utl::File out_file(path);
         if (!out_file.mkDirs(true)) {
             LOG(Log::ERR) << "Failed to make dir: " << out_file.getParentPath();
             return false;
         }
-        auto name_macro = ukive::toUpperCase(out_file.getName());
+        auto name_macro = utl::toUpperCase(out_file.getName());
         if (name_macro.empty()) {
             LOG(Log::ERR) << "Invalid out file name: " << out_file.getPath();
             return false;
         }
 
-        name_macro = ukive::replaceAll(name_macro, L".", L"_").append(L"_");
+        name_macro = utl::replaceAll(name_macro, L".", L"_").append(L"_");
 
         string8 out_str;
-        generateOutput(ukive::UTF16ToUTF8(name_macro), view_id_map, layout_id_map, &out_str);
+        generateOutput(utl::UTF16ToUTF8(name_macro), view_id_map, layout_id_map, &out_str);
 
         writer.write(out_str.data(), out_str.length());
 
@@ -87,7 +87,7 @@ namespace oigka {
 
         for (const auto& pair : layout_id_map) {
             out->append(getIndent(2)).append("const int ");
-            out->append(ukive::replaceAll(pair.first, ".", "_"));
+            out->append(utl::replaceAll(pair.first, ".", "_"));
             out->append(" = ");
             out->append(std::to_string(pair.second));
             out->append(";");

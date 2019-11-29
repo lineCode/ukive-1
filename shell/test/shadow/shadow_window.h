@@ -4,7 +4,7 @@
 #include "ukive/window/window.h"
 #include "ukive/animation/animator.h"
 #include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/utils/com_ptr.h"
+#include "ukive/system/com_ptr.hpp"
 
 
 namespace ukive {

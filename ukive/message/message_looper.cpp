@@ -1,6 +1,7 @@
 ﻿#include "message_looper.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/message/cycler.h"
 #include "ukive/message/message.h"
 #include "ukive/message/message_queue.h"

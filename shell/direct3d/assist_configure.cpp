@@ -1,7 +1,9 @@
 ﻿#include "assist_configure.h"
 
+#include "utils/string_utils.h"
+#include "utils/files/file_utils.h"
+
 #include "ukive/graphics/direct3d/space.h"
-#include "ukive/utils/string_utils.h"
 #include "ukive/application.h"
 
 
@@ -41,7 +43,7 @@ namespace shell {
         layout[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[2].InstanceDataStepRate = 0;
 
-        ukive::string16 shader_path = ukive::Application::getExecFileName(true);
+        string16 shader_path = utl::getExecFileName(true);
 
         ukive::Space::createVertexShader(
             shader_path + L"\\shaders\\assist_vertex_shader.cso",

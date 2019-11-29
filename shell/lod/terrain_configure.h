@@ -2,7 +2,7 @@
 #define SHELL_LOD_TERRAIN_CONFIGURE_H_
 
 #include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/utils/com_ptr.h"
+#include "ukive/system/com_ptr.hpp"
 
 #include "shell/third_party/directx_math/Inc/DirectXMath.h"
 

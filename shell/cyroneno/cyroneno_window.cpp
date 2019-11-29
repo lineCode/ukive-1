@@ -3,22 +3,24 @@
 #include <algorithm>
 #include <random>
 
+#include "utils/log.h"
+
 #include "ukive/application.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap_factory.h"
 #include "ukive/graphics/point.h"
-#include "ukive/log.h"
 #include "ukive/views/title_bar/title_bar.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/views/image_view.h"
 #include "ukive/graphics/color.h"
 #include "ukive/drawable/color_drawable.h"
 
-#include "shell/cyroneno/ray_tracer/ray_tracer.h"
-#include "shell/cyroneno/rasterizer/rasterizer.h"
-#include "shell/cyroneno/pipeline/pipeline.h"
-#include "shell/cyroneno/text/opentype/opentype_font.h"
-#include "shell/cyroneno/text/opentype/opentype_rasterizer.h"
+#include "cyroneno/ray_tracer/ray_tracer.h"
+#include "cyroneno/rasterizer/rasterizer.h"
+#include "cyroneno/pipeline/pipeline.h"
+#include "cyroneno/text/opentype/opentype_font.h"
+#include "cyroneno/text/opentype/opentype_rasterizer.h"
+
 #include "shell/resources/oigka_resources_id.h"
 
 
@@ -43,6 +45,9 @@ namespace shell {
     void CyronenoWindow::onCreate() {
         Window::onCreate();
 
+        cyro::Point2T<int> p1(1, 1);
+        cyro::Point2T<double> p12 = p1;
+
         showTitleBar();
         setBackgroundColor(ukive::Color::Transparent);
         setContentView(Res::Layout::cyroneno_layout_xml);
@@ -56,8 +61,9 @@ namespace shell {
         switch (examples) {
         case Examples::RAY_TRACER:
         {
+            cyro::ImagePng image(IMAGE_WIDTH, IMAGE_HEIGHT);
             cyro::RayTracer ray_tracer;
-            auto image = ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT);
+            ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT, &image);
             auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_);
 
             // Save to file
@@ -210,8 +216,8 @@ namespace shell {
             double rad = (3.14159265359 / 180) * i;
             double x = 400 * std::sin(rad);
             double y = 400 * std::cos(rad);
-            double x2 = std::round((p1.x_ + p3.x_) / 2 + x);
-            double y2 = std::round((p1.y_ + p3.y_) / 2 + y);
+            double x2 = std::round((p1.x + p3.x) / 2 + x);
+            double y2 = std::round((p1.y + p3.y) / 2 + y);
 
             //rz.drawBezier(p1, { x2, y2 }, p3, cyro::Color(0, 0, 0, 0.5f));
         }

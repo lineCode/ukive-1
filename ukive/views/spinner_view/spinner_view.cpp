@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "utils/weak_bind.hpp"
+
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/layout/linear_layout_params.h"
@@ -11,7 +13,6 @@
 #include "ukive/drawable/shape_drawable.h"
 #include "ukive/event/input_event.h"
 #include "ukive/window/window.h"
-#include "ukive/utils/weak_bind.h"
 #include "ukive/views/list/list_view.h"
 #include "ukive/views/list/linear_list_layouter.h"
 #include "ukive/views/spinner_view/spinner_list_adapter.h"

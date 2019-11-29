@@ -1,10 +1,11 @@
 ﻿#include "cycler.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+#include "utils/executable.h"
+
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
 #include "ukive/system/time_utils.h"
-#include "ukive/utils/executable.h"
 
 
 namespace ukive {
@@ -29,15 +30,15 @@ namespace ukive {
         listener_ = l;
     }
 
-    void Cycler::post(Executable* exec) {
+    void Cycler::post(utl::Executable* exec) {
         postDelayed(exec, 0);
     }
 
-    void Cycler::postDelayed(Executable* exec, uint64_t delay) {
+    void Cycler::postDelayed(utl::Executable* exec, uint64_t delay) {
         postAtTime(exec, delay + now());
     }
 
-    void Cycler::postAtTime(Executable* exec, uint64_t at_time) {
+    void Cycler::postAtTime(utl::Executable* exec, uint64_t at_time) {
         Message* msg = Message::obtain();
         msg->callback = exec;
 
@@ -60,11 +61,11 @@ namespace ukive {
         sendMessageAtTime(msg, at_time);
     }
 
-    bool Cycler::hasCallbacks(Executable* exec) {
+    bool Cycler::hasCallbacks(utl::Executable* exec) {
         return looper_->getQueue()->contains(this, exec, nullptr);
     }
 
-    void Cycler::removeCallbacks(Executable* exec) {
+    void Cycler::removeCallbacks(utl::Executable* exec) {
         looper_->getQueue()->remove(this, exec, nullptr);
     }
 

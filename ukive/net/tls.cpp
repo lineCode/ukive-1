@@ -3,9 +3,10 @@
 #include <chrono>
 #include <random>
 
-#include "ukive/utils/stl_utils.h"
+#include "utils/stl_utils.h"
+#include "utils/big_integer/big_integer.h"
+
 #include "ukive/net/socket.h"
-#include "ukive/utils/big_integer/big_integer.h"
 #include "ukive/security/crypto/ecdp.h"
 
 
@@ -287,7 +288,7 @@ namespace tls {
         KeyShareClientHello key_share;
 
         {
-            auto k = BigInteger::fromRandom(32 * 8);
+            auto k = utl::BigInteger::fromRandom(32 * 8);
             k.setBit(255, 0);
             k.setBit(254, 1);
             k.setBit(2, 0);
@@ -296,9 +297,9 @@ namespace tls {
 
             uint32_t A;
             uint8_t cofactor, Up;
-            BigInteger p, order, Vp, result;
+            utl::BigInteger p, order, Vp, result;
             crypto::ECDP::curve25519(&p, &A, &order, &cofactor, &Up, &Vp);
-            crypto::ECDP::X25519(p, k, BigInteger::fromU32(Up), &result);
+            crypto::ECDP::X25519(p, k, utl::BigInteger::fromU32(Up), &result);
 
             auto r = result.getBytesLE();
             if (r.size() < 32) {
@@ -312,10 +313,10 @@ namespace tls {
         }
 
         uint8_t h;
-        BigInteger a, b, S, p, Gx, Gy, n;
+        utl::BigInteger a, b, S, p, Gx, Gy, n;
         {
             crypto::ECDP::secp384r1(&p, &a, &b, &S, &Gx, &Gy, &n, &h);
-            auto d = BigInteger::fromRandom(BigInteger::ONE, n - 1);
+            auto d = utl::BigInteger::fromRandom(utl::BigInteger::ONE, n - 1);
             crypto::ECDP::mulPoint(p, a, d, &Gx, &Gy);
             crypto::ECDP::verifyPoint(p, a, b, Gx, Gy);
 
@@ -331,7 +332,7 @@ namespace tls {
 
         {
             crypto::ECDP::secp256r1(&p, &a, &b, &S, &Gx, &Gy, &n, &h);
-            auto d = BigInteger::fromRandom(BigInteger::ONE, n - 1);
+            auto d = utl::BigInteger::fromRandom(utl::BigInteger::ONE, n - 1);
             crypto::ECDP::mulPoint(p, a, d, &Gx, &Gy);
             crypto::ECDP::verifyPoint(p, a, b, Gx, Gy);
 

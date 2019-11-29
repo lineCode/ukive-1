@@ -4,9 +4,11 @@
 
 #include "oigka/layout_constants.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+#include "utils/xml/xml_parser.h"
+#include "utils/files/file_utils.h"
+
 #include "ukive/application.h"
-#include "ukive/utils/xml/xml_parser.h"
 #include "ukive/views/layout/view_group.h"
 
 #include "ukive/views/button.h"
@@ -87,8 +89,8 @@ namespace ukive {
 
         string8 str(buf.get(), charSize);
 
-        XMLParser parser;
-        std::shared_ptr<XMLParser::Element> root;
+        utl::XMLParser parser;
+        std::shared_ptr<utl::XMLParser::Element> root;
         if (!parser.parse(str, &root)) {
             DCHECK(false);
             return nullptr;
@@ -109,7 +111,7 @@ namespace ukive {
         if (!has_read_lim_) {
             has_read_lim_ = true;
 
-            auto file_path = Application::getExecFileName(true);
+            auto file_path = utl::getExecFileName(true);
             file_path.append(L"\\oigka\\");
             auto lm_file_path = file_path + oigka::kLayoutIdFileName;
 
@@ -152,18 +154,18 @@ namespace ukive {
                     continue;
                 }
 
-                auto pair = splitString(line, "=");
+                auto pair = utl::splitString(line, "=");
                 if (pair.size() != 2) {
                     continue;
                 }
 
                 uint32_t id;
-                if (!stringToNumber(pair[0], &id)) {
+                if (!utl::stringToNumber(pair[0], &id)) {
                     DCHECK(false);
                     return false;
                 }
 
-                layout_id_map_[id] = file_path + UTF8ToUTF16(pair[1]);
+                layout_id_map_[id] = file_path + utl::UTF8ToUTF16(pair[1]);
             }
         }
 
@@ -184,23 +186,23 @@ namespace ukive {
         }
 
         if (*parent && !(*parent)->isViewGroup()) {
-            LOG(Log::ERR) << "The parent of the View: " << UTF8ToUTF16(element->tag_name) << " is not a ViewGroup.";
+            LOG(Log::ERR) << "The parent of the View: " << utl::UTF8ToUTF16(element->tag_name) << " is not a ViewGroup.";
             return false;
         }
 
         View::Attributes view_attrs;
         View::Attributes layout_attrs;
         for (auto& attr : element->attrs) {
-            if (startWith(attr.first, "layout_")) {
-                layout_attrs[UTF8ToUTF16(attr.first)] = UTF8ToUTF16(attr.second);
+            if (utl::startWith(attr.first, "layout_")) {
+                layout_attrs[utl::UTF8ToUTF16(attr.first)] = utl::UTF8ToUTF16(attr.second);
             } else {
-                view_attrs[UTF8ToUTF16(attr.first)] = UTF8ToUTF16(attr.second);
+                view_attrs[utl::UTF8ToUTF16(attr.first)] = utl::UTF8ToUTF16(attr.second);
             }
         }
 
-        auto it = handler_map_.find(UTF8ToUTF16(element->tag_name));
+        auto it = handler_map_.find(utl::UTF8ToUTF16(element->tag_name));
         if (it == handler_map_.end()) {
-            LOG(Log::ERR) << "Cannot find View: " << UTF8ToUTF16(element->tag_name);
+            LOG(Log::ERR) << "Cannot find View: " << utl::UTF8ToUTF16(element->tag_name);
             return false;
         }
 
@@ -215,7 +217,7 @@ namespace ukive {
         }
 
         for (const auto& content : element->contents) {
-            if (content.type != ukive::xml::Content::Type::Element) {
+            if (content.type != utl::xml::Content::Type::Element) {
                 continue;
             }
             if (!traverseTree(content.element, &cur_view)) {

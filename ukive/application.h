@@ -35,7 +35,6 @@ namespace ukive {
         static bool isVSyncEnabled();
 
         static HMODULE getModuleHandle();
-        static string16 getExecFileName(bool dir);
         static GraphicDeviceManager* getGraphicDeviceManager();
 
         static WICManager* getWICManager();

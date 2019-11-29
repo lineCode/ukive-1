@@ -4,9 +4,10 @@
 #include <Windowsx.h>
 #include <VersionHelpers.h>
 
+#include "utils/log.h"
+
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
-#include "ukive/log.h"
 
 
 namespace ukive {

@@ -1,0 +1,8 @@
+#ifndef UTILS_PLATFORM_UTILS_H_
+#define UTILS_PLATFORM_UTILS_H_
+
+// 指定是大端还是小端平台
+//#define UTILS_BIG_ENDIAN
+#define UTILS_LITTLE_ENDIAN
+
+#endif  // UTILS_PLATFORM_UTILS_H_

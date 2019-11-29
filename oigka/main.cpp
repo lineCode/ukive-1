@@ -1,17 +1,17 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "ukive/log.h"
-#include "ukive/files/file.h"
+#include "utils/log.h"
+#include "utils/files/file.h"
 
 #include "oigka/layout_processor.h"
 #include "oigka/resource_header_processor.h"
 
 
 int processXMLFiles(const string16& res_path, const string16& build_path) {
-    ukive::File layout_xml_file = ukive::File(res_path, L"layout");
-    ukive::File header_file = ukive::File(res_path, L"oigka_resources_id.h");
-    ukive::File build_res_file = ukive::File(build_path, L"oigka");
+    utl::File layout_xml_file(res_path, L"layout");
+    utl::File header_file(res_path, L"oigka_resources_id.h");
+    utl::File build_res_file(build_path, L"oigka");
 
     string16 layout_xml_path = layout_xml_file.getPath();
     string16 header_file_path = header_file.getPath();
@@ -47,13 +47,13 @@ int APIENTRY wWinMain(
 {
     int result = 0;
 
-    ukive::Log::Params log_params;
+    utl::Log::Params log_params;
     log_params.file_name = L"Oigka.log";
     log_params.short_file_name = true;
-    log_params.target = ukive::Log::OutputTarget::CONSOLE;
-    ukive::InitLogging(log_params);
+    log_params.target = utl::Log::OutputTarget::CONSOLE;
+    utl::InitLogging(log_params);
 
-    auto cmds = ukive::splitString(lpCmdLine, L" ", true);
+    auto cmds = utl::splitString(lpCmdLine, L" ", true);
     if (cmds.size() != 2) {
         LOG(Log::ERR) << "Invalid params: The number of params must equal 2!";
         result = 1;
@@ -84,6 +84,6 @@ int APIENTRY wWinMain(
         system("pause");
     }
 
-    ukive::UninitLogging();
+    utl::UninitLogging();
     return result;
 }

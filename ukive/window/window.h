@@ -4,8 +4,9 @@
 #include <memory>
 #include <vector>
 
+#include "utils/string_utils.h"
+
 #include "ukive/message/cycler.h"
-#include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
 #include "ukive/views/view.h"
 

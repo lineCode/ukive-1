@@ -1,12 +1,13 @@
 ﻿#include "terrain_scene.h"
 
+#include "utils/log.h"
+
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/graphics/direct3d/drawing_object_manager.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/direct3d_view.h"
 #include "ukive/window/window.h"
-#include "ukive/log.h"
 
 #include "shell/lod/lod_generator.h"
 #include "shell/lod/terrain_configure.h"

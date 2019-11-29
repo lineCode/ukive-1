@@ -3,6 +3,12 @@
 #include <functional>
 #include <fstream>
 
+#include "utils/weak_bind.hpp"
+#include "utils/xml/xml_parser.h"
+#include "utils/xml/xml_writer.h"
+#include "utils/files/file.h"
+#include "utils/files/file_utils.h"
+
 #include "ukive/application.h"
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
@@ -21,14 +27,10 @@
 #include "ukive/views/list/list_view.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/graphics/color.h"
-#include "ukive/utils/weak_bind.h"
 #include "ukive/views/list/grid_list_layouter.h"
 #include "ukive/views/list/flow_list_layouter.h"
 #include "ukive/views/list/linear_list_layouter.h"
 #include "ukive/views/spinner_view/spinner_view.h"
-#include "ukive/utils/xml/xml_parser.h"
-#include "ukive/utils/xml/xml_writer.h"
-#include "ukive/files/file.h"
 #include "ukive/animation/interpolator.h"
 #include "ukive/system/time_utils.h"
 #include "ukive/net/http_client.h"
@@ -179,8 +181,8 @@ namespace shell {
         textView->getEditable()->addSpan(span, ukive::Editable::Reason::API);
 
         image_view_ = findViewById<ukive::ImageView>(Res::Id::iv_test_img);
-        std::wstring imgFileName = ukive::Application::getExecFileName(true);
-        auto bitmap = ukive::BitmapFactory::decodeFile(this, ukive::File(imgFileName, L"freshpaint.png").getPath());
+        std::wstring imgFileName = utl::getExecFileName(true);
+        auto bitmap = ukive::BitmapFactory::decodeFile(this, utl::File(imgFileName, L"freshpaint.png").getPath());
         image_view_->setImageBitmap(bitmap);
 
         test_button_ = findViewById<ukive::Button>(Res::Id::bt_test_button);

@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "utils/weak_bind.hpp"
+
 #include "ukive/menu/menu_impl.h"
 #include "ukive/drawable/shape_drawable.h"
 #include "ukive/graphics/color.h"
@@ -9,7 +11,6 @@
 #include "ukive/animation/view_animator.h"
 #include "ukive/window/window.h"
 #include "ukive/message/cycler.h"
-#include "ukive/utils/weak_bind.h"
 
 
 namespace ukive {

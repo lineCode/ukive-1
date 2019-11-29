@@ -1,7 +1,8 @@
 #include "ukive/window/window_class_manager.h"
 
+#include "utils/log.h"
+
 #include "ukive/application.h"
-#include "ukive/log.h"
 #include "ukive/window/window_impl.h"
 
 

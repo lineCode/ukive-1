@@ -1,8 +1,9 @@
 #include "window_manager.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/window/window.h"
-#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -36,11 +37,11 @@ namespace ukive {
     }
 
     int WindowManager::getWindowCount() {
-        return STLCInt(window_list_.size());
+        return utl::STLCInt(window_list_.size());
     }
 
     Window* WindowManager::getWindow(int index) {
-        auto i = STLCST(window_list_, index);
+        auto i = utl::STLCST(window_list_, index);
         if (i >= window_list_.size()) {
             LOG(Log::ERR) << "Out of bounds.";
             return nullptr;

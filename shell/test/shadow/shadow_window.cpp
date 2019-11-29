@@ -1,6 +1,7 @@
 #include "shadow_window.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/application.h"
 #include "ukive/graphics/color.h"
 #include "ukive/graphics/canvas.h"

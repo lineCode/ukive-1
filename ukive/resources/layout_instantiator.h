@@ -4,9 +4,10 @@
 #include <functional>
 #include <map>
 
+#include "utils/string_utils.h"
+#include "utils/xml/xml_structs.h"
+
 #include "ukive/views/view.h"
-#include "ukive/utils/string_utils.h"
-#include "ukive/utils/xml/xml_structs.h"
 
 
 namespace ukive {
@@ -17,7 +18,7 @@ namespace ukive {
     class LayoutInstantiator {
     public:
         using Handler = std::function<View*(Window* w, const View::Attributes& attrs)>;
-        using ElementPtr = std::shared_ptr<ukive::xml::Element>;
+        using ElementPtr = std::shared_ptr<utl::xml::Element>;
 
         LayoutInstantiator();
 

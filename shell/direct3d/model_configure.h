@@ -1,7 +1,7 @@
 ﻿#ifndef SHELL_DIRECT3D_MODEL_CONFIGURE_H_
 #define SHELL_DIRECT3D_MODEL_CONFIGURE_H_
 
-#include "ukive/utils/com_ptr.h"
+#include "ukive/system/com_ptr.hpp"
 #include "ukive/graphics/graphic_device_manager.h"
 
 #include "shell/third_party/directx_math/Inc/DirectXMath.h"

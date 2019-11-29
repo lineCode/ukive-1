@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "ukive/utils/string_utils.h"
-#include "ukive/utils/xml/xml_structs.h"
+#include "utils/string_utils.h"
+#include "utils/xml/xml_structs.h"
 
 
 namespace oigka {
@@ -12,7 +12,7 @@ namespace oigka {
     class LayoutProcessor {
     public:
         using IdMap = std::map<string8, int>;
-        using ElementPtr = std::shared_ptr<ukive::xml::Element>;
+        using ElementPtr = std::shared_ptr<utl::xml::Element>;
 
         LayoutProcessor();
 

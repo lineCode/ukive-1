@@ -2,6 +2,9 @@
 
 #include <algorithm>
 
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/application.h"
 #include "ukive/text/text_renderer.h"
 #include "ukive/window/window.h"
@@ -9,9 +12,7 @@
 #include "ukive/graphics/rect.h"
 #include "ukive/graphics/point.h"
 #include "ukive/graphics/bitmap.h"
-#include "ukive/log.h"
-#include "ukive/utils/stl_utils.h"
-#include "ukive/utils/win10_version.h"
+#include "ukive/system/win10_version.h"
 
 
 namespace ukive {
@@ -785,7 +786,7 @@ namespace ukive {
 
         solid_brush_->SetColor(d2d_color);
         rt_->DrawTextW(
-            text.c_str(), STLCU32(text.length()), textFormat, d2d_layout_rect, solid_brush_.get());
+            text.c_str(), utl::STLCU32(text.length()), textFormat, d2d_layout_rect, solid_brush_.get());
     }
 
     void Canvas::drawTextLayout(
@@ -940,7 +941,7 @@ namespace ukive {
 
         ComPtr<IDWriteTextLayout> layout;
         HRESULT hr = dwrite_factory->CreateTextLayout(
-            text.c_str(), STLCU32(text.length()), format, max_width, max_height, &layout);
+            text.c_str(), utl::STLCU32(text.length()), format, max_width, max_height, &layout);
         if (FAILED(hr)) {
             LOG(Log::WARNING) << "Failed to create text layout: " << hr;
             return {};

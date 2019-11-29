@@ -1,11 +1,12 @@
 #ifndef UKIVE_VIEWS_SPINNER_VIEW_SPINNER_VIEW_H_
 #define UKIVE_VIEWS_SPINNER_VIEW_SPINNER_VIEW_H_
 
+#include "utils/weak_ref_nest.hpp"
+
 #include "ukive/menu/inner_window.h"
 #include "ukive/views/layout/view_group.h"
 #include "ukive/views/click_listener.h"
 #include "ukive/views/list/list_view.h"
-#include "ukive/utils/weak_ref_nest.h"
 
 
 namespace ukive {
@@ -57,7 +58,7 @@ namespace ukive {
         ListView* list_view_ = nullptr;
         SpinnerListAdapter* adapter_ = nullptr;
         std::shared_ptr<InnerWindow> inner_window_;
-        WeakRefNest<SpinnerView> weak_ref_nest_;
+        utl::WeakRefNest<SpinnerView> weak_ref_nest_;
     };
 
 }

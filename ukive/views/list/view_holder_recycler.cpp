@@ -1,8 +1,9 @@
 #include "view_holder_recycler.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/views/layout/view_group.h"
-#include "ukive/utils/stl_utils.h"
 
 
 namespace ukive {
@@ -68,12 +69,12 @@ namespace ukive {
     }
 
     int ViewHolderRecycler::getRecycledCount(int item_id) {
-        return STLCInt(recycled_holders_[item_id].size());
+        return utl::STLCInt(recycled_holders_[item_id].size());
     }
 
     void ViewHolderRecycler::clear() {
         for (auto& pair : recycled_holders_) {
-            STLDeleteElements(&pair.second);
+            utl::STLDeleteElements(&pair.second);
         }
 
         recycled_holders_.clear();

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iomanip>
 
-#include "ukive/log.h"
+#include "utils/log.h"
 #include "ukive/security/crypto/aes.h"
 #include "ukive/security/crypto/ecdp.h"
 #include "ukive/security/crypto/aead.hpp"
@@ -78,7 +78,7 @@ namespace test {
     }
 
     void TEST_ECDP_X25519() {
-        auto k = ukive::BigInteger::fromString(swapHexStrBytes(
+        auto k = utl::BigInteger::fromString(swapHexStrBytes(
             "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4"), 16);
 
         k.setBit(255, 0);
@@ -87,13 +87,13 @@ namespace test {
         k.setBit(1, 0);
         k.setBit(0, 0);
 
-        auto u = ukive::BigInteger::fromString(swapHexStrBytes(
+        auto u = utl::BigInteger::fromString(swapHexStrBytes(
             "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c"), 16);
         u.setBit(255, 0);
 
         uint32_t A;
         uint8_t cofactor, Up;
-        ukive::BigInteger p, order, Vp, result;
+        utl::BigInteger p, order, Vp, result;
         ukive::crypto::ECDP::curve25519(&p, &A, &order, &cofactor, &Up, &Vp);
 
         ukive::crypto::ECDP::X25519(p, k, u, &result);
@@ -106,7 +106,7 @@ namespace test {
     }
 
     void TEST_ECDP_X448() {
-        auto k = ukive::BigInteger::fromString(swapHexStrBytes(
+        auto k = utl::BigInteger::fromString(swapHexStrBytes(
             "3d262fddf9ec8e88495266fea19a34d28882acef045104d0d1aae121"
             "700a779c984c24f8cdd78fbff44943eba368f54b29259a4f1c600ad3"), 16);
 
@@ -114,13 +114,13 @@ namespace test {
         k.setBit(1, 0);
         k.setBit(0, 0);
 
-        auto u = ukive::BigInteger::fromString(swapHexStrBytes(
+        auto u = utl::BigInteger::fromString(swapHexStrBytes(
             "06fce640fa3487bfda5f6cf2d5263f8aad88334cbd07437f020f08f9"
             "814dc031ddbdc38c19c6da2583fa5429db94ada18aa7a7fb4ef8a086"), 16);
 
         uint32_t A;
         uint8_t cofactor, Up;
-        ukive::BigInteger p, order, Vp, result;
+        utl::BigInteger p, order, Vp, result;
         ukive::crypto::ECDP::curve448(&p, &A, &order, &cofactor, &Up, &Vp);
 
         ukive::crypto::ECDP::X448(p, k, u, &result);

@@ -5,10 +5,13 @@
 #include <functional>
 
 
+namespace utl {
+    class Executable;
+}
+
 namespace ukive {
 
     class Cycler;
-    class Executable;
 
     class Message {
     public:
@@ -22,7 +25,7 @@ namespace ukive {
         int what;
         uint64_t when;
         Cycler* target;
-        Executable* callback;
+        utl::Executable* callback;
         std::function<void()> func;
         void* data;
 

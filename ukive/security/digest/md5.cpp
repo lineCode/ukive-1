@@ -82,7 +82,7 @@ namespace digest {
             if (val < 16) {
                 result.append("0");
             }
-            result.append(toString8Hex(val));
+            result.append(utl::toString8Hex(val));
         }
 
         return result;
@@ -110,7 +110,7 @@ namespace digest {
             if (val < 16) {
                 result.append("0");
             }
-            result.append(toString8Hex(val));
+            result.append(utl::toString8Hex(val));
         }
 
         return result;

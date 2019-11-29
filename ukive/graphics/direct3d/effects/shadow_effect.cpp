@@ -1,7 +1,9 @@
 #include "shadow_effect.h"
 
+#include "utils/log.h"
+#include "utils/files/file_utils.h"
+
 #include "ukive/application.h"
-#include "ukive/log.h"
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/canvas.h"
@@ -42,7 +44,7 @@ namespace ukive {
         layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[0].InstanceDataStepRate = 0;
 
-        string16 shader_path = Application::getExecFileName(true);
+        string16 shader_path = utl::getExecFileName(true);
 
         Space::createVertexShader(
             shader_path + L"\\shaders\\shadow_effect_vs.cso",

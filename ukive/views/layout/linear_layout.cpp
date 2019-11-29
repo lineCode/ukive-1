@@ -3,8 +3,9 @@
 #include <algorithm>
 #include <typeinfo>
 
+#include "utils/stl_utils.h"
+
 #include "ukive/views/layout/linear_layout_params.h"
-#include "ukive/utils/stl_utils.h"
 #include "ukive/resources/dimension_utils.h"
 
 #include "oigka/layout_constants.h"
@@ -21,9 +22,9 @@ namespace ukive {
     {
         auto ori = resolveAttrString(
             attrs, oigka::kAttrLinearLayoutViewOri, oigka::kAttrValLinearLayoutViewOriVert);
-        if (isEqual(ori, oigka::kAttrValLinearLayoutViewOriVert, false)) {
+        if (utl::isEqual(ori, oigka::kAttrValLinearLayoutViewOriVert, false)) {
             orientation_ = VERTICAL;
-        } else if (isEqual(ori, oigka::kAttrValLinearLayoutViewOriHori, false)) {
+        } else if (utl::isEqual(ori, oigka::kAttrValLinearLayoutViewOriHori, false)) {
             orientation_ = HORIZONTAL;
         }
     }

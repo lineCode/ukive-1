@@ -1,6 +1,7 @@
 #include "view.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
@@ -71,7 +72,7 @@ namespace ukive {
     {
         auto it = attrs.find(oigka::kAttrViewId);
         if (it != attrs.end()) {
-            if (!stringToNumber(it->second, &id_)) {
+            if (!utl::stringToNumber(it->second, &id_)) {
                 LOG(Log::WARNING) << "Cannot convert View id: " << it->second;
             }
         }

@@ -1,9 +1,10 @@
 #include "ukive/views/spinner_view/spinner_list_adapter.h"
 
+#include "utils/stl_utils.h"
+
 #include "ukive/views/layout/linear_layout.h"
 #include "ukive/views/layout/linear_layout_params.h"
 #include "ukive/views/text_view.h"
-#include "ukive/utils/stl_utils.h"
 #include "ukive/window/window.h"
 #include "ukive/drawable/ripple_drawable.h"
 
@@ -32,7 +33,7 @@ namespace ukive {
     }
 
     int SpinnerListAdapter::getItemCount() {
-        return STLCInt(data_.size());
+        return utl::STLCInt(data_.size());
     }
 
     void SpinnerListAdapter::addItem(const string16& title) {
@@ -41,7 +42,7 @@ namespace ukive {
     }
 
     void SpinnerListAdapter::addItem(int pos, const string16& title) {
-        if (pos < 0 || pos >= STLCInt(data_.size())) {
+        if (pos < 0 || pos >= utl::STLCInt(data_.size())) {
             return;
         }
 
@@ -50,7 +51,7 @@ namespace ukive {
     }
 
     void SpinnerListAdapter::modifyItem(int pos, const string16& title) {
-        if (pos < 0 || pos >= STLCInt(data_.size())) {
+        if (pos < 0 || pos >= utl::STLCInt(data_.size())) {
             return;
         }
         data_[pos] = title;
@@ -58,7 +59,7 @@ namespace ukive {
     }
 
     void SpinnerListAdapter::removeItem(int pos) {
-        if (pos < 0 || pos >= STLCInt(data_.size())) {
+        if (pos < 0 || pos >= utl::STLCInt(data_.size())) {
             return;
         }
 

@@ -3,8 +3,9 @@
 
 #include <functional>
 
+#include "utils/weak_ref_nest.hpp"
+
 #include "ukive/message/cycler.h"
-#include "ukive/utils/weak_ref_nest.h"
 
 
 namespace ukive {
@@ -37,7 +38,7 @@ namespace ukive {
         Runner runner_;
 
         Cycler cycler_;
-        WeakRefNest<Timer> weak_ref_nest_;
+        utl::WeakRefNest<Timer> weak_ref_nest_;
     };
 
 }
