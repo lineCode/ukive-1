@@ -21,22 +21,22 @@ namespace cyro {
 
     //////////
     Color::Color()
-        : r_(0), g_(0), b_(0), a_(1.f) {
+        : r(0), g(0), b(0), a(1.f) {
     }
 
     Color::Color(float r, float g, float b, float a)
-        : r_(r), g_(g), b_(b), a_(a) {
+        : r(r), g(g), b(b), a(a) {
     }
 
     Color::Color(const Color& rhs)
-        : r_(rhs.r_), g_(rhs.g_), b_(rhs.b_), a_(rhs.a_) {
+        : r(rhs.r), g(rhs.g), b(rhs.b), a(rhs.a) {
     }
 
     Color& Color::operator=(const Color& rhs) {
-        r_ = rhs.r_;
-        g_ = rhs.g_;
-        b_ = rhs.b_;
-        a_ = rhs.a_;
+        r = rhs.r;
+        g = rhs.g;
+        b = rhs.b;
+        a = rhs.a;
         return *this;
     }
 
@@ -85,54 +85,54 @@ namespace cyro {
     }
 
     void Color::add(const Color& rhs) {
-        r_ = std::min(1.f, r_ + rhs.r_);
-        g_ = std::min(1.f, g_ + rhs.g_);
-        b_ = std::min(1.f, b_ + rhs.b_);
-        a_ = std::min(1.f, a_ + rhs.a_);
+        r = std::min(1.f, r + rhs.r);
+        g = std::min(1.f, g + rhs.g);
+        b = std::min(1.f, b + rhs.b);
+        a = std::min(1.f, a + rhs.a);
     }
 
     void Color::sub(const Color& rhs) {
-        r_ = std::max(0.f, r_ - rhs.r_);
-        g_ = std::max(0.f, g_ - rhs.g_);
-        b_ = std::max(0.f, b_ - rhs.b_);
-        a_ = std::max(0.f, a_ - rhs.a_);
+        r = std::max(0.f, r - rhs.r);
+        g = std::max(0.f, g - rhs.g);
+        b = std::max(0.f, b - rhs.b);
+        a = std::max(0.f, a - rhs.a);
     }
 
     void Color::mul(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        r_ *= factor;
-        g_ *= factor;
-        b_ *= factor;
-        a_ *= factor;
+        r *= factor;
+        g *= factor;
+        b *= factor;
+        a *= factor;
     }
 
     void Color::div(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        r_ /= factor;
-        g_ /= factor;
-        b_ /= factor;
-        a_ /= factor;
+        r /= factor;
+        g /= factor;
+        b /= factor;
+        a /= factor;
     }
 
 
     //////////
     ColorRGB::ColorRGB()
-        : r_(0), g_(0), b_(0) {}
+        : r(0), g(0), b(0) {}
 
     ColorRGB::ColorRGB(float r, float g, float b)
-        : r_(r), g_(g), b_(b) {}
+        : r(r), g(g), b(b) {}
 
     ColorRGB::ColorRGB(const ColorRGB& rhs)
-        : r_(rhs.r_), g_(rhs.g_), b_(rhs.b_) {}
+        : r(rhs.r), g(rhs.g), b(rhs.b) {}
 
     ColorRGB& ColorRGB::operator=(const ColorRGB& rhs) {
-        r_ = rhs.r_;
-        g_ = rhs.g_;
-        b_ = rhs.b_;
+        r = rhs.r;
+        g = rhs.g;
+        b = rhs.b;
         return *this;
     }
 
@@ -181,54 +181,54 @@ namespace cyro {
     }
 
     void ColorRGB::add(const ColorRGB& rhs) {
-        r_ = std::min(1.f, r_ + rhs.r_);
-        g_ = std::min(1.f, g_ + rhs.g_);
-        b_ = std::min(1.f, b_ + rhs.b_);
+        r = std::min(1.f, r + rhs.r);
+        g = std::min(1.f, g + rhs.g);
+        b = std::min(1.f, b + rhs.b);
     }
 
     void ColorRGB::sub(const ColorRGB& rhs) {
-        r_ = std::max(0.f, r_ - rhs.r_);
-        g_ = std::max(0.f, g_ - rhs.g_);
-        b_ = std::max(0.f, b_ - rhs.b_);
+        r = std::max(0.f, r - rhs.r);
+        g = std::max(0.f, g - rhs.g);
+        b = std::max(0.f, b - rhs.b);
     }
 
     void ColorRGB::mul(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        r_ *= factor;
-        g_ *= factor;
-        b_ *= factor;
+        r *= factor;
+        g *= factor;
+        b *= factor;
     }
 
     void ColorRGB::div(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        r_ /= factor;
-        g_ /= factor;
-        b_ /= factor;
+        r /= factor;
+        g /= factor;
+        b /= factor;
     }
 
 
     //////////
     ColorBGRAInt::ColorBGRAInt()
-        : b_(0), g_(0), r_(0), a_(255) {
+        : b(0), g(0), r(0), a(255) {
     }
 
     ColorBGRAInt::ColorBGRAInt(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
-        : b_(b), g_(g), r_(r), a_(a) {
+        : b(b), g(g), r(r), a(a) {
     }
 
     ColorBGRAInt::ColorBGRAInt(const ColorBGRAInt& rhs)
-        : b_(rhs.b_), g_(rhs.g_), r_(rhs.r_), a_(rhs.a_) {
+        : b(rhs.b), g(rhs.g), r(rhs.r), a(rhs.a) {
     }
 
     ColorBGRAInt& ColorBGRAInt::operator=(const ColorBGRAInt& rhs) {
-        b_ = rhs.b_;
-        g_ = rhs.g_;
-        r_ = rhs.r_;
-        a_ = rhs.a_;
+        b = rhs.b;
+        g = rhs.g;
+        r = rhs.r;
+        a = rhs.a;
         return *this;
     }
 
@@ -288,61 +288,61 @@ namespace cyro {
     }
 
     void ColorBGRAInt::add(const ColorBGRAInt& rhs) {
-        b_ = clampAdd(b_, rhs.b_);
-        g_ = clampAdd(g_, rhs.g_);
-        r_ = clampAdd(r_, rhs.r_);
-        a_ = clampAdd(a_, rhs.a_);
+        b = clampAdd(b, rhs.b);
+        g = clampAdd(g, rhs.g);
+        r = clampAdd(r, rhs.r);
+        a = clampAdd(a, rhs.a);
     }
 
     void ColorBGRAInt::sub(const ColorBGRAInt& rhs) {
-        b_ = clampSub(b_, rhs.b_);
-        g_ = clampSub(g_, rhs.g_);
-        r_ = clampSub(r_, rhs.r_);
-        a_ = clampSub(a_, rhs.a_);
+        b = clampSub(b, rhs.b);
+        g = clampSub(g, rhs.g);
+        r = clampSub(r, rhs.r);
+        a = clampSub(a, rhs.a);
     }
 
     void ColorBGRAInt::mul(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        b_ *= factor;
-        g_ *= factor;
-        r_ *= factor;
-        a_ *= factor;
+        b = uint8_t(b*factor);
+        g = uint8_t(g*factor);
+        r = uint8_t(r*factor);
+        a = uint8_t(a*factor);
     }
 
     void ColorBGRAInt::mul(const Color& rhs) {
-        b_ *= rhs.b_;
-        g_ *= rhs.g_;
-        r_ *= rhs.r_;
-        a_ *= rhs.a_;
+        b = uint8_t(b*rhs.b);
+        g = uint8_t(g*rhs.g);
+        r = uint8_t(r*rhs.r);
+        a = uint8_t(a*rhs.a);
     }
 
     void ColorBGRAInt::div(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        b_ /= factor;
-        g_ /= factor;
-        r_ /= factor;
-        a_ /= factor;
+        b = uint8_t(b/factor);
+        g = uint8_t(g/factor);
+        r = uint8_t(r/factor);
+        a = uint8_t(a/factor);
     }
 
 
     //////////
     ColorBGRInt::ColorBGRInt()
-        : b_(0), g_(0), r_(0) {}
+        : b(0), g(0), r(0) {}
 
     ColorBGRInt::ColorBGRInt(uint8_t r, uint8_t g, uint8_t b)
-        : b_(b), g_(g), r_(r) {}
+        : b(b), g(g), r(r) {}
 
     ColorBGRInt::ColorBGRInt(const ColorBGRInt& rhs)
-        : b_(rhs.b_), g_(rhs.g_), r_(rhs.r_) {}
+        : b(rhs.b), g(rhs.g), r(rhs.r) {}
 
     ColorBGRInt& ColorBGRInt::operator=(const ColorBGRInt& rhs) {
-        b_ = rhs.b_;
-        g_ = rhs.g_;
-        r_ = rhs.r_;
+        b = rhs.b;
+        g = rhs.g;
+        r = rhs.r;
         return *this;
     }
 
@@ -402,43 +402,43 @@ namespace cyro {
     }
 
     void ColorBGRInt::add(const ColorBGRInt& rhs) {
-        b_ = clampAdd(b_, rhs.b_);
-        g_ = clampAdd(g_, rhs.g_);
-        r_ = clampAdd(r_, rhs.r_);
+        b = clampAdd(b, rhs.b);
+        g = clampAdd(g, rhs.g);
+        r = clampAdd(r, rhs.r);
     }
 
     void ColorBGRInt::sub(const ColorBGRInt& rhs) {
-        b_ = clampSub(b_, rhs.b_);
-        g_ = clampSub(g_, rhs.g_);
-        r_ = clampSub(r_, rhs.r_);
+        b = clampSub(b, rhs.b);
+        g = clampSub(g, rhs.g);
+        r = clampSub(r, rhs.r);
     }
 
     void ColorBGRInt::mul(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        b_ *= factor;
-        g_ *= factor;
-        r_ *= factor;
+        b = uint8_t(b*factor);
+        g = uint8_t(g*factor);
+        r = uint8_t(r*factor);
     }
 
     void ColorBGRInt::mul(const ColorRGB& rhs) {
-        b_ *= rhs.b_;
-        g_ *= rhs.g_;
-        r_ *= rhs.r_;
+        b = uint8_t(b*rhs.b);
+        g = uint8_t(g*rhs.g);
+        r = uint8_t(r*rhs.r);
     }
 
     void ColorBGRInt::div(float factor) {
         factor = std::max(0.f, factor);
         factor = std::min(1.f, factor);
 
-        b_ /= factor;
-        g_ /= factor;
-        r_ /= factor;
+        b = uint8_t(b/factor);
+        g = uint8_t(g/factor);
+        r = uint8_t(r/factor);
     }
 
     ColorBGRAInt ColorBGRInt::toBGRAInt(uint8_t a) const {
-        return ColorBGRAInt(r_, g_, b_, a);
+        return ColorBGRAInt(r, g, b, a);
     }
 
 }

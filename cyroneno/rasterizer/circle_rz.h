@@ -14,12 +14,12 @@ namespace cyro {
      */
     class CircleRz {
     public:
-        static void draw(const Point2& center, int r, const Color& c, ImagePng* img);
-        static void draw(const Point2& center, int a, int b, const Color& c, ImagePng* img);
+        static void draw(const Point2I& center, int r, const Color& c, ImagePng* img);
+        static void draw(const Point2I& center, int a, int b, const Color& c, ImagePng* img);
         static void drawAA(const Point2& center, double r, const Color& c, ImagePng* img);
 
     private:
-        static void drawOld(const Point2& center, int r, const Color& c, ImagePng* img);
+        static void drawOld(const Point2I& center, int r, const Color& c, ImagePng* img);
 
     };
 

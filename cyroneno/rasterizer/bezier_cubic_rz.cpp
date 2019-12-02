@@ -10,7 +10,7 @@
 namespace cyro {
 
     void BezierCubicRz::draw(
-        const Point2& p1, const Point2& p2, const Point2& p3, const Point2& p4,
+        const Point2I& p1, const Point2I& p2, const Point2I& p3, const Point2I& p4,
         const Color& c, ImagePng* target)
     {
         /*drawParam(p1, p2, p3, p4, c, target);
@@ -84,18 +84,18 @@ namespace cyro {
         tn[ct++] = 0.5;
 
         double t1 = -0.5;
-        Point2 pp0(p1);
+        Point2I pp0(p1);
         for (int i = 0; i < ct; ++i) {
             double t2 = tn[i];
-            Point2 pp1(
-                std::round(-t2 * (t1*t1*xa - 2 * t1*xb + xc) + t1*t1*xb - 2 * t1*xc + xd + p1.x),
-                std::round(-t2 * (t1*t1*ya - 2 * t1*yb + yc) + t1*t1*yb - 2 * t1*yc + yd + p1.y));
-            Point2 pp2(
-                std::round(-t1 * (t2*t2*xa - 2 * t2*xb + xc) + t2*t2*xb - 2 * t2*xc + xd + p1.x),
-                std::round(-t1 * (t2*t2*ya - 2 * t2*yb + yc) + t2*t2*yb - 2 * t2*yc + yd + p1.y));
-            Point2 pp3(
-                std::round(-t2*t2*t2*xa + 3*t2*t2*xb - 3 * t2*xc + xd + p1.x),
-                std::round(-t2*t2*t2*ya + 3*t2*t2*yb - 3 * t2*yc + yd + p1.y));
+            Point2I pp1(
+                int(std::round(-t2 * (t1*t1*xa - 2 * t1*xb + xc) + t1*t1*xb - 2 * t1*xc + xd + p1.x)),
+                int(std::round(-t2 * (t1*t1*ya - 2 * t1*yb + yc) + t1*t1*yb - 2 * t1*yc + yd + p1.y)));
+            Point2I pp2(
+                int(std::round(-t1 * (t2*t2*xa - 2 * t2*xb + xc) + t2*t2*xb - 2 * t2*xc + xd + p1.x)),
+                int(std::round(-t1 * (t2*t2*ya - 2 * t2*yb + yc) + t2*t2*yb - 2 * t2*yc + yd + p1.y)));
+            Point2I pp3(
+                int(std::round(-t2*t2*t2*xa + 3*t2*t2*xb - 3 * t2*xc + xd + p1.x)),
+                int(std::round(-t2*t2*t2*ya + 3*t2*t2*yb - 3 * t2*yc + yd + p1.y)));
             drawSegment(pp0, pp1, pp2, pp3, c, target);
 
             pp0 = pp3;
@@ -104,7 +104,7 @@ namespace cyro {
     }
 
     void BezierCubicRz::drawSegment(
-        const Point2& p1, const Point2& p2, const Point2& p3, const Point2& p4,
+        const Point2I& p1, const Point2I& p2, const Point2I& p3, const Point2I& p4,
         const Color& c, ImagePng* target)
     {
         // TODO: 当前算法在绘制闭合曲线时可能会失败
@@ -238,7 +238,7 @@ namespace cyro {
             }
         }
 
-        LineRz::draw(Point2(xk + xs, yk + ys), Point2(xe + xs, ye + ys), c, target);
+        LineRz::draw(Point2I(xk + xs, yk + ys), Point2I(xe + xs, ye + ys), c, target);
     }
 
     void BezierCubicRz::drawParam(
@@ -255,7 +255,7 @@ namespace cyro {
             t_yk = std::round(t_yk);
 
             //PointRz::draw(xk, yk, c, target);
-            LineRz::draw(Point2(xk, yk), Point2(t_xk, t_yk), c, target);
+            LineRz::draw(Point2I(int(xk), int(yk)), Point2I(int(t_xk), int(t_yk)), c, target);
 
             xk = t_xk;
             yk = t_yk;

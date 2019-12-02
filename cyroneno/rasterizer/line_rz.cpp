@@ -21,7 +21,7 @@ namespace {
 
 namespace cyro {
 
-    void LineRz::draw(const Point2& p0, const Point2& p1, const Color& c, ImagePng* target) {
+    void LineRz::draw(const Point2I& p0, const Point2I& p1, const Color& c, ImagePng* target) {
         int dx = std::abs(p1.x - p0.x);
         int dy = std::abs(p1.y - p0.y);
 
@@ -53,9 +53,9 @@ namespace cyro {
         }
     }
 
-    void LineRz::drawSeg(const Point2& p0, const Point2& p1, const Color& c, ImagePng* target) {
-        int x0 = std::round(p0.x), y0 = std::round(p0.y);
-        int x1 = std::round(p1.x), y1 = std::round(p1.y);
+    void LineRz::drawSeg(const Point2I& p0, const Point2I& p1, const Color& c, ImagePng* target) {
+        int x0 = p0.x, y0 = p0.y;
+        int x1 = p1.x, y1 = p1.y;
 
         int dx = std::abs(x1 - x0);
         int dy = std::abs(y1 - y0);

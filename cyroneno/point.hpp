@@ -20,7 +20,7 @@ namespace cyro {
 
         template<typename C>
         operator Point2T<C>() const {
-            return Point2T<C>(x, y);
+            return Point2T<C>(static_cast<C>(x), static_cast<C>(y));
         }
 
         Point2T& add(const Vector2T<T>& rhs) {
@@ -126,6 +126,8 @@ namespace cyro {
     using Point2 = Point2T<double>;
     using Point3 = Point3T<double>;
     using Point4 = Point4T<double>;
+
+    using Point2I = Point2T<int>;
 
 }
 

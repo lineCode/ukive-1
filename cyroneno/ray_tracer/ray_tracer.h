@@ -19,7 +19,7 @@ namespace cyro {
     private:
         void initLights();
         void initSurfaces();
-        ColorBGRInt rayColor(const cyro::Ray& ray, double t0, double t1);
+        ColorBGRInt rayColor(const Ray& ray, double t0, double t1);
 
         Scene scene_;
         std::vector<Light> lights_;

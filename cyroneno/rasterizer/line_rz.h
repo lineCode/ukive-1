@@ -13,8 +13,8 @@ namespace cyro {
      */
     class LineRz {
     public:
-        static void draw(const Point2& p0, const Point2& p1, const Color& c, ImagePng* target);
-        static void drawSeg(const Point2& p0, const Point2& p1, const Color& c, ImagePng* target);
+        static void draw(const Point2I& p0, const Point2I& p1, const Color& c, ImagePng* target);
+        static void drawSeg(const Point2I& p0, const Point2I& p1, const Color& c, ImagePng* target);
         static void drawAA(const Point2& p0, const Point2& p1, const Color& c, ImagePng* target);
     };
 

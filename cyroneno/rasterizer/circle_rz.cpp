@@ -6,7 +6,7 @@
 namespace cyro {
 
     void CircleRz::draw(
-        const Point2& center, int r, const Color& c, ImagePng* img)
+        const Point2I& center, int r, const Color& c, ImagePng* img)
     {
         if (r <= 0) {
             return;
@@ -45,7 +45,7 @@ namespace cyro {
     }
 
     void CircleRz::draw(
-        const Point2& center, int a, int b, const Color& c, ImagePng* img)
+        const Point2I& center, int a, int b, const Color& c, ImagePng* img)
     {
         if (a <= 0 || b <= 0) {
             return;
@@ -94,22 +94,22 @@ namespace cyro {
     {
     }
 
-    void CircleRz::drawOld(const Point2& center, int radius, const Color& c, ImagePng* img) {
-        if (radius <= 0) {
+    void CircleRz::drawOld(const Point2I& center, int r, const Color& c, ImagePng* img) {
+        if (r <= 0) {
             return;
         }
 
-        int pk = 1 - radius;
+        int pk = 1 - r;
 
         int xk = 0;
-        int yk = radius;
+        int yk = r;
         PointRz::draw(xk + center.x, yk + center.y, c, img);
         PointRz::draw(yk + center.y, xk + center.x, c, img);
         PointRz::draw(xk + center.x, -yk + center.y, c, img);
         PointRz::draw(-yk + center.y, xk + center.x, c, img);
 
         int _2xk = 0;
-        int _2yk = 2 * radius;
+        int _2yk = 2 * r;
 
         while (xk < yk) {
             ++xk;

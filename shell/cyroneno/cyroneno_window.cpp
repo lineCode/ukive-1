@@ -45,9 +45,6 @@ namespace shell {
     void CyronenoWindow::onCreate() {
         Window::onCreate();
 
-        cyro::Point2T<int> p1(1, 1);
-        cyro::Point2T<double> p12 = p1;
-
         showTitleBar();
         setBackgroundColor(ukive::Color::Transparent);
         setContentView(Res::Layout::cyroneno_layout_xml);
@@ -92,6 +89,8 @@ namespace shell {
         case Examples::BASIC_RASTERIZER:
         {
             cyro::Rasterizer rasterizer(IMAGE_WIDTH, IMAGE_HEIGHT);
+
+            //TEST_QUAD_BEZIERS(rasterizer);
 
             rasterizer.drawCubicBezier(
                 cyro::Point2(200, 200),
@@ -219,7 +218,7 @@ namespace shell {
             double x2 = std::round((p1.x + p3.x) / 2 + x);
             double y2 = std::round((p1.y + p3.y) / 2 + y);
 
-            //rz.drawBezier(p1, { x2, y2 }, p3, cyro::Color(0, 0, 0, 0.5f));
+            rz.drawQuadBezier(p1, { x2, y2 }, p3, cyro::Color(0, 0, 0, 0.5f));
         }
 
         if (false)

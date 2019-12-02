@@ -102,9 +102,6 @@ namespace shell {
         d3d_effect_->setRadius(animator->getCurValue());
         d3d_effect_->draw();
 
-        D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
-            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
-
         shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
         invalidate();
     }

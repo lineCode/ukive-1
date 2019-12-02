@@ -55,10 +55,10 @@ namespace cyro {
 
     void ImagePng::drawColor(int x, int y, const ColorBGRAInt& c) {
         if (x < 0 || x >= width_ || y < 0 || y >= height_) return;
-        if (c.a_ == 0) return;
+        if (c.a == 0) return;
 
         auto cur = getColor(x, y);
-        auto blend = cur * (1 - c.a_ / 255.f) + c * (c.a_ / 255.f);
+        auto blend = cur * (1 - c.a / 255.f) + c * (c.a / 255.f);
 
         y = height_ > 0 ? (height_ - y - 1) : 0;
         int index = x + y * width_;

@@ -29,7 +29,7 @@ namespace cyro {
         void mul(float factor);
         void div(float factor);
 
-        float r_, g_, b_, a_;
+        float r, g, b, a;
     };
 
 
@@ -56,7 +56,7 @@ namespace cyro {
         void mul(float factor);
         void div(float factor);
 
-        float r_, g_, b_;
+        float r, g, b;
     };
 
 
@@ -86,7 +86,7 @@ namespace cyro {
         void mul(const Color& rhs);
         void div(float factor);
 
-        uint8_t b_, g_, r_, a_;
+        uint8_t b, g, r, a;
     };
 
 
@@ -118,7 +118,7 @@ namespace cyro {
 
         ColorBGRAInt toBGRAInt(uint8_t a) const;
 
-        uint8_t b_, g_, r_;
+        uint8_t b, g, r;
     };
 
 }

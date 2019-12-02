@@ -15,12 +15,12 @@ namespace cyro {
     class BezierCubicRz {
     public:
         static void draw(
-            const Point2& p1, const Point2& p2, const Point2& p3, const Point2& p4,
+            const Point2I& p1, const Point2I& p2, const Point2I& p3, const Point2I& p4,
             const Color& c, ImagePng* target);
 
     private:
         static void drawSegment(
-            const Point2& p1, const Point2& p2, const Point2& p3, const Point2& p4,
+            const Point2I& p1, const Point2I& p2, const Point2I& p3, const Point2I& p4,
             const Color& c, ImagePng* target);
 
         static void drawParam(

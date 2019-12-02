@@ -22,7 +22,7 @@ namespace cyro {
     }
 
     void Rasterizer::drawPoint(double x, double y, const Color& c) {
-        PointRz::draw(x, y, c, &image_);
+        PointRz::draw(int(x), int(y), c, &image_);
     }
 
     void Rasterizer::drawLine(const Point2& p0, const Point2& p1, const Color& c) {
@@ -50,11 +50,11 @@ namespace cyro {
     }
 
     void Rasterizer::drawCircle(const Point2& center, double r, const Color& c) {
-        CircleRz::draw(center, r, c, &image_);
+        CircleRz::draw(center, int(r), c, &image_);
     }
 
     void Rasterizer::drawEllipse(const Point2& center, double a, double b, const Color& c) {
-        CircleRz::draw(center, a, b, c, &image_);
+        CircleRz::draw(center, int(a), int(b), c, &image_);
     }
 
     void Rasterizer::drawTriangle(

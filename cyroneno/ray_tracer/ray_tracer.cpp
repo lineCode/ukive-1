@@ -15,8 +15,6 @@ namespace cyro {
     void RayTracer::rayTracer(
         ProjectionType type, int img_width, int img_height, ImagePng* image)
     {
-        using namespace cyro;
-
         double l = -img_width;
         double r = img_width;
         double t = img_height;
@@ -52,8 +50,6 @@ namespace cyro {
     }
 
     void RayTracer::initLights() {
-        using namespace cyro;
-
         Light light1;
         light1.pos = Point3(-300, 300, -800);
         light1.intensity = ColorRGB(0.4f, 0.4f, 0.4f);
@@ -66,8 +62,6 @@ namespace cyro {
     }
 
     void RayTracer::initSurfaces() {
-        using namespace cyro;
-
         auto sphere1 = new Sphere(Point3(-100, 82, -600), 80);
         sphere1->setKd(ColorBGRInt(100, 100, 100));
         sphere1->setKs(ColorBGRInt(205, 205, 205));
@@ -94,10 +88,8 @@ namespace cyro {
         scene_.addSurface(std::shared_ptr<Surface>(plane1));
     }
 
-    cyro::ColorBGRInt RayTracer::rayColor(const cyro::Ray& ray, double t0, double t1) {
-        using namespace cyro;
-
-        double ambient_intensity = 0.5;
+    ColorBGRInt RayTracer::rayColor(const Ray& ray, double t0, double t1) {
+        float ambient_intensity = 0.5f;
         ColorBGRInt ambient_color(64, 64, 64);
         ColorBGRInt background_color(32, 32, 32);
 
@@ -130,10 +122,11 @@ namespace cyro {
                 if (!scene_.hit(shadow_ray, 0.001, std::numeric_limits<double>::max(), shadow_hit)) {
                     auto cur_surface = scene_.getSurface(hit.index);
                     if (cur_surface->getShadingMethod() & Surface::DIFFUSE) {
-                        color += cur_surface->getKd() * light.intensity * std::max(0., hit.n*lv);
+                        color += cur_surface->getKd() * light.intensity * std::max(0.f, float(hit.n*lv));
                     }
                     if (cur_surface->getShadingMethod() & Surface::SPECULAR) {
-                        color += cur_surface->getKs() * light.intensity * std::pow(std::max(0., hit.n*hv), cur_surface->getPhongExp());
+                        color += cur_surface->getKs() * light.intensity
+                            * float(std::pow(std::max(0., hit.n*hv), cur_surface->getPhongExp()));
                     }
                 }
             }
