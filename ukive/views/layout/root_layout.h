@@ -7,7 +7,6 @@
 namespace ukive {
 
     class Window;
-    class DebugView;
     class LayoutParams;
     class FrameLayout;
     class LinearLayout;
@@ -26,14 +25,9 @@ namespace ukive {
         void addShade(View* shade);
         void removeShade(View* shade);
 
-        void showDebugView();
-        void removeDebugView();
-        void toggleDebugView();
-
         bool isTitleBarShowing() const;
         TitleBar* getTitleBar() const;
         View* getContentView() const;
-        DebugView* getDebugView() const;
 
         void setContent(int id);
         void setContent(View* content);
@@ -50,7 +44,6 @@ namespace ukive {
 
     private:
         TitleBar* title_bar_;
-        DebugView* debug_view_;
         FrameLayout* shade_layout_;
         FrameLayout* content_layout_;
         View* content_view_;

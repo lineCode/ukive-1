@@ -34,7 +34,7 @@ namespace shell {
         canvas.fillRect(ukive::RectF(0, 0, BACKGROUND_SIZE, BACKGROUND_SIZE), ukive::Color::Green400);
         //canvas.fillCircle(BACKGROUND_SIZE / 2.f, BACKGROUND_SIZE / 2.f, BACKGROUND_SIZE / 4.f, ukive::Color::Blue200);
         canvas.endDraw();
-        content_bmp_ = canvas.extractBitmap()->getNative();
+        content_bmp_ = canvas.extractBitmap();
 
         d3d_effect_ = new ukive::ShadowEffect();
         d3d_effect_->setRadius(RADIUS);
@@ -79,13 +79,11 @@ namespace shell {
         canvas->save();
         canvas->translate(-RADIUS, -RADIUS);
 
-        ukive::Bitmap s_bmp(shadow_bmp_);
-        canvas->drawBitmap(100, 10, &s_bmp);
+        canvas->drawBitmap(100, 10, shadow_bmp_.get());
 
         canvas->restore();
 
-        ukive::Bitmap c_bmp(content_bmp_);
-        canvas->drawBitmap(100, 10, &c_bmp);
+        canvas->drawBitmap(100, 10, content_bmp_.get());
     }
 
     void ShadowWindow::onDestroy() {

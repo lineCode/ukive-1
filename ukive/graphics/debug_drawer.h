@@ -1,5 +1,5 @@
-#ifndef UKIVE_VIEWS_DEBUG_VIEW_H_
-#define UKIVE_VIEWS_DEBUG_VIEW_H_
+#ifndef UKIVE_GRAPHICS_DEBUG_DRAWER_H_
+#define UKIVE_GRAPHICS_DEBUG_DRAWER_H_
 
 #include <vector>
 
@@ -10,22 +10,21 @@ namespace ukive {
 
     class Window;
 
-    class DebugView : public View {
+    class DebugDrawer {
     public:
         enum Mode {
             RENDER,
             LAYOUT
         };
 
-        explicit DebugView(Window* w);
-        DebugView(Window* w, AttrsRef attrs);
+        explicit DebugDrawer(Window* w);
 
         void toggleMode();
         void addDuration(uint64_t duration);
 
         Mode getMode();
 
-        void onDraw(Canvas* canvas) override;
+        void draw(int width, int height, Canvas* canvas);
 
     private:
         struct FrameDuration {
@@ -35,6 +34,7 @@ namespace ukive {
                 :duration(micro / 1000.f) {}
         };
 
+        Window* window_;
         int strip_width_;
         int screen_width_;
         Mode mode_;
@@ -43,4 +43,4 @@ namespace ukive {
 
 }
 
-#endif  // UKIVE_VIEWS_DEBUG_VIEW_H_
+#endif  // UKIVE_GRAPHICS_DEBUG_DRAWER_H_

@@ -1,4 +1,4 @@
-#include "debug_view.h"
+#include "debug_drawer.h"
 
 #include "ukive/application.h"
 #include "ukive/graphics/canvas.h"
@@ -7,24 +7,16 @@
 
 namespace ukive {
 
-    DebugView::DebugView(Window* w)
-        : DebugView(w, {}) {}
-
-    DebugView::DebugView(Window* w, AttrsRef attrs)
-        : View(w, attrs),
+    DebugDrawer::DebugDrawer(Window* w)
+        : window_(w),
           strip_width_(w->dpToPxX(4)),
           screen_width_(Application::getScreenWidth()),
           mode_(RENDER) {
     }
 
-    void DebugView::onDraw(Canvas* canvas) {
-        View::onDraw(canvas);
-
-        int width = getContentBounds().width();
-        int height = getContentBounds().height();
-
+    void DebugDrawer::draw(int width, int height, Canvas* canvas) {
         int cur_x = width;
-        int base_height = getWindow()->dpToPxX(64);
+        int base_height = window_->dpToPxX(64);
         float base_time = 0.f;
         if (mode_ == LAYOUT) {
             base_time = 4;
@@ -46,11 +38,11 @@ namespace ukive {
         }
 
         canvas->fillRect(
-            RectF(0, std::round(height - base_height), width, std::round(getWindow()->dpToPxX(2))),
+            RectF(0, std::round(height - base_height), width, std::round(window_->dpToPxX(2))),
             Color::Red400);
     }
 
-    void DebugView::toggleMode() {
+    void DebugDrawer::toggleMode() {
         if (mode_ == RENDER) {
             mode_ = LAYOUT;
         } else if (mode_ == LAYOUT) {
@@ -58,14 +50,13 @@ namespace ukive {
         }
 
         durations_.clear();
-        invalidate();
     }
 
-    void DebugView::addDuration(uint64_t duration) {
+    void DebugDrawer::addDuration(uint64_t duration) {
         durations_.push_back(FrameDuration(duration));
     }
 
-    DebugView::Mode DebugView::getMode() {
+    DebugDrawer::Mode DebugDrawer::getMode() {
         return mode_;
     }
 }

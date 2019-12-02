@@ -201,6 +201,7 @@
     <ClInclude Include="graphics\canvas.h" />
     <ClInclude Include="graphics\color.h" />
     <ClInclude Include="graphics\cursor.h" />
+    <ClInclude Include="graphics\debug_drawer.h" />
     <ClInclude Include="graphics\device_lost_notifier.h" />
     <ClInclude Include="graphics\direct3d\drawing_object_manager.h" />
     <ClInclude Include="graphics\direct3d\effects\shadow_effect.h" />
@@ -273,7 +274,6 @@
     <ClInclude Include="views\chart_view.h" />
     <ClInclude Include="views\check_box.h" />
     <ClInclude Include="views\click_listener.h" />
-    <ClInclude Include="views\debug_view.h" />
     <ClInclude Include="views\direct3d_view.h" />
     <ClInclude Include="views\image_view.h" />
     <ClInclude Include="views\layout\non_client_layout.h" />
@@ -336,6 +336,7 @@
     <ClCompile Include="graphics\canvas.cpp" />
     <ClCompile Include="graphics\color.cpp" />
     <ClCompile Include="graphics\cursor.cpp" />
+    <ClCompile Include="graphics\debug_drawer.cpp" />
     <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp" />
     <ClCompile Include="graphics\direct3d\effects\shadow_effect.cpp" />
     <ClCompile Include="graphics\direct3d\scene.cpp" />
@@ -406,7 +407,6 @@
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\chart_view.cpp" />
     <ClCompile Include="views\check_box.cpp" />
-    <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
     <ClCompile Include="views\layout\non_client_layout.cpp" />

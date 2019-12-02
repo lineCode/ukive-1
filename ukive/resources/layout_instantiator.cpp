@@ -14,7 +14,6 @@
 #include "ukive/views/button.h"
 #include "ukive/views/chart_view.h"
 #include "ukive/views/check_box.h"
-#include "ukive/views/debug_view.h"
 #include "ukive/views/image_view.h"
 #include "ukive/views/scroll_view.h"
 #include "ukive/views/seek_bar.h"
@@ -47,7 +46,6 @@ namespace ukive {
         VIEW_CONSTRUCTOR(Button);
         VIEW_CONSTRUCTOR(ChartView);
         VIEW_CONSTRUCTOR(CheckBox);
-        VIEW_CONSTRUCTOR(DebugView);
         VIEW_CONSTRUCTOR(ImageView);
         VIEW_CONSTRUCTOR(SeekBar);
         VIEW_CONSTRUCTOR(SpinnerView);

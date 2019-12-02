@@ -1,6 +1,8 @@
 #ifndef UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_H_
 #define UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_H_
 
+#include <memory>
+
 #include "ukive/graphics/graphic_device_manager.h"
 
 #include "shell/third_party/directx_math/Inc/DirectXMath.h"
@@ -10,6 +12,7 @@ namespace ukive {
 
     namespace dx = DirectX;
 
+    class Bitmap;
     class Canvas;
 
     class ShadowEffect {
@@ -22,7 +25,7 @@ namespace ukive {
         void setContent(ID3D11Texture2D* texture);
 
         int getRadius() const;
-        ComPtr<ID2D1Bitmap> getOutput(ID2D1RenderTarget* rt);
+        std::shared_ptr<Bitmap> getOutput(ID2D1RenderTarget* rt);
 
     private:
         struct ConstBuffer {

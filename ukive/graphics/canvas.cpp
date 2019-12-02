@@ -21,23 +21,7 @@ namespace ukive {
         : is_texture_target_(true),
           opacity_(1.f)
     {
-        d3d_tex2d_ = createTexture2D(width, height, false);
-        if (!d3d_tex2d_) {
-            return;
-        }
-
-        auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
-        if (!dxgi_surface) {
-            LOG(Log::WARNING) << "Failed to query DXGI surface.";
-            return;
-        }
-
-        rt_ = createDXGIRenderTarget(dxgi_surface.get(), false);
-        if (!rt_) {
-            return;
-        }
-
-        initCanvas();
+        createOffScreenBRT(width, height);
     }
 
     Canvas::Canvas(Window* w, bool hw_acc)
@@ -77,6 +61,27 @@ namespace ukive {
 
         solid_brush_->SetOpacity(opacity_);
         bitmap_brush_->SetOpacity(opacity_);
+    }
+
+    bool Canvas::createOffScreenBRT(int width, int height) {
+        d3d_tex2d_ = createTexture2D(width, height, false);
+        if (!d3d_tex2d_) {
+            return false;
+        }
+
+        auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
+        if (!dxgi_surface) {
+            LOG(Log::WARNING) << "Failed to query DXGI surface.";
+            return false;
+        }
+
+        rt_ = createDXGIRenderTarget(dxgi_surface.get(), false);
+        if (!rt_) {
+            return false;
+        }
+
+        initCanvas();
+        return true;
     }
 
     ComPtr<ID2D1RenderTarget> Canvas::createHardwareBRT() {
@@ -304,7 +309,7 @@ namespace ukive {
     bool Canvas::resize() {
         bool ret;
         if (is_texture_target_) {
-            // TODO:
+            DCHECK(false);
             ret = true;
         } else {
             if (is_layered_) {
@@ -319,6 +324,10 @@ namespace ukive {
         }
 
         return ret;
+    }
+
+    bool Canvas::resize(int width, int height) {
+        return createOffScreenBRT(width, height);
     }
 
     void Canvas::clear() {
@@ -465,6 +474,14 @@ namespace ukive {
 
     ID2D1RenderTarget* Canvas::getRT() {
         return rt_.get();
+    }
+
+    int Canvas::getWidth() const {
+        return rt_->GetPixelSize().width;
+    }
+
+    int Canvas::getHeight() const {
+        return rt_->GetPixelSize().height;
     }
 
     ComPtr<ID3D11Texture2D> Canvas::getTexture() {
@@ -649,28 +666,12 @@ namespace ukive {
         fillOval(cx, cy, radius, radius, color);
     }
 
-    void Canvas::drawCircle(const RectF& rect, const Color& color) {
-        float cx = rect.left + rect.width() / 2;
-        float cy = rect.top + rect.height() / 2;
-        float radius = std::min(rect.width() / 2, rect.height() / 2);
-
-        drawOval(cx, cy, radius, radius, color);
-    }
-
-    void Canvas::drawCircle(const RectF& rect, float stroke_width, const Color& color) {
-        float cx = rect.left + rect.width() / 2;
-        float cy = rect.top + rect.height() / 2;
-        float radius = std::min(rect.width() / 2, rect.height() / 2);
-
-        drawOval(cx, cy, radius, radius, stroke_width, color);
-    }
-
-    void Canvas::fillCircle(const RectF& rect, const Color& color) {
-        float cx = rect.left + rect.width() / 2;
-        float cy = rect.top + rect.height() / 2;
-        float radius = std::min(rect.width() / 2, rect.height() / 2);
-
-        fillOval(cx, cy, radius, radius, color);
+    void Canvas::fillCircle(float cx, float cy, float radius, Bitmap* bmp) {
+        bitmap_brush_->SetBitmap(bmp->getNative().get());
+        bitmap_brush_->SetExtendModeX(D2D1_EXTEND_MODE_CLAMP);
+        bitmap_brush_->SetExtendModeY(D2D1_EXTEND_MODE_CLAMP);
+        rt_->FillEllipse(
+            D2D1::Ellipse(D2D1::Point2F(cx, cy), radius, radius), bitmap_brush_.get());
     }
 
     void Canvas::drawOval(float cx, float cy, float rx, float ry, const Color& color) {
@@ -708,8 +709,11 @@ namespace ukive {
         rt_->FillGeometry(geo, solid_brush_.get());
     }
 
-    void Canvas::fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush) {
-        rt_->FillGeometry(geo, brush);
+    void Canvas::fillGeometry(ID2D1Geometry* geo, Bitmap* bmp) {
+        bitmap_brush_->SetBitmap(bmp->getNative().get());
+        bitmap_brush_->SetExtendModeX(D2D1_EXTEND_MODE_CLAMP);
+        bitmap_brush_->SetExtendModeY(D2D1_EXTEND_MODE_CLAMP);
+        rt_->FillGeometry(geo, bitmap_brush_.get());
     }
 
     void Canvas::drawBitmap(Bitmap* bitmap) {

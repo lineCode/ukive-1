@@ -140,11 +140,10 @@ namespace ukive {
     void ShadowEffect::draw(Canvas* c) {
         draw();
         auto shadow_bmp = getOutput(c->getRT());
-        Bitmap bmp(shadow_bmp);
 
         c->save();
         c->translate(-std::floor(elevation_ * 2), -std::floor(elevation_ * 2));
-        c->drawBitmap(c->getOpacity(), &bmp);
+        c->drawBitmap(c->getOpacity(), shadow_bmp.get());
         c->restore();
     }
 
@@ -249,7 +248,7 @@ namespace ukive {
         return radius_;
     }
 
-    ComPtr<ID2D1Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
+    std::shared_ptr<Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
@@ -261,7 +260,7 @@ namespace ukive {
             return {};
         }
 
-        return bitmap;
+        return std::make_shared<Bitmap>(bitmap);
     }
 
 

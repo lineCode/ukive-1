@@ -233,9 +233,6 @@
     <ClCompile Include="system\qpc_service.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="views\debug_view.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\rendering_command_list.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -382,6 +379,9 @@
     </ClCompile>
     <ClCompile Include="security\cert\asn1_reader.cpp">
       <Filter>security\cert</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\debug_drawer.cpp">
+      <Filter>graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -644,9 +644,6 @@
     <ClInclude Include="system\qpc_service.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="views\debug_view.h">
-      <Filter>views</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\rendering_command_list.h">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -781,6 +778,9 @@
     </ClInclude>
     <ClInclude Include="security\cert\asn1_reader.h">
       <Filter>security\cert</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\debug_drawer.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

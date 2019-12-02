@@ -3,11 +3,10 @@
 
 #include "ukive/window/window.h"
 #include "ukive/animation/animator.h"
-#include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/system/com_ptr.hpp"
 
 
 namespace ukive {
+    class Bitmap;
     class Button;
     class Canvas;
     class ShadowEffect;
@@ -34,9 +33,8 @@ namespace shell {
         ukive::Animator animator_;
 
         ukive::ShadowEffect* d3d_effect_;
-        ukive::ComPtr<ID2D1Bitmap> shadow_bmp_;
-        ukive::ComPtr<ID2D1Bitmap> content_bmp_;
-        ukive::ComPtr<ID3D11Texture2D> d3d_tex2d_;
+        std::shared_ptr<ukive::Bitmap> shadow_bmp_;
+        std::shared_ptr<ukive::Bitmap> content_bmp_;
     };
 
 }
