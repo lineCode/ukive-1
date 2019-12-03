@@ -5,11 +5,13 @@
 #include "utils/string_utils.h"
 
 
-// JSON 解析实现
-// 参考 http://www.json.org/
-
 namespace utl {
 
+    /**
+     * JSON 解析实现
+     * 参考 http://www.json.org/
+     * 以及 https://tools.ietf.org/html/rfc8259
+     */
     class JSONParser {
     public:
         using index_t = string8::size_type;

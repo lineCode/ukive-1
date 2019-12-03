@@ -10,12 +10,7 @@ namespace shell {
 namespace test {
 
     void TEST_JSON() {
-        /*ukive::File file(L"D:\\DAUVer");
-        auto files = file.listFiles([](const string16& name, bool is_dir)->bool {
-            return !is_dir;
-        });*/
-
-        std::fstream dau_file("D:\\DAUVer\\20180903.json");
+        std::fstream dau_file("D:\\test.json");
         if (dau_file) {
             std::string json_str;
             dau_file >> json_str;

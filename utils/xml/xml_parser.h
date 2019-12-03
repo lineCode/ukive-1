@@ -10,6 +10,10 @@
 
 namespace utl {
 
+    /**
+     * XML 1.0 Ω‚Œˆ µœ÷
+     * https://www.w3.org/TR/xml/
+     */
     class XMLParser {
     public:
         using Prolog = xml::Prolog;

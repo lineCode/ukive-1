@@ -308,8 +308,14 @@ namespace utl {
             ADV_IDX(2);
             bool illegal = false;
             while (!startWith(str, "-->", idx)) {
-                illegal = (str[idx] == '-');
-                // TODO:
+                if (str[idx] == '-') {
+                    // 不能连着两次出现'-'
+                    if (illegal) RET_FALSE;
+                    illegal = true;
+                } else {
+                    illegal = false;
+                }
+                // TODO: 解出注释的内容并保存
                 if (isSpace(str[idx])) {
                     pedometer_.space(str[idx]);
                     ADV_IDX_NO_PEDO(1);
@@ -317,6 +323,7 @@ namespace utl {
                     ADV_IDX(1);
                 }
             }
+            // 最后一个字符不能是'-'
             if (illegal) RET_FALSE;
             ADV_IDX(2);
         } else {

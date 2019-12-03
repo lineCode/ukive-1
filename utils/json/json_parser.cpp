@@ -182,12 +182,15 @@ namespace utl {
         } else if (startWith(json_str, "true", cur)) {
             // true;
             *v = new json::BoolValue(true);
+            cur += 4;
         } else if (startWith(json_str, "false", cur)) {
             // false;
             *v = new json::BoolValue(false);
+            cur += 5;
         } else if (startWith(json_str, "null", cur)) {
             // null;
             *v = new json::NullValue();
+            cur += 4;
         } else {
             // may be number
             json::Value* num_val;
@@ -315,10 +318,18 @@ namespace utl {
         ADV_CUR(1);
         ch = json_str[cur];
 
+        string16 u16_tmp;
+
         for (;;) {
             if (ch == '\\') {
                 ADV_CUR(1);
                 ch = json_str[cur];
+                if (ch != 'u' && !u16_tmp.empty()) {
+                    string8 tmp;
+                    Unicode::UTF16ToUTF8(u16_tmp, &tmp);
+                    str.append(tmp); u16_tmp.clear();
+                }
+
                 switch (ch) {
                 case '"': str.push_back('\"'); break;
                 case '\\': str.push_back('\\'); break;
@@ -335,32 +346,43 @@ namespace utl {
                     // To UTF-16 LE
                     ADV_CUR(1); ch = json_str[cur];
                     if (!isHexDigit(ch)) return false;
-                    code |= uint16_t(getHexVal(ch)) << 4;
-
-                    ADV_CUR(1); ch = json_str[cur];
-                    if (!isHexDigit(ch)) return false;
-                    code |= uint16_t(getHexVal(ch));
-
-                    ADV_CUR(1); ch = json_str[cur];
-                    if (!isHexDigit(ch)) return false;
                     code |= uint16_t(getHexVal(ch)) << 12;
 
                     ADV_CUR(1); ch = json_str[cur];
                     if (!isHexDigit(ch)) return false;
                     code |= uint16_t(getHexVal(ch)) << 8;
 
-                    string8 tmp;
-                    Unicode::UTF16ToUTF8({ code }, &tmp);
-                    str.append(tmp);
+                    ADV_CUR(1); ch = json_str[cur];
+                    if (!isHexDigit(ch)) return false;
+                    code |= uint16_t(getHexVal(ch)) << 4;
+
+                    ADV_CUR(1); ch = json_str[cur];
+                    if (!isHexDigit(ch)) return false;
+                    code |= uint16_t(getHexVal(ch)) << 0;
+
+                    u16_tmp.append({ code });
                     break;
                 }
                 default: return false;
                 }
                 ADV_CUR(1);
+                ch = json_str[cur];
             } else if (ch == '"') {
+                if (!u16_tmp.empty()) {
+                    string8 tmp;
+                    Unicode::UTF16ToUTF8(u16_tmp, &tmp);
+                    str.append(tmp); u16_tmp.clear();
+                }
+
                 ADV_CUR(1);
                 break;
             } else {
+                if (!u16_tmp.empty()) {
+                    string8 tmp;
+                    Unicode::UTF16ToUTF8(u16_tmp, &tmp);
+                    str.append(tmp); u16_tmp.clear();
+                }
+
                 str.push_back(ch);
                 ADV_CUR(1);
                 ch = json_str[cur];

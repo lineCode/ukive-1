@@ -56,6 +56,9 @@ namespace ukive {
     void Canvas::initCanvas() {
         layer_counter_ = 0;
 
+        solid_brush_.reset();
+        bitmap_brush_.reset();
+
         rt_->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &solid_brush_);
         rt_->CreateBitmapBrush(nullptr, &bitmap_brush_);
 

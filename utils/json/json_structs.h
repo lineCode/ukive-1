@@ -32,13 +32,34 @@ namespace json {
 
         virtual Type getType() const = 0;
 
-        IntegerValue* asInteger() { return reinterpret_cast<IntegerValue*>(this); }
-        DoubleValue* asDouble()   { return reinterpret_cast<DoubleValue*>(this); }
-        StringValue* asString()   { return reinterpret_cast<StringValue*>(this); }
-        BoolValue* asBool()       { return reinterpret_cast<BoolValue*>(this); }
-        NullValue* asNull()       { return reinterpret_cast<NullValue*>(this); }
-        ArrayValue* asArray()     { return reinterpret_cast<ArrayValue*>(this); }
-        ObjectValue* asObject()   { return reinterpret_cast<ObjectValue*>(this); }
+        IntegerValue* asInteger() {
+            if (getType() != INTEGER) { return nullptr; }
+            return reinterpret_cast<IntegerValue*>(this);
+        }
+        DoubleValue* asDouble() {
+            if (getType() != DOUBLE) { return nullptr; }
+            return reinterpret_cast<DoubleValue*>(this);
+        }
+        StringValue* asString() {
+            if (getType() != STRING) { return nullptr; }
+            return reinterpret_cast<StringValue*>(this);
+        }
+        BoolValue* asBool() {
+            if (getType() != BOOL) { return nullptr; }
+            return reinterpret_cast<BoolValue*>(this);
+        }
+        NullValue* asNull() {
+            if (getType() != NULL_VAL) { return nullptr; }
+            return reinterpret_cast<NullValue*>(this);
+        }
+        ArrayValue* asArray() {
+            if (getType() != ARRAY) { return nullptr; }
+            return reinterpret_cast<ArrayValue*>(this);
+        }
+        ObjectValue* asObject() {
+            if (getType() != OBJECT) { return nullptr; }
+            return reinterpret_cast<ObjectValue*>(this);
+        }
     };
 
 
