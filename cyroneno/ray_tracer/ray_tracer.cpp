@@ -2,14 +2,23 @@
 
 #include <algorithm>
 
+#include "ukive/message/message.h"
+
 #include "surface.h"
 
 
 namespace cyro {
 
-    RayTracer::RayTracer() {
+    RayTracer::RayTracer()
+        : need_stop_(false)
+    {
+        cycler_.setListener(this);
+
         initLights();
         initSurfaces();
+    }
+
+    RayTracer::~RayTracer() {
     }
 
     void RayTracer::rayTracer(
@@ -46,6 +55,32 @@ namespace cyro {
                 auto color = rayColor(ray, 0, std::numeric_limits<double>::max());
                 image->setColor(i, j, color.toBGRAInt(255));
             }
+        }
+    }
+
+    void RayTracer::rayTracerAsync(
+        ProjectionType type, int img_width, int img_height, RayTracerListener* listener)
+    {
+        listener_ = listener;
+        worker_ = std::thread(&RayTracer::run, this, type, img_width, img_height);
+    }
+
+    void RayTracer::stop() {
+        need_stop_ = true;
+        worker_.join();
+        cycler_.setListener(nullptr);
+    }
+
+    void RayTracer::onHandleMessage(ukive::Message* msg) {
+        switch (msg->what) {
+        case 10089:
+            if (listener_) {
+                auto info = static_cast<std::vector<RenderInfo>*>(msg->shared_data.get());
+                listener_->onPixelData(*info);
+            }
+            break;
+        default:
+            break;
         }
     }
 
@@ -135,6 +170,56 @@ namespace cyro {
         }
 
         return background_color;
+    }
+
+    void RayTracer::run(ProjectionType type, int img_width, int img_height) {
+        double l = -img_width;
+        double r = img_width;
+        double t = img_height;
+        double b = -img_height;
+
+        Point3 eye(0, 100, 0);
+        Vector3 view_dir(0, -0.3, -1);
+        Vector3 up_vector(0, 1, 0);
+
+        Vector3 cb_w = -view_dir.normalize();
+        Vector3 cb_u = (up_vector ^ cb_w).normalize();
+        Vector3 cb_v = cb_w ^ cb_u;
+
+        for (int j = 0; j < img_height; ++j) {
+            auto ifs = std::make_shared<std::vector<RenderInfo>>();
+            for (int i = 0; i < img_width; ++i) {
+                if (need_stop_) {
+                    return;
+                }
+
+                double u = l + (r - l)*(i + 0.5) / img_width;
+                double v = b + (t - b)*(j + 0.5) / img_height;
+
+                Ray ray;
+                if (type == ORTHO) {
+                    ray.direction = -cb_w;
+                    ray.origin = eye + cb_u * u + cb_v * v;
+                } else if (type == PERSP) {
+                    float d = 500;
+                    ray.direction = -cb_w * d + cb_u * u + cb_v * v;
+                    ray.origin = eye;
+                }
+
+                auto color = rayColor(ray, 0, std::numeric_limits<double>::max());
+
+                RenderInfo info;
+                info.x = i;
+                info.y = j;
+                info.color = color.toBGRAInt(255);
+                ifs->push_back(info);
+            }
+
+            auto msg = ukive::Message::obtain();
+            msg->what = 10089;
+            msg->shared_data = ifs;
+            cycler_.sendMessageDelayed(msg, 10);
+        }
     }
 
 }

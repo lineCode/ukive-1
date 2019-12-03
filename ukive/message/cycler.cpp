@@ -23,7 +23,7 @@ namespace ukive {
     }
 
     Cycler::~Cycler() {
-        looper_->getQueue()->remove(this, nullptr);
+        looper_->getQueue()->remove(this);
     }
 
     void Cycler::setListener(CyclerListener* l) {
@@ -62,11 +62,11 @@ namespace ukive {
     }
 
     bool Cycler::hasCallbacks(utl::Executable* exec) {
-        return looper_->getQueue()->contains(this, exec, nullptr);
+        return looper_->getQueue()->contains(this, exec);
     }
 
     void Cycler::removeCallbacks(utl::Executable* exec) {
-        looper_->getQueue()->remove(this, exec, nullptr);
+        looper_->getQueue()->remove(this, exec);
     }
 
     void Cycler::sendEmptyMessage(int what) {
@@ -100,22 +100,15 @@ namespace ukive {
     void Cycler::enqueueMessage(Message* msg) {
         msg->target = this;
         looper_->getQueue()->enqueue(msg);
+        looper_->wakeup();
     }
 
     bool Cycler::hasMessages(int what) {
-        return looper_->getQueue()->contains(this, what, nullptr);
-    }
-
-    bool Cycler::hasMessages(int what, void* data) {
-        return looper_->getQueue()->contains(this, what, data);
+        return looper_->getQueue()->contains(this, what);
     }
 
     void Cycler::removeMessages(int what) {
-        looper_->getQueue()->remove(this, what, nullptr);
-    }
-
-    void Cycler::removeMessages(int what, void* data) {
-        looper_->getQueue()->remove(this, what, data);
+        looper_->getQueue()->remove(this, what);
     }
 
     void Cycler::dispatchMessage(Message* msg) {

@@ -16,12 +16,19 @@ namespace ukive {
 
     MessageLooper::MessageLooper() {
         msg_queue_ = new MessageQueue();
+        event_ = ::CreateEventW(nullptr, TRUE, FALSE, nullptr);
+        if (event_ == nullptr) {
+            LOG(Log::ERR) << "Cannot create event: " << ::GetLastError();
+        }
     }
 
     MessageLooper::~MessageLooper() {
         delete msg_queue_;
     }
 
+    void MessageLooper::wakeup() {
+        ::SetEvent(event_);
+    }
 
     void MessageLooper::quit() {
         msg_queue_->quit();
@@ -30,7 +37,6 @@ namespace ukive {
     MessageQueue* MessageLooper::getQueue() {
         return msg_queue_;
     }
-
 
     void MessageLooper::prepare() {
         std::lock_guard<std::mutex> lk(looper_sync_);
@@ -62,8 +68,7 @@ namespace ukive {
         MessageQueue* queue = looper->getQueue();
 
         queue->addBarrier();
-
-        while (true) {
+        for (;;) {
             Message* msg = queue->dequeue();
             if (!msg) {
                 break;
@@ -72,10 +77,36 @@ namespace ukive {
             msg->target->dispatchMessage(msg);
             msg->recycle();
         }
-
         queue->removeBarrier();
 
-        return queue->hasMessage();
+        if (!queue->hasMessage()) {
+            DWORD result = ::MsgWaitForMultipleObjectsEx(
+                1, &looper->event_, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
+            if (result == WAIT_OBJECT_0) {
+                //
+            }
+            ::ResetEvent(looper->event_);
+        }
+
+        DWORD status = ::GetQueueStatus(QS_INPUT);
+        if (HIWORD(status) & QS_INPUT) {
+            //
+        }
+
+        MSG msg;
+        bool done = false;
+        while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                done = true;
+                looper->quit();
+                break;
+            }
+
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+        }
+
+        return !done;
     }
 
     MessageQueue* MessageLooper::myQueue() {

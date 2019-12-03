@@ -139,11 +139,7 @@ namespace ukive {
     }
 
     void Application::run() {
-        MSG msg;
-        bool done = false;
-        ZeroMemory(&msg, sizeof(MSG));
-
-        while (!done) {
+        for (;;) {
             if (vsync_enabled_) {
                 HRESULT hr = graphic_device_manager_->getCurOutput()->WaitForVBlank();
                 if (FAILED(hr)) {
@@ -152,29 +148,8 @@ namespace ukive {
                 }
             }
 
-            bool has_message = MessageLooper::loop();
-            if (!has_message) {
-                DWORD result = ::MsgWaitForMultipleObjectsEx(
-                    0, nullptr, INFINITE, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
-                if (result == WAIT_OBJECT_0) {
-                    //
-                }
-            }
-
-            DWORD status = ::GetQueueStatus(QS_INPUT);
-            if (HIWORD(status) & QS_INPUT) {
-                //
-            }
-
-            while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-                if (msg.message == WM_QUIT) {
-                    done = true;
-                    MessageLooper::myLooper()->quit();
-                    break;
-                } else {
-                    ::TranslateMessage(&msg);
-                    ::DispatchMessage(&msg);
-                }
+            if (!MessageLooper::loop()) {
+                break;
             }
         }
     }

@@ -15,7 +15,6 @@
 #include "ukive/graphics/color.h"
 #include "ukive/drawable/color_drawable.h"
 
-#include "cyroneno/ray_tracer/ray_tracer.h"
 #include "cyroneno/rasterizer/rasterizer.h"
 #include "cyroneno/pipeline/pipeline.h"
 #include "cyroneno/text/opentype/opentype_font.h"
@@ -53,21 +52,18 @@ namespace shell {
 
         img_view_ = findViewById<ukive::ImageView>(Res::Id::iv_cyroneno_img);
 
-        Examples examples = Examples::BASIC_RASTERIZER;
+        Examples examples = Examples::RAY_TRACER;
 
         switch (examples) {
         case Examples::RAY_TRACER:
         {
-            cyro::ImagePng image(IMAGE_WIDTH, IMAGE_HEIGHT);
-            cyro::RayTracer ray_tracer;
-            ray_tracer.rayTracer(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT, &image);
-            auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_);
+            image_ = std::make_unique<cyro::ImagePng>(IMAGE_WIDTH, IMAGE_HEIGHT, cyro::ColorBGRAInt(0, 0, 0, 0));
+            ray_tracer_.rayTracerAsync(cyro::ProjectionType::ORTHO, IMAGE_WIDTH, IMAGE_HEIGHT, this);
 
             // Save to file
             /*ukive::Application::getWICManager()->saveToPngFile(
                 IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr, L"test.png");*/
 
-            bmp_ = ukive::BitmapFactory::create(this, IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr);
             break;
         }
 
@@ -157,31 +153,23 @@ namespace shell {
         }
 
         default:
-        {
-            cyro::ImagePng image(100, 100, cyro::ColorBGRAInt(0, 0, 0, 0));
-
-            std::random_device rd;
-            std::default_random_engine en(rd());
-            std::uniform_int_distribution<int> user_dist(64, 255);
-            std::normal_distribution<float> norm_dist;
-
-            for (int h = 0; h < 100; ++h) {
-                for (int w = 0; w < 100; ++w) {
-                    int alpha = user_dist(en);
-                    //int alpha = norm_dist(en) * 255;
-                    image.setColor(w, h, cyro::ColorBGRAInt(0, 0, 0, alpha));
-                }
-            }
-            auto img_data_ptr = reinterpret_cast<unsigned char*>(image.data_);
-            bmp_ = ukive::BitmapFactory::create(this, 100, 100, img_data_ptr);
-
-            // Save to file
-            ukive::Application::getWICManager()->saveToPngFile(
-                100, 100, img_data_ptr, L"test.png");
             break;
         }
-        }
 
+        img_view_->setImageBitmap(bmp_);
+    }
+
+    void CyronenoWindow::onDestroy() {
+        ray_tracer_.stop();
+        Window::onDestroy();
+    }
+
+    void CyronenoWindow::onPixelData(const std::vector<cyro::RenderInfo>& row) {
+        for (const auto& info : row) {
+            image_->setColor(info.x, info.y, info.color);
+        }
+        auto img_data_ptr = reinterpret_cast<unsigned char*>(image_->data_);
+        bmp_ = ukive::BitmapFactory::create(this, IMAGE_WIDTH, IMAGE_HEIGHT, img_data_ptr);
         img_view_->setImageBitmap(bmp_);
     }
 

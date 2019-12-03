@@ -28,15 +28,16 @@ namespace ukive {
         utl::Executable* callback;
         std::function<void()> func;
         void* data;
+        std::shared_ptr<void> shared_data;
 
         Message* next;
-
-        static Message* pool;
-        static uint64_t pool_size;
 
     private:
         Message();
         ~Message();
+
+        static Message* pool;
+        static uint64_t pool_size;
 
         static bool is_initialized;
         static std::mutex pool_sync;

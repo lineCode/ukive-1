@@ -6,8 +6,8 @@
 
     <ImageView
         id="@+id/iv_cyroneno_img"
-        layout_width="fit_content"
-        layout_height="fit_content"
+        layout_width="match_parent"
+        layout_height="match_parent"
         layout_start_handle_id="@id/rl_cyroneno"
         layout_start_handle_margin="8dp"
         layout_top_handle_id="@id/rl_cyroneno"

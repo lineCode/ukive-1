@@ -1,6 +1,9 @@
 ﻿#ifndef UKIVE_MESSAGE_MESSAGE_LOOPER_H_
 #define UKIVE_MESSAGE_MESSAGE_LOOPER_H_
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
 #include <memory>
 #include <mutex>
 
@@ -15,6 +18,7 @@ namespace ukive {
     public:
         ~MessageLooper();
 
+        void wakeup();
         void quit();
         MessageQueue* getQueue();
 
@@ -30,6 +34,7 @@ namespace ukive {
     private:
         MessageLooper();
 
+        HANDLE event_;
         MessageQueue* msg_queue_;
 
         static std::mutex looper_sync_;

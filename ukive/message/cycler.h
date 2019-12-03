@@ -60,9 +60,7 @@ namespace ukive {
         void enqueueMessage(Message* msg);
 
         bool hasMessages(int what);
-        bool hasMessages(int what, void* data);
         void removeMessages(int what);
-        void removeMessages(int what, void* data);
 
         void dispatchMessage(Message* msg);
 

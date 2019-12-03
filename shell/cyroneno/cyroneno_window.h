@@ -5,6 +5,8 @@
 
 #include "ukive/window/window.h"
 
+#include "cyroneno/ray_tracer/ray_tracer.h"
+
 
 namespace ukive {
     class Bitmap;
@@ -17,11 +19,18 @@ namespace cyro {
 
 namespace shell {
 
-    class CyronenoWindow : public ukive::Window {
+    class CyronenoWindow :
+        public ukive::Window,
+        public cyro::RayTracerListener {
     public:
         CyronenoWindow();
 
         void onCreate() override;
+        void onDestroy() override;
+
+    protected:
+        // cyro::RayTracerListener
+        void onPixelData(const std::vector<cyro::RenderInfo>& row) override;
 
     private:
         void TEST_LINES(cyro::Rasterizer& rz);
@@ -31,6 +40,9 @@ namespace shell {
 
         ukive::ImageView* img_view_ = nullptr;
         std::shared_ptr<ukive::Bitmap> bmp_;
+
+        cyro::RayTracer ray_tracer_;
+        std::unique_ptr<cyro::ImagePng> image_;
     };
 
 }
