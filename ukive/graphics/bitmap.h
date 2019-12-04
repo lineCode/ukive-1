@@ -19,6 +19,19 @@ namespace ukive {
         ComPtr<ID2D1Bitmap> native_bitmap_;
     };
 
+    class SWBitmap {
+    public:
+        explicit SWBitmap(const ComPtr<IWICBitmap> &source);
+
+        int getWidth() const;
+        int getHeight() const;
+
+        ComPtr<IWICBitmap> getNative() const;
+
+    private:
+        ComPtr<IWICBitmap> native_bitmap_;
+    };
+
 }
 
 #endif  // UKIVE_GRAPHICS_BITMAP_H_

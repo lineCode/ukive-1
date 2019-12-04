@@ -4,15 +4,14 @@
 namespace ukive {
 
     Paint::Paint()
-        :color_(Color::Black),
-        style_(Style::STROKE),
-        bitmap_(nullptr),
-        opacity_(1.f),
-        stroke_width_(1.f),
-        has_stroke_style_(false),
-        is_antialiased_(true),
-        is_text_antialiased_(true) {}
-
+        : color_(Color::Black),
+          style_(Style::STROKE),
+          bitmap_({}),
+          stroke_width_(1.f),
+          has_stroke_style_(false),
+          is_antialiased_(true),
+          is_text_antialiased_(true) {
+    }
 
     void Paint::setStyle(Style s) {
         style_ = s;
@@ -23,16 +22,12 @@ namespace ukive {
         has_stroke_style_ = true;
     }
 
-    void Paint::setBitmap(Bitmap* b) {
+    void Paint::setBitmap(const Bitmap& b) {
         bitmap_ = b;
     }
 
     void Paint::setColor(const Color& color) {
         color_ = color;
-    }
-
-    void Paint::setOpacity(float opacity) {
-        opacity_ = opacity;
     }
 
     void Paint::setAntialias(bool enabled) {
@@ -47,39 +42,35 @@ namespace ukive {
         stroke_width_ = width;
     }
 
-    Paint::Style Paint::getStyle() {
+    Paint::Style Paint::getStyle() const {
         return style_;
     }
 
-    Paint::StrokeStyle Paint::getStrokeStyle() {
+    const Paint::StrokeStyle& Paint::getStrokeStyle() const {
         return stroke_style_;
     }
 
-    Bitmap* Paint::getBitmap() {
+    const Bitmap& Paint::getBitmap() const {
         return bitmap_;
     }
 
-    Color Paint::getColor() {
+    Color Paint::getColor() const {
         return color_;
     }
 
-    float Paint::getOpacity() {
-        return opacity_;
-    }
-
-    bool Paint::hasStrokeStyle() {
+    bool Paint::hasStrokeStyle() const {
         return has_stroke_style_;
     }
 
-    bool Paint::isAntialiased() {
+    bool Paint::isAntialiased() const {
         return is_antialiased_;
     }
 
-    bool Paint::isTextAntialiased() {
+    bool Paint::isTextAntialiased() const {
         return is_text_antialiased_;
     }
 
-    float Paint::getStrokeWidth() {
+    float Paint::getStrokeWidth() const {
         return stroke_width_;
     }
 

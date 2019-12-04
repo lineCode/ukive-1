@@ -32,9 +32,9 @@ namespace shell {
 
         ukive::Animator animator_;
 
-        ukive::ShadowEffect* d3d_effect_;
         std::shared_ptr<ukive::Bitmap> shadow_bmp_;
         std::shared_ptr<ukive::Bitmap> content_bmp_;
+        std::unique_ptr<ukive::ShadowEffect> shadow_effect_;
     };
 
 }

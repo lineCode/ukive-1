@@ -11,6 +11,10 @@ namespace utl {
 
     using Solid = std::function<void()>;
 
+    /**
+     * WeakPtr
+     * 对象指针必须是 std::shared_ptr
+     */
     template <typename Ret>
     struct WeakPtrWrapper {
         template <typename Obj>
@@ -54,6 +58,7 @@ namespace utl {
 
     /**
      * WeakRef
+     * 需要与 WeakRefNest 合用
      */
     template <typename Ret>
     struct WeakRefWrapper {

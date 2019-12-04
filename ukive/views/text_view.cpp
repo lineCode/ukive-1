@@ -4,7 +4,7 @@
 
 #include "utils/stl_utils.h"
 
-#include "ukive/text/input_connection.h"
+#include "ukive/text/tsf_input_connection.h"
 #include "ukive/event/input_event.h"
 #include "ukive/text/text_blink.h"
 #include "ukive/system/clipboard_manager.h"

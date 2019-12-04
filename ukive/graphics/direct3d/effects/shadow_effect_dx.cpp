@@ -1,10 +1,11 @@
-#include "shadow_effect.h"
+#include "shadow_effect_dx.h"
 
 #include "utils/log.h"
 #include "utils/files/file_utils.h"
 
 #include "ukive/application.h"
 #include "ukive/graphics/direct3d/space.h"
+#include "ukive/graphics/offscreen_buffer.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
@@ -21,7 +22,7 @@ namespace {
 
 namespace ukive {
 
-    ShadowEffect::ShadowEffect()
+    ShadowEffectDX::ShadowEffectDX()
         : width_(0),
           height_(0),
           view_width_(0),
@@ -80,7 +81,7 @@ namespace ukive {
         }
     }
 
-    void ShadowEffect::draw() {
+    void ShadowEffectDX::draw() {
         Space::setVertexShader(vertex_shader_.get());
         Space::setPixelShader(pixel_shader_.get());
         Space::setInputLayout(input_layout_.get());
@@ -137,9 +138,9 @@ namespace ukive {
         d3d_dc->DrawIndexed(6, 0, 0);
     }
 
-    void ShadowEffect::draw(Canvas* c) {
+    void ShadowEffectDX::draw(Canvas* c) {
         draw();
-        auto shadow_bmp = getOutput(c->getRT());
+        auto shadow_bmp = getOutput(c);
 
         c->save();
         c->translate(-std::floor(elevation_ * 2), -std::floor(elevation_ * 2));
@@ -147,7 +148,7 @@ namespace ukive {
         c->restore();
     }
 
-    void ShadowEffect::setSize(int width, int height) {
+    void ShadowEffectDX::setSize(int width, int height) {
         if (width_ == width && height_ == height) {
             return;
         }
@@ -208,7 +209,7 @@ namespace ukive {
         createTexture(shadow2_tex2d_, shadow2_rtv_, shadow2_srv_);
     }
 
-    void ShadowEffect::setRadius(int radius) {
+    void ShadowEffectDX::setRadius(int radius) {
         if (radius == radius_ || radius <= 0) {
             return;
         }
@@ -219,7 +220,9 @@ namespace ukive {
         createKernelTexture();
     }
 
-    void ShadowEffect::setContent(ID3D11Texture2D* texture) {
+    void ShadowEffectDX::setContent(OffscreenBuffer* content) {
+        auto texture = content->getTexture();
+
         D3D11_TEXTURE2D_DESC desc;
         texture->GetDesc(&desc);
         view_width_ = desc.Width;
@@ -228,14 +231,14 @@ namespace ukive {
         auto device = Application::getGraphicDeviceManager()->getD3DDevice();
 
         bg_srv_.reset();
-        HRESULT hr = device->CreateShaderResourceView(texture, nullptr, &bg_srv_);
+        HRESULT hr = device->CreateShaderResourceView(texture.get(), nullptr, &bg_srv_);
         if (FAILED(hr)) {
             LOG(Log::WARNING) << "Failed to create SRV: " << hr;
             return;
         }
 
         bg_rtv_.reset();
-        hr = device->CreateRenderTargetView(texture, nullptr, &bg_rtv_);
+        hr = device->CreateRenderTargetView(texture.get(), nullptr, &bg_rtv_);
         if (FAILED(hr)) {
             LOG(Log::WARNING) << "Failed to create RTV: " << hr;
             return;
@@ -244,11 +247,13 @@ namespace ukive {
         setSize(view_width_ + radius_ * 2, view_height_ + radius_ * 2);
     }
 
-    int ShadowEffect::getRadius() const {
+    int ShadowEffectDX::getRadius() const {
         return radius_;
     }
 
-    std::shared_ptr<Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
+    std::shared_ptr<Bitmap> ShadowEffectDX::getOutput(Canvas* c) {
+        auto rt = c->getBuffer()->getRT();
+
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
@@ -264,12 +269,12 @@ namespace ukive {
     }
 
 
-    void ShadowEffect::createTexture(
+    void ShadowEffectDX::createTexture(
         ComPtr<ID3D11Texture2D>& tex,
         ComPtr<ID3D11RenderTargetView>& rtv,
         ComPtr<ID3D11ShaderResourceView>& srv)
     {
-        tex = Canvas::createTexture2D(width_, height_, false);
+        tex = Application::getGraphicDeviceManager()->createTexture2D(width_, height_, false);
         auto device = Application::getGraphicDeviceManager()->getD3DDevice();
 
         srv.reset();
@@ -287,7 +292,7 @@ namespace ukive {
         }
     }
 
-    void ShadowEffect::createKernelTexture() {
+    void ShadowEffectDX::createKernelTexture() {
         float total_weight = 0;
         std::unique_ptr<float[]> weight_matrix(new float[radius_ + 1]());
         for (int i = 0; i < radius_ + 1; ++i) {

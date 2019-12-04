@@ -19,6 +19,7 @@ namespace ukive {
     class InputEvent;
     class WindowImpl;
     class DebugDrawer;
+    class WindowBuffer;
     class TitleBar;
     class RootLayout;
     class ContextMenu;
@@ -181,9 +182,11 @@ namespace ukive {
 
         std::unique_ptr<WindowImpl> impl_;
 
-        Canvas* canvas_;
         Cycler* labour_cycler_;
         RootLayout* root_layout_;
+
+        Canvas* canvas_;
+        std::shared_ptr<WindowBuffer> buffer_;
 
         View* mouse_holder_;
         View* touch_holder_;

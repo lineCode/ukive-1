@@ -7,7 +7,7 @@
 #include "utils/log.h"
 #include "utils/stl_utils.h"
 
-#include "ukive/text/input_connection.h"
+#include "ukive/text/tsf_input_connection.h"
 #include "ukive/window/window.h"
 #include "ukive/window/window_impl.h"
 
