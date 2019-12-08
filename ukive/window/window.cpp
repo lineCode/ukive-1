@@ -15,6 +15,7 @@
 #include "ukive/message/message.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
+#include "ukive/graphics/window_buffer.h"
 #include "ukive/graphics/debug_drawer.h"
 #include "ukive/system/qpc_service.h"
 #include "ukive/window/window_listener.h"
@@ -595,7 +596,10 @@ namespace ukive {
                 LayoutParams::MATCH_PARENT,
                 LayoutParams::MATCH_PARENT));
 
-        canvas_ = new Canvas(this, true);
+        buffer_ = std::make_shared<WindowBuffer>(this);
+        buffer_->onCreate(true);
+
+        canvas_ = new Canvas(buffer_);
 
         root_layout_->onAttachedToWindow();
     }
@@ -741,10 +745,12 @@ namespace ukive {
     }
 
     void Window::onResize(int param, int width, int height) {
-        if (!canvas_->resize()) {
+        canvas_->release();
+        if (!buffer_->onResize(0, 0)) {
             LOG(Log::ERR) << "Resize canvas failed.";
             return;
         }
+        canvas_->refresh();
         off_canvas_.reset();
 
         switch (param) {
@@ -838,6 +844,9 @@ namespace ukive {
 
         delete canvas_;
         canvas_ = nullptr;
+
+        buffer_->onDestroy();
+        buffer_.reset();
 
         delete labour_cycler_;
 

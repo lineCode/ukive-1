@@ -19,24 +19,22 @@ namespace ukive {
     class Bitmap;
     class Window;
     class TextRenderer;
+    class CyroBuffer;
 
     class Canvas {
     public:
         Canvas(int width, int height);
-        Canvas(Window* w, bool hw_acc);
+        explicit Canvas(const std::shared_ptr<CyroBuffer>& buffer);
         ~Canvas();
 
         void setOpacity(float opacity);
         float getOpacity();
 
-        bool resize();
-        bool resize(int width, int height);
-
         void clear();
         void clear(const Color& color);
 
         void beginDraw();
-        void endDraw();
+        bool endDraw();
 
         void pushClip(const Rect& rect);
         void popClip();
@@ -48,13 +46,17 @@ namespace ukive {
         void save();
         void restore();
 
-        //临时方法。
+        // 临时方法。
         ID2D1RenderTarget* getRT();
+        // 临时方法。
+        void release();
+        // 临时方法。
+        void refresh();
 
         int getWidth() const;
         int getHeight() const;
-        ComPtr<ID3D11Texture2D> getTexture();
-        std::shared_ptr<Bitmap> extractBitmap();
+        CyroBuffer* getBuffer() const;
+        std::shared_ptr<Bitmap> extractBitmap() const;
 
         void scale(float sx, float sy);
         void scale(float sx, float sy, float cx, float cy);
@@ -117,12 +119,6 @@ namespace ukive {
             float x, float y,
             IDWriteTextLayout* textLayout, const Color& color);
 
-        static ComPtr<ID2D1RenderTarget> createWICRenderTarget(IWICBitmap* wic_bitmap);
-        static ComPtr<ID2D1DCRenderTarget> createDCRenderTarget();
-
-        static ComPtr<ID3D11Texture2D> createTexture2D(int width, int height, bool gdi_compat);
-        static ComPtr<ID2D1RenderTarget> createDXGIRenderTarget(IDXGISurface* surface, bool gdi_compat);
-
         static ComPtr<IDWriteTextFormat> createTextFormat(
             const string16& font_family_name,
             float font_size, const string16& locale_name);
@@ -132,25 +128,12 @@ namespace ukive {
 
     private:
         void initCanvas();
-
-        bool createOffScreenBRT(int width, int height);
-        ComPtr<ID2D1RenderTarget> createHardwareBRT();
-        ComPtr<ID2D1RenderTarget> createSoftwareBRT();
-        ComPtr<ID2D1RenderTarget> createSwapchainBRT();
-
-        bool resizeHardwareBRT();
-        bool resizeSoftwareBRT();
-        bool resizeSwapchainBRT();
-
-        bool drawLayered();
-        bool drawSwapchain();
-
         void releaseResources();
 
         int layer_counter_;
-        bool is_texture_target_;
         float opacity_;
         Matrix matrix_;
+        bool is_own_buffer_ = false;
 
         ComPtr<TextRenderer> text_renderer_;
 
@@ -159,15 +142,10 @@ namespace ukive {
         ComPtr<ID2D1SolidColorBrush> solid_brush_;
         ComPtr<ID2D1BitmapBrush> bitmap_brush_;
 
-        ComPtr<ID3D11Texture2D> d3d_tex2d_;
-
         std::stack<float> opacity_stack_;
         std::stack<ComPtr<ID2D1DrawingStateBlock>> drawing_state_stack_;
 
-        bool is_layered_ = false;
-        bool is_hardware_acc_ = false;
-        Window* owner_window_ = nullptr;
-        ComPtr<IDXGISwapChain> swapchain_;
+        std::shared_ptr<CyroBuffer> buffer_;
     };
 
 }

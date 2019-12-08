@@ -6,14 +6,14 @@
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
 #include "ukive/animation/view_animator.h"
-#include "ukive/text/input_connection.h"
+#include "ukive/text/tsf_input_connection.h"
 #include "ukive/views/click_listener.h"
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/window/window.h"
 #include "ukive/application.h"
 #include "ukive/message/cycler.h"
 #include "ukive/graphics/point.h"
-#include "ukive/graphics/direct3d/effects/shadow_effect.h"
+#include "ukive/graphics/effects/shadow_effect.h"
 #include "ukive/resources/dimension_utils.h"
 
 #include "oigka/layout_constants.h"
@@ -324,7 +324,7 @@ namespace ukive {
         }
 
         if (!shadow_effect_) {
-            shadow_effect_ = std::make_unique<ShadowEffect>();
+            shadow_effect_.reset(ShadowEffect::createShadowEffect());
         }
 
         elevation_ = elevation;
@@ -680,17 +680,16 @@ namespace ukive {
         bool hasShadow = (hasBg && (elevation_ > 0.f) && shadow_effect_);
 
         std::shared_ptr<Bitmap> bg_bmp;
-        ComPtr<ID3D11Texture2D> bg_texture;
+        std::shared_ptr<Canvas> bg_off;
         if (hasShadow) {
             // 将背景绘制到 bg_bmp 上
-            Canvas offscreen(getWidth(), getHeight());
-            offscreen.beginDraw();
-            offscreen.clear();
-            offscreen.setOpacity(canvas->getOpacity());
-            drawBackground(&offscreen);
-            offscreen.endDraw();
-            bg_bmp = offscreen.extractBitmap();
-            bg_texture = offscreen.getTexture();
+            bg_off = std::make_shared<Canvas>(getWidth(), getHeight());
+            bg_off->beginDraw();
+            bg_off->clear();
+            bg_off->setOpacity(canvas->getOpacity());
+            drawBackground(bg_off.get());
+            bg_off->endDraw();
+            bg_bmp = bg_off->extractBitmap();
         }
 
         // 若有，使用 layer 应用 reveal 动画
@@ -712,9 +711,8 @@ namespace ukive {
                     offscreen.fillCircle(mRevealCenterX, mRevealCenterY, mRevealRadius, bg_bmp.get());
                     offscreen.endDraw();
                     auto revealed_bg_bmp = offscreen.extractBitmap();
-                    auto revealed_bg_texture = offscreen.getTexture();
 
-                    shadow_effect_->setContent(revealed_bg_texture.get());
+                    shadow_effect_->setContent(reinterpret_cast<OffscreenBuffer*>(offscreen.getBuffer()));
                     shadow_effect_->draw(canvas);
 
                     canvas->drawBitmap(revealed_bg_bmp.get());
@@ -743,9 +741,8 @@ namespace ukive {
                     offscreen.fillGeometry(rectGeo.get(), bg_bmp.get());
                     offscreen.endDraw();
                     auto revealed_bg_bmp = offscreen.extractBitmap();
-                    auto revealed_bg_texture = offscreen.getTexture();
 
-                    shadow_effect_->setContent(revealed_bg_texture.get());
+                    shadow_effect_->setContent(reinterpret_cast<OffscreenBuffer*>(offscreen.getBuffer()));
                     shadow_effect_->draw(canvas);
 
                     canvas->drawBitmap(revealed_bg_bmp.get());
@@ -761,7 +758,7 @@ namespace ukive {
             // 没有 reveal 动画，直接绘制背景和阴影
             if (hasBg) {
                 if (hasShadow) {
-                    shadow_effect_->setContent(bg_texture.get());
+                    shadow_effect_->setContent(reinterpret_cast<OffscreenBuffer*>(bg_off->getBuffer()));
                     shadow_effect_->draw(canvas);
 
                     canvas->drawBitmap(bg_bmp.get());

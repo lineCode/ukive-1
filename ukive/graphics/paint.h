@@ -2,6 +2,7 @@
 #define UKIVE_GRAPHICS_PAINT_H_
 
 #include "ukive/graphics/color.h"
+#include "ukive/graphics/bitmap.h"
 
 
 namespace ukive {
@@ -13,8 +14,7 @@ namespace ukive {
         enum class Style {
             STROKE,
             FILL,
-            GRADIENT,
-            BITMAP
+            BITMAP,
         };
 
         enum class CapStyle {
@@ -31,7 +31,7 @@ namespace ukive {
             MITER_OR_BEVEL
         };
 
-        enum DashStyle {
+        enum class DashStyle {
             SOLID,
             DASH,
             DOT,
@@ -69,29 +69,26 @@ namespace ukive {
 
         void setStyle(Style s);
         void setStrokeStyle(const StrokeStyle& s);
-        void setBitmap(Bitmap* b);
+        void setBitmap(const Bitmap& b);
         void setColor(const Color& color);
-        void setOpacity(float opacity);
         void setAntialias(bool enabled);
         void setTextAntialias(bool enabled);
         void setStrokeWidth(float width);
 
-        Style getStyle();
-        StrokeStyle getStrokeStyle();
-        Bitmap* getBitmap();
-        Color getColor();
-        float getOpacity();
-        bool hasStrokeStyle();
-        bool isAntialiased();
-        bool isTextAntialiased();
-        float getStrokeWidth();
+        Style getStyle() const;
+        const StrokeStyle& getStrokeStyle() const;
+        const Bitmap& getBitmap() const;
+        Color getColor() const;
+        bool hasStrokeStyle() const;
+        bool isAntialiased() const;
+        bool isTextAntialiased() const;
+        float getStrokeWidth() const;
 
     private:
         Color color_;
         Style style_;
         StrokeStyle stroke_style_;
-        Bitmap* bitmap_;
-        float opacity_;
+        Bitmap bitmap_;
         float stroke_width_;
         bool has_stroke_style_;
         bool is_antialiased_;

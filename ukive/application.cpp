@@ -74,8 +74,6 @@ namespace ukive {
         graphic_device_manager_.reset(new GraphicDeviceManager());
         graphic_device_manager_->init();
 
-        wic_manager_.reset(new WICManager());
-
         tsf_manager_.reset(new TsfManager());
         hr = tsf_manager_->init();
         if (FAILED(hr)) {
@@ -89,8 +87,6 @@ namespace ukive {
 
         tsf_manager_->close();
         tsf_manager_.reset();
-
-        wic_manager_.reset();
 
         graphic_device_manager_->shutdown();
 
@@ -173,10 +169,6 @@ namespace ukive {
 
     HMODULE Application::getModuleHandle() {
         return ::GetModuleHandle(nullptr);
-    }
-
-    WICManager* Application::getWICManager() {
-        return instance_->wic_manager_.get();
     }
 
     TsfManager* Application::getTsfManager() {

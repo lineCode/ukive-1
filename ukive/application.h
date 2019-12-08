@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "utils/string_utils.h"
-#include "ukive/graphics/wic_manager.h"
 #include "ukive/text/tsf_manager.h"
 
 
@@ -37,7 +36,6 @@ namespace ukive {
         static HMODULE getModuleHandle();
         static GraphicDeviceManager* getGraphicDeviceManager();
 
-        static WICManager* getWICManager();
         static TsfManager* getTsfManager();
 
         static int getViewID();
@@ -65,7 +63,6 @@ namespace ukive {
         std::vector<string16> command_list_;
 
         std::unique_ptr<TsfManager> tsf_manager_;
-        std::unique_ptr<WICManager> wic_manager_;
         std::unique_ptr<GraphicDeviceManager> graphic_device_manager_;
     };
 

@@ -1,7 +1,5 @@
 ﻿#include "ukive/graphics/canvas.h"
 
-#include <algorithm>
-
 #include "utils/log.h"
 #include "utils/stl_utils.h"
 
@@ -12,46 +10,37 @@
 #include "ukive/graphics/rect.h"
 #include "ukive/graphics/point.h"
 #include "ukive/graphics/bitmap.h"
-#include "ukive/system/win10_version.h"
+#include "ukive/graphics/cyro_buffer.h"
+#include "ukive/graphics/offscreen_buffer.h"
 
 
 namespace ukive {
 
     Canvas::Canvas(int width, int height)
-        : is_texture_target_(true),
-          opacity_(1.f)
+        : opacity_(1.f),
+          is_own_buffer_(true)
     {
-        createOffScreenBRT(width, height);
+        buffer_ = std::make_shared<OffscreenBuffer>(width, height);
+        if (buffer_->onCreate(true)) {
+            rt_ = buffer_->getRT();
+            initCanvas();
+        }
     }
 
-    Canvas::Canvas(Window* w, bool hw_acc)
-        : is_texture_target_(false),
-          opacity_(1.f),
-          is_hardware_acc_(hw_acc),
-          owner_window_(w)
+    Canvas::Canvas(const std::shared_ptr<CyroBuffer>& buffer)
+        : opacity_(1.f),
+          is_own_buffer_(false),
+          buffer_(buffer)
     {
-        is_layered_ = owner_window_->isTranslucent();
-
-        ComPtr<ID2D1RenderTarget> rt;
-        if (is_layered_) {
-            if (is_hardware_acc_) {
-                rt = createHardwareBRT();
-            } else {
-                rt = createSoftwareBRT();
-            }
-        } else {
-            rt = createSwapchainBRT();
-        }
-
-        if (!rt) {
-            return;
-        }
-
-        rt_ = rt;
+        rt_ = buffer_->getRT();
         initCanvas();
     }
 
-    Canvas::~Canvas() {}
+    Canvas::~Canvas() {
+        if (is_own_buffer_) {
+            buffer_->onDestroy();
+        }
+    }
 
     void Canvas::initCanvas() {
         layer_counter_ = 0;
@@ -66,214 +55,8 @@ namespace ukive {
         bitmap_brush_->SetOpacity(opacity_);
     }
 
-    bool Canvas::createOffScreenBRT(int width, int height) {
-        d3d_tex2d_ = createTexture2D(width, height, false);
-        if (!d3d_tex2d_) {
-            return false;
-        }
-
-        auto dxgi_surface = d3d_tex2d_.cast<IDXGISurface>();
-        if (!dxgi_surface) {
-            LOG(Log::WARNING) << "Failed to query DXGI surface.";
-            return false;
-        }
-
-        rt_ = createDXGIRenderTarget(dxgi_surface.get(), false);
-        if (!rt_) {
-            return false;
-        }
-
-        initCanvas();
-        return true;
-    }
-
-    ComPtr<ID2D1RenderTarget> Canvas::createHardwareBRT() {
-        D3D11_TEXTURE2D_DESC tex_desc = { 0 };
-        tex_desc.ArraySize = 1;
-        tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
-        tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        tex_desc.Width = owner_window_->getWidth();
-        tex_desc.Height = owner_window_->getHeight();
-        tex_desc.MipLevels = 1;
-        tex_desc.SampleDesc.Count = 1;
-        tex_desc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
-
-        ComPtr<ID3D11Texture2D> d3d_texture;
-        HRESULT hr = Application::getGraphicDeviceManager()->getD3DDevice()->
-            CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
-        if (FAILED(hr)) {
-            LOG(Log::WARNING) << "Failed to create tex2d.";
-            return {};
-        }
-
-        auto dxgi_surface = d3d_texture.cast<IDXGISurface>();
-        if (!dxgi_surface) {
-            LOG(Log::WARNING) << "Failed to cast tex2d to dxgi surface.";
-            return {};
-        }
-
-        return createDXGIRenderTarget(dxgi_surface.get(), true);
-    }
-
-    ComPtr<ID2D1RenderTarget> Canvas::createSoftwareBRT() {
-        auto wic_bmp = Application::getWICManager()->createBitmap(
-            owner_window_->getWidth(),
-            owner_window_->getHeight());
-        if (!wic_bmp) {
-            LOG(Log::WARNING) << "Failed to create wic bitmap.";
-            return {};
-        }
-
-        return createWICRenderTarget(wic_bmp.get());
-    }
-
-    ComPtr<ID2D1RenderTarget> Canvas::createSwapchainBRT() {
-        DXGI_SWAP_CHAIN_DESC swapChainDesc;
-        ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-
-        swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_STRETCHED;
-        swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.BufferCount = 2;
-        swapChainDesc.OutputWindow = owner_window_->getImpl()->getHandle();
-        swapChainDesc.Windowed = TRUE;
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-        auto gdm = Application::getGraphicDeviceManager();
-
-        HRESULT hr = gdm->getDXGIFactory()->CreateSwapChain(
-            gdm->getD3DDevice().get(),
-            &swapChainDesc, &swapchain_);
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to create swap chain: " << hr;
-            return {};
-        }
-
-        ComPtr<IDXGISurface> back_buffer;
-        hr = swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer));
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to query DXGI surface: " << hr;
-            return {};
-        }
-
-        return createDXGIRenderTarget(back_buffer.get(), false);
-    }
-
-    bool Canvas::resizeHardwareBRT() {
-        if (owner_window_->getWidth() <= 0 ||
-            owner_window_->getHeight() <= 0)
-        {
-            return true;
-        }
-
-        releaseResources();
-
-        rt_.reset();
-        rt_ = createHardwareBRT();
-
-        initCanvas();
-
-        return rt_ != nullptr;
-    }
-
-    bool Canvas::resizeSoftwareBRT() {
-        if (owner_window_->getWidth() <= 0 ||
-            owner_window_->getHeight() <= 0)
-        {
-            return true;
-        }
-
-        rt_.reset();
-        rt_ = createSoftwareBRT();
-
-        return rt_ != nullptr;
-    }
-
-    bool Canvas::resizeSwapchainBRT() {
-        releaseResources();
-
-        rt_.reset();
-
-        // 在某些系统上，需要传入完整大小
-        static bool need_total = win::isWin10Ver1703OrGreater();
-
-        int width = owner_window_->getClientWidth(need_total);
-        int height = owner_window_->getClientHeight(need_total);
-        if (width <= 0 || height <= 0) {
-            return true;
-        }
-
-        HRESULT hr = swapchain_->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to resize swap chain: " << hr;
-            return false;
-        }
-
-        ComPtr<IDXGISurface> back_buffer;
-        hr = swapchain_->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<LPVOID*>(&back_buffer));
-        if (FAILED(hr)) {
-            LOG(Log::FATAL) << "Failed to query DXGI surface: " << hr;
-            return false;
-        }
-
-        rt_ = createDXGIRenderTarget(back_buffer.get(), false);
-
-        initCanvas();
-
-        return rt_ != nullptr;
-    }
-
-    bool Canvas::drawLayered() {
-        auto gdi_rt = rt_.cast<ID2D1GdiInteropRenderTarget>();
-        if (!gdi_rt) {
-            LOG(Log::FATAL) << "Failed to cast ID2D1RenderTarget to GDI RT.";
-            return false;
-        }
-
-        HDC hdc = nullptr;
-        HRESULT hr = gdi_rt->GetDC(D2D1_DC_INITIALIZE_MODE_COPY, &hdc);
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Failed to get DC: " << hr;
-            return false;
-        }
-
-        RECT wr;
-        ::GetWindowRect(owner_window_->getImpl()->getHandle(), &wr);
-        POINT zero = { 0, 0 };
-        SIZE size = { wr.right - wr.left, wr.bottom - wr.top };
-        POINT position = { wr.left, wr.top };
-        BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-        BOOL ret = ::UpdateLayeredWindow(
-            owner_window_->getImpl()->getHandle(),
-            nullptr, &position, &size, hdc, &zero,
-            RGB(0xFF, 0xFF, 0xFF), &blend, ULW_ALPHA);
-        if (ret == 0) {
-            LOG(Log::ERR) << "Failed to update layered window: " << ::GetLastError();
-        }
-
-        RECT rect = {};
-        hr = gdi_rt->ReleaseDC(&rect);
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Failed to release DC: " << hr;
-            return false;
-        }
-
-        return true;
-    }
-
-    bool Canvas::drawSwapchain() {
-        HRESULT hr = swapchain_->Present(Application::isVSyncEnabled() ? 1 : 0, 0);
-        if (FAILED(hr)) {
-            LOG(Log::ERR) << "Failed to present.";
-            return false;
-        }
-
-        return true;
-    }
-
     void Canvas::releaseResources() {
+        rt_.reset();
         layer_counter_ = 0;
         matrix_.identity();
         while (!opacity_stack_.empty()) {
@@ -287,7 +70,6 @@ namespace ukive {
         layer_.reset();
         solid_brush_.reset();
         bitmap_brush_.reset();
-        d3d_tex2d_.reset();
     }
 
     void Canvas::setOpacity(float opacity) {
@@ -309,30 +91,6 @@ namespace ukive {
         return opacity_;
     }
 
-    bool Canvas::resize() {
-        bool ret;
-        if (is_texture_target_) {
-            DCHECK(false);
-            ret = true;
-        } else {
-            if (is_layered_) {
-                if (is_hardware_acc_) {
-                    ret = resizeHardwareBRT();
-                } else {
-                    ret = resizeSoftwareBRT();
-                }
-            } else {
-                ret = resizeSwapchainBRT();
-            }
-        }
-
-        return ret;
-    }
-
-    bool Canvas::resize(int width, int height) {
-        return createOffScreenBRT(width, height);
-    }
-
     void Canvas::clear() {
         rt_->Clear();
     }
@@ -343,30 +101,11 @@ namespace ukive {
     }
 
     void Canvas::beginDraw() {
-        rt_->BeginDraw();
+        buffer_->onBeginDraw();
     }
 
-    void Canvas::endDraw() {
-        if (is_texture_target_) {
-            HRESULT hr = rt_->EndDraw();
-            if (FAILED(hr)) {
-                LOG(Log::ERR) << "Failed to end draw.";
-            }
-        } else {
-            if (is_layered_) {
-                drawLayered();
-            }
-
-            HRESULT hr = rt_->EndDraw();
-            if (FAILED(hr)) {
-                DCHECK(false);
-                LOG(Log::ERR) << "Failed to draw d2d content.";
-            }
-
-            if (!is_layered_) {
-                drawSwapchain();
-            }
-        }
+    bool Canvas::endDraw() {
+        return buffer_->onEndDraw();
     }
 
     void Canvas::pushClip(const Rect& rect) {
@@ -479,6 +218,22 @@ namespace ukive {
         return rt_.get();
     }
 
+    void Canvas::release() {
+        releaseResources();
+    }
+
+    void Canvas::refresh() {
+        rt_ = buffer_->getRT();
+        initCanvas();
+
+        if (text_renderer_) {
+            text_renderer_->setOpacity(opacity_);
+        }
+
+        solid_brush_->SetOpacity(opacity_);
+        bitmap_brush_->SetOpacity(opacity_);
+    }
+
     int Canvas::getWidth() const {
         return rt_->GetPixelSize().width;
     }
@@ -487,27 +242,12 @@ namespace ukive {
         return rt_->GetPixelSize().height;
     }
 
-    ComPtr<ID3D11Texture2D> Canvas::getTexture() {
-        return d3d_tex2d_;
+    CyroBuffer* Canvas::getBuffer() const {
+        return buffer_.get();
     }
 
-    std::shared_ptr<Bitmap> Canvas::extractBitmap() {
-        if (is_texture_target_) {
-            ComPtr<ID2D1Bitmap> bitmap;
-            D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
-            HRESULT hr = rt_->CreateSharedBitmap(
-                __uuidof(IDXGISurface), d3d_tex2d_.cast<IDXGISurface>().get(), &bmp_prop, &bitmap);
-            if (FAILED(hr)) {
-                DCHECK(false);
-                LOG(Log::WARNING) << "Failed to create shared bitmap: " << hr;
-                return {};
-            }
-
-            return std::make_shared<Bitmap>(bitmap);
-        }
-
-        return {};
+    std::shared_ptr<Bitmap> Canvas::extractBitmap() const {
+        return buffer_->onExtractBitmap();
     }
 
     void Canvas::scale(float sx, float sy) {
@@ -821,100 +561,6 @@ namespace ukive {
 
         text_renderer_->setTextColor(color);
         textLayout->Draw(v, text_renderer_.get(), x, y);
-    }
-
-    // static
-    ComPtr<ID2D1RenderTarget> Canvas::createWICRenderTarget(IWICBitmap* wic_bitmap) {
-        ComPtr<ID2D1RenderTarget> render_target;
-        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
-        if (d2d_factory) {
-            const D2D1_PIXEL_FORMAT format =
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
-
-            const D2D1_RENDER_TARGET_PROPERTIES properties
-                = D2D1::RenderTargetProperties(
-                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                    format, 96, 96,
-                    D2D1_RENDER_TARGET_USAGE_NONE);
-
-            HRESULT hr = d2d_factory->CreateWicBitmapRenderTarget(
-                wic_bitmap, properties, &render_target);
-            if (FAILED(hr)) {
-                DCHECK(false);
-                LOG(Log::WARNING) << "Failed to create WICBitmap RenderTarget: " << hr;
-                return {};
-            }
-        }
-
-        return render_target;
-    }
-
-    ComPtr<ID2D1DCRenderTarget> Canvas::createDCRenderTarget() {
-        ComPtr<ID2D1DCRenderTarget> render_target;
-        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
-
-        if (d2d_factory) {
-            const D2D1_PIXEL_FORMAT format =
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
-                    D2D1_ALPHA_MODE_PREMULTIPLIED);
-
-            // DPI 固定为 96
-            const D2D1_RENDER_TARGET_PROPERTIES properties =
-                D2D1::RenderTargetProperties(
-                    D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                    format);
-
-            HRESULT hr = d2d_factory->CreateDCRenderTarget(
-                &properties, &render_target);
-            if (FAILED(hr)) {
-                LOG(Log::WARNING) << "Failed to create DC RenderTarget: " << hr;
-                return {};
-            }
-        }
-
-        return render_target;
-    }
-
-    ComPtr<ID3D11Texture2D> Canvas::createTexture2D(int width, int height, bool gdi_compat) {
-        auto d3d_device = Application::getGraphicDeviceManager()->getD3DDevice();
-
-        D3D11_TEXTURE2D_DESC tex_desc = { 0 };
-        tex_desc.ArraySize = 1;
-        tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-        tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        tex_desc.Width = width;
-        tex_desc.Height = height;
-        tex_desc.MipLevels = 1;
-        tex_desc.SampleDesc.Count = 1;
-        tex_desc.SampleDesc.Quality = 0;
-        tex_desc.MiscFlags = gdi_compat ? D3D11_RESOURCE_MISC_GDI_COMPATIBLE : 0;
-
-        ComPtr<ID3D11Texture2D> d3d_texture;
-        HRESULT hr = d3d_device->CreateTexture2D(&tex_desc, nullptr, &d3d_texture);
-        if (FAILED(hr)) {
-            LOG(Log::WARNING) << "Failed to create 2d texture: " << hr;
-            return {};
-        }
-
-        return d3d_texture;
-    }
-
-    ComPtr<ID2D1RenderTarget> Canvas::createDXGIRenderTarget(IDXGISurface* surface, bool gdi_compat) {
-        ComPtr<ID2D1RenderTarget> render_target;
-        auto d2d_factory = Application::getGraphicDeviceManager()->getD2DFactory();
-        if (d2d_factory) {
-            D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-                D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-                96, 96, gdi_compat ? D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE : D2D1_RENDER_TARGET_USAGE_NONE);
-
-            HRESULT hr = d2d_factory->CreateDxgiSurfaceRenderTarget(surface, props, &render_target);
-            if (FAILED(hr)) {
-                DCHECK(false);
-            }
-        }
-
-        return render_target;
     }
 
     ComPtr<IDWriteTextFormat> Canvas::createTextFormat(

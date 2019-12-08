@@ -29,9 +29,6 @@
     <ClCompile Include="graphics\color.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="graphics\wic_manager.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="system\clipboard_manager.cpp">
       <Filter>system</Filter>
     </ClCompile>
@@ -57,9 +54,6 @@
       <Filter>animation</Filter>
     </ClCompile>
     <ClCompile Include="text\editable.cpp">
-      <Filter>text</Filter>
-    </ClCompile>
-    <ClCompile Include="text\input_connection.cpp">
       <Filter>text</Filter>
     </ClCompile>
     <ClCompile Include="text\text_action_mode.cpp">
@@ -217,9 +211,6 @@
     </ClCompile>
     <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp">
       <Filter>graphics\direct3d</Filter>
-    </ClCompile>
-    <ClCompile Include="graphics\direct3d\effects\shadow_effect.cpp">
-      <Filter>graphics\direct3d\effects</Filter>
     </ClCompile>
     <ClCompile Include="views\layout\root_layout.cpp">
       <Filter>views\layout</Filter>
@@ -383,6 +374,21 @@
     <ClCompile Include="graphics\debug_drawer.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="graphics\window_buffer.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\offscreen_buffer.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="text\tsf_input_connection.cpp">
+      <Filter>text</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\direct3d\effects\shadow_effect_dx.cpp">
+      <Filter>graphics\direct3d\effects</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\effects\shadow_effect.cpp">
+      <Filter>graphics\effects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
@@ -416,9 +422,6 @@
     <ClInclude Include="graphics\color.h">
       <Filter>graphics</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\wic_manager.h">
-      <Filter>graphics</Filter>
-    </ClInclude>
     <ClInclude Include="system\clipboard_manager.h">
       <Filter>system</Filter>
     </ClInclude>
@@ -447,9 +450,6 @@
       <Filter>animation</Filter>
     </ClInclude>
     <ClInclude Include="text\editable.h">
-      <Filter>text</Filter>
-    </ClInclude>
-    <ClInclude Include="text\input_connection.h">
       <Filter>text</Filter>
     </ClInclude>
     <ClInclude Include="text\text_action_mode.h">
@@ -629,9 +629,6 @@
     <ClInclude Include="graphics\direct3d\drawing_object_manager.h">
       <Filter>graphics\direct3d</Filter>
     </ClInclude>
-    <ClInclude Include="graphics\direct3d\effects\shadow_effect.h">
-      <Filter>graphics\direct3d\effects</Filter>
-    </ClInclude>
     <ClInclude Include="views\layout\root_layout.h">
       <Filter>views\layout</Filter>
     </ClInclude>
@@ -782,6 +779,33 @@
     <ClInclude Include="graphics\debug_drawer.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\window_buffer.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\cyro_buffer.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\offscreen_buffer.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\cyro_renderer.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="text\tsf_input_connection.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="text\text_connection.h">
+      <Filter>text</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\direct3d\effects\shadow_effect_dx.h">
+      <Filter>graphics\direct3d\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\effects\cyro_effect.h">
+      <Filter>graphics\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\effects\shadow_effect.h">
+      <Filter>graphics\effects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
@@ -861,6 +885,9 @@
     </Filter>
     <Filter Include="security\cert">
       <UniqueIdentifier>{b79e4820-9ee2-4cf7-aec2-21b017c2ee7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="graphics\effects">
+      <UniqueIdentifier>{fdd0f737-22c2-4432-b7e6-7424e54b8679}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

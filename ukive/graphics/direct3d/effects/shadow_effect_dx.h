@@ -1,8 +1,9 @@
-#ifndef UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_H_
-#define UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_H_
+#ifndef UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_DX_H_
+#define UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_DX_H_
 
 #include <memory>
 
+#include "ukive/graphics/effects/shadow_effect.h"
 #include "ukive/graphics/graphic_device_manager.h"
 
 #include "shell/third_party/directx_math/Inc/DirectXMath.h"
@@ -14,18 +15,19 @@ namespace ukive {
 
     class Bitmap;
     class Canvas;
+    class OffscreenBuffer;
 
-    class ShadowEffect {
+    class ShadowEffectDX : public ShadowEffect {
     public:
-        ShadowEffect();
+        ShadowEffectDX();
 
-        void draw();
-        void draw(Canvas* c);
-        void setRadius(int radius);
-        void setContent(ID3D11Texture2D* texture);
+        void draw() override;
+        void draw(Canvas* c) override;
+        void setContent(OffscreenBuffer* content) override;
+        std::shared_ptr<Bitmap> getOutput(Canvas* c) override;
 
-        int getRadius() const;
-        std::shared_ptr<Bitmap> getOutput(ID2D1RenderTarget* rt);
+        void setRadius(int radius) override;
+        int getRadius() const override;
 
     private:
         struct ConstBuffer {
@@ -101,4 +103,4 @@ namespace ukive {
 
 }
 
-#endif  // UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_H_
+#endif  // UKIVE_GRAPHICS_DIRECT3D_EFFECTS_SHADOW_EFFECT_DX_H_

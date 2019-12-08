@@ -9,8 +9,8 @@
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/button.h"
-#include "ukive/graphics/bitmap.h"
-#include "ukive/graphics/direct3d/effects/shadow_effect.h"
+#include "ukive/graphics/effects/shadow_effect.h"
+#include "ukive/graphics/offscreen_buffer.h"
 #include "ukive/animation/interpolator.h"
 
 #define RADIUS 4
@@ -21,7 +21,7 @@ namespace shell {
 
     ShadowWindow::ShadowWindow()
         : ce_button_(nullptr),
-          d3d_effect_(nullptr) {}
+          shadow_effect_(nullptr) {}
 
     void ShadowWindow::onCreate() {
         Window::onCreate();
@@ -36,13 +36,13 @@ namespace shell {
         canvas.endDraw();
         content_bmp_ = canvas.extractBitmap();
 
-        d3d_effect_ = new ukive::ShadowEffect();
-        d3d_effect_->setRadius(RADIUS);
-        d3d_effect_->setContent(canvas.getTexture().get());
+        shadow_effect_.reset(ukive::ShadowEffect::createShadowEffect());
+        shadow_effect_->setRadius(RADIUS);
+        shadow_effect_->setContent(reinterpret_cast<ukive::OffscreenBuffer*>(canvas.getBuffer()));
 
-        d3d_effect_->draw();
+        shadow_effect_->draw();
 
-        shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
+        shadow_bmp_ = shadow_effect_->getOutput(getCanvas());
 
         using Rlp = ukive::RestraintLayoutParams;
 
@@ -97,10 +97,10 @@ namespace shell {
     }
 
     void ShadowWindow::onAnimationProgress(ukive::Animator* animator) {
-        d3d_effect_->setRadius(animator->getCurValue());
-        d3d_effect_->draw();
+        shadow_effect_->setRadius(animator->getCurValue());
+        shadow_effect_->draw();
 
-        shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
+        shadow_bmp_ = shadow_effect_->getOutput(getCanvas());
         invalidate();
     }
 
