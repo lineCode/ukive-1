@@ -5,9 +5,10 @@
 #include <cstring>
 #include <locale>
 
+#include "utils/log.h"
+
 #include "ukive/security/digest/sha.h"
 #include "ukive/security/digest/md5.h"
-#include "ukive/log.h"
 
 /*
  *  Define patterns for testing

@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="big_integer">
+      <UniqueIdentifier>{7e7815be-0278-492d-a56f-481a014698dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="files">
+      <UniqueIdentifier>{0a15b978-798f-488c-920e-295afd4c0020}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="json">
+      <UniqueIdentifier>{7203e4b2-bdd2-48a8-86cb-578f1ee1b1f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="xml">
+      <UniqueIdentifier>{2307ea1b-0eb9-48f7-ac7d-dd95fda721cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="convert.cpp" />
+    <ClCompile Include="log.cpp" />
+    <ClCompile Include="platform_utils.cpp" />
+    <ClCompile Include="stl_utils.cpp" />
+    <ClCompile Include="string_utils.cpp" />
+    <ClCompile Include="unicode.cpp" />
+    <ClCompile Include="big_integer\big_integer.cpp">
+      <Filter>big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="big_integer\byte_string.cpp">
+      <Filter>big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="big_integer\int_array.cpp">
+      <Filter>big_integer</Filter>
+    </ClCompile>
+    <ClCompile Include="files\file.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_parser.cpp">
+      <Filter>json</Filter>
+    </ClCompile>
+    <ClCompile Include="json\json_structs.cpp">
+      <Filter>json</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\xml_parser.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\xml_pedometer.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\xml_structs.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\xml_writer.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="files\file_utils.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="convert.h" />
+    <ClInclude Include="event_handler.hpp" />
+    <ClInclude Include="executable.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="platform_utils.h" />
+    <ClInclude Include="stl_utils.h" />
+    <ClInclude Include="string_utils.h" />
+    <ClInclude Include="unicode.h" />
+    <ClInclude Include="weak_bind.hpp" />
+    <ClInclude Include="weak_ref_nest.hpp" />
+    <ClInclude Include="big_integer\big_integer.h">
+      <Filter>big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="big_integer\int_array.h">
+      <Filter>big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="files\file.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json_parser.h">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json_structs.h">
+      <Filter>json</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\xml_parser.h">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\xml_pedometer.h">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\xml_structs.h">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\xml_writer.h">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="big_integer\byte_string.h">
+      <Filter>big_integer</Filter>
+    </ClInclude>
+    <ClInclude Include="files\file_utils.h">
+      <Filter>files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

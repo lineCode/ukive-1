@@ -1,6 +1,7 @@
 #include "ukive/window/window.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/application.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/window/window_manager.h"
@@ -14,8 +15,8 @@
 #include "ukive/message/message.h"
 #include "ukive/event/input_event.h"
 #include "ukive/graphics/canvas.h"
+#include "ukive/graphics/debug_drawer.h"
 #include "ukive/system/qpc_service.h"
-#include "ukive/views/debug_view.h"
 #include "ukive/window/window_listener.h"
 
 
@@ -469,8 +470,7 @@ namespace ukive {
         }
 
         QPCService qpc_service;
-        auto debug_view = root_layout_->getDebugView();
-        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::LAYOUT);
+        bool enable_qpc = (debug_drawer_ && debug_drawer_->getMode() == DebugDrawer::Mode::LAYOUT);
         if (enable_qpc) {
             qpc_service.start();
         }
@@ -484,7 +484,7 @@ namespace ukive {
 
         if (enable_qpc) {
             auto duration = qpc_service.stop();
-            debug_view->addDuration(duration);
+            debug_drawer_->addDuration(duration);
         }
     }
 
@@ -493,21 +493,9 @@ namespace ukive {
             return;
         }
 
-        QPCService qpc_service;
-        auto debug_view = root_layout_->getDebugView();
-        bool enable_qpc = (debug_view && debug_view->getMode() == DebugView::Mode::RENDER);
-        if (enable_qpc) {
-            qpc_service.start();
-        }
-
         dirty_region_ = next_dirty_region_;
         next_dirty_region_.set(0, 0, 0, 0);
         onDraw(dirty_region_);
-
-        if (enable_qpc) {
-            auto duration = qpc_service.stop();
-            debug_view->addDuration(duration);
-        }
     }
 
     View* Window::findViewById(int id) const {
@@ -667,41 +655,86 @@ namespace ukive {
         }
 
         if (canvas_) {
-            bool only_update_dr = true;
-
-            canvas_->beginDraw();
-
-            if (only_update_dr) {
-                canvas_->pushClip(rect);
+            if (debug_drawer_) {
+                drawWithDebug(rect);
+            } else {
+                draw(rect);
             }
-
-            canvas_->clear(background_color_);
-
-            onPreDrawCanvas(canvas_);
-
-            if (root_layout_->isLayouted() &&
-                root_layout_->getVisibility() == View::VISIBLE &&
-                root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
-            {
-                canvas_->save();
-                canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
-                root_layout_->draw(canvas_);
-                canvas_->restore();
-            }
-
-            if (!only_update_dr) {
-                Color color = Color::Pink300;
-                color.a = 0.4f;
-                canvas_->fillRect(RectF(rect.left, rect.top, rect.width(), rect.height()), color);
-            }
-
-            onPostDrawCanvas(canvas_);
-
-            if (only_update_dr) {
-                canvas_->popClip();
-            }
-            canvas_->endDraw();
         }
+    }
+
+    void Window::draw(const Rect& rect) {
+        canvas_->beginDraw();
+        canvas_->pushClip(rect);
+        canvas_->clear(background_color_);
+
+        onPreDrawCanvas(canvas_);
+
+        if (root_layout_->isLayouted() &&
+            root_layout_->getVisibility() == View::VISIBLE &&
+            root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
+        {
+            canvas_->save();
+            canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
+            root_layout_->draw(canvas_);
+            canvas_->restore();
+        }
+
+        onPostDrawCanvas(canvas_);
+
+        canvas_->popClip();
+        canvas_->endDraw();
+    }
+
+    void Window::drawWithDebug(const Rect& rect) {
+        if (!off_canvas_) {
+            off_canvas_ = std::make_unique<Canvas>(canvas_->getWidth(), canvas_->getHeight());
+        }
+
+        QPCService qpc_service;
+        bool enable_qpc = debug_drawer_->getMode() == DebugDrawer::Mode::RENDER;
+        if (enable_qpc) {
+            qpc_service.start();
+        }
+
+        off_canvas_->beginDraw();
+        off_canvas_->pushClip(rect);
+        off_canvas_->clear(background_color_);
+
+        onPreDrawCanvas(off_canvas_.get());
+
+        if (root_layout_->isLayouted() &&
+            root_layout_->getVisibility() == View::VISIBLE &&
+            root_layout_->getWidth() > 0 && root_layout_->getHeight() > 0)
+        {
+            off_canvas_->save();
+            off_canvas_->translate(root_layout_->getLeft(), root_layout_->getTop());
+            root_layout_->draw(off_canvas_.get());
+            off_canvas_->restore();
+        }
+
+        onPostDrawCanvas(off_canvas_.get());
+        off_canvas_->popClip();
+        off_canvas_->endDraw();
+
+        canvas_->beginDraw();
+        canvas_->clear();
+        canvas_->drawBitmap(off_canvas_->extractBitmap().get());
+
+        if (enable_qpc) {
+            auto duration = qpc_service.stop();
+            debug_drawer_->addDuration(duration);
+        }
+
+        if (debug_drawer_) {
+            Color color = Color::Pink300;
+            color.a = 0.4f;
+            canvas_->fillRect(RectF(rect.left, rect.top, rect.width(), rect.height()), color);
+
+            debug_drawer_->draw(canvas_->getWidth(), canvas_->getHeight(), canvas_);
+        }
+
+        canvas_->endDraw();
     }
 
     void Window::onMove(int x, int y) {
@@ -712,6 +745,7 @@ namespace ukive {
             LOG(Log::ERR) << "Resize canvas failed.";
             return;
         }
+        off_canvas_.reset();
 
         switch (param) {
         case SIZE_RESTORED:
@@ -882,18 +916,24 @@ namespace ukive {
 
         if (e->isKeyboardEvent()) {
             // debug view
-            /*if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
+            if (e->getEvent() == InputEvent::EVK_DOWN && e->getKeyboardVirtualKey() == 0x51) {
                 bool isShiftKeyPressed = (::GetKeyState(VK_SHIFT) < 0);
                 bool isCtrlKeyPressed = (::GetKeyState(VK_CONTROL) < 0);
                 if (isCtrlKeyPressed && isShiftKeyPressed) {
-                    root_layout_->toggleDebugView();
+                    if (debug_drawer_) {
+                        debug_drawer_.reset();
+                        off_canvas_.reset();
+                    } else {
+                        debug_drawer_ = std::make_unique<DebugDrawer>(this);
+                    }
+                    invalidate();
                 } else if (isCtrlKeyPressed && !isShiftKeyPressed) {
-                    auto debug_view = root_layout_->getDebugView();
-                    if (debug_view) {
-                        debug_view->toggleMode();
+                    if (debug_drawer_) {
+                        debug_drawer_->toggleMode();
+                        invalidate();
                     }
                 }
-            }*/
+            }
 
             if (focus_holder_) {
                 return focus_holder_->dispatchInputEvent(e);

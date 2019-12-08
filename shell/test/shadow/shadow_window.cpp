@@ -1,6 +1,7 @@
 #include "shadow_window.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/application.h"
 #include "ukive/graphics/color.h"
 #include "ukive/graphics/canvas.h"
@@ -33,7 +34,7 @@ namespace shell {
         canvas.fillRect(ukive::RectF(0, 0, BACKGROUND_SIZE, BACKGROUND_SIZE), ukive::Color::Green400);
         //canvas.fillCircle(BACKGROUND_SIZE / 2.f, BACKGROUND_SIZE / 2.f, BACKGROUND_SIZE / 4.f, ukive::Color::Blue200);
         canvas.endDraw();
-        content_bmp_ = canvas.extractBitmap()->getNative();
+        content_bmp_ = canvas.extractBitmap();
 
         d3d_effect_ = new ukive::ShadowEffect();
         d3d_effect_->setRadius(RADIUS);
@@ -78,13 +79,11 @@ namespace shell {
         canvas->save();
         canvas->translate(-RADIUS, -RADIUS);
 
-        ukive::Bitmap s_bmp(shadow_bmp_);
-        canvas->drawBitmap(100, 10, &s_bmp);
+        canvas->drawBitmap(100, 10, shadow_bmp_.get());
 
         canvas->restore();
 
-        ukive::Bitmap c_bmp(content_bmp_);
-        canvas->drawBitmap(100, 10, &c_bmp);
+        canvas->drawBitmap(100, 10, content_bmp_.get());
     }
 
     void ShadowWindow::onDestroy() {
@@ -100,9 +99,6 @@ namespace shell {
     void ShadowWindow::onAnimationProgress(ukive::Animator* animator) {
         d3d_effect_->setRadius(animator->getCurValue());
         d3d_effect_->draw();
-
-        D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
-            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
         shadow_bmp_ = d3d_effect_->getOutput(getCanvas()->getRT());
         invalidate();

@@ -1,8 +1,9 @@
 ﻿#include "drawing_object_manager.h"
 
+#include "utils/stl_utils.h"
+#include "utils/log.h"
+
 #include "ukive/graphics/direct3d/space.h"
-#include "ukive/utils/stl_utils.h"
-#include "ukive/log.h"
 
 
 namespace ukive {
@@ -11,7 +12,7 @@ namespace ukive {
     }
 
     DrawingObjectManager::~DrawingObjectManager() {
-        STLDeleteElements(&drawing_objs_);
+        utl::STLDeleteElements(&drawing_objs_);
     }
 
     void DrawingObjectManager::add(

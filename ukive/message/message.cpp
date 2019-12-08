@@ -1,5 +1,7 @@
 ﻿#include "message.h"
 
+#include "utils/log.h"
+
 
 namespace ukive {
 
@@ -22,8 +24,10 @@ namespace ukive {
     }
 
     void Message::init(uint64_t pool_capacity) {
-        if (is_initialized)
-            throw std::logic_error("Message-init(): can only init once.");
+        if (is_initialized) {
+            LOG(Log::ERR) << "can only init once.";
+            return;
+        }
 
         Message* ptr = nullptr;
 
@@ -32,8 +36,7 @@ namespace ukive {
             if (pool) {
                 ptr->next = msg;
                 ptr = msg;
-            }
-            else {
+            } else {
                 pool = msg;
                 ptr = pool;
             }

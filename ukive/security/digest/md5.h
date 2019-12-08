@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "ukive/utils/string_utils.h"
+#include "utils/string_utils.h"
 
 
 namespace ukive {
@@ -16,7 +16,7 @@ namespace digest {
         md5BadParam         // passed a bad parameter
     };
 
-    
+
     /**
      * 根据 RFC1321 实现的 MD5 算法
      * https://tools.ietf.org/html/rfc1321

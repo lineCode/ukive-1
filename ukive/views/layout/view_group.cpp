@@ -2,10 +2,11 @@
 
 #include <queue>
 
+#include "utils/log.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/views/layout/layout_params.h"
 #include "ukive/graphics/canvas.h"
-#include "ukive/log.h"
-#include "ukive/utils/stl_utils.h"
 #include "ukive/resources/dimension_utils.h"
 
 #include "oigka/layout_constants.h"
@@ -23,7 +24,7 @@ namespace ukive {
     }
 
     ViewGroup::~ViewGroup() {
-        STLDeleteElements(&views_);
+        utl::STLDeleteElements(&views_);
     }
 
     bool ViewGroup::checkLayoutParams(LayoutParams* lp) const {
@@ -46,17 +47,17 @@ namespace ukive {
 
         auto width_attr = resolveAttrString(
             attrs, oigka::kAttrLayoutWidth, oigka::kAttrValLayoutFit);
-        if (isEqual(width_attr, oigka::kAttrValLayoutFit, false)) {
+        if (utl::isEqual(width_attr, oigka::kAttrValLayoutFit, false)) {
             width = LayoutParams::FIT_CONTENT;
-        } else if (isEqual(width_attr, oigka::kAttrValLayoutMatch, false)) {
+        } else if (utl::isEqual(width_attr, oigka::kAttrValLayoutMatch, false)) {
             width = LayoutParams::MATCH_PARENT;
         }
 
         auto height_attr = resolveAttrString(
             attrs, oigka::kAttrLayoutHeight, oigka::kAttrValLayoutFit);
-        if (isEqual(height_attr, oigka::kAttrValLayoutFit, false)) {
+        if (utl::isEqual(height_attr, oigka::kAttrValLayoutFit, false)) {
             height = LayoutParams::FIT_CONTENT;
-        } else if (isEqual(height_attr, oigka::kAttrValLayoutMatch, false)) {
+        } else if (utl::isEqual(height_attr, oigka::kAttrValLayoutMatch, false)) {
             height = LayoutParams::MATCH_PARENT;
         }
 
@@ -133,7 +134,7 @@ namespace ukive {
     }
 
     void ViewGroup::addView(View* v, LayoutParams* params, bool req_layout) {
-        addView(STLCInt(views_.size()), v, params, req_layout);
+        addView(utl::STLCInt(views_.size()), v, params, req_layout);
     }
 
     void ViewGroup::addView(int index, View* v, LayoutParams* params, bool req_layout) {
@@ -142,7 +143,7 @@ namespace ukive {
             return;
         }
 
-        if (index < 0 || STLCST(views_, index) > views_.size()) {
+        if (index < 0 || utl::STLCST(views_, index) > views_.size()) {
             DCHECK(false) << "ViewGroup-addView(): Invalid index";
             return;
         }
@@ -173,7 +174,7 @@ namespace ukive {
             v->setLayoutParams(params);
         }
 
-        if (STLCST(views_, index) == views_.size()) {
+        if (utl::STLCST(views_, index) == views_.size()) {
             views_.push_back(v);
         } else {
             views_.insert(views_.begin() + index, v);
@@ -244,7 +245,7 @@ namespace ukive {
     }
 
     int ViewGroup::getChildCount() const {
-        return STLCInt(views_.size());
+        return utl::STLCInt(views_.size());
     }
 
     View* ViewGroup::getChildById(int id) const {
@@ -258,7 +259,7 @@ namespace ukive {
     }
 
     View* ViewGroup::getChildAt(int index) const {
-        return views_.at(STLCST(views_, index));
+        return views_.at(utl::STLCST(views_, index));
     }
 
     View* ViewGroup::findViewById(int id) const {

@@ -1,0 +1,103 @@
+#ifndef UTILS_LOG_H_
+#define UTILS_LOG_H_
+
+#include <string>
+#include <sstream>
+
+#include "utils/string_utils.h"
+
+
+#define TO_WIDE_STRING(x) L##x
+#define _TO_WIDE_STRING(x) TO_WIDE_STRING(x)
+#define __WFILE__ _TO_WIDE_STRING(__FILE__)
+
+
+#define LOG_STREAM(level) \
+    ::utl::Log(__WFILE__, __LINE__, level).stream()
+
+#define VOIDABLE_STREAM(stream, condition) \
+    !(condition) ? (void) 0 : ::utl::LogVoidify() & (stream)
+
+#define IS_LOG_ON   true
+#define IS_CHECK_ON true
+
+#ifndef NDEBUG
+
+#define IS_DLOG_ON   true
+#define IS_DCHECK_ON true
+
+#else
+
+#define IS_DLOG_ON   false
+#define IS_DCHECK_ON false
+
+#endif
+
+#define LOG(level) \
+    VOIDABLE_STREAM(LOG_STREAM(level), IS_LOG_ON)
+
+#define CHECK(condition) \
+    VOIDABLE_STREAM(LOG_STREAM(::utl::Log::FATAL), IS_CHECK_ON && !(condition))
+
+#define DLOG(level) \
+    VOIDABLE_STREAM(LOG_STREAM(level), IS_DLOG_ON)
+
+#define DCHECK(condition) \
+    VOIDABLE_STREAM(LOG_STREAM(::utl::Log::FATAL), IS_DCHECK_ON && !(condition))
+
+
+namespace utl {
+
+    class Log {
+    public:
+        enum Severity {
+            INFO,
+            WARNING,
+            ERR,
+            FATAL
+        };
+
+        enum OutputTarget {
+            CONSOLE = 1 << 0,
+            FILE =    1 << 1,
+            DBG_STR = 1 << 2,
+            STANDARD = 1 << 3,
+        };
+
+        struct Params {
+            int target;
+            bool short_file_name;
+            string16 file_name;
+        };
+
+        static void debugBreak();
+        static void debugBreakIfInDebugger();
+
+        Log(const wchar_t* file_name, int line_number, Severity level);
+        ~Log();
+
+        std::wostringstream& stream();
+
+    private:
+        Severity level_;
+        int line_number_;
+        string16 file_name_;
+        std::wostringstream stream_;
+    };
+
+    class LogVoidify {
+    public:
+        LogVoidify() = default;
+        void operator&(std::wostream& s) {}
+    };
+
+
+    void InitLogging(const Log::Params& params);
+    void UninitLogging();
+
+}
+
+using Log = utl::Log;
+
+
+#endif  // UTILS_LOG_H_

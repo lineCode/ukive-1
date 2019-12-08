@@ -3,9 +3,10 @@
 
 #include <memory>
 
+#include "utils/weak_ref_nest.hpp"
+
 #include "ukive/menu/menu_callback.h"
 #include "ukive/menu/inner_window.h"
-#include "ukive/utils/weak_ref_nest.h"
 
 
 namespace ukive {
@@ -45,7 +46,7 @@ namespace ukive {
 
         MenuImpl* menu_impl_;
         std::shared_ptr<InnerWindow> inner_window_;
-        WeakRefNest<TextActionMode> weak_ref_nest_;
+        utl::WeakRefNest<TextActionMode> weak_ref_nest_;
     };
 
 }

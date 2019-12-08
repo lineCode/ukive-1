@@ -1,7 +1,7 @@
 #ifndef UKIVE_SECURITY_CRYPTO_AEAD_HPP_
 #define UKIVE_SECURITY_CRYPTO_AEAD_HPP_
 
-#include "ukive/utils/string_utils.h"
+#include "utils/string_utils.h"
 
 
 namespace ukive {

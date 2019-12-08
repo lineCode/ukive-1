@@ -4,9 +4,10 @@
 #include <map>
 #include <memory>
 
-#include "ukive/utils/executable.h"
+#include "utils/executable.h"
+#include "utils/string_utils.h"
+
 #include "ukive/graphics/rect.h"
-#include "ukive/utils/string_utils.h"
 #include "ukive/graphics/cursor.h"
 #include "ukive/drawable/drawable.h"
 
@@ -254,7 +255,7 @@ namespace ukive {
             INVALIDATED = 1 << 4,
         };
 
-        class ClickPerformer : public Executable {
+        class ClickPerformer : public utl::Executable {
         public:
             explicit ClickPerformer(View* v)
                 :view_(v) {}

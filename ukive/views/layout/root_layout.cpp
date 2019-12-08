@@ -5,7 +5,6 @@
 #include "ukive/views/layout/frame_layout.h"
 #include "ukive/views/layout/root_layout_params.h"
 #include "ukive/window/window.h"
-#include "ukive/views/debug_view.h"
 #include "ukive/views/title_bar/title_bar.h"
 #include "ukive/resources/layout_instantiator.h"
 
@@ -24,7 +23,6 @@ namespace ukive {
     RootLayout::RootLayout(Window* w, AttrsRef attrs)
         : NonClientLayout(w, attrs),
           title_bar_(nullptr),
-          debug_view_(nullptr),
           shade_layout_(nullptr),
           content_layout_(nullptr),
           content_view_(nullptr),
@@ -97,11 +95,7 @@ namespace ukive {
     void RootLayout::addShade(View* shade) {
         shade_layout_->addView(shade);
         if (shade_layout_->getChildCount() == 1) {
-            if (debug_view_) {
-                addView(1, shade_layout_);
-            } else {
-                addView(shade_layout_);
-            }
+            addView(shade_layout_);
             shade_added_ = true;
         }
     }
@@ -111,32 +105,6 @@ namespace ukive {
         if (shade_layout_->getChildCount() == 0) {
             removeView(shade_layout_, false);
             shade_added_ = false;
-        }
-    }
-
-    void RootLayout::showDebugView() {
-        if (!debug_view_) {
-            debug_view_ = new DebugView(getWindow());
-            debug_view_->setLayoutParams(
-                new LayoutParams(
-                    LayoutParams::MATCH_PARENT,
-                    LayoutParams::MATCH_PARENT));
-            addView(debug_view_);
-        }
-    }
-
-    void RootLayout::removeDebugView() {
-        if (debug_view_) {
-            removeView(debug_view_);
-            debug_view_ = nullptr;
-        }
-    }
-
-    void RootLayout::toggleDebugView() {
-        if (debug_view_) {
-            removeDebugView();
-        } else {
-            showDebugView();
         }
     }
 
@@ -150,10 +118,6 @@ namespace ukive {
 
     View* RootLayout::getContentView() const {
         return content_view_;
-    }
-
-    DebugView* RootLayout::getDebugView() const {
-        return debug_view_;
     }
 
     void RootLayout::setContent(int id) {

@@ -2,7 +2,6 @@
 
 #include "ukive/graphics/canvas.h"
 #include "ukive/graphics/bitmap.h"
-#include "ukive/log.h"
 
 
 namespace ukive {

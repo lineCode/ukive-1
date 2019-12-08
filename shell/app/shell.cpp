@@ -2,14 +2,14 @@
 
 #include <memory>
 
+#include "utils/log.h"
+
 #include "ukive/application.h"
-#include "ukive/log.h"
 
 #include "shell/test/test_window.h"
 #include "shell/lod/lod_window.h"
 #include "shell/test/3d/motion_window.h"
 #include "shell/test/text/text_window.h"
-#include "shell/test/bitmap_research/bitmap_research_window.h"
 #include "shell/test/shadow/shadow_window.h"
 #include "shell/disassembler/disassembler_window.h"
 #include "shell/cyroneno/cyroneno_window.h"
@@ -19,22 +19,15 @@ int APIENTRY wWinMain(
     HINSTANCE hInstance, HINSTANCE hPrevInstance,
     LPWSTR lpCmdLine, int nCmdShow)
 {
-    ukive::Log::Params log_params;
+    utl::Log::Params log_params;
     log_params.file_name = L"Debug.log";
     log_params.short_file_name = false;
-    log_params.target = ukive::Log::OutputTarget::DBG_STR | ukive::Log::OutputTarget::FILE;
-    ukive::InitLogging(log_params);
+    log_params.target = utl::Log::OutputTarget::DBG_STR | utl::Log::OutputTarget::FILE;
+    utl::InitLogging(log_params);
 
     LOG(Log::INFO) << "Application start.";
 
     auto app = std::make_shared<ukive::Application>(lpCmdLine);
-
-    /*auto bmp_window = std::make_shared<shell::BitmapResearchWindow>();
-    bmp_window->setTitle(L"Ukive Bitmap Dumper");
-    bmp_window->setWidth(ukive::Application::dpToPxX(400));
-    bmp_window->setHeight(ukive::Application::dpToPxY(400));
-    bmp_window->center();
-    bmp_window->show();*/
 
     /*auto text_window = std::make_shared<shell::TextWindow>();
     text_window->setTitle(L"Test");
@@ -99,7 +92,7 @@ int APIENTRY wWinMain(
 
     LOG(Log::INFO) << "Application exit.\n";
 
-    ukive::UninitLogging();
+    utl::UninitLogging();
 
     return 0;
 }

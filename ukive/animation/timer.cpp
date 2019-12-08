@@ -1,6 +1,6 @@
 #include "ukive/animation/timer.h"
 
-#include "ukive/utils/weak_bind.h"
+#include "utils/weak_bind.hpp"
 
 
 namespace ukive {

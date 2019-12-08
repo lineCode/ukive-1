@@ -1,7 +1,9 @@
 #include "shadow_effect.h"
 
+#include "utils/log.h"
+#include "utils/files/file_utils.h"
+
 #include "ukive/application.h"
-#include "ukive/log.h"
 #include "ukive/graphics/direct3d/space.h"
 #include "ukive/window/window.h"
 #include "ukive/graphics/canvas.h"
@@ -42,7 +44,7 @@ namespace ukive {
         layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         layout[0].InstanceDataStepRate = 0;
 
-        string16 shader_path = Application::getExecFileName(true);
+        string16 shader_path = utl::getExecFileName(true);
 
         Space::createVertexShader(
             shader_path + L"\\shaders\\shadow_effect_vs.cso",
@@ -138,11 +140,10 @@ namespace ukive {
     void ShadowEffect::draw(Canvas* c) {
         draw();
         auto shadow_bmp = getOutput(c->getRT());
-        Bitmap bmp(shadow_bmp);
 
         c->save();
         c->translate(-std::floor(elevation_ * 2), -std::floor(elevation_ * 2));
-        c->drawBitmap(c->getOpacity(), &bmp);
+        c->drawBitmap(c->getOpacity(), shadow_bmp.get());
         c->restore();
     }
 
@@ -247,7 +248,7 @@ namespace ukive {
         return radius_;
     }
 
-    ComPtr<ID2D1Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
+    std::shared_ptr<Bitmap> ShadowEffect::getOutput(ID2D1RenderTarget* rt) {
         D2D1_BITMAP_PROPERTIES bmp_prop = D2D1::BitmapProperties(
             D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
 
@@ -259,7 +260,7 @@ namespace ukive {
             return {};
         }
 
-        return bitmap;
+        return std::make_shared<Bitmap>(bitmap);
     }
 
 

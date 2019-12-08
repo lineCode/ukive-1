@@ -29,9 +29,6 @@
     <Filter Include="test\list">
       <UniqueIdentifier>{6fac98bf-1c33-4738-85f6-95d1af0587b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="test\bitmap_research">
-      <UniqueIdentifier>{e7a193cc-b2d1-4016-8d7a-3523627dd8ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test\emulator">
       <UniqueIdentifier>{a8ecb2be-23d0-45b0-bca9-34a710e22936}</UniqueIdentifier>
     </Filter>
@@ -55,21 +52,6 @@
     </Filter>
     <Filter Include="cyroneno">
       <UniqueIdentifier>{77384204-9752-4b6b-a92b-12b15077fd82}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cyroneno\pipeline">
-      <UniqueIdentifier>{56095ada-0813-4191-afea-5417d242e336}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cyroneno\text">
-      <UniqueIdentifier>{92cb94c4-671b-400a-9b75-b734a61abfc9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cyroneno\text\opentype">
-      <UniqueIdentifier>{ea8dfd21-1f35-47f6-bcf2-75cade15e65a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cyroneno\text\opentype\tables">
-      <UniqueIdentifier>{03aff1b1-1191-46b5-9897-cf7bd3fa42fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="cyroneno\text\opentype\tt_instruction">
-      <UniqueIdentifier>{e0d75f04-7935-4652-bd1f-a0c15b75c6a1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -106,12 +88,6 @@
     <ClCompile Include="test\list\test_adapter.cpp">
       <Filter>test\list</Filter>
     </ClCompile>
-    <ClCompile Include="test\bitmap_research\bitmap_dump_view.cpp">
-      <Filter>test\bitmap_research</Filter>
-    </ClCompile>
-    <ClCompile Include="test\bitmap_research\bitmap_research_window.cpp">
-      <Filter>test\bitmap_research</Filter>
-    </ClCompile>
     <ClCompile Include="test\emulator\emulator_view.cpp">
       <Filter>test\emulator</Filter>
     </ClCompile>
@@ -129,27 +105,6 @@
     </ClCompile>
     <ClCompile Include="test\3d\motion_window.cpp">
       <Filter>test\3d</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\code_data_provider.cpp">
-      <Filter>disassembler</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\debugger.cpp">
-      <Filter>disassembler</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\intel_instruction_params.cpp">
-      <Filter>disassembler</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\intel_instructions.cpp">
-      <Filter>disassembler</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\opcode_list_adapter.cpp">
-      <Filter>disassembler</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\opcode_map.cpp">
-      <Filter>disassembler</Filter>
-    </ClCompile>
-    <ClCompile Include="disassembler\pe_file.cpp">
-      <Filter>disassembler</Filter>
     </ClCompile>
     <ClCompile Include="disassembler\disassembler_window.cpp">
       <Filter>disassembler</Filter>
@@ -169,71 +124,8 @@
     <ClCompile Include="cyroneno\cyroneno_window.cpp">
       <Filter>cyroneno</Filter>
     </ClCompile>
-    <ClCompile Include="cyroneno\color.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\image.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\matrix.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\vector.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\point.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\equations.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\surface.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\box.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\ray_tracer.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\scene.cpp">
-      <Filter>cyroneno</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\pipeline\rasterizer.cpp">
-      <Filter>cyroneno\pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\pipeline\pipeline.cpp">
-      <Filter>cyroneno\pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\opentype_font.cpp">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\opentype_rasterizer.cpp">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\opentype_tables.cpp">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tables\cmap.cpp">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tables\glyf.cpp">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tables\head.cpp">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tables\loca.cpp">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tables\maxp.cpp">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.cpp">
-      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
-    </ClCompile>
-    <ClCompile Include="cyroneno\text\opentype\tables\cvt.cpp">
-      <Filter>cyroneno\text\opentype\tables</Filter>
+    <ClCompile Include="disassembler\opcode_list_adapter.cpp">
+      <Filter>disassembler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -270,12 +162,6 @@
     <ClInclude Include="test\list\test_adapter.h">
       <Filter>test\list</Filter>
     </ClInclude>
-    <ClInclude Include="test\bitmap_research\bitmap_dump_view.h">
-      <Filter>test\bitmap_research</Filter>
-    </ClInclude>
-    <ClInclude Include="test\bitmap_research\bitmap_research_window.h">
-      <Filter>test\bitmap_research</Filter>
-    </ClInclude>
     <ClInclude Include="test\emulator\emulator_view.h">
       <Filter>test\emulator</Filter>
     </ClInclude>
@@ -293,27 +179,6 @@
     </ClInclude>
     <ClInclude Include="test\3d\motion_window.h">
       <Filter>test\3d</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\code_data_provider.h">
-      <Filter>disassembler</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\debugger.h">
-      <Filter>disassembler</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\intel_instruction_params.h">
-      <Filter>disassembler</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\intel_instructions.h">
-      <Filter>disassembler</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\opcode_list_adapter.h">
-      <Filter>disassembler</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\opcode_map.h">
-      <Filter>disassembler</Filter>
-    </ClInclude>
-    <ClInclude Include="disassembler\pe_file.h">
-      <Filter>disassembler</Filter>
     </ClInclude>
     <ClInclude Include="disassembler\disassembler_window.h">
       <Filter>disassembler</Filter>
@@ -333,83 +198,8 @@
     <ClInclude Include="cyroneno\cyroneno_window.h">
       <Filter>cyroneno</Filter>
     </ClInclude>
-    <ClInclude Include="cyroneno\color.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\image.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\matrix.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\vector.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\point.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\equations.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\surface.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\box.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\ray_tracer.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\scene.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\ray_tracer_structs.h">
-      <Filter>cyroneno</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\pipeline\rasterizer.h">
-      <Filter>cyroneno\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\pipeline\pipeline.h">
-      <Filter>cyroneno\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\opentype_common.h">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\opentype_font.h">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\opentype_rasterizer.h">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\opentype_tables.h">
-      <Filter>cyroneno\text\opentype</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tables\cmap.h">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tables\glyf.h">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tables\head.h">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tables\loca.h">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tables\maxp.h">
-      <Filter>cyroneno\text\opentype\tables</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tt_instructions\graphics_state.h">
-      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tt_instructions\tti_interpreter.h">
-      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tt_instructions\opcode_map.h">
-      <Filter>cyroneno\text\opentype\tt_instruction</Filter>
-    </ClInclude>
-    <ClInclude Include="cyroneno\text\opentype\tables\cvt.h">
-      <Filter>cyroneno\text\opentype\tables</Filter>
+    <ClInclude Include="disassembler\opcode_list_adapter.h">
+      <Filter>disassembler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

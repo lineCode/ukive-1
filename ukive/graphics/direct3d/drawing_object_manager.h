@@ -3,8 +3,9 @@
 
 #include <list>
 
+#include "utils/string_utils.h"
+
 #include "ukive/graphics/graphic_device_manager.h"
-#include "ukive/utils/string_utils.h"
 
 
 namespace ukive {

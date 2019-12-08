@@ -361,11 +361,11 @@ namespace shell {
     void LodWindow::onSeekValueChanged(ukive::SeekBar *seekBar, float value) {
         switch (seekBar->getId()) {
         case ID_C1_SEEKBAR:
-            c1_value_tv_->setText(ukive::stringPrintf(L"%.2f", 1.f + value));
+            c1_value_tv_->setText(utl::stringPrintf(L"%.2f", 1.f + value));
             break;
 
         case ID_C2_SEEKBAR:
-            c2_value_tv_->setText(ukive::stringPrintf(L"%.2f", 1.f + value));
+            c2_value_tv_->setText(utl::stringPrintf(L"%.2f", 1.f + value));
             break;
         default:
             break;

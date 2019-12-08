@@ -1,5 +1,7 @@
 #include "context_menu.h"
 
+#include "utils/weak_bind.hpp"
+
 #include "ukive/animation/view_animator.h"
 #include "ukive/drawable/color_drawable.h"
 #include "ukive/menu/context_menu_callback.h"
@@ -8,7 +10,6 @@
 #include "ukive/graphics/color.h"
 #include "ukive/window/window_impl.h"
 #include "ukive/window/window.h"
-#include "ukive/utils/weak_bind.h"
 
 
 namespace ukive {

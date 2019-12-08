@@ -1,10 +1,11 @@
 ﻿#include "cycler.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+#include "utils/executable.h"
+
 #include "ukive/message/message.h"
 #include "ukive/message/message_looper.h"
 #include "ukive/system/time_utils.h"
-#include "ukive/utils/executable.h"
 
 
 namespace ukive {
@@ -22,22 +23,22 @@ namespace ukive {
     }
 
     Cycler::~Cycler() {
-        looper_->getQueue()->remove(this, nullptr);
+        looper_->getQueue()->remove(this);
     }
 
     void Cycler::setListener(CyclerListener* l) {
         listener_ = l;
     }
 
-    void Cycler::post(Executable* exec) {
+    void Cycler::post(utl::Executable* exec) {
         postDelayed(exec, 0);
     }
 
-    void Cycler::postDelayed(Executable* exec, uint64_t delay) {
+    void Cycler::postDelayed(utl::Executable* exec, uint64_t delay) {
         postAtTime(exec, delay + now());
     }
 
-    void Cycler::postAtTime(Executable* exec, uint64_t at_time) {
+    void Cycler::postAtTime(utl::Executable* exec, uint64_t at_time) {
         Message* msg = Message::obtain();
         msg->callback = exec;
 
@@ -60,12 +61,12 @@ namespace ukive {
         sendMessageAtTime(msg, at_time);
     }
 
-    bool Cycler::hasCallbacks(Executable* exec) {
-        return looper_->getQueue()->contains(this, exec, nullptr);
+    bool Cycler::hasCallbacks(utl::Executable* exec) {
+        return looper_->getQueue()->contains(this, exec);
     }
 
-    void Cycler::removeCallbacks(Executable* exec) {
-        looper_->getQueue()->remove(this, exec, nullptr);
+    void Cycler::removeCallbacks(utl::Executable* exec) {
+        looper_->getQueue()->remove(this, exec);
     }
 
     void Cycler::sendEmptyMessage(int what) {
@@ -99,22 +100,15 @@ namespace ukive {
     void Cycler::enqueueMessage(Message* msg) {
         msg->target = this;
         looper_->getQueue()->enqueue(msg);
+        looper_->wakeup();
     }
 
     bool Cycler::hasMessages(int what) {
-        return looper_->getQueue()->contains(this, what, nullptr);
-    }
-
-    bool Cycler::hasMessages(int what, void* data) {
-        return looper_->getQueue()->contains(this, what, data);
+        return looper_->getQueue()->contains(this, what);
     }
 
     void Cycler::removeMessages(int what) {
-        looper_->getQueue()->remove(this, what, nullptr);
-    }
-
-    void Cycler::removeMessages(int what, void* data) {
-        looper_->getQueue()->remove(this, what, data);
+        looper_->getQueue()->remove(this, what);
     }
 
     void Cycler::dispatchMessage(Message* msg) {

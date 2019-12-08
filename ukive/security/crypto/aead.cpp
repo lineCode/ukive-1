@@ -2,8 +2,9 @@
 
 #include <assert.h>
 
+#include "utils/big_integer/byte_string.h"
+
 #include "ukive/security/crypto/aes.h"
-#include "ukive/utils/big_integer/byte_string.hpp"
 
 
 namespace ukive {
@@ -13,15 +14,15 @@ namespace crypto {
         stringu8 Z(16, 0), V(Y);
 
         for (int i = 0; i < 128; ++i) {
-            auto t = ByteString::getBit(X, i);
+            auto t = utl::ByteString::getBit(X, i);
             if (t) {
-                ByteString:: xor (Z, V, &Z);
+                utl::ByteString::exor(Z, V, &Z);
             }
             if (V.back() & 0x01) {
-                ByteString::div2(V, &V);
+                utl::ByteString::div2(V, &V);
                 V[0] ^= 0xE1;
             } else {
-                ByteString::div2(V, &V);
+                utl::ByteString::div2(V, &V);
             }
         }
 
@@ -33,7 +34,7 @@ namespace crypto {
         stringu8 Y(16, 0);
 
         for (int i = 0; i < m; ++i) {
-            ByteString::xor(Y, X.substr(i * 16, 16), &Y);
+            utl::ByteString::exor(Y, X.substr(i * 16, 16), &Y);
             product(Y, H, &Y);
         }
 
@@ -55,8 +56,8 @@ namespace crypto {
             CIPH(K, CB, &crypted);
 
             stringu8 Yi(X.substr(i * 16, 16));
-            ByteString::xor(Yi, crypted, &Yi);
-            ByteString::inc(CB, 4, &CB);
+            utl::ByteString::exor(Yi, crypted, &Yi);
+            utl::ByteString::inc(CB, 4, &CB);
 
             Y.append(Yi);
         }
@@ -65,7 +66,7 @@ namespace crypto {
         CIPH(K, CB, &crypted);
 
         stringu8 Yi(X.substr(i * 16, 16));
-        ByteString::xor(Yi, crypted.substr(0, Yi.size()), &Yi);
+        utl::ByteString::exor(Yi, crypted.substr(0, Yi.size()), &Yi);
 
         Y.append(Yi);
 
@@ -99,22 +100,22 @@ namespace crypto {
             X.append(s + 8, 0);
 
             stringu8 len;
-            ByteString::len64(IV, &len);
+            utl::ByteString::len64(IV, &len);
             X.append(len);
 
             GHASH(H, X, &J0);
         }
 
         stringu8 J0_1(J0);
-        ByteString::inc(J0_1, 4, &J0_1);
+        utl::ByteString::inc(J0_1, 4, &J0_1);
         GCTR(K, J0_1, P, C);
 
         int u = 16 * ((C->size() + 15) / 16) - C->size();
         int v = 16 * ((A.size() + 15) / 16) - A.size();
 
         stringu8 len_A, len_C;
-        ByteString::len64(A, &len_A);
-        ByteString::len64(*C, &len_C);
+        utl::ByteString::len64(A, &len_A);
+        utl::ByteString::len64(*C, &len_C);
 
         stringu8 X(A);
         X.append(v, 0).append(*C).append(u, 0)
@@ -149,7 +150,7 @@ namespace crypto {
             X.append(s + 8, 0);
 
             stringu8 len;
-            ByteString::len64(IV, &len);
+            utl::ByteString::len64(IV, &len);
             X.append(len);
 
             GHASH(H, X, &J0);
@@ -157,15 +158,15 @@ namespace crypto {
 
         stringu8 _P;
         stringu8 J0_1(J0);
-        ByteString::inc(J0_1, 4, &J0_1);
+        utl::ByteString::inc(J0_1, 4, &J0_1);
         GCTR(K, J0_1, C, &_P);
 
         int u = 16 * ((C.size() + 15) / 16) - C.size();
         int v = 16 * ((A.size() + 15) / 16) - A.size();
 
         stringu8 len_A, len_C;
-        ByteString::len64(A, &len_A);
-        ByteString::len64(C, &len_C);
+        utl::ByteString::len64(A, &len_A);
+        utl::ByteString::len64(C, &len_C);
 
         stringu8 X(A);
         X.append(v, 0).append(C).append(u, 0)

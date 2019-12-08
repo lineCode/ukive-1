@@ -1,6 +1,7 @@
 #include "shell/disassembler/opcode_list_adapter.h"
 
-#include "ukive/utils/stl_utils.h"
+#include "utils/stl_utils.h"
+
 #include "ukive/views/layout/restraint_layout.h"
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/views/text_view.h"
@@ -62,7 +63,7 @@ namespace shell {
     }
 
     int OpcodeListAdapter::getItemCount() {
-        return ukive::STLCInt(data_.size());
+        return utl::STLCInt(data_.size());
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿#include "text_window.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/views/button.h"
 #include "ukive/views/text_view.h"
 #include "ukive/views/layout/linear_layout.h"

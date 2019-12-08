@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <typeinfo>
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/views/layout/restraint_layout_params.h"
 #include "ukive/resources/dimension_utils.h"
 
@@ -16,13 +17,13 @@ namespace ukive {
 
         RestraintLayoutParams::Edge resolveEdge(const string16& sh_edge_str) {
             RestraintLayoutParams::Edge sh_edge = RestraintLayoutParams::Edge::START;
-            if (isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHEStart, false)) {
+            if (utl::isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHEStart, false)) {
                 sh_edge = RestraintLayoutParams::Edge::START;
-            } else if (isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHEEnd, false)) {
+            } else if (utl::isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHEEnd, false)) {
                 sh_edge = RestraintLayoutParams::Edge::END;
-            } else if (isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHETop, false)) {
+            } else if (utl::isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHETop, false)) {
                 sh_edge = RestraintLayoutParams::Edge::TOP;
-            } else if (isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHEBottom, false)) {
+            } else if (utl::isEqual(sh_edge_str, oigka::kAttrValRestraintLayoutHEBottom, false)) {
                 sh_edge = RestraintLayoutParams::Edge::BOTTOM;
             }
             return sh_edge;

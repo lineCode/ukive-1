@@ -1,7 +1,7 @@
 ﻿#include "color.h"
 
-#include "ukive/log.h"
-#include "ukive/utils/string_utils.h"
+#include "utils/log.h"
+#include "utils/string_utils.h"
 
 
 namespace ukive {
@@ -31,9 +31,9 @@ namespace ukive {
 
         if (color.length() == 7) {
             int r, g, b;
-            if (!hexStringToNumber(color.substr(1, 2), &r) ||
-                !hexStringToNumber(color.substr(3, 2), &g) ||
-                !hexStringToNumber(color.substr(5, 2), &b))
+            if (!utl::hexStringToNumber(color.substr(1, 2), &r) ||
+                !utl::hexStringToNumber(color.substr(3, 2), &g) ||
+                !utl::hexStringToNumber(color.substr(5, 2), &b))
             {
                 LOG(Log::ERR) << "Unknown color: " << color;
                 return Red500;
@@ -44,10 +44,10 @@ namespace ukive {
 
         if (color.length() == 9) {
             int a, r, g, b;
-            if (!hexStringToNumber(color.substr(1, 2), &a) ||
-                !hexStringToNumber(color.substr(3, 2), &r) ||
-                !hexStringToNumber(color.substr(5, 2), &g) ||
-                !hexStringToNumber(color.substr(7, 2), &b))
+            if (!utl::hexStringToNumber(color.substr(1, 2), &a) ||
+                !utl::hexStringToNumber(color.substr(3, 2), &r) ||
+                !utl::hexStringToNumber(color.substr(5, 2), &g) ||
+                !utl::hexStringToNumber(color.substr(7, 2), &b))
             {
                 LOG(Log::ERR) << "Unknown color: " << color;
                 return Red500;

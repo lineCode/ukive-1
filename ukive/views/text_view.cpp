@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "utils/stl_utils.h"
+
 #include "ukive/text/input_connection.h"
 #include "ukive/event/input_event.h"
 #include "ukive/text/text_blink.h"
@@ -15,7 +17,6 @@
 #include "ukive/menu/menu.h"
 #include "ukive/menu/menu_item.h"
 #include "ukive/resources/dimension_utils.h"
-#include "ukive/utils/stl_utils.h"
 
 #include "oigka/layout_constants.h"
 
@@ -298,7 +299,7 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(STLCU32(start - len), Editable::Reason::USER_INPUT);
+                    base_text_->setSelection(utl::STLCU32(start - len), Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_RIGHT) {
@@ -318,7 +319,7 @@ namespace ukive {
                         }
                     }
 
-                    base_text_->setSelection(STLCU32(end + len), Editable::Reason::USER_INPUT);
+                    base_text_->setSelection(utl::STLCU32(end + len), Editable::Reason::USER_INPUT);
                 }
             }
         } else if (keyCode == VK_UP) {

@@ -1,6 +1,6 @@
 #include "ukive/resources/dimension_utils.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
 
 #include "oigka/layout_constants.h"
 
@@ -8,15 +8,15 @@
 namespace ukive {
 
     bool resolveDimension(Window* w, const string16& dm, float* out) {
-        if (endWith(dm, L"dp", false)) {
+        if (utl::endWith(dm, L"dp", false)) {
             float val = 0;
-            if (stringToNumber(dm.substr(0, dm.length() - 2), &val)) {
+            if (utl::stringToNumber(dm.substr(0, dm.length() - 2), &val)) {
                 *out = w->dpToPxX(val);
                 return true;
             }
-        } else if (endWith(dm, L"px", false)) {
+        } else if (utl::endWith(dm, L"px", false)) {
             float val = 0;
-            if (stringToNumber(dm.substr(0, dm.length() - 2), &val)) {
+            if (utl::stringToNumber(dm.substr(0, dm.length() - 2), &val)) {
                 *out = val;
                 return true;
             }
@@ -30,7 +30,7 @@ namespace ukive {
         auto it = attrs.find(key);
         if (it != attrs.end()) {
             int val = 0;
-            if (stringToNumber(it->second, &val)) {
+            if (utl::stringToNumber(it->second, &val)) {
                 return val;
             }
             LOG(Log::WARNING) << "Cannot resolve int attr " << key
@@ -45,7 +45,7 @@ namespace ukive {
         auto it = attrs.find(key);
         if (it != attrs.end()) {
             float val = 0;
-            if (stringToNumber(it->second, &val)) {
+            if (utl::stringToNumber(it->second, &val)) {
                 return val;
             }
             LOG(Log::WARNING) << "Cannot resolve float attr " << key
@@ -75,10 +75,10 @@ namespace ukive {
         auto it = attrs.find(key);
         if (it != attrs.end()) {
             float val = 0;
-            if (isEqual(it->second, L"true", false)) {
+            if (utl::isEqual(it->second, L"true", false)) {
                 return true;
             }
-            if (isEqual(it->second, L"false", false)) {
+            if (utl::isEqual(it->second, L"false", false)) {
                 return false;
             }
             LOG(Log::WARNING) << "Cannot resolve bool attr " << key

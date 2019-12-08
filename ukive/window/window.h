@@ -4,8 +4,9 @@
 #include <memory>
 #include <vector>
 
+#include "utils/string_utils.h"
+
 #include "ukive/message/cycler.h"
-#include "ukive/utils/string_utils.h"
 #include "ukive/graphics/color.h"
 #include "ukive/views/view.h"
 
@@ -17,6 +18,7 @@ namespace ukive {
     class Canvas;
     class InputEvent;
     class WindowImpl;
+    class DebugDrawer;
     class TitleBar;
     class RootLayout;
     class ContextMenu;
@@ -174,6 +176,9 @@ namespace ukive {
             SCHEDULE_LAYOUT = 1,
         };
 
+        void draw(const Rect& rect);
+        void drawWithDebug(const Rect& rect);
+
         std::unique_ptr<WindowImpl> impl_;
 
         Canvas* canvas_;
@@ -199,6 +204,8 @@ namespace ukive {
 
         Rect dirty_region_;
         Rect next_dirty_region_;
+        std::unique_ptr<Canvas> off_canvas_;
+        std::unique_ptr<DebugDrawer> debug_drawer_;
     };
 
 }

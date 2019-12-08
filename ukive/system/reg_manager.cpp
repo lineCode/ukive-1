@@ -4,8 +4,8 @@
 #include <Windows.h>
 #include <ShlObj.h>
 
-#include "ukive/log.h"
-#include "ukive/utils/stl_utils.h"
+#include "utils/log.h"
+#include "utils/stl_utils.h"
 
 
 namespace ukive {
@@ -79,7 +79,7 @@ namespace ukive {
         ls = ::RegSetValueExW(
             progid_key, L"", 0, REG_SZ,
             reinterpret_cast<const BYTE*>(friendly_name.data()),
-            STLCU32(friendly_name.size()) * sizeof(wchar_t) + 1);
+            utl::STLCU32(friendly_name.size()) * sizeof(wchar_t) + 1);
         bool result = (ls == ERROR_SUCCESS);
 
         ls = ::RegCloseKey(progid_key);
@@ -103,7 +103,7 @@ namespace ukive {
         ls = ::RegSetValueExW(
             cmd_key, L"", 0, REG_SZ,
             reinterpret_cast<const BYTE*>(cmd.data()),
-            STLCU32(cmd.size()) * sizeof(wchar_t) + 1);
+            utl::STLCU32(cmd.size()) * sizeof(wchar_t) + 1);
         result = (ls == ERROR_SUCCESS);
 
         ls = ::RegCloseKey(cmd_key);

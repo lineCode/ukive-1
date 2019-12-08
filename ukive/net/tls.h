@@ -5,8 +5,10 @@
 #include <string>
 #include <vector>
 
+#include "utils/string_utils.h"
+#include "utils/big_integer/big_integer.h"
+
 #include "ukive/net/tls_common.hpp"
-#include "ukive/utils/string_utils.h"
 #include "ukive/net/tls_record_layer.hpp"
 
 
@@ -185,6 +187,11 @@ namespace tls {
         PRIVATE_USE_END = 0xFFFF,
     };
 
+    enum class CertificateType : uint8_t {
+        X509 = 0,
+        RawPublicKey = 2,
+    };
+
     enum class ExtensionType : uint16_t {
         ServerName = 0,
         MaxFragmentLength = 1,
@@ -244,6 +251,22 @@ namespace tls {
         std::vector<KeyShareEntry> client_shares;
     };
 
+    struct HKDFLabel {
+        uint16_t length;
+        stringu8 label;
+        stringu8 context;
+    };
+
+    struct CertificateEntry {
+        stringu8 cert_data;
+        std::vector<Extension> exts;
+    };
+
+    struct Certificate {
+        stringu8 certificate_request_context;
+        std::vector<CertificateEntry> certs;
+    };
+
 
     class TLS {
     public:
@@ -255,9 +278,11 @@ namespace tls {
     private:
         void parseFragment(const TLSRecordLayer::TLSPlaintext& text);
         void parseServerHello(const stringu8& content);
+        void parsePlainExtensions(const stringu8& data);
+        void parseEncryptedExtensions(const stringu8& data);
+        void parseCertificate(const stringu8& data);
 
         void constructHandshake(HandshakeType type, stringu8* out);
-
         void constructClientHello(stringu8* out);
 
         stringu8 getTimestampFromUInt32();
@@ -266,8 +291,24 @@ namespace tls {
         stringu8 getSupportCompressionMethods();
         stringu8 getSupportExtensions();
 
+        // Section 7.1
+        bool deriveSecret(
+            const stringu8& secret, const string8& label, const stringu8& message,
+            stringu8* out);
+        bool HKDFExpandLabel(
+            const stringu8& secret, const string8& label, const stringu8& context,
+            uint32_t length, stringu8* out);
+
         string8 host_;
         TLSRecordLayer record_layer_;
+
+        stringu8 client_hello_data_;
+        stringu8 server_hello_data_;
+        KeyShareClientHello key_share_;
+        utl::BigInteger x25519_K_;
+        utl::BigInteger x25519_P_;
+        stringu8 share_K_;
+        CipherSuite selected_cs_;
     };
 
 

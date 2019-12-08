@@ -4,7 +4,6 @@
 
 #include "ukive/system/time_utils.h"
 #include "ukive/window/window.h"
-#include "ukive/log.h"
 
 
 namespace ukive {

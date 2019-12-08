@@ -8,10 +8,6 @@
     <ClCompile Include="window\window.cpp">
       <Filter>window</Filter>
     </ClCompile>
-    <ClCompile Include="log.cpp" />
-    <ClCompile Include="utils\string_utils.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="window\window_class_manager.cpp">
       <Filter>window</Filter>
     </ClCompile>
@@ -198,9 +194,6 @@
     <ClCompile Include="views\list\list_view.cpp">
       <Filter>views\list</Filter>
     </ClCompile>
-    <ClCompile Include="utils\stl_utils.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\matrix.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -240,9 +233,6 @@
     <ClCompile Include="system\qpc_service.cpp">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="views\debug_view.cpp">
-      <Filter>views</Filter>
-    </ClCompile>
     <ClCompile Include="graphics\rendering_command_list.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -264,17 +254,8 @@
     <ClCompile Include="views\layout\non_client_layout.cpp">
       <Filter>views\layout</Filter>
     </ClCompile>
-    <ClCompile Include="utils\event_handler.h">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="system\reg_manager.cpp">
       <Filter>system</Filter>
-    </ClCompile>
-    <ClCompile Include="files\file.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\unicode.cpp">
-      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="drawable\check_drawable.cpp">
       <Filter>drawable</Filter>
@@ -300,26 +281,8 @@
     <ClCompile Include="views\chart_view.cpp">
       <Filter>views</Filter>
     </ClCompile>
-    <ClCompile Include="utils\dynamic_windows_api.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\win10_version.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\xml\xml_parser.cpp">
-      <Filter>utils\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\xml\xml_writer.cpp">
-      <Filter>utils\xml</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\xml\xml_structs.cpp">
-      <Filter>utils\xml</Filter>
-    </ClCompile>
     <ClCompile Include="resources\layout_instantiator.cpp">
       <Filter>resources</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\xml\xml_pedometer.cpp">
-      <Filter>utils\xml</Filter>
     </ClCompile>
     <ClCompile Include="resources\dimension_utils.cpp">
       <Filter>resources</Filter>
@@ -378,12 +341,6 @@
     <ClCompile Include="net\socket.cpp">
       <Filter>net</Filter>
     </ClCompile>
-    <ClCompile Include="utils\big_integer\big_integer.cpp">
-      <Filter>utils\big_integer</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\big_integer\int_array.cpp">
-      <Filter>utils\big_integer</Filter>
-    </ClCompile>
     <ClCompile Include="security\crypto\ecdp.cpp">
       <Filter>security\crypto</Filter>
     </ClCompile>
@@ -392,15 +349,6 @@
     </ClCompile>
     <ClCompile Include="views\spinner_view\spinner_list_adapter.cpp">
       <Filter>views\spinner_view</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\json\json_parser.cpp">
-      <Filter>utils\json</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\json\json_structs.cpp">
-      <Filter>utils\json</Filter>
-    </ClCompile>
-    <ClCompile Include="utils\convert.cpp">
-      <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="net\tls_record_layer.cpp">
       <Filter>net</Filter>
@@ -411,9 +359,6 @@
     <ClCompile Include="security\crypto\aead.cpp">
       <Filter>security\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="utils\big_integer\byte_string.cpp">
-      <Filter>utils\big_integer</Filter>
-    </ClCompile>
     <ClCompile Include="event\velocity_calculator.cpp">
       <Filter>event</Filter>
     </ClCompile>
@@ -423,8 +368,20 @@
     <ClCompile Include="views\list\flow_list_layouter.cpp">
       <Filter>views\list</Filter>
     </ClCompile>
-    <ClCompile Include="utils\platform_utils.cpp">
-      <Filter>utils</Filter>
+    <ClCompile Include="system\dynamic_windows_api.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\win10_version.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="security\cert\x509.cpp">
+      <Filter>security\cert</Filter>
+    </ClCompile>
+    <ClCompile Include="security\cert\asn1_reader.cpp">
+      <Filter>security\cert</Filter>
+    </ClCompile>
+    <ClCompile Include="graphics\debug_drawer.cpp">
+      <Filter>graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -434,10 +391,6 @@
     </ClInclude>
     <ClInclude Include="window\window.h">
       <Filter>window</Filter>
-    </ClInclude>
-    <ClInclude Include="log.h" />
-    <ClInclude Include="utils\string_utils.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="window\window_class_manager.h">
       <Filter>window</Filter>
@@ -453,9 +406,6 @@
     </ClInclude>
     <ClInclude Include="window\frame\non_client_frame.h">
       <Filter>window\frame</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\com_ptr.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="event\input_event.h">
       <Filter>event</Filter>
@@ -486,9 +436,6 @@
     </ClInclude>
     <ClInclude Include="message\message_queue.h">
       <Filter>message</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\executable.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="graphics\device_lost_notifier.h">
       <Filter>graphics</Filter>
@@ -661,14 +608,8 @@
     <ClInclude Include="views\list\list_view.h">
       <Filter>views\list</Filter>
     </ClInclude>
-    <ClInclude Include="utils\stl_utils.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\cursor.h">
       <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\weak_bind.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="graphics\direct3d\scene.h">
       <Filter>graphics\direct3d</Filter>
@@ -703,9 +644,6 @@
     <ClInclude Include="system\qpc_service.h">
       <Filter>system</Filter>
     </ClInclude>
-    <ClInclude Include="views\debug_view.h">
-      <Filter>views</Filter>
-    </ClInclude>
     <ClInclude Include="graphics\rendering_command_list.h">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -729,12 +667,6 @@
     </ClInclude>
     <ClInclude Include="system\reg_manager.h">
       <Filter>system</Filter>
-    </ClInclude>
-    <ClInclude Include="files\file.h">
-      <Filter>files</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\unicode.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="drawable\check_drawable.h">
       <Filter>drawable</Filter>
@@ -766,29 +698,8 @@
     <ClInclude Include="views\chart_view.h">
       <Filter>views</Filter>
     </ClInclude>
-    <ClInclude Include="utils\dynamic_windows_api.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\win10_version.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\weak_ref_nest.h">
-      <Filter>utils</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\xml\xml_parser.h">
-      <Filter>utils\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\xml\xml_writer.h">
-      <Filter>utils\xml</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\xml\xml_structs.h">
-      <Filter>utils\xml</Filter>
-    </ClInclude>
     <ClInclude Include="resources\layout_instantiator.h">
       <Filter>resources</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\xml\xml_pedometer.h">
-      <Filter>utils\xml</Filter>
     </ClInclude>
     <ClInclude Include="resources\dimension_utils.h">
       <Filter>resources</Filter>
@@ -829,12 +740,6 @@
     <ClInclude Include="net\socket.h">
       <Filter>net</Filter>
     </ClInclude>
-    <ClInclude Include="utils\big_integer\big_integer.h">
-      <Filter>utils\big_integer</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\big_integer\int_array.h">
-      <Filter>utils\big_integer</Filter>
-    </ClInclude>
     <ClInclude Include="security\crypto\ecdp.h">
       <Filter>security\crypto</Filter>
     </ClInclude>
@@ -843,15 +748,6 @@
     </ClInclude>
     <ClInclude Include="views\spinner_view\spinner_list_adapter.h">
       <Filter>views\spinner_view</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\json\json_parser.h">
-      <Filter>utils\json</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\json\json_structs.h">
-      <Filter>utils\json</Filter>
-    </ClInclude>
-    <ClInclude Include="utils\convert.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="net\tls_record_layer.hpp">
       <Filter>net</Filter>
@@ -862,25 +758,34 @@
     <ClInclude Include="security\crypto\aead.hpp">
       <Filter>security\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="utils\big_integer\byte_string.hpp">
-      <Filter>utils\big_integer</Filter>
-    </ClInclude>
     <ClInclude Include="event\velocity_calculator.h">
       <Filter>event</Filter>
     </ClInclude>
     <ClInclude Include="views\list\flow_list_layouter.h">
       <Filter>views\list</Filter>
     </ClInclude>
-    <ClInclude Include="utils\platform_utils.h">
-      <Filter>utils</Filter>
+    <ClInclude Include="system\dynamic_windows_api.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="system\win10_version.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="system\com_ptr.hpp">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="security\cert\x509.h">
+      <Filter>security\cert</Filter>
+    </ClInclude>
+    <ClInclude Include="security\cert\asn1_reader.h">
+      <Filter>security\cert</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics\debug_drawer.h">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">
       <UniqueIdentifier>{b51f6f19-acfb-4465-b930-f86996d5b4d3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="utils">
-      <UniqueIdentifier>{7a5fe501-e462-429a-abc6-3c10680bc40f}</UniqueIdentifier>
     </Filter>
     <Filter Include="graphics">
       <UniqueIdentifier>{be442fbf-17c4-4caa-9ad5-cec076079454}</UniqueIdentifier>
@@ -933,14 +838,8 @@
     <Filter Include="graphics\render_node">
       <UniqueIdentifier>{bbfb6918-d6e4-4428-8a70-2e63ad352cc6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="files">
-      <UniqueIdentifier>{b51fd15d-9a20-4be5-9d96-026070975a3d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="views\title_bar">
       <UniqueIdentifier>{58d30b33-09a0-48c8-9859-84fef49669e7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="utils\xml">
-      <UniqueIdentifier>{b60392f2-edcb-453d-97b4-e34c386651a6}</UniqueIdentifier>
     </Filter>
     <Filter Include="resources">
       <UniqueIdentifier>{74a72a50-3993-40f9-bdd2-940dc88aa351}</UniqueIdentifier>
@@ -957,14 +856,11 @@
     <Filter Include="security\crypto">
       <UniqueIdentifier>{7bf90690-59e2-4a8b-9948-afe6fc44071f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="utils\big_integer">
-      <UniqueIdentifier>{c8eb10ae-79fa-40b4-b963-aa0c12d18fdf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="views\spinner_view">
       <UniqueIdentifier>{8857160c-cdd7-460a-be7a-661d14015527}</UniqueIdentifier>
     </Filter>
-    <Filter Include="utils\json">
-      <UniqueIdentifier>{460d5ff5-9da8-45d3-8837-7f404b54ad13}</UniqueIdentifier>
+    <Filter Include="security\cert">
+      <UniqueIdentifier>{b79e4820-9ee2-4cf7-aec2-21b017c2ee7b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

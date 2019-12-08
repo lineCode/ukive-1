@@ -96,7 +96,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -120,7 +120,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -140,7 +140,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -164,7 +164,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;UKIVE_EXPORTS;_WINDOWS;_USRDLL;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -196,12 +196,12 @@
     <ClInclude Include="drawable\shape_drawable.h" />
     <ClInclude Include="event\input_event.h" />
     <ClInclude Include="event\velocity_calculator.h" />
-    <ClInclude Include="files\file.h" />
     <ClInclude Include="graphics\bitmap.h" />
     <ClInclude Include="graphics\bitmap_factory.h" />
     <ClInclude Include="graphics\canvas.h" />
     <ClInclude Include="graphics\color.h" />
     <ClInclude Include="graphics\cursor.h" />
+    <ClInclude Include="graphics\debug_drawer.h" />
     <ClInclude Include="graphics\device_lost_notifier.h" />
     <ClInclude Include="graphics\direct3d\drawing_object_manager.h" />
     <ClInclude Include="graphics\direct3d\effects\shadow_effect.h" />
@@ -218,7 +218,6 @@
     <ClInclude Include="graphics\render_node\render_tree.h" />
     <ClInclude Include="graphics\vector2.h" />
     <ClInclude Include="graphics\wic_manager.h" />
-    <ClInclude Include="log.h" />
     <ClInclude Include="menu\context_menu.h" />
     <ClInclude Include="menu\context_menu_callback.h" />
     <ClInclude Include="menu\inner_window.h" />
@@ -238,6 +237,8 @@
     <ClInclude Include="net\tls_record_layer.hpp" />
     <ClInclude Include="resources\dimension_utils.h" />
     <ClInclude Include="resources\layout_instantiator.h" />
+    <ClInclude Include="security\cert\asn1_reader.h" />
+    <ClInclude Include="security\cert\x509.h" />
     <ClInclude Include="security\crypto\aead.hpp" />
     <ClInclude Include="security\crypto\aes.h" />
     <ClInclude Include="security\crypto\ecdp.h" />
@@ -246,9 +247,12 @@
     <ClInclude Include="security\digest\sha.h" />
     <ClInclude Include="security\digest\sha_private.h" />
     <ClInclude Include="system\clipboard_manager.h" />
+    <ClInclude Include="system\com_ptr.hpp" />
+    <ClInclude Include="system\dynamic_windows_api.h" />
     <ClInclude Include="system\qpc_service.h" />
     <ClInclude Include="system\reg_manager.h" />
     <ClInclude Include="system\time_utils.h" />
+    <ClInclude Include="system\win10_version.h" />
     <ClInclude Include="text\editable.h" />
     <ClInclude Include="text\input_connection.h" />
     <ClInclude Include="text\span\effect_span.h" />
@@ -266,31 +270,10 @@
     <ClInclude Include="text\tsf_editor.h" />
     <ClInclude Include="text\tsf_manager.h" />
     <ClInclude Include="text\word_breaker.h" />
-    <ClInclude Include="utils\big_integer\big_integer.h" />
-    <ClInclude Include="utils\big_integer\byte_string.hpp" />
-    <ClInclude Include="utils\big_integer\int_array.h" />
-    <ClInclude Include="utils\com_ptr.h" />
-    <ClInclude Include="utils\convert.h" />
-    <ClInclude Include="utils\dynamic_windows_api.h" />
-    <ClInclude Include="utils\executable.h" />
-    <ClInclude Include="utils\json\json_parser.h" />
-    <ClInclude Include="utils\json\json_structs.h" />
-    <ClInclude Include="utils\platform_utils.h" />
-    <ClInclude Include="utils\stl_utils.h" />
-    <ClInclude Include="utils\string_utils.h" />
-    <ClInclude Include="utils\unicode.h" />
-    <ClInclude Include="utils\weak_bind.h" />
-    <ClInclude Include="utils\weak_ref_nest.h" />
-    <ClInclude Include="utils\win10_version.h" />
-    <ClInclude Include="utils\xml\xml_parser.h" />
-    <ClInclude Include="utils\xml\xml_pedometer.h" />
-    <ClInclude Include="utils\xml\xml_structs.h" />
-    <ClInclude Include="utils\xml\xml_writer.h" />
     <ClInclude Include="views\button.h" />
     <ClInclude Include="views\chart_view.h" />
     <ClInclude Include="views\check_box.h" />
     <ClInclude Include="views\click_listener.h" />
-    <ClInclude Include="views\debug_view.h" />
     <ClInclude Include="views\direct3d_view.h" />
     <ClInclude Include="views\image_view.h" />
     <ClInclude Include="views\layout\non_client_layout.h" />
@@ -348,12 +331,12 @@
     <ClCompile Include="drawable\shape_drawable.cpp" />
     <ClCompile Include="event\input_event.cpp" />
     <ClCompile Include="event\velocity_calculator.cpp" />
-    <ClCompile Include="files\file.cpp" />
     <ClCompile Include="graphics\bitmap.cpp" />
     <ClCompile Include="graphics\bitmap_factory.cpp" />
     <ClCompile Include="graphics\canvas.cpp" />
     <ClCompile Include="graphics\color.cpp" />
     <ClCompile Include="graphics\cursor.cpp" />
+    <ClCompile Include="graphics\debug_drawer.cpp" />
     <ClCompile Include="graphics\direct3d\drawing_object_manager.cpp" />
     <ClCompile Include="graphics\direct3d\effects\shadow_effect.cpp" />
     <ClCompile Include="graphics\direct3d\scene.cpp" />
@@ -369,7 +352,6 @@
     <ClCompile Include="graphics\render_node\render_tree.cpp" />
     <ClCompile Include="graphics\vector2.cpp" />
     <ClCompile Include="graphics\wic_manager.cpp" />
-    <ClCompile Include="log.cpp" />
     <ClCompile Include="menu\context_menu.cpp" />
     <ClCompile Include="menu\inner_window.cpp" />
     <ClCompile Include="menu\menu_impl.cpp" />
@@ -385,6 +367,8 @@
     <ClCompile Include="net\tls_record_layer.cpp" />
     <ClCompile Include="resources\dimension_utils.cpp" />
     <ClCompile Include="resources\layout_instantiator.cpp" />
+    <ClCompile Include="security\cert\asn1_reader.cpp" />
+    <ClCompile Include="security\cert\x509.cpp" />
     <ClCompile Include="security\crypto\aead.cpp" />
     <ClCompile Include="security\crypto\aes.cpp" />
     <ClCompile Include="security\crypto\ecdp.cpp" />
@@ -399,9 +383,11 @@
     <ClCompile Include="security\digest\sha512.cpp" />
     <ClCompile Include="security\digest\usha.cpp" />
     <ClCompile Include="system\clipboard_manager.cpp" />
+    <ClCompile Include="system\dynamic_windows_api.cpp" />
     <ClCompile Include="system\qpc_service.cpp" />
     <ClCompile Include="system\reg_manager.cpp" />
     <ClCompile Include="system\time_utils.cpp" />
+    <ClCompile Include="system\win10_version.cpp" />
     <ClCompile Include="text\editable.cpp" />
     <ClCompile Include="text\input_connection.cpp" />
     <ClCompile Include="text\span\effect_span.cpp" />
@@ -418,27 +404,9 @@
     <ClCompile Include="text\tsf_editor.cpp" />
     <ClCompile Include="text\tsf_manager.cpp" />
     <ClCompile Include="text\word_breaker.cpp" />
-    <ClCompile Include="utils\big_integer\big_integer.cpp" />
-    <ClCompile Include="utils\big_integer\byte_string.cpp" />
-    <ClCompile Include="utils\big_integer\int_array.cpp" />
-    <ClCompile Include="utils\convert.cpp" />
-    <ClCompile Include="utils\dynamic_windows_api.cpp" />
-    <ClCompile Include="utils\json\json_parser.cpp" />
-    <ClCompile Include="utils\json\json_structs.cpp" />
-    <ClCompile Include="utils\platform_utils.cpp" />
-    <ClCompile Include="utils\stl_utils.cpp" />
-    <ClCompile Include="utils\string_utils.cpp" />
-    <ClCompile Include="utils\event_handler.h" />
-    <ClCompile Include="utils\unicode.cpp" />
-    <ClCompile Include="utils\win10_version.cpp" />
-    <ClCompile Include="utils\xml\xml_parser.cpp" />
-    <ClCompile Include="utils\xml\xml_pedometer.cpp" />
-    <ClCompile Include="utils\xml\xml_structs.cpp" />
-    <ClCompile Include="utils\xml\xml_writer.cpp" />
     <ClCompile Include="views\button.cpp" />
     <ClCompile Include="views\chart_view.cpp" />
     <ClCompile Include="views\check_box.cpp" />
-    <ClCompile Include="views\debug_view.cpp" />
     <ClCompile Include="views\direct3d_view.cpp" />
     <ClCompile Include="views\image_view.cpp" />
     <ClCompile Include="views\layout\non_client_layout.cpp" />

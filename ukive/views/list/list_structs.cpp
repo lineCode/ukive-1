@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "ukive/log.h"
-#include "ukive/utils/stl_utils.h"
+#include "utils/log.h"
+#include "utils/stl_utils.h"
 
 
 namespace ukive {
@@ -78,7 +78,7 @@ namespace ukive {
     }
 
     int Column::getHolderCount() const {
-        return STLCInt(holders_.size());
+        return utl::STLCInt(holders_.size());
     }
 
     int Column::getFinalScroll(int dy) const {
@@ -142,7 +142,7 @@ namespace ukive {
     }
 
     ListAdapter::ViewHolder* Column::getHolder(int index) const {
-        if (index >= 0 && index < STLCInt(holders_.size())) {
+        if (index >= 0 && index < utl::STLCInt(holders_.size())) {
             return holders_[index];
         }
         return nullptr;
@@ -179,7 +179,7 @@ namespace ukive {
     }
 
     ListAdapter::ViewHolder* Column::findAndInsertHolder(int start_index, int item_id) {
-        if (start_index < 0 || start_index >= STLCInt(holders_.size())) {
+        if (start_index < 0 || start_index >= utl::STLCInt(holders_.size())) {
             return nullptr;
         }
 

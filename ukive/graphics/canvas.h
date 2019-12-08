@@ -4,7 +4,7 @@
 #include <stack>
 #include <memory>
 
-#include "ukive/utils/com_ptr.h"
+#include "ukive/system/com_ptr.hpp"
 #include "ukive/graphics/graphic_device_manager.h"
 #include "ukive/graphics/color.h"
 #include "ukive/graphics/matrix.h"
@@ -30,6 +30,7 @@ namespace ukive {
         float getOpacity();
 
         bool resize();
+        bool resize(int width, int height);
 
         void clear();
         void clear(const Color& color);
@@ -50,6 +51,8 @@ namespace ukive {
         //临时方法。
         ID2D1RenderTarget* getRT();
 
+        int getWidth() const;
+        int getHeight() const;
         ComPtr<ID3D11Texture2D> getTexture();
         std::shared_ptr<Bitmap> extractBitmap();
 
@@ -87,17 +90,14 @@ namespace ukive {
         void drawCircle(float cx, float cy, float radius, const Color& color);
         void drawCircle(float cx, float cy, float radius, float stroke_width, const Color& color);
         void fillCircle(float cx, float cy, float radius, const Color& color);
-
-        void drawCircle(const RectF& rect, const Color& color);
-        void drawCircle(const RectF& rect, float stroke_width, const Color& color);
-        void fillCircle(const RectF& rect, const Color& color);
+        void fillCircle(float cx, float cy, float radius, Bitmap* bmp);
 
         void drawOval(float cx, float cy, float rx, float ry, const Color& color);
         void drawOval(float cx, float cy, float rx, float ry, float stroke_width, const Color& color);
         void fillOval(float cx, float cy, float rx, float ry, const Color& color);
 
         void fillGeometry(ID2D1Geometry* geo, const Color& color);
-        void fillGeometry(ID2D1Geometry* geo, ID2D1Brush* brush);
+        void fillGeometry(ID2D1Geometry* geo, Bitmap* bmp);
 
         void drawBitmap(Bitmap* bitmap);
         void drawBitmap(float x, float y, Bitmap* bitmap);
@@ -133,6 +133,7 @@ namespace ukive {
     private:
         void initCanvas();
 
+        bool createOffScreenBRT(int width, int height);
         ComPtr<ID2D1RenderTarget> createHardwareBRT();
         ComPtr<ID2D1RenderTarget> createSoftwareBRT();
         ComPtr<ID2D1RenderTarget> createSwapchainBRT();

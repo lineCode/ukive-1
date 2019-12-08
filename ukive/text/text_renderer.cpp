@@ -1,6 +1,7 @@
 ﻿#include "text_renderer.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/graphics/color.h"
 #include "ukive/text/span/effect_span.h"
 #include "ukive/text/span/underline_span.h"

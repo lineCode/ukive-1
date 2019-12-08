@@ -1,6 +1,7 @@
 #include "ukive/net/http_client.h"
 
-#include "ukive/log.h"
+#include "utils/log.h"
+
 #include "ukive/net/socket.h"
 
 
@@ -72,7 +73,7 @@ namespace net {
             }
             host = url_tmp.substr(0, index);
             auto port_str = url_tmp.substr(index + 1);
-            if (!stringToNumber(port_str, &port)) {
+            if (!utl::stringToNumber(port_str, &port)) {
                 return false;
             }
         } else {
